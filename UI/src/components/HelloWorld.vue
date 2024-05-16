@@ -4,11 +4,11 @@
   </q-page>
 </template>
 
-<style>
-</style>
-
 <script>
 export default {
   name: 'HelloWorld'
 }
 </script>
+<style lang="scss" scoped>
+</style>
+

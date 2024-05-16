@@ -730,7 +730,7 @@
         return html;
       };
       var installedPlugins = function (editor) {
-        if (editor == null) {
+        if (editor === null) {
           return '';
         }
         return '<div data-mce-tabstop="1" tabindex="-1">' + pluginLister(editor) + '</div>';

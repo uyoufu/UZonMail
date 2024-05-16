@@ -1,8 +1,8 @@
 <template>
   <q-card class="global-message-container">
-    <div class="gm-shade"></div>
-    <SendingProgress @close="closeProgress"/>
-    <div id="capture" v-html="htmlValue"></div>
+    <div class="gm-shade" />
+    <SendingProgress @close="closeProgress" />
+    <div id="capture" v-html="htmlValue" />
   </q-card>
 </template>
 
@@ -26,14 +26,14 @@ export default {
     }
   },
 
+  data() {
+    return {}
+  },
+
   computed: {
     htmlValue() {
       return this.message.result.html
     }
-  },
-
-  data() {
-    return {}
   },
 
   watch: {
@@ -41,7 +41,7 @@ export default {
       if (!newValue) return
 
       if (newValue.command === 'html2image') {
-        this.$nextTick(async () => {
+        this.$nextTick(async() => {
           // 转成图片发送回去
           // 生成模板预览图
           // 生成图片

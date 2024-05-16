@@ -12036,7 +12036,7 @@
             function o(i, f) {
               if (!n[i]) {
                 if (!e[i]) {
-                  var c = 'function' == typeof require && require;
+                  var c = 'function' === typeof require && require;
                   if (!f && c)
                     return c(i, !0);
                   if (u)
@@ -12052,7 +12052,7 @@
               }
               return n[i].exports;
             }
-            for (var u = 'function' == typeof require && require, i = 0; i < t.length; i++)
+            for (var u = 'function' === typeof require && require, i = 0; i < t.length; i++)
               o(t[i]);
             return o;
           }

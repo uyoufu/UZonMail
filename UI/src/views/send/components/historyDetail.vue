@@ -13,7 +13,7 @@
       class="col-grow"
       @request="initQuasarTable_onRequest"
     >
-      <template v-slot:top>
+      <template #top>
         <q-space />
         <q-input
           v-model="filter"
@@ -22,19 +22,19 @@
           placeholder="搜索"
           color="primary"
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon name="search" />
           </template>
         </q-input>
       </template>
 
-      <template v-slot:body-cell-index="props">
+      <template #body-cell-index="props">
         <q-td :props="props" class="row justify-end">
           {{ props.rowIndex + 1 }}
         </q-td>
       </template>
 
-      <template v-slot:body-cell-sendMessage="props">
+      <template #body-cell-sendMessage="props">
         <q-td :props="props">
           {{ props.value }}
           <q-tooltip>
@@ -43,7 +43,7 @@
         </q-td>
       </template>
 
-      <template v-slot:body-cell-operations="props">
+      <template #body-cell-operations="props">
         <q-td :props="props" class="row justify-end">
           <!-- <q-btn
             :size="btn_detail.size"
@@ -67,7 +67,7 @@
         :loading="isResending"
         @click="resend"
       >
-        <template v-slot:loading>
+        <template #loading>
           <q-spinner-hourglass class="on-left" />
           {{ resendLabel }}
         </template>
@@ -284,7 +284,7 @@ export default {
 
     // 轮询获取进度
     getProgressInfo() {
-      setTimeout(async () => {
+      setTimeout(async() => {
         // 获取更新数据
         const res = await getSendingInfo()
         // console.log('getProgressInfo:', res.data)

@@ -3,13 +3,6 @@ import { newGroup } from '@/api/group'
 import { notifySuccess } from '@/components/iPrompt'
 
 export default {
-  computed: {
-    newGroupTitle() {
-      if (this.groupType === 'send') return '添加发件箱'
-
-      return '添加收件箱'
-    }
-  },
   data() {
     return {
       isShowNewGroupDialog: false,
@@ -57,6 +50,13 @@ export default {
           }
         ]
       }
+    }
+  },
+  computed: {
+    newGroupTitle() {
+      if (this.groupType === 'send') return '添加发件箱'
+
+      return '添加收件箱'
     }
   },
 

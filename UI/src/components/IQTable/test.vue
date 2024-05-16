@@ -1,6 +1,6 @@
 <template>
   <wrapped-table :data="data" :columns="columns" :dense="dense">
-    <template v-slot:body-cell-index="props">
+    <template #body-cell-index="props">
       <q-td>{{ props.value }}_1</q-td>
     </template>
   </wrapped-table>

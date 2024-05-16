@@ -1,7 +1,7 @@
 <template>
   <q-table v-bind="$attrs" :dense="dense" v-on="$listeners">
     <!--示例: 在封装组件中增加插槽，通过后备内容进行自定义，方便父组件覆盖当前插槽-->
-    <template v-slot:top="props">
+    <template #top="props">
       <slot name="top" v-bind="props">
         <q-space />
         <q-input
@@ -11,7 +11,7 @@
           placeholder="搜索"
           color="primary"
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon name="search" />
           </template>
         </q-input>
@@ -19,7 +19,7 @@
     </template>
 
     <!--根据父类插槽定义，传递插槽到被封装组件-->
-    <template v-for="slotName in scopedSlotsName" v-slot:[slotName]="props">
+    <template v-for="slotName in scopedSlotsName" #[slotName]="props">
       <!-- v-bind 是向插槽中传递参数，使得父类的插槽可以使用-->
       <slot :name="slotName" v-bind="props" />
     </template>

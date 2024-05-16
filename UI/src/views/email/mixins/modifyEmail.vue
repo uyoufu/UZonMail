@@ -56,7 +56,7 @@ export default {
 
   computed: {
     modifyEmailTitle() {
-      if (this.group.groupType == 'send') {
+      if (this.group.groupType === 'send') {
         return '修改发件箱'
       }
       return '修改收件箱'
@@ -66,7 +66,7 @@ export default {
   methods: {
     showModifyEmailDialog(data) {
       const fields = [...emailCommonInfo]
-      if (this.group.groupType == 'send') {
+      if (this.group.groupType === 'send') {
         fields.push(...emailSender)
       }
       fields[0].default = this.group._id
@@ -91,7 +91,7 @@ export default {
           data.email || ''
         )
       }
-      if (this.group.groupType == 'send') {
+      if (this.group.groupType === 'send') {
         this.$set(
           this.initModifyEmailParams.fields[3],
           'default',

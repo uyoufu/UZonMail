@@ -1,6 +1,6 @@
 <template>
   <div :class="{ fullscreen: fullscreen }" class="tinymce-container">
-    <div id="html2image"></div>
+    <div id="html2image" />
     <textarea :id="tinymceId" class="tinymce-textarea" />
     <!-- <div class="editor-custom-btn-container">
       <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" />
@@ -77,8 +77,6 @@ export default {
         branding: false, // 关闭底部官网提示 默认true
         statusbar: true, // 显示底部状态栏 默认true
         resize: false, // 调节编辑器大小 默认 true
-
-        branding: false, // 编辑框右下角是否显示 ：”由TINY驱动“
         selector: `#${this.tinymceId}`,
         language: 'zh_CN',
         // language_url: 'https://cdn.jsdelivr.net/npm/tinymce-lang/langs/zh_CN.js', // site absolute URL
@@ -86,7 +84,6 @@ export default {
         // body_class: 'panel-body',
         // object_resizing: true, // 是否禁用表格图片大小调整
         toolbar: toolbar, // 分组工具栏控件
-        menubar: ['custom', 'edit', 'insert', 'view', 'format', 'table'], // 菜单:指定应该出现哪些菜单
         // 配置菜单
         menu: {
           custom: {
@@ -177,7 +174,7 @@ export default {
     // blob 转 dataUrl
     fileReader(blob) {
       return new Promise((resolve, reject) => {
-        let reader = new FileReader()
+        const reader = new FileReader()
         reader.onload = e => {
           resolve(e.target.result)
         }
@@ -234,8 +231,10 @@ export default {
     overflow: hidden;
   }
 }
-.tinymce-container >>> .mce-fullscreen {
+.tinymce-container {
+  ::v-deep .mce-fullscreen {
   z-index: 10000;
+}
 }
 .tinymce-textarea {
   visibility: hidden;

@@ -14,7 +14,7 @@
     :selected.sync="selected"
     @request="initQuasarTable_onRequest"
   >
-    <template v-slot:top>
+    <template #top>
       <q-space />
       <q-input
         v-model="filter"
@@ -23,7 +23,7 @@
         placeholder="搜索"
         color="primary"
       >
-        <template v-slot:append>
+        <template #append>
           <q-icon name="search" />
         </template>
       </q-input>

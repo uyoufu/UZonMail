@@ -2,7 +2,7 @@
   <div class="text-center">
     <div class="column justify-center">
       <div class="card-img avatar" @click="triger = true">
-        <img :src="avatar" class="card-img avatar" />
+        <img :src="avatar" class="card-img avatar">
         <q-tooltip anchor="center middle" self="center middle">
           单击选择图片
         </q-tooltip>

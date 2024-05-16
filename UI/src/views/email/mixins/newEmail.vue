@@ -41,14 +41,6 @@ const emailSender = [
 ]
 
 export default {
-  computed: {
-    newEmailTitle() {
-      if (this.group.groupType == 'send') {
-        return '新增发件箱'
-      }
-      return '新增收件箱'
-    }
-  },
   data() {
     return {
       isShowNewEmailDialog: false,
@@ -61,11 +53,19 @@ export default {
       }
     }
   },
+  computed: {
+    newEmailTitle() {
+      if (this.group.groupType === 'send') {
+        return '新增发件箱'
+      }
+      return '新增收件箱'
+    }
+  },
   methods: {
     openNewEmailDialog() {
       // 添加 fields
       const fields = [...emailCommonInfo]
-      if (this.group.groupType == 'send') {
+      if (this.group.groupType === 'send') {
         fields.push(...emailSender)
       }
       fields[0].default = this.group._id
@@ -81,7 +81,7 @@ export default {
       if (index > -1) this.data.splice(index, 1, data)
       else this.data.push(data)
 
-      this.isShowNewEmailDialog=false
+      this.isShowNewEmailDialog = false
       notifySuccess('添加成功')
     }
   }

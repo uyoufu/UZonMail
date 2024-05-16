@@ -1,5 +1,5 @@
 <template>
-  <EmailGroup class="email-group" groupType="receive" />
+  <EmailGroup class="email-group" group-type="receive" />
 </template>
 
 <script>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-splitter v-model="splitterModel" class="email-spliter">
-      <template v-slot:before>
+      <template #before>
         <div class="q-pa-md">
           <q-tree
             :nodes="groupsData"
@@ -12,7 +12,7 @@
             no-connectors
             no-nodes-label="单击此处右键添加分组"
           >
-            <template v-slot:default-header="prop">
+            <template #default-header="prop">
               <div>
                 {{ prop.node.name }}
               </div>
@@ -71,11 +71,11 @@
           >
             <q-list bordered class="rounded-borders text-primary" dense>
               <q-item
-                clickable
                 v-if="groupsData.length === 0"
                 v-close-popup
-                @click="showNewGroupDialog(null)"
+                clickable
                 dense
+                @click="showNewGroupDialog(null)"
               >
                 <q-item-section>添加组</q-item-section>
               </q-item>
@@ -84,7 +84,7 @@
         </div>
       </template>
 
-      <template v-slot:after>
+      <template #after>
         <q-tab-panels
           v-model="selectedNode"
           animated
@@ -155,24 +155,18 @@ export default {
 
   computed: {
     groupsData() {
-      // 将所有的组解析成树的结构
-      const ltt = new LTT(this.groupsOrigin, {
-        key_id: '_id',
-        key_parent: 'parentId',
-        key_child: 'children',
-        empty_children: true
-      })
-
-      this.dataTree = ltt
-
-      return ltt.GetTree()
+      return this.dataTree.GetTree()
     }
   },
-
   watch: {
     filterTreeText(val) {
       this.$refs.groupTree.filter(val)
     }
+  },
+
+  created() {
+    // Call the method to compute the data tree when the component is created
+    this.computeDataTree()
   },
 
   async mounted() {
@@ -181,11 +175,21 @@ export default {
 
     this.groupsOrigin = res.data
     // 选择第一个
-    if (this.groupsOrigin && this.groupsOrigin.length > 0)
-      this.selectedNode = this.groupsOrigin[0]._id
+    if (this.groupsOrigin && this.groupsOrigin.length > 0) { this.selectedNode = this.groupsOrigin[0]._id }
   },
 
   methods: {
+    computeDataTree() {
+      // This method is responsible for computing the tree structure
+      const ltt = new LTT(this.groupsOrigin, {
+        key_id: '_id',
+        key_parent: 'parentId',
+        key_child: 'children',
+        empty_children: true
+      })
+
+      this.dataTree = ltt.GetTree()
+    },
     async deleteNode(data) {
       const ok = await okCancle('删除提醒', '是否删除组？')
       if (!ok) return

@@ -34,11 +34,10 @@ export default {
     onGlobalMessage(message) {
       this.websocketMsg = message
 
-      if(message.result.index===message.result.total){
-        this.isShowGlobalMessage = false;
-        return;
-      }
-      else this.isShowGlobalMessage = true      
+      if (message.result.index === message.result.total) {
+        this.isShowGlobalMessage = false
+        return
+      } else this.isShowGlobalMessage = true
     }
   }
 }

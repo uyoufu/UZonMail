@@ -57,7 +57,7 @@ export default {
     },
 
     getProgressInfo() {
-      setTimeout(async () => {
+      setTimeout(async() => {
         // 获取更新数据
         const res = await getSendingInfo()
         console.log('getProgressInfo:', res.data)

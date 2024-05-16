@@ -13,7 +13,7 @@
       class="full-height"
       @request="initQuasarTable_onRequest"
     >
-      <template v-slot:top>
+      <template #top>
         <div class="row justify-center q-gutter-sm">
           <q-btn
             label="新增"
@@ -38,7 +38,7 @@
             style="display: none"
             accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             @change="fileSelected"
-          />
+          >
         </div>
         <q-space />
         <q-input
@@ -48,12 +48,12 @@
           placeholder="搜索"
           color="primary"
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon name="search" />
           </template>
         </q-input>
       </template>
-      <template v-slot:header-cell-operation="props">
+      <template #header-cell-operation="props">
         <q-th :props="props">
           {{ props.col.label }}
           <q-btn
@@ -67,7 +67,7 @@
         </q-th>
       </template>
 
-      <template v-slot:body-cell-operation="props">
+      <template #body-cell-operation="props">
         <q-td :props="props" class="row justify-end">
           <q-btn
             :size="btn_modify.size"

@@ -7,7 +7,7 @@
           发件主题，不能为空
         </q-tooltip>
       </strong>
-      <input type="text" class="send-input col-grow" v-model="subject" />
+      <input v-model="subject" type="text" class="send-input col-grow">
     </div>
 
     <div class="receive-box row justify-between">
@@ -22,13 +22,13 @@
           v-for="rec in senders"
           :key="rec.type + rec._id"
           removable
-          @remove="removeSender(rec)"
           :color="rec.type === 'group' ? 'orange' : 'primary'"
           size="sm"
           text-color="white"
           :label="rec.label"
+          @remove="removeSender(rec)"
         />
-        <input type="text" class="send-input col-grow" />
+        <input type="text" class="send-input col-grow">
       </div>
       <q-btn
         size="sm"
@@ -36,8 +36,8 @@
         class="self-center q-mb-sm"
         color="secondary"
         outline
-        @click="openSelectSendersDialog"
         label="选择发件人"
+        @click="openSelectSendersDialog"
       />
     </div>
 
@@ -59,7 +59,7 @@
           :label="rec.label"
           @remove="removeReceiver(rec)"
         />
-        <input type="text" class="send-input col-grow" />
+        <input type="text" class="send-input col-grow">
       </div>
       <q-btn
         size="sm"
@@ -90,7 +90,7 @@
           :label="rec.label"
           @remove="removeCopyTo(rec)"
         />
-        <input type="text" class="send-input col-grow" />
+        <input type="text" class="send-input col-grow">
       </div>
       <q-btn
         size="sm"
@@ -126,7 +126,7 @@
                 width="300px"
               />
             </div>
-            <el-option :label="item.name" :value="item"></el-option>
+            <el-option :label="item.name" :value="item" />
           </el-tooltip>
         </el-select>
       </div>
@@ -144,7 +144,7 @@
           style="display: none"
           accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           @change="fileSelected"
-        />
+        >
         <q-btn
           label="选择Excel"
           dense
@@ -164,13 +164,13 @@
           v-for="att in attachments"
           :key="att"
           removable
-          @remove="removeAttachment(att)"
           color="orange"
           size="sm"
           text-color="white"
           :label="getFileBaseName(att)"
+          @remove="removeAttachment(att)"
         />
-        <input type="text" class="send-input col-grow" />
+        <input type="text" class="send-input col-grow">
       </div>
       <q-btn
         size="sm"
@@ -178,12 +178,12 @@
         class="self-center q-mb-sm"
         color="secondary"
         outline
-        @click="sendSignToSelectAttachment"
         label="选择附件"
+        @click="sendSignToSelectAttachment"
       />
     </div>
 
-    <div v-html="selectedTemplate.html" class="q-ma-md"></div>
+    <div class="q-ma-md" v-html="selectedTemplate.html" />
 
     <div class="row justify-end preview-row q-mr-md">
       <q-btn

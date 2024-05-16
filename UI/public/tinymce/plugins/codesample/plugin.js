@@ -165,7 +165,7 @@
             function o(i, f) {
               if (!n[i]) {
                 if (!e[i]) {
-                  var c = 'function' == typeof require && require;
+                  var c = 'function' === typeof require && require;
                   if (!f && c)
                     return c(i, !0);
                   if (u)
@@ -181,7 +181,7 @@
               }
               return n[i].exports;
             }
-            for (var u = 'function' == typeof require && require, i = 0; i < t.length; i++)
+            for (var u = 'function' === typeof require && require, i = 0; i < t.length; i++)
               o(t[i]);
             return o;
           }
@@ -372,7 +372,7 @@
                             if (src) {
                               var scripts = document.getElementsByTagName('script');
                               for (var i in scripts) {
-                                if (scripts[i].src == src) {
+                                if (scripts[i].src === src) {
                                   return scripts[i];
                                 }
                               }
@@ -413,7 +413,7 @@
                           var ret = {};
                           for (var token in grammar) {
                             if (grammar.hasOwnProperty(token)) {
-                              if (token == before) {
+                              if (token === before) {
                                 for (var newToken in insert) {
                                   if (insert.hasOwnProperty(newToken)) {
                                     ret[newToken] = insert[newToken];
@@ -573,7 +573,7 @@
                       this.length = (matchedStr || '').length | 0;
                     }
                     Token.stringify = function stringify(o, language) {
-                      if (typeof o == 'string') {
+                      if (typeof o === 'string') {
                         return o;
                       }
                       if (Array.isArray(o)) {
@@ -627,7 +627,7 @@
                         var patterns = grammar[token];
                         patterns = Array.isArray(patterns) ? patterns : [patterns];
                         for (var j = 0; j < patterns.length; ++j) {
-                          if (rematch && rematch.cause == token + ',' + j) {
+                          if (rematch && rematch.cause === token + ',' + j) {
                             return;
                           }
                           var patternObj = patterns[j];

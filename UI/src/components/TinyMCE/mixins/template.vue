@@ -106,7 +106,6 @@ export default {
               model: '',
               type: 'text' // optional
             },
-            cancel: true,
             persistent: true,
             ok: {
               dense: true,

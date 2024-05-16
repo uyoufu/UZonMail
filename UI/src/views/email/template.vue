@@ -6,23 +6,21 @@
         color="primary"
         class="q-mb-md self-center q-pl-sm q-pr-sm"
         @click="jumpToTemplateEditor()"
-        >新增</q-btn
-      >
+      >新增</q-btn>
 
       <q-btn
         dense
         color="primary"
         class="q-mb-md self-center q-pl-sm q-pr-sm"
         @click="selectFile"
-        >导入</q-btn
-      >
+      >导入</q-btn>
       <input
-        type="file"
         id="fileInput"
+        type="file"
         style="display: none"
         accept="text/html"
         @change="fileSelected"
-      />
+      >
     </div>
 
     <div class="row q-gutter-sm">
@@ -47,24 +45,21 @@
               size="sm"
               dense
               @click="jumpToTemplateEditor(temp._id)"
-              >编辑</q-btn
-            >
+            >编辑</q-btn>
             <q-btn
               color="primary"
               class="self-center"
               size="sm"
               dense
               @click="viewTemplate(temp.imageUrl)"
-              >查看</q-btn
-            >
+            >查看</q-btn>
             <q-btn
               color="negative"
               class="self-center"
               size="sm"
               dense
               @click="deleteTemplate(temp._id)"
-              >删除</q-btn
-            >
+            >删除</q-btn>
           </div>
         </div>
       </q-card>
@@ -84,23 +79,22 @@
 
           <q-footer elevated class="bg-teal">
             <div class="row justify-end q-ma-sm q-gutter-sm">
-              <q-btn color="warning" size="sm" v-close-popup>取消</q-btn>
+              <q-btn v-close-popup color="warning" size="sm">取消</q-btn>
               <q-btn
                 color="primary"
                 size="sm"
-                @click="confirmTemplate"
                 :loading="isSavingTemplate"
-                >确认</q-btn
-              >
+                @click="confirmTemplate"
+              >确认</q-btn>
             </div>
           </q-footer>
 
           <q-page-container>
             <div
               id="capture"
-              v-html="templateHtml"
               style="background-color: white"
-            ></div>
+              v-html="templateHtml"
+            />
           </q-page-container>
         </q-layout>
       </q-card>
@@ -121,6 +115,13 @@ import { api as viewerApi } from 'v-viewer'
 import ModifyTemplate from './mixins/modifyTemplate.vue'
 
 export default {
+  filters: {
+    formatDate(date) {
+      if (!date) return ''
+
+      return moment(date).format('YYYY-MM-DD')
+    }
+  },
   mixins: [ModifyTemplate],
   data() {
     return {
@@ -129,13 +130,6 @@ export default {
       selectedFileName: '',
       data: [],
       isSavingTemplate: false
-    }
-  },
-  filters: {
-    formatDate(date) {
-      if (!date) return ''
-
-      return moment(date).format('YYYY-MM-DD')
     }
   },
 
@@ -186,7 +180,7 @@ export default {
     async confirmTemplate() {
       this.isSavingTemplate = true
 
-      this.$nextTick(async () => {
+      this.$nextTick(async() => {
         const imageUrl = await toImage(document.getElementById('capture'))
 
         // 发送模板
@@ -223,7 +217,7 @@ export default {
       if (!ok) return
 
       const res = await deleteTemplate(id)
-
+      console.log('deleteTemplate:', res)
       // 删除成功后，清除显示
       const index = this.data.findIndex(d => d._id === id)
       if (index > -1) this.data.splice(index, 1)

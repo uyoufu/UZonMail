@@ -13,7 +13,7 @@
       class="full-height"
       @request="initQuasarTable_onRequest"
     >
-      <template v-slot:top>
+      <template #top>
         <q-space />
         <q-input
           v-model="filter"
@@ -22,13 +22,13 @@
           placeholder="搜索"
           color="primary"
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon name="search" />
           </template>
         </q-input>
       </template>
 
-      <template v-slot:body-cell-operations="props">
+      <template #body-cell-operations="props">
         <q-td :props="props" class="row justify-end">
           <q-btn
             :size="btn_detail.size"

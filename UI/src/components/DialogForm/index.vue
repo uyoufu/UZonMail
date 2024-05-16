@@ -6,10 +6,10 @@
       <q-input
         v-for="field in fields"
         :key="field.name"
+        v-model="data[field.name]"
         clearable
         clear-icon="close"
         outlined
-        v-model="data[field.name]"
         :type="field.type"
         :label="field.label"
         dense
@@ -18,11 +18,11 @@
 
       <div class="row justify-end q-gutter-sm">
         <q-btn
+          v-close-popup
           :size="btn_cancel.size"
           :color="btn_cancel.color"
           :label="btn_cancel.label"
           :dense="btn_cancel.dense"
-          v-close-popup
         />
 
         <q-btn
@@ -53,7 +53,8 @@ export default {
   props: {
     initParams: {
       type: Object,
-      require: true
+      require: true,
+      default: null
     },
 
     // 类型，有 create,update 两种
@@ -63,7 +64,8 @@ export default {
     },
 
     initData: {
-      type: Object
+      type: Object,
+      default: null
     }
   },
 
@@ -127,7 +129,7 @@ export default {
       }
 
       if (!this.initParams.interceptApi && !this.initParams.api) {
-        throw `需要传递 api`
+        throw new Error(`需要传递 api`)
       }
 
       const result = await this[`${this.type}Doc`]()
@@ -142,11 +144,12 @@ export default {
       const createData = _.cloneDeep(this.data)
 
       if (this.initParams.handler && this.initParams.handler.before) {
-        if (!this.initParams.handler.before(createData))
+        if (!this.initParams.handler.before(createData)) {
           return {
             code: 200,
             message: '前置操作失败'
           }
+        }
       }
 
       console.log('createDoc data:', createData)
@@ -194,11 +197,12 @@ export default {
 
       // 前置操作
       if (this.initParams.handler && this.initParams.handler.before) {
-        if (!this.initParams.handler.before(updateData))
+        if (!this.initParams.handler.before(updateData)) {
           return {
             code: 200,
             message: '前置操作失败'
           }
+        }
       }
 
       // 拦截api响应，直接返回数据

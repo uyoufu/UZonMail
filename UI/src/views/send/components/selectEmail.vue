@@ -6,7 +6,7 @@
         ...使用q-card-section展现它?
       -->
       <q-splitter v-model="splitterModel" class="email-selector">
-        <template v-slot:before>
+        <template #before>
           <div class="q-pa-xs">
             <q-tree
               :nodes="groupsData"
@@ -21,7 +21,7 @@
           </div>
         </template>
 
-        <template v-slot:after>
+        <template #after>
           <q-tab-panels
             v-model="selectedNode"
             animated

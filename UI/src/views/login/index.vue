@@ -7,7 +7,7 @@
       众里寻他千百度，无件可发凭风孤
     </div>
     <div class="row justify-center">
-      <embed src="resources/images/login-logo.svg" class="svg-style" />
+      <embed src="resources/images/login-logo.svg" class="svg-style">
 
       <el-form
         ref="loginForm"
@@ -132,7 +132,7 @@ export default {
           this.loading = true
           this.$store
             .dispatch('user/login', this.loginForm)
-            .then(async () => {
+            .then(async() => {
               // 登陆成功后，进行websocket 登陆
               await ws.sendRequest({
                 name: 'Login',

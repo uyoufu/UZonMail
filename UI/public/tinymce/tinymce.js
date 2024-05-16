@@ -1998,7 +1998,7 @@
             function o(i, f) {
               if (!n[i]) {
                 if (!e[i]) {
-                  var c = 'function' == typeof require && require;
+                  var c = 'function' === typeof require && require;
                   if (!f && c)
                     return c(i, !0);
                   if (u)
@@ -2014,7 +2014,7 @@
               }
               return n[i].exports;
             }
-            for (var u = 'function' == typeof require && require, i = 0; i < t.length; i++)
+            for (var u = 'function' === typeof require && require, i = 0; i < t.length; i++)
               o(t[i]);
             return o;
           }
@@ -5635,7 +5635,7 @@
         ATTR: function (name, operator, check) {
           return function (elem) {
             var result = Sizzle.attr(elem, name);
-            if (result == null) {
+            if (result === null) {
               return operator === '!=';
             }
             if (!operator) {
@@ -5821,7 +5821,7 @@
         },
         text: function (elem) {
           var attr;
-          return elem.nodeName.toLowerCase() === 'input' && elem.type === 'text' && ((attr = elem.getAttribute('type')) == null || attr.toLowerCase() === 'text');
+          return elem.nodeName.toLowerCase() === 'input' && elem.type === 'text' && ((attr = elem.getAttribute('type')) === null || attr.toLowerCase() === 'text');
         },
         first: createPositionalPseudo(function () {
           return [0];
@@ -6085,7 +6085,7 @@
     }
     function matcherFromGroupMatchers(elementMatchers, setMatchers) {
       var bySet = setMatchers.length > 0, byElement = elementMatchers.length > 0, superMatcher = function (seed, context, xml, results, outermost) {
-          var elem, j, matcher, matchedCount = 0, i = '0', unmatched = seed && [], setMatched = [], contextBackup = outermostContext, elems = seed || byElement && Expr.find.TAG('*', outermost), dirrunsUnique = dirruns += contextBackup == null ? 1 : Math.random() || 0.1, len = elems.length;
+          var elem, j, matcher, matchedCount = 0, i = '0', unmatched = seed && [], setMatched = [], contextBackup = outermostContext, elems = seed || byElement && Expr.find.TAG('*', outermost), dirrunsUnique = dirruns += contextBackup === null ? 1 : Math.random() || 0.1, len = elems.length;
           if (outermost) {
             outermostContext = context !== document$1 && context;
           }
@@ -28691,7 +28691,7 @@
         }
         if (!/^[\w\-]*:?\/\//.test(url)) {
           var baseUrl = this.settings.base_uri ? this.settings.base_uri.path : new URI(document.location.href).directory;
-          if (this.settings.base_uri && this.settings.base_uri.protocol == '') {
+          if (this.settings.base_uri && this.settings.base_uri.protocol === '') {
             url = '//mce_host' + self.toAbsPath(baseUrl, url);
           } else {
             var match = /([^#?]*)([#?]?.*)/.exec(url);
@@ -28788,12 +28788,12 @@
         return absoluteUri.getURI(noHost && this.isSameOrigin(absoluteUri));
       };
       URI.prototype.isSameOrigin = function (uri) {
-        if (this.host == uri.host && this.protocol == uri.protocol) {
-          if (this.port == uri.port) {
+        if (this.host === uri.host && this.protocol === uri.protocol) {
+          if (this.port === uri.port) {
             return true;
           }
           var defaultPort = DEFAULT_PORTS[this.protocol];
-          if (defaultPort && (this.port || defaultPort) == (uri.port || defaultPort)) {
+          if (defaultPort && (this.port || defaultPort) === (uri.port || defaultPort)) {
             return true;
           }
         }

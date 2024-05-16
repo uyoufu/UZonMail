@@ -24,8 +24,7 @@ export default {
       if (result.status !== 200) return
 
       for (const fullName of result.result) {
-        if (this.attachments.findIndex(attName => attName === fullName) > -1)
-          continue
+        if (this.attachments.findIndex(attName => attName === fullName) > -1) { continue }
 
         this.attachments.push(fullName)
       }

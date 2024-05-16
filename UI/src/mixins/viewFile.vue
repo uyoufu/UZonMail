@@ -11,11 +11,12 @@ export default {
     async viewFile_openFile(ioFileId) {
       // 获取文件类型
       const ioFileInfoRes = await getIoFileInfo(ioFileId)
-      if (!ioFileInfoRes.ok)
+      if (!ioFileInfoRes.ok) {
         return {
           ok: false,
           message: '未找到文件'
         }
+      }
 
       // 获取查看的url
       const res = await presignedGetObject(ioFileId)

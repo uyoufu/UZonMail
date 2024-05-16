@@ -1,6 +1,6 @@
 <template>
   <q-splitter v-model="splitterModel" class="email-selector">
-    <template v-slot:before>
+    <template #before>
       <div class="q-pa-xs">
         <q-tree
           :nodes="groupsData"
@@ -11,12 +11,11 @@
           no-connectors
           tick-strategy="leaf"
           :ticked.sync="tickedNodes"
-        >
-        </q-tree>
+        />
       </div>
     </template>
 
-    <template v-slot:after>
+    <template #after>
       <q-tab-panels
         v-model="selectedNode"
         animated
@@ -31,7 +30,7 @@
           class="q-pa-none"
           style="height: 100%"
         >
-          <EmailTable :group="group" v-model="tickedUsers" />
+          <EmailTable v-model="tickedUsers" :group="group" />
         </q-tab-panel>
       </q-tab-panels>
     </template>
@@ -74,6 +73,11 @@ export default {
       tickedUsers: this.value.filter(v => v.type !== 'group')
     }
   },
+  computed: {
+    groupsData() {
+      return this.dataTree.GetTree()
+    }
+  },
   watch: {
     tickedNodes(val) {
       // 转换数据格式
@@ -110,22 +114,10 @@ export default {
       this.$emit('input', results)
     }
   },
-  computed: {
-    groupsData() {
-      // 将所有的组解析成树的结构
-      const ltt = new LTT(this.groupsOrigin, {
-        key_id: '_id',
-        key_parent: 'parentId',
-        key_child: 'children',
-        empty_children: true
-      })
-
-      this.dataTree = ltt
-
-      return ltt.GetTree()
-    }
+  created() {
+    // Call the method to compute the data tree when the component is created
+    this.computeDataTree()
   },
-
   async mounted() {
     console.log('this.value:', this.value)
     // 获取所有的组
@@ -133,8 +125,20 @@ export default {
 
     this.groupsOrigin = res.data
     // 选择第一个
-    if (this.groupsOrigin && this.groupsOrigin.length > 0)
-      this.selectedNode = this.groupsOrigin[0]._id
+    if (this.groupsOrigin && this.groupsOrigin.length > 0) { this.selectedNode = this.groupsOrigin[0]._id }
+  },
+  methods: {
+    computeDataTree() {
+      // This method is responsible for computing the tree structure
+      const ltt = new LTT(this.groupsOrigin, {
+        key_id: '_id',
+        key_parent: 'parentId',
+        key_child: 'children',
+        empty_children: true
+      })
+
+      this.dataTree = ltt.GetTree()
+    }
   }
 }
 </script>
