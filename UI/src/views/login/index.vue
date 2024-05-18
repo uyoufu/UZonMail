@@ -4,11 +4,10 @@
       class="row justify-center"
       style="font-size: 2em; font-family: cursive; margin-bottom: 100px"
     >
-      众里寻他千百度，无件可发凭风孤
+      {{ $t('login.title') }}
     </div>
     <div class="row justify-center">
       <embed src="resources/images/login-logo.svg" class="svg-style">
-
       <el-form
         ref="loginForm"
         :model="loginForm"
@@ -24,7 +23,7 @@
           <el-input
             ref="userName"
             v-model="loginForm.userName"
-            placeholder="Username"
+            :placeholder="$t('login.username')"
             name="userName"
             type="text"
             tabindex="1"
@@ -41,7 +40,7 @@
             ref="password"
             v-model="loginForm.password"
             :type="passwordType"
-            placeholder="Password"
+            :placeholder="$t('login.password')"
             name="password"
             tabindex="2"
             auto-complete="on"
@@ -54,6 +53,7 @@
           </span>
         </el-form-item>
 
+        <div class="row" style="font-size: 2em; font-family: cursive; margin-bottom: 15px;">{{$t('login.language')}}<lang/></div>
         <el-button
           :loading="loading"
           type="primary"
@@ -61,7 +61,7 @@
           class="bg-primary"
           @click.native.prevent="handleLogin"
         >
-          登陆/注册
+          {{ $t('login.login') }}
         </el-button>
       </el-form>
     </div>
@@ -77,14 +77,14 @@ export default {
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!value || value.length < 2) {
-        callback(new Error('用户名长度至少 2 位'))
+        callback(new Error(this.$t('login.usernameRequired')))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('密码长度至少 6 位'))
+        callback(new Error(this.$t('login.passwordRequired')))
       } else {
         callback()
       }

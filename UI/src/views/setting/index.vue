@@ -3,57 +3,32 @@
     <div class="column justify-center q-gutter-sm" style="max-width: 600px">
       <div>
         <div class="text-subtitle1 q-mb-lg">
-          发件间隔：
+          {{ $t('sendInterval') }}
           <q-tooltip>
-            单个发件箱发件连续两封邮件发件时间的间隔范围，在该范围内随机波动
+            {{ $t('sendIntervalTooltip') }}
           </q-tooltip>
         </div>
-        <q-range
-          v-model="sendInterval"
-          :min="2"
-          :max="20"
-          :step="0.5"
-          :left-label-value="sendInterval.min + '秒'"
-          :right-label-value="sendInterval.max + '秒'"
-          label-always
-          style="min-width: 300px"
-        />
+        <q-range v-model="sendInterval" :min="2" :max="20" :step="0.5"
+          :left-label-value="sendInterval.min + ' ' + $t('second')"
+          :right-label-value="sendInterval.max + ' ' + $t('second')" label-always style="min-width: 300px" />
       </div>
 
       <div>
         <div class="text-subtitle1 q-mb-lg">
-          单邮箱每日发件总数：
-          <q-tooltip> 单个发件箱每日发件限制数。0代表无限制 </q-tooltip>
+          {{ $t('maxEmailsPerDay') }}
+          <q-tooltip> {{ $t('maxEmailsPerDayTooltip') }} </q-tooltip>
         </div>
-        <q-slider
-          v-model="maxEmailsPerDay"
-          :min="0"
-          :max="500"
-          :step="10"
-          label
-          label-always
-          :label-value="maxEmailsPerDay ? maxEmailsPerDay : '无限制'"
-          style="min-width: 300px"
-        />
+        <q-slider v-model="maxEmailsPerDay" :min="0" :max="500" :step="10" label label-always
+          :label-value="maxEmailsPerDay ? maxEmailsPerDay : $t('unlimited')" style="min-width: 300px" />
       </div>
 
-      <q-checkbox
-        v-model="isAutoResend"
-        label="自动重发"
-        color="secondary"
-        class="self-start q-ml-xs"
-      >
-        <q-tooltip> 发件失败自动重发，重发最大次数为5。 </q-tooltip>
+      <q-checkbox v-model="isAutoResend" :label="$t('autoResend')" color="secondary" class="self-start q-ml-xs">
+        <q-tooltip> {{$t('autoResendTooltip')}} </q-tooltip>
       </q-checkbox>
 
-      <q-checkbox
-        v-model="sendWithImageAndHtml"
-        label="图文混发"
-        color="secondary"
-        class="self-start q-ml-xs"
-      >
+      <q-checkbox v-model="sendWithImageAndHtml" :label="$t('sendWithImageAndHtml')" color="secondary" class="self-start q-ml-xs">
         <q-tooltip>
-          将一半邮件转成图片发送（图片在转换过程中会丢失）
+          {{ $t('sendWithImageAndHtmlTooltip') }}
         </q-tooltip>
       </q-checkbox>
     </div>

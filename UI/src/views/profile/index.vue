@@ -4,7 +4,7 @@
       <div class="card-img avatar" @click="triger = true">
         <img :src="avatar" class="card-img avatar">
         <q-tooltip anchor="center middle" self="center middle">
-          单击选择图片
+          {{ $t('avatarTooltip') }}
         </q-tooltip>
       </div>
       <div>{{ userName }}</div>
@@ -64,7 +64,7 @@ export default {
         console.log('handleUploaded:', rs, this.$store.getters.name)
 
         if (rs.data.length < 1) {
-          notifyError('头像上传失败')
+          notifyError($t('uploadedAvatarError'))
           return
         }
 
@@ -84,11 +84,11 @@ export default {
 
     handleCompleted(response, form, xhr) {
       console.log('handleCompleted:', response)
-      notifySuccess('修改成功')
+      notifySuccess($t('successModified'))
     },
 
     handlerError(message, type, xhr) {
-      notifyError('头像上传失败' + message)
+      notifyError($t('uploadedAvatarError') + message)
     }
   }
 }

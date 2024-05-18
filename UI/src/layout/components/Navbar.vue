@@ -1,14 +1,11 @@
 <template>
   <div class="navbar">
-    <hamburger
-      :is-active="sidebar.opened"
-      class="hamburger-container"
-      @toggleClick="toggleSideBar"
-    />
+    <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
 
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
+      <Lang />
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img :src="avatar" class="user-avatar">
@@ -16,31 +13,25 @@
         </div>
         <el-dropdown-menu slot="dropdown">
           <router-link to="/">
-            <el-dropdown-item>首页</el-dropdown-item>
+            <el-dropdown-item>{{ $t('home') }}</el-dropdown-item>
           </router-link>
-          <a
-            target="_blank"
-            href="https://galensgan.github.io/2020/2QMK677.html"
-          >
-            <el-dropdown-item>使用说明</el-dropdown-item>
+          <a target="_blank" href="https://galens.uamazing.cn/posts/2020/2QMK677.html">
+            <el-dropdown-item>{{ $t('docs') }}</el-dropdown-item>
           </a>
 
           <router-link to="/profile/index">
-            <el-dropdown-item>我的资料</el-dropdown-item>
+            <el-dropdown-item>{{ $t('profile') }}</el-dropdown-item>
           </router-link>
 
           <el-dropdown-item divided @click.native="logout">
-            <span style="display: block">退出登陆</span>
+            <span style="display: block">{{ $t('logout') }}</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
 
       <!--添加全局消息-->
       <q-dialog v-model="isShowGlobalMessage" persistent>
-        <GlobalMesssage
-          :message="websocketMsg"
-          @close="isShowGlobalMessage = false"
-        />
+        <GlobalMesssage :message="websocketMsg" @close="isShowGlobalMessage = false" />
       </q-dialog>
     </div>
   </div>

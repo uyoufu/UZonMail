@@ -30,6 +30,7 @@ import Layout from '@/layout'
  * a base page that does not have permission requirements
  * all roles can be accessed
  */
+
 export const constantRoutes = [
   {
     path: '/login',
@@ -42,128 +43,10 @@ export const constantRoutes = [
     component: () => import('@/views/404'),
     hidden: true
   },
-
-  // {
-  //   path: "/",
-  //   component: Layout,
-  //   redirect: "/dashboard",
-  //   children: [
-  //     {
-  //       path: "dashboard",
-  //       name: "Dashboard",
-  //       component: () => import("@/views/dashboard/index"),
-  //       meta: { title: "Dashboard", icon: "dashboard" }
-  //     }
-  //   ]
-  // },
-
-  // {
-  //   path: "/example",
-  //   component: Layout,
-  //   redirect: "/example/table",
-  //   name: "Example",
-  //   meta: { title: "Example", icon: "el-icon-s-help" },
-  //   children: [
-  //     {
-  //       path: "table",
-  //       name: "Table",
-  //       component: () => import("@/views/table/index"),
-  //       meta: { title: "Table", icon: "table" }
-  //     },
-  //     {
-  //       path: "tree",
-  //       name: "Tree",
-  //       component: () => import("@/views/tree/index"),
-  //       meta: { title: "Tree", icon: "tree" }
-  //     }
-  //   ]
-  // },
-
-  // {
-  //   path: "/form",
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: "index",
-  //       name: "Form",
-  //       component: () => import("@/views/form/index"),
-  //       meta: { title: "Form", icon: "form" }
-  //     }
-  //   ]
-  // },
-
-  // {
-  //   path: "/nested",
-  //   component: Layout,
-  //   redirect: "/nested/menu1",
-  //   name: "Nested",
-  //   meta: {
-  //     title: "Nested",
-  //     icon: "nested"
-  //   },
-  //   children: [
-  //     {
-  //       path: "menu1",
-  //       component: () => import("@/views/nested/menu1/index"), // Parent router-view
-  //       name: "Menu1",
-  //       meta: { title: "Menu1" },
-  //       children: [
-  //         {
-  //           path: "menu1-1",
-  //           component: () => import("@/views/nested/menu1/menu1-1"),
-  //           name: "Menu1-1",
-  //           meta: { title: "Menu1-1" }
-  //         },
-  //         {
-  //           path: "menu1-2",
-  //           component: () => import("@/views/nested/menu1/menu1-2"),
-  //           name: "Menu1-2",
-  //           meta: { title: "Menu1-2" },
-  //           children: [
-  //             {
-  //               path: "menu1-2-1",
-  //               component: () =>
-  //                 import("@/views/nested/menu1/menu1-2/menu1-2-1"),
-  //               name: "Menu1-2-1",
-  //               meta: { title: "Menu1-2-1" }
-  //             },
-  //             {
-  //               path: "menu1-2-2",
-  //               component: () =>
-  //                 import("@/views/nested/menu1/menu1-2/menu1-2-2"),
-  //               name: "Menu1-2-2",
-  //               meta: { title: "Menu1-2-2" }
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           path: "menu1-3",
-  //           component: () => import("@/views/nested/menu1/menu1-3"),
-  //           name: "Menu1-3",
-  //           meta: { title: "Menu1-3" }
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       path: "menu2",
-  //       component: () => import("@/views/nested/menu2/index"),
-  //       name: "Menu2",
-  //       meta: { title: "menu2" }
-  //     }
-  //   ]
-  // },
-
-  // {
-  //   path: "external-link",
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: "https://panjiachen.github.io/vue-element-admin-site/#/",
-  //       meta: { title: "External Link", icon: "link" }
-  //     }
-  //   ]
-  // },
-
+  {
+    path: '/lang',
+    component: () => import('@/views/login/index')
+  },
   {
     path: '/',
     component: Layout,
@@ -173,8 +56,7 @@ export const constantRoutes = [
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/dashboard/index'),
-        // component: () => import('@/components/IQTable/test'),
-        meta: { title: '首页', icon: 'dashboard' }
+        meta: { title: 'home', icon: 'dashboard' }
       }
     ]
   },
@@ -189,7 +71,7 @@ export const constantRoutes = [
         name: 'Profile',
         hidden: true,
         component: () => import('@/views/profile/index'),
-        meta: { title: '我的资料', icon: 'dashboard' }
+        meta: { title: 'profile', icon: 'dashboard' }
       }
     ]
   },
@@ -202,7 +84,7 @@ export const constantRoutes = [
         path: 'index',
         name: 'Setting',
         component: () => import('@/views/setting/index'),
-        meta: { title: '系统设置', icon: 'setting' }
+        meta: { title: 'settings', icon: 'setting' }
       }
     ]
   },
@@ -210,33 +92,33 @@ export const constantRoutes = [
   {
     path: '/email',
     component: Layout,
-    meta: { title: '邮箱管理', icon: 'data' },
+    meta: { title: 'emailManagement', icon: 'data' },
     redirect: '/email/send-box',
     children: [
       {
         path: 'send-box',
         name: 'SendBox',
         component: () => import('@/views/email/send'),
-        meta: { title: '发件箱', icon: 'outbox', noCache: false }
+        meta: { title: 'outbox', icon: 'outbox', noCache: false }
       },
       {
         path: 'receive-box',
         name: 'ReceiveBox',
         component: () => import('@/views/email/receive'),
-        meta: { title: '收件箱', icon: 'inbox', noCache: false }
+        meta: { title: 'inbox', icon: 'inbox', noCache: false }
       },
       {
         path: 'template',
         name: 'Template',
         component: () => import('@/views/email/template'),
-        meta: { title: '正文模板', icon: 'template-f' }
+        meta: { title: 'template', icon: 'template-f' }
       },
       {
         path: 'template-editor',
         name: 'TemplateEditor',
         hidden: true,
         component: () => import('@/views/email/templateEditor'),
-        meta: { title: '编辑模板', icon: 'form' }
+        meta: { title: 'editTemplate', icon: 'form' }
       }
     ]
   },
@@ -244,20 +126,20 @@ export const constantRoutes = [
   {
     path: '/send',
     component: Layout,
-    meta: { title: '发件管理', icon: 'send' },
+    meta: { title: 'sendManagement', icon: 'send' },
     redirect: '/send/index',
     children: [
       {
         path: 'index',
         name: 'SendIndex',
         component: () => import('@/views/send/index'),
-        meta: { title: '新建发件', icon: 'add' }
+        meta: { title: 'newSend', icon: 'add' }
       },
       {
         path: 'history',
         name: 'SendHistory',
         component: () => import('@/views/send/history'),
-        meta: { title: '发件历史', icon: 'history' }
+        meta: { title: 'sendHistory', icon: 'history' }
       }
     ]
   },
@@ -268,7 +150,7 @@ export const constantRoutes = [
     children: [
       {
         path: 'https://galensgan.github.io/posts/2020/2QMK677.html',
-        meta: { title: '使用说明', icon: 'book' }
+        meta: { title: 'docs', icon: 'book' }
       }
     ]
   },

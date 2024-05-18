@@ -39,9 +39,16 @@ export default {
   computed: {
     progressValue() {
       return _.clamp(this.progress, 0.1, 0.9)
+    },
+    arrivalRate(){
+      return this.$t('arrivalRate')
     }
   },
-
+  watch: {
+    '$i18n.locale'() {
+      this.initChart() // 语言切换时重新初始化图表
+    }
+  },
   async mounted() {
     // 获取成功率
     const res = await getSuccessRate()
@@ -60,7 +67,6 @@ export default {
     initChart() {
       const value = this.progress || 1
       const mainColor = '#67b279'
-
       // 参数
       const option = {
         // 背景色
@@ -92,7 +98,7 @@ export default {
               normal: {
                 position: ['50%', '30%'],
                 // 显示文本
-                formatter: `到达率: ${(value * 100).toFixed(0)}%`,
+                formatter: `${this.arrivalRate}: ${(value * 100).toFixed(0)}%`,
                 textStyle: {
                   // 文本字号
                   fontSize: '28px',
