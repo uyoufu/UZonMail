@@ -119,7 +119,7 @@ export default {
     sent_state_fail: "Fallimento",
     sendMessage: "Motivo",
     tryCount: "Numero di Tentativi",
-    index:"indice",
+    index: "indice",
   },
   button: {
     create: "Crea",
@@ -199,4 +199,5 @@ export default {
   start_label: "Inizio...",
   resend: "inviare nuovamente",
   mail_sent_successfully: "Mail inviata con successo",
+  all: "Tutti",
 }
