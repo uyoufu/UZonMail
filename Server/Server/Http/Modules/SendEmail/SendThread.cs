@@ -85,9 +85,9 @@ namespace Server.Http.Modules.SendEmail
 
                     // 获取发件箱
                     var sendItem = sendItems.Pop();
-                    var mailMessage = await GenerateMailMessage(sendItem);
                     try
                     {
+                        var mailMessage = await GenerateMailMessage(sendItem);
                         //是否使用默认凭据，若为false，则使用自定义的证书，就是下面的networkCredential实例对象
                         smtpclient.UseDefaultCredentials = false;
                         //指定邮箱账号和密码,需要注意的是，这个密码是你在QQ邮箱设置里开启服务的时候给你的那个授权码
