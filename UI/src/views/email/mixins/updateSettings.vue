@@ -8,7 +8,7 @@ export default {
     return {
       isShowUpdateSettings: false,
       initSettingParams: {
-        title: '设置',
+        title: this.$t('btnSettings'),
         tooltip: '',
         api: updateSendEmailSettings,
         // type 可接受的值：text/password/textarea/email/search/tel/file/number/url/time/date
@@ -16,7 +16,7 @@ export default {
           {
             name: '_id',
             type: 'text',
-            label: '发件人id',
+            label: this.$t('table.senderId'),
             required: false,
             readonly: false, // 为true时会被过滤
             hidden: true
@@ -24,14 +24,14 @@ export default {
           {
             name: 'userName',
             type: 'text',
-            label: '姓名',
+            label: this.$t('table.userName'),
             required: true,
             readonly: true
           },
           {
             name: 'maxEmailsPerDay',
             type: 'number',
-            label: '单日最大发件量',
+            label: this.$t('table.maxEmailsPerDay'),
             required: true
           }
         ]
@@ -55,7 +55,7 @@ export default {
         )
       }
 
-      this.initSettingParams.title = '设置：' + data.email
+      this.initSettingParams.title = this.$t('btnSettings')+'：' + data.email
       this.isShowUpdateSettings = true
     },
 
@@ -66,7 +66,7 @@ export default {
       if (index > -1) this.data.splice(index, 1, data)
 
       this.isShowUpdateSettings = false
-      notifySuccess('修改成功')
+      notifySuccess(this.$t('editSuccess'))
     }
   }
 }

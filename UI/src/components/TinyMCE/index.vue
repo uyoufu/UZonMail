@@ -1,6 +1,6 @@
 <template>
   <div :class="{ fullscreen: fullscreen }" class="tinymce-container">
-    <div id="html2image" />
+    <div id="html2image"></div>
     <textarea :id="tinymceId" class="tinymce-textarea" />
     <!-- <div class="editor-custom-btn-container">
       <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" />
@@ -41,6 +41,11 @@ export default {
     }
   },
 
+  watch: {
+    '$i18n.locale': function (newLocale, oldLocale) {
+      this.reinitTinymce()
+    }
+  },
   mounted() {
     this.init()
   },
@@ -57,6 +62,10 @@ export default {
     this.destroyTinymce()
   },
   methods: {
+reinitTinymce() {
+      this.destroyTinymce()
+      this.initTinymce()
+    },
     init() {
       // dynamic load tinymce from cdn
       load(tinymceCDN, err => {
@@ -73,12 +82,14 @@ export default {
       window.tinymce.init({
         width: '100%', //  设置富文本编辑器宽度
         height: '100%', //  设置富文本编辑器高度
-        menubar: false, // 设置富文本编辑器菜单, 默认true
+        menubar: ['custom', 'edit', 'insert', 'view', 'format', 'table'], // 菜单:指定应该出现哪些菜单
         branding: false, // 关闭底部官网提示 默认true
         statusbar: true, // 显示底部状态栏 默认true
         resize: false, // 调节编辑器大小 默认 true
+
+        branding: false, // 编辑框右下角是否显示 ：”由TINY驱动“
         selector: `#${this.tinymceId}`,
-        language: 'zh_CN',
+        language: `${this.$t('system.language')}`,
         // language_url: 'https://cdn.jsdelivr.net/npm/tinymce-lang/langs/zh_CN.js', // site absolute URL
 
         // body_class: 'panel-body',
@@ -133,25 +144,25 @@ export default {
           })
 
           editor.ui.registry.addMenuItem('newTemplate', {
-            text: '新建',
+            text: `${this.$t('template.new')}`,
             icon: 'new-document',
             onAction: _this.newTemplate.bind(_this)
           })
 
           editor.ui.registry.addMenuItem('saveTemplate', {
-            text: '保存',
+            text: this.$t('template.save'),
             icon: 'save',
             onAction: _this.saveTemplate.bind(_this)
           })
 
           editor.ui.registry.addMenuItem('saveAsTemplate', {
-            text: '另存为',
+            text: this.$t('template.saveAs'),
             icon: 'save',
             onAction: _this.saveAsTemplate.bind(_this)
           })
 
           editor.ui.registry.addMenuItem('exitEditor', {
-            text: '退出',
+            text: this.$t('template.close'),
             icon: 'close',
             onAction: _this.exitEditor.bind(_this)
           })
@@ -174,7 +185,7 @@ export default {
     // blob 转 dataUrl
     fileReader(blob) {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader()
+        let reader = new FileReader()
         reader.onload = e => {
           resolve(e.target.result)
         }
@@ -231,10 +242,8 @@ export default {
     overflow: hidden;
   }
 }
-.tinymce-container {
-  ::v-deep .mce-fullscreen {
+.tinymce-container >>> .mce-fullscreen {
   z-index: 10000;
-}
 }
 .tinymce-textarea {
   visibility: hidden;

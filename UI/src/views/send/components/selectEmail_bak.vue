@@ -64,7 +64,7 @@ export default {
     return {
       splitterModel: 30,
       groupsOrigin: [],
-
+      dataTree: [],
       selectedNode: '',
 
       tickedNodes: this.value
@@ -75,7 +75,7 @@ export default {
   },
   computed: {
     groupsData() {
-      return this.dataTree.GetTree()
+      return this.dataTree
     }
   },
   watch: {
@@ -115,8 +115,6 @@ export default {
     }
   },
   created() {
-    // Call the method to compute the data tree when the component is created
-    this.computeDataTree()
   },
   async mounted() {
     console.log('this.value:', this.value)
@@ -126,6 +124,7 @@ export default {
     this.groupsOrigin = res.data
     // 选择第一个
     if (this.groupsOrigin && this.groupsOrigin.length > 0) { this.selectedNode = this.groupsOrigin[0]._id }
+    this.computeDataTree()
   },
   methods: {
     computeDataTree() {

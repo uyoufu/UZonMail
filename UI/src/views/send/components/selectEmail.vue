@@ -48,8 +48,8 @@
 
       <!-- 按钮示例 -->
       <q-card-actions align="right">
-        <q-btn color="negative" label="取消" dense @click="onCancelClick" />
-        <q-btn color="primary" label="确认" dense @click="onOKClick" />
+        <q-btn color="negative" :label="$t('cancel')" dense @click="onCancelClick" />
+        <q-btn color="primary" :label="$t('confirm')" dense @click="onOKClick" />
       </q-card-actions>
     </q-card>
   </q-dialog>

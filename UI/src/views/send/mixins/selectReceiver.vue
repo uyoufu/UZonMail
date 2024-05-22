@@ -13,7 +13,7 @@ export default {
   methods: {
     async openSelectReceiversDialog() {
       // 打开
-      const res = await okCancle('选择收件人', '', {
+      const res = await okCancle(this.$t('select_receiver'), '', {
         component: SelectEmail,
 
         // 如果要访问自定义组件中的

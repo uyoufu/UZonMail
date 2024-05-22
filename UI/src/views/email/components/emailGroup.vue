@@ -3,81 +3,38 @@
     <q-splitter v-model="splitterModel" class="email-spliter">
       <template #before>
         <div class="q-pa-md">
-          <q-tree
-            :nodes="groupsData"
-            node-key="_id"
-            selected-color="primary"
-            label-key="name"
-            :selected.sync="selectedNode"
-            no-connectors
-            no-nodes-label="单击此处右键添加分组"
-          >
+          <q-tree :nodes="groupsData" node-key="_id" selected-color="primary" label-key="name"
+            :selected.sync="selectedNode" no-connectors :no-nodes-label="$t('nodesLabel')">
             <template #default-header="prop">
               <div>
                 {{ prop.node.name }}
               </div>
-              <q-menu
-                transition-show="scale"
-                transition-hide="scale"
-                touch-position
-                context-menu
-              >
+              <q-menu transition-show="scale" transition-hide="scale" touch-position context-menu>
                 <q-list bordered class="rounded-borders text-teal" dense>
-                  <q-item
-                    v-if="!prop.node.parentId"
-                    v-close-popup="2"
-                    clickable
-                    dense
-                    @click="showNewGroupDialog(null)"
-                  >
-                    <q-item-section>添加组</q-item-section>
+                  <q-item v-if="!prop.node.parentId" v-close-popup="2" clickable dense
+                    @click="showNewGroupDialog(null)">
+                    <q-item-section>{{ $t('addGroup') }}</q-item-section>
                   </q-item>
 
-                  <q-item
-                    v-close-popup="2"
-                    clickable
-                    dense
-                    @click="showNewGroupDialog(prop.node)"
-                  >
-                    <q-item-section>添加子组</q-item-section>
+                  <q-item v-close-popup="2" clickable dense @click="showNewGroupDialog(prop.node)">
+                    <q-item-section>{{ $t('addSubNode') }}</q-item-section>
                   </q-item>
 
-                  <q-item
-                    v-close-popup
-                    clickable
-                    dense
-                    @click="showModifyGroupDialog(prop.node)"
-                  >
-                    <q-item-section>修改</q-item-section>
+                  <q-item v-close-popup clickable dense @click="showModifyGroupDialog(prop.node)">
+                    <q-item-section>{{ $t('modify') }}</q-item-section>
                   </q-item>
 
-                  <q-item
-                    v-close-popup
-                    clickable
-                    dense
-                    @click="deleteNode(prop.node)"
-                  >
-                    <q-item-section>删除</q-item-section>
+                  <q-item v-close-popup clickable dense @click="deleteNode(prop.node)">
+                    <q-item-section>{{ $t('delete') }}</q-item-section>
                   </q-item>
                 </q-list>
               </q-menu>
             </template>
           </q-tree>
-          <q-menu
-            transition-show="scale"
-            transition-hide="scale"
-            touch-position
-            context-menu
-          >
+          <q-menu transition-show="scale" transition-hide="scale" touch-position context-menu>
             <q-list bordered class="rounded-borders text-primary" dense>
-              <q-item
-                v-if="groupsData.length === 0"
-                v-close-popup
-                clickable
-                dense
-                @click="showNewGroupDialog(null)"
-              >
-                <q-item-section>添加组</q-item-section>
+              <q-item v-if="groupsData.length === 0" v-close-popup clickable dense @click="showNewGroupDialog(null)">
+                <q-item-section>{{ $t('addGroup') }}</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -85,19 +42,9 @@
       </template>
 
       <template #after>
-        <q-tab-panels
-          v-model="selectedNode"
-          animated
-          transition-prev="jump-up"
-          transition-next="jump-up"
-          style="height: 100%"
-        >
-          <q-tab-panel
-            v-for="group in groupsOrigin"
-            :key="group._id"
-            :name="group._id"
-            style="height: 100%"
-          >
+        <q-tab-panels v-model="selectedNode" animated transition-prev="jump-up" transition-next="jump-up"
+          style="height: 100%">
+          <q-tab-panel v-for="group in groupsOrigin" :key="group._id" :name="group._id" style="height: 100%">
             <GroupEmailInfos :group="group" />
           </q-tab-panel>
         </q-tab-panels>
@@ -105,19 +52,11 @@
     </q-splitter>
 
     <q-dialog v-model="isShowNewGroupDialog">
-      <DialogForm
-        type="create"
-        :init-params="initNewGroupParams"
-        @createSuccess="addNewGroup"
-      />
+      <DialogForm type="create" :init-params="initNewGroupParams" @createSuccess="addNewGroup" />
     </q-dialog>
 
     <q-dialog v-model="isShowModifyGroupDialog">
-      <DialogForm
-        type="update"
-        :init-params="initModifyGroupParams"
-        @updateSuccess="modifyGroup"
-      />
+      <DialogForm type="update" :init-params="initModifyGroupParams" @updateSuccess="modifyGroup" />
     </q-dialog>
   </div>
 </template>
@@ -148,14 +87,14 @@ export default {
     return {
       splitterModel: 20,
       groupsOrigin: [],
-
+      dataTree: [],
       selectedNode: ''
     }
   },
 
   computed: {
     groupsData() {
-      return this.dataTree.GetTree()
+      return this.dataTree
     }
   },
   watch: {
@@ -165,8 +104,6 @@ export default {
   },
 
   created() {
-    // Call the method to compute the data tree when the component is created
-    this.computeDataTree()
   },
 
   async mounted() {
@@ -176,6 +113,7 @@ export default {
     this.groupsOrigin = res.data
     // 选择第一个
     if (this.groupsOrigin && this.groupsOrigin.length > 0) { this.selectedNode = this.groupsOrigin[0]._id }
+    this.computeDataTree()
   },
 
   methods: {
@@ -191,7 +129,7 @@ export default {
       this.dataTree = ltt.GetTree()
     },
     async deleteNode(data) {
-      const ok = await okCancle('删除提醒', '是否删除组？')
+      const ok = await okCancle(this.$t('deleteNodeTooltip'), this.$t('deleteNodeConfirm'))
       if (!ok) return
 
       // 查找当前组和其所有的子组
@@ -205,7 +143,7 @@ export default {
         g => targetNodes.findIndex(node => node._id === g._id) < 0
       )
 
-      notifySuccess('删除成功')
+      notifySuccess(this.$t('delete_success'))
 
       // 如果选中的当前节点，需要换成其它节点
       if (

@@ -8,7 +8,7 @@ export default {
       isShowNewGroupDialog: false,
 
       initNewGroupParams: {
-        title: '新增',
+        title: this.$t('new'),
         tooltip: '',
         api: newGroup,
         // type 可接受的值：text/password/textarea/email/search/tel/file/number/url/time/date
@@ -16,7 +16,7 @@ export default {
           {
             name: 'groupType',
             type: 'text',
-            label: '组类型',
+            label: this.$t('table.groupType'),
             required: true,
             readonly: true,
             default: this.groupType
@@ -24,7 +24,7 @@ export default {
           {
             name: 'parentId',
             type: 'text',
-            label: '父组id',
+            label: this.$t('table.parentId'),
             required: false,
             readonly: true,
             hidden: true
@@ -32,20 +32,20 @@ export default {
           {
             name: 'parentName',
             type: 'text',
-            label: '父组',
+            label: this.$t('table.parentName'),
             required: false,
             readonly: true
           },
           {
             name: 'name',
             type: 'text',
-            label: '子组名称',
+            label: this.$t('table.subGroupName'),
             required: true
           },
           {
             name: 'description',
             type: 'textarea',
-            label: '描述',
+            label: this.$t('table.description'),
             required: false
           }
         ]
@@ -54,9 +54,9 @@ export default {
   },
   computed: {
     newGroupTitle() {
-      if (this.groupType === 'send') return '添加发件箱'
+      if (this.groupType === 'send') return this.$t('newOutbox')
 
-      return '添加收件箱'
+      return  this.$t('newInbox')
     }
   },
 
@@ -75,7 +75,7 @@ export default {
     addNewGroup(data) {
       this.groupsOrigin.push(data)
       this.isShowNewGroupDialog = false
-      notifySuccess('添加成功')
+      notifySuccess(this.$t('addSuccess'))
     }
   }
 }

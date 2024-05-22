@@ -1,6 +1,7 @@
 <template>
   <div class="history-container">
     <q-table
+      :key="tableKey"
       row-key="_id"
       :data="data"
       :columns="columns"
@@ -19,7 +20,7 @@
           v-model="filter"
           dense
           debounce="300"
-          placeholder="搜索"
+          :placeholder="$t('search')"
           color="primary"
         >
           <template #append>
@@ -65,7 +66,6 @@ import {
 import moment from 'moment'
 
 import { table } from '@/themes/index'
-const { btn_detail, btn_delete } = table
 
 import HistoryDetail from './components/historyDetail.vue'
 import { notifyError, notifySuccess, okCancle } from '@/components/iPrompt'
@@ -77,23 +77,50 @@ export default {
   mixins: [mixin_initQTable],
   data() {
     return {
-      btn_detail,
-      btn_delete,
-
-      columns: [
+      columns: [],
+      toShowId: '',
+      isShowDetailDialog: false,
+      tableKey: 0,
+      dateFormat: 'YYYY-MM-DD',
+    }
+  },
+  computed: {
+    btn_detail() {
+      return table.btn_detail
+    },
+    btn_delete() {
+      return table.btn_delete
+    },
+  },
+  watch: {
+    '$i18n.locale'() {
+      this.init() // 语言切换时重新初始化
+      this.loadData() // 语言切换时重新加载数据
+    }
+  },
+  async mounted() {
+    this.init()
+    this.loadData()
+  },
+  methods: {
+    init() {
+      if (this.$i18n.locale === 'it') {
+        this.dateFormat="DD/MM/YYYY"
+      }
+      this.columns = [
         {
           name: 'createDate',
           required: true,
-          label: '日期',
+          label: this.$t('table.createDate'),
           align: 'left',
           field: 'createDate',
-          format: val => moment(val).format('YYYY-MM-DD'),
+          format: val => moment(val).format(this.dateFormat),
           sortable: true
         },
         {
           name: 'subject',
           required: true,
-          label: '主题',
+          label: this.$t('table.subject'),
           align: 'left',
           field: 'subject',
           sortable: true
@@ -101,7 +128,7 @@ export default {
         {
           name: 'template',
           required: true,
-          label: '模板',
+          label: this.$t('table.templateName'),
           align: 'left',
           field: 'templateName',
           sortable: true
@@ -109,7 +136,7 @@ export default {
         {
           name: 'senderIdsLength',
           required: true,
-          label: '发件箱总数',
+          label: this.$t('table.senderIdsLength'),
           align: 'left',
           field: 'senderIds',
           format: val => val.length,
@@ -118,7 +145,7 @@ export default {
         {
           name: 'receiverIdsLength',
           required: true,
-          label: '收件箱总数',
+          label: this.$t('table.receiverIdsLength'),
           align: 'left',
           field: 'receiverIds',
           format: val => val.length,
@@ -128,7 +155,7 @@ export default {
         {
           name: 'status',
           required: true,
-          label: '状态',
+          label: this.$t('table.status'),
           align: 'left',
           field: row => row,
           format: this.formatStatus,
@@ -137,17 +164,17 @@ export default {
         {
           name: 'operations',
           required: true,
-          label: '操作',
+          label: this.$t('table.operations'),
           align: 'right'
         }
-      ],
-
-      toShowId: '',
-      isShowDetailDialog: false
-    }
-  },
-
-  methods: {
+      ]
+    },
+    async loadData() {
+      // 强制刷新表格
+      this.tableKey += 1
+      // 调用mixin中的方法加载数据
+      await this.initQuasarTable_onRequest()
+    },
     // 获取筛选的数量
     // 重载 mixin 中的方法
     async initQuasarTable_getFilterCount(filterObj) {
@@ -168,32 +195,32 @@ export default {
 
       if (val.sendStatus & 1) {
         status.push(
-          `发送结束，成功：${val.successCount}/${val.receiverIds.length}`
+          `${this.$t('send_status1')}：${val.successCount}/${val.receiverIds.length}`
         )
       }
 
       if (val.sendStatus & 2) {
-        status.push(`已初始化，但未发送`)
+        status.push(this.$t('send_status2'))
       }
 
       if (val.sendStatus & 4) {
-        status.push(`发送中...`)
+        status.push(this.$t('send_status4'))
       }
 
       if (val.sendStatus & 8) {
-        status.push(`重发中...`)
+        status.push(this.$t('send_status8'))
       }
 
       if (val.sendStatus & 16) {
-        status.push(`暂停`)
+        status.push(this.$t('send_status16'))
       }
 
       if (val.sendStatus & 32) {
-        status.push(`正在发送图片`)
+        status.push(this.$t('send_status32'))
       }
 
-      if (val.sendStatus & 32) {
-        status.push(`正在发送html`)
+      if (val.sendStatus & 64) {
+        status.push(this.$t('send_status64'))
       }
 
       return status.join()
@@ -207,7 +234,7 @@ export default {
     // 删除发件
     async deleteHistoryGroup(historyId) {
       // 提醒
-      const ok = await okCancle('是否删除该项发送记录？')
+      const ok = await okCancle(this.$t('delete_history_group_confirm'))
       if (!ok) return
 
       // 开始删除
@@ -220,7 +247,7 @@ export default {
       }
 
       // 提示成功
-      notifySuccess('删除成功')
+      notifySuccess(this.$t('delete_success'))
     },
 
     // 关闭详细面板
@@ -229,7 +256,7 @@ export default {
       const res = await getHistoryById(historyId)
       if (!res.data) {
         this.isShowDetailDialog = false
-        notifyError('更新历史记录失败')
+        notifyError(this.$t('get_history_detail_error'))
         return
       }
 

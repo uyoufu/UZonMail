@@ -14,7 +14,7 @@ export default {
     // 打开发件人选择框
     async openSelectCopyToDialog() {
       // 打开
-      const res = await okCancle('选择抄送人', '', {
+      const res = await okCancle(this.$t('select_copy_to'), '', {
         component: SelectEmail,
 
         // 如果要访问自定义组件中的

@@ -43,7 +43,10 @@ namespace Server.Http.Controller
             var histories = LiteDb.Fetch<HistoryGroup>(h => h.userId == Token.UserId);
 
             var results = histories.GetPageDatas(data.filter, data.pagination);
-
+            foreach (var item in results)
+            {
+               item.successCount = LiteDb.Fetch<SendItem>(s => s.historyId == item._id && s.isSent).Count;
+            }
             // 获取状态
             await ResponseSuccessAsync(results);
         }

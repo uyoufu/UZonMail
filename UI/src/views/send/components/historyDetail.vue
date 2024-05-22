@@ -1,27 +1,10 @@
 <template>
   <q-card class="column" style="max-width: none; height: 60%">
-    <q-table
-      row-key="_id"
-      :data="data"
-      :columns="columns"
-      :pagination.sync="pagination"
-      :loading="loading"
-      :filter="filter"
-      dense
-      binary-state-sort
-      virtual-scroll
-      class="col-grow"
-      @request="initQuasarTable_onRequest"
-    >
+    <q-table row-key="_id" :data="data" :columns="columns" :pagination.sync="pagination" :loading="loading"
+      :filter="filter" dense binary-state-sort virtual-scroll class="col-grow" @request="initQuasarTable_onRequest">
       <template #top>
         <q-space />
-        <q-input
-          v-model="filter"
-          dense
-          debounce="300"
-          placeholder="搜索"
-          color="primary"
-        >
+        <q-input v-model="filter" dense debounce="300" :placeholder="$t('search')" color="primary">
           <template #append>
             <q-icon name="search" />
           </template>
@@ -56,30 +39,15 @@
       </template>
     </q-table>
     <div class="row justify-end q-pa-sm">
-      <q-btn
-        v-if="isShowResent"
-        label="重发"
-        color="teal"
-        size="sm"
-        class="q-mr-sm"
-        :class="resentClass"
-        :disable="disableResend"
-        :loading="isResending"
-        @click="resend"
-      >
+      <q-btn v-if="isShowResent" :label="$t('resend')" color="teal" size="sm" class="q-mr-sm" :class="resentClass"
+        :disable="disableResend" :loading="isResending" @click="resend">
         <template #loading>
           <q-spinner-hourglass class="on-left" />
           {{ resendLabel }}
         </template>
       </q-btn>
 
-      <q-btn
-        :disable="disableCancle"
-        label="取消"
-        color="negative"
-        size="sm"
-        @click="closeHistoryDetail"
-      />
+      <q-btn :disable="disableCancle" :label="$t('cancel')" color="negative" size="sm" @click="closeHistoryDetail" />
     </div>
   </q-card>
 </template>
@@ -93,7 +61,6 @@ import {
 import { startSending, getCurrentStatus, getSendingInfo } from '@/api/send'
 
 import { table } from '@/themes/index'
-const { btn_detail } = table
 
 import moment from 'moment'
 import { notifyError, notifySuccess, okCancle } from '@/components/iPrompt'
@@ -111,100 +78,18 @@ export default {
   },
   data() {
     return {
-      btn_detail,
-
-      columns: [
-        {
-          name: 'index',
-          required: true,
-          label: '序号',
-          align: 'left'
-        },
-        {
-          name: 'createDate',
-          required: true,
-          label: '日期',
-          align: 'left',
-          field: 'createDate',
-          format: val => moment(val).format('YYYY-MM-DD'),
-          sortable: true
-        },
-        {
-          name: 'senderName',
-          required: true,
-          label: '发件人',
-          align: 'left',
-          field: 'senderName',
-          format: val => val || '-',
-          sortable: true
-        },
-        {
-          name: 'senderEmail',
-          required: true,
-          label: '发件箱',
-          align: 'left',
-          field: 'senderEmail',
-          format: val => val || '-',
-          sortable: true
-        },
-        {
-          name: 'receiverName',
-          required: true,
-          label: '收件人',
-          align: 'left',
-          field: 'receiverName',
-          sortable: true
-        },
-        {
-          name: 'receiverEmail',
-          required: true,
-          label: '收件箱',
-          align: 'left',
-          field: 'receiverEmail',
-          sortable: true
-        },
-        // 状态
-        {
-          name: 'isSent',
-          required: true,
-          label: '状态',
-          align: 'left',
-          field: 'isSent',
-          format: val => (val ? '成功' : '失败'),
-          sortable: true
-        },
-        {
-          name: 'sendMessage',
-          required: true,
-          label: '原因',
-          align: 'left',
-          field: 'sendMessage',
-          sortable: true,
-          style: 'max-width:200px;text-overflow: ellipsis;overflow: hidden'
-        },
-        {
-          name: 'tryCount',
-          required: true,
-          label: '重发次数',
-          align: 'left',
-          field: 'tryCount',
-          sortable: true
-        }
-        // {
-        //   name: 'operations',
-        //   required: true,
-        //   label: '操作',
-        //   align: 'right'
-        // }
-      ],
-
+      columns: [],
       disableResend: false,
       disableCancle: false,
       isResending: false,
-      resendLabel: '开始...'
+      resendLabel: this.$t('start_label'),
+      dateFormat: 'YYYY-MM-DD',
     }
   },
   computed: {
+    btn_detail() {
+      return table.btn_detail
+    },
     // 是否显示重新发送功能
     isShowResent() {
       const result = this.data.some(d => !d.isSent)
@@ -218,17 +103,18 @@ export default {
       return 'resend-normal'
     }
   },
-
   watch: {
+    '$i18n.locale'() {
+      this.init() // 语言切换时重新初始化
+    },
     data(val) {
       this.disableResend = val.every(d => d.isSent)
     }
   },
-
   async mounted() {
     // 获取数据
     if (!this.historyId) return
-
+    this.init()
     // 获取当前状态，可能处于发送中
     const statusRes = await getCurrentStatus()
     if (statusRes.data & 1 && statusRes.data & 8) {
@@ -242,6 +128,96 @@ export default {
   },
 
   methods: {
+    init() {
+      if (this.$i18n.locale === 'it') {
+        this.dateFormat = "DD/MM/YYYY"
+      }
+      this.columns = [
+        {
+          name: 'index',
+          required: true,
+          label: this.$t('table.index'),
+          align: 'left'
+        },
+        {
+          name: 'createDate',
+          required: true,
+          label: this.$t('table.createDate'),
+          align: 'left',
+          field: 'createDate',
+          format: val => moment(val).format(this.dateFormat),
+          sortable: true
+        },
+        {
+          name: 'senderName',
+          required: true,
+          label: this.$t('table.senderName'),
+          align: 'left',
+          field: 'senderName',
+          format: val => val || '-',
+          sortable: true
+        },
+        {
+          name: 'senderEmail',
+          required: true,
+          label: this.$t('table.senderEmail'),
+          align: 'left',
+          field: 'senderEmail',
+          format: val => val || '-',
+          sortable: true
+        },
+        {
+          name: 'receiverName',
+          required: true,
+          label: this.$t('table.receiverName'),
+          align: 'left',
+          field: 'receiverName',
+          sortable: true
+        },
+        {
+          name: 'receiverEmail',
+          required: true,
+          label: this.$t('table.receiverEmail'),
+          align: 'left',
+          field: 'receiverEmail',
+          sortable: true
+        },
+        // 状态
+        {
+          name: 'isSent',
+          required: true,
+          label: this.$t('table.isSent'),
+          align: 'left',
+          field: 'isSent',
+          format: val => (val ? this.$t('table.sent_state_success') : this.$t('table.sent_state_fail')),
+          sortable: true
+        },
+        {
+          name: 'sendMessage',
+          required: true,
+          label: this.$t('table.sendMessage'),
+          align: 'left',
+          field: 'sendMessage',
+          format: val => this.$t(val),
+          sortable: true,
+          style: 'max-width:200px;text-overflow: ellipsis;overflow: hidden'
+        },
+        {
+          name: 'tryCount',
+          required: true,
+          label: this.$t('table.tryCount'),
+          align: 'left',
+          field: 'tryCount',
+          sortable: true
+        }
+        // {
+        //   name: 'operations',
+        //   required: true,
+        //   label: '操作',
+        //   align: 'right'
+        // }
+      ]
+    },
     // 获取筛选的数量
     // 重载 mixin 中的方法
     async initQuasarTable_getFilterCount(filterObj) {
@@ -264,11 +240,11 @@ export default {
       const ids = this.data.filter(d => !d.isSent).map(d => d._id)
 
       // 提示
-      const ok = await okCancle(`是否重发所有失败项？共 ${ids.length} 项。`)
+      const ok = await okCancle(this.$t('resend_confirmation', { count: ids.length }))
       if (!ok) return
 
       if (!ids || ids.length < 1) {
-        notifyError('未找到可发送项')
+        notifyError(this.$t('no_items_to_send'))
         return
       }
 
@@ -284,7 +260,7 @@ export default {
 
     // 轮询获取进度
     getProgressInfo() {
-      setTimeout(async() => {
+      setTimeout(async () => {
         // 获取更新数据
         const res = await getSendingInfo()
         // console.log('getProgressInfo:', res.data)
@@ -311,7 +287,7 @@ export default {
           this.disableCancle = false
           this.isResending = false
           // 恢复重发初始值
-          this.resendLabel = '开始...'
+          this.resendLabel = this.$t('start_label')
         }
       }, 800)
     },

@@ -2,87 +2,87 @@ export default {
   btn_create: {
     size: 'sm',
     color: 'secondary',
-    label: '新建',
+    label: 'table.create',
     dense: true
   },
 
   btn_trans: {
     size: 'sm',
     color: 'primary',
-    label: '流转',
-    tooltip: '流转',
+    label: 'table.trans',
+    tooltip: 'table.trans',
     dense: true
   },
 
   btn_trans_history: {
     size: 'sm',
     color: 'primary',
-    label: '流转历史',
-    tooltip: '流转历史',
+    label: 'table.trans_history',
+    tooltip: 'table.trans_history',
     dense: true
   },
 
   btn_detail: {
     size: 'sm',
     color: 'primary',
-    label: '详细',
-    tooltip: '查看详细信息',
+    label: 'table.detail',
+    tooltip: 'table.detail_tooltip',
     dense: true
   },
 
   btn_modify: {
     size: 'sm',
     color: 'primary',
-    label: '修改',
-    tooltip: '修改',
+    label: 'table.modify',
+    tooltip: 'table.modify',
     dense: true
   },
 
   btn_delete: {
     size: 'sm',
     color: 'negative',
-    label: '删除',
-    tooltip: '删除',
+    label: 'table.delete',
+    tooltip: 'table.delete_tooltip',
     dense: true
   },
 
   btn_remove: {
     size: 'sm',
     color: 'negative',
-    label: '移除',
-    tooltip: '移除',
+    label: 'table.remove',
+    tooltip: 'table.remove_tooltip',
     dense: true
   },
 
   btn_preview: {
     size: 'sm',
     color: 'primary',
-    label: '预览',
-    tooltip: '预览',
+    label: 'table.preview',
+    tooltip: 'table.preview_tooltip',
     dense: true
   },
 
   btn_version_manager: {
     size: 'sm',
     color: 'secondary',
-    label: '版本管理',
-    tooltip: '版本管理',
+    label: 'table.version_manager',
+    tooltip: 'table.version_manager_tooltip',
     dense: true
   },
 
   btn_upload: {
     size: 'sm',
     color: 'primary',
-    label: '上传',
-    tooltip: '上传',
+    label: 'table.upload',
+    tooltip: 'table.upload_tooltip',
     dense: true
   },
 
   btn_download: {
     size: 'sm',
     color: 'warning',
-    label: '下载',
-    tooltip: '下载',
+    label: 'table.download',
+    tooltip: 'table.download_tooltip',
     dense: true
   }
 }

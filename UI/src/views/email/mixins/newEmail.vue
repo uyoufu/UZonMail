@@ -2,50 +2,13 @@
 import { newEmail } from '@/api/group'
 import { notifySuccess } from '@/components/iPrompt'
 
-const emailCommonInfo = [
-  {
-    name: 'groupId',
-    type: 'text',
-    label: '组id',
-    required: true,
-    readonly: false,
-    hidden: true
-  },
-  {
-    name: 'userName',
-    type: 'text',
-    label: '姓名',
-    required: true
-  },
-  {
-    name: 'email',
-    type: 'email',
-    label: '邮箱',
-    required: true
-  }
-]
-
-const emailSender = [
-  {
-    name: 'smtp',
-    type: 'text',
-    label: 'smtp服务器',
-    required: true
-  },
-  {
-    name: 'password',
-    type: 'password',
-    label: 'smtp密码',
-    required: true
-  }
-]
 
 export default {
   data() {
     return {
       isShowNewEmailDialog: false,
       initNewEmailParams: {
-        title: '新增',
+        title: this.$t('new'),
         tooltip: '',
         api: newEmail,
         // type 可接受的值：text/password/textarea/email/search/tel/file/number/url/time/date
@@ -56,15 +19,48 @@ export default {
   computed: {
     newEmailTitle() {
       if (this.group.groupType === 'send') {
-        return '新增发件箱'
+        return this.$t('newOutbox')
       }
-      return '新增收件箱'
+      return this.$t('newInbox')
     }
   },
   methods: {
     openNewEmailDialog() {
       // 添加 fields
-      const fields = [...emailCommonInfo]
+      const fields = [{
+        name: 'groupId',
+        type: 'text',
+        label: this.$t('table.groupId'),
+        required: true,
+        readonly: false,
+        hidden: true
+      },
+      {
+        name: 'userName',
+        type: 'text',
+        label: this.$t('table.userName'),
+        required: true
+      },
+      {
+        name: 'email',
+        type: 'email',
+        label: this.$t('table.email'),
+        required: true
+      }]
+
+      const emailSender = [
+        {
+          name: 'smtp',
+          type: 'text',
+          label: this.$t('table.smtp'),
+          required: true
+        },
+        {
+          name: 'password',
+          type: 'password',
+          label: this.$t('table.password'),
+          required: true
+        }]
       if (this.group.groupType === 'send') {
         fields.push(...emailSender)
       }
@@ -82,7 +78,7 @@ export default {
       else this.data.push(data)
 
       this.isShowNewEmailDialog = false
-      notifySuccess('添加成功')
+      notifySuccess(this.$t('addSuccess'))
     }
   }
 }

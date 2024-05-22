@@ -2,9 +2,9 @@
   <div class="q-pa-lg send-container q-gutter-md">
     <div class="receive-box row">
       <strong style="height: auto; align-self: center">
-        主题：
+        {{ $t('subject') }}
         <q-tooltip anchor="center right" self="center left">
-          发件主题，不能为空
+          {{ $t('subject_tooltip') }}
         </q-tooltip>
       </strong>
       <input v-model="subject" type="text" class="send-input col-grow">
@@ -13,9 +13,9 @@
     <div class="receive-box row justify-between">
       <div class="row col-grow">
         <strong style="height: auto; align-self: center">
-          发件人：
+          {{ $t('sender') }}
           <q-tooltip anchor="center right" self="center left">
-            <div>如果发件人为空，则会使用随机发件箱进行发件</div>
+            <div>{{ $t('sender_tooltip') }}</div>
           </q-tooltip>
         </strong>
         <q-chip
@@ -36,7 +36,7 @@
         class="self-center q-mb-sm"
         color="secondary"
         outline
-        label="选择发件人"
+        :label="$t('select_sender')"
         @click="openSelectSendersDialog"
       />
     </div>
@@ -44,9 +44,9 @@
     <div class="receive-box row justify-between">
       <div class="row col-grow">
         <strong style="height: auto; align-self: center">
-          收件人：
+          {{ $t('receiver') }}
           <q-tooltip anchor="center right" self="center left">
-            如果按数据中定义的收件人来发件，则收件人栏必须为空
+            {{ $t('receiver_tooltip') }}
           </q-tooltip>
         </strong>
         <q-chip
@@ -67,7 +67,7 @@
         class="self-center q-mb-sm"
         color="secondary"
         outline
-        label="选择收件人"
+        :label="$t('select_receiver')"
         @click="openSelectReceiversDialog"
       />
     </div>
@@ -75,9 +75,9 @@
     <div class="receive-box row justify-between">
       <div class="row col-grow">
         <strong style="height: auto; align-self: center">
-          抄送人：
+          {{ $t('copy_to') }}
           <q-tooltip anchor="center right" self="center left">
-            抄送人为空时，会从数据中读取 copyToEmails 中的用户名作为抄送对象
+            {{ $t('copy_to_tooltip') }}
           </q-tooltip>
         </strong>
         <q-chip
@@ -98,17 +98,17 @@
         class="self-center q-mb-sm"
         color="secondary"
         outline
-        label="选择抄送人"
+        :label="$t('select_copy_to')"
         @click="openSelectCopyToDialog"
       />
     </div>
 
     <div class="row justify-between">
       <div class="row content-center">
-        <strong style="height: auto; align-self: center">模板：</strong>
+        <strong style="height: auto; align-self: center">{{ $t('template_name') }}</strong>
         <el-select
           v-model="selectedTemplate"
-          placeholder="请选择"
+          :placeholder="$t('select_template')"
           size="small"
           value-key="_id"
         >
@@ -135,7 +135,7 @@
         style="flex: 1"
       >
         <div>
-          <strong style="height: auto; align-self: center">数据：</strong>
+          <strong style="height: auto; align-self: center">{{ $t('excel_file_name') }}</strong>
           {{ selectedFileName }}
         </div>
         <input
@@ -146,7 +146,7 @@
           @change="fileSelected"
         >
         <q-btn
-          label="选择Excel"
+          :label="$t('select_excel_file')"
           dense
           size="sm"
           outline
@@ -159,7 +159,7 @@
 
     <div class="receive-box row justify-between">
       <div class="row col-grow">
-        <strong style="height: auto; align-self: center">附件：</strong>
+        <strong style="height: auto; align-self: center">{{ $t('attachment') }}</strong>
         <q-chip
           v-for="att in attachments"
           :key="att"
@@ -178,7 +178,7 @@
         class="self-center q-mb-sm"
         color="secondary"
         outline
-        label="选择附件"
+        :label="$t('select_attachment')"
         @click="sendSignToSelectAttachment"
       />
     </div>
@@ -187,14 +187,14 @@
 
     <div class="row justify-end preview-row q-mr-md">
       <q-btn
-        label="预览"
+        :label="$t('preview')"
         color="secondary"
         size="sm"
         @click="previewEmailBody"
       />
 
       <q-btn
-        label="发送"
+        :label="$t('send')"
         color="primary"
         size="sm"
         class="q-ml-sm"
@@ -203,7 +203,7 @@
       />
       <q-btn
         v-if="false"
-        label="定时"
+        :label="$t('schedule_send')"
         color="primary"
         class="q-ml-sm"
         size="sm"
@@ -226,7 +226,7 @@
         >
           <q-header elevated class="bg-primary">
             <div class="q-pa-sm text-subtitle1">
-              发送给：{{ previewData.receiverName }}/{{
+              {{ $t('send_to') }}{{ previewData.receiverName }}/{{
                 previewData.receiverEmail
               }}
             </div>
@@ -235,24 +235,24 @@
           <q-footer elevated class="bg-secondary">
             <div class="row justify-between q-pa-sm">
               <div>
-                当前：{{ previewData.index + 1 }} / 合计：{{
+               {{ $t('current') }}{{ previewData.index + 1 }} {{ $t('total') }}{{
                   previewData.total
                 }}
               </div>
               <div class="row justify-end q-gutter-sm">
                 <q-btn
-                  label="上一条"
+                  :label="$t('previous_item')"
                   color="orange"
                   size="sm"
                   @click="previousItem"
                 />
                 <q-btn
-                  label="下一条"
+                  :label="$t('next_item')"
                   color="orange"
                   size="sm"
                   @click="nextItem"
                 />
-                <q-btn v-close-popup label="退出" color="negative" size="sm" />
+                <q-btn v-close-popup :label="$t('close')" color="negative" size="sm" />
               </div>
             </div>
           </q-footer>
@@ -378,13 +378,13 @@ export default {
 
     async checkData() {
       if (!this.subject) {
-        notifyError('请输入主题')
+        notifyError(this.$t('subject_required'))
         return false
       }
 
       // 判断收件人与数据是否至少有一个
       if ((!this.receivers || this.receivers.length < 1) && !this.excelData) {
-        notifyError('请选择收件人或者录入数据（两者必须有其一）')
+        notifyError(this.$t('receiver_required'))
         return false
       }
 
@@ -451,11 +451,21 @@ export default {
       const ok = await new Promise((resolve, reject) => {
         this.$q
           .dialog({
-            title: '发件确认<em>!</em>',
-            message: `<div>选择收件：${data.selectedReceiverCount} 个</div>
-            <div>录入数据：${data.dataReceiverCount} 条</div>
-            <div>实际发件：${data.acctualReceiverCount} 个</div>
-            <div style="font-size: 1.375em; color: crimson;margin-top: 10px;">是否继续？</div>`,
+            title: this.$t('send_dialog_title'),
+            message: `
+                    <div>
+                      ${this.$t('selected_receiver_count', { count: data.selectedReceiverCount })}
+                    </div>
+                    <div>
+                      ${this.$t('data_receiver_count', { count: data.dataReceiverCount })}
+                    </div>
+                    <div>
+                      ${this.$t('actual_receiver_count', { count: data.acctualReceiverCount })}
+                    </div>
+                    <div style="font-size: 1.375em; color: crimson; margin-top: 10px;">
+                      ${this.$t('continue_confirmation')}
+                    </div>
+                  `,
             html: true,
             ok: {
               dense: true,

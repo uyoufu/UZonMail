@@ -45,7 +45,6 @@
 
 import { button } from '@/themes/index'
 import { notifyError } from '@/components/iPrompt'
-const { btn_confirm, btn_cancel } = button
 
 import _ from 'lodash'
 
@@ -71,13 +70,17 @@ export default {
 
   data() {
     return {
-      btn_confirm,
-      btn_cancel,
       data: {}
     }
   },
 
   computed: {
+    btn_confirm() {
+      return button.btn_confirm
+    },
+    btn_cancel() {
+      return button.btn_cancel
+    },
     fields() {
       const fields = this.initParams.fields.filter(f => !f.hidden)
       console.log('fields:', fields)

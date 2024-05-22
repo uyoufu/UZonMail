@@ -1,7 +1,7 @@
 <template>
   <q-card class="q-ma-md" style="width: 400px">
     <div class="q-pa-sm">
-      已发送：{{ sendingData.receiverEmail }}, {{ sendingData.index }} /
+      {{ $t('sending_progress') }}{{ sendingData.receiverEmail }}, {{ sendingData.index }} /
       {{ sendingData.total }}
     </div>
     <q-linear-progress

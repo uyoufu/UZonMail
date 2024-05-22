@@ -64,7 +64,7 @@ export default {
         console.log('handleUploaded:', rs, this.$store.getters.name)
 
         if (rs.data.length < 1) {
-          notifyError($t('uploadedAvatarError'))
+          notifyError(this.$t('uploadedAvatarError'))
           return
         }
 
@@ -84,11 +84,11 @@ export default {
 
     handleCompleted(response, form, xhr) {
       console.log('handleCompleted:', response)
-      notifySuccess($t('successModified'))
+      notifySuccess(this.$t('successModified'))
     },
 
     handlerError(message, type, xhr) {
-      notifyError($t('uploadedAvatarError') + message)
+      notifyError(this.$t('uploadedAvatarError') + message)
     }
   }
 }

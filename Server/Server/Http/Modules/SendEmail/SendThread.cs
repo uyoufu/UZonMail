@@ -105,7 +105,7 @@ namespace Server.Http.Modules.SendEmail
                         sendItem.senderEmail = _sendBox.email;
                         sendItem.senderName = _sendBox.userName;
                         sendItem.isSent = true;
-                        sendItem.sendMessage = "邮件送达";
+                        sendItem.sendMessage = "mail_sent_successfully";
                         sendItem.sendDate = DateTime.Now;
                         _liteDb.Upsert(sendItem);
 

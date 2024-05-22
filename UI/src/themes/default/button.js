@@ -2,87 +2,87 @@ export default {
   btn_create: {
     size: 'sm',
     color: 'primary',
-    label: '新建',
+    label: 'button.create',
     dense: false
   },
 
   btn_add: {
     size: 'sm',
     color: 'primary',
-    label: '添加',
+    label: 'button.add',
     dense: false
   },
 
   btn_new: {
     size: 'sm',
     color: 'primary',
-    label: '新增',
+    label: 'button.new',
     dense: false
   },
 
   btn_modify: {
     size: 'sm',
     color: 'warning',
-    label: '修改',
+    label: 'button.modify',
     dense: false
   },
 
   btn_save: {
     size: 'sm',
     color: 'secondary',
-    label: '保存',
+    label: 'button.save',
     dense: false
   },
 
   btn_confirm: {
     size: 'sm',
     color: 'primary',
-    label: '确认',
+    label: 'button.confirm',
     dense: false
   },
 
   btn_import: {
     size: 'sm',
     color: 'primary',
-    label: '导入',
+    label: 'button.import',
     dense: false
   },
 
   btn_export: {
     size: 'sm',
     color: 'primary',
-    label: '导出',
+    label: 'button.export',
     dense: false
   },
 
   btn_cancel: {
     size: 'sm',
     color: 'negative',
-    label: '取消',
+    label: 'button.cancel',
     dense: false
   },
 
   btn_remove: {
     size: 'sm',
     color: 'negative',
-    label: '移除',
-    tooltip: '移除',
+    label: 'button.remove',
+    tooltip: 'button.remove',
     dense: false
   },
 
   btn_delete: {
     size: 'sm',
     color: 'negative',
-    label: '删除',
-    tooltip: '删除',
+    label: 'button.delete',
+    tooltip: 'button.delete',
     dense: false
   },
 
   btn_select: {
     size: 'sm',
     color: 'primary',
-    label: '选择',
-    tooltip: '选择',
+    label: 'button.select',
+    tooltip: 'button.select',
     dense: false
   },
 
@@ -90,8 +90,8 @@ export default {
     size: 'sm',
     color: 'white',
     textColor: 'black',
-    label: '关闭',
-    tooltip: '关闭',
+    label: 'button.close',
+    tooltip: 'button.close',
     dense: false
   },
 
@@ -99,32 +99,32 @@ export default {
   btn_project_login: {
     size: 'sm',
     color: 'primary',
-    label: '登录',
-    tooltip: '登录',
+    label: 'button.projectLogin',
+    tooltip: 'button.projectLogin',
     dense: false
   },
 
   btn_storage_in: {
     size: 'sm',
     color: 'primary',
-    label: '入库',
-    tooltip: '新物品入库',
+    label: 'button.storageIn',
+    tooltip: 'button.storageInTooltip',
     dense: false
   },
 
   btn_download: {
     size: 'sm',
     color: 'warning',
-    label: '下载',
-    tooltip: '下载',
+    label: 'button.download',
+    tooltip: 'button.download',
     dense: false
   },
 
   btn_preview: {
     size: 'sm',
     color: 'primary',
-    label: '预览',
-    tooltip: '预览',
+    label: 'button.preview',
+    tooltip: 'button.preview',
     dense: false
   },
 
@@ -132,8 +132,8 @@ export default {
     size: 'sm',
     color: 'white',
     textColor: 'black',
-    label: '返回',
-    tooltip: '返回',
+    label: 'button.back',
+    tooltip: 'button.back',
     dense: false
   }
 }

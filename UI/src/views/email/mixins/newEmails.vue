@@ -26,7 +26,7 @@ export default {
       const file = e.target.files[0]
       const excelData = await this.readExcelData(file)
       if (!excelData) {
-        notifyError('添加失败')
+        notifyError(this.$t('addFailed'))
         return
       }
 
@@ -36,7 +36,7 @@ export default {
       // 更新本地
       this.data.push(...res.data)
 
-      notifySuccess('添加成功')
+      notifySuccess(thsi.$t('addSuccess'))
     },
 
     async readExcelData(file) {

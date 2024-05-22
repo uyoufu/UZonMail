@@ -17,8 +17,10 @@ import './quasar'
 import i18n from './lang/index'
 import Lang from '@/components/lang'
 import AsyncComputed from 'vue-async-computed'
+
 Vue.use(AsyncComputed)
 Vue.component('Lang', Lang)
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

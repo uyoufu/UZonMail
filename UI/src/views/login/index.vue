@@ -53,7 +53,10 @@
           </span>
         </el-form-item>
 
-        <div class="row" style="font-size: 2em; font-family: cursive; margin-bottom: 15px;">{{$t('login.language')}}<lang/></div>
+        <div class="row" style="font-size: 2em; font-family: cursive; margin-bottom: 15px;">
+          {{ $t('login.language') }}
+          <lang/>
+        </div>
         <el-button
           :loading="loading"
           type="primary"

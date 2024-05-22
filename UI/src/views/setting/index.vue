@@ -8,9 +8,15 @@
             {{ $t('sendIntervalTooltip') }}
           </q-tooltip>
         </div>
-        <q-range v-model="sendInterval" :min="2" :max="20" :step="0.5"
+        <q-range
+          v-model="sendInterval"
+          :min="2"
+          :max="20"
+          :step="0.5"
           :left-label-value="sendInterval.min + ' ' + $t('second')"
-          :right-label-value="sendInterval.max + ' ' + $t('second')" label-always style="min-width: 300px" />
+          :right-label-value="sendInterval.max + ' ' + $t('second')"
+          label-always
+          style="min-width: 300px" />
       </div>
 
       <div>
@@ -18,15 +24,30 @@
           {{ $t('maxEmailsPerDay') }}
           <q-tooltip> {{ $t('maxEmailsPerDayTooltip') }} </q-tooltip>
         </div>
-        <q-slider v-model="maxEmailsPerDay" :min="0" :max="500" :step="10" label label-always
-          :label-value="maxEmailsPerDay ? maxEmailsPerDay : $t('unlimited')" style="min-width: 300px" />
+        <q-slider
+          v-model="maxEmailsPerDay"
+          :min="0"
+          :max="500"
+          :step="10"
+          label
+          label-always
+          :label-value="maxEmailsPerDay ? maxEmailsPerDay : $t('unlimited')"
+          style="min-width: 300px" />
       </div>
 
-      <q-checkbox v-model="isAutoResend" :label="$t('autoResend')" color="secondary" class="self-start q-ml-xs">
-        <q-tooltip> {{$t('autoResendTooltip')}} </q-tooltip>
+      <q-checkbox
+        v-model="isAutoResend"
+        :label="$t('autoResend')"
+        color="secondary"
+        class="self-start q-ml-xs">
+        <q-tooltip> {{ $t('autoResendTooltip') }} </q-tooltip>
       </q-checkbox>
 
-      <q-checkbox v-model="sendWithImageAndHtml" :label="$t('sendWithImageAndHtml')" color="secondary" class="self-start q-ml-xs">
+      <q-checkbox
+        v-model="sendWithImageAndHtml"
+        :label="$t('sendWithImageAndHtml')"
+        color="secondary"
+        class="self-start q-ml-xs">
         <q-tooltip>
           {{ $t('sendWithImageAndHtmlTooltip') }}
         </q-tooltip>

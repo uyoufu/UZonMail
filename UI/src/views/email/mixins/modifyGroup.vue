@@ -7,7 +7,7 @@ export default {
     return {
       isShowModifyGroupDialog: false,
       initModifyGroupParams: {
-        title: '修改',
+        title: this.$t('modify'),
         tooltip: '',
         api: modifyGroup,
         // type 可接受的值：text/password/textarea/email/search/tel/file/number/url/time/date
@@ -15,7 +15,7 @@ export default {
           {
             name: '_id',
             type: 'text',
-            label: '组id',
+            label: this.$t('table.groupId'),
             required: false,
             readonly: false, // 为true时会被过滤
             hidden: true
@@ -23,13 +23,13 @@ export default {
           {
             name: 'name',
             type: 'text',
-            label: '子组名称',
+            label: this.$t('table.subGroupName'),
             required: true
           },
           {
             name: 'description',
             type: 'textarea',
-            label: '描述',
+            label: this.$t('table.description'),
             required: false
           }
         ]
@@ -70,7 +70,7 @@ export default {
       }
 
       this.isShowModifyGroupDialog = false
-      notifySuccess('添加成功')
+      notifySuccess(this.$t('modifySuccess'))
     }
   }
 }

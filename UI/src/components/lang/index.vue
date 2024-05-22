@@ -22,6 +22,10 @@
 
 <script>
 import SvgIcon from '@/components/SvgIcon'
+import langZH from 'quasar/lang/zh-hans.js'
+import langEN from 'quasar/lang/en-us.js'
+import langIT from 'quasar/lang/it.js'
+import { Quasar } from 'quasar'
 
 export default {
   name: 'Lang',
@@ -31,6 +35,20 @@ export default {
   methods: {
     changeLanguage(lang) {
       localStorage.setItem('lang', lang)
+      switch (lang) {
+        case 'en':
+          Quasar.lang.set(langEN)
+          break
+        case 'zh-CN':
+          Quasar.lang.set(langZH)
+          break
+        case 'it':
+          Quasar.lang.set(langIT)
+          break
+        default:
+          Quasar.lang.set(langZH)
+      }
+
       this.$i18n.locale = lang
       this.$message.success(this.$t('langSwitchSuccess')) // 使用国际化消息
     }
