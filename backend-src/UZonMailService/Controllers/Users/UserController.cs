@@ -49,7 +49,7 @@ namespace UZonMailService.Controllers.Users
         /// 新建用户
         /// </summary>
         /// <returns></returns>
-        [Authorize("RequireAdmin")]
+        [Authorize(Roles ="Admin")]
         [HttpPost("sign-up")]
         public async Task<ResponseResult<User>> SignUp([FromBody] User user)
         {
