@@ -1,19 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Services.EmailSending.Sender;
 using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.Core.Services.SendCore.Sender;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.SignalRHubs.SendEmail;
 using UZonMail.Core.Utils.Database;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.DB.SQL.EmailSending;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// 发件项后处理器
-    /// 1. 更新发件状态到数据库
-    /// 2. 判断是否可以重试
+    /// 1. 判断是否可以重试
+    /// 2. 更新发件状态到数据库
     /// 3. 发送通知
     /// </summary>
     public class EmailItemPostHandler : AbstractSendingHandler
@@ -25,65 +24,34 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
             // 根据状态发送进度信息
             var emailItem = context.EmailItem;
-
             // 判断发件项是否需要重试
+            if (!emailItem.IsErrorOrSuccess())
+            {
+                if (emailItem.TriedCount >= emailItem.MaxRetryCount)
+                {
+                    // 说明已经达到了最大重试次数
+                    emailItem.SetStatus(SendItemMetaStatus.Error, $"重试已达最大次数 {emailItem.MaxRetryCount}");
+                }
+            }
 
+            // 标记结束
+            emailItem.Done();
 
+            if (!emailItem.IsErrorOrSuccess()) return;
+            
+            // 保存结果到数据库
+            var sendingItem = await SaveSendingItemInfos(context);
+
+            // 通知前端发件项状态变化
             var client = context.HubClient.GetUserClient(context.OutboxAddress.UserId);
-            if (emailItem.Status.HasFlag(SendItemMetaStatus.Success) || emailItem.Status.HasFlag(SendItemMetaStatus.Error))
-            {
-                var sendingItem = await SaveSendingItemInfos(context);
-                // 通知前端
-                await client.SendingItemStatusChanged(new SendingItemStatusChangedArg(sendingItem));
-            }
-
-            // 增加重试次数
-            emailItem.IncreaseTriedCount();
-
-            var sendCompleteResult = sendingContext.SendResult;
-            // 判断是否需要重试，满足以下条件则重试
-            // 1. 状态码非 ForbiddenRetring
-            // 2. 重试次数未达到上限
-            // 3. 非指定发件箱
-            if (!sendCompleteResult.Ok
-                && !sendCompleteResult.SentStatus.HasFlag(SentStatus.ForbiddenRetring)
-                && SendItemMeta.TriedCount < MaxRetryCount
-                && string.IsNullOrEmpty(SendItemMeta.OutboxEmail))
-            {
-                // TODO: 使用其它发件箱重试
-                if (sendCompleteResult.SentStatus.HasFlag(SentStatus.OutboxError))
-                {
-                    // 不再使用当前发件箱发件
-                    // 向发件箱中添加标记
-                    // 在取件时，根据标记过滤这些发件箱
-                }
-
-                // 通知上层并返回重试状态
-                sendCompleteResult.SentStatus |= SentStatus.Retry;
-            }
-            else
-            {
-
-                // 保存到数据库
-                SendingItem updatedItem = await SaveSendItemInfos(sendingContext);
-
-                // 通知发送结果
-                var client = sendingContext.HubClient.GetUserClient(SendingItem.UserId);
-                if (client != null)
-                {
-                    await client.SendingItemStatusChanged(new SendingItemStatusChangedArg(updatedItem));
-                }
-            }
-
-            // 调用回调,通知上层处理结果
-            await sendingContext.SendingGroupTask.EmailItemSendCompleted(sendingContext);
+            await client.SendingItemStatusChanged(new SendingItemStatusChangedArg(sendingItem));
         }
 
         /// <summary>
         /// 保存 SendItem 状态
         /// </summary>
         /// <returns></returns>
-        private async Task<SendingItem> SaveSendingItemInfos(SendingContext sendingContext)
+        private static async Task<SendingItem> SaveSendingItemInfos(SendingContext sendingContext)
         {
             var outbox = sendingContext.OutboxAddress;
             var emailItem = sendingContext.EmailItem;

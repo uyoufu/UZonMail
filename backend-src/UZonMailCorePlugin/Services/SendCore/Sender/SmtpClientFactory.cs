@@ -3,11 +3,10 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using System.Collections.Concurrent;
 using Uamazing.Utils.Envs;
-using UZonMail.Core.Services.EmailSending.Base;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL.Emails;
+using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender
 {
@@ -22,7 +21,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// </summary>
         /// <param name="outbox"></param>
         /// <returns></returns>
-        public static async Task<FuncResult<SmtpClient>> GetSmtpClientAsync(SendingContext sendingContext, OutboxEmailAddress outbox, ProxyInfo? proxyInfo)
+        public static async Task<Result<SmtpClient>> GetSmtpClientAsync(SendingContext sendingContext, OutboxEmailAddress outbox, ProxyInfo? proxyInfo)
         {
             var key = outbox.Email;
             if (_smptClients.TryGetValue(key, out var clientValue))
@@ -32,7 +31,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 {
                     // 更新代理
                     clientValue.ProxyClient = proxyInfo?.GetProxyClient(_logger);
-                    return new FuncResult<SmtpClient>() { Data = clientValue };
+                    return new Result<SmtpClient>() { Data = clientValue };
                 }
                 // 说明已经断开,进行移除
                 await clientValue.DisconnectAsync(true);
@@ -69,14 +68,14 @@ namespace UZonMail.Core.Services.SendCore.Sender
                     if (!string.IsNullOrEmpty(outbox.AuthPassword)) client.Authenticate(outbox.AuthUserName, outbox.AuthPassword);
 
                 _smptClients.TryAdd(key, client);
-                return new FuncResult<SmtpClient>() { Data = client };
+                return new Result<SmtpClient>() { Data = client };
             }
             catch (Exception ex)
             {
                 _logger.Warn(ex);
                 client.Disconnect(true);
                 client.Dispose();
-                return new FuncResult<SmtpClient>()
+                return new Result<SmtpClient>()
                 {
                     Ok = false,
                     Message = ex.Message,

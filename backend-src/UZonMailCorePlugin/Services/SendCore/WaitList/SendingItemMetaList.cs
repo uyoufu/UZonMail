@@ -1,25 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Emails;
-using UZonMail.DB.SQL.EmailSending;
 
-namespace UZonMail.Core.Services.SendCore.EmailWaitList
+namespace UZonMail.Core.Services.SendCore.WaitList
 {
     /// <summary>
     /// 发件项元数据列表
     /// </summary>
-    public class SendingItemMetaList()
+    public class SendingItemMetaList
     {
         // 为了加速查找，使用字典: key = sendingItemId
-        // 包含所有的发件箱
+        // 包含所有的发件箱: 特定+非特定，但不包含回收站
         private readonly ConcurrentDictionary<long, SendItemMeta> _allWaitDic = [];
+
         // 没有指定发件箱，保存到此处
         private readonly ConcurrentBag<SendItemMeta> _anoymousList = [];
 
         // 指定发件箱，保存到此处
+        // 指定发件箱的邮件只能使用这个发件箱发送
+        // key: 发件箱 id
         private readonly ConcurrentDictionary<long, ConcurrentBag<SendItemMeta>> _outboxDic = [];
 
         /// <summary>
@@ -29,6 +29,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
 
         /// <summary>
         /// 计数器
+        /// 这个是实际的发送项计数
         /// </summary>
         public SendingItemsCounter Counter { get; } = new();
 
@@ -66,6 +67,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         {
             if (itemMeta == null) return false;
 
+            // 如果存在，则不添加
             if (!_allWaitDic.TryAdd(itemMeta.SendingItemId, itemMeta))
                 return false;
 
@@ -166,20 +168,42 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         }
 
         /// <summary>
+        /// 移除等待发送的项
+        /// 移除的项会被记入失败的数量
+        /// 正在发送的项无法被移除
+        /// </summary>
+        /// <param name="sendingItemId"></param>
+        /// <param name="outboxId"></param>
+        /// <returns></returns>
+        public bool RemovePendingItem(long sendingItemId)
+        {
+            // 找到项, 标记删除
+            if (!_allWaitDic.TryRemove(sendingItemId, out var meta)) return true;
+
+            if (!meta.IsDeleted)
+            {
+                meta.IsDeleted = true;
+                Counter.IncreaseSentCount(false);
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// 获取发件箱
         /// </summary>
         /// <returns></returns>
         public SendItemMeta? GetSendingMeta()
         {
-            if (_anoymousList.TryTake(out var meta))
-            {
-                _allWaitDic.TryRemove(meta.SendingItemId, out _);
-                MoveToRecycleBin(meta);
+            if (!_anoymousList.TryTake(out var meta)) return null;
+            _allWaitDic.TryRemove(meta.SendingItemId, out _);
 
-                return meta;
-            }
+            // 若已经被删除，重新获取
+            if (meta.IsDeleted)
+                return GetSendingMeta();
 
-            return null;
+            MoveToRecycleBin(meta);
+            return meta;
         }
 
         /// <summary>
@@ -192,11 +216,35 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
             if (!_outboxDic.TryGetValue(outboxId, out var list)) return null;
 
             if (!list.TryTake(out var meta)) return null;
-
             _allWaitDic.TryRemove(meta.SendingItemId, out _);
-            MoveToRecycleBin(meta);
 
+            // 若已经被删除，重新获取
+            if (meta.IsDeleted)
+                return GetSendingMeta(outboxId);
+
+            MoveToRecycleBin(meta);
             return meta;
+        }
+
+        /// <summary>
+        /// 通过发件箱 id 能否匹配到发件元数据
+        /// 回收站中的项也会进行匹配
+        /// </summary>
+        /// <param name="outboxId"></param>
+        /// <param name="onlySpecific">仅匹配特定的发件项</param>
+        /// <returns></returns>
+        public bool MatchSendingMeta(long outboxId, bool onlySpecific)
+        {
+            if (!onlySpecific)
+            {
+                // 匿名发件
+                if (!_anoymousList.IsEmpty) return true;
+                return _recycleBin.Any(x => x.Value.OutboxId == 0);
+            }
+
+            // 指定项
+            if (!_outboxDic.TryGetValue(outboxId, out var list)) return false;
+            return list.Any(x => x.OutboxId == outboxId);
         }
 
         /// <summary>

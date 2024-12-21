@@ -1,7 +1,5 @@
 ﻿using log4net;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Mail;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UZonMail.Core.Database.SQL.EmailSending;
 using UZonMail.Core.Services.SendCore.Contexts;
@@ -39,7 +37,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         public long SendingItemId { get; private set; }
 
         /// <summary>
-        /// 发件箱
+        /// 发件箱 Id，这个是系统初始值，过程中不会修改
+        /// 程序通过这个判断是否属于特定发件箱
         /// </summary>
         public long OutboxId { get; set; }
 
@@ -48,11 +47,56 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// </summary>
         private int _triedCount = 0;
         public int TriedCount => _triedCount;
-        public void IncreaseTriedCount()
+
+        /// <summary>
+        /// 是否被删除
+        /// </summary>
+        public bool IsDeleted { get; set; } = false;
+        #region 容器
+        public SendingItemMetaList Parent { get; private set; }
+        public void SetParent(SendingItemMetaList metaList)
         {
-            _triedCount++;
+            Parent = metaList;
         }
 
+        /// <summary>
+        /// 完成：成功、失败、重试都调用该接口
+        /// 成功，失败：清除回收站数据
+        /// 其它状态：重试
+        /// </summary>
+        /// <param name="success"></param>
+        /// <exception cref="NullReferenceException"></exception>
+        public void Done()
+        {
+            if(Parent==null)throw new NullReferenceException("未设置父容器");
+
+            if (Status.HasFlag(SendItemMetaStatus.Success))
+            {
+                Parent.ClearRecycleBin(SendingItemId, true);
+            }
+            else if (Status.HasFlag(SendItemMetaStatus.Error))
+            {
+                Parent.ClearRecycleBin(SendingItemId, false);
+            }
+            else
+            {
+                Retry();
+            }
+        }
+
+        /// <summary>
+        /// 重试
+        /// </summary>
+        /// <exception cref="NullReferenceException"></exception>
+        private void Retry()
+        {
+            _triedCount++;
+            if (Parent == null) throw new NullReferenceException("未设置父容器");
+            Parent.MoveRecycleToWaitList(SendingItemId);
+        }
+        #endregion
+
+        #region 状态
         /// <summary>
         /// 状态
         /// </summary>
@@ -73,6 +117,16 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             Status = status;
             Message = message;
         }
+
+        /// <summary>
+        /// 状态为失败或者成功
+        /// </summary>
+        /// <returns></returns>
+        public bool IsErrorOrSuccess()
+        {
+            return Status.HasFlag(SendItemMetaStatus.Error) || Status.HasFlag(SendItemMetaStatus.Success);
+        }
+        #endregion
 
         #region 重写相等
         /// <summary>
@@ -290,6 +344,11 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             }
             return true;
         }
+
+        /// <summary>
+        /// 用户名
+        /// </summary>
+        public long UserId => SendingItem.UserId;
 
         /// <summary>
         /// 收件箱

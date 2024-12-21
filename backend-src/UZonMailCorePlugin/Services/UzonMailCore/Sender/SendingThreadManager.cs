@@ -1,8 +1,8 @@
 ﻿using log4net;
-using UZonMail.Core.Services.EmailSending.Event;
-using UZonMail.Core.Services.EmailSending.Event.Commands;
 using UZonMail.Core.Services.EmailSending.OutboxPool;
 using UZonMail.Core.Services.EmailSending.Pipeline;
+using UZonMail.Core.Services.SendCore.Event;
+using UZonMail.Core.Services.SendCore.Event.Commands;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Utils.Web.Service;
 using Timer = System.Timers.Timer;

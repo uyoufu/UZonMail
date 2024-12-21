@@ -1,28 +1,22 @@
 ﻿using log4net;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using UZonMail.Core.Services.EmailSending.Base;
-using UZonMail.Core.Services.EmailSending.Event;
-using UZonMail.Core.Services.EmailSending.Event.Commands;
-using UZonMail.Core.Services.EmailSending.Pipeline;
-using UZonMail.Core.Services.UzonMailCore.Utils;
+using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.Core.Services.SendCore.Interfaces;
 
 namespace UZonMail.Core.Services.SendCore.Outboxes
 {
     /// <summary>
     /// 单个用户的发件箱池
     /// 每个邮箱账号共用冷却池
-    /// key: 邮箱 userId+邮箱号 ，value: 发件箱列表
+    /// key: 邮箱号 ，value: 发件箱列表
     /// </summary>
     /// <param name="userId">所属用户id</param>
     /// <param name="weight">权重</param>
     public class OutboxesPool(long userId, int weight) : IWeight
     {
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxesPool));
+
+        // key: 邮箱号，value: 发件箱
         private readonly ConcurrentDictionary<string, OutboxEmailAddress> _outboxes = new();
 
         #region 自定义参数
@@ -65,22 +59,52 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         }
 
         /// <summary>
+        /// 移除发件箱
+        /// </summary>
+        /// <param name="outbox"></param>
+        /// <returns></returns>
+        public bool RemoveOutbox(OutboxEmailAddress outbox)
+        {
+            return _outboxes.TryRemove(outbox.Email, out _);
+        }
+
+        /// <summary>
+        /// 移除发件组关联的 outboxes
+        /// </summary>
+        /// <param name="sendingGroupId"></param>
+        /// <returns></returns>
+        public bool RemoveOutboxesBySendingGroup(long sendingGroupId)
+        {
+            var outboxes = _outboxes.Values;
+            foreach (var outbox in outboxes)
+            {
+                outbox.RemoveSendingGroup(sendingGroupId);
+                if (outbox.Working) continue;
+
+                // 移除
+                _outboxes.TryRemove(outbox.Email, out _);
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// 按用户设置的权重获取发件箱
         /// </summary>
         /// <returns></returns>
         public OutboxEmailAddress? GetOutboxByWeight()
         {
             var data = this._outboxes.GetDataByWeight();
-            if(data is not OutboxEmailAddress outbox)
+            if (data is not OutboxEmailAddress outbox)
             {
                 _logger.Info($"未能从{UserId}池中获取发件箱");
                 return null;
             }
-            
+
             if (!outbox.LockUsing())
             {
                 _logger.Info($"发件箱 {outbox.Email} 已被其它线程使用，锁定失败");
-                return null;                
+                return null;
             }
 
             // 保存当前引用
@@ -88,17 +112,14 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         }
 
 
-        public async Task EmailItemSendCompleted(SendingContext sendingContext)
+        /// <summary>
+        /// 给定发件组是否存在发件箱
+        /// </summary>
+        /// <param name="sendingGroupId"></param>
+        /// <returns></returns>
+        public bool ExistOutboxes(long sendingGroupId)
         {
-            // 移除发件箱
-            if (sendingContext.OutboxEmailAddress.ShouldDispose)
-            {
-                TryRemove(sendingContext.OutboxEmailAddress.Email, out _);
-                _logger.Info($"{sendingContext.OutboxEmailAddress.Email} 被标记为释放，从发件池中移除");
-            }
-
-            // 回调父级
-            await sendingContext.UserOutboxesPoolManager.EmailItemSendCompleted(sendingContext);
+            return _outboxes.Values.Any(x => !x.ShouldDispose && x.ContainsSendingGroup(sendingGroupId));
         }
     }
 }

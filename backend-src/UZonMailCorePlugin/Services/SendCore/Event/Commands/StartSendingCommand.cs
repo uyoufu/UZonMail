@@ -1,6 +1,6 @@
-﻿using UZonMail.Core.Services.EmailSending.Pipeline;
+﻿using UZonMail.Core.Services.SendCore.Contexts;
 
-namespace UZonMail.Core.Services.EmailSending.Event.Commands
+namespace UZonMail.Core.Services.SendCore.Event.Commands
 {
     public class StartSendingCommand : GenericCommand<int>
     {

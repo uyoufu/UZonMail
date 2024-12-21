@@ -43,5 +43,9 @@ namespace UZonMail.DB.Managers.Cache
             }
         }
         #endregion
+
+        #region 代理属性
+        public int MaxSendingBatchSize => Setting?.MaxSendingBatchSize ?? 0;
+        #endregion
     }
 }

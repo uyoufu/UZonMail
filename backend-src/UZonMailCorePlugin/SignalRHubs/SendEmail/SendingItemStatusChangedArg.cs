@@ -1,7 +1,4 @@
-﻿using UZonMail.Core.Services.EmailSending.Sender;
-using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.DB.SQL.Emails;
-using UZonMail.DB.SQL.EmailSending;
+﻿using UZonMail.DB.SQL.EmailSending;
 
 namespace UZonMail.Core.SignalRHubs.SendEmail
 {

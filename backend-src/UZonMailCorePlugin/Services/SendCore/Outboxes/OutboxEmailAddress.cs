@@ -1,17 +1,12 @@
-﻿using UZonMail.Core.Services.EmailSending.Base;
-using Timer = System.Timers.Timer;
-using UZonMail.Core.Services.EmailSending.Event.Commands;
-using System.Collections.Concurrent;
-using UZonMail.Core.Services.EmailSending.Pipeline;
-using UZonMail.Core.Services.EmailSending.Sender;
-using UZonMail.Utils.Extensions;
+﻿using UZonMail.Utils.Extensions;
 using UZonMail.Core.Utils.Database;
 using log4net;
 using UZonMail.DB.SQL.EmailSending;
 using UZonMail.DB.SQL.Emails;
 using UZonMail.Core.Services.SendCore.Utils;
-using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.DB.Managers.Cache;
+using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.Core.Services.SendCore.Interfaces;
 
 namespace UZonMail.Core.Services.SendCore.Outboxes
 {
@@ -31,14 +26,14 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         private Outbox _outbox;
 
         /// <summary>
-        /// 当指定邮件被指定收件箱时，此处有值
+        /// 发送目录的 id
         /// </summary>
-        private HashSet<long> _sendingItemIds { get; } = [];
+        private HashSet<SendingTargetId> _sendingTargetIds = [];
 
         /// <summary>
-        /// 所属的发件箱组 id
+        /// 开始日期
         /// </summary>
-        private HashSet<long> _sendingGroupIds = [];
+        private DateTime _startDate = DateTime.Now;
         #endregion
 
         #region 公开属性
@@ -96,6 +91,25 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         public int SentTotalToday => _sentTotalToday;
 
         /// <summary>
+        /// 递增发送数量
+        /// 或跨越天数, 重置发送数量
+        /// </summary>
+        public void IncreaseSentCount()
+        {
+            // 重置每日发件量
+            if (_startDate.Date != DateTime.Now.Date)
+            {
+                _startDate = DateTime.Now;
+                _sentTotalToday = 0;
+            }
+            else
+            {
+                // 防止并发增加
+                _sentTotalToday++;
+            }
+        }
+
+        /// <summary>
         /// 代理 Id
         /// </summary>
         public long ProxyId => _outbox.ProxyId;
@@ -116,11 +130,17 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         public bool ShouldDispose { get; private set; } = false;
 
         /// <summary>
+        /// 工作中
+        /// 当没有发送目标后，working 为 false
+        /// </summary>
+        public bool Working => _sendingTargetIds.Count > 0;
+
+        /// <summary>
         /// 是否可用
         /// </summary>
         public bool Enable
         {
-            get => !ShouldDispose && !_isCooling && !_usingLock.IsLocked;
+            get => !ShouldDispose && !_isCooling && !_usingLock.IsLocked && Working;
         }
         #endregion
 
@@ -137,10 +157,23 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         {
             _outbox = outbox;
             AuthPassword = outbox.Password.DeAES(smtpPasswordSecretKeys.First(), smtpPasswordSecretKeys.Last());
-            _sendingGroupIds.Add(sendingGroupId);
             Type = type;
 
-            sendingItemIds?.ForEach(x => _sendingItemIds.Add(x));
+            // 共享发件箱
+            if (Type.HasFlag(OutboxEmailAddressType.Shared))
+            {
+                _sendingTargetIds.Add(new SendingTargetId(sendingGroupId));
+            }
+
+            if (sendingItemIds != null)
+            {
+                if (!Type.HasFlag(OutboxEmailAddressType.Specific))
+                    throw new Exception("特定发件箱的 Type 必须包含 Specific");
+
+                // 开始添加
+                sendingItemIds?.ForEach(x => _sendingTargetIds.Add(new SendingTargetId(sendingGroupId, x)));
+            }
+
 
             CreateDate = DateTime.Now;
             Email = outbox.Email;
@@ -163,12 +196,14 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         {
             // 更新类型
             Type |= data.Type;
+            Weight = data.Weight;
+            ReplyToEmails = data.ReplyToEmails;
 
             // 更新关联的项
-            data._sendingItemIds?.ToList()
-                .ForEach(x => _sendingItemIds.Add(x));
-            data._sendingGroupIds?.ToList()
-                .ForEach(x => _sendingGroupIds.Add(x));
+            foreach (var targetId in data._sendingTargetIds)
+            {
+                _sendingTargetIds.Add(targetId);
+            }
         }
         #endregion
 
@@ -202,9 +237,26 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// 若设置失败，则返回 false
         /// </summary>
         /// <returns></returns>
-        public void ChangeCoolingSate(bool cooling)
+        private void ChangeCoolingSate(bool cooling)
         {
             _isCooling = cooling;
+        }
+
+        private readonly Cooler _emailCooler = new();
+        /// <summary>
+        /// 进入冷却状态
+        /// </summary>
+        /// <param name="cooldownMilliseconds"></param>
+        /// <param name="threadsManager"></param>
+        public void StartCooling(long cooldownMilliseconds, SendingThreadsManager threadsManager)
+        {
+            ChangeCoolingSate(true);
+            _emailCooler.StartCooling(cooldownMilliseconds, () =>
+            {
+                ChangeCoolingSate(false);
+                threadsManager.StartSending(1);
+                _logger.Debug($"发件箱 {Email} 退出冷却状态");
+            });
         }
         #endregion
 
@@ -226,7 +278,44 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <returns></returns>
         public bool ContainsSendingGroup(long sendingGroupId)
         {
-            return _sendingGroupIds.Contains(sendingGroupId);
+            return _sendingTargetIds.Select(x => x.SendingGroupId).Contains(sendingGroupId);
+        }
+
+        /// <summary>
+        /// 获取发件组 id
+        /// </summary>
+        /// <returns></returns>
+        public List<long> GetSendingGroupIds()
+        {
+            return _sendingTargetIds.Select(x => x.SendingGroupId).ToList();
+        }
+
+        /// <summary>
+        /// 获取指定了发件箱的邮件
+        /// </summary>
+        /// <returns></returns>
+        public List<long> GetSpecificSendingItemIds()
+        {
+            return _sendingTargetIds.Where(x => x.SendingGroupId > 0).Select(x => x.SendingItemId).ToList();
+        }
+
+        /// <summary>
+        /// 移除指定的发件项
+        /// </summary>
+        /// <param name="sendingGroupId"></param>
+        /// <param name="sendingItemId"></param>
+        public void RemoveSepecificSendingItem(long sendingGroupId, long sendingItemId)
+        {
+            _sendingTargetIds.Remove(new SendingTargetId(sendingGroupId, sendingItemId));
+        }
+
+        /// <summary>
+        /// 移除指定发送组
+        /// </summary>
+        /// <param name="sendingGroupId"></param>
+        public void RemoveSendingGroup(long sendingGroupId)
+        {
+            _sendingTargetIds = _sendingTargetIds.Where(x => x.SendingGroupId != sendingGroupId).ToHashSet();
         }
 
         /// <summary>
@@ -237,90 +326,6 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         {
             ErroredMessage = erroredMessage;
             ShouldDispose = true;
-        }
-
-        /// <summary>
-        /// 更新使用记录
-        /// </summary>
-        public async Task EmailItemSendCompleted(SendingContext sendingContext)
-        {
-            // 重置每日发件量
-            if (_startDate.Date != DateTime.Now.Date)
-            {
-                _startDate = DateTime.Now;
-                _sentTotalToday = 0;
-            }
-            else
-            {
-                // 防止并发增加
-                Interlocked.Increment(ref _sentTotalToday);
-            }
-
-            var userReader = await DBCacher.GetCache<UserInfoCache>(sendingContext.SqlContext, UserId.ToString());
-            var userSetting = await DBCacher.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, userReader.OrganizationObjectId);
-
-            // 本身有限制时，若已经达到发送上限，则不再发送
-            if (MaxSendCountPerDay > 0)
-            {
-                if (SentTotalToday > MaxSendCountPerDay)
-                {
-                    ShouldDispose = true;
-                }
-            }
-            // 本身没限制，使用系统的限制
-            else if (userSetting.MaxSendCountPerEmailDay > 0 && SentTotalToday >= userSetting.MaxSendCountPerEmailDay)
-            {
-                ShouldDispose = true;
-            }
-
-            // 若是发件连接失败，则移除
-            if (sendingContext.SendResult.SentStatus.HasFlag(SentStatus.OutboxError)
-                || sendingContext.SendResult.SentStatus.HasFlag(SentStatus.EmptySendingGroup))
-            {
-                ShouldDispose = true;
-            }
-
-            // 判断发件箱是否需要释放
-            if (sendingContext.OutboxEmailAddress.ShouldDispose)
-            {
-                // 受影响的发件任务
-                var sendingGroupIds = sendingContext.OutboxEmailAddress._sendingGroupIds;
-                // 移除指定发件箱的发件项
-                foreach (var sendingGroupId in sendingGroupIds)
-                {
-                    if (!sendingContext.UserSendingGroupsPool.TryGetValue(sendingGroupId, out var sendingGroup)) continue;
-
-                    // 判断当前发件组是否还有发件箱
-                    var existOtherOutbox = sendingContext.UserOutboxesPool.Values.Any(x => x.Email != sendingContext.OutboxEmailAddress.Email
-                        && x._sendingGroupIds.Contains(sendingGroupId));
-                    if (!existOtherOutbox)
-                    {
-                        // 移除发件组
-                        var removeGroupResult = await sendingContext.UserSendingGroupsPool.TryRemoveSendingGroupTask(sendingContext, sendingGroupId);
-                        if (removeGroupResult)
-                        {
-                            // 修改发件项状态
-                            await sendingContext.SqlContext.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending
-                            , x => x.SetProperty(y => y.Status, SendingItemStatus.Failed)
-                                .SetProperty(y => y.SendResult, sendingContext.SendResult.Message ?? "发件箱退出发件池，无发件箱可用")
-                            );
-                            // 修改发件组状态
-                            await sendingContext.SqlContext.SendingGroups.UpdateAsync(x => x.Id == sendingGroupId, x => x.SetProperty(y => y.Status, SendingGroupStatus.Finish));
-
-                            // 通知发件组发送完成
-                            await removeGroupResult.Data.NotifyEnd(sendingContext, sendingGroupId);
-                        }
-
-                        continue;
-                    }
-
-                    // 移除指定发件箱的发件项
-                    await sendingGroup.RemoveSpecificSendingItems(sendingContext);
-                }
-            }
-
-            // 向上继续调用
-            await sendingContext.UserOutboxesPool.EmailItemSendCompleted(sendingContext);
         }
         #endregion
     }

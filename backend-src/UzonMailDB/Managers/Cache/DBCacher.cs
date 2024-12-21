@@ -63,7 +63,7 @@ namespace UZonMail.DB.Managers.Cache
             var fullKey = GetFullKey<T>(objectIdKey);
             // 移除缓存数据
             if (!_settingsDic.TryGetValue(fullKey, out var value)) return false;
-            value.SetDirty();
+            value.SetDirty(true);
             return true;
         }
 

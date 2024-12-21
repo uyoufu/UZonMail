@@ -6,9 +6,9 @@ namespace UZonMail.Core.SignalRHubs.SendEmail
     /// <summary>
     /// 发送组进度参数
     /// </summary>
-    public class SendingGroupProgressArg: SendingProgressArg
+    public class SendingGroupProgressArg : SendingProgressArg
     {
-        public SendingGroupProgressArg(SendingGroup sendingGroup,DateTime startDate)
+        public SendingGroupProgressArg(SendingGroup sendingGroup, DateTime startDate)
         {
             Total = sendingGroup.TotalCount;
             Current = sendingGroup.SentCount;
@@ -17,17 +17,6 @@ namespace UZonMail.Core.SignalRHubs.SendEmail
             SuccessCount = sendingGroup.SuccessCount;
             SentCount = sendingGroup.SentCount;
             Subject = sendingGroup.GetFirstSubject();
-        }
-
-        public SendingGroupProgressArg(long sendingGroupId, SendingItemList counter,DateTime startDate)
-        {
-            Total = counter.InitTotal;
-            Current = counter.TotalSentCount;
-            StartDate = startDate;
-            SendingGroupId = sendingGroupId;
-            SuccessCount = counter.TotalSuccessCount;
-            SentCount = counter.TotalSentCount;
-            Subject = string.Empty;
         }
 
         /// <summary>

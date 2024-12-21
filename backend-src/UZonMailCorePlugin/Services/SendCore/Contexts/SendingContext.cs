@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using UZonMail.Core.Services.SendCore.Actions;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.SignalRHubs;
@@ -30,20 +29,21 @@ namespace UZonMail.Core.Services.SendCore.Contexts
 
         #region 中间变量
         /// <summary>
+        /// 发件任务开始时间
+        /// </summary>
+        public DateTime GroupTaskStartDate { get; set; }
+
+        /// <summary>
         /// 发件箱地址
         /// </summary>
         public OutboxEmailAddress? OutboxAddress { get; set; }
 
+        #region 发件列表相关临时参数
         /// <summary>
         /// 发件项
         /// </summary>
         public SendItemMeta? EmailItem { get; set; }
-
-        /// <summary>
-        /// 执行的动作
-        /// 在这个动作里，进行数据清除等操作
-        /// </summary>
-        public List<IAction> Actions => [];
+        #endregion
         #endregion
     }
 }

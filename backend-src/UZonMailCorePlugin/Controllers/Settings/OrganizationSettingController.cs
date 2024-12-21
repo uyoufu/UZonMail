@@ -7,7 +7,6 @@ using UZonMail.Core.Services.Settings;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Settings;
-using UZonMail.Managers.Cache;
 using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Settings

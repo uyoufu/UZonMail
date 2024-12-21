@@ -1,5 +1,6 @@
 ﻿using log4net;
 using System.Collections.Concurrent;
+using UZonMail.Core.Services.EmailSending.WaitList;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.Core.Services.SendCore.Outboxes;
@@ -11,10 +12,9 @@ namespace UZonMail.Core.Services.SendCore.WaitList
     /// <summary>
     /// 系统级的待发件调度器
     /// </summary>
-    public class GroupTasksList() : ISingletonService
+    public class GroupTasksList() : ConcurrentDictionary<long, GroupTasks>, ISingletonService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasksList));
-        private readonly ConcurrentDictionary<long, GroupTasks> _userTasks = new();
 
         /// <summary>
         /// 将发件组添加到待发件队列
@@ -36,11 +36,11 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             }
 
             // 判断是否有用户发件管理器
-            if (!_userTasks.TryGetValue(group.UserId, out var groupTasks))
+            if (!this.TryGetValue(group.UserId, out var groupTasks))
             {
                 // 新建用户发件管理器
                 groupTasks = new GroupTasks(group.UserId);
-                _userTasks.TryAdd(group.UserId, groupTasks);
+                this.TryAdd(group.UserId, groupTasks);
             }
 
             // 向发件管理器添加发件组
@@ -65,7 +65,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             // 用户发件池
             var groupTasks = GetGroupTasks(outbox.UserId);
             if (groupTasks == null)
-            {               
+            {
                 return null;
             }
 
@@ -79,7 +79,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         private GroupTasks? GetGroupTasks(long userId)
         {
-            if (_userTasks.Count == 0)
+            if (this.IsEmpty)
             {
                 _logger.Info("系统发件任务池为空");
                 return null;
@@ -89,17 +89,17 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             // 返回 null 有以下几种情况：
             // 1. manager 为空
             // 2. 所有发件箱都在冷却中
-            if (!_userTasks.TryGetValue(userId, out var sendingGroupsPool))
+            if (!this.TryGetValue(userId, out var sendingGroupsPool))
             {
                 _logger.Info($"无法获取用户 {userId} 发件任务队列，该队列已释放");
                 return null;
             }
 
             // 为空时移除
-            if (sendingGroupsPool.Count == 0)
+            if (sendingGroupsPool.IsEmpty)
             {
                 // 移除自己
-                _userTasks.TryRemove(userId, out _);
+                this.TryRemove(userId, out _);
                 return null;
             }
 
@@ -107,27 +107,15 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         }
 
         /// <summary>
-        /// 邮件项发送完成回调
+        /// 移除发件任务
+        /// 单纯移除，不更新状态与触发通知
         /// </summary>
-        /// <param name="sendingContext"></param>
+        /// <param name="userId"></param>
+        /// <param name="sendingGroupId"></param>
         /// <returns></returns>
-        public async Task EmailItemSendCompleted(SendingContext sendingContext)
+        public void RemoveSendingGroupTask(long userId, long sendingGroupId)
         {
-            // 清除数据
-            // 移除用户队列池
-            if (sendingContext.UserSendingGroupsPool.Count == 0)
-            {
-                _logger.Info($"用户 {sendingContext.UserSendingGroupsPool.UserId} 发件池为空，从发件池管理器中移除");
-                _userTasks.TryRemove(sendingContext.UserSendingGroupsPool.UserId, out _);
-            }
-
-            // 回调发件箱处理
-            await sendingContext.OutboxEmailAddress.EmailItemSendCompleted(sendingContext);
-        }
-
-        public async Task RemoveSendingGroupTask(long userId, long sendingGroupId)
-        {
-            if (!_userTasks.TryGetValue(userId, out var userSendingGroupsPool)) return;
+            if (!this.TryGetValue(userId, out var userSendingGroupsPool)) return;
             userSendingGroupsPool.TryRemove(sendingGroupId, out _);
         }
     }

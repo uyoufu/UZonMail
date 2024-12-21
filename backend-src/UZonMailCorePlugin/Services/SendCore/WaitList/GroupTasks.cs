@@ -1,6 +1,5 @@
 ﻿using log4net;
 using System.Collections.Concurrent;
-using UZonMail.Core.Services.EmailSending.Base;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Utils.Database;
@@ -13,32 +12,18 @@ namespace UZonMail.Core.Services.SendCore.WaitList
     /// 单个用户的发件任务管理
     /// 先添加先发送
     /// </summary>
-    public class GroupTasks : ConcurrentDictionary<long, GroupTask>
+    /// <remarks>
+    /// 构造函数
+    /// </remarks>
+    /// <param name="userId"></param>
+    public class GroupTasks(long userId) : ConcurrentDictionary<long, GroupTask>
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasks));
 
         /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="userId"></param>
-        public GroupTasks(long userId)
-        {
-            UserId = userId;
-        }
-
-        #region 内部字段定义
-        // 所有的发件箱
-        private List<string> _outboxes = new();
-        #endregion
-
-        #region 公开属性
-
-        #endregion
-
-        /// <summary>
         /// 用户 id
         /// </summary>
-        public long UserId { get; set; }
+        public long UserId { get; set; } = userId;
 
         /// <summary>
         /// 添加发件组任务
@@ -86,41 +71,19 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             return null;
         }
 
-        /// <summary>
-        /// 邮件项发送完成
-        /// </summary>
-        /// <param name="sendingContext"></param>
-        /// <returns></returns>
-        public async Task EmailItemSendCompleted(SendingContext sendingContext)
+        public bool MatchEmailItem(OutboxEmailAddress outbox)
         {
-            // 判断邮件任务是否已经发送完成
-            if (sendingContext.SendingGroupTask.ShouldDispose)
+            if (outbox.UserId != UserId) return false;
+
+            // 依次获取发件项
+            foreach (var kv in this)
             {
-                // 说明已经发完了               
-                // 移除当前任务
-                await TryRemoveSendingGroupTask(sendingContext, sendingContext.SendingGroupTask.SendingGroupId);
-                _logger.Info($"{sendingContext.SendingGroupTask.SendingGroupId} 可发邮件为空，从队列中移除");
+                var groupTask = kv.Value;
+                var match = groupTask.MatchEmailItem(outbox);
+                if (match) return true;
             }
 
-            // 向上回调
-            await sendingContext.UserSendingGroupsManager.EmailItemSendCompleted(sendingContext);
-        }
-
-        public async Task<FuncResult<GroupTask>> TryRemoveSendingGroupTask(SendingContext sendingContext, long sendingGroupId)
-        {
-            if (!TryRemove(sendingContext.SendingGroupTask.SendingGroupId, out var value))
-                return new FuncResult<GroupTask>()
-                {
-                    Ok = false,
-                };
-
-            // 更新数据库
-            await sendingContext.SqlContext.SendingGroups.UpdateAsync(x => x.Id == sendingGroupId, x => x.SetProperty(y => y.Status, SendingGroupStatus.Finish));
-            return new FuncResult<GroupTask>()
-            {
-                Ok = true,
-                Data = value,
-            };
+            return false;
         }
     }
 }

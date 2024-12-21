@@ -1,6 +1,7 @@
-﻿using UZonMail.Core.Services.EmailSending.Pipeline;
+﻿
+using UZonMail.Core.Services.SendCore.Contexts;
 
-namespace UZonMail.Core.Services.EmailSending.Event.Commands
+namespace UZonMail.Core.Services.SendCore.Event.Commands
 {
     /// <summary>
     /// 释放用户的发件箱池

@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Services.EmailSending.Sender;
 using UZonMail.Core.SignalRHubs.SendEmail;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.Utils.Database;
 using log4net;
 using UZonMail.DB.SQL.EmailSending;
 using UZonMail.DB.SQL.Emails;
-using UZonMail.DB.SQL.Templates;
 using UZonMail.Core.Database.SQL.EmailSending;
 using UZonMail.DB.SQL;
 
@@ -15,7 +13,6 @@ using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.EmailWaitList;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.MySql;
 using UZonMail.DB.SQL.Base;
 
 namespace UZonMail.Core.Services.EmailSending.WaitList
@@ -101,9 +98,9 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         public bool ShouldDispose => _sendingItemMetas.ToSendingCount == 0;
 
         /// <summary>
-        /// 已成功的数量
+        /// 任务开始日期
         /// </summary>
-        private DateTime _startDate = DateTime.Now;
+        private readonly DateTime _startDate = DateTime.Now;
         #endregion
 
 
@@ -173,7 +170,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             var outboxAddresses = outboxes.ConvertAll(x => new OutboxEmailAddress(x, SendingGroupId, SmtpPasswordSecretKeys, OutboxEmailAddressType.Shared));
             foreach (var outbox in outboxAddresses)
             {
-                await container.AddOutbox(outbox);
+                container.AddOutbox(outbox);
             }
 
             // 解析发件箱组
@@ -341,6 +338,9 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <returns></returns>
         public async Task<SendItemMeta?> GetEmailItem(SendingContext sendingContext)
         {
+            // 保存当前组的开始日期
+            sendingContext.GroupTaskStartDate = _startDate;
+
             var outboxEmailAddress = sendingContext.OutboxAddress;
             if (outboxEmailAddress == null) return null;
 
@@ -488,103 +488,29 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             return _sendingGroup.GetRandSubject();
         }
 
+
         /// <summary>
-        /// 判断是否在冷却中
+        /// 判断 outbox 能否匹配到发件项
         /// </summary>
-        /// <param name="inboxIds"></param>
+        /// <param name="outbox"></param>
         /// <returns></returns>
-        private async Task<Tuple<bool, string>> IsInboxICooling(SqlContext sqlContext, List<long> inboxIds)
+        public bool MatchEmailItem(OutboxEmailAddress outbox)
         {
-            // 获取收件箱信息
-            var inboxes = await sqlContext.Inboxes.Where(x => inboxIds.Contains(x.Id))
-                .ToListAsync();
-            if (inboxes.Count == 0) return Tuple.Create(false, "");
-
-            // 自身有冷却设置
-            var inboxesWithSelfCooling = inboxes.Where(x => x.MinInboxCooldownHours >= 0).ToList();
-            var coolingInbox = inboxesWithSelfCooling.FirstOrDefault(x => x.LastSuccessDeliveryDate.AddHours(x.MinInboxCooldownHours) > DateTime.Now);
-            if (coolingInbox != null)
+            // 特定发件箱
+            if (outbox.Type.HasFlag(OutboxEmailAddressType.Specific))
             {
-                return Tuple.Create(true, $"收件箱 {coolingInbox.Email} 正在冷却中");
+                var matchSpecific = _sendingItemMetas.MatchSendingMeta(outbox.Id, true);
+                if (matchSpecific) return true;
             }
 
-            // 从缓存中读取设置数据
-            var userReader = await DBCacher.GetCache<UserInfoCache>(sqlContext, UserId.ToString());
-            var settingsReader = await DBCacher.GetCache<OrganizationSettingCache>(sqlContext, userReader.OrganizationObjectId);
-
-            if (settingsReader.MinInboxCooldownHours <= 0) return Tuple.Create(false, "");
-
-            var inboxesWhithGlobalCooling = inboxes.Where(x => x.MinInboxCooldownHours < 0).ToList();
-            coolingInbox = inboxesWhithGlobalCooling.FirstOrDefault(x => x.LastSuccessDeliveryDate.AddHours(settingsReader.MinInboxCooldownHours) > DateTime.Now);
-            if (coolingInbox != null)
+            // 从当前组中获取
+            if (outbox.Type.HasFlag(OutboxEmailAddressType.Shared))
             {
-                return Tuple.Create(true, $"收件箱 {coolingInbox.Email} 正在冷却中");
+                var matchShared = _sendingItemMetas.MatchSendingMeta(outbox.Id, false);
+                if (matchShared) return true;
             }
 
-            // 从数据库中判断
-            return Tuple.Create(false, "");
-        }
-
-
-
-        /// <summary>
-        /// 邮件发送完成
-        /// 只储存 邮件组 数据，具体的每次发件数据在 SendItem 中处理
-        /// 只有失败或者成功才会触发，重发时不会触发
-        /// </summary>
-        /// <param name="sendingContext">发送结果</param>
-        public async Task EmailItemSendCompleted(SendingContext sendingContext)
-        {
-            // 若是 outbox 连接错误，则移除所有相关发件项
-            if (sendingContext.SendResult.SentStatus.HasFlag(SentStatus.OutboxError))
-            {
-                await RemoveSpecificSendingItems(sendingContext);
-            }
-
-            // 移除运行计数
-            _sendingItemsCounter.IncreaseRunningCount(-1);
-
-            var sendCompleteResult = sendingContext.SendResult;
-            var sendItem = sendingContext.EmailItem;
-
-            // 若需要重试，则重新添加到队列中
-            if (sendCompleteResult.SentStatus.HasFlag(SentStatus.Retry))
-            {
-                _sendingItemMetas.Add(sendingContext.EmailItem.SendItemMeta);
-            }
-            else
-            {
-                // 只有已经发送成功或者不重试了，才更新发送进度
-                _sendingItemsCounter.IncreaseSentCount(sendCompleteResult.Ok);
-                var sqlContext = sendingContext.SqlContext;
-
-                // 向数据库中保存状态
-                var newSendingGroup = await sqlContext.SendingGroups.FirstAsync(x => x.Id == _sendingGroup.Id);
-                newSendingGroup.SuccessCount = _sendingItemsCounter.TotalSuccessCount;
-                newSendingGroup.SentCount = _sendingItemsCounter.TotalSentCount;
-                newSendingGroup.LastMessage = sendCompleteResult.Message;
-                await sqlContext.SaveChangesAsync();
-
-                // 向用户推送发送组的进度            
-                var client = sendingContext.HubClient.GetUserClient(UserId);
-                if (client != null)
-                {
-                    // 推送发送组进度
-                    await client.SendingGroupProgressChanged(new SendingGroupProgressArg(newSendingGroup, _startDate));
-
-                    // 若已经完成，推送完成的进度
-                    if (ShouldDispose)
-                    {
-                        await client.SendingGroupProgressChanged(new SendingGroupProgressArg(newSendingGroup, _startDate)
-                        {
-                            ProgressType = ProgressType.End
-                        });
-                    }
-                }
-            }
-
-            // 调用外部回调
-            await sendingContext.UserSendingGroupsPool.EmailItemSendCompleted(sendingContext);
+            return false;
         }
 
         /// <summary>
@@ -592,29 +518,9 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// </summary>
         /// <param name="outboxEmail"></param>
         /// <returns></returns>
-        public async Task RemoveSpecificSendingItems(SendingContext sendingContext)
+        public void RemovePendingItems(List<long> sendingItemIds)
         {
-            var outboxEmail = sendingContext.OutboxEmailAddress;
-            if (outboxEmail.SendingItemIds.IsEmpty) return;
-
-            _sendingItemsCounter.IncreaseTotalCount(-outboxEmail.SendingItemIds.Count);
-            // 对这些发件项标记失败
-            await sendingContext.SqlContext.SendingItems.UpdateAsync(x => outboxEmail.SendingItemIds.Contains(x.Id),
-                x => x.SetProperty(y => y.Status, SendingItemStatus.Failed)
-                .SetProperty(y => y.SendDate, DateTime.Now)
-                .SetProperty(y => y.SendResult, sendingContext.SendResult.Message));
-        }
-
-        public async Task NotifyEnd(SendingContext sendingContext, long sendingGroupId)
-        {
-            var client = sendingContext.HubClient.GetUserClient(UserId);
-            if (client != null)
-            {
-                await client.SendingGroupProgressChanged(new SendingGroupProgressArg(sendingGroupId, _sendingItemsCounter, _startDate)
-                {
-                    ProgressType = ProgressType.End
-                });
-            }
+            sendingItemIds.ForEach(x => _sendingItemMetas.RemovePendingItem(x));
         }
     }
 }

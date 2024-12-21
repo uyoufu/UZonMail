@@ -222,7 +222,7 @@ namespace UZonMail.Core.Services.EmailSending.Sender
         public async Task EmailItemSendCompleted(SendingContext sendingContext)
         {
             // 增加重试次数
-            SendItemMeta.IncreaseTriedCount();
+            SendItemMeta.Retry();
 
             var sendCompleteResult = sendingContext.SendResult;
             // 判断是否需要重试，满足以下条件则重试

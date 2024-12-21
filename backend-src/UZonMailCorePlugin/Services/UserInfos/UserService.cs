@@ -13,9 +13,6 @@ using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
 using UZonMail.Core.Services.Plugin;
 using UZonMail.Core.Services.Settings;
-using UZonMail.DB.SQL.Settings;
-using System.ComponentModel;
-using UZonMail.Managers.Cache;
 using UZonMail.DB.SQL.Permission;
 using UZonMail.DB.Managers.Cache;
 

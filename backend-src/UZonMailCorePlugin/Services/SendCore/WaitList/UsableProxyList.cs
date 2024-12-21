@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using UZonMail.Core.Services.EmailSending.Sender;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Emails;

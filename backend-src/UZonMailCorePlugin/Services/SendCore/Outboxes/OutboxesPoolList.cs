@@ -1,11 +1,8 @@
 ﻿using log4net;
 using System.Collections.Concurrent;
-using System.Runtime.Intrinsics.X86;
-using UZonMail.Core.Services.EmailSending.Base;
-using UZonMail.Core.Services.EmailSending.OutboxPool;
 using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Utils;
-using UZonMail.Core.Services.UzonMailCore.Utils;
+using UZonMail.Core.Services.SendCore.Interfaces;
+using UZonMail.DB.SQL.Emails;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.SendCore.Outboxes
@@ -15,17 +12,16 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
     /// </summary>
     public class OutboxesPoolList(ServiceProvider serviceProvider) : ISingletonService
     {
-        private readonly static ILog _logger = LogManager.GetLogger(typeof(UserOutboxesPoolManager));
+        private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxesPoolList));
 
         // key : 用户id，value: 发件箱池
         private readonly ConcurrentDictionary<long, OutboxesPool> _pools = new();
-
 
         /// <summary>
         /// 添加发件箱
         /// </summary>
         /// <param name="outbox"></param>
-        public async Task AddOutbox(OutboxEmailAddress outbox)
+        public void AddOutbox(OutboxEmailAddress outbox)
         {
             var outboxPool = new OutboxesPool(outbox.UserId, outbox.Weight);
             if (!_pools.TryAdd(outbox.UserId, outboxPool))
@@ -53,13 +49,13 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             var data = _pools.GetDataByWeight();
 
             // 未获取到发件箱
-            if (data==null)
+            if (data == null)
             {
                 return null;
             }
 
             // 获取子项
-            if(data is not OutboxesPool outboxesPool)
+            if (data is not OutboxesPool outboxesPool)
             {
                 _logger.Error("获取发件箱池失败");
                 return null;
@@ -69,46 +65,35 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             return result;
         }
 
-
-
         /// <summary>
-        /// 邮件发送完成回调
+        /// 移除发件箱
         /// </summary>
-        /// <param name="sendingContext"></param>
-        /// <returns></returns>
-        public async Task EmailItemSendCompleted(SendingContext sendingContext)
+        /// <param name="outbox"></param>
+        public bool RemoveOutbox(OutboxEmailAddress outbox)
         {
-            // 移除发件箱
-            if (sendingContext.UserOutboxesPool.IsEmpty)
-            {
-                UserOutboxesPools.TryRemove(sendingContext.UserOutboxesPool.UserId, out _);
-                _logger.Info($"用户 {sendingContext.UserOutboxesPool.UserId} 发件池为空，从发件池管理器中移除");
-            }
+            if (!_pools.TryGetValue(outbox.UserId, out var userPool)) return true;
+            return userPool.RemoveOutbox(outbox);
         }
 
         /// <summary>
-        /// 通过用户 Id 和邮件组id 移除关联的发件箱
+        /// 移除组对应的发件箱
         /// </summary>
-        /// <param name="userId"></param>
+        /// <returns></returns>
+        public bool RemoveOutbox(long userId, long sendingGroupId)
+        {
+            if (!_pools.TryGetValue(userId, out var userPool)) return true;
+            return userPool.RemoveOutboxesBySendingGroup(sendingGroupId);
+        }
+
+        /// <summary>
+        /// 指定发件组是否存在发件箱
+        /// </summary>
         /// <param name="sendingGroupId"></param>
         /// <returns></returns>
-        public async Task RemoveOutboxesBySendingGroup(long userId, long sendingGroupId)
+        public bool ExistOutboxes(long userId, long sendingGroupId)
         {
-            if (!UserOutboxesPools.TryGetValue(userId, out var userOutboxesPool)) return;
-
-            // 找到后，开始执行操作
-            var outboxes = userOutboxesPool.Values.Where(x => x.SendingGroupIds.Contains(sendingGroupId));
-            // 开始移除
-            foreach (var outbox in outboxes)
-            {
-                outbox.SendingGroupIds.Remove(sendingGroupId);
-                if (outbox.SendingGroupIds.Count != 0) continue;
-
-                // 标记为使用中，防止其它线程继续使用
-                outbox.LockUsing();
-                // 发件箱没有对应的发件组，移除
-                userOutboxesPool.TryRemove(outbox.Email, out _);
-            }
+            if(!_pools.TryGetValue(userId, out var userPool)) return false;
+            return userPool.ExistOutboxes(sendingGroupId);
         }
     }
 }

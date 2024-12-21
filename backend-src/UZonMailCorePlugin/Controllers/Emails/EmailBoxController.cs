@@ -5,7 +5,6 @@ using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Core.Database.Validators;
 using UZonMail.Core.Services.Emails;
-using UZonMail.Core.Services.EmailSending.Sender;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.UserInfos;
 using UZonMail.Core.Utils.Database;
@@ -15,6 +14,7 @@ using UZonMail.DB.SQL.Emails;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.Core.Services.SendCore.Sender;
 
 namespace UZonMail.Core.Controllers.Emails
 {

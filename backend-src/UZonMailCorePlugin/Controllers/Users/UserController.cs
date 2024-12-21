@@ -15,8 +15,6 @@ using UZonMail.Core.Utils.Extensions;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Managers.Cache;
-using UZonMail.DB.SQL.Settings;
 
 namespace UZonMail.Core.Controllers.Users
 {

@@ -1,7 +1,4 @@
 ﻿using log4net;
-using UZonMail.DB.SQL.Organization;
-using UZonMail.DB.SQL.Settings;
-using UZonMail.Managers.Cache;
 using Timer = System.Timers.Timer;
 
 namespace UZonMail.Core.Services.SendCore.Utils
@@ -27,7 +24,7 @@ namespace UZonMail.Core.Services.SendCore.Utils
         /// <param name="cooldownMilliseconds">单位: 毫秒</param>
         /// <param name="callback">冷却结束后的回调</param></param>
         /// <returns></returns>
-        public void StartCooling(int cooldownMilliseconds, Action callback)
+        public void StartCooling(long cooldownMilliseconds, Action callback)
         {
             // 说明被其它线程已经使用了
             if (IsCooling)

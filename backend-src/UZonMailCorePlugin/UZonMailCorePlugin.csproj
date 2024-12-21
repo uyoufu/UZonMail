@@ -19,9 +19,13 @@
 
 	<ItemGroup>
 	  <Compile Remove="bin\**" />
+	  <Compile Remove="Services\UzonMailCore\**" />
 	  <Content Remove="bin\**" />
+	  <Content Remove="Services\UzonMailCore\**" />
 	  <EmbeddedResource Remove="bin\**" />
+	  <EmbeddedResource Remove="Services\UzonMailCore\**" />
 	  <None Remove="bin\**" />
+	  <None Remove="Services\UzonMailCore\**" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -2,20 +2,19 @@
 using Newtonsoft.Json.Linq;
 using Quartz;
 using UZonMail.Core.Jobs;
-using UZonMail.Core.Services.EmailSending.OutboxPool;
-using UZonMail.Core.Services.EmailSending.Pipeline;
-using UZonMail.Core.Services.EmailSending.Sender;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Utils.Database;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Utils.Web.Service;
-using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Json;
 using UZonMail.Core.Database.SQL.EmailSending;
 using UZonMail.DB.SQL.Emails;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.DB.Managers.Cache;
+using UZonMail.Core.Services.SendCore;
+using UZonMail.Core.Services.SendCore.Outboxes;
+using UZonMail.Core.Services.SendCore.Contexts;
 
 namespace UZonMail.Core.Services.EmailSending
 {
@@ -24,9 +23,9 @@ namespace UZonMail.Core.Services.EmailSending
     /// </summary>
     public class SendingGroupService(SqlContext db
         , TokenService tokenService
-        , SendingThreadManager tasksService
+        , SendingThreadsManager tasksService
         , GroupTasksList waitList
-        , UserOutboxesPoolManager userOutboxesPoolManager
+        , OutboxesPoolList outboxesPoolList
         , ISchedulerFactory schedulerFactory
         , IServiceProvider serviceProvider
         ) : IScopedService
@@ -78,15 +77,15 @@ namespace UZonMail.Core.Services.EmailSending
                 await ctx.SaveChangesAsync();
 
                 // 获取用户设置
-                var userReader = await DBCacher.GetCache<UserInfoCache>(ctx, sendingGroupData.UserId.ToString());
-                var settingsReader = await DBCacher.GetCache<OrganizationSettingCache>(ctx, userReader.OrganizationObjectId);
+                var userInfo = await DBCacher.GetCache<UserInfoCache>(ctx, sendingGroupData.UserId);
+                var orgSetting = await DBCacher.GetCache<OrganizationSettingCache>(ctx, userInfo.OrganizationId);
 
                 // 保存发件箱
                 await SaveInboxes(sendingGroupData.Data, sendingGroupData.UserId);
 
                 // 将数据组装成 SendingItem 保存
                 // 要确保数据已经通过验证
-                var builder = new SendingItemsBuilder(ctx, sendingGroupData, settingsReader.MaxSendingBatchSize, tokenService);
+                var builder = new SendingItemsBuilder(ctx, sendingGroupData, orgSetting.MaxSendingBatchSize, tokenService);
                 List<SendingItem> items = await builder.GenerateAndSave();
 
                 // 更新发件总数量
@@ -241,13 +240,13 @@ namespace UZonMail.Core.Services.EmailSending
         public async Task SendNow(SendingGroup sendingGroup, List<long>? sendItemIds = null)
         {
             // 创建新的上下文
-            var scopeServices = new SendingContext(serviceProvider);
+            var sendingContext = new SendingContext(serviceProvider);
             // 添加到发件列表
-            await waitList.AddSendingGroup(scopeServices, sendingGroup, sendItemIds);
+            await waitList.AddSendingGroup(sendingContext, sendingGroup, sendItemIds);
             // 开始发件
             tasksService.StartSending();
             // 更新状态
-            await scopeServices.SqlContext.SendingGroups
+            await sendingContext.SqlContext.SendingGroups
                 .UpdateAsync(x => x.Id == sendingGroup.Id, x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending));
         }
 
@@ -286,9 +285,10 @@ namespace UZonMail.Core.Services.EmailSending
         public async Task RemoveSendingGroupTask(SendingGroup sendingGroup)
         {
             // 找到关联的发件箱移除
-            await userOutboxesPoolManager.RemoveOutboxesBySendingGroup(sendingGroup.UserId, sendingGroup.Id);
+            outboxesPoolList.RemoveOutbox(sendingGroup.UserId, sendingGroup.Id);
+
             // 移除任务
-            await waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);
+            waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);
         }
     }
 }

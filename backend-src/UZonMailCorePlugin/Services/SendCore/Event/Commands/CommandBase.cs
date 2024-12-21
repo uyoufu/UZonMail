@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using UZonMail.Core.Services.EmailSending.Pipeline;
+﻿using UZonMail.Core.Services.SendCore.Contexts;
 
-namespace UZonMail.Core.Services.EmailSending.Event.Commands
+namespace UZonMail.Core.Services.SendCore.Event.Commands
 {
     /// <summary>
     /// 事件中心参数
