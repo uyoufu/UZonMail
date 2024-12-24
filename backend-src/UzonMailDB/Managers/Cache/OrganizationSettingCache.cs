@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Settings;
 
@@ -46,6 +44,8 @@ namespace UZonMail.DB.Managers.Cache
 
         #region 代理属性
         public int MaxSendingBatchSize => Setting?.MaxSendingBatchSize ?? 0;
+
+        public bool EnableEmailTracker => Setting?.EnableEmailTracker ?? false;
         #endregion
     }
 }

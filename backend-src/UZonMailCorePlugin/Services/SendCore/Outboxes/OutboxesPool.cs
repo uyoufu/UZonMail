@@ -12,12 +12,9 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
     /// </summary>
     /// <param name="userId">所属用户id</param>
     /// <param name="weight">权重</param>
-    public class OutboxesPool(long userId, int weight) : IWeight
+    public class OutboxesPool(long userId, int weight) : ConcurrentDictionary<string, OutboxEmailAddress>, IWeight
     {
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxesPool));
-
-        // key: 邮箱号，value: 发件箱
-        private readonly ConcurrentDictionary<string, OutboxEmailAddress> _outboxes = new();
 
         #region 自定义参数
         public long UserId { get; } = userId;
@@ -36,8 +33,8 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         {
             get
             {
-                if (_outboxes.Count == 0) return false;
-                return _outboxes.Values.Any(x => x.Enable);
+                if (this.Count == 0) return false;
+                return this.Values.Any(x => x.Enable);
             }
         }
         #endregion
@@ -48,14 +45,14 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <param name="outbox"></param>
         public bool AddOutbox(OutboxEmailAddress outbox)
         {
-            if (_outboxes.TryGetValue(outbox.Email, out var existValue))
+            if (this.TryGetValue(outbox.Email, out var existValue))
             {
                 existValue.Update(outbox);
                 return true;
             }
 
             // 不存在则添加
-            return _outboxes.TryAdd(outbox.Email, outbox);
+            return this.TryAdd(outbox.Email, outbox);
         }
 
         /// <summary>
@@ -65,7 +62,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <returns></returns>
         public bool RemoveOutbox(OutboxEmailAddress outbox)
         {
-            return _outboxes.TryRemove(outbox.Email, out _);
+            return this.TryRemove(outbox.Email, out _);
         }
 
         /// <summary>
@@ -75,14 +72,14 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <returns></returns>
         public bool RemoveOutboxesBySendingGroup(long sendingGroupId)
         {
-            var outboxes = _outboxes.Values;
+            var outboxes = this.Values;
             foreach (var outbox in outboxes)
             {
                 outbox.RemoveSendingGroup(sendingGroupId);
                 if (outbox.Working) continue;
 
                 // 移除
-                _outboxes.TryRemove(outbox.Email, out _);
+                this.TryRemove(outbox.Email, out _);
             }
 
             return true;
@@ -94,7 +91,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <returns></returns>
         public OutboxEmailAddress? GetOutboxByWeight()
         {
-            var data = this._outboxes.GetDataByWeight();
+            var data = this.GetDataByWeight();
             if (data is not OutboxEmailAddress outbox)
             {
                 _logger.Info($"未能从{UserId}池中获取发件箱");
@@ -119,7 +116,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <returns></returns>
         public bool ExistOutboxes(long sendingGroupId)
         {
-            return _outboxes.Values.Any(x => !x.ShouldDispose && x.ContainsSendingGroup(sendingGroupId));
+            return this.Values.Any(x => !x.ShouldDispose && x.ContainsSendingGroup(sendingGroupId));
         }
     }
 }

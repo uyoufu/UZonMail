@@ -9,8 +9,7 @@ namespace UZonMail.DB.SQL.Permission
 {
     /// <summary>
     /// 权限角色
-    /// </summary>
-    [EntityTypeConfiguration(typeof(Role))]
+    /// </summary>    
     [Index(nameof(Name), IsUnique = true)]
     public class Role : OrgId, IEntityTypeConfiguration<Role>
     {

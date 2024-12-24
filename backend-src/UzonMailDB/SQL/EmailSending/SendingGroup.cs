@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using UZonMail.DB.SQL.Base;
 using UZonMail.DB.SQL.Emails;
 using UZonMail.DB.SQL.Files;
+using UZonMail.DB.SQL.Permission;
 using UZonMail.DB.SQL.Settings;
 using UZonMail.DB.SQL.Templates;
 
@@ -15,7 +16,7 @@ namespace UZonMail.DB.SQL.EmailSending
     /// 发件组
     /// 此处只记录统计数据
     /// 具体的数据由 EmailItem 记录
-    /// </summary>
+    /// </summary>    
     public class SendingGroup : SqlId, IEntityTypeConfiguration<SendingGroup>
     {
         #region EF 定义
@@ -209,9 +210,9 @@ namespace UZonMail.DB.SQL.EmailSending
 
         #endregion
 
-
         public void Configure(EntityTypeBuilder<SendingGroup> builder)
         {
+            Console.WriteLine("Configure SendingGroup");
             builder.HasMany(x => x.Templates).WithMany();
             builder.HasMany(x => x.Outboxes).WithMany();
             builder.HasMany(x => x.Attachments).WithMany();

@@ -12,7 +12,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
     /// <summary>
     /// 系统级的待发件调度器
     /// </summary>
-    public class GroupTasksList() : ConcurrentDictionary<long, GroupTasks>, ISingletonService
+    public class GroupTasksList : ConcurrentDictionary<long, GroupTasks>, ISingletonService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasksList));
 

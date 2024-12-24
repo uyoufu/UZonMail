@@ -7,7 +7,9 @@ using UZonMail.DB.SQL.Base;
 
 namespace UZonMail.DB.SQL.EntityConfigs
 {
-    // 指定 outbox 外键
+    /// <summary>
+    /// 通用的实体配置
+    /// </summary>
     internal class EntityTypeConfig : IEntityTypeConfig
     {
         public void Configure(ModelBuilder modelBuilder)
@@ -20,6 +22,7 @@ namespace UZonMail.DB.SQL.EntityConfigs
 
             // 对所有的实体配置 json 转换
             modelBuilder.AddJsonFields();
+
             // 应用配置，参考：https://learn.microsoft.com/zh-cn/ef/core/modeling/#applying-all-configurations-in-an-assembly
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 

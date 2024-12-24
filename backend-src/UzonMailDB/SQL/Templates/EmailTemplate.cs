@@ -10,7 +10,6 @@ namespace UZonMail.DB.SQL.Templates
     /// <summary>
     /// 邮箱模板
     /// </summary>
-    [EntityTypeConfiguration(typeof(EmailTemplate))]
     public class EmailTemplate : SqlId, IEntityTypeConfiguration<EmailTemplate>
     {
         /// <summary>
