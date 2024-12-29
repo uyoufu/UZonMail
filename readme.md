@@ -2,7 +2,7 @@
 
 ## 🥝简介
 
-![uzon-mail-login-3](https://obs.uamazing.cn:52443/public/files/images/uzon-mail-login-3.png)
+![uzon-mail-login-3](D:\Develop\Personal\SendMultipleEmails\src\images\uzon-mail-login-3.png)
 
 本软件名为 "宇正群邮 (UZonMail)"，是一款开源免费的邮件群发软件。它具有非常强大的邮件正文定制能力，可快速实现 "千人千面" 式地批量群发，使每一封邮件都让人觉得很温暖。
 
@@ -18,7 +18,7 @@
 
 ## 🍎特点
 
-![image-20240614121857801](https://obs.uamazing.cn:52443/public/files/images/image-20240614121857801.png)
+![image-20240614121857801](D:\Develop\Personal\SendMultipleEmails\src\images\uzon-mail-dashboard.png)
 
 1. 支持多个发件人同时发件
 
