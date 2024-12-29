@@ -47,6 +47,8 @@
 </template>
 
 <script lang="ts" setup>
+import { getSendingItemsCount, getSendingItemsData, SendingItemStatus } from 'src/api/sendingItem'
+
 // 定义 props
 const vueProps = defineProps({
   sendingGroupId: {
@@ -57,9 +59,9 @@ const vueProps = defineProps({
 const statusTab = ref(-1)
 const statusTabOptions = [
   { label: '全部', value: -1 },
-  { label: '发送中', value: 2 },
-  { label: '成功', value: 3 },
-  { label: '失败', value: 4 }
+  { label: '发送中', value: SendingItemStatus.Pending },
+  { label: '成功', value: SendingItemStatus.Success },
+  { label: '失败', value: SendingItemStatus.Failed }
 ]
 watch(statusTab, () => {
   refreshTable()
@@ -73,8 +75,6 @@ import { formatDateStr } from 'src/utils/format'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-
-import { getSendingItemsCount, getSendingItemsData, SendingItemStatus } from 'src/api/sendingItem'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [

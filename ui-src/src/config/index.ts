@@ -3,6 +3,8 @@ import { QuasarContext } from '@quasar/app-vite/types/configuration/context'
 import appConfigs from './app.config'
 import { IAppConfig } from './types'
 
+import _ from 'lodash'
+
 /**
  * 具体的配置接口
  */
@@ -35,5 +37,5 @@ export function useConfig (quasarContext?: QuasarContext): IAppConfig {
  */
 export function changeConfig (newConfig: IAppConfig) {
   console.log('[config] 修改配置:', newConfig)
-  Object.assign(config, newConfig)
+  _.merge(config, newConfig)
 }

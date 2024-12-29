@@ -29,10 +29,10 @@
       </div>
     </div>
 
-    <div class="row justify-center items-center q-mb-lg text-primary">
-      <div>version:&nbsp;</div>
-      <div>client&nbsp;{{ clientVersion }},&nbsp;</div>
-      <div>server&nbsp;{{ serverVersion }}</div>
+    <div class="row justify-center items-center q-mb-lg text-secondary">
+      <div class="text-primary">版本:&nbsp;&nbsp;</div>
+      <div>client - {{ clientVersion }},&nbsp;&nbsp;</div>
+      <div :class="serverVersionClass">server - {{ serverVersion }}</div>
     </div>
   </div>
 </template>
@@ -106,10 +106,15 @@ import { useConfig } from 'src/config'
 import { getServerVersion } from 'src/api/system'
 const config = useConfig()
 const clientVersion = ref(config.version)
-const serverVersion = ref('0.0.1')
+const serverVersion = ref('connecting...')
 onMounted(async () => {
   const { data: version } = await getServerVersion()
   serverVersion.value = version
+})
+const serverVersionClass = computed(() => {
+  return {
+    'text-negative': serverVersion.value === 'connecting...'
+  }
 })
 // #endregion
 </script>
