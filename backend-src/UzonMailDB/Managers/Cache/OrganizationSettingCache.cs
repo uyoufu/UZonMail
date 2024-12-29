@@ -31,7 +31,7 @@ namespace UZonMail.DB.Managers.Cache
             if (!NeedUpdate) return;
             SetDirty(false);
 
-            var Setting = await db.OrganizationSettings.AsNoTracking().FirstOrDefaultAsync(x => x.OrganizationId == OrganizationId);
+            Setting = await db.OrganizationSettings.AsNoTracking().FirstOrDefaultAsync(x => x.OrganizationId == OrganizationId);
             if (Setting == null)
             {
                 // 添加默认值

@@ -29,7 +29,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             int cooldownMilliseconds = orgSetting.Setting?.GetCooldownMilliseconds() ?? 0;
             if (cooldownMilliseconds <= 0) return;
 
-            _logger.Debug($"发件箱 {outbox.Email} 进入冷却状态，冷却时间 {cooldownMilliseconds} 毫秒");
+            _logger.Info($"发件箱 {outbox.Email} 进入冷却状态，冷却时间 {cooldownMilliseconds} 毫秒");
             outbox.StartCooling(cooldownMilliseconds, sendingThreadsManager);
         }
     }

@@ -4,6 +4,7 @@ using UZonMail.Core.Services.EmailSending.WaitList;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.Core.Services.SendCore.Outboxes;
+using UZonMail.Core.Utils.Database;
 using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Utils.Web.Service;
 
@@ -45,6 +46,11 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
             // 向发件管理器添加发件组
             bool result = await groupTasks.AddSendingGroup(sendingContext, group.Id, group.SmtpPasswordSecretKeys, sendingItemIds);
+
+            // 更新发件组状态为发送中
+            await sendingContext.SqlContext.SendingGroups
+                .UpdateAsync(x => x.Id == group.Id, x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending));
+
             return result;
         }
 

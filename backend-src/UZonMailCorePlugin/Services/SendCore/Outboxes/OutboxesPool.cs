@@ -104,6 +104,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
                 return null;
             }
 
+            _logger.Info($"进程 {Environment.CurrentManagedThreadId} 锁定发件箱 {outbox.Email} 成功");
             // 保存当前引用
             return outbox;
         }

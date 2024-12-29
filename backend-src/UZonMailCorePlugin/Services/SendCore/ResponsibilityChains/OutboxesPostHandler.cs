@@ -144,7 +144,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
                     // 标记为错误
                     await sqlContext.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && sendingItemIds.Contains(x.Id),
-                        x => x.SetProperty(y => y.Status, SendingItemStatus.Failed | SendingItemStatus.Read)
+                        x => x.SetProperty(y => y.Status, SendingItemStatus.Failed)
                             .SetProperty(y => y.SendDate, DateTime.Now)
                             .SetProperty(y => y.SendResult, outbox.ErroredMessage ?? "发件箱退出发件池，无发件箱可用")
                         );

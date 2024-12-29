@@ -245,9 +245,6 @@ namespace UZonMail.Core.Services.EmailSending
             await waitList.AddSendingGroup(sendingContext, sendingGroup, sendItemIds);
             // 开始发件
             tasksService.StartSending();
-            // 更新状态
-            await sendingContext.SqlContext.SendingGroups
-                .UpdateAsync(x => x.Id == sendingGroup.Id, x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending));
         }
 
         /// <summary>
@@ -282,7 +279,7 @@ namespace UZonMail.Core.Services.EmailSending
         /// 里面不会修改发件组和发件项的状态
         /// </summary>
         /// <returns></returns>
-        public async Task RemoveSendingGroupTask(SendingGroup sendingGroup)
+        public void RemoveSendingGroupTaskOnly(SendingGroup sendingGroup)
         {
             // 找到关联的发件箱移除
             outboxesPoolList.RemoveOutbox(sendingGroup.UserId, sendingGroup.Id);

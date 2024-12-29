@@ -49,6 +49,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             // 未获取到发件箱
             if (data == null)
             {
+                _logger.Info("发件池中暂无可用的发件箱");
                 return null;
             }
 

@@ -146,6 +146,11 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         #endregion
 
         #region 运行时到一定阶段时,动态添加的数据
+        /// <summary>
+        /// 是否已经初始化了
+        /// </summary>
+        public bool Initialized { get; set; } = false;
+
         public SendingItem SendingItem { get; private set; }
         public void SetSendingItem(SendingItem sendingItem)
         {
@@ -239,9 +244,10 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public async Task<EmailDecoratorParams> GetEmailDecoratorParams(SendingContext sendingContext)
         {
-            var userCache = await DBCacher.GetCache<UserInfoCache>(sendingContext.SqlContext, Outbox.UserId);
+            var outbox = sendingContext.OutboxAddress;
+            var userCache = await DBCacher.GetCache<UserInfoCache>(sendingContext.SqlContext, outbox.UserId);
             var orgSettingCache = await DBCacher.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, userCache.OrganizationId);
-            return new EmailDecoratorParams(sendingContext.Provider, orgSettingCache, SendingItem, Outbox.Email);
+            return new EmailDecoratorParams(sendingContext.Provider, orgSettingCache, SendingItem, outbox.Email);
         }
         #endregion
 
