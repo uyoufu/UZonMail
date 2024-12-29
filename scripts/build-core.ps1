@@ -184,10 +184,11 @@ function Copy-Assembly {
     }    
 }
 
-# 编译后端 UzonMailCore
+# 编译后端 UZonMailCorePlugin
+$pluginsSrc = Join-Path -Path $backendSrc -ChildPath "Plugins"
 $uZonMailCorePlugin = 'UZonMailCorePlugin'
 Write-Host "开始编译后端 $uZonMailCorePlugin ..." -ForegroundColor Yellow
-$serviceSrc = Join-Path -Path $backendSrc -ChildPath $uZonMailCorePlugin
+$serviceSrc = Join-Path -Path $pluginsSrc -ChildPath $uZonMailCorePlugin
 # 使用 dotnet 编译
 $serviceDist = "$mainService/$uZonMailCorePlugin"
 Set-Location $serviceSrc
@@ -206,7 +207,7 @@ $uZonMailProPlugin = 'UZonMailProPlugin'
 Write-Host "开始编译后端 $uZonMailProPlugin ..." -ForegroundColor Yellow
 # 使用 dotnet 编译
 Set-Location -Path $gitRoot
-$proPluginPath = "../UzonMailPro/$uZonMailProPlugin"
+$proPluginPath = "../UZonMailProPlugins/$uZonMailProPlugin"
 $serviceSrc = Resolve-Path -Path $proPluginPath
 if (test-path -path $serviceSrc -PathType Container) {
     $serviceDist = "$mainService/$uZonMailProPlugin"

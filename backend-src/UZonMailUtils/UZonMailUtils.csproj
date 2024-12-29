@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UzonMailDB\UzonMailDB.csproj" />
+    <ProjectReference Include="..\Plugins\UzonMailDB\UzonMailDB.csproj" />
   </ItemGroup>
 
 </Project>
