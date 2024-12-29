@@ -1,10 +1,10 @@
 <template>
   <q-list dense class="column no-wrap justify-start">
-    <q-item class="plain-list__item text-primary bg-grey-12" v-ripple>
+    <q-item class="plain-list__item text-primary bg-grey-11" v-ripple>
       <q-item-section avatar class="q-pr-none">
         <q-icon :name="header.icon" />
       </q-item-section>
-      <q-item-section class="q-px-lg q-py-sm">
+      <q-item-section class="q-px-lg q-py-sm text-bold">
         {{ header.label }}
         <AsyncTooltip v-if="!readonly" tooltip="右键可添加分组" />
       </q-item-section>

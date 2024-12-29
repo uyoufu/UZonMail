@@ -1,6 +1,6 @@
 <template>
-  <q-tooltip ref="tooltipRef" class="bg-primary" :anchor="anchor" :self="self" transition-show="rotate"
-    transition-hide="rotate" @before-show="onTooltipBeforeShow" v-model="tooltipModel" max-width="40em">
+  <q-tooltip ref="tooltipRef" class="bg-primary" :anchor="anchor" :self="self" transition-show="scale"
+    transition-hide="scale" @before-show="onTooltipBeforeShow" v-model="tooltipModel" max-width="40em">
     <div v-for="tip in tooltips" :key="tip">{{ tip }}</div>
   </q-tooltip>
 </template>

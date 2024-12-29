@@ -17,6 +17,21 @@ export interface ISendingItem {
 /// </summary>
 export enum SendingItemStatus {
   /// <summary>
+  /// 发送失败
+  /// </summary>
+  Failed,
+
+  /// <summary>
+  /// 无效
+  /// </summary>
+  Invalid,
+
+  /// <summary>
+  /// 已取消
+  /// </summary>
+  Cancel,
+
+  /// <summary>
   /// 初始状态
   /// </summary>
   Created,
@@ -35,21 +50,6 @@ export enum SendingItemStatus {
   /// 发送成功
   /// </summary>
   Success,
-
-  /// <summary>
-  /// 发送失败
-  /// </summary>
-  Failed,
-
-  /// <summary>
-  /// 无效
-  /// </summary>
-  Invalid,
-
-  /// <summary>
-  /// 已取消
-  /// </summary>
-  Cancel,
 
   /// <summary>
   /// 已读
