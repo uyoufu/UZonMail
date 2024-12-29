@@ -148,13 +148,13 @@ namespace UZonMail.Core.Controllers.Files
         [HttpDelete("file-usages/{fileUsageId:long}")]
         public async Task<ResponseResult<bool>> DeleteFileUsage(long fileUsageId)
         {
-            var fileUsage = await db.FileUsages.FirstOrDefaultAsync(x => x.Id == fileUsageId);
+            var fileUsage = await db.FileUsages.Where(x => x.Id == fileUsageId).Include(x => x.FileObject).FirstOrDefaultAsync();
             if (fileUsage == null) return true.ToSuccessResponse();
             db.FileUsages.Remove(fileUsage);
 
             // 若文件不存在 fileUsage引用，则删除原始文件
             var otherFileUsagesCount = await db.FileUsages.Where(x => x.FileObjectId == fileUsage.FileObjectId && x.Id != fileUsageId).CountAsync();
-            if (otherFileUsagesCount == 0)
+            if (otherFileUsagesCount == 0 && fileUsage.FileObject != null)
             {
                 await fileStoreService.DeleteFileObject(fileUsage.FileObject.Sha256);
             }
@@ -170,7 +170,7 @@ namespace UZonMail.Core.Controllers.Files
         /// <param name="displayName"></param>
         /// <returns></returns>
         [HttpPut("file-usages/{fileUsageId:long}/display-name")]
-        public async Task<ResponseResult<bool>> UpdateDisplayName(long fileUsageId, [FromQuery]string displayName)
+        public async Task<ResponseResult<bool>> UpdateDisplayName(long fileUsageId, [FromQuery] string displayName)
         {
             var fileUsage = await db.FileUsages.FirstOrDefaultAsync(x => x.Id == fileUsageId);
             if (fileUsage == null) return false.ToFailResponse("文件不存在");

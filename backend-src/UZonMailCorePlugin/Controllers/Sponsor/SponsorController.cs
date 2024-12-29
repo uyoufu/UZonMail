@@ -16,10 +16,13 @@ namespace UZonMail.Core.Controllers.Sponsor
         [HttpGet("content")]
         public async Task<ResponseResult<string>> GetSponsorPageHtml()
         {
-            // 从 https://gitee.com/galensgan/SendMultipleEmails/raw/master/docs/sponsor.md 读取内容
-            string url = "https://gitee.com/galensgan/SendMultipleEmails/raw/master/docs/sponsor.md";
+            // 从 https://gitee.com/uzonmail/UZonMail/raw/master/docs/docs/sponsor.md 读取内容
+            string url = "https://gitee.com/uzonmail/UZonMail/raw/master/docs/docs/sponsor.md";
             var httpClient = httpClientFactory.CreateClient();
             var content = await httpClient.GetStringAsync(url);
+
+            // 去掉 --- yaml 头部
+            content = content.Substring(content.LastIndexOf("---") + 3);
             return content.ToSuccessResponse();
         }
     }

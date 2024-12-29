@@ -93,6 +93,9 @@ namespace UZonMail.Core.Services.SendCore.WaitList
                 Counter.IncreaseTotalCount();
             }
 
+            // 添加父级
+            itemMeta.SetParent(this);
+
             return true;
         }
 

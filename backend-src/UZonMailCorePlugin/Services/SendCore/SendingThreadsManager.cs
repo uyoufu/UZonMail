@@ -82,6 +82,7 @@ namespace UZonMail.Core.Services.SendCore
 
                 _timer.Elapsed += (sender, e) =>
                 {
+                    _logger.Info("守护任务开始执行 ...");
                     StartSending(1);
                 };
                 _timer.Start();
@@ -96,9 +97,6 @@ namespace UZonMail.Core.Services.SendCore
         /// <returns></returns>
         private async Task DoSendingWork()
         {
-            // 保存进程 Id
-            ThreadContext.Properties["threadId"] = Environment.CurrentManagedThreadId;
-
             // 生成 task 的 scope
             var scope = _ssf.CreateAsyncScope();
             Interlocked.Increment(ref _runningTasksCount);
@@ -112,6 +110,7 @@ namespace UZonMail.Core.Services.SendCore
                 var sendingContext = provider.GetRequiredService<SendingContext>();
 
                 // 创建职责链
+                // 每条职责链必定会被执行，内部需要根据状态判断是否调用核心逻辑
                 var chainHandlers = new List<Type>()
                 {
                     typeof(OutboxGetter), // 获取发件箱
@@ -121,6 +120,7 @@ namespace UZonMail.Core.Services.SendCore
                     typeof(GroupTaskPostHandler), // 发件任务回调
                     typeof(OutboxesPostHandler), // 发件箱回调
                     typeof(OutboxCooler), // 发件箱冷却重置
+                    typeof(OutboxUnlocker) // 发件箱解锁
                 } 
                 .Select(provider.GetRequiredService)
                 .Where(x => x != null)
@@ -132,6 +132,7 @@ namespace UZonMail.Core.Services.SendCore
                 // 根据返回值，判断线程是否需要继续
                 if (sendingContext.Status.HasFlag(ContextStatus.ShouldExitThread))
                 {
+                    _logger.Info($"线程 {Environment.CurrentManagedThreadId} 结束工作 ...");
                     break;
                 }
             }

@@ -19,17 +19,20 @@
 
 	<ItemGroup>
 	  <Compile Remove="bin\**" />
+	  <Compile Remove="Controllers\Organization\**" />
 	  <Compile Remove="Services\UzonMailCore\**" />
 	  <Content Remove="bin\**" />
+	  <Content Remove="Controllers\Organization\**" />
 	  <Content Remove="Services\UzonMailCore\**" />
 	  <EmbeddedResource Remove="bin\**" />
+	  <EmbeddedResource Remove="Controllers\Organization\**" />
 	  <EmbeddedResource Remove="Services\UzonMailCore\**" />
 	  <None Remove="bin\**" />
+	  <None Remove="Controllers\Organization\**" />
 	  <None Remove="Services\UzonMailCore\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Controllers\Organization\" />
 		<Folder Include="Utils\Attributes\" />
 		<Folder Include="Utils\Helpers\" />
 	</ItemGroup>

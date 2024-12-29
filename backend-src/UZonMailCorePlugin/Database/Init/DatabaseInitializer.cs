@@ -28,23 +28,25 @@ namespace UZonMail.Core.Database.Init
         /// </summary>
         public async Task Init()
         {
-            await ResetSendingItemsStatus();
             await ResetSendingGroup();
-        }
-
-        private async Task ResetSendingItemsStatus()
-        {
-            // 对所有的 Pending 状态的发件项重置为 Created
-            await _db.SendingItems.UpdateAsync(x => x.Status == SendingItemStatus.Pending || x.Status == SendingItemStatus.Sending, 
-                x => x.SetProperty(y => y.Status, SendingItemStatus.Created));
+            await ResetSendingItemsStatus();
         }
 
         private async Task ResetSendingGroup()
         {
             // 将所有的 Sending 或者 Create 状态的发件组重置为 Finish
             await _db.SendingGroups.UpdateAsync(x => x.Status == SendingGroupStatus.Sending
-                || (x.Status == SendingGroupStatus.Created && x.Status != SendingGroupStatus.Scheduled)
-            , obj => obj.SetProperty(x => x.Status, SendingGroupStatus.Finish));
+                || x.Status == SendingGroupStatus.Created
+            , obj => obj.SetProperty(x => x.Status, SendingGroupStatus.Finish)
+                .SetProperty(x => x.LastMessage, "系统被中断")
+            );
+        }
+
+        private async Task ResetSendingItemsStatus()
+        {
+            // 对所有的 Pending 状态的发件项重置为 Created
+            await _db.SendingItems.UpdateAsync(x => x.Status == SendingItemStatus.Pending || x.Status == SendingItemStatus.Sending,
+                x => x.SetProperty(y => y.Status, SendingItemStatus.Created));
         }
     }
 }

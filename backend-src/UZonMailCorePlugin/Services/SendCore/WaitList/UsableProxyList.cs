@@ -17,6 +17,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         /// <param name="proxyId"></param>
         public void AddSendingItemProxy(long sendingItemId, long proxyId)
         {
+            if (proxyId <= 0) return;
             _sendingItemProxies.TryAdd(sendingItemId, proxyId);
         }
 

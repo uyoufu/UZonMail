@@ -9,20 +9,21 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
     /// <param name="container"></param>
     public class OutboxGetter(OutboxesPoolList container) : AbstractSendingHandler
     {
-        protected override Task HandleCore(SendingContext context)
+        protected override async Task HandleCore(SendingContext context)
         {
             // 获取发件箱
             var address = container.GetOutbox();
             // 保存到 context 中
             context.OutboxAddress = address;
 
-            // 如果获取失败，则修改 context 状态
+            // 如果获取失败，则停止线程
             if (address == null)
             {
                 context.Status |= ContextStatus.Fail;
+                context.Status |= ContextStatus.ShouldExitThread;
             }
 
-            return Task.CompletedTask;
+            return;
         }
     }
 }

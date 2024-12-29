@@ -33,7 +33,11 @@ namespace UZonMail.Core.Controllers.Emails
             {
                 if (itemStatus == SendingItemStatus.Success)
                 {
-                    dbSet = dbSet.Where(x => x.Status == SendingItemStatus.Success || x.Status == SendingItemStatus.Read);
+                    dbSet = dbSet.Where(x => x.Status >= SendingItemStatus.Success);
+                }
+                else if (itemStatus == SendingItemStatus.Failed)
+                {
+                    dbSet = dbSet.Where(x => x.Status <= SendingItemStatus.Cancel);
                 }
                 else
                 {

@@ -64,7 +64,7 @@ namespace UZonMail.Core.Controllers.Emails
                 return vdResult.ToErrorResponse<SendingGroup>();
             }
 
-            sendingData.SendingType = SendingGroupType.Scheduled;            
+            sendingData.SendingType = SendingGroupType.Scheduled;
 
             // 创建发件组
             var sendingGroup = await sendingService.CreateSendingGroup(sendingData);
@@ -77,6 +77,11 @@ namespace UZonMail.Core.Controllers.Emails
             }.ToSuccessResponse();
         }
 
+        /// <summary>
+        /// 暂停发件
+        /// </summary>
+        /// <param name="sendingGroupId"></param>
+        /// <returns></returns>
         [HttpPost("sending-groups/{sendingGroupId:long}/pause")]
         public async Task<ResponseResult<bool>> PauseSending(long sendingGroupId)
         {
@@ -87,18 +92,19 @@ namespace UZonMail.Core.Controllers.Emails
                 return false.ToFailResponse("发件组不存在");
             }
 
-            // 暂停发件
-            await sendingService.RemoveSendingGroupTask(sendingGroup);
-
+            // 移除发件组任务
+            sendingService.RemoveSendingGroupTaskOnly(sendingGroup);
             // 更新状态
             await db.SendingGroups.UpdateAsync(x => x.Id == sendingGroupId, x => x.SetProperty(y => y.Status, SendingGroupStatus.Pause));
-            await db.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending, x => x.SetProperty(y => y.Status, SendingItemStatus.Created));
+            await db.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending,
+                x => x.SetProperty(y => y.Status, SendingItemStatus.Created));
 
             return true.ToSuccessResponse();
         }
 
         /// <summary>
         /// 重新开始发件
+        /// 该接口同时支持取消的重新发件
         /// </summary>
         /// <param name="sendingGroupId"></param>
         /// <returns></returns>
@@ -110,7 +116,8 @@ namespace UZonMail.Core.Controllers.Emails
             if (sendingGroup == null)
             {
                 return false.ToFailResponse("发件组不存在");
-            }
+            }            
+
             sendingGroup.SmtpPasswordSecretKeys = smtpSecretKeys.SmtpPasswordSecretKeys;
 
             // 重新开始发件
@@ -138,7 +145,7 @@ namespace UZonMail.Core.Controllers.Emails
             if (sendingGroup.Status == SendingGroupStatus.Sending)
             {
                 // 取消发件
-                await sendingService.RemoveSendingGroupTask(sendingGroup);
+                sendingService.RemoveSendingGroupTaskOnly(sendingGroup);
             }
 
             // 更新状态

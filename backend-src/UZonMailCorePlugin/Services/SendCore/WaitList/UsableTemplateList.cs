@@ -20,6 +20,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         /// <param name="templateId"></param>
         public void AddSendingItemTemplate(long sendingItemId, long templateId)
         {
+            if (templateId <= 0) return;
             _sendingItemTemplateIds.TryAdd(sendingItemId, templateId);
         }
 
@@ -29,7 +30,8 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         /// <param name="templateIds"></param>
         public void AddSendingGroupTemplates(List<long> templateIds)
         {
-            _sendingGroupTemplateIds.AddRange(templateIds);
+            var validTemplateIds = templateIds.Where(x => x > 0);
+            _sendingGroupTemplateIds.AddRange(validTemplateIds);
         }
 
         /// <summary>

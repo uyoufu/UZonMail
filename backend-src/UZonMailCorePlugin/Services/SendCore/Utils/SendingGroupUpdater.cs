@@ -24,11 +24,9 @@ namespace UZonMail.Core.Services.SendCore.Utils
                 .ToListAsync();
 
             var successCount = statusCount.Where(x => x.Status >= SendingItemStatus.Success).Select(x => x.Count).Sum();
-            var sentCount = statusCount.Where(x => x.Status.HasFlag(SendingItemStatus.Failed)
-                || x.Status.HasFlag(SendingItemStatus.Invalid)
-                || x.Status.HasFlag(SendingItemStatus.Cancel))
+            var sentCount = statusCount.Where(x => x.Status <= SendingItemStatus.Cancel)
             .Select(x => x.Count)
-            .Sum();
+            .Sum() + successCount;
 
             var sendingGroup = await sqlContext.SendingGroups.FirstAsync(x => x.Id == sendingGroupId);
             sendingGroup.SuccessCount = successCount;

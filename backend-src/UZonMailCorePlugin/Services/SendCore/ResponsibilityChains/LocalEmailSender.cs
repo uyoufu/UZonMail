@@ -112,7 +112,11 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 var client = clientResult.Data;
                 string sendResult = await client.SendAsync(message);
                 _logger.Info($"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}");
+
+                // 标记邮件状态
                 sendItem.SetStatus(SendItemMetaStatus.Success, "ok");
+                // 标记上下文状态
+                context.Status |= ContextStatus.Success;
                 return;
             }
             catch (SmtpCommandException smtpCommandException)
