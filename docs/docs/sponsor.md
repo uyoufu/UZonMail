@@ -1,6 +1,8 @@
 ---
 title: 支持作者
 sidebar: false
+
+editLink: false
 ---
 
 <div class="column justify-center items-center">
@@ -24,3 +26,5 @@ sidebar: false
   </div>
   <div class="q-mb-xl"></div>
 </div>
+
+
