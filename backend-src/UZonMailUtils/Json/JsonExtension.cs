@@ -11,10 +11,7 @@ namespace UZonMail.Utils.Json
 {
     public static class JsonExtension
     {
-        private readonly static JsonSerializerSettings _jsonSettings = new()
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
-        };
+        private readonly static JsonSerializerSettings _jsonSettings = new JsonSetting().WithCameCase();
 
         /// <summary>
         /// object 对象转换成 json
@@ -23,7 +20,7 @@ namespace UZonMail.Utils.Json
         /// <returns></returns>
         public static string ToJson<T>(this T obj)
         {
-            return JsonConvert.SerializeObject(obj, _jsonSettings);           
+            return JsonConvert.SerializeObject(obj, _jsonSettings);
         }
 
         /// <summary>
@@ -32,7 +29,7 @@ namespace UZonMail.Utils.Json
         /// <typeparam name="T"></typeparam>
         /// <param name="json"></param>
         /// <returns></returns>
-        public static T JsonTo<T>(this string json)
+        public static T? JsonTo<T>(this string json)
         {
             return JsonConvert.DeserializeObject<T>(json, _jsonSettings);
         }
@@ -48,7 +45,7 @@ namespace UZonMail.Utils.Json
         {
             if (jt == null) return default_;
 
-            T value = jt.ToObject<T>();
+            T? value = jt.ToObject<T>();
             if (value == null) return default_;
 
             return value;
@@ -62,12 +59,33 @@ namespace UZonMail.Utils.Json
         /// <param name="path"></param>
         /// <param name="default_"></param>
         /// <returns></returns>
-        public static T SelectTokenOrDefault<T>( this JToken jt, string path, T default_)
+        public static T SelectTokenOrDefault<T>(this JToken jt, string path, T default_)
         {
             if (string.IsNullOrEmpty(path)) return default_;
-            if(jt == null) return default_;
+            if (jt == null) return default_;
 
-            return jt.SelectToken(path).ToObjectOrDefault(default_);
+            var value = jt.SelectToken(path);
+            if (value == null) return default_;
+            return value.ToObjectOrDefault(default_);
+        }
+
+        /// <summary>
+        /// 转换成 query string
+        /// </summary>
+        /// <param name="jobj"></param>
+        /// <returns></returns>
+        public static string ToQueryString(this JObject jobj)
+        {
+            var stringBuilder = new StringBuilder();
+            foreach (var item in jobj)
+            {
+                var value = item.Value?.ToString();
+                value ??= string.Empty;
+                if (value == "True" || value == "False") value = value.ToLower();
+
+                stringBuilder.Append($"{item.Key}={value}&");
+            }
+            return stringBuilder.ToString().TrimEnd('&');
         }
     }
 }

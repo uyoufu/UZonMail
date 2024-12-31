@@ -11,8 +11,12 @@
 
   <ItemGroup>
     <Compile Remove="Utils\**" />
+    <Compile Remove="Web\Extensions\**" />
+    <Content Remove="Web\Extensions\**" />
     <EmbeddedResource Remove="Utils\**" />
+    <EmbeddedResource Remove="Web\Extensions\**" />
     <None Remove="Utils\**" />
+    <None Remove="Web\Extensions\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,7 +33,6 @@
   <ItemGroup>
     <Folder Include="Path\" />
     <Folder Include="Web\Captcha\" />
-    <Folder Include="Web\Extensions\" />
   </ItemGroup>
 
   <ItemGroup>
