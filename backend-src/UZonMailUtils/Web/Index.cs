@@ -12,6 +12,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.OpenApi.Models;
 using System.IO;
+using System.Collections.Generic;
 
 namespace UZonMail.Utils.Web
 {
@@ -47,25 +48,69 @@ namespace UZonMail.Utils.Web
                 .GetTypes();
             var transientType = typeof(ITransientService);
             // 分多种情况，注册不同的生命周期
-            var transientTypes = serviceTypes.Where(x => !x.IsAbstract && transientType.IsAssignableFrom(x))
+            var transientTypes = serviceTypes.Where(x => !x.IsInterface && !x.IsAbstract && transientType.IsAssignableFrom(x))
                 .ToList();
-            transientTypes.ForEach(type => services.AddTransient(type));
+            transientTypes.ForEach(type =>
+            {
+                // 获取注册类型和实现类型
+                var serviceType = GetServiceType(type);
+                services.AddTransient(serviceType, type);
+            });
 
             // 请求周期
             var scopedServiceType = typeof(IScopedService);
             // 分多种情况，注册不同的生命周期
-            var scopedServiceTypes = serviceTypes.Where(x => !x.IsAbstract && scopedServiceType.IsAssignableFrom(x))
+            var scopedServiceTypes = serviceTypes.Where(x => !x.IsInterface && !x.IsAbstract && scopedServiceType.IsAssignableFrom(x))
                 .ToList();
-            scopedServiceTypes.ForEach(type => services.AddScoped(type));
+            scopedServiceTypes.ForEach(type =>
+            {
+                var serviceType = GetServiceType(type);
+                services.AddScoped(serviceType, type);
+            });
 
             // 单例
             var singletonServiceType = typeof(ISingletonService);
             // 分多种情况，注册不同的生命周期
-            var singletonServiceTypes = serviceTypes.Where(x => !x.IsAbstract && singletonServiceType.IsAssignableFrom(x))
+            var singletonServiceTypes = serviceTypes.Where(x => !x.IsInterface && !x.IsAbstract && singletonServiceType.IsAssignableFrom(x))
                .ToList();
-            singletonServiceTypes.ForEach(type => services.AddSingleton(type));
+            singletonServiceTypes.ForEach(type =>
+            {
+                var serviceType = GetServiceType(type);
+                services.AddSingleton(serviceType, type);
+            });
 
             return services;
+        }
+
+        /// <summary>
+        /// 通过实现类型获取服务类型
+        /// </summary>
+        /// <param name="implementationType">实现类型，必须继承 ITransientService 或 IScopedService 或 ISingletonService</param>
+        /// <returns></returns>
+        public static Type GetServiceType(Type implementationType)
+        {
+            var interfaceNames = new List<Type>() {
+                typeof(ITransientService<>), typeof(IScopedService<>), typeof(ISingletonService<>),
+                typeof(ITransientService), typeof(IScopedService), typeof(ISingletonService)
+            }.ConvertAll(x => x.Name);
+
+            // 不断向上查找，直到找到 IService 为止
+            var interfaces = implementationType.GetInterfaces()
+                .Where(x => x.IsInterface)
+                .Where(x => interfaceNames.Contains(x.Name))
+                .ToList();
+
+            foreach (var item in interfaces)
+            {
+                if (item.IsGenericType)
+                {
+                    // 获取泛型参数
+                    Type genericArgument = item.GetGenericArguments().First();
+                    return genericArgument;
+                }
+            }
+
+            return implementationType;
         }
 
         /// <summary>

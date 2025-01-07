@@ -8,6 +8,9 @@ using UZonMail.DB.SQL.Organization;
 
 namespace Uamazing.Utils.Web.Token
 {
+    /// <summary>
+    /// Token payload 构建器
+    /// </summary>
     public class TokenClaimsBuilders
     {
         private static readonly List<ITokenClaimBuilder> _builders = [];

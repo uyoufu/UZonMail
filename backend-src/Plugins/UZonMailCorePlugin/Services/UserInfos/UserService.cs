@@ -285,6 +285,7 @@ namespace UZonMail.Core.Services.UserInfos
 
             // 查找用户的权限
             List<string> access = await permission.GetUserPermissionCodes(user.Id);
+            // 获取插件中的权限码
 
             // 获取已经安装的插件名称
             var installedPlugins = pluginService.GetInstalledPluginNames();

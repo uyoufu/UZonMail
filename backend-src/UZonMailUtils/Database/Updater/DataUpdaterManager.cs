@@ -19,8 +19,8 @@ namespace UZonMail.Core.Database.Updater
         private readonly static Version _minVersionSupport = new("0.10.0.0");
         private readonly static Version _requiredVersion = new("0.10.0.0");
 
-        private string _settingKey = "DataVersion";
-        private static List<Assembly> _assemblies = [];
+        private readonly string _settingKey = "DataVersion";
+        private static readonly List<Assembly> _assemblies = [];
 
         /// <summary>
         /// 获取所有的更新器

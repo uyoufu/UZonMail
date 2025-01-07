@@ -16,7 +16,7 @@ namespace UZonMail.Utils.Http
             var content = await response.Content.ReadAsStringAsync();
             if(string.IsNullOrWhiteSpace(content))
             {
-                return new JObject();
+                return [];
             }
 
             return JObject.Parse(content);

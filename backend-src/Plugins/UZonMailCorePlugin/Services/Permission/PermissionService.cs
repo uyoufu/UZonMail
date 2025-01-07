@@ -20,7 +20,7 @@ namespace UZonMail.Core.Services.Permission
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public string GetPermissionCacheKey(long userId) => $"permissions/{userId}";
+        public string GetPermissionCacheKey(long userId) => $"permissions:{userId}";
 
         /// <summary>
         /// 更新用户的权限缓存

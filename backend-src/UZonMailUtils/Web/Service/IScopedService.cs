@@ -11,7 +11,7 @@ namespace UZonMail.Utils.Web.Service
     {
     }
 
-    public interface IScopeService<T> : IScopedService
+    public interface IScopedService<T> : IScopedService
     {
 
     }
