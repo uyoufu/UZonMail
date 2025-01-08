@@ -54,3 +54,54 @@
     transform: scale(1.03);
   }
 }
+
+/*
+标题添加序号
+*/
+
+/* 首先全局进行一次reset，这样即使不添加h1标题也可以使用较低级别的标题 */
+.theme-hope-content {
+  counter-reset: h1 h2 0;
+}
+
+.theme-hope-content h1 {
+  counter-reset: h2;
+}
+.theme-hope-content h2 {
+  counter-reset: h3;
+}
+.theme-hope-content h3 {
+  counter-reset: h4;
+}
+.theme-hope-content h4 {
+  counter-reset: h5;
+}
+.theme-hope-content h5 {
+  counter-reset: h6;
+}
+
+/** put counter result into headings */
+.theme-hope-content h1:before {
+  counter-increment: h1;
+  /* content: counter(h1) ". " */
+}
+.theme-hope-content h2:before {
+  counter-increment: h2;
+  content: counter(h2) '. ';
+}
+.theme-hope-content h3:before {
+  counter-increment: h3;
+  content: counter(h2) '.' counter(h3) ' ';
+}
+.theme-hope-content h4:before {
+  counter-increment: h4;
+  content: counter(h2) '.' counter(h3) '.' counter(h4) ' ';
+}
+.theme-hope-content h5:before {
+  counter-increment: h5;
+  content: counter(h2) '.' counter(h3) '.' counter(h4) '.' counter(h5) ' ';
+}
+.theme-hope-content h6:before {
+  counter-increment: h6;
+  content: counter(h2) '.' counter(h3) '.' counter(h4) '.' counter(h5) '.' counter(h6) ' ';
+}
