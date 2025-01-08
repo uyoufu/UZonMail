@@ -3,10 +3,14 @@ using Uamazing.Utils.Web.Token;
 using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Organization;
+using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Utils.Token
 {
-    public class TokenClaimsBuilder : ITokenClaimBuilder
+    /// <summary>
+    /// TokenClaims 生成器
+    /// </summary>
+    public class TokenClaimsBuilder : ITokenClaimBuilder, IScopedService<TokenClaimsBuilder>
     {
         /// <summary>
         /// 生成 TokenClaims

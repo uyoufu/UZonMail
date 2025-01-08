@@ -4,13 +4,14 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Organization;
+using UZonMail.Utils.Web.Service;
 
 namespace Uamazing.Utils.Web.Token
 {
     /// <summary>
     /// TokenClaim 构建器
     /// </summary>
-    public interface ITokenClaimBuilder
+    public interface ITokenClaimBuilder : IScopedService<ITokenClaimBuilder>
     {
         /// <summary>
         /// 构建 TokenClaim
