@@ -1,7 +1,4 @@
-﻿
-using UZonMail.DB.SQL.Base;
-
-namespace UZonMail.Utils.Web.PagingQuery
+﻿namespace UZonMail.Utils.Web.PagingQuery
 {
     /// <summary>
     /// 分页过滤

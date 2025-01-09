@@ -7,13 +7,14 @@ using UZonMail.Core.SignalRHubs;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.Services.Cache;
 using UZonMail.DB.SQL.Permission;
+using UZonMail.Utils.Web.Access;
 
 namespace UZonMail.Core.Services.Permission
 {
     /// <summary>
     /// 权限服务
     /// </summary>
-    public class PermissionService(SqlContext db, CacheService cache, IHubContext<UzonMailHub, IUzonMailClient> hub) : IScopedService
+    public class PermissionService(SqlContext db, CacheService cache, IHubContext<UzonMailHub, IUzonMailClient> hub, IServiceProvider serviceProvider) : IScopedService
     {
         /// <summary>
         /// 生成权限缓存的 key
@@ -21,6 +22,38 @@ namespace UZonMail.Core.Services.Permission
         /// <param name="userId"></param>
         /// <returns></returns>
         public string GetPermissionCacheKey(long userId) => $"permissions:{userId}";
+
+        /// <summary>
+        /// 生成用户的权限码
+        /// 会调用所有的 IAccessBuilder 服务
+        /// </summary>
+        /// <param name="userIds"></param>
+        /// <returns></returns>
+        public async Task<Dictionary<long, List<string>>> GenerateUsersPermissionCodes(List<long> userIds)
+        {
+            // 获取所有实现了 IAccessBuilder 接口的服务
+            var accessBuilders = serviceProvider.GetRequiredService<IEnumerable<IAccessBuilder>>();
+            Dictionary<long,HashSet<string>> results = [];
+            foreach(var builder in accessBuilders)
+            {
+                var codes = await builder.GenerateUserPermissionCodes(userIds);
+                foreach(var item in codes)
+                {
+                    if(!results.TryGetValue(item.Key,out var value))
+                    {
+                        value = [];
+                        results.Add(item.Key,value);
+                    }
+                    // 保存值
+                    foreach(var code in item.Value)
+                    {
+                        value.Add(code);
+                    }
+                }
+            }
+
+            return results.ToDictionary(x => x.Key, x => x.Value.ToList());
+        }
 
         /// <summary>
         /// 更新用户的权限缓存
@@ -31,22 +64,13 @@ namespace UZonMail.Core.Services.Permission
         {
             if (userIds.Count == 0) return [];
 
-            var userRoles = await db.UserRole.AsNoTracking()
-                .Where(x => userIds.Contains(x.UserId))
-                .Include(x => x.Roles)
-                .ThenInclude(x => x.PermissionCodes)
-                .GroupBy(x => x.UserId)
-                .ToListAsync();
-
-            Dictionary<long, List<string>> results = [];
-            foreach (var item in userRoles)
+            var userPermissions = await GenerateUsersPermissionCodes(userIds);
+            // 更新缓存
+            foreach (var item in userPermissions)
             {
-                var permissionCodes = item.SelectMany(x => x.Roles).SelectMany(x => x.PermissionCodes).Select(x => x.Code).Distinct().ToList();
-                results.Add(item.Key, permissionCodes);
-                // 更新缓存
-                await cache.SetAsync(GetPermissionCacheKey(item.Key), permissionCodes);
+                await cache.SetAsync(GetPermissionCacheKey(item.Key), item.Value);
             }
-            return results;
+            return userPermissions;
         }
 
         /// <summary>
@@ -74,16 +98,6 @@ namespace UZonMail.Core.Services.Permission
 
             // 更新缓存
             cacheValues ??= await UpdateUserPermissionsCache(userId);
-
-            // 添加管理员权限码
-            var user = await db.Users.AsNoTracking().FirstAsync(x => x.Id == userId);
-            if (user.IsSuperAdmin)
-                cacheValues.AddRange(["admin", "*"]);
-
-            // 如果是子账户，添加子账户权限码
-            if (user.Type == UserType.SubUser)
-                cacheValues.Add("subUser");
-
             return cacheValues;
         }
 

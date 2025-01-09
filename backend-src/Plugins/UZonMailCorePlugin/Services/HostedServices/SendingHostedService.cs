@@ -6,6 +6,7 @@ using UZonMail.Core.Jobs;
 using UZonMail.Core.Database.Init;
 using UZonMail.Core.Database.Updater;
 using UZonMail.Core.Config;
+using UZonMail.Utils.Database.Initializer;
 
 namespace UZonMail.Core.Services.HostedServices
 {
@@ -30,21 +31,17 @@ namespace UZonMail.Core.Services.HostedServices
         /// <returns></returns>
         private static async Task InitDatabase(IServiceProvider serviceProvider)
         {
-            var nv = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+            // 数据库迁移
             var context = serviceProvider.GetRequiredService<SqlContext>();
-            // 应用迁移
             context.Database.Migrate();
             await context.Database.EnsureCreatedAsync();
 
-            var appConfig = serviceProvider.GetRequiredService<IOptions<AppConfig>>();
-
-            // 数据初始化
-            var initializer = new DatabaseInitializer(nv, context, appConfig.Value);
-            await initializer.Init();
+            // 数据库初始化
+            var dbStartup = serviceProvider.GetRequiredService<DatabaseStartup>();
+            await dbStartup.Init();
 
             // 数据升级
-            var config = serviceProvider.GetRequiredService<IConfiguration>();
-            var dataUpdater = new DataUpdaterManager(context, config);
+            var dataUpdater = serviceProvider.GetRequiredService<DatabaseUpdateService>();            
             await dataUpdater.Update();
         }
 

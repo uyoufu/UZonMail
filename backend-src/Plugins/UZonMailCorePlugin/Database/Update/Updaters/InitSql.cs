@@ -9,22 +9,22 @@ using UZonMail.DB.SQL.Organization;
 using UZonMail.DB.SQL.Permission;
 using UZonMail.Utils.Extensions;
 
-namespace UZonMail.Core.Database.SQL.Updaters
+namespace UZonMail.Core.Database.Update.Updaters
 {
-    public class InitSql : IDataUpdater
+    public class InitSql(SqlContext db, IConfiguration config) : IDatabaseUpdater
     {
         public Version Version => new("0.1.0.0");
 
-        public async Task Update(SqlContext db, IConfiguration config)
+        public async Task Update()
         {
             // 初始化权限
-            await InitPermission(db);
+            await InitPermission();
 
             // 初始化存储库
-            await InitFileStorage(db, config);
+            await InitFileStorage();
 
             // 初始化用户
-            await InitUser(db, config);
+            await InitUser();
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace UZonMail.Core.Database.SQL.Updaters
         /// <param name="db"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        private async Task InitUser(SqlContext db, IConfiguration config)
+        private async Task InitUser()
         {
             // 判断是否有默认组织和部门
             var systemDepartments = await db.Departments.Where(x => x.IsSystem).ToListAsync();
@@ -147,7 +147,7 @@ namespace UZonMail.Core.Database.SQL.Updaters
                 var userConfig = new UserConfig();
                 config.GetSection("User")?.Bind(userConfig);
                 // 从配置中读取超管的信息
-                if (userConfig.AdminUser!=null)
+                if (userConfig.AdminUser != null)
                 {
                     var adminUserConfig = userConfig.AdminUser;
                     if (!string.IsNullOrEmpty(adminUserConfig.UserId)) adminUser.UserId = adminUserConfig.UserId;
@@ -191,7 +191,7 @@ namespace UZonMail.Core.Database.SQL.Updaters
         /// 2. 生成一个管理员角色和一个普通用户角色
         /// 3. 为角色赋予默认功能码
         /// </summary>
-        private async Task InitPermission(SqlContext db)
+        private async Task InitPermission()
         {
             // 检查是否已经有数据
             if (db.Users.Any())
@@ -207,7 +207,7 @@ namespace UZonMail.Core.Database.SQL.Updaters
         /// <summary>
         /// 初始化存储库
         /// </summary>
-        private async Task InitFileStorage(SqlContext db, IConfiguration config)
+        private async Task InitFileStorage()
         {
             bool existDefaultFileBucket = await db.FileBuckets.AnyAsync(x => x.IsDefault);
             if (existDefaultFileBucket) return;

@@ -3,10 +3,14 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
 using UZonMail.DB.SQL;
+using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Database.Updater
 {
-    public interface IDataUpdater
+    /// <summary>
+    /// 数据库更新器
+    /// </summary>
+    public interface IDatabaseUpdater : IScopedService<IDatabaseUpdater>
     {
         /// <summary>
         /// 版本号
@@ -17,6 +21,6 @@ namespace UZonMail.Core.Database.Updater
         /// 开始更新数据
         /// </summary>
         /// <returns></returns>
-        Task Update(SqlContext db, IConfiguration config);
+        Task Update();
     }
 }

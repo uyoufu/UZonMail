@@ -15,6 +15,7 @@ using UZonMail.Core.Services.Plugin;
 using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL.Permission;
 using UZonMail.DB.Managers.Cache;
+using System.Security.Claims;
 
 namespace UZonMail.Core.Services.UserInfos
 {
@@ -308,8 +309,13 @@ namespace UZonMail.Core.Services.UserInfos
         /// <returns></returns>
         private async Task<string> GenerateToken(User userInfo)
         {
-            var claims = await TokenClaimsBuilders.GetClaims(serviceProvider, userInfo);
-            // 保证每个机器不一样
+            var tokenClaimBuilders = serviceProvider.GetServices<ITokenClaimBuilder>();
+            List<Claim> claims = [];
+            foreach(var claimBuilder in tokenClaimBuilders)
+            {
+                var claimsTemp = await claimBuilder.Build(userInfo);
+                claims.AddRange(claimsTemp);
+            }
             string token = JWTToken.CreateToken(appConfig.Value.TokenParams, claims);
             return token;
         }

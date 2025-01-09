@@ -1,10 +1,10 @@
 ﻿using log4net;
 using MailKit.Net.Smtp;
 using MimeKit;
+using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Sender;
 using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.Utils.Email.MessageDecorator;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {
@@ -94,7 +94,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
             // 对 message 进行额外的设置
             var emailDecoratorParams = await sendItem.GetEmailDecoratorParams(context);
-            message = await MimeMessageDecorators.StartDecorating(emailDecoratorParams, message);
+            var mimeMessageDecorator = context.Provider.GetService<MimeMessageDecorateService>();
+            message = await mimeMessageDecorator.Decorate(emailDecoratorParams, message);
 
             try
             {

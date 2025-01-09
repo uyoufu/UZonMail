@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using UZonMail.Core.Database.SQL.EmailSending;
+using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.DB.Managers.Cache;
@@ -9,7 +10,6 @@ using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Emails;
 using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Utils.Email;
-using UZonMail.Utils.Email.BodyDecorator;
 
 namespace UZonMail.Core.Services.SendCore.WaitList
 {
@@ -234,7 +234,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         private async Task<string> StartDecorators(SendingContext sendingContext, string htmlBody)
         {
             var decoratorParams = await GetEmailDecoratorParams(sendingContext);
-            return await EmailBodyDecorators.StartDecorating(decoratorParams, htmlBody);
+            var decorateService = sendingContext.Provider.GetRequiredService<EmailBodyDecorateService>();
+            return await decorateService.Decorate(decoratorParams, htmlBody);
         }
 
         /// <summary>

@@ -26,11 +26,6 @@ namespace UZonMail.Core
             services.AddServices();
             // 添加后台服务
             services.AddHostedService<SendingHostedService>();
-
-            // 添加 TokenPayloadsBuilder
-            TokenClaimsBuilders.AddBuilder(new TokenClaimsBuilder());
-            // 添加数据库更新器
-            DataUpdaterManager.AddCallingAssembly();
         }
 
         public void UseApp(WebApplication webApplication)

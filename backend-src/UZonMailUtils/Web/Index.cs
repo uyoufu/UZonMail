@@ -53,8 +53,11 @@ namespace UZonMail.Utils.Web
             transientTypes.ForEach(type =>
             {
                 // 获取注册类型和实现类型
-                var serviceType = GetServiceType(type);
-                services.AddTransient(serviceType, type);
+                var serviceTypes = GetServiceTypes(type);
+                serviceTypes.ForEach(serviceType =>
+                {
+                    services.AddTransient(serviceType, type);
+                });
             });
 
             // 请求周期
@@ -64,8 +67,11 @@ namespace UZonMail.Utils.Web
                 .ToList();
             scopedServiceTypes.ForEach(type =>
             {
-                var serviceType = GetServiceType(type);
-                services.AddScoped(serviceType, type);
+                var serviceTypes = GetServiceTypes(type);
+                serviceTypes.ForEach(serviceType =>
+                {
+                    services.AddScoped(serviceType, type);
+                });
             });
 
             // 单例
@@ -75,8 +81,11 @@ namespace UZonMail.Utils.Web
                .ToList();
             singletonServiceTypes.ForEach(type =>
             {
-                var serviceType = GetServiceType(type);
-                services.AddSingleton(serviceType, type);
+                var serviceTypes = GetServiceTypes(type);
+                serviceTypes.ForEach(serviceType =>
+                {
+                    services.AddSingleton(serviceType, type);
+                });              
             });
 
             return services;
@@ -87,7 +96,7 @@ namespace UZonMail.Utils.Web
         /// </summary>
         /// <param name="implementationType">实现类型，必须继承 ITransientService 或 IScopedService 或 ISingletonService</param>
         /// <returns></returns>
-        public static Type GetServiceType(Type implementationType)
+        public static List<Type> GetServiceTypes(Type implementationType)
         {
             var interfaceNames = new List<Type>() {
                 typeof(ITransientService<>), typeof(IScopedService<>), typeof(ISingletonService<>),
@@ -100,17 +109,18 @@ namespace UZonMail.Utils.Web
                 .Where(x => interfaceNames.Contains(x.Name))
                 .ToList();
 
+            List<Type> serviceTypes = [implementationType];
             foreach (var item in interfaces)
             {
                 if (item.IsGenericType)
                 {
                     // 获取泛型参数
                     Type genericArgument = item.GetGenericArguments().First();
-                    return genericArgument;
+                    serviceTypes.Add(genericArgument);
                 }
             }
 
-            return implementationType;
+            return serviceTypes;
         }
 
         /// <summary>

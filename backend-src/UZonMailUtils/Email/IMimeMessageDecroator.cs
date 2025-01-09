@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.EmailSending;
 using UZonMail.DB.SQL.Settings;
+using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Utils.Email
 {
@@ -11,7 +12,7 @@ namespace UZonMail.Utils.Email
     /// 邮件正文修饰器
     /// 使用私有变量时，注意实例是多用户共用的
     /// </summary>
-    public interface IMimeMessageDecroator
+    public interface IMimeMessageDecroator: ITransientService<IMimeMessageDecroator>
     {
         /// <summary>
         /// 开始进行装饰

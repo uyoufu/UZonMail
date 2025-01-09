@@ -1,16 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
-using UZonMail.DB.SQL.Settings;
+﻿using System.Threading.Tasks;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Utils.Email.BodyDecorator
+namespace UZonMail.Utils.Email
 {
     /// <summary>
     /// 邮件正文修饰器
     /// 使用私有变量时，注意实例是多用户共用的
     /// </summary>
-    public interface IEmailBodyDecroator
+    public interface IEmailBodyDecroator : ITransientService<IEmailBodyDecroator>
     {
         /// <summary>
         /// 开始进行装饰

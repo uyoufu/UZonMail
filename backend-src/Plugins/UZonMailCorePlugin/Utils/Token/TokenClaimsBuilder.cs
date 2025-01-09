@@ -10,7 +10,7 @@ namespace UZonMail.Core.Utils.Token
     /// <summary>
     /// TokenClaims 生成器
     /// </summary>
-    public class TokenClaimsBuilder : ITokenClaimBuilder, IScopedService<TokenClaimsBuilder>
+    public class TokenClaimsBuilder : ITokenClaimBuilder
     {
         /// <summary>
         /// 生成 TokenClaims
@@ -18,7 +18,7 @@ namespace UZonMail.Core.Utils.Token
         /// <param name="sqlContext"></param>
         /// <param name="userInfo"></param>
         /// <returns></returns>
-        public async Task<List<Claim>> Build(IServiceProvider serviceProvider, User userInfo)
+        public async Task<List<Claim>> Build(User userInfo)
         {
             var tokenPayloads = new TokenPayloads(userInfo);
             return tokenPayloads;

@@ -3,7 +3,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.Features;
-using UZonMail.Utils.Extensions;
 using Quartz;
 using UZonMail.Utils.Helpers;
 using UZonMailService.Middlewares;
@@ -230,10 +229,5 @@ app.MapControllers();
 
 pluginLoader.UseApp(app);
 
-// ³õÊ¼Êý¾Ý¿â
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseDeveloperExceptionPage();
-//}
 app.Run();
 
