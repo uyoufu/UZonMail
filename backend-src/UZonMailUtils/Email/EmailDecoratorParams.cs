@@ -4,10 +4,8 @@ using UZonMail.DB.SQL.EmailSending;
 
 namespace UZonMail.Utils.Email
 {
-    public class EmailDecoratorParams(IServiceProvider serviceProvider, OrganizationSettingCache settingReader, SendingItem sendingItem, string outboxEmail)
+    public class EmailDecoratorParams(OrganizationSettingCache settingReader, SendingItem sendingItem, string outboxEmail)
     {
-        public IServiceProvider ServiceProvider { get; } = serviceProvider;
-
         public OrganizationSettingCache SettingsReader { get; } = settingReader;
 
         public SendingItem SendingItem { get; } = sendingItem;

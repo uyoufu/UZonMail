@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.OpenApi.Models;
 using System.IO;
 using System.Collections.Generic;
+using Microsoft.Extensions.Hosting;
 
 namespace UZonMail.Utils.Web
 {
@@ -36,7 +37,14 @@ namespace UZonMail.Utils.Web
         }
 
         /// <summary>
-        /// 批量注入服务
+        /// 批量注入调用程序集中的服务
+        /// 该方法会自动扫描当前程序集中的所有服务，并注册到容器中, 服务包括实现了以下接口的类：
+        /// 1. ITransientService
+        /// 2. IScopedService
+        /// 3. ISingletonService
+        /// 4. IHostedService
+        /// 其中，ITransientService、IScopedService、ISingletonService 可以是泛型接口
+        /// IHostedService 是后台服务，会自动注册为单例
         /// </summary>
         /// <typeparam name="T">通过指定类型,来注入所有实现该接口的单例。若要全部注册，只需传入 IService 即可</typeparam>
         /// <param name="services"></param>
@@ -44,11 +52,13 @@ namespace UZonMail.Utils.Web
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             // 批量注入 Services 单例            
-            var serviceTypes = Assembly.GetCallingAssembly()
+            var assembleyTypes = Assembly.GetCallingAssembly()
                 .GetTypes();
             var transientType = typeof(ITransientService);
             // 分多种情况，注册不同的生命周期
-            var transientTypes = serviceTypes.Where(x => !x.IsInterface && !x.IsAbstract && transientType.IsAssignableFrom(x))
+
+            // 瞬时类型
+            var transientTypes = assembleyTypes.Where(x => !x.IsInterface && !x.IsAbstract && transientType.IsAssignableFrom(x))
                 .ToList();
             transientTypes.ForEach(type =>
             {
@@ -63,7 +73,7 @@ namespace UZonMail.Utils.Web
             // 请求周期
             var scopedServiceType = typeof(IScopedService);
             // 分多种情况，注册不同的生命周期
-            var scopedServiceTypes = serviceTypes.Where(x => !x.IsInterface && !x.IsAbstract && scopedServiceType.IsAssignableFrom(x))
+            var scopedServiceTypes = assembleyTypes.Where(x => !x.IsInterface && !x.IsAbstract && scopedServiceType.IsAssignableFrom(x))
                 .ToList();
             scopedServiceTypes.ForEach(type =>
             {
@@ -77,7 +87,7 @@ namespace UZonMail.Utils.Web
             // 单例
             var singletonServiceType = typeof(ISingletonService);
             // 分多种情况，注册不同的生命周期
-            var singletonServiceTypes = serviceTypes.Where(x => !x.IsInterface && !x.IsAbstract && singletonServiceType.IsAssignableFrom(x))
+            var singletonServiceTypes = assembleyTypes.Where(x => !x.IsInterface && !x.IsAbstract && singletonServiceType.IsAssignableFrom(x))
                .ToList();
             singletonServiceTypes.ForEach(type =>
             {
@@ -85,7 +95,17 @@ namespace UZonMail.Utils.Web
                 serviceTypes.ForEach(serviceType =>
                 {
                     services.AddSingleton(serviceType, type);
-                });              
+                });
+            });
+
+            // 后台服务,在启动时，就会运行
+            var hostedServiceType = typeof(IHostedService);
+            var hostedServiceTypes = assembleyTypes.Where(x => !x.IsInterface && !x.IsAbstract && hostedServiceType.IsAssignableFrom(x))
+                .ToList();
+            hostedServiceTypes.ForEach(type =>
+            {
+                services.AddSingleton(hostedServiceType, type);
+                services.AddSingleton(type);
             });
 
             return services;
@@ -96,7 +116,7 @@ namespace UZonMail.Utils.Web
         /// </summary>
         /// <param name="implementationType">实现类型，必须继承 ITransientService 或 IScopedService 或 ISingletonService</param>
         /// <returns></returns>
-        public static List<Type> GetServiceTypes(Type implementationType)
+        private static List<Type> GetServiceTypes(Type implementationType)
         {
             var interfaceNames = new List<Type>() {
                 typeof(ITransientService<>), typeof(IScopedService<>), typeof(ISingletonService<>),

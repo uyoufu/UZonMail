@@ -24,8 +24,6 @@ namespace UZonMail.Core
             services.AddCache();
             // 批量注册服务
             services.AddServices();
-            // 添加后台服务
-            services.AddHostedService<SendingHostedService>();
         }
 
         public void UseApp(WebApplication webApplication)

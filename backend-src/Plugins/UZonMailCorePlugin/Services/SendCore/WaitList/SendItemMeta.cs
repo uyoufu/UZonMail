@@ -248,7 +248,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             var outbox = sendingContext.OutboxAddress;
             var userCache = await DBCacher.GetCache<UserInfoCache>(sendingContext.SqlContext, outbox.UserId);
             var orgSettingCache = await DBCacher.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, userCache.OrganizationId);
-            return new EmailDecoratorParams(sendingContext.Provider, orgSettingCache, SendingItem, outbox.Email);
+            return new EmailDecoratorParams(orgSettingCache, SendingItem, outbox.Email);
         }
         #endregion
 
