@@ -23,7 +23,7 @@ import { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import { formatDateStr } from 'src/utils/format'
+import { formatDate } from 'src/utils/format'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [
@@ -59,7 +59,7 @@ const columns: QTableColumn[] = [
     align: 'left',
     field: 'firstVisitDate',
     sortable: true,
-    format: v => formatDateStr(v)
+    format: v => formatDate(v)
   },
   {
     name: 'lastVisitDate',
@@ -68,7 +68,7 @@ const columns: QTableColumn[] = [
     align: 'left',
     field: 'lastVisitDate',
     sortable: true,
-    format: v => formatDateStr(v)
+    format: v => formatDate(v)
   }
 ]
 

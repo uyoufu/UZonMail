@@ -28,6 +28,7 @@ import { QTableColumn, format } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
+import { formatDate } from 'src/utils/format'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [
@@ -75,9 +76,7 @@ const columns: QTableColumn[] = [
     label: '创建日期',
     align: 'left',
     field: 'createDate',
-    format: (val: string) => {
-      return val ? new Date(val).toLocaleString() : ''
-    },
+    format: formatDate,
     sortable: true
   }
 ]

@@ -1,18 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { httpClientPro } from 'src/api//base/httpClient'
 
-/**
- * 获取 pro 版本的访问权限
- * @returns
- */
-export function getProAccess (userId: string) {
-  return httpClientPro.get<string[]>('/license/access', {
-    params: {
-      userId
-    }
-  })
-}
-
 export enum LicenseType {
   None,
   /// <summary>

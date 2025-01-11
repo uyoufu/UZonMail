@@ -26,16 +26,21 @@
 
 <script lang="ts" setup>
 import { QTableColumn } from 'quasar'
+
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+
 import { getAllRoles, getUserRolesCount, getUserRolesData, IRole, IUserRole, upsertUserRole, deleteUserRoles } from 'src/api/permission'
-import { confirmOperation, notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import { getAllUsers } from 'src/api/user'
-import { IUserInfo } from 'src/stores/types'
 import { IContextMenuItem } from 'src/components/contextMenu/types'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
+
+import { IUserInfo } from 'src/stores/types'
+
+import { confirmOperation, notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
+import { formatDate } from 'src/utils/format'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [
@@ -63,9 +68,7 @@ const columns: QTableColumn[] = [
     label: '创建日期',
     align: 'left',
     field: 'createDate',
-    format: (val: string) => {
-      return val ? new Date(val).toLocaleString() : ''
-    },
+    format: formatDate,
     sortable: true
   }
 ]

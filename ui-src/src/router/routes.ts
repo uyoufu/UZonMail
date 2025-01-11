@@ -200,6 +200,36 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     ]
   },
   {
+    name: 'EmailCrawler',
+    path: '/email-crawler',
+    component: NormalLayout,
+    meta: {
+      label: '邮件爬虫',
+      icon: 'bug_report'
+    },
+    redirect: '/email-crawler/task',
+    children: [
+      {
+        name: 'CrawlerTask',
+        path: 'task',
+        meta: {
+          icon: 'flag',
+          label: '爬虫任务'
+        },
+        component: () => import('pages/emailCrawler/crawlerTask/CrawlerTask.vue')
+      },
+      {
+        name: 'CrawlerResult',
+        path: 'result',
+        meta: {
+          icon: 'contact_mail',
+          label: '爬取结果'
+        },
+        component: () => import('pages/emailCrawler/crawlerResult/CrawlerResult.vue')
+      }
+    ]
+  },
+  {
     name: 'System',
     path: '/system',
     component: NormalLayout,

@@ -28,7 +28,9 @@ const defaultStatusStyles = [
   { status: 'instant', label: '即时', color: 'primary', textColor: 'white', icon: '' },
   { status: 'scheduled', label: '定时', color: 'warning', textColor: 'white', icon: '' },
   { status: 'invalid', label: '无效', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'unsubscribed', label: '取消订阅', color: 'negative', textColor: 'white', icon: '' }
+  { status: 'unsubscribed', label: '取消订阅', color: 'negative', textColor: 'white', icon: '' },
+  { status: 'running', label: '运行中', color: 'secondary', textColor: 'white', icon: '' },
+  { status: 'unknown', label: '未知', color: 'negative', textColor: 'white', icon: '' }
 ]
 const props = defineProps({
   status: {

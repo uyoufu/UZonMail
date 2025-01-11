@@ -37,14 +37,16 @@
 import { QTableColumn } from 'quasar'
 import { useQTable } from 'src/compositions/qTableUtils'
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import { usePermission } from 'src/compositions/permission'
+
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
-
 import CreateBtn from 'src/components/componentWrapper/buttons/CreateBtn.vue'
+
 import { getFilteredUsersCount, getFilteredUsersData } from 'src/api/user'
 
-import { usePermission } from 'src/compositions/permission'
 import { UserStatus, UserType } from 'src/stores/types'
+import { formatDate } from 'src/utils/format'
 
 const columns: QTableColumn[] = [
   {
@@ -61,9 +63,7 @@ const columns: QTableColumn[] = [
     label: '注册日期',
     align: 'left',
     field: 'createDate',
-    format: (val: string) => {
-      return val ? new Date(val).toLocaleString() : ''
-    },
+    format: formatDate,
     sortable: true
   },
   {

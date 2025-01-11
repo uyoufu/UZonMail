@@ -10,7 +10,7 @@
             {{ item.label }}
           </q-item-section>
         </div>
-        <AsyncTooltip :tooltip="item.tooltip" anchor="center right" self="center left" />
+        <AsyncTooltip :tooltip="item.tooltip" :color="item.color" anchor="center right" self="center left" />
       </q-item>
     </q-list>
   </q-menu>
