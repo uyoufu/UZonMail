@@ -50,7 +50,7 @@ const props = defineProps({
 })
 
 import { IInbox } from 'src/api/emailBox'
-import { IEmailGroupListItem } from 'src/pages/emailManage/components/types'
+import { IEmailGroupListItem } from 'src/pages/emailManager/components/types'
 
 // placeholder 显示
 import { useCustomQField } from '../helper'

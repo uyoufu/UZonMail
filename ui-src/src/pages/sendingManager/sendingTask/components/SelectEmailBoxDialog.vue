@@ -34,7 +34,7 @@
 
 <script lang='ts' setup>
 import { IInbox, getInboxesCount, getInboxesData, getOutboxesCount, getOutboxesData, createUngroupedInbox } from 'src/api/emailBox'
-import { IEmailGroupListItem } from 'src/pages/emailManage/components/types'
+import { IEmailGroupListItem } from 'src/pages/emailManager/components/types'
 // props 定义
 const props = defineProps({
   emailBoxType: {
@@ -70,7 +70,7 @@ defineEmits([
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
 
 // 分类列表
-import EmailGroupList from 'pages/emailManage/components/EmailGroupList.vue'
+import EmailGroupList from 'pages/emailManager/components/EmailGroupList.vue'
 
 const emailGroupRef: Ref<IEmailGroupListItem> = ref({
   name: 'selected',
@@ -168,7 +168,7 @@ watch(emailGroupRef, () => {
 })
 
 // 新增收件箱
-import { showNewInboxDialog } from 'pages/emailManage/inbox/headerFunctions'
+import { showNewInboxDialog } from 'src/pages/emailManager/inbox/headerFunctions'
 import { notifyError } from 'src/utils/dialog'
 
 async function onNewTempInboxClick () {

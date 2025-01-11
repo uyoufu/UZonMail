@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import logger from 'loglevel'
+
 import { IProxy, deleteProxy, updateProxy, validateProxyName } from 'src/api/proxy'
 import { IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
@@ -6,7 +8,40 @@ import { getCommonProxyFields } from './headerFuncs'
 import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 
+import { useUserInfoStore } from 'src/stores/user'
+
 export function useContextMenu (deleteRowById: (id?: number) => void) {
+  const proxyContextMenuItems: IContextMenuItem[] = [
+    {
+      name: 'edit',
+      label: '编辑',
+      tooltip: '编辑代理',
+      icon: 'edit',
+      vif: isOwner,
+      onClick: modifyProxy
+    },
+    {
+      name: 'delete',
+      label: '删除',
+      tooltip: '删除代理',
+      color: 'negative',
+      icon: 'delete',
+      vif: isOwner,
+      onClick: onDeleteProxy
+    }
+  ]
+
+  const userInfo = useUserInfoStore()
+  /**
+   * 判断是否是拥有者
+   * @param proxyInfo
+   * @returns
+   */
+  function isOwner (proxyInfo: Record<string, any>) {
+    logger.debug('[proxyManager] isOwner:', userInfo.userSqlId, proxyInfo.userId)
+    return userInfo.userSqlId === proxyInfo.userId
+  }
+
   async function modifyProxy (proxyInfo: Record<string, any>) {
     const proxyData = proxyInfo as IProxy
 
@@ -71,24 +106,5 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     await deleteProxy(proxyData.id)
     deleteRowById(proxyData.id)
   }
-
-  const proxyContextMenuItems: IContextMenuItem[] = [
-    {
-      name: 'edit',
-      label: '编辑',
-      tooltip: '编辑代理',
-      icon: 'edit',
-      onClick: modifyProxy
-    },
-    {
-      name: 'delete',
-      label: '删除',
-      tooltip: '删除代理',
-      color: 'negative',
-      icon: 'delete',
-      onClick: onDeleteProxy
-    }
-  ]
-
   return { proxyContextMenuItems }
 }

@@ -8,8 +8,10 @@ export interface IProxy {
   emailMatch?: string
   description?: string
   isActive: boolean
-  proxy: string,
-  isShared?: boolean
+  url: string,
+  isShared?: boolean,
+  userId: number,
+  organizationId: number
 }
 
 /**

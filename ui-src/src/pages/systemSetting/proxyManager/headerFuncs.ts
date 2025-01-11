@@ -31,10 +31,10 @@ export function getCommonProxyFields (): IPopupDialogField[] {
       required: true
     },
     {
-      name: 'proxy',
+      name: 'url',
       type: PopupDialogFieldType.text,
       label: '代理地址',
-      placeholder: '格式：username:password@host 或 host',
+      placeholder: '格式：schema://username:password@host',
       value: '',
       required: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,15 +46,18 @@ export function getCommonProxyFields (): IPopupDialogField[] {
           }
         }
 
-        // 若不包含 http 或 https 则添加
-        if (!value.includes('http://') && !value.includes('https://')) {
-          value = `https://${value}`
+        // 若不包含 ://, 说明没有协议，返回错误
+        if (!value.includes('://')) {
+          return {
+            ok: false,
+            message: '代理地址缺失协议,格式为：schema://username:password@host 或 host'
+          }
         }
 
         if (!URL.canParse(value)) {
           return {
             ok: false,
-            message: '代理地址格式不正确,格式为：username:password@host 或 host'
+            message: '代理地址格式不正确,格式为：schema://username:password@host 或 schema://host'
           }
         }
         return {
@@ -88,7 +91,7 @@ export function getCommonProxyFields (): IPopupDialogField[] {
  * @returns
  */
 export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => void) {
-  const userInfoStore = useUserInfoStore()
+  const userInfo = useUserInfoStore()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function validateProxyInfo (data: Record<string, any>) {
@@ -98,7 +101,7 @@ export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => 
   async function onCreateProxy () {
     const fields = getCommonProxyFields()
     // 若是管理员，则添加共享字段
-    if (userInfoStore.isAdmin) {
+    if (userInfo.isAdmin) {
       fields.push({
         name: 'isShared',
         type: PopupDialogFieldType.boolean,
@@ -129,6 +132,10 @@ export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => 
 
   // 开关代理共享
   async function onToggleShareProxy (proxyInfo: IProxy) {
+    if (userInfo.userSqlId !== proxyInfo.userId) {
+      return
+    }
+
     // 向服务器请求更新
     updateProxySharedStatus(proxyInfo.id as number, !!proxyInfo.isShared)
   }
