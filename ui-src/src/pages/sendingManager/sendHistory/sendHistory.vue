@@ -47,7 +47,7 @@ import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
 import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
 
-import { formatDateStr } from 'src/utils/format'
+import { formatDate } from 'src/utils/format'
 
 import { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
@@ -143,8 +143,8 @@ const columns: QTableColumn[] = [
     align: 'left',
     field: v => v,
     format: (value: ISendingGroupInfo) => {
-      if (value.sendingType === SendingGroupType.Scheduled) return formatDateStr(value.scheduleDate)
-      return formatDateStr(value.createDate)
+      if (value.sendingType === SendingGroupType.Scheduled) return formatDate(value.scheduleDate)
+      return formatDate(value.createDate)
     },
     sortable: true
   }, {

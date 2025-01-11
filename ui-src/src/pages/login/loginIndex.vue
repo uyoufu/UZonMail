@@ -39,7 +39,6 @@
 
 <script lang="ts" setup>
 import { userLogin } from 'src/api/user'
-import { getProAccess } from 'src/api/pro/license'
 
 import { useUserInfoStore } from 'src/stores/user'
 import { useRoutesStore } from 'src/stores/routes'
@@ -80,17 +79,6 @@ async function onUserLogin () {
 
   const userInfoStore = useUserInfoStore()
   userInfoStore.setInstalledPlugins(installedPlugins)
-
-  if (userInfoStore.hasProPlugin) {
-    // 获取 pro 版授权信息
-    const { data: proAccess } = await getProAccess(userId.value)
-    logger.debug('[Login] Pro 版授权信息:', proAccess)
-    if (proAccess) {
-      access.push(...proAccess)
-    }
-  } else {
-    access.push('noProPlugin')
-  }
 
   userInfoStore.setUserLoginInfo(userInfo, token, access)
   userInfoStore.setSecretKey(md5(password.value))

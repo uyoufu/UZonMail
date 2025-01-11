@@ -2,6 +2,9 @@
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { IEmailGroupListItem } from '../components/types'
+
+import { addNewRowType } from 'src/compositions/qTableUtils'
+
 import { IInbox, createInbox, createInboxes } from 'src/api/emailBox'
 import { notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { IExcelColumnMapper, readExcel, writeExcel } from 'src/utils/file'
@@ -75,8 +78,7 @@ export async function showNewInboxDialog (emailGroupLabel: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
-  addNewRow: (newRow: Record<string, any>, idField?: string) => void) {
+export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType) {
   // 新建发件箱
   async function onNewInboxClick () {
     // 新增发件箱

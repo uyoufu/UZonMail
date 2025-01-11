@@ -70,7 +70,7 @@ watch(statusTab, () => {
 const sendingGroupId = ref(vueProps.sendingGroupId)
 
 import { QTableColumn } from 'quasar'
-import { formatDateStr } from 'src/utils/format'
+import { formatDate } from 'src/utils/format'
 
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
@@ -121,7 +121,7 @@ const columns: QTableColumn[] = [
     label: '发送日期',
     align: 'left',
     field: 'sendDate',
-    format: v => formatDateStr(v),
+    format: v => formatDate(v),
     sortable: true
   }
 ]

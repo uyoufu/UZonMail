@@ -1,5 +1,5 @@
 <template>
-  <q-tooltip ref="tooltipRef" class="bg-primary" :anchor="anchor" :self="self" transition-show="scale"
+  <q-tooltip ref="tooltipRef" :class="bgColor" :anchor="anchor" :self="self" transition-show="scale"
     transition-hide="scale" @before-show="onTooltipBeforeShow" v-model="tooltipModel" max-width="40em">
     <div v-for="tip in tooltips" :key="tip">{{ tip }}</div>
   </q-tooltip>
@@ -61,16 +61,28 @@ const props = defineProps({
     type: Object,
     default: () => { return {} }
   },
+
   // 是否缓存
   cache: {
     type: Boolean,
     default: true
   },
+
   // 可以是字符串，字符串数组，或者是一个返回字符串数组的函数
   tooltip: {
     type: [Array, Function, String] as PropType<Array<string> | ((params?: object) => Promise<string[]>) | string>,
     default: () => []
+  },
+
+  // 背景颜色
+  color: {
+    type: String,
+    default: 'primary'
   }
+})
+
+const bgColor = computed(() => {
+  return `bg-${props.color}`
 })
 
 const tooltips: Ref<string[]> = ref([])

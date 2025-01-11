@@ -38,7 +38,7 @@
 
 <script lang="ts" setup>
 import { QTable, QTableColumn } from 'quasar'
-import { formatDateStr } from 'src/utils/format'
+import { formatDate } from 'src/utils/format'
 
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import CreateBtn from 'src/components/componentWrapper/buttons/CreateBtn.vue'
@@ -104,7 +104,7 @@ const columns: QTableColumn[] = [
     label: '最近发件日期',
     align: 'left',
     field: 'lastSuccessDeliveryDate',
-    format: v => formatDateStr(v),
+    format: v => formatDate(v),
     sortable: true
   }
 ]
