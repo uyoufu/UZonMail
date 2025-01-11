@@ -29,7 +29,7 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
     id: 0,
     name: '无',
     isActive: true,
-    proxy: ''
+    url: ''
   })
   return [
     {

@@ -14,6 +14,9 @@ export const useUserInfoStore = defineStore('userInfo', {
     userInfo: useSessionStorage('userInfo', {}).value as IUserInfo
   }),
   getters: {
+    // 用户数据库的 id
+    userSqlId: (state) => state.userInfo.id,
+
     // 用户 id
     userId: (state) => state.userInfo.userId,
 

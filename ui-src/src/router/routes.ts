@@ -58,8 +58,8 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     ]
   },
   {
-    name: 'EmailManage',
-    path: '/email-manage',
+    name: 'EmailManagement',
+    path: '/email-management',
     component: NormalLayout,
     meta: {
       label: '邮箱管理',
@@ -74,7 +74,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'forward_to_inbox',
           label: '发件箱'
         },
-        component: () => import('pages/emailManage/outbox/outboxManage.vue')
+        component: () => import('pages/emailManager/outbox/outboxManage.vue')
       },
       {
         name: 'inboxManage',
@@ -83,12 +83,12 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'mark_email_unread',
           label: '收件箱'
         },
-        component: () => import('pages/emailManage/inbox/inboxManage.vue')
+        component: () => import('pages/emailManager/inbox/inboxManage.vue')
       }
     ]
   },
   {
-    name: 'TemplateManage',
+    name: 'TemplateManagement',
     path: '/template',
     component: NormalLayout,
     meta: {
@@ -105,7 +105,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           label: '模板管理',
           noCache: true
         },
-        component: () => import('pages/templateManage/emailTemplates.vue')
+        component: () => import('pages/templateManager/emailTemplates.vue')
       },
       {
         name: 'templateEditor',
@@ -115,7 +115,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           label: '模板编辑',
           noMenu: true
         },
-        component: () => import('pages/templateManage/templateEditor.vue')
+        component: () => import('pages/templateManager/templateEditor.vue')
       }
     ]
   },
@@ -136,7 +136,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'add_box',
           label: '新建发件'
         },
-        component: () => import('pages/sendingManage/sendingTask/sendingTask.vue')
+        component: () => import('pages/sendingManager/sendingTask/sendingTask.vue')
       },
       {
         name: 'SendHistory',
@@ -145,7 +145,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'schedule_send',
           label: '历史发件'
         },
-        component: () => import('pages/sendingManage/sendHistory/sendHistory.vue')
+        component: () => import('pages/sendingManager/sendHistory/sendHistory.vue')
       },
       {
         name: 'SendDetailTable',
@@ -155,7 +155,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'schedule_send',
           label: '发件明细'
         },
-        component: () => import('pages/sendingManage/sendHistory/SendDetailTable.vue')
+        component: () => import('pages/sendingManager/sendHistory/SendDetailTable.vue')
       },
       {
         name: 'AttachmentManager',
@@ -164,7 +164,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'cloud_upload',
           label: '附件管理'
         },
-        component: () => import('pages/sendingManage/fileManager/AttachmentManager.vue')
+        component: () => import('pages/sendingManager/fileManager/AttachmentManager.vue')
       }
     ]
   },
@@ -226,7 +226,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'public',
           label: '代理管理'
         },
-        component: () => import('pages/systemSetting/proxyManage/ProxyManager.vue')
+        component: () => import('pages/systemSetting/proxyManager/ProxyManager.vue')
       },
       {
         name: 'UserManager',

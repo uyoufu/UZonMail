@@ -31,10 +31,10 @@ export function getCommonProxyFields (): IPopupDialogField[] {
       required: true
     },
     {
-      name: 'proxy',
+      name: 'url',
       type: PopupDialogFieldType.text,
       label: '代理地址',
-      placeholder: '格式：username:password@host 或 host',
+      placeholder: '格式：schema://username:password@host',
       value: '',
       required: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,15 +46,18 @@ export function getCommonProxyFields (): IPopupDialogField[] {
           }
         }
 
-        // 若不包含 http 或 https 则添加
-        if (!value.includes('http://') && !value.includes('https://')) {
-          value = `https://${value}`
+        // 若不包含 ://, 说明没有协议，返回错误
+        if (!value.includes('://')) {
+          return {
+            ok: false,
+            message: '代理地址缺失协议,格式为：schema://username:password@host 或 host'
+          }
         }
 
         if (!URL.canParse(value)) {
           return {
             ok: false,
-            message: '代理地址格式不正确,格式为：username:password@host 或 host'
+            message: '代理地址格式不正确,格式为：schema://username:password@host 或 schema://host'
           }
         }
         return {
