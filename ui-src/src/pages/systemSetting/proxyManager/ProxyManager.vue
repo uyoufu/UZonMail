@@ -17,11 +17,10 @@
 
     <template v-slot:body-cell-isShared="props">
       <q-td :props="props">
-        <q-toggle :disable="!isOwner(props.row)" color="secondary" dense v-model="props.row.isShared"
+        <q-toggle :disable="disableShareToggle(props.row)" color="secondary" dense v-model="props.row.isShared"
           @click="onToggleShareProxy(props.row)">
           <q-tooltip>
-            <div v-if="props.row.isShared">已共享</div>
-            <div v-else>未共享</div>
+            {{ getProxyShareTooltip(props.row) }}
           </q-tooltip>
         </q-toggle>
       </q-td>
@@ -115,7 +114,12 @@ const { onCreateProxy, onToggleShareProxy } = useHeaderFunctions(addNewRow)
 
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import { useContextMenu } from './contextMenu'
-const { proxyContextMenuItems, isOwner } = useContextMenu(deleteRowById)
+const { proxyContextMenuItems } = useContextMenu(deleteRowById)
+// #endregion
+
+// #region toggle 控制
+import { useShareToggle } from './compositions/useShareToggle'
+const { disableShareToggle, getProxyShareTooltip } = useShareToggle()
 // #endregion
 </script>
 

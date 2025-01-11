@@ -9,7 +9,9 @@ export interface IProxy {
   description?: string
   isActive: boolean
   url: string,
-  isShared?: boolean
+  isShared?: boolean,
+  userId: number,
+  organizationId: number
 }
 
 /**

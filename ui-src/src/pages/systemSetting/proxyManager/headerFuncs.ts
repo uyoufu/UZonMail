@@ -91,7 +91,7 @@ export function getCommonProxyFields (): IPopupDialogField[] {
  * @returns
  */
 export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => void) {
-  const userInfoStore = useUserInfoStore()
+  const userInfo = useUserInfoStore()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function validateProxyInfo (data: Record<string, any>) {
@@ -101,7 +101,7 @@ export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => 
   async function onCreateProxy () {
     const fields = getCommonProxyFields()
     // 若是管理员，则添加共享字段
-    if (userInfoStore.isAdmin) {
+    if (userInfo.isAdmin) {
       fields.push({
         name: 'isShared',
         type: PopupDialogFieldType.boolean,
@@ -132,6 +132,10 @@ export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => 
 
   // 开关代理共享
   async function onToggleShareProxy (proxyInfo: IProxy) {
+    if (userInfo.userSqlId !== proxyInfo.userId) {
+      return
+    }
+
     // 向服务器请求更新
     updateProxySharedStatus(proxyInfo.id as number, !!proxyInfo.isShared)
   }

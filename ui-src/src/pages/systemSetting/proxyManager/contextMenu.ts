@@ -32,6 +32,11 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
   ]
 
   const userInfo = useUserInfoStore()
+  /**
+   * 判断是否是拥有者
+   * @param proxyInfo
+   * @returns
+   */
   function isOwner (proxyInfo: Record<string, any>) {
     logger.debug('[proxyManager] isOwner:', userInfo.userSqlId, proxyInfo.userId)
     return userInfo.userSqlId === proxyInfo.userId
@@ -101,6 +106,5 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     await deleteProxy(proxyData.id)
     deleteRowById(proxyData.id)
   }
-
-  return { proxyContextMenuItems, isOwner }
+  return { proxyContextMenuItems }
 }
