@@ -166,7 +166,7 @@ namespace UZonMail.Core.Services.UserInfos
                      UserId = userId,
                      Password = password.Sha256(1),
                      Type = UserType.Independent,
-                     CreateBy = tokenService.GetUserDataId(),
+                     CreateBy = tokenService.GetUserSqlId(),
                  };
                  ctx.Add(user);
                  await ctx.SaveChangesAsync();
@@ -191,7 +191,7 @@ namespace UZonMail.Core.Services.UserInfos
             if (user.Type == type) return true;
 
             // 只能修改由自己创建的用户
-            var handlerId = tokenService.GetUserDataId();
+            var handlerId = tokenService.GetUserSqlId();
             if (user.CreateBy != handlerId) throw new KnownException("只能操作由自己创建的用户");
 
             user.Type = type;
@@ -330,7 +330,7 @@ namespace UZonMail.Core.Services.UserInfos
         }
         private IQueryable<User> FilterUser(string filter)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 只显示由自己创建的账户
             return db.Users.Where(x => !x.IsDeleted && !x.IsHidden && !x.IsSuperAdmin)
                 .Where(x => x.CreateBy == userId)

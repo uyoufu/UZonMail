@@ -53,7 +53,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 {
                     // 获取当前用户信息
                     var user = await sqlContext.Users.AsNoTracking().Where(x=>x.Id == outbox.UserId).FirstOrDefaultAsync();
-                    var proxy = await sqlContext.OrganizationProxies.Where(x => x.OrganizationId == user.OrganizationId)
+                    var proxy = await sqlContext.Proxies.Where(x => x.OrganizationId == user.OrganizationId)
                         .Where(x => x.Id == outbox.ProxyId)
                         .FirstOrDefaultAsync();
                     if (proxy != null)

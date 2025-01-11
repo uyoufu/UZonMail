@@ -179,7 +179,7 @@ namespace UZonMail.Core.Controllers.Users
         public async Task<ResponseResult<bool>> ChangeUserPassword([FromBody] ChangePasswordModel passwordModel)
         {
             // 获取当前用户
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 验证原密码是否正确
             bool result = await userService.ChangeUserPassword(userId, passwordModel);
             return result.ToSuccessResponse();
@@ -195,7 +195,7 @@ namespace UZonMail.Core.Controllers.Users
         {
             if (file == null) throw new KnownException("文件不能为空");
 
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(userId.ToString(), "avatar", DateTime.Now.ToTimestamp() + "_" + file.FileName);
 
             // 清除原来的头像文件

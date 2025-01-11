@@ -31,7 +31,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("by-id-or-name")]
         public async Task<ResponseResult<EmailTemplate?>> GetEmailTemplateByIdOrName(long templateId, string templateName)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var result = await db.EmailTemplates.FirstOrDefaultAsync(x => x.UserId == userId && (x.Id == templateId || x.Name == templateName));
             return result.ToSuccessResponse();
         }
@@ -44,7 +44,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("{emailTemplateId:long}")]
         public async Task<ResponseResult<EmailTemplate?>> GetEmailTemplateById(long emailTemplateId)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var result = await db.EmailTemplates.FirstOrDefaultAsync(x => x.Id == emailTemplateId && x.UserId == userId);
             return result.ToSmartResponse();
         }
@@ -58,7 +58,7 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<EmailTemplate>> Upsert([FromBody] EmailTemplate entity)
         {
             // 添加当前用户名
-            entity.UserId = tokenService.GetUserDataId();
+            entity.UserId = tokenService.GetUserSqlId();
 
             // 数据验证
             var emailTemplateValidator = new EmailTemplateValidator();
@@ -121,7 +121,7 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<bool>> Delete(long id)
         {
             // 通过条件删除
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var email = await db.EmailTemplates.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId) ?? throw new KnownException("模板不存在");
             db.Remove(email);
             await db.SaveChangesAsync();
@@ -135,7 +135,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("filtered-count")]
         public async Task<ResponseResult<int>> GetEmailTemplatesCount(string filter)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var dbSet = db.EmailTemplates.Where(x => x.UserId == userId);
             if (!string.IsNullOrEmpty(filter))
             {
@@ -154,7 +154,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpPost("filtered-data")]
         public async Task<ResponseResult<List<EmailTemplate>>> GetEmailTemplatesData(string filter, Pagination pagination)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var dbSet = db.EmailTemplates.Where(x => x.UserId == userId);
             if (!string.IsNullOrEmpty(filter))
             {

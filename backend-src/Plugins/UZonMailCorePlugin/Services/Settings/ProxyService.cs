@@ -23,23 +23,25 @@ namespace UZonMail.Core.Services.Settings
             if (string.IsNullOrEmpty(name)) return StringResult.Fail("代理名称不能为空");
 
             var organizationId = tokenService.GetOrganizationId();
-            bool isExist = await db.OrganizationProxies.AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
+            bool isExist = await db.Proxies.AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
             return new StringResult(isExist, "代理名称已存在");
         }
 
         /// <summary>
         /// 创建组织代理
         /// </summary>
-        /// <param name="organizationProxy"></param>
+        /// <param name="proxy"></param>
         /// <returns></returns>
-        public async Task<OrganizationProxy> CreateOrganizationProxy(OrganizationProxy organizationProxy)
+        public async Task<Proxy> CreateProxy(Proxy proxy)
         {
-            var organizationId = tokenService.GetOrganizationId();
-            organizationProxy.OrganizationId = organizationId;
-            organizationProxy.IsActive = true;
-            db.OrganizationProxies.Add(organizationProxy);
+            var tokenInfo = tokenService.GetTokenPayloads();
+            proxy.IsActive = true;
+            proxy.OrganizationId = proxy.IsShared ? tokenInfo.OrganizationId : 0;
+            proxy.UserId = tokenInfo.UserId;
+
+            db.Proxies.Add(proxy);
             await db.SaveChangesAsync();
-            return organizationProxy;
+            return proxy;
         }
 
         /// <summary>
@@ -47,13 +49,14 @@ namespace UZonMail.Core.Services.Settings
         /// </summary>
         /// <param name="userProxy"></param>
         /// <returns></returns>
-        public async Task<bool> UpdateOrganizationProxy(OrganizationProxy userProxy)
+        public async Task<bool> UpdateProxy(Proxy userProxy)
         {
-            var organizationId = tokenService.GetOrganizationId();
-            await db.OrganizationProxies.UpdateAsync(x => x.OrganizationId == organizationId && x.Id == userProxy.Id,
+            // 只能更新自己的代理
+            var userId = tokenService.GetUserSqlId();
+            await db.Proxies.UpdateAsync(x => x.UserId == userId && x.Id == userProxy.Id,
                 x => x.SetProperty(y => y.Name, userProxy.Name)
                     .SetProperty(y => y.Description, userProxy.Description)
-                    .SetProperty(y => y.Proxy, userProxy.Proxy)
+                    .SetProperty(y => y.Url, userProxy.Url)
                     .SetProperty(y => y.IsActive, userProxy.IsActive)
                     .SetProperty(y => y.MatchRegex, userProxy.MatchRegex)
                     .SetProperty(y => y.Priority, userProxy.Priority)

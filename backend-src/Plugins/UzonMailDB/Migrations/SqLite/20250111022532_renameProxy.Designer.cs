@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UZonMail.DB.SqLite;
 
 #nullable disable
 
-namespace UZonMailService.Migrations.SqLite
+namespace UZonMail.DB.Migrations.SqLite
 {
     [DbContext(typeof(SqLiteContext))]
-    partial class SqLiteContextModelSnapshot : ModelSnapshot
+    [Migration("20250111022532_renameProxy")]
+    partial class renameProxy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -167,283 +170,6 @@ namespace UZonMailService.Migrations.SqLite
                     b.HasKey("Id");
 
                     b.ToTable("IdAndName");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.CrawlerEmailResult", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("CrawlerTaskId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Nickname")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<int>("TikTokAuthorId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CrawlerEmailResults");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.CrawlerTaskInfo", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Deadline")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("ProxyId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CrawlerTaskInfos");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.TikTokAuthStats", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("DiggCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FollwerCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FollwingCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FreindCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Heart")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("HeartCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("TikTokAuthorId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("VideoCount")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TikTokAuthorId");
-
-                    b.ToTable("TikTokAuthStats");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.TikTokAuthorDiversification", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("TikTokAuthorId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TikTokAuthorId");
-
-                    b.ToTable("TikTokAuthorDiversifications");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.TiktokAuthor", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("AuthorId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AvatarLarger")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AvatarMedium")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AvatarThumb")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CommentSetting")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("DownloadSetting")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("DueSetting")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Ftc")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsAdVirtual")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsEmbedBanned")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Nickname")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<bool>("OpenFavorite")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("PrivateAccount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Relation")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SecUid")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Secret")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Signature")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("StitchSetting")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("TtSeller")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("UniqueId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Verified")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TiktokAuthors");
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.EmailAddress", b =>
@@ -1541,7 +1267,54 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("OrganizationSettings");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Settings.Proxy", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Settings.SystemSetting", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("BoolValue")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("IntValue")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Json")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("LongValue")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<string>("StringValue")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemSettings");
+                });
+
+            modelBuilder.Entity("UZonMail.DB.SQL.Settings.UserProxy", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1592,54 +1365,7 @@ namespace UZonMailService.Migrations.SqLite
 
                     b.HasKey("Id");
 
-                    b.ToTable("Proxies");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Settings.SystemSetting", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("BoolValue")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("IntValue")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Json")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("LongValue")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<string>("StringValue")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SystemSettings");
+                    b.ToTable("UserProxies");
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.Templates.EmailTemplate", b =>
@@ -1957,28 +1683,6 @@ namespace UZonMailService.Migrations.SqLite
                         .HasForeignKey("UserRolesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.TikTokAuthStats", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.EmailCrawler.TiktokAuthor", "TiktokAuthor")
-                        .WithMany()
-                        .HasForeignKey("TikTokAuthorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("TiktokAuthor");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.TikTokAuthorDiversification", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.EmailCrawler.TiktokAuthor", "TiktokAuthor")
-                        .WithMany()
-                        .HasForeignKey("TikTokAuthorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("TiktokAuthor");
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.SendingItem", b =>

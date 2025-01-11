@@ -58,7 +58,7 @@ namespace UZonMail.Core.Services.Settings
         /// 获取 token 中的 userId
         /// </summary>
         /// <returns></returns>
-        public long GetUserDataId()
+        public long GetUserSqlId()
         {
             return GetLongId("userId");
         }

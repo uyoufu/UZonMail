@@ -9,7 +9,7 @@ namespace UZonMail.Core.Services.SendCore
 {
     public class SendingThreadsManager : ISendingThreadsManager, ISingletonService<ISendingThreadsManager>
     {
-        private ILog _logger = LogManager.GetLogger(typeof(SendingThreadsManager));
+        private readonly ILog _logger = LogManager.GetLogger(typeof(SendingThreadsManager));
         private IServiceScopeFactory _ssf;
 
         /// <summary>

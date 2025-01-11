@@ -19,7 +19,7 @@ namespace UZonMail.Core.Controllers.Statistics
         [HttpGet("outbox")]
         public async Task<ResponseResult<List<EmailCount>>> GetOutboxEmailCountInfo()
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var emailCounts = await db.Outboxes.OfType<Outbox>()
                 .Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)
@@ -41,7 +41,7 @@ namespace UZonMail.Core.Controllers.Statistics
         [HttpGet("inbox")]
         public async Task<ResponseResult<List<EmailCount>>> GetInboxesEmailCountInfo()
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var emailCounts = await db.Inboxes
                 .Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)
@@ -62,7 +62,7 @@ namespace UZonMail.Core.Controllers.Statistics
         [HttpGet("monthly-sending")]
         public async Task<ResponseResult<List<MonthlySendingInfo>>> GetMonthlySendingCountInfo()
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var monthlySendingInfos = await db.SendingItems.OfType<SendingItem>()
                 .Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)

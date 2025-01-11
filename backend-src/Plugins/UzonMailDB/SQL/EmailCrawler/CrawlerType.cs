@@ -2,8 +2,6 @@
 {
     public enum CrawlerType
     {
-        None,
-
         TikTokEmail,
     }
 }

@@ -2,8 +2,6 @@
 {
     public enum CrawlerStatus
     {
-        None,
-
         /// <summary>
         /// 已创建
         /// </summary>

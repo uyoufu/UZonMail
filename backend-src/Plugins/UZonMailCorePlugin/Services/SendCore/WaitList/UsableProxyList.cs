@@ -36,7 +36,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
             var allProxies = await DBCacher.GetCache<UserProxiesCache>(db, userId);
             if (allProxies.Count == 0) return null;
 
-            OrganizationProxy? proxy = null;
+            Proxy? proxy = null;
             if (_sendingItemProxies.TryGetValue(sendingItemId, out var proxyId))
             {
                 // 从所有的代理中查找
@@ -54,7 +54,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
                 return null;
             }
 
-            return new ProxyInfo(proxy.Proxy);
+            return new ProxyInfo(proxy.Url);
         }
     }
 }

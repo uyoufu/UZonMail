@@ -6,8 +6,9 @@ namespace UZonMail.DB.SQL.Settings
 {
     /// <summary>
     /// 组织中的代理
+    /// 若有组织 id, 则组织共用，若没有组织 id, 则为个人代理
     /// </summary>
-    public class OrganizationProxy : OrgId
+    public class Proxy : UserAndOrgId
     {
         /// <summary>
         /// 代理名称
@@ -37,9 +38,14 @@ namespace UZonMail.DB.SQL.Settings
         public bool IsActive { get; set; }
 
         /// <summary>
-        /// 代理设置
+        /// 是否共享
         /// </summary>
-        public string Proxy { get; set; }
+        public bool IsShared { get; set; }
+
+        /// <summary>
+        /// 代理设置地址
+        /// </summary>
+        public string Url { get; set; }
 
         /// <summary>
         /// 是否匹配
@@ -69,8 +75,8 @@ namespace UZonMail.DB.SQL.Settings
         /// <returns></returns>
         public ProxyInfo? ToProxyInfo()
         {
-            if (string.IsNullOrEmpty(Proxy)) return null;
-            return new ProxyInfo(Proxy);
+            if (string.IsNullOrEmpty(Url)) return null;
+            return new ProxyInfo(Url);
         }
     }
 }

@@ -1,10 +1,16 @@
 ﻿using log4net;
 using Microsoft.EntityFrameworkCore;
+using UZonMail.DB.SQL.EmailCrawler;
 using UZonMail.DB.SQL.Emails;
 using UZonMail.DB.SQL.EmailSending;
 using UZonMail.DB.SQL.EntityConfigs;
+using UZonMail.DB.SQL.Files;
+using UZonMail.DB.SQL.Organization;
+using UZonMail.DB.SQL.Permission;
+using UZonMail.DB.SQL.ReadingTracker;
 using UZonMail.DB.SQL.Settings;
 using UZonMail.DB.SQL.Templates;
+using UZonMail.DB.SQL.Unsubscribes;
 
 namespace UZonMail.DB.SQL
 {
@@ -35,17 +41,17 @@ namespace UZonMail.DB.SQL
         #endregion
 
         #region 数据表定义
-        public DbSet<Organization.Department> Departments { get; set; }
-        public DbSet<Organization.User> Users { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<User> Users { get; set; }
 
-        public DbSet<Permission.PermissionCode> PermissionCodes { get; set; }
-        public DbSet<Permission.Role> Roles { get; set; }
-        public DbSet<Permission.UserRoles> UserRole { get; set; }
+        public DbSet<PermissionCode> PermissionCodes { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRoles> UserRole { get; set; }
 
-        public DbSet<Files.FileBucket> FileBuckets { get; set; }
-        public DbSet<Files.FileObject> FileObjects { get; set; }
-        public DbSet<Files.FileUsage> FileUsages { get; set; }
-        public DbSet<Files.FileReader> FileReaders { get; set; }
+        public DbSet<FileBucket> FileBuckets { get; set; }
+        public DbSet<FileObject> FileObjects { get; set; }
+        public DbSet<FileUsage> FileUsages { get; set; }
+        public DbSet<FileReader> FileReaders { get; set; }
 
         public DbSet<EmailGroup> EmailGroups { get; set; }
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
@@ -57,18 +63,25 @@ namespace UZonMail.DB.SQL
         public DbSet<SendingItemInbox> SendingItemInboxes { get; set; }
 
         public DbSet<SystemSetting> SystemSettings { get; set; }
-        public DbSet<OrganizationProxy> OrganizationProxies { get; set; }
+        public DbSet<Proxy> Proxies { get; set; }
         public DbSet<OrganizationSetting> OrganizationSettings { get; set; }
 
-        public DbSet<ReadingTracker.EmailAnchor> EmailAnchors { get; set; }
-        public DbSet<ReadingTracker.EmailVisitHistory> EmailVisitHistories { get; set; }
-        public DbSet<ReadingTracker.IPInfo> IPInfos { get; set; }
+        public DbSet<EmailAnchor> EmailAnchors { get; set; }
+        public DbSet<EmailVisitHistory> EmailVisitHistories { get; set; }
+        public DbSet<IPInfo> IPInfos { get; set; }
 
         // 退定相关
-        public DbSet<Unsubscribes.UnsubscribeSetting> UnsubscribeSettings { get; set; }
-        public DbSet<Unsubscribes.UnsubscribePage> UnsubscribePages { get; set; }
-        public DbSet<Unsubscribes.UnsubscribeEmail> UnsubscribeEmails { get; set; }
-        public DbSet<Unsubscribes.UnsubscribeButton> UnsubscribeButtons { get; set; }
+        public DbSet<UnsubscribeSetting> UnsubscribeSettings { get; set; }
+        public DbSet<UnsubscribePage> UnsubscribePages { get; set; }
+        public DbSet<UnsubscribeEmail> UnsubscribeEmails { get; set; }
+        public DbSet<UnsubscribeButton> UnsubscribeButtons { get; set; }
+
+        // 爬虫相关
+        public DbSet<CrawlerTaskInfo> CrawlerTaskInfos { get; set; } // 爬虫任务
+        public DbSet<CrawlerEmailResult> CrawlerEmailResults { get; set; } // 爬取的邮箱
+        public DbSet<TiktokAuthor> TiktokAuthors { get; set; } // TikTok 作者信息
+        public DbSet<TikTokAuthStats> TikTokAuthStats { get; set; } // TikTok 作者统计信息
+        public DbSet<TikTokAuthorDiversification> TikTokAuthorDiversifications { get; set; } // TikTok 作者视频分类信息
         #endregion
 
         #region 测试
