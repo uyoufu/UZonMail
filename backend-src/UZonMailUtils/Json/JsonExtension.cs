@@ -59,7 +59,7 @@ namespace UZonMail.Utils.Json
         /// <param name="path"></param>
         /// <param name="default_"></param>
         /// <returns></returns>
-        public static T SelectTokenOrDefault<T>(this JToken jt, string path, T default_)
+        public static T? SelectTokenOrDefault<T>(this JToken jt, string path, T? default_=default)
         {
             if (string.IsNullOrEmpty(path)) return default_;
             if (jt == null) return default_;

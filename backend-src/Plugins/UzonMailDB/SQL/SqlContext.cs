@@ -78,10 +78,10 @@ namespace UZonMail.DB.SQL
 
         // 爬虫相关
         public DbSet<CrawlerTaskInfo> CrawlerTaskInfos { get; set; } // 爬虫任务
-        public DbSet<CrawlerEmailResult> CrawlerEmailResults { get; set; } // 爬取的邮箱
         public DbSet<TiktokAuthor> TiktokAuthors { get; set; } // TikTok 作者信息
-        public DbSet<TikTokAuthStats> TikTokAuthStats { get; set; } // TikTok 作者统计信息
         public DbSet<TikTokAuthorDiversification> TikTokAuthorDiversifications { get; set; } // TikTok 作者视频分类信息
+        public DbSet<CrawlerTaskResult> CrawlerTaskResults { get; set; }
+        public DbSet<TikTokDevice> TikTokDevices { get; set; }
         #endregion
 
         #region 测试

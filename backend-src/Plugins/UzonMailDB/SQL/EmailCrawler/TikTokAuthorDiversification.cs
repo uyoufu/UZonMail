@@ -12,6 +12,10 @@ namespace UZonMail.DB.SQL.EmailCrawler
         /// 用户 id
         /// </summary>
         public long TikTokAuthorId { get; set; }
-        public TiktokAuthor TiktokAuthor { get; set; }
+
+        /// <summary>
+        /// 分类 id
+        /// </summary>
+        public long DiversificationId { get; set; }
     }
 }

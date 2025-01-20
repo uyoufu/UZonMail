@@ -53,5 +53,15 @@ namespace UZonMail.DB.SQL.EmailCrawler
         /// 结束日期
         /// </summary>
         public DateTime EndDate { get; set; }
+
+        /// <summary>
+        /// 设备 id
+        /// </summary>
+        public long TikTokDeviceId { get; set; }
+
+        /// <summary>
+        /// 数量
+        /// </summary>
+        public int Count { get; set; }
     }
 }

@@ -2,11 +2,8 @@
 
 namespace UZonMail.DB.SQL.EmailCrawler
 {
-    public class TikTokAuthStats : SqlId
+    public class TikTokAuthStats
     {
-        public long TikTokAuthorId { get; set; }
-        public TiktokAuthor TiktokAuthor { get; set; }
-
         public int DiggCount { get; set; }
         public int FollwerCount { get; set; }
         public int FollwingCount { get; set; }
@@ -14,5 +11,16 @@ namespace UZonMail.DB.SQL.EmailCrawler
         public int Heart { get; set; }
         public int HeartCount { get; set; }
         public int VideoCount { get; set; }
+
+        public void SetTo(TiktokAuthor author)
+        {
+            author.DiggCount = DiggCount;
+            author.FollwerCount = FollwerCount;
+            author.FollwingCount = FollwingCount;
+            author.FreindCount = FreindCount;
+            author.Heart = Heart;
+            author.HeartCount = HeartCount;
+            author.VideoCount = VideoCount;
+        }
     }
 }
