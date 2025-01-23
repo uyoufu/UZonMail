@@ -82,6 +82,20 @@ namespace UZonMail.Core.Controllers.Users
         }
 
         /// <summary>
+        /// 更新登陆用户信息
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPut("sign-in")]
+        public async Task<ResponseResult<UserSignInResult>> UpdateSignIn()
+        {
+            var userId = tokenService.GetUserSqlId();
+            var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId) ?? throw new KnownException("用户不存在");
+            var loginResult = await userService.UserSignIn(user);
+            return loginResult.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 获取用户信息
         /// </summary>
         /// <param name="userId"></param>
