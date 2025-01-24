@@ -79,7 +79,6 @@ async function onUserLogin () {
 
   const userInfoStore = useUserInfoStore()
   userInfoStore.setInstalledPlugins(installedPlugins)
-
   userInfoStore.setUserLoginInfo(userInfo, token, access)
   userInfoStore.setSecretKey(md5(password.value))
   routeStore.resetDynamicRoutes()

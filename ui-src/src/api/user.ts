@@ -26,6 +26,15 @@ export function userLogin (userId: string, password: string) {
   })
 }
 
+/**
+ * 用户重新登陆
+ * 获取新的权限等数据
+ * @returns
+ */
+export function userRelogin () {
+  return httpClient.put<IUserLoginInfo>('/user/sign-in')
+}
+
 // 检查用户ID是否存在
 export function checkUserId (userId: string) {
   return httpClient.get<boolean>('/user/check-user-id', {

@@ -1,12 +1,18 @@
 import { CrawlerStatus, CrawlerType } from 'src/api/pro/crawlerTask'
+import { getAllUserTikTokDevices, ITikTokDevice } from 'src/api/pro/tikTokDevice'
 import { getUsableProxies, IProxy } from 'src/api/proxy'
 
 export function useColumnsFormater () {
   const usableProxies: Ref<IProxy[]> = ref([])
+  const usableDevices: Ref<ITikTokDevice[]> = ref([])
+
   // 获取用户的代理
   onMounted(async () => {
     const { data: proxies } = await getUsableProxies()
     usableProxies.value = proxies
+
+    const { data: devices } = await getAllUserTikTokDevices()
+    usableDevices.value = devices
   })
 
   /**
@@ -26,9 +32,16 @@ export function useColumnsFormater () {
     return CrawlerStatus[value]
   }
 
+  function formatDeviceId (deviceId: number) {
+    return usableDevices.value.find(x => x.id === deviceId)?.name || ''
+  }
+
   return {
     formatProxyId,
     formatCrawlerType,
-    formatCrawlerStatus
+    formatCrawlerStatus,
+    formatDeviceId,
+    usableProxies,
+    usableDevices
   }
 }

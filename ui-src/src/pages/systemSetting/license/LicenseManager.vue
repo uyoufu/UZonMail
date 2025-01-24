@@ -32,10 +32,12 @@
 </template>
 
 <script lang="ts" setup>
+import logger from 'loglevel'
+
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { confirmOperation, notifyError, notifySuccess } from 'src/utils/dialog'
 import dayjs from 'dayjs'
-import { ILicenseInfo, LicenseType, updateLicenseInfo, getProAccess, getLicenseInfo } from 'src/api/pro/license'
+import { ILicenseInfo, LicenseType, updateLicenseInfo, getLicenseInfo } from 'src/api/pro/license'
 
 const license = ref<string>('')
 
@@ -64,6 +66,7 @@ function getActiveIconTooltip () {
 // 激活激活码
 import { useUserInfoStore } from 'src/stores/user'
 import { useRoutesStore } from 'src/stores/routes'
+import { userRelogin } from 'src/api/user'
 
 const userInfoStore = useUserInfoStore()
 const routeStore = useRoutesStore()
@@ -83,12 +86,17 @@ async function onActiveLicense () {
   activeInfo.value = licenseInfo
 
   // 重新拉取权限码
-  const { data: access } = await getProAccess(userInfoStore.userId)
-  userInfoStore.appendAccess(access)
-  // 重置动态路由
+  const { data: { userInfo, token, access, installedPlugins } } = await userRelogin()
+  logger.debug('[Login] 用户重新登陆:', userInfo, token, access)
+
+  const userInfoStore = useUserInfoStore()
+  userInfoStore.setInstalledPlugins(installedPlugins)
+  userInfoStore.setUserLoginInfo(userInfo, token, access)
   routeStore.resetDynamicRoutes()
+
   // 更新路由
-  notifySuccess('您已升级成功, 刷新后生效')
+  notifySuccess('升级成功!')
+  window.location.reload()
 }
 
 // #region  激活信息
