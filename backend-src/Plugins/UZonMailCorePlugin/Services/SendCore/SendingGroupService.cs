@@ -37,7 +37,7 @@ namespace UZonMail.Core.Services.EmailSending
         /// <returns></returns>
         public async Task<SendingGroup> CreateSendingGroup(SendingGroup sendingGroupData)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
 
             // 格式化 Excel 数据
             sendingGroupData.Data = await FormatExcelData(sendingGroupData.Data, userId);

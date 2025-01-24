@@ -23,7 +23,7 @@ namespace UZonMail.Core.Controllers.Settings
         [HttpGet]
         public async Task<ResponseResult<OrganizationSetting>> GetUserSettings()
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var organizationId = tokenService.GetOrganizationId();
 
             var orgSetting = await db.OrganizationSettings.Where(x => x.OrganizationId == organizationId).FirstOrDefaultAsync();
@@ -48,7 +48,7 @@ namespace UZonMail.Core.Controllers.Settings
         [HttpPut]
         public async Task<ResponseResult<bool>> UpsertOrganizationSetting([FromBody] OrganizationSetting organizationSettings)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 判断当前用户是否是组织管理员
             var isOrganization = await permissionService.HasOrganizationPermission(userId);
             if (!isOrganization)

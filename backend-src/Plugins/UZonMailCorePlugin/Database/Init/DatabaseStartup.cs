@@ -7,6 +7,7 @@ using UZonMail.DB.SQL.Files;
 using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Core.Config;
 using UZonMail.DB.SQL.Settings;
+using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Database.Init
 {
@@ -15,7 +16,7 @@ namespace UZonMail.Core.Database.Init
     /// 每次启动时，都需要执行
     /// </summary>
     /// <param name="db"></param>
-    public class DatabaseStartup(SqlContext db)
+    public class DatabaseStartup(SqlContext db) : IScopedService
     {
         /// <summary>
         /// 开始执行初始化

@@ -36,7 +36,7 @@ namespace UZonMail.Core.Database.SQL.EmailSending
             // allInboxes 有的是从数据中解析得到的，需要获取其 id
             var inboxesWithoutId = allInboxes.Where(x => x.Id == 0).ToList();
             // 获取当前用户下的发件箱
-            var currentUserId = tokenService.GetUserDataId();
+            var currentUserId = tokenService.GetUserSqlId();
             var inboxesEmails = inboxesWithoutId.Select(x => x.Email).ToList();
             var inboxes = await db.Inboxes.AsNoTracking().Where(x => x.UserId== currentUserId && inboxesEmails.Contains(x.Email)).ToListAsync();
             inboxesWithoutId.ForEach(x =>

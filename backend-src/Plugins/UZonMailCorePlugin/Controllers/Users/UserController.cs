@@ -82,6 +82,20 @@ namespace UZonMail.Core.Controllers.Users
         }
 
         /// <summary>
+        /// 更新登陆用户信息
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPut("sign-in")]
+        public async Task<ResponseResult<UserSignInResult>> UpdateSignIn()
+        {
+            var userId = tokenService.GetUserSqlId();
+            var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId) ?? throw new KnownException("用户不存在");
+            var loginResult = await userService.UserSignIn(user);
+            return loginResult.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 获取用户信息
         /// </summary>
         /// <param name="userId"></param>
@@ -179,7 +193,7 @@ namespace UZonMail.Core.Controllers.Users
         public async Task<ResponseResult<bool>> ChangeUserPassword([FromBody] ChangePasswordModel passwordModel)
         {
             // 获取当前用户
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 验证原密码是否正确
             bool result = await userService.ChangeUserPassword(userId, passwordModel);
             return result.ToSuccessResponse();
@@ -195,7 +209,7 @@ namespace UZonMail.Core.Controllers.Users
         {
             if (file == null) throw new KnownException("文件不能为空");
 
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(userId.ToString(), "avatar", DateTime.Now.ToTimestamp() + "_" + file.FileName);
 
             // 清除原来的头像文件

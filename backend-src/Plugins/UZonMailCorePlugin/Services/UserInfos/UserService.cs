@@ -166,7 +166,7 @@ namespace UZonMail.Core.Services.UserInfos
                      UserId = userId,
                      Password = password.Sha256(1),
                      Type = UserType.Independent,
-                     CreateBy = tokenService.GetUserDataId(),
+                     CreateBy = tokenService.GetUserSqlId(),
                  };
                  ctx.Add(user);
                  await ctx.SaveChangesAsync();
@@ -191,7 +191,7 @@ namespace UZonMail.Core.Services.UserInfos
             if (user.Type == type) return true;
 
             // 只能修改由自己创建的用户
-            var handlerId = tokenService.GetUserDataId();
+            var handlerId = tokenService.GetUserSqlId();
             if (user.CreateBy != handlerId) throw new KnownException("只能操作由自己创建的用户");
 
             user.Type = type;
@@ -266,6 +266,11 @@ namespace UZonMail.Core.Services.UserInfos
             User user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId && x.Password == password)
                 ?? throw new KnownException("用户名或密码错误");
 
+            return await UserSignIn(user);
+        }
+
+        public async Task<UserSignInResult> UserSignIn(User user)
+        {
             // 禁用，则返回错误
             if (user.Status == UserStatus.ForbiddenLogin)
                 throw new KnownException("该账号已注销");
@@ -286,7 +291,6 @@ namespace UZonMail.Core.Services.UserInfos
 
             // 查找用户的权限
             List<string> access = await permission.GetUserPermissionCodes(user.Id);
-            // 获取插件中的权限码
 
             // 获取已经安装的插件名称
             var installedPlugins = pluginService.GetInstalledPluginNames();
@@ -299,8 +303,6 @@ namespace UZonMail.Core.Services.UserInfos
                 InstalledPlugins = installedPlugins
             };
         }
-
-
 
         /// <summary>
         /// 生成 token
@@ -330,7 +332,7 @@ namespace UZonMail.Core.Services.UserInfos
         }
         private IQueryable<User> FilterUser(string filter)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 只显示由自己创建的账户
             return db.Users.Where(x => !x.IsDeleted && !x.IsHidden && !x.IsSuperAdmin)
                 .Where(x => x.CreateBy == userId)

@@ -30,7 +30,7 @@ namespace UZonMail.Core.Controllers.Permission
         [HttpGet("filtered-count")]
         public async Task<ResponseResult<int>> GetRolesCount(string filter)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var dbSet = db.Roles.AsNoTracking();
             if (!string.IsNullOrEmpty(filter))
             {
@@ -48,7 +48,7 @@ namespace UZonMail.Core.Controllers.Permission
         [HttpPost("filtered-data")]
         public async Task<ResponseResult<List<Role>>> GetRolesData(string filter, [FromBody] Pagination pagination)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var dbSet = db.Roles.AsNoTracking();
             if (!string.IsNullOrEmpty(filter))
             {

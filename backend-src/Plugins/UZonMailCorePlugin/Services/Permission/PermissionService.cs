@@ -16,12 +16,14 @@ namespace UZonMail.Core.Services.Permission
     /// </summary>
     public class PermissionService(SqlContext db, CacheService cache, IHubContext<UzonMailHub, IUzonMailClient> hub, IServiceProvider serviceProvider) : IScopedService
     {
+        private readonly static string _permissionPrefix = "permissions";
+
         /// <summary>
         /// 生成权限缓存的 key
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public string GetPermissionCacheKey(long userId) => $"permissions:{userId}";
+        public string GetPermissionCacheKey(long userId) => $"{_permissionPrefix}:{userId}";
 
         /// <summary>
         /// 生成用户的权限码
@@ -134,6 +136,15 @@ namespace UZonMail.Core.Services.Permission
             {
                 await hub.GetUserClient(item.Key).PermissionUpdated(item.Value);
             }
+        }
+
+        /// <summary>
+        /// 重置所有用户的权限缓存
+        /// </summary>
+        /// <returns></returns>
+        public async Task ResetAllUserPermissionsCache()
+        {
+            await cache.RemoveByPrefix(_permissionPrefix);
         }
     }
 }

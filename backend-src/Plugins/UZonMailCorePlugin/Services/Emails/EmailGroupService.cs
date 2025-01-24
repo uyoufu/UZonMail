@@ -76,7 +76,7 @@ namespace UZonMail.Core.Services.Emails
         {
             ; if (string.IsNullOrEmpty(name)) throw new KnownException("组名不允许为空");
             // 获取当前用户 id
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var emailGroup = new EmailGroup()
             {
                 Id = 0,

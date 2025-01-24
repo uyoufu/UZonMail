@@ -1,14 +1,8 @@
 ﻿using Uamazing.Utils.Plugin;
 using UZonMail.Core.Config;
-using UZonMail.Core.Services.HostedServices;
-using UZonMail.Utils.Web.Service;
 using UZonMail.Utils.Web;
 using UZonMail.Core.SignalRHubs;
 using UZonMail.Utils.Extensions;
-using Uamazing.Utils.Web.Token;
-using UZonMail.Core.Utils.Token;
-using UZonMail.Core.Services.Cache;
-using UZonMail.Core.Database.Updater;
 
 namespace UZonMail.Core
 {
@@ -20,12 +14,8 @@ namespace UZonMail.Core
 
             // 绑定配置
             services.Configure<AppConfig>(webApplicationBuilder.Configuration);
-            // 添加数据缓存
-            services.AddCache();
             // 批量注册服务
             services.AddServices();
-            // 添加后台服务
-            services.AddHostedService<SendingHostedService>();
         }
 
         public void UseApp(WebApplication webApplication)

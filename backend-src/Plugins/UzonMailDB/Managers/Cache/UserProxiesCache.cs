@@ -13,10 +13,10 @@ namespace UZonMail.DB.Managers.Cache
     /// 每隔一段时间要自动释放内存
     /// key 值为 userId
     /// </summary>
-    public class UserProxiesCache : BaseCache, IEnumerable<OrganizationProxy>
+    public class UserProxiesCache : BaseCache, IEnumerable<Proxy>
     {
         public long UserId => LongValue;
-        private List<OrganizationProxy> _proxies { get; set; } = [];
+        private List<Proxy> _proxies { get; set; } = [];
 
         public int Count => _proxies.Count;
 
@@ -27,7 +27,7 @@ namespace UZonMail.DB.Managers.Cache
 
             var userInfo = await DBCacher.GetCache<UserInfoCache>(db, UserId);
             // 按用户缓存代理
-            _proxies = await db.OrganizationProxies
+            _proxies = await db.Proxies
                 .AsNoTracking()
                 .Where(x => x.OrganizationId == userInfo.OrganizationId)
                 .ToListAsync();
@@ -40,7 +40,7 @@ namespace UZonMail.DB.Managers.Cache
         }
 
         #region 支持迭代
-        public IEnumerator<OrganizationProxy> GetEnumerator()
+        public IEnumerator<Proxy> GetEnumerator()
         {
             return _proxies.GetEnumerator();
         }

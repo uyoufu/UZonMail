@@ -19,7 +19,6 @@ namespace UZonMail.Core.Services.HostedServices
         {
             using var scope = ssf.CreateScope();
             var serviceProvider = scope.ServiceProvider;
-
             await InitDatabase(serviceProvider);
             await InitScheduler(serviceProvider);
         }

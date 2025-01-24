@@ -48,5 +48,6 @@ namespace UZonMail.Core.Services.Settings
         public long UserId => long.Parse(this["userId"]);
         public long OrganizationId => long.Parse(this["organizationId"]);
         public long DepartmentId => long.Parse(this["departmentId"]);
+        public string UserName => this["userName"];
     }
 }

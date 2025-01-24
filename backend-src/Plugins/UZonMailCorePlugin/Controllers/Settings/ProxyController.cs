@@ -8,6 +8,7 @@ using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Settings;
 using UZonMail.DB.SQL.Emails;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.Core.Utils.Database;
 
 namespace UZonMail.Core.Controllers.Settings
 {
@@ -39,21 +40,21 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="userProxy"></param>
         /// <returns></returns>
         [HttpPost()]
-        public async Task<ResponseResult<OrganizationProxy>> CreateProxy(OrganizationProxy userProxy)
+        public async Task<ResponseResult<Proxy>> CreateProxy(Proxy userProxy)
         {
             var isExist = await proxyService.ValidateProxyName(userProxy.Name);
             if (isExist)
             {
-                return ResponseResult<OrganizationProxy>.Fail(isExist.Message);
+                return ResponseResult<Proxy>.Fail(isExist.Message);
             }
 
             // 验证代理设置是否合法
-            if (!ProxyInfo.CanParse(userProxy.Proxy))
+            if (!ProxyInfo.CanParse(userProxy.Url))
             {
-                return ResponseResult<OrganizationProxy>.Fail("代理格式不正确");
+                return ResponseResult<Proxy>.Fail("代理格式不正确");
             }
 
-            var proxy = await proxyService.CreateOrganizationProxy(userProxy);
+            var proxy = await proxyService.CreateProxy(userProxy);
             return proxy.ToSuccessResponse();
         }
 
@@ -63,10 +64,29 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="userProxy"></param>
         /// <returns></returns>
         [HttpPut()]
-        public async Task<ResponseResult<bool>> UpdateProxy(OrganizationProxy userProxy)
+        public async Task<ResponseResult<bool>> UpdateProxy(Proxy userProxy)
         {
-            var result = await proxyService.UpdateOrganizationProxy(userProxy);
+            var result = await proxyService.UpdateProxy(userProxy);
             return result.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 修改代理的共享状态
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="isShared"></param>
+        /// <returns></returns>
+        [HttpPut("{id:long}/shared")]
+        public async Task<ResponseResult<bool>> UpdateProxyShareStatus(long id, bool isShared)
+        {
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var organizationId = isShared ? tokenPayloads.OrganizationId : 0;
+
+            await db.Proxies.UpdateAsync(x => x.Id == id && x.UserId == tokenPayloads.UserId,
+                x => x.SetProperty(y => y.OrganizationId, organizationId)
+                    .SetProperty(y => y.IsShared, isShared)
+                );
+            return true.ToSuccessResponse();
         }
 
         /// <summary>
@@ -77,8 +97,9 @@ namespace UZonMail.Core.Controllers.Settings
         [HttpDelete("{id:long}")]
         public async Task<ResponseResult<bool>> DeleteById(long id)
         {
-            var organizationId = tokenService.GetOrganizationId();
-            db.OrganizationProxies.Remove(new OrganizationProxy { Id = id, OrganizationId = organizationId });
+            // 只能删除自己的代理
+            var userId = tokenService.GetUserSqlId();
+            db.Proxies.Remove(new Proxy { Id = id, UserId = userId });
             await db.SaveChangesAsync();
             return true.ToSuccessResponse();
         }
@@ -90,11 +111,11 @@ namespace UZonMail.Core.Controllers.Settings
         [HttpGet("filtered-count")]
         public async Task<ResponseResult<int>> GetFilteredCount(string filter)
         {
-            var organizationId = tokenService.GetOrganizationId();
-            var dbSet = db.OrganizationProxies.Where(x => x.OrganizationId == organizationId);
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var dbSet = db.Proxies.Where(x => x.OrganizationId == tokenPayloads.OrganizationId || x.UserId == tokenPayloads.UserId);
             if (!string.IsNullOrEmpty(filter))
             {
-                dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Proxy.Contains(filter));
+                dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Url.Contains(filter));
             }
 
             var count = await dbSet.CountAsync();
@@ -108,13 +129,13 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<OrganizationProxy>>> GetFilteredData(string filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<Proxy>>> GetFilteredData(string filter, [FromBody] Pagination pagination)
         {
-            var organizationId = tokenService.GetOrganizationId();
-            var dbSet = db.OrganizationProxies.Where(x => x.OrganizationId == organizationId);
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var dbSet = db.Proxies.Where(x => x.IsActive).Where(x => x.OrganizationId == tokenPayloads.OrganizationId || x.UserId == tokenPayloads.UserId);
             if (!string.IsNullOrEmpty(filter))
             {
-                dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Proxy.Contains(filter));
+                dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Url.Contains(filter));
             }
             var results = await dbSet.Page(pagination).ToListAsync();
             return results.ToSuccessResponse();
@@ -125,10 +146,13 @@ namespace UZonMail.Core.Controllers.Settings
         /// </summary>
         /// <returns></returns>
         [HttpGet("usable")]
-        public async Task<ResponseResult<List<OrganizationProxy>>> GetAllUsableProxies()
+        public async Task<ResponseResult<List<Proxy>>> GetAllUsableProxies()
         {
             var organizationId = tokenService.GetOrganizationId();
-            var dbSet = db.OrganizationProxies.Where(x => x.OrganizationId == organizationId).Where(x => x.IsActive);
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var dbSet = db.Proxies.Where(x => x.IsActive)
+                .Where(x => x.OrganizationId == tokenPayloads.OrganizationId || x.UserId == tokenPayloads.UserId);
+
             var results = await dbSet.ToListAsync();
             return results.ToSuccessResponse();
         }

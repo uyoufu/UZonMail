@@ -21,7 +21,7 @@ namespace UZonMail.Utils.Json
 
         public string ToSnakeCaseJson()
         {
-            return JsonConvert.SerializeObject(this, _cameCaseSetting);
+            return JsonConvert.SerializeObject(this, _snakeCaseSetting);
         }
 
         public string ToPascalCaseJson()

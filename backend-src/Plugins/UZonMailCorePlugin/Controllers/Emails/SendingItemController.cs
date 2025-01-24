@@ -20,7 +20,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("filtered-count")]
         public async Task<ResponseResult<int>> GetEmailTemplatesCount(long sendingGroupId, string filter, SendingItemStatus itemStatus)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 只能获取自己的发件历史
             var sendingGroup = await db.SendingGroups.FirstOrDefaultAsync(x => x.Id == sendingGroupId && x.UserId == userId);
             if (sendingGroup == null)
@@ -62,7 +62,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpPost("filtered-data")]
         public async Task<ResponseResult<List<SendingItem>>> GetEmailTemplatesData(long sendingGroupId, string filter, Pagination pagination, SendingItemStatus itemStatus)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 只能获取自己的发件历史
             var sendingGroup = await db.SendingGroups.FirstOrDefaultAsync(x => x.Id == sendingGroupId && x.UserId == userId);
             if (sendingGroup == null)
@@ -107,7 +107,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("{sendingItemId:long}/body")]
         public async Task<ResponseResult<string?>> GetSendingItemBody(long sendingItemId)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var sendingItem = await db.SendingItems.FirstOrDefaultAsync(x => x.Id == sendingItemId && x.UserId == userId);
             if (sendingItem == null) return "".ToFailResponse("邮件已被删除");
             return sendingItem.Content.ToSuccessResponse();

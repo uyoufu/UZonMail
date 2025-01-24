@@ -27,7 +27,7 @@ namespace UZonMail.Core.Controllers.Files
             FileObject? fileObject = await fileStoreService.GetExistFileObject(sha256);
             if (fileObject == null) return (-1L).ToSuccessResponse();
 
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
 
             // 获取 fileUsageId
             FileUsage fileUsage = await fileStoreService.GetOrCreateFileUsage(userId, fileName, sha256);
@@ -42,7 +42,7 @@ namespace UZonMail.Core.Controllers.Files
         [HttpPost("upload-file-object")]
         public async Task<ResponseResult<long>> UploadFileObject(ObjectFileUploaderBody fileParams)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             fileParams.File ??= Request.Form.Files.FirstOrDefault();
             FileUsage fileUsage = await fileStoreService.UploadFileObject(userId, fileParams);
             return fileUsage.Id.ToSuccessResponse();
@@ -93,7 +93,7 @@ namespace UZonMail.Core.Controllers.Files
         [HttpPost("upload-static-file")]
         public ResponseResult<string> UploadToStaticFile(StaticFileUploaderBody fileParams)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(userId.ToString(), fileParams.SubPath, fileParams.File.FileName);
 
             using var stream = new FileStream(fullPath, FileMode.Create);
@@ -109,7 +109,7 @@ namespace UZonMail.Core.Controllers.Files
         [HttpGet("file-usages/filtered-count")]
         public async Task<ResponseResult<int>> GetFileUsagesCount(string? filter)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 收件箱
             var dbSet = db.FileUsages.Where(x => x.OwnerUserId == userId);
             if (!string.IsNullOrEmpty(filter))
@@ -129,7 +129,7 @@ namespace UZonMail.Core.Controllers.Files
         [HttpPost("file-usages/filtered-data")]
         public async Task<ResponseResult<List<FileUsage>>> GetFileUsagesData(string? filter, [FromBody] Pagination pagination)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             // 收件箱
             var dbSet = db.FileUsages.Where(x => x.OwnerUserId == userId);
             if (!string.IsNullOrEmpty(filter))

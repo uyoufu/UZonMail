@@ -37,7 +37,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpPost()]
         public async Task<ResponseResult<EmailGroup>> Create([FromBody] EmailGroup entity)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             entity.UserId = userId;
 
             EmailGroup emailGroup = await groupService.Create(entity);
@@ -52,7 +52,7 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("all")]
         public async Task<ResponseResult<List<EmailGroup>>> GetEmailGroups([FromQuery] EmailGroupType type)
         {
-            var userId = tokenService.GetUserDataId();
+            var userId = tokenService.GetUserSqlId();
             var groups = await groupService.GetEmailGroups(userId, type);
             return groups.ToSuccessResponse();
         }
