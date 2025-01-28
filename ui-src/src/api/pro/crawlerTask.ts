@@ -89,7 +89,7 @@ export function createCrawlerTaskInfo (data: ICrawlerTaskInfo) {
  * @returns
  */
 export function updateCrawlerTaskInfo (crawlerTaskId: number, data: ICrawlerTaskInfo) {
-  return httpClientPro.put<ICrawlerTaskInfo>(`/crawler-task-info/${crawlerTaskId}`, {
+  return httpClientPro.put<boolean>(`/crawler-task-info/${crawlerTaskId}`, {
     data
   })
 }
@@ -100,7 +100,7 @@ export function updateCrawlerTaskInfo (crawlerTaskId: number, data: ICrawlerTask
  * @returns
  */
 export function deleteCrawlerTaskInfo (crawlerTaskId: number) {
-  return httpClientPro.delete<any>(`/crawler-task-info/${crawlerTaskId}`)
+  return httpClientPro.delete<boolean>(`/crawler-task-info/${crawlerTaskId}`)
 }
 
 /**
@@ -109,7 +109,7 @@ export function deleteCrawlerTaskInfo (crawlerTaskId: number) {
  * @returns
  */
 export function startCrawlerTask (crawlerTaskId: number) {
-  return httpClientPro.put<any>(`/crawler-task-info/${crawlerTaskId}/start`)
+  return httpClientPro.put<boolean>(`/crawler-task-info/${crawlerTaskId}/start`)
 }
 
 /**
@@ -118,5 +118,5 @@ export function startCrawlerTask (crawlerTaskId: number) {
  * @returns
  */
 export function stopCrawlerTask (crawlerTaskId: number) {
-  return httpClientPro.put<any>(`/crawler-task-info/${crawlerTaskId}/stop`)
+  return httpClientPro.put<boolean>(`/crawler-task-info/${crawlerTaskId}/stop`)
 }

@@ -3,7 +3,9 @@ import { QTableColumn, QTableProps } from 'quasar'
 import { IQTableInitParams, TTableFilterObject, IQTablePagination, IRequestPagination } from './types'
 import QTableIndex from 'src/components/tableComponents/TableIndex.vue'
 
-export type addNewRowType = (newRow: Record<string, any>, idField?: string) => void
+export type addNewRowType<T = Record<string, any>> = (newRow: T, idField?: string) => void
+
+export type deleteRowByIdType = (id?: number, idField?: string) => void
 
 /**
  * 返回一个QTable的配置对象

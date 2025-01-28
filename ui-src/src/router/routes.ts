@@ -210,6 +210,15 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     redirect: '/email-crawler/task',
     children: [
       {
+        name: 'TickTokDevice',
+        path: 'tiktok-device',
+        meta: {
+          icon: 'devices',
+          label: 'TikTok设备'
+        },
+        component: () => import('pages/emailCrawler/tikTokDevice/TikTokDeviceManager.vue')
+      },
+      {
         name: 'CrawlerTask',
         path: 'task',
         meta: {
@@ -220,10 +229,11 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
       },
       {
         name: 'CrawlerResult',
-        path: 'result',
+        path: 'tasks/:id',
         meta: {
           icon: 'contact_mail',
-          label: '爬取结果'
+          label: '爬取结果',
+          noMenu: true
         },
         component: () => import('pages/emailCrawler/crawlerResult/CrawlerResult.vue')
       }

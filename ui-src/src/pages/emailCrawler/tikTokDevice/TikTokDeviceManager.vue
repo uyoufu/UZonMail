@@ -3,7 +3,7 @@
     v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
     @request="onTableRequest">
     <template v-slot:top-left>
-      <CreateBtn @click="onCreateCrawlerTask" />
+      <CreateBtn @click="onCreateTikTokDevice" />
     </template>
 
     <template v-slot:top-right>
@@ -15,10 +15,9 @@
       <ContextMenu :items="contextMenuItems" :value="props.row" />
     </template>
 
-    <template v-slot:body-cell-status="props">
+    <template v-slot:body-cell-userId="props">
       <q-td :props="props">
-        <StatusChip :status="props.value">
-        </StatusChip>
+        {{ props.value }}
       </q-td>
     </template>
   </q-table>
@@ -28,19 +27,16 @@
 import { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
-import { useColumnsFormater } from './compositions/useColumnsFormater'
-
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import StatusChip from 'src/components/statusChip/StatusChip.vue'
 
-import { formatDate } from 'src/utils/format'
+import { getUserTikTokDevicesCount, getUserTikTokDevicesData } from 'src/api/pro/tikTokDevice'
 
-const { formatProxyId, formatCrawlerType, formatCrawlerStatus, formatDeviceId: formatTikTokDeviceId } = useColumnsFormater()
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [
   indexColumn,
   {
     name: 'name',
+    required: true,
     label: '名称',
     align: 'left',
     field: 'name',
@@ -48,94 +44,37 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'description',
+    required: true,
     label: '描述',
     align: 'left',
     field: 'description',
     sortable: true
   },
   {
-    name: 'type',
-    required: true,
-    label: '爬虫类型',
-    align: 'left',
-    field: 'type',
-    format: formatCrawlerType,
-    sortable: true
-  },
-  {
-    name: 'tikTokDeviceId',
-    required: true,
-    label: '设备',
-    align: 'left',
-    field: 'tikTokDeviceId',
-    format: formatTikTokDeviceId,
-    sortable: true
-  },
-  {
-    name: 'proxyId',
-    label: '代理',
-    align: 'left',
-    field: 'proxyId',
-    format: formatProxyId,
-    sortable: true
-  },
-  {
-    name: 'deadline',
+    name: 'deviceId',
     required: false,
-    label: '截止日期',
+    label: '设备ID (device_id)',
     align: 'left',
-    field: 'deadline',
-    format: formatDate,
+    field: 'deviceId',
     sortable: true
   },
   {
-    name: 'status',
-    required: true,
-    label: '状态',
-    align: 'left',
-    field: 'status',
-    format: formatCrawlerStatus,
-    sortable: true
-  },
-  {
-    name: 'startDate',
+    name: 'odinId',
     required: false,
-    label: '开始日期',
+    label: '广告ID (odinId)',
     align: 'left',
-    field: 'startDate',
-    format: formatDate,
-    sortable: true
-  },
-  {
-    name: 'endDate',
-    required: false,
-    label: '结束日期',
-    align: 'left',
-    field: 'endDate',
-    format: formatDate,
-    sortable: true
-  },
-  {
-    name: 'createDate',
-    required: false,
-    label: '创建日期',
-    align: 'left',
-    field: 'createDate',
-    format: formatDate,
+    field: 'odinId',
     sortable: true
   }
 ]
-
-import { getCrawlerTaskInfosCount, getCrawlerTaskInfosData } from 'src/api/pro/crawlerTask'
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
-  const { data } = await getCrawlerTaskInfosCount(filterObj.filter)
+  const { data } = await getUserTikTokDevicesCount(filterObj.filter)
   return data || 0
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
-  const { data } = await getCrawlerTaskInfosData(filterObj.filter, pagination)
+  const { data } = await getUserTikTokDevicesData(filterObj.filter, pagination)
   return data || []
 }
 
@@ -145,10 +84,8 @@ const { pagination, rows, filter, onTableRequest, loading, addNewRow, deleteRowB
   onRequest
 })
 
-// #region 头部相关的方法
 import { useHeaderFunctions } from './compositions/useHeaderFunctions'
-const { onCreateCrawlerTask } = useHeaderFunctions(addNewRow)
-// #endregion
+const { onCreateTikTokDevice } = useHeaderFunctions(addNewRow)
 
 // #region 右键菜单
 import { useContextMenu } from './compositions/useContextMenu'

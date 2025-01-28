@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+import { IPopupDialogField, IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
 import dayjs from 'dayjs'
 
 import { getUsableProxies } from 'src/api/proxy'
 import { CrawlerType, createCrawlerTaskInfo, ICrawlerTaskInfo } from 'src/api/pro/crawlerTask'
+import { getAllUserTikTokDevices } from 'src/api/pro/tikTokDevice'
 import { notifySuccess, showDialog } from 'src/utils/dialog'
 import { addNewRowType } from 'src/compositions/qTableUtils'
 
-export async function getCrawlerTaskFields () {
+export async function getCrawlerTaskFields (): Promise<IPopupDialogField[]> {
   // 获取用户的代理
   const { data: proxies } = await getUsableProxies()
-
   proxies.unshift({
     id: 0,
     name: '无',
@@ -20,6 +20,9 @@ export async function getCrawlerTaskFields () {
     userId: 0,
     organizationId: 0
   })
+
+  // 获取所有设备
+  const { data: allDevices } = await getAllUserTikTokDevices()
 
   return [
     {
@@ -44,6 +47,18 @@ export async function getCrawlerTaskFields () {
       optionValue: 'value',
       mapOptions: true,
       emitValue: true
+    },
+    {
+      name: 'tikTokDeviceId',
+      type: PopupDialogFieldType.selectOne,
+      label: '设备',
+      value: 0,
+      options: allDevices,
+      optionLabel: 'name',
+      optionValue: 'id',
+      mapOptions: true,
+      emitValue: true,
+      required: true
     },
     {
       name: 'description',
@@ -74,7 +89,7 @@ export async function getCrawlerTaskFields () {
  * 使用头部功能
  * @returns
  */
-export function useHeaderFunctions (addNewRow: (newRow: addNewRowType) => void) {
+export function useHeaderFunctions (addNewRow: addNewRowType<ICrawlerTaskInfo>) {
   async function onCreateCrawlerTask () {
     const fields = await getCrawlerTaskFields()
 
