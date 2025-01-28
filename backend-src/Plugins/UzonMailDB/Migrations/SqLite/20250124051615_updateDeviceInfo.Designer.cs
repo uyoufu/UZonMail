@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UZonMail.DB.SqLite;
 
 #nullable disable
 
-namespace UZonMailService.Migrations.SqLite
+namespace UZonMail.DB.Migrations.SqLite
 {
     [DbContext(typeof(SqLiteContext))]
-    partial class SqLiteContextModelSnapshot : ModelSnapshot
+    [Migration("20250124051615_updateDeviceInfo")]
+    partial class updateDeviceInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -205,9 +208,6 @@ namespace UZonMailService.Migrations.SqLite
                         .HasColumnType("TEXT")
                         .HasColumnName("_id");
 
-                    b.Property<long>("OutboxGroupId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long>("ProxyId")
                         .HasColumnType("INTEGER");
 
@@ -246,9 +246,6 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<bool>("ExistExtraInfo")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsAttachingInbox")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
@@ -264,8 +261,6 @@ namespace UZonMailService.Migrations.SqLite
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TikTokAuthorId");
 
                     b.ToTable("CrawlerTaskResults");
                 });
@@ -2006,17 +2001,6 @@ namespace UZonMailService.Migrations.SqLite
                         .HasForeignKey("UserRolesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.CrawlerTaskResult", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.EmailCrawler.TiktokAuthor", "TiktokAuthor")
-                        .WithMany()
-                        .HasForeignKey("TikTokAuthorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("TiktokAuthor");
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.SendingItem", b =>
