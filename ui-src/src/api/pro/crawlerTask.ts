@@ -40,6 +40,7 @@ export interface ICrawlerTaskInfo {
   deadline: string, // 任务截止时间
   startDate: string,
   endDate: string,
+  count: number,
 }
 
 /**
@@ -68,6 +69,17 @@ export function getCrawlerTaskInfosData (filter: string | undefined, pagination:
       filter
     },
     data: pagination
+  })
+}
+
+/**
+ * 获取爬虫任务的 count 信息
+ * @param crawlerTaskIds
+ * @returns
+ */
+export function getCrawlerTaskCountInfos (crawlerTaskIds: number[]) {
+  return httpClientPro.post<ICrawlerTaskInfo[]>('/crawler-task-info/count-infos', {
+    data: crawlerTaskIds
   })
 }
 
@@ -119,4 +131,44 @@ export function startCrawlerTask (crawlerTaskId: number) {
  */
 export function stopCrawlerTask (crawlerTaskId: number) {
   return httpClientPro.put<boolean>(`/crawler-task-info/${crawlerTaskId}/stop`)
+}
+
+/**
+ * 获取爬虫任务数量
+ * @param groupId
+ * @param filter
+ */
+export function getCrawlerTaskResultsCount (crawlerTaskId: number, filter: string | undefined) {
+  return httpClientPro.get<number>(`/crawler-task-info/${crawlerTaskId}/results/filtered-count`, {
+    params: {
+      filter,
+      crawlerTaskId
+    }
+  })
+}
+
+/**
+ * 获取爬虫任务数据
+ * @param groupId
+ * @param filter
+ * @param pagination
+ * @returns
+ */
+export function getCrawlerTaskResultsData (crawlerTaskId: number, filter: string | undefined, pagination: IRequestPagination) {
+  return httpClientPro.post<ICrawlerTaskInfo[]>(`/crawler-task-info/${crawlerTaskId}/results/filtered-data`, {
+    params: {
+      filter,
+      crawlerTaskId
+    },
+    data: pagination
+  })
+}
+
+/**
+ * 保存爬虫结果到收件箱
+ * @param crawlerTaskId
+ * @returns 保存成功的收件箱id
+ */
+export function saveCrawlerResultsAsInbox (crawlerTaskId: number) {
+  return httpClientPro.post<number[]>(`/crawler-task-info/${crawlerTaskId}/inbox-group`)
 }

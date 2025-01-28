@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CrawlerStatus, deleteCrawlerTaskInfo, ICrawlerTaskInfo, startCrawlerTask, stopCrawlerTask, updateCrawlerTaskInfo } from 'src/api/pro/crawlerTask'
+import { CrawlerStatus, deleteCrawlerTaskInfo, ICrawlerTaskInfo, startCrawlerTask, stopCrawlerTask, updateCrawlerTaskInfo, saveCrawlerResultsAsInbox } from 'src/api/pro/crawlerTask'
 import { IContextMenuItem } from 'src/components/contextMenu/types'
 import { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 import { getCrawlerTaskFields } from './useHeaderFunctions'
-import { confirmOperation, notifySuccess, showDialog } from 'src/utils/dialog'
+import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
 import { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { useRouter } from 'vue-router'
 
@@ -43,6 +43,12 @@ export function useContextMenu (addNewRow: addNewRowType<ICrawlerTaskInfo>, dele
       label: '查看',
       tooltip: '查看当前爬虫任务结果',
       onClick: onViewCrawlerResult
+    },
+    {
+      name: 'saveAsInbox',
+      label: '另存为',
+      tooltip: '另存为收件箱',
+      onClick: onSaveAsInbox
     }
   ]
 
@@ -117,6 +123,34 @@ export function useContextMenu (addNewRow: addNewRowType<ICrawlerTaskInfo>, dele
       query: {
         tagName: crawlerTaskInfo.name
       }
+    })
+  }
+
+  async function onSaveAsInbox (crawlerTaskInfo: ICrawlerTaskInfo) {
+    // 进行确认
+    const confirm = await confirmOperation('另存为收件箱', `是否将爬虫任务 [${crawlerTaskInfo.name}] 另存为收件箱？`)
+    if (!confirm) return
+
+    // 开始另存为
+    const inboxGroupId = await notifyUntil(async () => {
+      const { data } = await saveCrawlerResultsAsInbox(crawlerTaskInfo.id as number)
+      return data
+    }, '正在另存为收件箱')
+
+    if (!inboxGroupId) {
+      notifyError('另存为收件箱失败')
+      return
+    }
+
+    // 提示跳转
+    notifySuccess('另存为收件箱成功')
+
+    const confirm2InboxDetail = await confirmOperation('另存为收件箱成功', '是否跳转到收件箱详情页面？')
+    if (!confirm2InboxDetail) return
+
+    // 开始跳转
+    router.push({
+      name: 'inboxManager'
     })
   }
 

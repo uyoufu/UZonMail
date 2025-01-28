@@ -2,9 +2,9 @@
   <q-table class="full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
     v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
     @request="onTableRequest">
-    <template v-slot:top-left>
+    <!-- <template v-slot:top-left>
       <CreateBtn />
-    </template>
+    </template> -->
 
     <template v-slot:top-right>
       <SearchInput v-model="filter" />
@@ -58,16 +58,32 @@ const columns: QTableColumn[] = [
     sortable: true
   }
 ]
+
+import { useRoute } from 'vue-router'
+import { getCrawlerTaskResultsCount, getCrawlerTaskResultsData } from 'src/api/pro/crawlerTask'
+// 从路由中获取id
+const crawlerTaskId = ref(0)
+const route = useRoute()
+onMounted(async () => {
+  if (!route.params.id) return
+  crawlerTaskId.value = Number(route.params.id)
+  // 触发更新
+  refreshTable()
+})
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
-  return 0
+  if (crawlerTaskId.value <= 0) return 0
+  const { data } = await getCrawlerTaskResultsCount(crawlerTaskId.value, filterObj.filter)
+  return data
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
-  return []
+  const { data } = await getCrawlerTaskResultsData(crawlerTaskId.value, filterObj.filter, pagination)
+  return data || []
 }
 
-const { pagination, rows, filter, onTableRequest, loading } = useQTable({
+const { pagination, rows, filter, onTableRequest, loading, refreshTable } = useQTable({
   getRowsNumberCount,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onRequest
