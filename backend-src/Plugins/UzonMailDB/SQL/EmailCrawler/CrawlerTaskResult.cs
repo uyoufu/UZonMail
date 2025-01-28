@@ -13,10 +13,16 @@ namespace UZonMail.DB.SQL.EmailCrawler
         /// 用户 id
         /// </summary>
         public long TikTokAuthorId { get; set; }
+        public TiktokAuthor TiktokAuthor { get; set; }
 
         /// <summary>
         /// 是否存在额外的信息
         /// </summary>
         public bool ExistExtraInfo { get; set; }
+
+        /// <summary>
+        /// 是否关联了收件箱
+        /// </summary>
+        public bool IsAttachingInbox { get; set; }
     }
 }

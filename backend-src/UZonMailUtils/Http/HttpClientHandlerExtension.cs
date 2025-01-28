@@ -8,7 +8,7 @@ namespace UZonMail.Utils.Http
     {
         public static HttpClientHandler WithProxy(this HttpClientHandler handler, string proxy)
         {
-            return handler.WithProxy(new Uri(proxy));
+            return handler.WithProxy(new Uri2(proxy));
         }
 
         /// <summary>
@@ -17,14 +17,14 @@ namespace UZonMail.Utils.Http
         /// <param name="handler"></param>
         /// <param name="proxy"></param>
         /// <returns></returns>
-        public static HttpClientHandler WithProxy(this HttpClientHandler handler, Uri proxy)
+        public static HttpClientHandler WithProxy(this HttpClientHandler handler, Uri2 proxy)
         {
             var webProxy = new WebProxy()
             {
                 Address = proxy,
                 BypassProxyOnLocal = false,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential()
+                Credentials = proxy.UserInfo2.GetCredential()
             };
             handler.Proxy = webProxy;
             return handler;

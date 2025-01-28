@@ -63,5 +63,10 @@ namespace UZonMail.DB.SQL.EmailCrawler
         /// 数量
         /// </summary>
         public int Count { get; set; }
+
+        /// <summary>
+        /// 发件箱组 id
+        /// </summary>
+        public long OutboxGroupId { get; set; }
     }
 }
