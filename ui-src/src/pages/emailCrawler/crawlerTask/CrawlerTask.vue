@@ -98,6 +98,14 @@ const columns: QTableColumn[] = [
     sortable: true
   },
   {
+    name: 'count',
+    required: true,
+    label: '数量',
+    align: 'left',
+    field: 'count',
+    sortable: true
+  },
+  {
     name: 'startDate',
     required: false,
     label: '开始日期',
@@ -153,6 +161,11 @@ const { onCreateCrawlerTask } = useHeaderFunctions(addNewRow)
 // #region 右键菜单
 import { useContextMenu } from './compositions/useContextMenu'
 const { contextMenuItems } = useContextMenu(addNewRow, deleteRowById)
+// #endregion
+
+// #region 自动更新正在运行任务的数量
+import { useCountUpdator } from './compositions/useCountUpdator'
+useCountUpdator(rows)
 // #endregion
 </script>
 

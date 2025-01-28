@@ -65,25 +65,25 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
       label: '邮箱管理',
       icon: 'alternate_email'
     },
-    redirect: '/email-manage/out-box',
+    redirect: '/email-manager/out-box',
     children: [
       {
-        name: 'outboxManage',
+        name: 'outboxManager',
         path: 'out-box',
         meta: {
           icon: 'forward_to_inbox',
           label: '发件箱'
         },
-        component: () => import('pages/emailManager/outbox/outboxManage.vue')
+        component: () => import('pages/emailManager/outbox/outboxManager.vue')
       },
       {
-        name: 'inboxManage',
+        name: 'inboxManager',
         path: 'in-box',
         meta: {
           icon: 'mark_email_unread',
           label: '收件箱'
         },
-        component: () => import('pages/emailManager/inbox/inboxManage.vue')
+        component: () => import('pages/emailManager/inbox/inboxManager.vue')
       }
     ]
   },
@@ -205,7 +205,8 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     component: NormalLayout,
     meta: {
       label: '邮件爬虫',
-      icon: 'bug_report'
+      icon: 'bug_report',
+      access: ['enterprise']
     },
     redirect: '/email-crawler/task',
     children: [
