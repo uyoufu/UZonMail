@@ -4,6 +4,36 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.11.1
+
+> 更新日期: 2025-01-29
+
+### 功能优化
+
+1. 增加 TikTok 邮箱爬虫
+
+### bug 修复
+
+1. 修复发件箱对于-符号的域名验证不通过的 bug
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.11.1.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-desktop-win-x64-0.11.1.0.zip)
+
+[uzonmail-service-win-x64-0.11.1.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-win-x64-0.11.1.0.zip)
+
+[uzonmail-service-linux-x64-0.11.1.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-linux-x64-0.11.1.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
+### 新春福利
+
+值此新春佳节，祝所有同学新春快乐，万事如意！
+
+在此为同学们提供 uzon-mail 企业版本两个月的试用码，希望 uzon-mail 可以对你有所帮助。
+
+激活码: happy-chinese-new-year
+
 ## 0.11.0
 
 > 更新日期: 2024-12-29
@@ -24,6 +54,8 @@ editLink: false
 本版本虽然支持直接从 0.10.x 版本升级，但是由于数据格式有变化，会导致发件状态显示异常。
 建议直接使用新版本。
 :::
+
+### 下载地址
 
 [uzonmail-desktop-win-x64-0.11.0.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-desktop-win-x64-0.11.0.0.zip)
 
