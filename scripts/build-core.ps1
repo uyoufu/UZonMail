@@ -63,12 +63,12 @@ try {
     $gitRoot = & git rev-parse --show-toplevel    
 }
 catch {
-    Write-Host "无法找到 Git 仓库的根目录，请确保在 Git 仓库中运行此脚本" -ForegroundColor Red
+    Write-Host "无法找到 Git 仓库的根目录，请确保在 UzonMail 仓库中运行此脚本" -ForegroundColor Red
     exit 1
 }
 
 if (-not $gitRoot) {
-    Write-Host "未找到 Git 仓库的根目录" -ForegroundColor Red
+    Write-Host "未找到 UzonMail 仓库的根目录" -ForegroundColor Red
     exit 1
 }
 
@@ -213,7 +213,7 @@ if (test-path -path $serviceSrc -PathType Container) {
     $serviceDist = "$mainService/$uZonMailProPlugin"
     Set-Location $proPluginPath
     dotnet publish -c Release -o $serviceDist -r $publishPlatform --self-contained false
-    # 复制依赖到根目录，复制库 到 Plugins 目录
+    # 复制依赖到根目录，复制库到 Plugins 目录
     Copy-Assembly -src $serviceDist -exclude "$uZonMailProPlugin.*"
     $uzonMailProPluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailProPlugin"
     New-Item -Path $uzonMailProPluginPath -ItemType Directory -Force
@@ -221,6 +221,9 @@ if (test-path -path $serviceSrc -PathType Container) {
     # 删除临时目录
     Remove-Item -Path $serviceDist -Recurse -Force
     Write-Host "后端 $uZonMailProPlugin 编译完成!" -ForegroundColor Green
+}
+else {
+    Write-Host "未找到 $uZonMailProPlugin 插件, 跳过编译" -ForegroundColor Yellow
 }
 
 # 复制前端编译结果到服务端指定位置

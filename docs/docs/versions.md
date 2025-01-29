@@ -12,6 +12,8 @@ editLink: false
 
 1. 增加 TikTok 邮箱爬虫
 
+   ![image-20250129102009655](https://oss.223434.xyz:2234/public/files/images/image-20250129102009655.png)
+
 ### bug 修复
 
 1. 修复发件箱对于-符号的域名验证不通过的 bug
@@ -32,7 +34,7 @@ editLink: false
 
 在此为同学们提供 uzon-mail 企业版本两个月的试用码，希望 uzon-mail 可以对你有所帮助。
 
-激活码: happy-chinese-new-year
+激活码: `happy-chinese-new-year`，该码有效期 2 个月，单次激活一个月，每台机器可重复使用 2 次。
 
 ## 0.11.0
 
