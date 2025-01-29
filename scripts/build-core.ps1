@@ -203,13 +203,20 @@ Remove-Item -Path $serviceDist -Recurse -Force
 Write-Host "后端 $uZonMailCorePlugin 编译完成!" -ForegroundColor Green
 
 # 编译后端 UzonMailPro
-$uZonMailProPlugin = 'UZonMailProPlugin'
-Write-Host "开始编译后端 $uZonMailProPlugin ..." -ForegroundColor Yellow
-# 使用 dotnet 编译
-Set-Location -Path $gitRoot
-$proPluginPath = "../UZonMailProPlugins/$uZonMailProPlugin"
-$serviceSrc = Resolve-Path -Path $proPluginPath
-if (test-path -path $serviceSrc -PathType Container) {
+function New-Desktop {
+    $uZonMailProPlugin = 'UZonMailProPlugin'    
+    # 使用 dotnet 编译
+    Set-Location -Path $gitRoot
+    $proPluginPath = "../UZonMailProPlugins/$uZonMailProPlugin"
+    $serviceSrc = Resolve-Path -Path $proPluginPath -ErrorAction SilentlyContinue
+    if (-not($serviceSrc)) {
+        return
+    }
+
+    if (-not(test-path -path $serviceSrc -PathType Container)) {
+        return
+    }
+    
     $serviceDist = "$mainService/$uZonMailProPlugin"
     Set-Location $proPluginPath
     dotnet publish -c Release -o $serviceDist -r $publishPlatform --self-contained false
@@ -222,9 +229,7 @@ if (test-path -path $serviceSrc -PathType Container) {
     Remove-Item -Path $serviceDist -Recurse -Force
     Write-Host "后端 $uZonMailProPlugin 编译完成!" -ForegroundColor Green
 }
-else {
-    Write-Host "未找到 $uZonMailProPlugin 插件, 跳过编译" -ForegroundColor Yellow
-}
+New-Desktop
 
 # 复制前端编译结果到服务端指定位置
 $serviceWwwroot = Join-Path -Path $mainService -ChildPath "wwwroot"
