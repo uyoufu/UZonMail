@@ -1,4 +1,4 @@
-import { httpClient } from 'src/api//base/httpClient'
+import { httpClient } from 'src/api/base/httpClient'
 
 /**
  * 获取服务器版本
