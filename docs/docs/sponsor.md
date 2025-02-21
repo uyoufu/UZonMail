@@ -6,7 +6,7 @@ editLink: false
 ---
 
 <div class="column justify-center items-center">
-  <h6 class="text-primary">支持作者</h6>
+  <p class="text-primary">支持作者</p>
   <p class="q-mx-md">如果觉得这个软件对您有帮助，欢迎对我进行赞助。</p>
   <p class="q-mx-md">您的支持是我持续改进和提供长期服务的动力。</p>
   <p class="q-mx-md">感谢您的慷慨支持！</p>
@@ -26,5 +26,6 @@ editLink: false
   </div>
   <div class="q-mb-xl"></div>
 </div>
+
 
 

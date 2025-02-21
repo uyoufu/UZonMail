@@ -85,7 +85,7 @@ editLink: false
 
 1. Windows 7 及以上
 3. Webview2 环境，下载地址：[microsoft-edge/webview2/](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)
-4. ASP.NET Core 环境，下载地址：[runtime-aspnetcore-8.0.6-windows-hosting-bundle-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-8.0.6-windows-hosting-bundle-installer)
+4. ASP.NET Core 环境，下载地址：[runtime-aspnetcore-9.0.2-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.2-windows-x64-installer)
 
 ## 🌱软件安装
 
@@ -103,15 +103,16 @@ editLink: false
 
 #### Web 方式
 
-1. 安装 [ASP.NET Core，单击下载](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-8.0.6-windows-hosting-bundle-installer)
+1. 安装 [ASP.NET Core Runtime 9，单击下载](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.2-windows-x64-installer)
 
 2. 从历史版本中下载 `uzonmail-desktop-win-x64` 版本，解压
 
 3. 打开 `service/UZonMailService.exe` 程序
 
-   打开后界面如下图所示，其中的 WARN 不用理会。	![image-20241017221814354](https://obs.uamazing.cn:52443/public/files/images/image-20241017221814354.png)
+   打开后界面如下图所示，其中黄颜色的 WARN 不用理会。	![image-20241017221814354](https://obs.uamazing.cn:52443/public/files/images/image-20241017221814354.png)
 
 4. 打开浏览器，输入 [http://localhost:22345/](http://localhost:22345/) 进行使用
+
 
 #### Windows 7
 
@@ -119,9 +120,9 @@ editLink: false
 
 #### Windows 10+
 
-1. 安装 [ASP.NET Core，单击下载](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-8.0.6-windows-hosting-bundle-installer)
-2. 安装 [DotNET windows desktop](https://download.visualstudio.microsoft.com/download/pr/f398d462-9d4e-4b9c-abd3-86c54262869a/4a8e3a10ca0a9903a989578140ef0499/windowsdesktop-runtime-8.0.10-win-x64.exe)(一般系统自带)
-3. 安装 [Webview2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)(一般系统自带)
+1. 安装 [ASP.NET Core Runtime 9，单击下载](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.2-windows-x64-installer)
+2. 安装 [.NET Desktop Runtime 9](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-9.0.2-windows-x64-installer)(一般系统自带)
+3. 安装 [Webview2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)(有 edge 浏览器，一般都自带)
 4. 从历史版本中下载 `uzonmail-desktop-win-x64` 版本，解压
 5. 打开 `UZonMailDesktop.exe` 开始使用
 
