@@ -60,6 +60,14 @@ export function updateLicenseInfo (licenseCode: string) {
 }
 
 /**
+ * 重新从服务器获取授权信息
+ * 该接口只有管理员才能调用
+ */
+export function updateExistingLicenseInfo () {
+  return httpClientPro.put<ILicenseInfo>('/license/exist')
+}
+
+/**
  * 获取授权信息
  * @returns
  */
