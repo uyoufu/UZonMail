@@ -6,12 +6,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UZonMail.DB.SQL.Emails;
+using System.Data;
 
 namespace UZonMail.Core.Database.Validators.Tests
 {
     [TestClass()]
     public class InboxValidatorTests
     {
+        [DataRow("eschuitsza@vet-med.fu-berin.de")]
+        [DataRow("eschuitsza@vetmed.fu-berin.de")]
+        [DataRow("vasudaia@cc.miyazaki-u.ac.jp")]
         [DataRow("linzirui@ra.sc.e.titech.ac.jp")]
         [TestMethod()]
         public void InboxValidatorTest(string email)
