@@ -37,7 +37,7 @@ import logger from 'loglevel'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { confirmOperation, notifyError, notifySuccess } from 'src/utils/dialog'
 import dayjs from 'dayjs'
-import { ILicenseInfo, LicenseType, updateLicenseInfo, getLicenseInfo } from 'src/api/pro/license'
+import { ILicenseInfo, LicenseType, updateLicenseInfo, getLicenseInfo, updateExistingLicenseInfo } from 'src/api/pro/license'
 
 const license = ref<string>('')
 
@@ -116,6 +116,8 @@ function formatLicenseType (licenseType: LicenseType) {
   return LicenseType[licenseType]
 }
 
+import { usePermission } from 'src/compositions/permission'
+const { isSuperAdmin } = usePermission()
 onMounted(async () => {
   // 判断是否包含 pro 插件
   if (!userInfoStore.hasProPlugin) {
@@ -123,9 +125,15 @@ onMounted(async () => {
     return
   }
 
-  // 从服务器拉取激活信息
-  const { data: licenseInfo } = await getLicenseInfo()
-  activeInfo.value = licenseInfo
+  // 如果是管理员，则更新授权后再拉取
+  if (isSuperAdmin) {
+    const { data: licenseInfo } = await updateExistingLicenseInfo()
+    activeInfo.value = licenseInfo
+  } else {
+    // 从服务器拉取激活信息
+    const { data: licenseInfo } = await getLicenseInfo()
+    activeInfo.value = licenseInfo
+  }
 })
 // #endregion
 </script>
