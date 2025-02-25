@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         xmlns:webview2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:mvvm="clr-namespace:UZonMailDesktop.MVVM"
-        Title="MainWindow" Height="450" Width="800">
+        Title="宇正群邮" Height="450" Width="800">
     <Grid>
         <webview2:WebView2 x:Name="MainWebview2" mvvm:WebView2Extensions.BindableSource="{Binding URL}"/>
     </Grid>

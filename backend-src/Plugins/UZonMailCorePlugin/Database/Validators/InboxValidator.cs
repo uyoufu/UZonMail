@@ -7,7 +7,7 @@ namespace UZonMail.Core.Database.Validators
 {
     /// <summary>
     /// 收件箱验证器
-    /// </summary>
+    /// </summary>R
     public class InboxValidator : AbstractValidator<Inbox>
     {
         public InboxValidator()
