@@ -11,7 +11,7 @@ namespace UZonMail.Core.Services.Emails
         /// <param name="decoratorParams"></param>
         /// <param name="body"></param>
         /// <returns></returns>
-        public async Task<string> Decorate(EmailDecoratorParams decoratorParams, string body)
+        public async Task<string> Decorate(IEmailDecoratorParams decoratorParams, string body)
         {
             var decorators = serviceProvider.GetServices<IEmailBodyDecroator>();
             foreach (var decorator in decorators)

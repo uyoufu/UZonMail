@@ -1,12 +1,13 @@
 ﻿using UZonMail.DB.SQL.Base;
 using UZonMail.DB.SQL.Permission;
+using UZonMail.Utils.Web.Token;
 
 namespace UZonMail.DB.SQL.Organization
 {
     /// <summary>
     /// 用户上下文
     /// </summary>
-    public class User : SqlId
+    public class User : SqlId, ITokenSource
     {
         /// <summary>
         /// 用户类型

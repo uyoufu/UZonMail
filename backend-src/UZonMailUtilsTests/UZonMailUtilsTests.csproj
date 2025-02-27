@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <Platforms>x64</Platforms>
+    <Platforms>x64;AnyCPU</Platforms>
 	<LangVersion>13.0</LangVersion>
   </PropertyGroup>
 
@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UZonMailDB\UZonMailDB.csproj" />
     <ProjectReference Include="..\UZonMailUtils\UZonMailUtils.csproj" />
   </ItemGroup>
 </Project>

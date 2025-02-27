@@ -7,6 +7,7 @@
 		<Platforms>x64</Platforms>
 		<OutputType>Library</OutputType>
 		<LangVersion>13.0</LangVersion>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -21,10 +22,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="LiteDB" Version="5.0.21" />
+		<PackageReference Include="log4net" Version="3.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.1.2" />
+		<PackageReference Include="MimeKit" Version="4.8.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.9.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2" />
@@ -33,10 +36,6 @@
 	<ItemGroup>
 		<Folder Include="Path\" />
 		<Folder Include="Web\Captcha\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Plugins\UzonMailDB\UzonMailDB.csproj" />
 	</ItemGroup>
 
 </Project>

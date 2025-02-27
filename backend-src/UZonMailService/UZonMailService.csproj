@@ -12,6 +12,7 @@
 		<LangVersion>13.0</LangVersion>
 		<FileVersion>0.11.2.0</FileVersion>
 		<AssemblyVersion>0.11.2.0</AssemblyVersion>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -66,6 +67,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Plugins\UzonMailDB\UzonMailDB.csproj" />
+		<ProjectReference Include="..\UzonMailDB\UzonMailDB.csproj" />
 		<ProjectReference Include="..\UZonMailUtils\UZonMailUtils.csproj" />
 	</ItemGroup>
 

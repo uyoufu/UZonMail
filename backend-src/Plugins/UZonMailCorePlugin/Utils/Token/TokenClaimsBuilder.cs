@@ -4,6 +4,7 @@ using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Organization;
 using UZonMail.Utils.Web.Service;
+using UZonMail.Utils.Web.Token;
 
 namespace UZonMail.Core.Utils.Token
 {
@@ -18,9 +19,9 @@ namespace UZonMail.Core.Utils.Token
         /// <param name="sqlContext"></param>
         /// <param name="userInfo"></param>
         /// <returns></returns>
-        public async Task<List<Claim>> Build(User userInfo)
+        public async Task<List<Claim>> Build(ITokenSource userInfo)
         {
-            var tokenPayloads = new TokenPayloads(userInfo);
+            var tokenPayloads = new TokenPayloads(userInfo as User);
             return tokenPayloads;
         }
     }

@@ -1,9 +1,6 @@
 ﻿using MimeKit;
 using System;
 using System.Threading.Tasks;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
-using UZonMail.DB.SQL.Settings;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Utils.Email
@@ -20,6 +17,6 @@ namespace UZonMail.Utils.Email
         /// <param name="decoratorParams"></param>
         /// <param name="originBody"></param>
         /// <returns></returns>
-        Task<MimeMessage> StartDecorating(EmailDecoratorParams decoratorParams, MimeMessage mimeMessage);
+        Task<MimeMessage> StartDecorating(IEmailDecoratorParams decoratorParams, MimeMessage mimeMessage);
     }
 }

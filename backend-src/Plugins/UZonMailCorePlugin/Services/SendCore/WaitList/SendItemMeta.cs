@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using UZonMail.Core.Database.SQL.EmailSending;
+using UZonMail.Core.PluginBase.Email;
 using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
@@ -9,7 +10,6 @@ using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Emails;
 using UZonMail.DB.SQL.EmailSending;
-using UZonMail.Utils.Email;
 
 namespace UZonMail.Core.Services.SendCore.WaitList
 {

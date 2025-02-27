@@ -1,8 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
-using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Database.Updater

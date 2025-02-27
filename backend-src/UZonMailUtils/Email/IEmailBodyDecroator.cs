@@ -15,6 +15,6 @@ namespace UZonMail.Utils.Email
         /// <param name="decoratorParams"></param>
         /// <param name="originBody"></param>
         /// <returns></returns>
-        Task<string> StartDecorating(EmailDecoratorParams decoratorParams, string originBody);
+        Task<string> StartDecorating(IEmailDecoratorParams decoratorParams, string originBody);
     }
 }

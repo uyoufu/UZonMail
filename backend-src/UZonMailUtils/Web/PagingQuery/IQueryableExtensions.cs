@@ -38,9 +38,9 @@ namespace UZonMail.Utils.Web.PagingQuery
         /// <param name="values"></param>
         /// <param name="pick"></param>
         /// <returns></returns>
-        public static IQueryable<T> Page<T>(this IQueryable<T> values, Pagination pick) where T : UZonMail.DB.SQL.Base.SqlId
+        public static IQueryable<T> Page<T>(this IQueryable<T> values, Pagination pick)
         {
-            return pick.Run<T>(values);
+            return pick.Run(values);
         }
     }
 }

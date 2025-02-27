@@ -7,6 +7,7 @@
 		<OutputType>Library</OutputType>
 		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -48,8 +49,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\UzonMailDB\UzonMailDB.csproj" />
 	  <ProjectReference Include="..\..\UZonMailUtils\UZonMailUtils.csproj" />
-	  <ProjectReference Include="..\UzonMailDB\UzonMailDB.csproj" />
 	</ItemGroup>
 
 </Project>
