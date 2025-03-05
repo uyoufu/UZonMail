@@ -24,8 +24,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             if (outbox.ShouldDispose) return;
 
             // 计算冷却时间
-            var userInfo = await DBCacher.GetCache<UserInfoCache>(sqlContext, outbox.UserId);
-            var orgSetting = await DBCacher.GetCache<OrganizationSettingCache>(sqlContext, userInfo.OrganizationId);
+            var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, outbox.UserId);
+            var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sqlContext, userInfo.OrganizationId);
             int cooldownMilliseconds = orgSetting.Setting?.GetCooldownMilliseconds() ?? 0;
             if (cooldownMilliseconds <= 0) return;
 

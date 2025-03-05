@@ -25,7 +25,7 @@ namespace UZonMail.DB.Managers.Cache
             if (!NeedUpdate) return;
             SetDirty(false);
 
-            var userInfo = await DBCacher.GetCache<UserInfoCache>(db, UserId);
+            var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(db, UserId);
             // 按用户缓存代理
             _proxies = await db.Proxies
                 .AsNoTracking()

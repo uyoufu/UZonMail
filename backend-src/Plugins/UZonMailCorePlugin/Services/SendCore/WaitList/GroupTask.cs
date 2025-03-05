@@ -252,7 +252,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             }
 
             // 对于取消订阅的邮件，进行标记
-            var userInfo = await DBCacher.GetCache<UserInfoCache>(sqlContext, UserId);
+            var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, UserId);
             var unsubscribedEmails = await sqlContext.UnsubscribeEmails.AsNoTracking()
                 .Where(x => x.OrganizationId == userInfo.OrganizationId)
                 .Where(x => !x.IsDeleted)

@@ -8,7 +8,8 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
 {
     public class UsableProxyList(long userId)
     {
-        private ConcurrentDictionary<long, long> _sendingItemProxies = [];
+        private readonly ConcurrentDictionary<long, long> _sendingItemProxies = [];
+        private readonly CacheManager _cacheManager = new();
 
         /// <summary>
         /// 添加发送项代理
@@ -33,7 +34,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         public async Task<ProxyInfo?> GetProxy(SqlContext db,long sendingItemId,string outboxEmail)
         {
             // 获取所有的代理
-            var allProxies = await DBCacher.GetCache<UserProxiesCache>(db, userId);
+            var allProxies = await _cacheManager.GetCache<UserProxiesCache>(db, userId);
             if (allProxies.Count == 0) return null;
 
             Proxy? proxy = null;

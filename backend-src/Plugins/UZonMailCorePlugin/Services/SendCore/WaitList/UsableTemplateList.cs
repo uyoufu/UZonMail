@@ -12,6 +12,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
     {
         private ConcurrentDictionary<long, long> _sendingItemTemplateIds = [];
         private readonly List<long> _sendingGroupTemplateIds = [];
+        private readonly CacheManager _cacheManager = new();
 
         /// <summary>
         /// 为 SendingItem 添加指定模板
@@ -43,7 +44,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         public async Task<EmailTemplate?> GetTemplate(SqlContext sqlContext, long sendingItemId)
         {
             // 获取所有的模板
-            var allTemplates = await DBCacher.GetCache<UserTemplatesCache>(sqlContext, userId);
+            var allTemplates = await _cacheManager.GetCache<UserTemplatesCache>(sqlContext, userId);
 
             if (_sendingItemTemplateIds.TryGetValue(sendingItemId, out var templateId))
             {
@@ -60,14 +61,14 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         public async Task<EmailTemplate?> GetTemplateById(SqlContext sqlContext, long templateId)
         {
             // 从自己可使用的所有模板中获取
-            var allTemplates = await DBCacher.GetCache<UserTemplatesCache>(sqlContext, userId);
+            var allTemplates = await _cacheManager.GetCache<UserTemplatesCache>(sqlContext, userId);
             return allTemplates.Where(x => x.Id == templateId).FirstOrDefault();
         }
 
         public async Task<EmailTemplate?> GetTemplateByName(SqlContext sqlContext, string templateName)
         {
             // 从自己可使用的所有模板中获取
-            var allTemplates = await DBCacher.GetCache<UserTemplatesCache>(sqlContext, userId);
+            var allTemplates = await _cacheManager.GetCache<UserTemplatesCache>(sqlContext, userId);
             return allTemplates.Where(x => x.Name == templateName).FirstOrDefault();
         }
     }

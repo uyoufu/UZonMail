@@ -84,8 +84,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
         /// </summary>
         private async Task CheckOutboxSentCountLimit(SqlContext sqlContext, OutboxEmailAddress outbox)
         {
-            var userInfo = await DBCacher.GetCache<UserInfoCache>(sqlContext, outbox.UserId);
-            var orgSetting = await DBCacher.GetCache<OrganizationSettingCache>(sqlContext, userInfo.OrganizationId);
+            var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, outbox.UserId);
+            var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sqlContext, userInfo.OrganizationId);
 
             // 本身有限制时，若已经达到发送上限，则不再发送
             var overflowLimit = false;

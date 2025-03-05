@@ -246,8 +246,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         public async Task<EmailDecoratorParams> GetEmailDecoratorParams(SendingContext sendingContext)
         {
             var outbox = sendingContext.OutboxAddress;
-            var userCache = await DBCacher.GetCache<UserInfoCache>(sendingContext.SqlContext, outbox.UserId);
-            var orgSettingCache = await DBCacher.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, userCache.OrganizationId);
+            var userCache = await CacheManager.Global.GetCache<UserInfoCache>(sendingContext.SqlContext, outbox.UserId);
+            var orgSettingCache = await CacheManager.Global.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, userCache.OrganizationId);
             return new EmailDecoratorParams(orgSettingCache, SendingItem, outbox.Email);
         }
         #endregion
@@ -269,8 +269,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         public async Task SetMaxRetryCount(SqlContext sqlContext)
         {
             var userId = SendingItem.UserId;
-            var userReader = await DBCacher.GetCache<UserInfoCache>(sqlContext, userId);
-            var organizationSetting = await DBCacher.GetCache<OrganizationSettingCache>(sqlContext, userReader.OrganizationId);
+            var userReader = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, userId);
+            var organizationSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sqlContext, userReader.OrganizationId);
             MaxRetryCount = organizationSetting?.Setting?.MaxRetryCount ?? 0;
         }
 
@@ -304,8 +304,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
             // 赋予回信人
             var userId = SendingItem.UserId;
-            var userReader = await DBCacher.GetCache<UserInfoCache>(sqlContext, userId);
-            var organizationSetting = await DBCacher.GetCache<OrganizationSettingCache>(sqlContext, userReader.OrganizationId);
+            var userReader = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, userId);
+            var organizationSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sqlContext, userReader.OrganizationId);
             if (organizationSetting == null || organizationSetting.Setting == null)
             {
                 ReplyToEmails = [];

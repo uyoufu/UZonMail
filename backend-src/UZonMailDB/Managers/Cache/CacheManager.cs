@@ -11,10 +11,16 @@ namespace UZonMail.DB.Managers.Cache
     /// <summary>
     /// 数据库缓存管理器
     /// </summary>
-    public class DBCacher
+    public class CacheManager
     {
-        private readonly static ILog _logger = LogManager.GetLogger(typeof(DBCacher));
-        private static readonly ConcurrentDictionary<string, ICache> _settingsDic = [];
+        private readonly static ILog _logger = LogManager.GetLogger(typeof(CacheManager));
+        private readonly static Lazy<CacheManager> _instance = new(() => new CacheManager());
+        /// <summary>
+        /// 全局缓存管理器
+        /// </summary>
+        public static CacheManager Global => _instance.Value;
+
+        private readonly ConcurrentDictionary<string, ICache> _settingsDic = [];
 
         /// <summary>
         /// 获取完整的 Key
@@ -23,7 +29,7 @@ namespace UZonMail.DB.Managers.Cache
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static string GetFullKey<T>(string key) where T : ICache, new()
+        public string GetFullKey<T>(string key) where T : ICache, new()
         {
             var fullName = typeof(T).FullName;
             if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
@@ -42,7 +48,7 @@ namespace UZonMail.DB.Managers.Cache
         /// <param name="fullKey"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static string GetSubKey<T>(string fullKey) where T : ICache, new()
+        public string GetSubKey<T>(string fullKey) where T : ICache, new()
         {
             var fullName = typeof(T).FullName;
             if (string.IsNullOrEmpty(fullKey)) throw new ArgumentNullException(nameof(fullKey));
@@ -58,7 +64,7 @@ namespace UZonMail.DB.Managers.Cache
         /// </summary>
         /// <param name="objectIdKey"></param>
         /// <returns></returns>
-        public static bool SetCacheDirty<T>(string objectIdKey) where T : ICache, new()
+        public bool SetCacheDirty<T>(string objectIdKey) where T : ICache, new()
         {
             var fullKey = GetFullKey<T>(objectIdKey);
             // 移除缓存数据
@@ -73,7 +79,7 @@ namespace UZonMail.DB.Managers.Cache
         /// <param name="db"></param>
         /// <param name="key">建议使用id</param>
         /// <returns></returns>
-        public static async Task<T> GetCache<T>(SqlContext db, string key) where T : ICache, new()
+        public async Task<T> GetCache<T>(SqlContext db, string key) where T : ICache, new()
         {
             var fullKey = GetFullKey<T>(key);
 
@@ -95,7 +101,7 @@ namespace UZonMail.DB.Managers.Cache
         /// <param name="db"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static async Task<T> GetCache<T>(SqlContext db,long key) where T : ICache, new()
+        public async Task<T> GetCache<T>(SqlContext db,long key) where T : ICache, new()
         {
             return await GetCache<T>(db, key.ToString());
         }
