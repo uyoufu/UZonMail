@@ -20,7 +20,7 @@ namespace UZonMail.Utils.Web
     /// <summary>
     /// DotNETCore 扩展类
     /// </summary>
-    public static class Index
+    public static class Setup
     {
         /// <summary>
         /// 设置 slugify-case 形式的路由

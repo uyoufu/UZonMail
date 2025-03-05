@@ -18,7 +18,7 @@ namespace UZonMail.Utils.Web.Tests
         [TestMethod()]
         public void GetServiceTypeTest(Type implementationType)
         {
-            var serviceType = Index.GetServiceTypes(implementationType);
+            var serviceType = Setup.GetServiceTypes(implementationType);
             Assert.AreEqual(implementationType, serviceType.FirstOrDefault());
         }
     }
