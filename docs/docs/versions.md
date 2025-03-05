@@ -4,6 +4,22 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.11.3
+
+### bug 修复
+
+1. 修复修改模板后，缓存未更新的bug
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.11.3.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-desktop-win-x64-0.11.3.0.zip)
+
+[uzonmail-service-win-x64-0.11.3.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-win-x64-0.11.3.0.zip)
+
+[uzonmail-service-linux-x64-0.11.3.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-linux-x64-0.11.3.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.11.2
 
 ### bug 修复
