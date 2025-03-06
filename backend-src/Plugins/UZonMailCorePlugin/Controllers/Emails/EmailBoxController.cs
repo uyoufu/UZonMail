@@ -379,6 +379,22 @@ namespace UZonMail.Core.Controllers.Emails
         }
 
         /// <summary>
+        /// 批量删除多个发件箱
+        /// </summary>
+        /// <param name="emailBoxId"></param>
+        /// <returns></returns>
+        /// <exception cref="KnownException"></exception>
+        [HttpDelete("outboxes")]
+        public async Task<ResponseResult<bool>> DeleteOutboxByIds([FromBody]List<string> outboxIds)
+        {
+            var emailBox =  db.Outboxes.Where(x => outboxIds.Contains(x.ObjectId));           
+            db.Outboxes.RemoveRange(emailBox);
+            await db.SaveChangesAsync();
+
+            return true.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 获取邮箱数量
         /// </summary>
         /// <param name="groupId"></param>
