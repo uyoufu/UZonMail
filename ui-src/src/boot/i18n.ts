@@ -1,7 +1,8 @@
 import { boot } from 'quasar/wrappers'
 import { createI18n } from 'vue-i18n'
+import { useSessionStorage } from '@vueuse/core'
 
-import messages from 'src/i18n'
+import { messages } from 'src/i18n'
 
 export type MessageLanguages = keyof typeof messages;
 // Type-define 'en-US' as the master schema for the resource
@@ -22,7 +23,8 @@ declare module 'vue-i18n' {
 /* eslint-enable @typescript-eslint/no-empty-interface */
 
 function getDefaultLocale (): string {
-  const browserLang = navigator.language
+  // 判断 session 中是否有 locale，若有，则使用 session 中的 locale
+  const browserLang = useSessionStorage('locale', navigator.language).value
   const messagesKeys = Object.keys(messages)
   const browserLangKey = messagesKeys.find(key => key.startsWith(browserLang))
   return browserLangKey || 'en-US'

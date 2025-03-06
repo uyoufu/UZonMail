@@ -11,7 +11,9 @@
 
           <GlobalSignalR />
 
-          <UserInfo />
+          <I18nSetting />
+
+          <UserInfo class="q-ml-md" />
 
         </q-toolbar>
 
@@ -47,6 +49,7 @@ import logger from 'loglevel'
 
 // 导入组件
 import MenuOpenButton from '../components/menuOpen/menuOpenButton.vue'
+import I18nSetting from '../components/i18nSetting/I18nSetting.vue'
 import UserInfo from '../components/userInfo/userInfo.vue'
 import BreadcrumbsIndex from '../components/breadcrumbs/breadcrumbsIndex.vue'
 import TagsView from '../components/tags/tagsView.vue'

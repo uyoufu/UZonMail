@@ -11,7 +11,8 @@ export const useUserInfoStore = defineStore('userInfo', {
     access: useSessionStorage('access', []).value as string[],
     secretKey: useSessionStorage('secretKey', '').value,
     installedPlugins: useSessionStorage('installedPlugins', [] as string[]).value,
-    userInfo: useSessionStorage('userInfo', {}).value as IUserInfo
+    userInfo: useSessionStorage('userInfo', {}).value as IUserInfo,
+    locale: useSessionStorage('locale', navigator.language).value
   }),
   getters: {
     // 用户数据库的 id
@@ -158,6 +159,15 @@ export const useUserInfoStore = defineStore('userInfo', {
     updateUserAvatar (avatarUrl: string) {
       this.userInfo.avatar = avatarUrl
       useSessionStorage('userInfo', {}).value = this.userInfo
+    },
+
+    /**
+     * 设置语言
+     * @param locale
+     */
+    setLocale (locale: string) {
+      this.locale = locale
+      useSessionStorage('locale', navigator.language).value = locale
     }
   }
 })

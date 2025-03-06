@@ -1,11 +1,12 @@
 <template>
   <UserAvatar>
-    <HoverableTip class="bg-white">
-      <q-list class="text-primary" style="min-width: 100px" dense>
-        <q-item clickable @click="onGoToProfile" dense>
+    <HoverableTip class="bg-white" anchor="bottom right" self="top right" :offset="[0, 6]">
+      <q-list class="rounded-borders shadow-1 user-info-menu" bordered separator
+        style="min-width: 80px;overflow: hidden;" dense>
+        <q-item clickable @click="onGoToProfile" class="active-item text-primary">
           <q-item-section>个人信息</q-item-section>
         </q-item>
-        <q-item clickable @click="onLogout" dense>
+        <q-item clickable @click="onLogout" class="active-item text-negative">
           <q-item-section>退出</q-item-section>
         </q-item>
       </q-list>
@@ -30,4 +31,17 @@ function onGoToProfile () {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.user-info-menu {
+  overflow: hidden;
+  font-size: 14px;
+
+  .active-item {
+    &:hover {
+      // 放大
+      scale: 1.1;
+      transition: all 0.3s;
+    }
+  }
+}
+</style>
