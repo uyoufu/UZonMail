@@ -2,6 +2,7 @@
   <q-avatar color="primary" class="text-white" :size="size">
     <img v-if="userAvatar" :src="userAvatar">
     <span v-else>{{ firstLetter }}</span>
+    <slot name="default"></slot>
   </q-avatar>
 </template>
 

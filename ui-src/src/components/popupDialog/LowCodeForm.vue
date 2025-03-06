@@ -81,9 +81,9 @@
 import { useDialogPluginComponent } from 'quasar'
 import dayjs from 'dayjs'
 
-import CommonBtn from '../componentWrapper/buttons/CommonBtn.vue'
-import OkBtn from 'src/components/componentWrapper/buttons/OkBtn.vue'
-import CancelBtn from 'src/components/componentWrapper/buttons/CancelBtn.vue'
+import CommonBtn from '../quasarWrapper/buttons/CommonBtn.vue'
+import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
+import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import PasswordInput from '../passwordInput/PasswordInput.vue'
 

@@ -1,0 +1,39 @@
+<template>
+  <q-tooltip v-bind="$attrs" class="hoverable-tip q-pa-none" :model-value="showing" @update:model-value="onUpdate"
+    @mouseenter="onHover" @mouseleave="onLeave">
+    <slot></slot>
+  </q-tooltip>
+</template>
+
+<script lang="ts" setup>
+// 参考：https://github.com/quasarframework/quasar/discussions/13155
+import logger from 'loglevel'
+
+const showing = ref(false)
+const isHovered = ref(false)
+// you need to debounce update:modelValue handler
+// that serves as a delay
+// as hovering in that empty space
+// between the parent and the tooltip
+// or leaving from parent will trigger its hide behavior
+// leaving you no time to hover the tooltip itself
+import { debounce } from 'quasar'
+const onUpdate = debounce((v) => {
+  logger.debug('[hoverableTip] onUpdate', v, isHovered.value)
+  !isHovered.value && (showing.value = v)
+}, 150)
+function onHover () {
+  logger.debug('[hoverableTip] onHover')
+  isHovered.value = showing.value
+}
+function onLeave () {
+  isHovered.value = false
+  showing.value = false
+}
+</script>
+
+<style lang="scss">
+.hoverable-tip.q-tooltip {
+  pointer-events: auto !important
+}
+</style>

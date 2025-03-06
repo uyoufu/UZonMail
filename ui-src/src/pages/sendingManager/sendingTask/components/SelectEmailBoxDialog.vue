@@ -192,8 +192,8 @@ async function onNewTempInboxClick () {
 }
 
 // 底部确认
-import CancelBtn from 'src/components/componentWrapper/buttons/CancelBtn.vue'
-import OkBtn from 'src/components/componentWrapper/buttons/OkBtn.vue'
+import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
+import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 function onOKClick () {
   const result = {
     selectedEmails: selected.value,

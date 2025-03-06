@@ -40,7 +40,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     component: NormalLayout,
     meta: {
       label: '用户信息',
-      icon: 'info',
+      icon: 'person',
       noTag: true,
       noMenu: true
     },

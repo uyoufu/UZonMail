@@ -41,7 +41,7 @@ import { usePermission } from 'src/compositions/permission'
 
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
-import CreateBtn from 'src/components/componentWrapper/buttons/CreateBtn.vue'
+import CreateBtn from 'src/components/quasarWrapper/buttons/CreateBtn.vue'
 
 import { getFilteredUsersCount, getFilteredUsersData } from 'src/api/user'
 

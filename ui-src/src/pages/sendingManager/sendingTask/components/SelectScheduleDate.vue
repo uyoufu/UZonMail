@@ -36,8 +36,8 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 import dayjs from 'dayjs'
 const modelValue = ref(dayjs().format('YYYY-MM-DD HH:mm'))
 
-import OkBtn from 'src/components/componentWrapper/buttons/OkBtn.vue'
-import CancelBtn from 'src/components/componentWrapper/buttons/CancelBtn.vue'
+import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
+import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 import { notifyError } from 'src/utils/dialog'
 function onOkClick () {
   // 验证日期是否大于当前日期

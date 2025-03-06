@@ -41,9 +41,9 @@ import { QTable, QTableColumn } from 'quasar'
 import { formatDate } from 'src/utils/format'
 
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import CreateBtn from 'src/components/componentWrapper/buttons/CreateBtn.vue'
-import ImportBtn from 'src/components/componentWrapper/buttons/ImportBtn.vue'
-import ExportBtn from 'src/components/componentWrapper/buttons/ExportBtn.vue'
+import CreateBtn from 'src/components/quasarWrapper/buttons/CreateBtn.vue'
+import ImportBtn from 'src/components/quasarWrapper/buttons/ImportBtn.vue'
+import ExportBtn from 'src/components/quasarWrapper/buttons/ExportBtn.vue'
 import EmailGroupList from '../components/EmailGroupList.vue'
 import ContextMenu from 'components/contextMenu/ContextMenu.vue'
 

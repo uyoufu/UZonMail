@@ -24,7 +24,7 @@
 
 <script lang="ts" setup>
 import UserAvatar from 'src/components/userAvatar/UserAvatar.vue'
-import CommonBtn from 'src/components/componentWrapper/buttons/CommonBtn.vue'
+import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import dayjs from 'dayjs'
 
 import { useUserInfoStore } from 'src/stores/user'

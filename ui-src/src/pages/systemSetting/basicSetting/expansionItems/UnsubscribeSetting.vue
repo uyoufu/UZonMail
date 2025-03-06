@@ -41,7 +41,7 @@
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import UnsubscribePage from './components/UnsubscribePage.vue'
-import OkBtn from 'src/components/componentWrapper/buttons/OkBtn.vue'
+import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 
 import { useUserInfoStore } from 'src/stores/user'
 import { setTimeoutAsync } from 'src/utils/tsUtils'

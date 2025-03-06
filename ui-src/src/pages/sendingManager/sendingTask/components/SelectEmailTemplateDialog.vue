@@ -95,8 +95,8 @@ function isSelected (row: IEmailTemplate) {
 }
 
 // 确定和取消
-import OkBtn from 'src/components/componentWrapper/buttons/OkBtn.vue'
-import CancelBtn from 'src/components/componentWrapper/buttons/CancelBtn.vue'
+import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
+import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 function onOkBtnClick () {
   // 单击确认
   onDialogOK(selected.value)

@@ -4,13 +4,21 @@
       <q-card class="column bg-white">
         <q-toolbar class="row items-center full-width">
           <MenuOpenButton v-model="drawer" />
+
           <q-toolbar-title>
             <BreadcrumbsIndex />
           </q-toolbar-title>
+
           <GlobalSignalR />
-          <UserInfo />
+
+          <I18nSetting />
+
+          <UserInfo class="q-ml-md" />
+
         </q-toolbar>
-        <q-separator></q-separator>
+
+        <q-separator />
+
         <TagsView />
       </q-card>
     </q-header>
@@ -41,6 +49,7 @@ import logger from 'loglevel'
 
 // 导入组件
 import MenuOpenButton from '../components/menuOpen/menuOpenButton.vue'
+import I18nSetting from '../components/i18nSetting/I18nSetting.vue'
 import UserInfo from '../components/userInfo/userInfo.vue'
 import BreadcrumbsIndex from '../components/breadcrumbs/breadcrumbsIndex.vue'
 import TagsView from '../components/tags/tagsView.vue'

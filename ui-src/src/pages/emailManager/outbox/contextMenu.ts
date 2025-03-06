@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IOutbox, deleteOutboxById, updateOutbox, validateOutbox } from 'src/api/emailBox'
+import { IOutbox, deleteOutboxByIds, updateOutbox, validateOutbox } from 'src/api/emailBox'
 
 import { IContextMenuItem } from 'src/components/contextMenu/types'
 import { IPopupDialogParams } from 'src/components/popupDialog/types'
@@ -8,6 +8,8 @@ import { getOutboxFields } from './headerFunctions'
 import { useUserInfoStore } from 'src/stores/user'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { deAes } from 'src/utils/encrypt'
+
+import { getSelectedRowsType } from 'src/compositions/qTableUtils'
 
 /**
  * 获取smtp密码
@@ -19,7 +21,7 @@ function getSmtpPassword (outbox: IOutbox, smtpPasswordSecretKeys: string[]) {
   return deAes(smtpPasswordSecretKeys[0], smtpPasswordSecretKeys[1], outbox.password)
 }
 
-export function useContextMenu (deleteRowById: (id?: number) => void) {
+export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType) {
   const outboxContextMenuItems: IContextMenuItem[] = [
     {
       name: 'edit',
@@ -30,7 +32,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     {
       name: 'delete',
       label: '删除',
-      tooltip: '删除当前发件箱',
+      tooltip: '删除当前或选中发件箱',
       color: 'negative',
       onClick: deleteOutbox
     },
@@ -39,6 +41,19 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
       label: '验证',
       tooltip: '向自己发送一封邮件，以此测试发件箱的有效性',
       onClick: onValidateOutbox
+    },
+    {
+      name: 'validateBatch',
+      label: '批量验证',
+      tooltip: '批量验证当前组中所有未验证的邮箱',
+      onClick: onValidateOutboxBatch
+    },
+    {
+      name: 'deleteInvalid',
+      label: '删除无效',
+      tooltip: '删除当前组中验证失败的发件箱',
+      color: 'negative',
+      onClick: deleteOutbox
     }
   ]
 
@@ -46,17 +61,26 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
 
   // 删除发件箱
   async function deleteOutbox (row: Record<string, any>) {
-    const outbox = row as IOutbox
-    // 提示是否删除
-    const confirm = await confirmOperation('删除发件箱', `是否删除发件箱: ${outbox.email}？`)
-    if (!confirm) return
+    const { rows, selectedRows } = getSelectedRows(row)
 
-    await deleteOutboxById(outbox.id as number)
+    // 提示是否删除
+    if (rows.length === 1) {
+      const confirm = await confirmOperation('删除发件箱', `是否删除发件箱: ${rows[0].email}？`)
+      if (!confirm) return
+    } else {
+      const confirm = await confirmOperation('删除发件箱', `是否删除选中的 ${rows.length} 个发件箱？`)
+      if (!confirm) return
+    }
+
+    // 请求删除
+    await deleteOutboxByIds(rows.map(row => row.objectId as string))
 
     // 开始删除
-    deleteRowById(outbox.id)
-
-    notifySuccess('删除成功')
+    rows.forEach(row => {
+      deleteRowById(row.id)
+    })
+    selectedRows.value = []
+    notifySuccess(`删除成功, 共删除 ${rows.length} 项`)
   }
 
   // 更新发件箱
@@ -144,6 +168,11 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     notifyError(fullMessage)
     // 更新状态
     row.isValid = false
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function onValidateOutboxBatch (row: Record<string, any>) {
+
   }
 
   return { outboxContextMenuItems }

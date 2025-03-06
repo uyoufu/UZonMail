@@ -7,6 +7,8 @@ export type addNewRowType<T = Record<string, any>> = (newRow: T, idField?: strin
 
 export type deleteRowByIdType = (id?: number, idField?: string) => void
 
+export type getSelectedRowsType = (cursorData: Record<string, any>) => { rows: Record<string, any>[]; selectedRows: Ref<Record<string, any>[]> }
+
 /**
  * 返回一个QTable的配置对象
  * @param initParams
@@ -147,16 +149,33 @@ export function useQTable (initParams: IQTableInitParams) {
     increaseRowsNumber(-1)
   }
 
+  const selectedRows = ref<Record<string, any>[]>([])
+  /**
+   * 获取选中的行
+   * @param cursorData
+   * @returns { rows, selectedRows }, rows 是当前选中的行，selectedRows 是选中的行的容器
+   */
+  function getSelectedRows (cursorData: Record<string, any>): { rows: Record<string, any>[]; selectedRows: Ref<Record<string, any>[]> } {
+    let rows = [cursorData]
+    if (selectedRows.value.length > 0) {
+      rows = selectedRows.value
+    }
+
+    return { rows, selectedRows }
+  }
+
   return {
     rows,
     pagination,
     filter,
     loading,
+    selectedRows,
     onTableRequest,
     increaseRowsNumber,
     refreshTable,
     addNewRow,
-    deleteRowById
+    deleteRowById,
+    getSelectedRows
   }
 }
 
