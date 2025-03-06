@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // 底部按钮
-import OkBtn from 'src/components/componentWrapper/buttons/OkBtn.vue'
-import CommonBtn from 'src/components/componentWrapper/buttons/CommonBtn.vue'
+import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
+import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { IEmailCreateInfo, sendEmailNow, sendSchedule } from 'src/api/emailSending'
 import { useUserInfoStore } from 'src/stores/user'

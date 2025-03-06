@@ -11,7 +11,7 @@ import { isEmail } from 'src/utils/validator'
 import { useUserInfoStore } from 'src/stores/user'
 import { aes } from 'src/utils/encrypt'
 import { IExcelColumnMapper, readExcel, writeExcel } from 'src/utils/file'
-import { getUsableProxies } from 'src/api/proxy'
+import { getUsableProxies, IProxy } from 'src/api/proxy'
 
 function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
   return aes(smtpPasswordSecretKeys[0], smtpPasswordSecretKeys[1], password)
@@ -30,7 +30,7 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
     name: '无',
     isActive: true,
     url: ''
-  })
+  } as IProxy)
   return [
     {
       name: 'email',

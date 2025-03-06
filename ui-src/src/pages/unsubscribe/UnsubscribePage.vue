@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import CommonBtn from 'src/components/componentWrapper/buttons/CommonBtn.vue'
+import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 

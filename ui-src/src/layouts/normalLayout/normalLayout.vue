@@ -4,13 +4,19 @@
       <q-card class="column bg-white">
         <q-toolbar class="row items-center full-width">
           <MenuOpenButton v-model="drawer" />
+
           <q-toolbar-title>
             <BreadcrumbsIndex />
           </q-toolbar-title>
+
           <GlobalSignalR />
+
           <UserInfo />
+
         </q-toolbar>
-        <q-separator></q-separator>
+
+        <q-separator />
+
         <TagsView />
       </q-card>
     </q-header>
