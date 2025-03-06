@@ -18,6 +18,7 @@ export interface IInbox {
  * 发件箱
  */
 export interface IOutbox extends IInbox {
+  objectId?: string,
   smtpHost: string,
   smtpPort?: number,
   userName?: string,
@@ -119,6 +120,17 @@ export function getOutboxesData (groupId: number | undefined, filter: string | u
  */
 export function deleteOutboxById (emailBoxId: number) {
   return httpClient.delete<boolean>(`/email-box/outboxes/${emailBoxId}`)
+}
+
+/**
+ * 通过 id 批量删除邮箱
+ * @param emailBoxIds 字符串 _id
+ * @returns
+ */
+export function deleteOutboxByIds (emailBoxIds: string[]) {
+  return httpClient.delete<boolean>('/email-box/outboxes', {
+    data: emailBoxIds
+  })
 }
 
 /**

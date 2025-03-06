@@ -4,8 +4,8 @@
       style="min-width: 160px;" :contextMenuItems="groupCtxMenuItems" />
 
     <q-table ref="outboxTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
-      v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
-      @request="onTableRequest">
+      v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort selection="multiple"
+      v-model:selected="selectedRows" @request="onTableRequest">
       <template v-slot:top-left>
         <div class="row justify-start q-gutter-sm">
           <CreateBtn tooltip="新增发件箱" @click="onNewOutboxClick" :disable="!isValidEmailGroup"
@@ -67,11 +67,12 @@ import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import { getOutboxesCount, getOutboxesData, IOutbox } from 'src/api/emailBox'
 import { IEmailGroupListItem } from '../components/types'
 
-// 左侧分组开关
+// #region 左侧分组开关
 import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
 const outboxTableRef = ref<InstanceType<typeof QTable> | undefined>()
 const isCollapseGroupList = ref(false)
 const { CollapseLeft, collapseStyleRef } = useTableCollapseLeft(outboxTableRef, isCollapseGroupList)
+// #endregion
 
 // 菜单项
 const emailGroupRef: Ref<IEmailGroupListItem> = ref({
@@ -188,7 +189,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
   const { data } = await getOutboxesData(emailGroupRef.value.id, filterObj.filter, pagination)
   return data
 }
-const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById } = useQTable({
+const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById, selectedRows, getSelectedRows } = useQTable({
   getRowsNumberCount,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onRequest,
@@ -226,7 +227,7 @@ const { onNewOutboxClick, onExportOutboxTemplateClick, onImportOutboxClick } = u
 
 // #region 数据右键菜单
 import { useContextMenu } from './contextMenu'
-const { outboxContextMenuItems } = useContextMenu(deleteRowById)
+const { outboxContextMenuItems } = useContextMenu(deleteRowById, getSelectedRows)
 // #endregion
 
 // #region 分组的右键菜单

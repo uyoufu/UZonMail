@@ -1,6 +1,6 @@
 <template>
   <UserAvatar>
-    <HoverableTip class="bg-white" anchor="bottom right" self="top right" :offset="[0, 6]">
+    <HoverableTip class="bg-white" anchor="bottom right" self="top right" :offset="[0, 8]">
       <q-list class="rounded-borders shadow-1 user-info-menu" bordered separator
         style="min-width: 80px;overflow: hidden;" dense>
         <q-item clickable @click="onGoToProfile" class="active-item text-primary">

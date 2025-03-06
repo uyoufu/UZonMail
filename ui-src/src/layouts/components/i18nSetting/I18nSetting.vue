@@ -1,6 +1,6 @@
 <template>
   <q-icon name="translate" size="sm" color="secondary">
-    <HoverableTip class="bg-white" anchor="bottom right" self="top right" :offset="[0, 6]">
+    <HoverableTip class="bg-white" anchor="bottom right" self="top right" :offset="[4, 8]">
       <q-list class="rounded-borders shadow-1 language-menu" bordered separator style="overflow: hidden;" dense>
         <q-item v-for="translation in sortedTranslations" :key="translation.locale" clickable
           @click="onSwitchLocale(translation.locale)" class="active-item text-primary">
