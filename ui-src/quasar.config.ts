@@ -14,8 +14,6 @@ import { ElementPlusResolver, QuasarResolver } from 'unplugin-vue-components/res
 
 // 导入用户配置
 import { useConfig } from 'src/config/index'
-import { getDefaultLocale } from 'src/boot/i18n'
-import { QuasarLanguageCodesHolder } from 'quasar'
 
 async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
   const userConfig = await useConfig(ctx)
@@ -37,7 +35,7 @@ async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['config.ts', 'i18n', 'axios', 'logger'],
+    boot: ['config.ts', 'quasar-lang-pack', 'i18n', 'axios', 'logger'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ['app.scss'],
@@ -146,7 +144,7 @@ async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
       },
 
       // iconSet: 'material-icons', // Quasar icon set
-      lang: getDefaultLocale() as keyof QuasarLanguageCodesHolder, // Quasar language pack
+      lang: 'zh-CN', // Quasar language pack
 
       // For special cases outside of where the auto-import strategy can have an impact
       // (like functional components as one of the examples),

@@ -2,29 +2,36 @@ import { boot } from 'quasar/wrappers'
 import { createI18n } from 'vue-i18n'
 import { useSessionStorage } from '@vueuse/core'
 
+/*
+ * All i18n resources specified in the plugin `include` option can be loaded
+ * at once using the import syntax
+ */
 import { messages } from 'src/i18n'
 
-export type MessageLanguages = keyof typeof messages;
+
+// export type MessageLanguages = keyof typeof messages;
 // Type-define 'en-US' as the master schema for the resource
-export type MessageSchema = typeof messages['en-US'];
+// export type MessageSchema = typeof messages['zh-CN'];
 
-// See https://vue-i18n.intlify.dev/guide/advanced/typescript.html#global-resource-schema-type-definition
-/* eslint-disable @typescript-eslint/no-empty-interface */
-declare module 'vue-i18n' {
-  // define the locale messages schema
-  export interface DefineLocaleMessage extends MessageSchema { }
+// // See https://vue-i18n.intlify.dev/guide/advanced/typescript.html#global-resource-schema-type-definition
+// /* eslint-disable @typescript-eslint/no-empty-interface */
+// declare module 'vue-i18n' {
+//   // define the locale messages schema
+//   export interface DefineLocaleMessage extends MessageSchema { }
 
-  // define the datetime format schema
-  export interface DefineDateTimeFormat { }
+//   // define the datetime format schema
+//   export interface DefineDateTimeFormat { }
 
-  // define the number format schema
-  export interface DefineNumberFormat { }
-}
-/* eslint-enable @typescript-eslint/no-empty-interface */
+//   // define the number format schema
+//   export interface DefineNumberFormat { }
+// }
+// /* eslint-enable @typescript-eslint/no-empty-interface */
 
 export function getDefaultLocale (): string {
   // 判断 session 中是否有 locale，若有，则使用 session 中的 locale
   const browserLang = useSessionStorage('locale', '').value
+  if (!browserLang) return 'zh-CN'
+
   const messagesKeys = Object.keys(messages)
   const browserLangKey = messagesKeys.find(key => key.startsWith(browserLang))
   return browserLangKey || 'zh-CN'

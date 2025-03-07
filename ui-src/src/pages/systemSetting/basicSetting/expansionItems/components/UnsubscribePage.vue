@@ -79,13 +79,12 @@ const { pagination, rows, filter, onTableRequest, loading, addNewRow } = useQTab
 // #region 新增退订页面
 import { notifySuccess, showComponentDialog, showDialog } from 'src/utils/dialog'
 
-import messages from 'src/i18n'
+import { translations } from 'src/i18n'
 import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
 import UnsubscribePageDialog from 'src/pages/unsubscribe/UnsubscribePageDialog.vue'
 
 function getPopupParams (data: IUnsubscribePage | null = null) {
   // 获取所有的语言
-  const languages = Object.keys(messages)
   const dialogParams: IPopupDialogParams = {
     title: data ? '编辑退定页面' : '新增退订页面',
     oneColumn: true,
@@ -94,7 +93,7 @@ function getPopupParams (data: IUnsubscribePage | null = null) {
         name: 'language',
         label: '语言',
         type: PopupDialogFieldType.selectOne,
-        options: languages.map((lang) => ({ label: lang, value: lang })),
+        options: translations.map(x => ({ label: x.label, value: x.locale })),
         required: true,
         emitValue: true,
         value: data?.language,
