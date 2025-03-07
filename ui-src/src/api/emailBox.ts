@@ -128,7 +128,7 @@ export function deleteOutboxById (emailBoxId: number) {
  * @returns
  */
 export function deleteOutboxByIds (emailBoxIds: string[]) {
-  return httpClient.delete<boolean>('/email-box/outboxes', {
+  return httpClient.delete<boolean>('/email-box/outboxes/ids', {
     data: emailBoxIds
   })
 }

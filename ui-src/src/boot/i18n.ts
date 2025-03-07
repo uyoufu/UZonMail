@@ -22,16 +22,18 @@ declare module 'vue-i18n' {
 }
 /* eslint-enable @typescript-eslint/no-empty-interface */
 
-function getDefaultLocale (): string {
+export function getDefaultLocale (): string {
   // 判断 session 中是否有 locale，若有，则使用 session 中的 locale
-  const browserLang = useSessionStorage('locale', navigator.language).value
+  const browserLang = useSessionStorage('locale', '').value
   const messagesKeys = Object.keys(messages)
   const browserLangKey = messagesKeys.find(key => key.startsWith(browserLang))
-  return browserLangKey || 'en-US'
+  return browserLangKey || 'zh-CN'
 }
 
 export const i18n = createI18n({
   locale: getDefaultLocale(),
+  fallbackLocale: 'zh-CN',
+  silentFallbackWarn: true, // 控制台上不打印警告
   legacy: false, // 如果要支持compositionAPI，此项必须设置为false
   messages,
   globalInjection: true // 注册全局 $t

@@ -26,9 +26,22 @@ const sortedTranslations = computed(() => {
 
 import { useI18n } from 'vue-i18n'
 const { locale } = useI18n()
+
+// 预加载所有可能的语言文件
+const modules = import.meta.glob('../../../../node_modules/quasar/lang/*.js')
+import { QuasarLanguage, useQuasar } from 'quasar'
+const $q = useQuasar()
 async function onSwitchLocale (value: string) {
   store.setLocale(value)
   locale.value = value
+
+  // 获取 quasar 语言
+  const moduleFile = `../../../../node_modules/quasar/lang/${value}.js`
+  console.log('modules', modules, modules[moduleFile])
+  if (!modules[moduleFile]) {
+    const lang = (await import(`quasar/lang/${value}.js`)).default as QuasarLanguage
+    $q.lang.set(lang)
+  }
 }
 </script>
 

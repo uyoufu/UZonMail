@@ -14,5 +14,8 @@ export default {
   },
   languageRequired: 'Language is required',
   htmlContentRequired: 'Html content is required',
-  unsubscribePageHasAreadyExist: 'Unsubscribe page for this language already exists'
+  unsubscribePageHasAreadyExist: 'Unsubscribe page for this language already exists',
+  outboxManager: {
+    doDeleteAllInvalidOutboxes: 'Do you want to delete all invalid outboxes in the current group?'
+  }
 }

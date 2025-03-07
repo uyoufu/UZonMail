@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import enUS from './en-US'
-import zhCN from './zh-CN'
+import enUS from './locales/en-US'
+import zhCN from './locales/zh-CN'
 
 export type Translation = {
   [key: string]: string | { [key: string]: string }
