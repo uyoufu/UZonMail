@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IOutbox, deleteOutboxByIds, updateOutbox, validateOutbox } from 'src/api/emailBox'
+import {
+  IOutbox, deleteOutboxByIds, updateOutbox, validateOutbox
+} from 'src/api/emailBox'
+import { deleteAllInvalidBoxesInGroup } from 'src/api/emailGroup'
 
 import { IContextMenuItem } from 'src/components/contextMenu/types'
 import { IPopupDialogParams } from 'src/components/popupDialog/types'
@@ -10,6 +13,8 @@ import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { deAes } from 'src/utils/encrypt'
 
 import { getSelectedRowsType } from 'src/compositions/qTableUtils'
+
+import { useI18n } from 'vue-i18n'
 
 /**
  * 获取smtp密码
@@ -22,6 +27,8 @@ function getSmtpPassword (outbox: IOutbox, smtpPasswordSecretKeys: string[]) {
 }
 
 export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType) {
+  const { t } = useI18n()
+
   const outboxContextMenuItems: IContextMenuItem[] = [
     {
       name: 'edit',
@@ -53,7 +60,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       label: '删除无效',
       tooltip: '删除当前组中验证失败的发件箱',
       color: 'negative',
-      onClick: deleteOutbox
+      onClick: onDeleteInvalidOutboxes
     }
   ]
 
@@ -173,6 +180,19 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function onValidateOutboxBatch (row: Record<string, any>) {
 
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function onDeleteInvalidOutboxes (row: Record<string, any>) {
+    const confirm = await confirmOperation(t('confirmOperation'), t('outboxManager.doDeleteAllInvalidOutboxes'))
+    if (!confirm) return
+
+    // 请求删除
+    const outbox = row as IOutbox
+    await deleteAllInvalidBoxesInGroup(outbox.emailGroupId as number)
+
+    // 删除成功
+    notifySuccess(t('deleteSuccess'))
   }
 
   return { outboxContextMenuItems }

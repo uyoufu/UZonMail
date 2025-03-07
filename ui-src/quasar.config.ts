@@ -13,10 +13,13 @@ import { QuasarContext } from '@quasar/app-vite/types/configuration/context'
 import { ElementPlusResolver, QuasarResolver } from 'unplugin-vue-components/resolvers'
 
 // 导入用户配置
-import { useConfig } from 'src/config'
+import { useConfig } from 'src/config/index'
+import { getDefaultLocale } from 'src/boot/i18n'
+import { QuasarLanguageCodesHolder } from 'quasar'
 
 async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
   const userConfig = await useConfig(ctx)
+
   return {
     eslint: {
       // fix: true,
@@ -143,7 +146,7 @@ async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
       },
 
       // iconSet: 'material-icons', // Quasar icon set
-      lang: 'zh-CN', // Quasar language pack
+      lang: getDefaultLocale() as keyof QuasarLanguageCodesHolder, // Quasar language pack
 
       // For special cases outside of where the auto-import strategy can have an impact
       // (like functional components as one of the examples),

@@ -56,3 +56,11 @@ export function updateEmailCroup (groupData: IEmailGroup) {
 export function deleteEmailGroupById (groupId: number) {
   return httpClient.delete<boolean>(`/email-group/${groupId}`)
 }
+
+/**
+ * 删除所有无效的发件箱
+ * @returns
+ */
+export function deleteAllInvalidBoxesInGroup (groupId: number) {
+  return httpClient.delete<boolean>(`/email-group//${groupId}/invalid-outboxes`)
+}

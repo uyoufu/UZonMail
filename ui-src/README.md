@@ -43,3 +43,20 @@ docker exec -it uzon-mail-dev yarn install && yarn run dev
 # 第二次启动
 docker exec -it uzon-mail-dev yarn run dev
 ```
+
+
+## quasar 升级
+
+### yarn4
+
+参考 https://quasar.dev/start/upgrade-guide#with-quasar-cli
+``` bash
+# 安装 cli
+yarn dlx @quasar/cli
+
+# 检查包
+yarn dlx @quasar/cli upgrade
+
+# 开始升级
+yarn dlx @quasar/cli upgrade --install
+```
