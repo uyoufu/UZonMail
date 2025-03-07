@@ -384,7 +384,7 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="emailBoxId"></param>
         /// <returns></returns>
         /// <exception cref="KnownException"></exception>
-        [HttpDelete("outboxes")]
+        [HttpDelete("outboxes/ids")]
         public async Task<ResponseResult<bool>> DeleteOutboxByIds([FromBody]List<string> outboxIds)
         {
             var emailBox =  db.Outboxes.Where(x => outboxIds.Contains(x.ObjectId));           
@@ -393,6 +393,7 @@ namespace UZonMail.Core.Controllers.Emails
 
             return true.ToSuccessResponse();
         }
+       
 
         /// <summary>
         /// 获取邮箱数量
