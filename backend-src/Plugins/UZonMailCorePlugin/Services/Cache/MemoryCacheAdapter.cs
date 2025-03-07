@@ -25,12 +25,12 @@ namespace UZonMail.Core.Services.Cache
 
         public async Task RemoveByPrefix(string prefix)
         {
-            var keys = _cache.Keys.Select(x => new { keyStr = x.ToString(), key = x })
+            var keyResults = _cache.Keys.Select(x => new { keyStr = x.ToString(), key = x })
                 .Where(x => x.keyStr.StartsWith(prefix))
                 .ToList();
-            foreach (var key in keys)
+            foreach (var keyResult in keyResults)
             {
-                _cache.Remove(key);
+                _cache.Remove(keyResult.key);
             }
         }
 
