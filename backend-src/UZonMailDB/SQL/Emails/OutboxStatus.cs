@@ -3,9 +3,9 @@
     public enum OutboxStatus
     {
         /// <summary>
-        /// 未知
+        /// 没有测试
         /// </summary>
-        Unknown,
+        None,
 
         /// <summary>
         /// 有效

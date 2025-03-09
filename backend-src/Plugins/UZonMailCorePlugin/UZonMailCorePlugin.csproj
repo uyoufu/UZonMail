@@ -7,11 +7,10 @@
 		<OutputType>Library</OutputType>
 		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-		<Platforms>x64</Platforms>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-		<BaseOutputPath>..\..\UZonMailService\bin\x64\Debug\net9.0\Plugins\UZonMailCore</BaseOutputPath>
+		<BaseOutputPath>..\..\UZonMailService\bin\Debug\net9.0\Plugins\UZonMailCore</BaseOutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">

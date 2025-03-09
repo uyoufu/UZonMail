@@ -9,13 +9,19 @@ using UZonMail.Core.Services.Common;
 using UZonMail.DB.SQL;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.Core.Controllers.Users.Model;
+using UZonMail.Core.Services.SendCore.Sender;
+using Microsoft.AspNetCore.SignalR;
+using UZonMail.Core.SignalRHubs;
+using UZonMail.Core.SignalRHubs.Extensions;
 
 namespace UZonMail.Core.Controllers.Emails
 {
     /// <summary>
     /// 邮件管理
     /// </summary>
-    public class EmailGroupController(SqlContext db, EmailGroupService groupService, TokenService tokenService) : ControllerBaseV1
+    public class EmailGroupController(SqlContext db, EmailGroupService groupService, TokenService tokenService, EmailUtilsService emailUtils,
+        IHubContext<UzonMailHub, IUzonMailClient> hub) : ControllerBaseV1
     {
         /// <summary>
         /// 获取值
@@ -109,6 +115,31 @@ namespace UZonMail.Core.Controllers.Emails
             db.Outboxes.RemoveRange(emailBoxes);
             await db.SaveChangesAsync();
 
+            return true.ToSuccessResponse();
+        }
+
+        [HttpPut("{groupId:long}/invalid-outbox/validate")]
+        public async Task<ResponseResult<bool>> ValidateAllInvalidOutboxes(long groupId, [FromBody] SmtpPasswordSecretKeys smtpPasswordSecretKeys)
+        {
+            // 判断是否属于自己的组
+            var userId = tokenService.GetUserSqlId();
+            var outboxes = db.Outboxes.AsNoTracking().Where(x => !x.IsValid && x.EmailGroupId == groupId && x.UserId == userId);
+
+            var client = hub.GetUserClient(userId);
+
+            // 开始进行验证
+            foreach (var outbox in outboxes)
+            {
+                // 发送测试邮件
+                var vdResult = await emailUtils.ValidateOutbox(outbox, smtpPasswordSecretKeys);
+
+                outbox.Status = vdResult.Ok ? OutboxStatus.Valid : OutboxStatus.Invalid;
+                outbox.ValidFailReason = vdResult.Message;
+                outbox.IsValid = vdResult.Ok;
+
+                // 推送验证结果
+                client.OutboxStatusChanged(outbox);
+            }
             return true.ToSuccessResponse();
         }
     }

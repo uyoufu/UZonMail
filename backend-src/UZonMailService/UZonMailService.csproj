@@ -8,11 +8,9 @@
 		<UserSecretsId>f2aa302e-c8fb-40d2-9a58-a6348ffd6c03</UserSecretsId>
 		<ServerGarbageCollection>false</ServerGarbageCollection>
 		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
-		<Platforms>x64</Platforms>
 		<LangVersion>13.0</LangVersion>
 		<FileVersion>0.11.3.0</FileVersion>
 		<AssemblyVersion>0.11.3.0</AssemblyVersion>
-		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 
 	<ItemGroup>

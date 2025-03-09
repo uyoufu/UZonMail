@@ -49,12 +49,6 @@
         public int SentTotalToday { get; set; }
 
         /// <summary>
-        /// 状态
-        /// 用于向前端展示发件箱是否可用
-        /// </summary>
-        public OutboxStatus Status { get; set; }
-
-        /// <summary>
         /// 回复邮箱
         /// 多个邮箱地址使用逗号分隔
         /// </summary>
@@ -70,6 +64,12 @@
         /// 必须通过验证后，才能正常使用
         /// </summary>
         public bool IsValid { get; set; }
+
+        /// <summary>
+        /// 状态
+        /// 用于向前端展示发件箱是否可用
+        /// </summary>
+        public OutboxStatus Status { get; set; }
 
         /// <summary>
         /// 验证失败原因

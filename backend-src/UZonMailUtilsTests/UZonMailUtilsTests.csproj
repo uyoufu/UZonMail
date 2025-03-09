@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <Platforms>x64;AnyCPU</Platforms>
 	<LangVersion>13.0</LangVersion>
   </PropertyGroup>
 

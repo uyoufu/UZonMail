@@ -4,10 +4,8 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>UZonMail.Utils</RootNamespace>
-		<Platforms>x64</Platforms>
 		<OutputType>Library</OutputType>
 		<LangVersion>13.0</LangVersion>
-		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 
 	<ItemGroup>

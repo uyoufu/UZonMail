@@ -39,6 +39,11 @@ namespace UZonMail.Core.SignalRHubs
             });
         }
 
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <returns></returns>
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             // 当用户断开连接时，将他们从字典中移除

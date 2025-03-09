@@ -42,7 +42,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             // 正文
             BodyBuilder bodyBuilder = new()
             {
-                HtmlBody = "This email is for SMTP Testing"
+                HtmlBody = "This email is for SMTP Testing from UZonMail"
             };
             message.Body = bodyBuilder.ToMessageBody();
             try

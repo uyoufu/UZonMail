@@ -21,7 +21,8 @@ namespace UZonMail.Core.Controllers.Emails
     /// <summary>
     /// 邮箱
     /// </summary>
-    public class EmailBoxController(SqlContext db, TokenService tokenService, UserService userService, EmailGroupService emailGroupService) : ControllerBaseV1
+    public class EmailBoxController(SqlContext db, TokenService tokenService, UserService userService,
+        EmailGroupService emailGroupService, EmailUtilsService emailUtils) : ControllerBaseV1
     {
         /// <summary>
         /// 创建发件箱
@@ -271,25 +272,10 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpPut("outbox/{outboxId:long}/validation")]
         public async Task<ResponseResult<bool>> ValidateOutbox(long outboxId, [FromBody] SmtpPasswordSecretKeys smtpPasswordSecretKeys)
         {
-            // 只能测试属于自己的发件箱
-            var userId = tokenService.GetUserSqlId();
-
-            var outbox = await db.Outboxes.FirstOrDefaultAsync(x => x.Id == outboxId && x.UserId == userId) ?? throw new KnownException("发件箱不存在");
-
-            // 发送测试邮件
-            var outboxTestor = new OutboxTestSender(outbox, smtpPasswordSecretKeys, db);
-            var result = await outboxTestor.SendTest();
-
-            // 更新数据库
-            await db.Outboxes.UpdateAsync(x => x.Id == outboxId, x => x.SetProperty(y => y.IsValid, result.Ok)
-            .SetProperty(x => x.ValidFailReason, result.Message));
-
-            return new ResponseResult<bool>()
-            {
-                Ok = true,
-                Data = result.Ok,
-                Message = result.Message,
-            };
+            var result = await emailUtils.ValidateOutbox(outboxId, smtpPasswordSecretKeys);
+            // 让前端自己处理错误
+            result.Ok = true;
+            return result;
         }
 
         /// <summary>
@@ -385,15 +371,17 @@ namespace UZonMail.Core.Controllers.Emails
         /// <returns></returns>
         /// <exception cref="KnownException"></exception>
         [HttpDelete("outboxes/ids")]
-        public async Task<ResponseResult<bool>> DeleteOutboxByIds([FromBody]List<string> outboxIds)
+        public async Task<ResponseResult<bool>> DeleteOutboxByIds([FromBody] List<string> outboxIds)
         {
-            var emailBox =  db.Outboxes.Where(x => outboxIds.Contains(x.ObjectId));           
+            var userId = tokenService.GetUserSqlId();
+
+            var emailBox = db.Outboxes.Where(x => x.UserId == userId && outboxIds.Contains(x.ObjectId));
             db.Outboxes.RemoveRange(emailBox);
             await db.SaveChangesAsync();
 
             return true.ToSuccessResponse();
         }
-       
+
 
         /// <summary>
         /// 获取邮箱数量
