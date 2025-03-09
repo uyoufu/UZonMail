@@ -10,9 +10,14 @@
         <div class="row justify-start q-gutter-sm">
           <CreateBtn tooltip="新增发件箱" @click="onNewOutboxClick" :disable="!isValidEmailGroup"
             tooltip-when-disabled="请先添加组" />
-          <ExportBtn label="模板" tooltip="导出发件箱模板" @click="onExportOutboxTemplateClick" />
-          <ImportBtn tooltip="导入发件箱" @click="onImportOutboxClick()" :disable="!isValidEmailGroup"
+
+          <ExportBtn label="模板" tooltip="下载发件箱模板" @click="onExportOutboxTemplateClick" />
+
+          <ImportBtn label="Excel 导入" tooltip="导入发件箱" @click="onImportOutboxClick()" :disable="!isValidEmailGroup"
             tooltip-when-disabled="请先添加组" />
+
+          <ImportBtn :label="importFromTxtLable" :tooltip="importFromTxtTooltip" @click="onImportOutboxClick()"
+            :disable="!isValidEmailGroup" tooltip-when-disabled="请先添加组" />
         </div>
       </template>
 
@@ -296,6 +301,12 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
 // #region 注册 signalR 事件，方便进行实时更新
 import { useSignalR } from './useSignalR'
 useSignalR(updateExistOne)
+// #endregion
+
+// #region 邮箱导入功能
+import { useOutboxImporter } from './useOutboxImporter'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { onImportOutboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useOutboxImporter()
 // #endregion
 </script>
 

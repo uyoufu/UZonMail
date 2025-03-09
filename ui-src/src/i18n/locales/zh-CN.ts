@@ -25,6 +25,9 @@ export default {
   },
 
   outboxManager: {
+    importFromTxt: 'Txt 导入',
+    importFromTxtTooltip: '支持格式:\n1. 邮箱, 密码: test@gmail.com, 1234\n2. 邮箱, 密码, smtp地址, smtp端口: test@gmail.com, 1234, smtp.gmail.com, 465',
+
     doDeleteAllInvalidOutboxes: '是否删除当前组中所有验证失败的发件箱？',
     editCurrentOutbox: '编辑当前发件箱',
     deleteCurrentOrSelection: '删除当前或选中的发件箱',
