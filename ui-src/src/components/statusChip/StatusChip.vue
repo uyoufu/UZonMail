@@ -9,6 +9,8 @@
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
+import logger from 'loglevel'
+
 import type { IStatusChipItem } from './types'
 const defaultStatusStyles = [
   { status: 'created', label: '新建', color: 'primary', textColor: 'white', icon: '' },
@@ -71,6 +73,8 @@ const statusStylesMap = computed(() => {
 const statusStyle = computed(() => {
   const statusStr = String(props.status).toLowerCase()
   const statusLabel = t(`statusChip.${String(props.status)}`)
+
+  logger.debug('[statusChip] statusStr:', statusLabel)
 
   const statusMap = statusStylesMap.value[statusStr]
   if (!statusMap) {

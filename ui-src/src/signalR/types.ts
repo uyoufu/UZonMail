@@ -3,12 +3,19 @@
  * 当注册后，服务器即可调用该方法
  */
 export enum UzonMailClientMethods {
+  // 通用的通知
   notify,
 
+  // 发送组进度变化
   sendingGroupProgressChanged,
+  // 发件项状态变化
   sendingItemStatusChanged,
 
+  // 发送错误
   sendError,
+
+  // 发件箱状态变化
+  outboxStatusChanged
 }
 
 export enum SendingGroupProgressType {

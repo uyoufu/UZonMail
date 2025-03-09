@@ -5,6 +5,8 @@ import QTableIndex from 'src/components/tableComponents/TableIndex.vue'
 
 export type addNewRowType<T = Record<string, any>> = (newRow: T, idField?: string) => void
 
+export type updateExistOneType<T = Record<string, any>> = (newData: T, idField?: string) => boolean
+
 export type deleteRowByIdType = (id?: number, idField?: string) => void
 
 export type getSelectedRowsType = (cursorData: Record<string, any>) => { rows: Record<string, any>[]; selectedRows: Ref<Record<string, any>[]> }
@@ -183,6 +185,22 @@ export function useQTable (initParams: IQTableInitParams) {
     increaseRowsNumber(1)
   }
 
+  /**
+   * 若存在项，则更新它
+   * @param newData
+   * @param idField
+   * @returns
+   */
+  function updateExistOne (newData: Record<string, any>, idField: string = 'id') {
+    // 查找是否存在
+    const found = rows.value.find(x => x[idField] === newData[idField])
+    if (!found) return false
+
+    // 更新
+    Object.assign(found, newData)
+    return true
+  }
+
   // 删除行
   function deleteRowById (id?: number, idField: string = 'id') {
     if (!id) return
@@ -216,6 +234,7 @@ export function useQTable (initParams: IQTableInitParams) {
     increaseRowsNumber,
     refreshTable,
     addNewRow,
+    updateExistOne,
     deleteRowById,
     getSelectedRows
   }

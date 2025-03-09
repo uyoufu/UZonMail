@@ -39,10 +39,10 @@
         </q-td>
       </template>
 
-      <template v-slot:body-cell-isValid="props">
+      <template v-slot:body-cell-status="props">
         <q-td class="cursor-pointer" :props="props">
           <StatusChip :status="props.value">
-
+            <AsyncTooltip :cache="false" :tooltip="props.row.validFailReason" />
           </StatusChip>
         </q-td>
       </template>
@@ -53,6 +53,9 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+
 import type { QTable, QTableColumn } from 'quasar'
 
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
@@ -62,6 +65,7 @@ import ExportBtn from 'src/components/quasarWrapper/buttons/ExportBtn.vue'
 import EmailGroupList from '../components/EmailGroupList.vue'
 import ContextMenu from 'components/contextMenu/ContextMenu.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
+import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
 import { useQTable } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
@@ -176,11 +180,23 @@ const columns: QTableColumn[] = [
     }
   },
   {
-    name: 'isValid',
+    name: 'status',
     required: true,
-    label: '验证',
+    label: t('outboxManager.col_status'),
     align: 'left',
-    field: 'isValid',
+    field: 'status',
+    format: (val: number) => {
+      switch (val) {
+        case 0:
+          return t('outboxStatus.none')
+        case 1:
+          return t('outboxStatus.success')
+        case 2:
+          return t('outboxStatus.failed')
+        default:
+          return t('outboxStatus.unknown')
+      }
+    },
     sortable: true
   }
 ]
@@ -192,12 +208,13 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
   const { data } = await getOutboxesData(emailGroupRef.value.id, filterObj.filter, pagination)
   return data
 }
-const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById, selectedRows, getSelectedRows } = useQTable({
-  getRowsNumberCount,
-
-  onRequest,
-  preventRequestWhenMounted: true
-})
+const { pagination, rows, filter, onTableRequest, loading,
+  refreshTable, addNewRow, deleteRowById, selectedRows,
+  getSelectedRows, updateExistOne } = useQTable({
+    getRowsNumberCount,
+    onRequest,
+    preventRequestWhenMounted: true
+  })
 watch(emailGroupRef, () => {
   // 组切换时，触发更新
   refreshTable()
@@ -230,7 +247,7 @@ const { onNewOutboxClick, onExportOutboxTemplateClick, onImportOutboxClick } = u
 
 // #region 数据右键菜单
 import { useContextMenu } from './contextMenu'
-const { outboxContextMenuItems } = useContextMenu(deleteRowById, getSelectedRows)
+const { outboxContextMenuItems } = useContextMenu(deleteRowById, getSelectedRows, refreshTable)
 // #endregion
 
 // #region 分组的右键菜单
@@ -274,6 +291,11 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
     strict: true
   })
 }
+// #endregion
+
+// #region 注册 signalR 事件，方便进行实时更新
+import { useSignalR } from './useSignalR'
+useSignalR(updateExistOne)
 // #endregion
 </script>
 
