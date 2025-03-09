@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IEmailTemplate } from 'src/api/emailTemplate'
+import type { IEmailTemplate } from 'src/api/emailTemplate'
 // 定义 v-model
 const modelValue = defineModel({
   type: Array as PropType<IEmailTemplate[]>,

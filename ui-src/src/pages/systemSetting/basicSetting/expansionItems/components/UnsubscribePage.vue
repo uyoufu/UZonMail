@@ -30,15 +30,17 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 
+import type { IUnsubscribePage
+} from 'src/api/pro/unsubscribePage';
 import {
   createUnsubscribePage, updateUnsubscribePage,
-  getUnsubscribePagesCount, getUnsubscribePagesData, IUnsubscribePage
+  getUnsubscribePagesCount, getUnsubscribePagesData
 } from 'src/api/pro/unsubscribePage'
 
 const columns: QTableColumn[] = [
@@ -59,12 +61,12 @@ const columns: QTableColumn[] = [
     sortable: true
   }
 ]
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getUnsubscribePagesCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getUnsubscribePagesData(filterObj.filter, pagination)
   return data || []
@@ -72,7 +74,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, addNewRow } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 
@@ -80,7 +82,8 @@ const { pagination, rows, filter, onTableRequest, loading, addNewRow } = useQTab
 import { notifySuccess, showComponentDialog, showDialog } from 'src/utils/dialog'
 
 import { translations } from 'src/i18n'
-import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams} from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import UnsubscribePageDialog from 'src/pages/unsubscribe/UnsubscribePageDialog.vue'
 
 function getPopupParams (data: IUnsubscribePage | null = null) {
@@ -155,7 +158,7 @@ async function onModifyUnsubscribePage (unsubscribePage: Record<string, any>) {
   notifySuccess('更新成功')
 }
 
-async function onPreviewUnsubscribePage (unsubscribePageId: number) {
+function onPreviewUnsubscribePage (unsubscribePageId: number) {
   const url = `/pages/unsubscribe/pls-give-me-a-shot?unsubscribeId=${unsubscribePageId}`
   window.open(url, '_blank')
 }

@@ -1,4 +1,4 @@
-import { IAxiosRequestConfig } from './types'
+import type { IAxiosRequestConfig } from './types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 class HttpCache {

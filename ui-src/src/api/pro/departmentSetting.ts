@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { httpClientPro } from 'src/api/base/httpClient'
-import { IOrganizationSetting } from '../organizationSetting'
+import type { IOrganizationSetting } from '../organizationSetting'
 
 /**
  * 获取用户设置

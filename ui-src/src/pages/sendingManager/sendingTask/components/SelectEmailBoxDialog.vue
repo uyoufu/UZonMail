@@ -124,7 +124,6 @@ selectedGroups.value.push(...props.initEmailGroups)
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   if (emailGroupRef.value.name === 'selected') {
     if (!filterObj.filter) return selected.value.length
-    // eslint-disable-next-line prefer-regex-literals
     const regex = new RegExp(filterObj.filter, 'i')
     return selected.value.filter(x => x.email.match(regex)).length
   }
@@ -140,7 +139,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
   if (emailGroupRef.value.name === 'selected') {
     let results = selected.value
     if (filterObj.filter) {
-      // eslint-disable-next-line prefer-regex-literals
+
       const regex = new RegExp(filterObj.filter, 'i')
       results = results.filter(x => x.email.match(regex))
     }
@@ -159,7 +158,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 }
 const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 watch(emailGroupRef, () => {

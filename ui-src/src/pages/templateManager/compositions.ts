@@ -1,7 +1,8 @@
 import { getEmailTemplatesCount, getEmailTemplatesData } from 'src/api/emailTemplate'
 import { useQTable } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
-import { useQuasar, QBtnDropdown, QEditor } from 'quasar'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { QBtnDropdown, QEditor } from 'quasar';
+import { useQuasar } from 'quasar'
 
 // 查看缩略图
 import 'viewerjs/dist/viewer.css'

@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { QTable, QTableColumn } from 'quasar'
+import type { QTable, QTableColumn } from 'quasar'
 
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import CreateBtn from 'src/components/quasarWrapper/buttons/CreateBtn.vue'
@@ -64,9 +64,10 @@ import ContextMenu from 'components/contextMenu/ContextMenu.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
 
 import { useQTable } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
-import { getOutboxesCount, getOutboxesData, IOutbox } from 'src/api/emailBox'
-import { IEmailGroupListItem } from '../components/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import { getOutboxesCount, getOutboxesData } from 'src/api/emailBox'
+import type { IOutbox } from 'src/api/emailBox'
+import type { IEmailGroupListItem } from '../components/types'
 
 // #region 左侧分组开关
 import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
@@ -83,7 +84,8 @@ const emailGroupRef: Ref<IEmailGroupListItem> = ref({
   order: 0
 })
 const isValidEmailGroup = computed(() => emailGroupRef.value.id)
-import { IProxy, getUsableProxies } from 'src/api/proxy'
+import type { IProxy } from 'src/api/proxy';
+import { getUsableProxies } from 'src/api/proxy'
 const usableProxies: Ref<IProxy[]> = ref([])
 onMounted(async () => {
   const { data: proxies } = await getUsableProxies()
@@ -192,7 +194,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 }
 const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById, selectedRows, getSelectedRows } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest,
   preventRequestWhenMounted: true
 })
@@ -208,12 +210,12 @@ function getPasswordValue (data: IOutbox) {
 import { deAes } from 'src/utils/encrypt'
 import { useUserInfoStore } from 'src/stores/user'
 const userInfoStore = useUserInfoStore()
-async function togglePasswordViewMode (data: IOutbox) {
+function togglePasswordViewMode (data: IOutbox) {
   // console.log('togglePasswordViewMode', data)
   // 若是显示密码，但没有解密，则先解密
   if (!data.decryptedPassword) {
     // 进行解密
-    const plainPwd = deAes(userInfoStore.smtpPasswordSecretKeys[0], userInfoStore.smtpPasswordSecretKeys[1], data.password)
+    const plainPwd = deAes(userInfoStore.smtpPasswordSecretKeys[0] || '', userInfoStore.smtpPasswordSecretKeys[1] || '', data.password)
     data.password = plainPwd || '密钥变动,解密失败。请重新输入 smtp 密码'
     data.decryptedPassword = true
   }
@@ -232,7 +234,7 @@ const { outboxContextMenuItems } = useContextMenu(deleteRowById, getSelectedRows
 // #endregion
 
 // #region 分组的右键菜单
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { notifyError } from 'src/utils/dialog'
 const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
   {
@@ -261,7 +263,7 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
   const { data: dataRows } = await getOutboxesData(group.id, '', { sortBy: 'id', descending: false, skip: 0, limit: count })
   // 对密码进行解密
   dataRows.forEach(row => {
-    const plainPwd = deAes(userInfoStore.smtpPasswordSecretKeys[0], userInfoStore.smtpPasswordSecretKeys[1], row.password)
+    const plainPwd = deAes(userInfoStore.smtpPasswordSecretKeys[0] || '', userInfoStore.smtpPasswordSecretKeys[1] || '', row.password)
     row.password = plainPwd || '密钥变动,解密失败'
   })
 

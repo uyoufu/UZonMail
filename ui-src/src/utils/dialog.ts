@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Notify, QNotifyCreateOptions, Dialog } from 'quasar'
+
+import type { QNotifyCreateOptions} from 'quasar';
+import { Notify, Dialog } from 'quasar'
 import { i18n } from 'src/boot/i18n'
 const { t } = i18n.global
 /**

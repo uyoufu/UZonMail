@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
-import { IContextMenuItem } from './types'
+import type { IContextMenuItem } from './types'
 const props = defineProps({
   items: {
     type: Array as PropType<IContextMenuItem[]>,
@@ -48,8 +48,8 @@ const contextItems = computed(() => {
 
     // 若没有颜色，则挑选与前后不一样的颜色
     const colorsTemp: (string | undefined)[] = []
-    if (index > 0) colorsTemp.push(results[index - 1].color)
-    if (index < results.length - 1) colorsTemp.push(results[index + 1].color)
+    if (index > 0) colorsTemp.push(results[index - 1]?.color)
+    if (index < results.length - 1) colorsTemp.push(results[index + 1]?.color)
     item.color = colors.find(x => !colorsTemp.includes(x))
   })
   return results
@@ -116,6 +116,7 @@ async function onMenuItemClick (event: Event, item: IContextMenuItem) {
     // 关闭菜单
     qMenuModel.value = false
   } catch {
+    // 异常时，不关闭菜单
   } finally {
     // 重置所有的动画状态
   }

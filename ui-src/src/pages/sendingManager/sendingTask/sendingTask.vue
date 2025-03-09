@@ -53,7 +53,7 @@ import AsyncTooltip from 'components/asyncTooltip/AsyncTooltip.vue'
 
 import { useBottomFunctions } from './bottomFunctions'
 
-import { IEmailCreateInfo } from 'src/api/emailSending'
+import type { IEmailCreateInfo } from 'src/api/emailSending'
 
 const emailInfo: Ref<IEmailCreateInfo> = ref({
   subjects: '', // 主题

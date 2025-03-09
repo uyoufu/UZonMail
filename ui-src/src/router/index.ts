@@ -1,11 +1,11 @@
 import { route } from 'quasar/wrappers'
 import {
-  Router,
   createMemoryHistory,
   createRouter,
   createWebHashHistory,
   createWebHistory
 } from 'vue-router'
+import type { Router } from 'vue-router'
 
 import { constantRoutes } from './routes'
 import { useRoutesStore } from 'src/stores/routes'

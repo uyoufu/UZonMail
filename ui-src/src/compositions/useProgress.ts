@@ -178,6 +178,7 @@ export function useNotifyProgress (progressName: string | number = 'default', op
     })
 
     if (percent >= 100 && fullOptions.autoDone) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       done(fullOptions.silent)
     }
   }

@@ -1,18 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type {
+  IOutbox
+} from 'src/api/emailBox';
 import {
-  IOutbox, deleteOutboxByIds, updateOutbox, validateOutbox
+  deleteOutboxByIds, updateOutbox, validateOutbox
 } from 'src/api/emailBox'
 import { deleteAllInvalidBoxesInGroup } from 'src/api/emailGroup'
 
-import { IContextMenuItem } from 'src/components/contextMenu/types'
-import { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getOutboxFields } from './headerFunctions'
 import { useUserInfoStore } from 'src/stores/user'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { deAes } from 'src/utils/encrypt'
 
-import { getSelectedRowsType } from 'src/compositions/qTableUtils'
+import type { getSelectedRowsType } from 'src/compositions/qTableUtils'
 
 import { useI18n } from 'vue-i18n'
 import logger from 'loglevel'
@@ -24,7 +27,7 @@ import logger from 'loglevel'
  */
 function getSmtpPassword (outbox: IOutbox, smtpPasswordSecretKeys: string[]) {
   if (outbox.decryptedPassword) return outbox.password
-  return deAes(smtpPasswordSecretKeys[0], smtpPasswordSecretKeys[1], outbox.password)
+  return deAes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, outbox.password)
 }
 
 export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType) {
@@ -73,7 +76,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
     // 提示是否删除
     if (rows.length === 1) {
-      const confirm = await confirmOperation('删除发件箱', `是否删除发件箱: ${rows[0].email}？`)
+      const confirm = await confirmOperation('删除发件箱', `是否删除发件箱: ${rows[0]!.email}？`)
       if (!confirm) return
     } else {
       const confirm = await confirmOperation('删除发件箱', `是否删除选中的 ${rows.length} 个发件箱？`)
@@ -141,7 +144,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<IOutbox>(popupParams)
     if (!ok) return
 
@@ -187,7 +190,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   async function onDeleteInvalidOutboxes (row: Record<string, any>) {
     const confirm = await confirmOperation(t('confirmOperation'), t('outboxManager.doDeleteAllInvalidOutboxes'))
     if (!confirm) return

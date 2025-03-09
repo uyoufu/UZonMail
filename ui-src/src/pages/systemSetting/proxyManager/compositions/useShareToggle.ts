@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IProxy } from 'src/api/proxy'
+import type { IProxy } from 'src/api/proxy'
 import { useUserInfoStore } from 'src/stores/user'
 
 export function useShareToggle () {

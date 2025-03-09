@@ -23,9 +23,9 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
 import { formatDate } from 'src/utils/format'
@@ -64,20 +64,20 @@ import { getCrawlerTaskResultsCount, getCrawlerTaskResultsData } from 'src/api/p
 // 从路由中获取id
 const crawlerTaskId = ref(0)
 const route = useRoute()
-onMounted(async () => {
+onMounted(() => {
   if (!route.params.id) return
   crawlerTaskId.value = Number(route.params.id)
   // 触发更新
   refreshTable()
 })
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   if (crawlerTaskId.value <= 0) return 0
   const { data } = await getCrawlerTaskResultsCount(crawlerTaskId.value, filterObj.filter)
   return data
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getCrawlerTaskResultsData(crawlerTaskId.value, filterObj.filter, pagination)
   return data || []
@@ -85,7 +85,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, refreshTable } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 </script>

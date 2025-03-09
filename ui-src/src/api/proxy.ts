@@ -1,5 +1,5 @@
 import { httpClient } from 'src/api//base/httpClient'
-import { IRequestPagination } from 'src/compositions/types'
+import type { IRequestPagination } from 'src/compositions/types'
 
 export interface IProxy {
   id?: number

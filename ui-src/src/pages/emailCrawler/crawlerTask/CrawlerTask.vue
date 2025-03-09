@@ -25,9 +25,9 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import { useColumnsFormater } from './compositions/useColumnsFormater'
 
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
@@ -136,12 +136,12 @@ const columns: QTableColumn[] = [
 
 import { getCrawlerTaskInfosCount, getCrawlerTaskInfosData } from 'src/api/pro/crawlerTask'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getCrawlerTaskInfosCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getCrawlerTaskInfosData(filterObj.filter, pagination)
   return data || []
@@ -149,7 +149,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, addNewRow, deleteRowById } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 
@@ -160,7 +160,9 @@ const { onCreateCrawlerTask } = useHeaderFunctions(addNewRow)
 
 // #region 右键菜单
 import { useContextMenu } from './compositions/useContextMenu'
-const { contextMenuItems } = useContextMenu(addNewRow, deleteRowById)
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const { contextMenuItems } = useContextMenu(addNewRow, deleteRowById) as { contextMenuItems: IContextMenuItem<Record<string, any>>[] }
 // #endregion
 
 // #region 自动更新正在运行任务的数量

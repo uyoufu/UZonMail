@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSessionStorage } from '@vueuse/core'
-import { IUserInfo } from './types'
+import type { IUserInfo } from './types'
 import { useRouter } from 'src/router/index'
 import logger from 'loglevel'
 
@@ -139,7 +139,7 @@ export const useUserInfoStore = defineStore('userInfo', {
     },
 
     // 退出登陆
-    logout () {
+    async logout () {
       // 重置数据
       const tokenSession = useSessionStorage('token', '')
       const accessSession = useSessionStorage('access', [])
@@ -148,7 +148,7 @@ export const useUserInfoStore = defineStore('userInfo', {
 
       // 重定向到登陆页面
       const router = useRouter()
-      router.push('/login')
+      await router.push('/login')
     },
 
     /**

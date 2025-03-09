@@ -24,9 +24,9 @@
 <script lang="ts" setup>
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 
-import { IRouteHistory } from './types'
+import type { IRouteHistory } from './types'
 import { useRouteHistories, removeHistory } from './routeHistories'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 
 // 显示和跳转 tag
 const { routes } = useRouteHistories()
@@ -37,12 +37,12 @@ function getTagClass (item: IRouteHistory) {
   }
 }
 function getTagLabel (tagItem: IRouteHistory) {
-  if (tagItem.query.tagName) return `${tagItem.label} - ${tagItem.query.tagName}`
+  if (tagItem.query.tagName) return `${tagItem.label} - ${String(tagItem.query.tagName)}`
   return tagItem.label
 }
 const router = useRouter()
-function goToRoute (item: IRouteHistory) {
-  router.push({
+async function goToRoute (item: IRouteHistory) {
+  await router.push({
     path: item.fullPath,
     query: item.query
   })
@@ -57,7 +57,7 @@ function mouseenterTag (item: IRouteHistory) {
 
 // 移除按钮
 async function onRemoveTag (item: IRouteHistory) {
-  removeHistory(router, item as unknown as IRouteHistory)
+  await removeHistory(router, item as unknown as IRouteHistory)
 }
 
 // 右键菜单
@@ -74,7 +74,7 @@ const tagContextItems: IContextMenuItem[] = [
       const current = params as IRouteHistory
       routes.value = routes.value.filter((route) => route.fullPath === current.fullPath)
       // 激活当前
-      router.push({
+      await router.push({
         path: current.fullPath
       })
     }
@@ -83,7 +83,7 @@ const tagContextItems: IContextMenuItem[] = [
     label: '关闭所有',
     onClick: async () => {
       routes.value = []
-      router.push({
+      await router.push({
         path: '/'
       })
     }

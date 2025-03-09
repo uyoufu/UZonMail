@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { httpClient } from 'src/api//base/httpClient'
-import { IUserInfo, UserStatus, UserType } from 'src/stores/types'
-import { IRequestPagination } from 'src/compositions/types'
+import type { IUserInfo, UserStatus, UserType } from 'src/stores/types'
+import type { IRequestPagination } from 'src/compositions/types'
 import { sha256, getSmtpPasswordSecretKeys } from 'src/utils/encrypt'
 
 export interface IUserLoginInfo {

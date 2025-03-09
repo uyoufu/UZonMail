@@ -49,8 +49,8 @@ const props = defineProps({
   }
 })
 
-import { IInbox } from 'src/api/emailBox'
-import { IEmailGroupListItem } from 'src/pages/emailManager/components/types'
+import type { IInbox } from 'src/api/emailBox'
+import type { IEmailGroupListItem } from 'src/pages/emailManager/components/types'
 
 // placeholder 显示
 import { useCustomQField } from '../helper'

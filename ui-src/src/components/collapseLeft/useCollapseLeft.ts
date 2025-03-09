@@ -1,6 +1,6 @@
 import { setTimeoutAsync } from 'src/utils/tsUtils'
 import CollapseLeft from './CollapseLeft.vue'
-import { QTable } from 'quasar'
+import type { QTable } from 'quasar'
 import logger from 'loglevel'
 
 /**

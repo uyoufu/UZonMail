@@ -50,7 +50,8 @@
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
-import { IOrganizationSetting, getCurrentOrganizationSetting, updateOrganizationSetting } from 'src/api/organizationSetting'
+import type { IOrganizationSetting} from 'src/api/organizationSetting';
+import { getCurrentOrganizationSetting, updateOrganizationSetting } from 'src/api/organizationSetting'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
 // import logger from 'loglevel'

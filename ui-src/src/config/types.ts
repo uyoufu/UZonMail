@@ -1,4 +1,4 @@
-import { LogLevelNames } from 'loglevel'
+import type { LogLevelNames } from 'loglevel'
 
 export interface IAppConfig {
   baseUrl: string,

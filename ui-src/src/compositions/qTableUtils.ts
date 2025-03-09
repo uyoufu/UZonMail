@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { QTableColumn, QTableProps } from 'quasar'
-import { IQTableInitParams, TTableFilterObject, IQTablePagination, IRequestPagination } from './types'
+import type { QTableColumn } from 'quasar'
+import type { IQTableInitParams, TTableFilterObject, IQTablePagination, IRequestPagination } from './types'
 import QTableIndex from 'src/components/tableComponents/TableIndex.vue'
 
 export type addNewRowType<T = Record<string, any>> = (newRow: T, idField?: string) => void
@@ -39,6 +39,7 @@ export interface ITableRequestProp {
   /**
    * String/Object to filter table with (the 'filter' prop)
    */
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   filter?: string | any
 
   /**
@@ -112,7 +113,7 @@ export function useQTable (initParams: IQTableInitParams) {
         // get all rows if "All" (0) is selected
         const fetchCount = rowsPerPage === 0 ? totalCount : rowsPerPage
         // calculate starting row of data
-        const startRow = (page as number - 1) * (rowsPerPage as number)
+        const startRow = (page - 1) * (rowsPerPage)
         const filterObj = await getFilterObject(filter)
         data = await initParams.onRequest(filterObj, {
           sortBy,
@@ -156,7 +157,7 @@ export function useQTable (initParams: IQTableInitParams) {
   })
 
   // 加载时，请求数据
-  onMounted(async () => {
+  onMounted(() => {
     // 初始化表格数据
     if (initParams.preventRequestWhenMounted) return
     refreshTable()

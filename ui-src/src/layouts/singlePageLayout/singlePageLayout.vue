@@ -18,8 +18,10 @@
 <script lang="ts" setup>
 import { useScrollAreaStyle } from 'src/compositions/scrollUtils'
 const { contentStyle, contentActiveStyle, thumbStyle } = useScrollAreaStyle()
-
 import { getRouteId } from '../components/tags/routeHistories'
+
+import { useRoute } from 'vue-router'
+const $route = useRoute()
 </script>
 
 <style lang="scss" scoped>

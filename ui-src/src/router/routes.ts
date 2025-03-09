@@ -1,4 +1,4 @@
-import { ExtendedRouteRecordRaw } from './types'
+import type { ExtendedRouteRecordRaw } from './types'
 const NormalLayout = () => import('../layouts/normalLayout/normalLayout.vue')
 const SinglePageLayout = () => import('../layouts/singlePageLayout/singlePageLayout.vue')
 

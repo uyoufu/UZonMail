@@ -12,7 +12,7 @@ export interface INotifyMessage {
 /**
  * 从服务器接收通知
  */
-export async function useNotifyRegister () {
+export function useNotifyRegister () {
   function receivedNotify (message: INotifyMessage) {
     logger.debug('[signalR] receive message from server:', message)
 

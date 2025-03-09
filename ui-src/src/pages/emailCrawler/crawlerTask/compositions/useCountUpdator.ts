@@ -6,8 +6,9 @@ export function useCountUpdator (rowsRef: Ref<Record<string, any>[]>) {
   const interval = 5000
 
   // 进行轮询更新
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const intervelId = setInterval(async () => {
-    if (runningRows.value.length === 0) return
+    if (runningRows.value.length > 0) return
 
     const { data: countInfos } = await getCrawlerTaskCountInfos(runningRows.value.map(x => x.id))
     for (const countInfo of countInfos) {

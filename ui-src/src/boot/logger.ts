@@ -1,5 +1,6 @@
 import { defineBoot } from '#q-app/wrappers'
-import log, { LogLevelNames } from 'loglevel'
+import type { LogLevelNames } from 'loglevel';
+import log from 'loglevel'
 
 // 声明全局变量
 declare global {

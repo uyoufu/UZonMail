@@ -21,8 +21,9 @@
 import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 
 // 打开详细进度弹窗
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-import { IRunningSendingGroup, getRunningSendingGroups } from 'src/api/sendingGroup'
+
+import type { IRunningSendingGroup } from 'src/api/sendingGroup';
+import { getRunningSendingGroups } from 'src/api/sendingGroup'
 const sendingGroups: Ref<IRunningSendingGroup[]> = ref([])
 const showMore = ref(false)
 watch(sendingGroups, () => {
@@ -51,8 +52,8 @@ function getSendingGroupProgressLabel (sendingGroupInfo: IRunningSendingGroup) {
   return `${(sendingGroupInfo.progress * 100).toFixed(1)}%`
 }
 const router = useRouter()
-function showSendingGroupDetail (sendingGroupInfo: IRunningSendingGroup) {
-  router.push({
+async function showSendingGroupDetail (sendingGroupInfo: IRunningSendingGroup) {
+  await router.push({
     name: 'SendDetailTable',
     query: {
       sendingGroupId: sendingGroupInfo.id,
@@ -67,10 +68,11 @@ useNotifyRegister()
 
 // 注册进度回调
 import { subscribeOne } from 'src/signalR/signalR'
-import { ISendingGroupProgressArg, UzonMailClientMethods, SendingGroupProgressType } from 'src/signalR/types'
+import type { ISendingGroupProgressArg } from 'src/signalR/types';
+import { UzonMailClientMethods, SendingGroupProgressType } from 'src/signalR/types'
 import { notifySuccess } from 'src/utils/dialog'
 // 注册单个发件组进度回调
-async function onSendingGroupProgressChanged (arg: ISendingGroupProgressArg) {
+function onSendingGroupProgressChanged (arg: ISendingGroupProgressArg) {
   let group = sendingGroups.value.find(item => item.id === arg.sendingGroupId)
   if (!group) {
     group = {

@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { notifyError } from 'src/utils/dialog'
 import * as XLSX from 'xlsx'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import CryptoJS from 'crypto-js'
-import { useNotifyProgress, IProgressOptions } from 'src/compositions/useProgress'
+import type { IProgressOptions } from 'src/compositions/useProgress';
+import { useNotifyProgress } from 'src/compositions/useProgress'
 import logger from 'loglevel'
 
 export interface ISelectFileResult {
@@ -41,7 +43,7 @@ export function selectFile (multiple: boolean = false, accept: string = ''): Pro
         })
       }
 
-      const file = files[0]
+      const file = files[0] as File
       // 读取数据
       const reader = new FileReader()
       reader.onload = e => {
@@ -110,7 +112,7 @@ export function bufferToBase64Png (buffer: ArrayBuffer): string {
   let binary = ''
   const bytes = new Uint8Array(buffer)
   for (let len = bytes.byteLength, i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i])
+    binary += String.fromCharCode(bytes[i] as number)
   }
   const base64 = 'data:image/png;base64,' + window.btoa(binary)
   return base64
@@ -193,9 +195,9 @@ export async function readExcelCore (params: IExcelReaderParams): Promise<{ data
     params.sheetIndex = workbook.SheetNames.indexOf(data.sheetName)
   }
 
-  const sheetName = workbook.SheetNames[params.sheetIndex]
-  const worksheet = workbook.Sheets[sheetName]
-  const rowsData = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[]
+  const sheetName = workbook.SheetNames[params.sheetIndex] as string
+  const worksheet = workbook.Sheets[sheetName] as XLSX.WorkSheet
+  const rowsData: Record<string, any>[] = XLSX.utils.sheet_to_json(worksheet)
   // 对数据进行处理，主要是浮点数问题
   const decimalCount = params.numberDecimalCount === undefined ? 5 : params.numberDecimalCount
   rowsData.forEach(row => {
@@ -391,7 +393,7 @@ export interface IUploadFile extends IUploadResult, File {
 /**
  * hash 计算回调
  */
-export interface FileSha256Callback {
+export interface TFileSha256Callback {
   progressLabel: string
   process: number
   computed: number
@@ -409,7 +411,7 @@ export interface FileSha256Callback {
  * @param progressStep 回调进度的步长，默认为 5 %
  * @returns
  */
-export function fileSha256 (file: File, callback?: (params: FileSha256Callback) => void, progressStep: number = 5): Promise<string> {
+export function fileSha256 (file: File, callback?: (params: TFileSha256Callback) => void, progressStep: number = 5): Promise<string> {
   console.log('getSha256:', file)
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -499,7 +501,7 @@ export async function saveFileSmart (fileName: string, contentOrString: string) 
  * @param fileName
  * @param fileUrl
  */
-export async function saveByUrl (fileName: string, fileUrl: string) {
+export function saveByUrl (fileName: string, fileUrl: string) {
   const aLink = document.createElement('a')
   aLink.href = fileUrl
   aLink.download = fileName
@@ -609,7 +611,7 @@ export async function saveByFileSystemAccess (fileName: string, downloadUrl: str
       const { done, value } = await reader.read()
       if (done) {
         writer.close()
-        progressDone()
+        await progressDone()
         break
       }
 
@@ -623,7 +625,7 @@ export async function saveByFileSystemAccess (fileName: string, downloadUrl: str
     }
 
     // 关闭进度条
-    if (progressDoneFn) progressDoneFn(true)
+    if (progressDoneFn) await progressDoneFn(true)
     console.error(e)
     return false
   }

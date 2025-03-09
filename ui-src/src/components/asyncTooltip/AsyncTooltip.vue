@@ -7,7 +7,7 @@
 
 <script lang="ts" setup>
 import { QTooltip } from 'quasar'
-import { PropType } from 'vue'
+import type { PropType } from 'vue'
 import logger from 'loglevel'
 
 /**

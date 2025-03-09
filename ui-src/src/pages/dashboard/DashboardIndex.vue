@@ -13,7 +13,7 @@
 <script lang="ts" setup>
 // 参考：https://echarts.apache.org/handbook/zh/basics/import/
 // 引入 echarts 核心模块，核心模块提供了 echarts 使用必须要的接口。
-import { EChartsOption, EChartsType } from 'echarts/types/dist/shared'
+import type { EChartsOption, EChartsType } from 'echarts/types/dist/shared'
 import * as echarts from 'echarts/core'
 // 引入柱状图图表，图表后缀都为 Chart
 import { BarChart, LineChart } from 'echarts/charts'
@@ -57,7 +57,8 @@ onUnmounted(() => {
   })
 })
 
-import { IEmailCount, IMonthlySendingInfo, getInboxEmailCountStatistics, getOutboxEmailCountStatistics, getMonthlySendingCountInfo } from 'src/api/statistics'
+import type { IEmailCount, IMonthlySendingInfo} from 'src/api/statistics';
+import { getInboxEmailCountStatistics, getOutboxEmailCountStatistics, getMonthlySendingCountInfo } from 'src/api/statistics'
 const outboxesCount: Ref<IEmailCount[]> = ref([])
 // 渲染 outbox 数量柱状图
 function renderOutboxCountBar () {

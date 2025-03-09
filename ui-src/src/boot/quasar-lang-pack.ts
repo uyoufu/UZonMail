@@ -1,5 +1,6 @@
 import { defineBoot } from '#q-app/wrappers'
-import { Lang, QuasarLanguage } from 'quasar'
+import type { QuasarLanguage } from 'quasar';
+import { Lang } from 'quasar'
 import { useSessionStorage } from '@vueuse/core'
 
 // relative path to your node_modules/quasar/..

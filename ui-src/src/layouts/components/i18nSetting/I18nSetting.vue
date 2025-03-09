@@ -31,7 +31,8 @@ const { locale } = useI18n()
 // 预加载所有可能的语言文件
 const modules = import.meta.glob('/node_modules/quasar/lang/*.js')
 
-import { QuasarLanguage, Lang } from 'quasar'
+import type { QuasarLanguage} from 'quasar';
+import { Lang } from 'quasar'
 async function onSwitchLocale (value: string) {
   store.setLocale(value)
   locale.value = value

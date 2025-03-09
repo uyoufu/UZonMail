@@ -2,7 +2,7 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import axios from 'axios'
 
-import { IAxiosRequestConfig, IHttpClientOptions, IResponseData } from './types'
+import type { IAxiosRequestConfig, IHttpClientOptions, IResponseData } from './types'
 import { useUserInfoStore } from 'src/stores/user'
 import { StatusCode } from 'status-code-enum'
 import { notifyError } from 'src/utils/dialog'
@@ -22,7 +22,7 @@ export default class HttpClient {
     return this._axios
   }
 
-  constructor (options: IHttpClientOptions) {
+  constructor(options: IHttpClientOptions) {
     this._options = options
     this._axios = this.createAxios()
     this.setRequestInterceptors(this._axios)
@@ -34,7 +34,7 @@ export default class HttpClient {
     const config = useConfig()
     const baseUrl = this._options.baseUrl || config.baseUrl
     const api = this._options.api || config.api
-    return `${baseUrl}${api}` as string
+    return `${baseUrl}${api}`
   }
 
   // 创建 axios 实例
@@ -53,9 +53,9 @@ export default class HttpClient {
       config.headers.Authorization = 'Bearer ' + store.token
       return config
     },
-    (error) => {
-      return Promise.reject(error)
-    })
+      (error) => {
+        return Promise.reject(error as Error)
+      })
   }
 
   // 添加响应拦截器
@@ -67,8 +67,9 @@ export default class HttpClient {
         return response
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const data = response.data as IResponseData<any>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       if (data.code !== StatusCode.SuccessOK) {
         // 处理错误
         if (this._options.notifyError) {
@@ -77,41 +78,43 @@ export default class HttpClient {
         }
 
         // 返回错误
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
         return Promise.reject(data)
       }
       // 其它非 200 状态码
       return response
     },
-    // 当 response.status 不是 200 时触发
-    async (error) => {
-      console.log('response error:', error)
-      if (!error.response && error.code) {
-        notifyError(error.code)
-        return Promise.reject(error)
-      }
+      // 当 response.status 不是 200 时触发
+      async (error) => {
+        console.log('response error:', error)
+        if (!error.response && error.code) {
+          notifyError(error.code)
+          return Promise.reject(error as Error)
+        }
 
-      const response = error.response as AxiosResponse
-      if (response.status === StatusCode.ClientErrorUnauthorized) {
-        // 退出登陆
-        await this.logout()
-        return Promise.reject(error)
-      }
+        const response = error.response as AxiosResponse
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        if (response.status === StatusCode.ClientErrorUnauthorized) {
+          // 退出登陆
+          await this.logout()
+          return Promise.reject(error as Error)
+        }
 
-      if (!response.data) {
-        // 其它错误，进行提示，后端返回的错误，都会进行消息展示
-        notifyError(response.statusText)
-      } else {
-        notifyError(error.message)
-      }
+        if (!response.data) {
+          // 其它错误，进行提示，后端返回的错误，都会进行消息展示
+          notifyError(response.statusText)
+        } else {
+          notifyError(error.message)
+        }
 
-      return Promise.reject(error)
-    })
+        return Promise.reject(error as Error)
+      })
   }
 
   // 退出登陆
   private async logout () {
     const store = useUserInfoStore()
-    store.logout()
+    await store.logout()
   }
 
   // 格式化配置

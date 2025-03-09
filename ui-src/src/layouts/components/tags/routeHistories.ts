@@ -1,5 +1,5 @@
-import { LocationQuery, Router } from 'vue-router'
-import { IRouteHistory } from './types'
+import type { LocationQuery, Router } from 'vue-router'
+import type { IRouteHistory } from './types'
 import logger from 'loglevel'
 
 export function getRouteId (fullPath: string, query: LocationQuery) {
@@ -15,9 +15,9 @@ export const routes: Ref<IRouteHistory[]> = ref([])
 * @param nextPath
 * @returns
 */
-export function removeHistory (router: Router, route: IRouteHistory, nextPath?: string) {
+export async function removeHistory (router: Router, route: IRouteHistory, nextPath?: string) {
   // 首页不可移除
-  if (routes.value.length === 1 && routes.value[0].fullPath === '/') {
+  if (routes.value.length === 1 && routes.value[0]!.fullPath === '/') {
     return
   }
 
@@ -29,7 +29,7 @@ export function removeHistory (router: Router, route: IRouteHistory, nextPath?: 
   }
 
   if (nextPath) {
-    router.push({
+    await router.push({
       path: nextPath
     })
     return
@@ -37,7 +37,7 @@ export function removeHistory (router: Router, route: IRouteHistory, nextPath?: 
 
   // 如果已经没有 tags，则跳转到首页
   if (routes.value.length === 0) {
-    router.push({
+    await router.push({
       path: '/'
     })
     return
@@ -49,8 +49,8 @@ export function removeHistory (router: Router, route: IRouteHistory, nextPath?: 
   }
 
   // 显示当前
-  const currentTag = routes.value[currentTagIndex]
-  router.push({
+  const currentTag = routes.value[currentTagIndex] as IRouteHistory
+  await router.push({
     path: currentTag.fullPath,
     query: currentTag.query
   })
@@ -89,7 +89,8 @@ export function useRouteHistories () {
       routes.value.push(routeTemp)
     } else {
       // 替换
-      routes.value[existIndex].isActive = true
+      const existRoute = routes.value[existIndex] as IRouteHistory
+      existRoute.isActive = true
     }
   }, { immediate: true })
 

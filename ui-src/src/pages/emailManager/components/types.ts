@@ -1,4 +1,4 @@
-import { IEmailGroup } from 'src/api/emailGroup'
+import type { IEmailGroup } from 'src/api/emailGroup'
 
 /**
  * 邮箱组数据结构

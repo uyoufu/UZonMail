@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ExtendedRouteRecordRaw } from 'src/router/types'
+import type { ExtendedRouteRecordRaw } from 'src/router/types'
 
 import LogoItem from './logoItem.vue'
 import MenuItem from './menuItem.vue'

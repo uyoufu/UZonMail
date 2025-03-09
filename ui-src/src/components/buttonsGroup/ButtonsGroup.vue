@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IButtonParams } from './types'
+import type { IButtonParams } from './types'
 
 const props = defineProps<{ buttons: IButtonParams[] }>()
 const { buttons } = toRefs(props)

@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import logger from 'loglevel'
 
-import { IProxy, deleteProxy, updateProxy, validateProxyName } from 'src/api/proxy'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IProxy} from 'src/api/proxy';
+import { deleteProxy, updateProxy, validateProxyName } from 'src/api/proxy'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { getCommonProxyFields } from './headerFuncs'
-import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams} from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 
 import { useUserInfoStore } from 'src/stores/user'
@@ -45,7 +47,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
   async function modifyProxy (proxyInfo: Record<string, any>) {
     const proxyData = proxyInfo as IProxy
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     async function validateProxyInfo (data: Record<string, any>) {
       if (proxyData.name === data.name) {
         return {
@@ -81,7 +83,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<IProxy>(popupParams)
     if (!ok) return
 

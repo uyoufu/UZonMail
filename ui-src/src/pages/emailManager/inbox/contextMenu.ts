@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IInbox, deleteInboxById, updateInbox } from 'src/api/emailBox'
+import type { IInbox} from 'src/api/emailBox';
+import { deleteInboxById, updateInbox } from 'src/api/emailBox'
 
-import { IContextMenuItem } from 'src/components/contextMenu/types'
-import { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { getInboxFields } from './headerFunctions'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
@@ -55,7 +56,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<IInbox>(popupParams)
     if (!ok) return
 

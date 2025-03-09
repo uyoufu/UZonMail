@@ -20,7 +20,7 @@ const isHovered = ref(false)
 import { debounce } from 'quasar'
 const onUpdate = debounce((v) => {
   logger.debug('[hoverableTip] onUpdate', v, isHovered.value)
-  !isHovered.value && (showing.value = v)
+  if (!isHovered.value) showing.value = v
 }, 150)
 function onHover () {
   logger.debug('[hoverableTip] onHover')

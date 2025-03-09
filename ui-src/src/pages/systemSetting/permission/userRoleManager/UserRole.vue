@@ -25,19 +25,21 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams} from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 
-import { getAllRoles, getUserRolesCount, getUserRolesData, IRole, IUserRole, upsertUserRole, deleteUserRoles } from 'src/api/permission'
+import type { IRole, IUserRole} from 'src/api/permission';
+import { getAllRoles, getUserRolesCount, getUserRolesData, upsertUserRole, deleteUserRoles } from 'src/api/permission'
 import { getAllUsers } from 'src/api/user'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 
-import { IUserInfo } from 'src/stores/types'
+import type { IUserInfo } from 'src/stores/types'
 
 import { confirmOperation, notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import { formatDate } from 'src/utils/format'
@@ -72,12 +74,12 @@ const columns: QTableColumn[] = [
     sortable: true
   }
 ]
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getUserRolesCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getUserRolesData(filterObj.filter, pagination)
   return data || []
@@ -85,7 +87,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, addNewRow, deleteRowById } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 

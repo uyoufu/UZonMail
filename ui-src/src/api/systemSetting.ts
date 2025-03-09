@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { httpClient } from 'src/api//base/httpClient'
 import { useConfig } from 'src/config'
 

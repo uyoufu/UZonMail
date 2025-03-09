@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
-import { IEmailGroupListItem } from '../components/types'
+import type { IPopupDialogParams} from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IEmailGroupListItem } from '../components/types'
 
-import { addNewRowType } from 'src/compositions/qTableUtils'
+import type { addNewRowType } from 'src/compositions/qTableUtils'
 
-import { IInbox, createInbox, createInboxes } from 'src/api/emailBox'
+import type { IInbox} from 'src/api/emailBox';
+import { createInbox, createInboxes } from 'src/api/emailBox'
 import { notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
-import { IExcelColumnMapper, readExcel, writeExcel } from 'src/utils/file'
+import type { IExcelColumnMapper} from 'src/utils/file';
+import { readExcel, writeExcel } from 'src/utils/file'
 import { isEmail } from 'src/utils/validator'
 import logger from 'loglevel'
 
@@ -73,17 +76,17 @@ export async function showNewInboxDialog (emailGroupLabel: string) {
   }
 
   // 弹出对话框
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   return await showDialog<IInbox>(popupParams)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+
 export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType) {
   // 新建发件箱
   async function onNewInboxClick () {
     // 新增发件箱
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showNewInboxDialog(emailGroup.value.label)
     if (!ok) return
     // 添加邮箱组

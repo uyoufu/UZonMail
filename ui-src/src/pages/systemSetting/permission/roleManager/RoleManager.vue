@@ -18,9 +18,9 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import dayjs from 'dayjs'
 
@@ -70,7 +70,7 @@ const columns: QTableColumn[] = [
     sortable: true
   }
 ]
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 // function formatColValue (col: any, row: any) {
 //   if (typeof col.format === 'function') {
 //     return col.format(row[col.field])
@@ -79,13 +79,14 @@ const columns: QTableColumn[] = [
 //   return row[col.field]
 // }
 
-import { getRolesCount, getRolesData, IPermissionCode, IRole, upsertRole, getAllPermissionCodes, deleteRole } from 'src/api/permission'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { IPermissionCode, IRole } from 'src/api/permission';
+import { getRolesCount, getRolesData, upsertRole, getAllPermissionCodes, deleteRole } from 'src/api/permission'
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getRolesCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getRolesData(filterObj.filter, pagination)
   return data || []
@@ -93,13 +94,14 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, addNewRow, deleteRowById } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 
 // #region 新增
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 async function onCreateRole () {
   // 创建新建弹窗
@@ -167,7 +169,7 @@ async function getPopupDialogParams (roleData?: IRole) {
 
 // #region 右键菜单
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 const contextItems: IContextMenuItem[] = [
   {
     name: 'edit',
@@ -204,7 +206,7 @@ async function onDeleteRole (data: Record<string, any>) {
 
   // 删除角色
   await deleteRole(data.id)
-  await deleteRowById(data.id)
+  deleteRowById(data.id)
 
   notifySuccess(`角色 ${data.name} 删除成功`)
 }

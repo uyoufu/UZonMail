@@ -69,7 +69,8 @@ defineProps({
   }
 })
 
-import { FileSha256Callback, IUploadFile, IUploadResult, fileSha256 } from 'src/utils/file'
+import { fileSha256 } from 'src/utils/file'
+import type { IUploadFile, IUploadResult, TFileSha256Callback } from 'src/utils/file'
 // 定义 v-model
 const modelValue = defineModel({
   type: Array as PropType<IUploadResult[]>,
@@ -82,7 +83,8 @@ onMounted(() => {
   // 后期有需要再实现
 })
 
-import { QUploader, QUploaderFactoryObject } from 'quasar'
+import type { QUploaderFactoryObject } from 'quasar';
+import { QUploader } from 'quasar'
 const uploaderRef: Ref<QUploader> = ref(null as unknown as QUploader)
 onMounted(() => {
   console.log('uploaderRef:', uploaderRef.value)
@@ -106,7 +108,7 @@ function factoryFn (files: readonly IUploadFile[]): Promise<QUploaderFactoryObje
         { name: 'Authorization', value: `Bearer ${token}` }
       ],
       formFields: [
-        { name: 'sha256', value: files[0].__sha256 as string }
+        { name: 'sha256', value: files[0]!.__sha256 as string }
       ]
     }
     resolve(result)
@@ -115,9 +117,9 @@ function factoryFn (files: readonly IUploadFile[]): Promise<QUploaderFactoryObje
 
 // 添加文件后的操作
 import { getFileUsageId } from 'src/api/file'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const vm = getCurrentInstance()
-function sha256Callback (params: FileSha256Callback) {
+function sha256Callback (params: TFileSha256Callback) {
   params.file.__progressLabel = params.progressLabel
   // 强制刷新
   vm?.proxy?.$forceUpdate()
@@ -144,8 +146,10 @@ async function onFileAdded (files: readonly IUploadFile[]) {
     uploaderRef.value.updateFileStatus(file, 'uploaded', file.size)
     const queueIndex = uploaderRef.value.queuedFiles.findIndex(x => x.__key === file.__key)
     // 从队列中移除, 强制去修改
+    // @ts-expect-error 允许直接修改
     uploaderRef.value.queuedFiles.splice(queueIndex, 1)
     // 添加到已上传文件列表
+    // @ts-expect-error 允许直接修改
     uploaderRef.value.uploadedFiles.push(file)
     // console.log('queuedFiles:', uploaderRef.value.queuedFiles)
     // 保存到结果中
@@ -160,7 +164,7 @@ const canUpload = computed(() => {
 // 文件上传后的操作
 import { notifyError } from 'src/utils/dialog'
 function onFileUploaded ({ files, xhr }: { files: readonly IUploadFile[], xhr: XMLHttpRequest }) {
-  const file = files[0]
+  const file = files[0] as IUploadFile
   const response = JSON.parse(xhr.responseText)
   if (!response.ok) {
     notifyError(response.message)

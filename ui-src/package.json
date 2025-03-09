@@ -34,7 +34,7 @@
     "v-viewer": "^3.0.21",
     "viewerjs": "^1.11.7",
     "vue": "^3.5.13",
-    "vue-cropper": "^0.6.5",
+    "vue-cropper": "^1.1.4",
     "vue-i18n": "^11.1.2",
     "vue-router": "^4.5.0",
     "vuedraggable": "^4.1.0",

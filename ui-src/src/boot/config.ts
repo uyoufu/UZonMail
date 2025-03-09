@@ -1,6 +1,6 @@
 import { defineBoot } from '#q-app/wrappers'
 import { changeConfig } from 'src/config/index'
-import { IAppConfig } from 'src/config/types'
+import type { IAppConfig } from 'src/config/types'
 
 /**
  * 配置 logger

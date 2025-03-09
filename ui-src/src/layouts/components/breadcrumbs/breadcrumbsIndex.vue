@@ -7,6 +7,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { ExtendedRouteRecordRaw } from 'src/router/types'
+
 const route = useRoute()
 const matchedRoutes = computed(() => {
   // 获取路由的全路径
@@ -15,7 +17,7 @@ const matchedRoutes = computed(() => {
     return validChildren.length !== 1
   })
   // console.log('results', results)
-  return results
+  return results as unknown as ExtendedRouteRecordRaw[]
 })
 </script>
 

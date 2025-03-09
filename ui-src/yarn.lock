@@ -9936,7 +9936,7 @@ __metadata:
     vite-plugin-checker: "npm:^0.9.0"
     vitest: "npm:^3.0.8"
     vue: "npm:^3.5.13"
-    vue-cropper: "npm:^0.6.5"
+    vue-cropper: "npm:^1.1.4"
     vue-i18n: "npm:^11.1.2"
     vue-router: "npm:^4.5.0"
     vue-tsc: "npm:^2.2.8"
@@ -10197,10 +10197,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-cropper@npm:^0.6.5":
-  version: 0.6.5
-  resolution: "vue-cropper@npm:0.6.5"
-  checksum: 10c0/fbd53df328b0054de27daeba718a9686624eedaae1e87c3f747f4521bab86a9abb48e58ccd83c8091a1b836b2733a195f94a74561c99ca14d54a028a549cd633
+"vue-cropper@npm:^1.1.4":
+  version: 1.1.4
+  resolution: "vue-cropper@npm:1.1.4"
+  checksum: 10c0/bf3d7bbc29b7a2051cf291faafebe57ea2b0cc142898c2ca9bd2f7f7e10eb5649fc856e425ebc8cd527ae002897381b6705f9f14693706e8f30c5b6127129117
   languageName: node
   linkType: hard
 

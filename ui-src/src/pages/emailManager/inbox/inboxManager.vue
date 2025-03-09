@@ -37,7 +37,8 @@
 </template>
 
 <script lang="ts" setup>
-import { QTable, QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar';
+import { QTable } from 'quasar'
 import { formatDate } from 'src/utils/format'
 
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
@@ -48,9 +49,9 @@ import EmailGroupList from '../components/EmailGroupList.vue'
 import ContextMenu from 'components/contextMenu/ContextMenu.vue'
 
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import { getInboxesCount, getInboxesData } from 'src/api/emailBox'
-import { IEmailGroupListItem } from '../components/types'
+import type { IEmailGroupListItem } from '../components/types'
 
 // 左侧分组开关
 // 左侧分组开关
@@ -118,7 +119,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 }
 const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 watch(emailGroupRef, () => {
@@ -137,7 +138,7 @@ const { inboxContextMenuItems } = useContextMenu(deleteRowById)
 // #endregion
 
 // #region 分组的右键菜单
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { notifyError } from 'src/utils/dialog'
 const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
   {
