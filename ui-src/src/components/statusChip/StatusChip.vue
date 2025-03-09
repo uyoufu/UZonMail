@@ -6,6 +6,8 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 import { IStatusChipItem } from './types'
 const defaultStatusStyles = [
@@ -66,10 +68,13 @@ const statusStylesMap = computed(() => {
   return result
 })
 
+import _ from 'lodash'
 const statusStyle = computed(() => {
-  const status = String(props.status).toLowerCase()
-  const result = statusStylesMap.value[status]
-  if (!result) {
+  const statusStr = String(props.status).toLowerCase()
+  const statusLabel = t(`statusChip.${String(props.status)}`)
+
+  const statusMap = statusStylesMap.value[statusStr]
+  if (!statusMap) {
     return {
       status: 'unknown',
       color: 'negative',
@@ -77,6 +82,9 @@ const statusStyle = computed(() => {
       textColor: 'white'
     }
   }
+
+  // 克隆一个新对象，避免修改原对象
+  const result = Object.assign({}, statusMap, { label: statusLabel || statusMap.label })
   return result
 })
 </script>

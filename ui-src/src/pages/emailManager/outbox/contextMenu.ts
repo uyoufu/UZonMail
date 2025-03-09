@@ -15,6 +15,7 @@ import { deAes } from 'src/utils/encrypt'
 import { getSelectedRowsType } from 'src/compositions/qTableUtils'
 
 import { useI18n } from 'vue-i18n'
+import logger from 'loglevel'
 
 /**
  * 获取smtp密码
@@ -166,15 +167,19 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       notifySuccess('验证成功')
       // 更新状态
       row.isValid = true
+      row.validFailReason = ''
       return
     }
 
     const fullMessage = `验证失败: ${message}`
-    console.log(fullMessage)
+    logger.error(fullMessage)
+
     // 验证失败
     notifyError(fullMessage)
+
     // 更新状态
     row.isValid = false
+    row.validFailReason = message
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

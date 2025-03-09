@@ -1,4 +1,4 @@
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 import { Lang, QuasarLanguage } from 'quasar'
 import { useSessionStorage } from '@vueuse/core'
 
@@ -8,11 +8,15 @@ const langList = import.meta.glob('/node_modules/quasar/lang/*.js')
 // or just a select few (example below with only DE and FR):
 // import.meta.glob('../../node_modules/quasar/lang/(de|fr).js')
 
-export default boot(async () => {
+export default defineBoot(async () => {
   const locale = useSessionStorage('locale', 'zh-CN').value
   try {
-    const lang = await langList[`/node_modules/quasar/lang/${locale}.js`]()
-    Lang.set((lang as Record<string, QuasarLanguage>).default)
+    const quasarLocale = langList[`/node_modules/quasar/lang/${locale}.js`]
+    if (!quasarLocale) {
+      throw new Error(`Quasar Language Pack ${locale} does not exist`)
+    }
+    const lang = await quasarLocale() as { default: QuasarLanguage }
+    Lang.set(lang.default)
 
   } catch (err) {
     console.error(err)

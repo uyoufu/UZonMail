@@ -1,11 +1,11 @@
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 import { changeConfig } from 'src/config/index'
 import { IAppConfig } from 'src/config/types'
 
 /**
  * 配置 logger
  */
-export default boot(async () => {
+export default defineBoot(async () => {
   // 从服务器获取 /app.config.ts 获取配置
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
   const fetchConfig = new Promise((resolve) => {

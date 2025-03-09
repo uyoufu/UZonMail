@@ -42,6 +42,7 @@
       <template v-slot:body-cell-isValid="props">
         <q-td class="cursor-pointer" :props="props">
           <StatusChip :status="props.value">
+
           </StatusChip>
         </q-td>
       </template>

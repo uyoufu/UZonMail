@@ -9,6 +9,47 @@ export type deleteRowByIdType = (id?: number, idField?: string) => void
 
 export type getSelectedRowsType = (cursorData: Record<string, any>) => { rows: Record<string, any>[]; selectedRows: Ref<Record<string, any>[]> }
 
+export interface ITableRequestProp {
+  /**
+   * Pagination object
+   */
+  pagination: {
+    /**
+     * Column name (from column definition)
+     */
+    sortBy: string;
+    /**
+     * Is sorting in descending order?
+     */
+    descending: boolean;
+    /**
+     * Page number (1-based)
+     */
+    page: number;
+    /**
+     * How many rows per page? 0 means Infinite
+     */
+    rowsPerPage: number;
+    /**
+     * For server-side fetching only. How many total database rows are there to be added to the table.
+     */
+    rowsNumber?: number;
+  }
+
+  /**
+   * String/Object to filter table with (the 'filter' prop)
+   */
+  filter?: string | any
+
+  /**
+   * Function to get a cell value
+   * @param col Column name from column definitions
+   * @param row The row object
+   * @returns Parsed/Processed cell value
+   */
+  getCellValue?: (col: any, row: any) => any
+}
+
 /**
  * 返回一个QTable的配置对象
  * @param initParams
@@ -56,7 +97,7 @@ export function useQTable (initParams: IQTableInitParams) {
   // 表格数据请求
   const loading = ref(false)
   const rows: Ref<Record<string, any>[]> = ref([])
-  async function onTableRequest (qTableProps: QTableProps) {
+  async function onTableRequest (qTableProps: ITableRequestProp) {
     if (refreshCounter.value < 0) return
     if (!initParams.onRequest) return
 

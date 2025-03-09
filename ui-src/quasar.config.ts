@@ -3,10 +3,10 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
+import { defineConfig } from '#q-app/wrappers';
+
 // import { configure } from 'quasar/wrappers'
 import { fileURLToPath } from 'node:url'
-import { QuasarConf } from '@quasar/app-vite/types/configuration/conf'
-import { QuasarContext } from '@quasar/app-vite/types/configuration/context'
 
 // 参考 https://element-plus.org/zh-CN/guide/quickstart.html
 // 按需导入 ElementPlus 组件
@@ -15,7 +15,8 @@ import { ElementPlusResolver, QuasarResolver } from 'unplugin-vue-components/res
 // 导入用户配置
 import { useConfig } from 'src/config/index'
 
-async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
+// mock:https://github.com/vbenjs/vite-plugin-mock/blob/main/README.zh_CN.md
+export default defineConfig(async (ctx) => {
   const userConfig = await useConfig(ctx)
 
   return {
@@ -68,6 +69,12 @@ async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
       target: {
         browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
         node: 'node20'
+      },
+
+      typescript: {
+        strict: true,
+        vueShim: true
+        // extendTsConfig (tsConfig) {}
       },
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
@@ -125,7 +132,15 @@ async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
           {
             resolvers: [ElementPlusResolver(), QuasarResolver()]
           }
-        ]
+        ],
+
+        ['vite-plugin-checker', {
+          vueTsc: true,
+          eslint: {
+            lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
+            useFlatConfig: true
+          }
+        }, { server: false }]
       ]
     },
 
@@ -260,10 +275,15 @@ async function buildConfig (ctx: QuasarContext): Promise<QuasarConf> {
       // extendBexScriptsConf (esbuildConf) {},
       // extendBexManifestJson (json) {},
 
-      contentScripts: ['my-content-script']
+      /**
+       * The list of extra scripts (js/ts) not in your bex manifest that you want to
+       * compile and use in your browser extension. Maybe dynamic use them?
+       *
+       * Each entry in the list should be a relative filename to /src-bex/
+       *
+       * @example [ 'my-script.ts', 'sub-folder/my-other-script.js' ]
+       */
+      extraScripts: ['my-content-script']
     }
   }
-}
-
-// mock:https://github.com/vbenjs/vite-plugin-mock/blob/main/README.zh_CN.md
-export default buildConfig
+})
