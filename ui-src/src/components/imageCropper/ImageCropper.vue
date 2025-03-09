@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts" setup>
+
 import { useDialogPluginComponent } from 'quasar'
 defineEmits([
   // 必需；需要指定一些事件
@@ -59,10 +60,10 @@ const option = ref({
   fixedNumber: [1, 1]
 })
 
-const cropperRef = ref<InstanceType<typeof VueCropper> | null>(null)
+const cropperRef = ref<InstanceType<typeof VueCropper>>()
 function getBlobDataFromCropper (): Promise<Blob> {
   const promise = new Promise<Blob>(resolve => {
-    cropperRef.value.getCropBlob((data: Blob) => {
+    cropperRef.value!.getCropBlob((data: Blob) => {
       resolve(data)
     })
   })

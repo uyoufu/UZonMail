@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import enUS from './locales/en-US'
 import zhCN from './locales/zh-CN'
 

@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { QuasarContext } from '@quasar/app-vite/types/configuration/context'
+
 import appConfigs from './app.config'
-import { IAppConfig } from './types'
+import type { IAppConfig } from './types'
+import type { QuasarContext } from '#q-types/configuration/context'
 
 import _ from 'lodash'
 

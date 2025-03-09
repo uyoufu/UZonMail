@@ -43,12 +43,12 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType } from 'vue'
-import { IEmailGroupListItem, IFlatHeader } from './types'
+import type { PropType } from 'vue'
+import type { IEmailGroupListItem, IFlatHeader } from './types'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 
 const modelValue = defineModel<IEmailGroupListItem>()
 const selectedValues = defineModel<IEmailGroupListItem[]>('selected', {
@@ -126,8 +126,10 @@ const filteredItems = computed(() => {
 })
 
 // 初始化获取组
-import { getEmailGroups, createEmailCroup, IEmailGroup, updateEmailCroup, deleteEmailGroupById } from 'src/api/emailGroup'
-import { IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IEmailGroup } from 'src/api/emailGroup';
+import { getEmailGroups, createEmailCroup, updateEmailCroup, deleteEmailGroupById } from 'src/api/emailGroup'
+import type { IPopupDialogParams } from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 onMounted(async () => {
@@ -144,7 +146,7 @@ onMounted(async () => {
 
   // 默认选中第一个
   if (filteredItems.value.length > 0) {
-    activeGroup(filteredItems.value[0])
+    activeGroup(filteredItems.value[0] as IEmailGroupListItem)
   }
 })
 function activeGroup (group: IEmailGroupListItem) {
@@ -153,7 +155,7 @@ function activeGroup (group: IEmailGroupListItem) {
   modelValue.value = group
 }
 
-async function onItemClick (item: IEmailGroupListItem) {
+function onItemClick (item: IEmailGroupListItem) {
   activeGroup(item)
 }
 
@@ -205,7 +207,7 @@ async function onCreateEmailGroup () {
   })
 
   // 设置新组为当前组
-  activeGroup(groupItems.value[groupItems.value.length - 1])
+  activeGroup(groupItems.value[groupItems.value.length - 1] as IEmailGroupListItem)
 
   // 新增组
   notifySuccess('新增成功')
@@ -248,6 +250,7 @@ async function modifyGroup (emailGroup: Record<string, any>) {
         name: 'order',
         label: '序号',
         value: typedEmailGroup.order || typedEmailGroup.side,
+        // eslint-disable-next-line @typescript-eslint/require-await
         validate: async (value: number) => {
           const numValue = Number(value)
           if (isNaN(numValue)) {
@@ -296,7 +299,7 @@ async function deleteGroup (emailGroup: Record<string, any>) {
   // 切换到临近的组
   const newIndex = Math.max(0, groupIndex - 1)
   if (groupItems.value.length > 0) {
-    groupItems.value[newIndex].active = true
+    groupItems.value[newIndex]!.active = true
     modelValue.value = groupItems.value[newIndex]
   } else {
     modelValue.value = {

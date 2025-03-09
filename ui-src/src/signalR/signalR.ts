@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as signalR from '@microsoft/signalr'
 import { useConfig } from 'src/config'
@@ -6,7 +7,7 @@ import { UzonMailClientMethods } from './types'
 import logger from 'loglevel'
 
 export interface ISignalRs {
-  sendingProgressHub?: signalR.HubConnection
+  sendingProgressHub?: signalR.HubConnection | undefined
 }
 
 const signalRs: ISignalRs = {
@@ -45,6 +46,7 @@ export function useSendEmailHub () {
     signalRs.sendingProgressHub = undefined
   })
 
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   signal.start().then(() => {
     logger.info('[signalR] 连接成功')
   })
@@ -70,13 +72,13 @@ export function subscribeOne (methodEnum: UzonMailClientMethods, callback: (...a
   if (!hub) return
 
   const methodName = UzonMailClientMethods[methodEnum]
-  onBeforeMount(async () => {
+  onBeforeMount(() => {
     logger.debug('[signalR] 订阅事件', methodName)
     // hub.on(methodName, callback)
     hub.on(methodName, callback)
   })
 
-  onUnmounted(async () => {
+  onUnmounted(() => {
     logger.debug('[signalR] 取消订阅事件', methodName)
     hub.off(methodName, callback)
   })
@@ -91,7 +93,7 @@ export function subscribeOnce (methodEnum: UzonMailClientMethods, callbackFunc: 
 
   const methodName = UzonMailClientMethods[methodEnum]
 
-  async function methodCore (...args: any[]): any {
+  async function methodCore (...args: any[]): Promise<any> {
     await callbackFunc(...args)
     const hub = useSendEmailHub()
     if (!hub) return

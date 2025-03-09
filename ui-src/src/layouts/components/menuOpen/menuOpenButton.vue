@@ -6,7 +6,7 @@
 
 const modelValue = defineModel<boolean>()
 const iconName = computed(() => modelValue.value ? 'menu_open' : 'menu')
-async function toggleModelValue () {
+function toggleModelValue () {
   modelValue.value = !modelValue.value
 }
 </script>

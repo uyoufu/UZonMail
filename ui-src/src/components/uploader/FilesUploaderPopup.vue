@@ -34,12 +34,19 @@ const props = defineProps({
 })
 import { uploadFileObject } from 'src/api/file'
 import dayjs from 'dayjs'
-import { fileSha256, FileSha256Callback } from 'src/utils/file'
+import { fileSha256, TFileSha256Callback } from 'src/utils/file'
 import { AxiosProgressEvent } from 'axios'
+
+interface IProgressInfo {
+  virtualFile: boolean
+  message: string
+  transferredBytes: number
+  totalBytes: number
+}
 
 const { humanStorageSize } = format
 const startDate = Date.now()
-const progressInfos = ref([
+const progressInfos: Ref<IProgressInfo[]> = ref([
   {
     virtualFile: false, // 是否是虚拟文件,虚拟文件不计算总字节数，仅用于计算进度
     message: '', // 消息
@@ -59,7 +66,7 @@ const labels = computed(() => {
     transferredBytes += info.transferredBytes
     totalBytes += info.totalBytes
   }
-  const lastInfo = progressInfos.value[progressInfos.value.length - 1]
+  const lastInfo = progressInfos.value[progressInfos.value.length - 1] as IProgressInfo
   const { message } = lastInfo
   const totalCount = props.files.length
 
@@ -96,25 +103,25 @@ const updateProgressInfo = throttle((index: number, message: string, transferred
     return
   }
 
-  const info = progressInfos.value[index]
+  const info = progressInfos.value[index] as IProgressInfo
   info.message = message
   info.transferredBytes = transferredBytes
   info.totalBytes = totalBytes
 }, 300)
 onMounted(async () => {
   let index = 0
-  function sha256Callback (callbackData: FileSha256Callback) {
+  function sha256Callback (callbackData: TFileSha256Callback) {
     updateProgressInfo(index, `正在计算 ${callbackData.file.name} 哈希值`, callbackData.computed, callbackData.file.size, true)
   }
 
   function onUploadProgress (progressEvent: AxiosProgressEvent) {
-    const file = props.files[index]
+    const file = props.files[index] as File
     updateProgressInfo(index, `正在上传 ${file.name}`, progressEvent.loaded, progressEvent.total || 1)
   }
 
   const fileIds: number[] = []
   for (; index < props.files.length; index++) {
-    const file = props.files[index]
+    const file = props.files[index] as File
     const sha256 = await fileSha256(file, sha256Callback)
     const { data: fileId } = await uploadFileObject(sha256, file, onUploadProgress)
     fileIds.push(fileId)

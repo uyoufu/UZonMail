@@ -53,8 +53,9 @@ import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import CreateBtn from 'src/components/quasarWrapper/buttons/CreateBtn.vue'
 import ImportBtn from 'src/components/quasarWrapper/buttons/ImportBtn.vue'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
-import { IEmailTemplate, deleteEmailTemplate, upsertEmailTemplate } from 'src/api/emailTemplate'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IEmailTemplate } from 'src/api/emailTemplate';
+import { deleteEmailTemplate, upsertEmailTemplate } from 'src/api/emailTemplate'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 
 // 模板接口
@@ -65,7 +66,7 @@ const { pagination, rows, filter, onTableRequest, loading, deleteRowById, getTem
 const router = useRouter()
 async function onNewEmailTemplate () {
   // 新增或编辑
-  router.push({
+  await router.push({
     name: 'templateEditor'
   })
 }
@@ -111,7 +112,7 @@ async function onDeleteEmailTemplate (templateItem: Record<string, any>) {
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onEditTemplateClick (value: Record<string, any>) {
-  router.push({
+  await router.push({
     name: 'templateEditor',
     query: {
       templateId: value.id,
@@ -131,7 +132,7 @@ const templateContextMenuItems = ref<IContextMenuItem[]>([
     label: '预览',
     tooltip: '查看预览图',
     onClick: async () => {
-      router.push({
+      await router.push({
         name: 'templateEditor'
       })
     }

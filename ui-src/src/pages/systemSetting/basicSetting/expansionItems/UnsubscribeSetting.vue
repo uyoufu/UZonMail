@@ -48,7 +48,8 @@ import { setTimeoutAsync } from 'src/utils/tsUtils'
 import logger from 'loglevel'
 import { notifySuccess } from 'src/utils/dialog'
 
-import { getUnsubscribeSettings, IUnsubscribeSettings, updateUnsubscribeSettings } from 'src/api/pro/unsubscribe'
+import type { IUnsubscribeSettings } from 'src/api/pro/unsubscribe';
+import { getUnsubscribeSettings, updateUnsubscribeSettings } from 'src/api/pro/unsubscribe'
 
 const unsubscribeSetting: Ref<IUnsubscribeSettings> = ref({
   id: 0,
@@ -73,12 +74,13 @@ async function onBeforeShow () {
   isInitializing.value = false
 }
 
-watch(unsubscribeSetting, async (newVal) => {
+watch(unsubscribeSetting, (newVal) => {
   if (isInitializing.value) return
   logger.debug('[setting] update unsubscribe setting', newVal)
 }, { deep: true })
 
 const enableUnsubscribePageSetting = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   return unsubscribeSetting.value.enable && unsubscribeSetting.value.type === 0
 })
 

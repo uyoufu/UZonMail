@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CrawlerStatus, deleteCrawlerTaskInfo, ICrawlerTaskInfo, startCrawlerTask, stopCrawlerTask, updateCrawlerTaskInfo, saveCrawlerResultsAsInbox } from 'src/api/pro/crawlerTask'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
-import { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
+import type { ICrawlerTaskInfo } from 'src/api/pro/crawlerTask';
+import { CrawlerStatus, deleteCrawlerTaskInfo, startCrawlerTask, stopCrawlerTask, updateCrawlerTaskInfo, saveCrawlerResultsAsInbox } from 'src/api/pro/crawlerTask'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 import { getCrawlerTaskFields } from './useHeaderFunctions'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
-import { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { useRouter } from 'vue-router'
 
 export function useContextMenu (addNewRow: addNewRowType<ICrawlerTaskInfo>, deleteRowById: deleteRowByIdType) {
@@ -74,7 +75,7 @@ export function useContextMenu (addNewRow: addNewRowType<ICrawlerTaskInfo>, dele
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<ICrawlerTaskInfo>(popupParams)
     if (!ok) return
     await updateCrawlerTaskInfo(crawlerTaskInfo.id, data)
@@ -115,7 +116,7 @@ export function useContextMenu (addNewRow: addNewRowType<ICrawlerTaskInfo>, dele
   const router = useRouter()
   async function onViewCrawlerResult (crawlerTaskInfo: ICrawlerTaskInfo) {
     // 跳转到结果页面
-    router.push({
+    await router.push({
       name: 'CrawlerResult',
       params: {
         id: crawlerTaskInfo.id
@@ -149,7 +150,7 @@ export function useContextMenu (addNewRow: addNewRowType<ICrawlerTaskInfo>, dele
     if (!confirm2InboxDetail) return
 
     // 开始跳转
-    router.push({
+    await router.push({
       name: 'inboxManager'
     })
   }

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useUserInfoStore } from './user'
 import { constantRoutes, dynamicRoutes, exceptionRoutes } from 'src/router/routes'
-import { ExtendedRouteRecordRaw } from 'src/router/types'
+import type { ExtendedRouteRecordRaw } from 'src/router/types'
 import logger from 'loglevel'
 import _ from 'lodash'
 

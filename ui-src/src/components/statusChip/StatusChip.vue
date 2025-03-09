@@ -6,8 +6,12 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
-import { IStatusChipItem } from './types'
+import logger from 'loglevel'
+
+import type { IStatusChipItem } from './types'
 const defaultStatusStyles = [
   { status: 'created', label: '新建', color: 'primary', textColor: 'white', icon: '' },
   { status: 'pending', label: '等待中', color: 'accent', textColor: 'white', icon: '' },
@@ -51,7 +55,7 @@ const statusStylesMap = computed(() => {
 
   const fullStatusStyles = [...defaultStatusStyles, ...props.statusStyles]
   for (let i = 0; i < fullStatusStyles.length; i++) {
-    const item = fullStatusStyles[i]
+    const item = fullStatusStyles[i] as IStatusChipItem
 
     // 修改颜色
     if (!item.color) {
@@ -67,16 +71,23 @@ const statusStylesMap = computed(() => {
 })
 
 const statusStyle = computed(() => {
-  const status = String(props.status).toLowerCase()
-  const result = statusStylesMap.value[status]
-  if (!result) {
+  const statusStr = String(props.status).toLowerCase()
+  const statusLabel = t(`statusChip.${String(props.status)}`)
+
+  logger.debug('[statusChip] statusStr:', statusLabel)
+
+  const statusMap = statusStylesMap.value[statusStr]
+  if (!statusMap) {
     return {
       status: 'unknown',
       color: 'negative',
-      label: status.toUpperCase(),
+      label: statusStr.toUpperCase(),
       textColor: 'white'
     }
   }
+
+  // 克隆一个新对象，避免修改原对象
+  const result = Object.assign({}, statusMap, { label: statusLabel || statusMap.label })
   return result
 })
 </script>

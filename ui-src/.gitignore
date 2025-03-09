@@ -46,4 +46,4 @@ yarn-error.log*
 !.yarn/sdks
 !.yarn/versions
 
-quasar-temp
+.quasar-temp

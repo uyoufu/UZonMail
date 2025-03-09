@@ -20,12 +20,12 @@ import HoverableTip from 'src/components/hoverableTip/HoverableTip.vue'
 
 import { useUserInfoStore } from 'src/stores/user'
 const userInfoStore = useUserInfoStore()
-function onLogout () {
-  userInfoStore.logout()
+async function onLogout () {
+  await userInfoStore.logout()
 }
 const router = useRouter()
-function onGoToProfile () {
-  router.push({
+async function onGoToProfile () {
+  await router.push({
     path: '/user/profile'
   })
 }

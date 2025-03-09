@@ -10,7 +10,7 @@
       <div class="q-py-md q-px-xs justify-start items-center" :class="getContainerClass()">
         <template v-for="field in validFields" :key="field.name">
           <q-input v-if="isMatchedType(field, commonInputTypes)" outlined class="q-mb-sm low-code__field q-px-sm"
-            standout dense v-model="fieldsModel[field.name]" :type="field.type" :label="field.label"
+            standout dense v-model="fieldsModel[field.name]" :type="(field.type as any)" :label="field.label"
             :placeholder="field.placeholder" :disable="field.disable">
             <template v-if="field.icon" v-slot:prepend>
               <q-icon :name="field.icon" />
@@ -87,10 +87,11 @@ import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import PasswordInput from '../passwordInput/PasswordInput.vue'
 
-import { PropType } from 'vue'
-import { ICustomPopupButton, IPopupDialogField, PopupDialogFieldType } from './types'
+import type { PropType } from 'vue'
+import type { ICustomPopupButton, IPopupDialogField } from './types';
+import { PopupDialogFieldType } from './types'
 import { notifyError } from 'src/utils/dialog'
-import { IFunctionResult } from 'src/types'
+import type { IFunctionResult } from 'src/types'
 
 const props = defineProps({
   title: {
@@ -149,9 +150,10 @@ const props = defineProps({
 })
 
 // 是否为匹配到的类型
-const commonInputTypes = ['number', 'search', 'time', 'text', 'email', 'tel', 'file', 'url', 'date', 'datetime-local']
+const commonInputTypes = ["text", "password", "textarea", "email", "search", "tel", "file", "number", "url", "time", "date", "datetime-local"]
 function isMatchedType (field: IPopupDialogField, types: string | string[]): boolean {
   if (Array.isArray(types)) return types.includes(field.type as string)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   return field.type === types
 }
 

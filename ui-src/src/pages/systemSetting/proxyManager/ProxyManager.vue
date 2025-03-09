@@ -29,9 +29,9 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
 // #region 表格定义
@@ -90,12 +90,12 @@ if (userInfoStore.isAdmin) {
 }
 
 import { getProxiesCount, getProxiesData } from 'src/api/proxy'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getProxiesCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getProxiesData(filterObj.filter, pagination)
   return data || []
@@ -103,7 +103,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, addNewRow, deleteRowById } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 // #endregion

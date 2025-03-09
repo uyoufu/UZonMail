@@ -1,12 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { IPopupDialogField, IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+
+import type { IPopupDialogField, IPopupDialogParams} from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import dayjs from 'dayjs'
 
 import { getUsableProxies } from 'src/api/proxy'
-import { CrawlerType, createCrawlerTaskInfo, ICrawlerTaskInfo } from 'src/api/pro/crawlerTask'
+import type { ICrawlerTaskInfo } from 'src/api/pro/crawlerTask';
+import { CrawlerType, createCrawlerTaskInfo } from 'src/api/pro/crawlerTask'
 import { getAllUserTikTokDevices } from 'src/api/pro/tikTokDevice'
 import { notifySuccess, showDialog } from 'src/utils/dialog'
-import { addNewRowType } from 'src/compositions/qTableUtils'
+import type { addNewRowType } from 'src/compositions/qTableUtils'
 
 export async function getCrawlerTaskFields (): Promise<IPopupDialogField[]> {
   // 获取用户的代理
@@ -100,7 +102,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<ICrawlerTaskInfo>) 
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<ICrawlerTaskInfo>(popupParams)
     if (!ok) return
     const { data: crawlerTaskInfo } = await createCrawlerTaskInfo(data)

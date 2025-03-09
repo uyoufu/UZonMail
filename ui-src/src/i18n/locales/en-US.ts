@@ -17,5 +17,9 @@ export default {
   unsubscribePageHasAreadyExist: 'Unsubscribe page for this language already exists',
   outboxManager: {
     doDeleteAllInvalidOutboxes: 'Do you want to delete all invalid outboxes in the current group?'
+  },
+  statusChip: {
+    false: 'No',
+    true: 'Yes'
   }
 }

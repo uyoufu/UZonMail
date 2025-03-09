@@ -1,4 +1,4 @@
-import { IFunctionResult } from 'src/types'
+import type { IFunctionResult } from 'src/types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export enum PopupDialogFieldType {

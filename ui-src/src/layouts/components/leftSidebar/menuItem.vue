@@ -20,7 +20,7 @@
  * 1- 若只有一个子菜单，则只展示子菜单
  */
 
-import { ExtendedRouteRecordRaw } from 'src/router/types'
+import type { ExtendedRouteRecordRaw } from 'src/router/types'
 import { getMenuRoute } from './helper'
 
 // props 参数
@@ -75,14 +75,14 @@ watch(route, () => {
 
 // 跳转到路由
 const router = useRouter()
-function goToRoute () {
+async function goToRoute () {
   // 若 path 为绝对路径，则直接跳转
   if (props.routeRaw.path.startsWith('http')) {
     window.open(props.routeRaw.path, '_blank')
     return
   }
 
-  router.push({
+  await router.push({
     name
   })
 }

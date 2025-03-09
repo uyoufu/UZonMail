@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { resendSendingItem } from 'src/api/emailSending'
-import { ISendingItem, SendingItemStatus, getSendingItemBody } from 'src/api/sendingItem'
+import type { ISendingItem } from 'src/api/sendingItem';
+import { SendingItemStatus, getSendingItemBody } from 'src/api/sendingItem'
 import { confirmOperation, notifySuccess, showHtmlDialog } from 'src/utils/dialog'
 import { useUserInfoStore } from 'src/stores/user'
 
@@ -13,6 +14,7 @@ export function useContextMenu () {
     const emailInfo = email as ISendingItem
     console.log(emailInfo)
     // 进行确认
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const confirm = await confirmOperation('重发确认', `即将重新发送【${emailInfo.inboxes.map(x => x.email)}】, 是否继续？`)
     if (!confirm) return
 

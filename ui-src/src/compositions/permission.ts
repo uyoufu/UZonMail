@@ -11,8 +11,8 @@ export function usePermission () {
     return hasPermission('*')
   })
 
-  const hasPermission = store.hasPermission
-  const hasPermissionOr = store.hasPermissionOr
+  const hasPermission = store.hasPermission.bind(store)
+  const hasPermissionOr = store.hasPermissionOr.bind(store)
 
   /**
    * 是否有专业版权限

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { checkUserId, createUser, getDefaultPassword, resetUserPassword, setUserType, setUserStatus } from 'src/api/user'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { UserStatus, UserType } from 'src/stores/types'
@@ -126,6 +126,7 @@ export function useContextMenu (addNewRow: (newRow: Record<string, any>) => void
           type: PopupDialogFieldType.text,
           required: true,
           placeholder: '请输入用户名,请仅用英文字母',
+          // eslint-disable-next-line @typescript-eslint/require-await
           validate: async (value) => {
             return {
               ok: value && value.length >= 3,
@@ -139,6 +140,7 @@ export function useContextMenu (addNewRow: (newRow: Record<string, any>) => void
           type: PopupDialogFieldType.text,
           required: true,
           placeholder: '请输入初始密码',
+          // eslint-disable-next-line @typescript-eslint/require-await
           validate: async (value) => {
             return {
               ok: value && value.length >= 6,

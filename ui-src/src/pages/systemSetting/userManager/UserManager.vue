@@ -34,9 +34,9 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import { usePermission } from 'src/compositions/permission'
 
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
@@ -72,10 +72,7 @@ const columns: QTableColumn[] = [
     label: '状态',
     align: 'left',
     field: 'status',
-    format: v => {
-      // 转为 enum 字符串
-      return UserStatus[v]
-    },
+    format: v => UserStatus[v] as string,
     sortable: true
   }
 ]
@@ -87,10 +84,7 @@ if (hasEnterpriseAccess()) {
     label: '用户类型',
     align: 'left',
     field: 'type',
-    format: v => {
-      // 转为 enum 字符串
-      return UserType[v]
-    },
+    format: v => UserType[v] as string,
     sortable: true
   })
 }
@@ -106,7 +100,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, addNewRow } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 

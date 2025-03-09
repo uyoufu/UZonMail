@@ -19,9 +19,9 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import { formatDate } from 'src/utils/format'
 
@@ -56,12 +56,12 @@ const columns: QTableColumn[] = [
 ]
 
 import { getUnsubscribesCount, getUnsubscribesData } from 'src/api/pro/unsubscribe'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getUnsubscribesCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getUnsubscribesData(filterObj.filter, pagination)
   return data || []
@@ -69,7 +69,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 </script>

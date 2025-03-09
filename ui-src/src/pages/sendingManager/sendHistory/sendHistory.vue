@@ -49,12 +49,13 @@ import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
 
 import { formatDate } from 'src/utils/format'
 
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
-import { getSendingGroupsCount, getEmailTemplatesData, SendingGroupStatus, SendingGroupType, ISendingGroupInfo } from 'src/api/sendingGroup'
+import type { ISendingGroupInfo } from 'src/api/sendingGroup';
+import { getSendingGroupsCount, getEmailTemplatesData, SendingGroupStatus, SendingGroupType } from 'src/api/sendingGroup'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,7 +88,7 @@ const columns: QTableColumn[] = [
     align: 'left',
     field: 'sendingType',
     sortable: true,
-    format: v => SendingGroupType[v]
+    format: v => SendingGroupType[v] as string
   },
   {
     name: 'templatesCount',
@@ -154,16 +155,16 @@ const columns: QTableColumn[] = [
     align: 'center',
     field: 'status',
     sortable: true,
-    format: v => SendingGroupStatus[v]
+    format: v => SendingGroupStatus[v] as string
   }
 ]
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getSendingGroupsCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getEmailTemplatesData(filterObj.filter, pagination)
   return data || []
@@ -173,7 +174,7 @@ const { pagination, rows, filter, onTableRequest, loading } = useQTable({
   sortBy: 'id',
   descending: true,
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 
@@ -188,7 +189,8 @@ const { openSendDetailDialog, sendingHistoryContextItems } = useContextMenu()
 
 // 注册进度获取回调
 import { subscribeOne } from 'src/signalR/signalR'
-import { ISendingGroupProgressArg, SendingGroupProgressType, UzonMailClientMethods } from 'src/signalR/types'
+import type { ISendingGroupProgressArg } from 'src/signalR/types';
+import { SendingGroupProgressType, UzonMailClientMethods } from 'src/signalR/types'
 
 // 进度变化
 function onSendingGroupProgressChanged (arg: ISendingGroupProgressArg) {

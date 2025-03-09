@@ -10,7 +10,7 @@
 
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
-import { PropType } from 'vue'
+import type { PropType } from 'vue'
 
 const props = defineProps({
   color: {

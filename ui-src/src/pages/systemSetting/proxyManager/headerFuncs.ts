@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IProxy, validateProxyName, createProxy, updateProxySharedStatus } from 'src/api/proxy'
+import type { IProxy } from 'src/api/proxy';
+import { validateProxyName, createProxy, updateProxySharedStatus } from 'src/api/proxy'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import { IPopupDialogField, IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogField, IPopupDialogParams } from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
 
@@ -37,7 +39,7 @@ export function getCommonProxyFields (): IPopupDialogField[] {
       placeholder: '格式：schema://username:password@host',
       value: '',
       required: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/require-await
       validate: async (value: any) => {
         if (!value) {
           return {
@@ -93,7 +95,7 @@ export function getCommonProxyFields (): IPopupDialogField[] {
 export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => void) {
   const userInfo = useUserInfoStore()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   async function validateProxyInfo (data: Record<string, any>) {
     return await validateProxyName(data.name)
   }
@@ -120,7 +122,7 @@ export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => 
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<IProxy>(popupParams)
     if (!ok) return
 
@@ -137,7 +139,7 @@ export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => 
     }
 
     // 向服务器请求更新
-    updateProxySharedStatus(proxyInfo.id as number, !!proxyInfo.isShared)
+    await updateProxySharedStatus(proxyInfo.id as number, !!proxyInfo.isShared)
   }
 
   return { onCreateProxy, onToggleShareProxy }

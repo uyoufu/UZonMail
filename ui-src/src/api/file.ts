@@ -1,6 +1,6 @@
-import { AxiosProgressEvent } from 'axios'
+import type { AxiosProgressEvent } from 'axios'
 import { httpClient } from 'src/api//base/httpClient'
-import { IRequestPagination } from 'src/compositions/types'
+import type { IRequestPagination } from 'src/compositions/types'
 
 /**
  * 上传文件到静态目录

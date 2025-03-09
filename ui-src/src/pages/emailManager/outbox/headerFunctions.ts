@@ -1,20 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import { IPopupDialogField, IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
-import { IEmailGroupListItem } from '../components/types'
+import type { IPopupDialogField, IPopupDialogParams } from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IEmailGroupListItem } from '../components/types'
 
-import { IOutbox, createOutbox, createOutboxes } from 'src/api/emailBox'
+import type { IOutbox } from 'src/api/emailBox';
+import { createOutbox, createOutboxes } from 'src/api/emailBox'
 
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { isEmail } from 'src/utils/validator'
 
 import { useUserInfoStore } from 'src/stores/user'
 import { aes } from 'src/utils/encrypt'
-import { IExcelColumnMapper, readExcel, writeExcel } from 'src/utils/file'
-import { getUsableProxies, IProxy } from 'src/api/proxy'
+import type { IExcelColumnMapper } from 'src/utils/file';
+import { readExcel, writeExcel } from 'src/utils/file'
+import type { IProxy } from 'src/api/proxy';
+import { getUsableProxies } from 'src/api/proxy'
 
 function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
-  return aes(smtpPasswordSecretKeys[0], smtpPasswordSecretKeys[1], password)
+  return aes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, password)
 }
 
 /**
@@ -71,8 +75,8 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
       label: 'smtp密码',
       type: PopupDialogFieldType.password,
       required: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      parser: async (value: any) => {
+
+      parser: (value: any) => {
         const pwd = String(value)
         // 对密码进行加密
         return encryptPassword(smtpPasswordSecretKeys, pwd)
@@ -169,7 +173,7 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
   ]
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+
 export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
   addNewRow: (newRow: Record<string, any>) => void) {
   const userInfoStore = useUserInfoStore()
@@ -183,7 +187,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<IOutbox>(popupParams)
     if (!ok) return
     // 新建请求

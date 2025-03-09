@@ -37,7 +37,8 @@ import logger from 'loglevel'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { confirmOperation, notifyError, notifySuccess } from 'src/utils/dialog'
 import dayjs from 'dayjs'
-import { ILicenseInfo, LicenseType, updateLicenseInfo, getLicenseInfo, updateExistingLicenseInfo } from 'src/api/pro/license'
+import type { ILicenseInfo} from 'src/api/pro/license';
+import { LicenseType, updateLicenseInfo, getLicenseInfo, updateExistingLicenseInfo } from 'src/api/pro/license'
 
 const license = ref<string>('')
 

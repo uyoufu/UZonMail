@@ -1,5 +1,5 @@
 import { httpClient } from 'src/api//base/httpClient'
-import { IRequestPagination } from 'src/compositions/types'
+import type { IRequestPagination } from 'src/compositions/types'
 
 /**
  * 收件箱
@@ -30,7 +30,9 @@ export interface IOutbox extends IInbox {
   decryptedPassword?: boolean,
   replyToEmails?: string,
   enableSSL: boolean, // 是否使用 ssl
-  isValid?: boolean
+  isValid?: boolean,
+  status: number
+  validFailReason?: string
 }
 
 /**
@@ -81,6 +83,7 @@ export function validateOutbox (outboxId: number, smtpPasswordSecretKeys: string
     }
   })
 }
+
 
 /**
  * 获取发件邮箱数量

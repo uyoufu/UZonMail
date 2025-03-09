@@ -1,13 +1,57 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { QTableColumn, QTableProps } from 'quasar'
-import { IQTableInitParams, TTableFilterObject, IQTablePagination, IRequestPagination } from './types'
+import type { QTableColumn } from 'quasar'
+import type { IQTableInitParams, TTableFilterObject, IQTablePagination, IRequestPagination } from './types'
 import QTableIndex from 'src/components/tableComponents/TableIndex.vue'
 
 export type addNewRowType<T = Record<string, any>> = (newRow: T, idField?: string) => void
 
+export type updateExistOneType<T = Record<string, any>> = (newData: T, idField?: string) => boolean
+
 export type deleteRowByIdType = (id?: number, idField?: string) => void
 
 export type getSelectedRowsType = (cursorData: Record<string, any>) => { rows: Record<string, any>[]; selectedRows: Ref<Record<string, any>[]> }
+
+export interface ITableRequestProp {
+  /**
+   * Pagination object
+   */
+  pagination: {
+    /**
+     * Column name (from column definition)
+     */
+    sortBy: string;
+    /**
+     * Is sorting in descending order?
+     */
+    descending: boolean;
+    /**
+     * Page number (1-based)
+     */
+    page: number;
+    /**
+     * How many rows per page? 0 means Infinite
+     */
+    rowsPerPage: number;
+    /**
+     * For server-side fetching only. How many total database rows are there to be added to the table.
+     */
+    rowsNumber?: number;
+  }
+
+  /**
+   * String/Object to filter table with (the 'filter' prop)
+   */
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  filter?: string | any
+
+  /**
+   * Function to get a cell value
+   * @param col Column name from column definitions
+   * @param row The row object
+   * @returns Parsed/Processed cell value
+   */
+  getCellValue?: (col: any, row: any) => any
+}
 
 /**
  * 返回一个QTable的配置对象
@@ -56,7 +100,7 @@ export function useQTable (initParams: IQTableInitParams) {
   // 表格数据请求
   const loading = ref(false)
   const rows: Ref<Record<string, any>[]> = ref([])
-  async function onTableRequest (qTableProps: QTableProps) {
+  async function onTableRequest (qTableProps: ITableRequestProp) {
     if (refreshCounter.value < 0) return
     if (!initParams.onRequest) return
 
@@ -71,7 +115,7 @@ export function useQTable (initParams: IQTableInitParams) {
         // get all rows if "All" (0) is selected
         const fetchCount = rowsPerPage === 0 ? totalCount : rowsPerPage
         // calculate starting row of data
-        const startRow = (page as number - 1) * (rowsPerPage as number)
+        const startRow = (page - 1) * (rowsPerPage)
         const filterObj = await getFilterObject(filter)
         data = await initParams.onRequest(filterObj, {
           sortBy,
@@ -115,7 +159,7 @@ export function useQTable (initParams: IQTableInitParams) {
   })
 
   // 加载时，请求数据
-  onMounted(async () => {
+  onMounted(() => {
     // 初始化表格数据
     if (initParams.preventRequestWhenMounted) return
     refreshTable()
@@ -139,6 +183,22 @@ export function useQTable (initParams: IQTableInitParams) {
 
     rows.value.push(newRow)
     increaseRowsNumber(1)
+  }
+
+  /**
+   * 若存在项，则更新它
+   * @param newData
+   * @param idField
+   * @returns
+   */
+  function updateExistOne (newData: Record<string, any>, idField: string = 'id') {
+    // 查找是否存在
+    const found = rows.value.find(x => x[idField] === newData[idField])
+    if (!found) return false
+
+    // 更新
+    Object.assign(found, newData)
+    return true
   }
 
   // 删除行
@@ -174,6 +234,7 @@ export function useQTable (initParams: IQTableInitParams) {
     increaseRowsNumber,
     refreshTable,
     addNewRow,
+    updateExistOne,
     deleteRowById,
     getSelectedRows
   }

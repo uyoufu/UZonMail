@@ -24,9 +24,9 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import ImportBtn from 'src/components/quasarWrapper/buttons/ImportBtn.vue'
 
@@ -51,13 +51,14 @@ const columns: QTableColumn[] = [
   }
 ]
 
-import { getPermissionCodesCount, getPermissionCodesData, IPermissionCode, updateRoutePermissionCodes } from 'src/api/permission'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { IPermissionCode} from 'src/api/permission';
+import { getPermissionCodesCount, getPermissionCodesData, updateRoutePermissionCodes } from 'src/api/permission'
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getPermissionCodesCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getPermissionCodesData(filterObj.filter, pagination)
   return data || []
@@ -65,7 +66,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, addNewRow } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 
@@ -74,7 +75,7 @@ import { usePermission } from 'src/compositions/permission'
 const { isSuperAdmin } = usePermission()
 
 import { dynamicRoutes } from 'src/router/routes'
-import { ExtendedRouteRecordRaw } from 'src/router/types'
+import type { ExtendedRouteRecordRaw } from 'src/router/types'
 import { notifySuccess } from 'src/utils/dialog'
 
 async function onImportRoutePermissionCode () {

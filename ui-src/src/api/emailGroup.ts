@@ -62,5 +62,21 @@ export function deleteEmailGroupById (groupId: number) {
  * @returns
  */
 export function deleteAllInvalidBoxesInGroup (groupId: number) {
-  return httpClient.delete<boolean>(`/email-group//${groupId}/invalid-outboxes`)
+  return httpClient.delete<boolean>(`/email-group/${groupId}/invalid-outboxes`)
+}
+
+/**
+ * 验证组中未验证通过的邮箱
+ * 发件验证结果 websocket 进行回调
+ * @param groupId
+ * @param smtpPasswordSecretKeys
+ * @returns
+ */
+export function validateAllInvalidOutboxes (groupId: number, smtpPasswordSecretKeys: string[]) {
+  return httpClient.put<boolean>(`/email-group/${groupId}/invalid-outbox/validate`, {
+    data: {
+      key: smtpPasswordSecretKeys[0],
+      iv: smtpPasswordSecretKeys[1]
+    }
+  })
 }

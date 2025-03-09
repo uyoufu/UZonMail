@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  IOutbox, deleteOutboxByIds, updateOutbox, validateOutbox
-} from 'src/api/emailBox'
-import { deleteAllInvalidBoxesInGroup } from 'src/api/emailGroup'
+import type { IOutbox } from 'src/api/emailBox'
+import { deleteOutboxByIds, updateOutbox, validateOutbox } from 'src/api/emailBox'
+import { deleteAllInvalidBoxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
 
-import { IContextMenuItem } from 'src/components/contextMenu/types'
-import { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getOutboxFields } from './headerFunctions'
 import { useUserInfoStore } from 'src/stores/user'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { deAes } from 'src/utils/encrypt'
 
-import { getSelectedRowsType } from 'src/compositions/qTableUtils'
+import type { getSelectedRowsType } from 'src/compositions/qTableUtils'
 
 import { useI18n } from 'vue-i18n'
+import logger from 'loglevel'
 
 /**
  * 获取smtp密码
@@ -23,42 +23,42 @@ import { useI18n } from 'vue-i18n'
  */
 function getSmtpPassword (outbox: IOutbox, smtpPasswordSecretKeys: string[]) {
   if (outbox.decryptedPassword) return outbox.password
-  return deAes(smtpPasswordSecretKeys[0], smtpPasswordSecretKeys[1], outbox.password)
+  return deAes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, outbox.password)
 }
 
-export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType) {
+export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType, refreshTable: () => void) {
   const { t } = useI18n()
 
   const outboxContextMenuItems: IContextMenuItem[] = [
     {
       name: 'edit',
-      label: '编辑',
-      tooltip: '编辑当前发件箱',
+      label: t('edit'),
+      tooltip: t('outboxManager.editCurrentOutbox'),
       onClick: onUpdateOutbox
     },
     {
       name: 'delete',
-      label: '删除',
-      tooltip: '删除当前或选中发件箱',
+      label: t('delete'),
+      tooltip: t('outboxManager.deleteCurrentOrSelection'),
       color: 'negative',
       onClick: deleteOutbox
     },
     {
       name: 'validate',
-      label: '验证',
-      tooltip: '向自己发送一封邮件，以此测试发件箱的有效性',
+      label: t('outboxManager.validate'),
+      tooltip: t('outboxManager.sendTestToMe'),
       onClick: onValidateOutbox
     },
     {
       name: 'validateBatch',
-      label: '批量验证',
-      tooltip: '批量验证当前组中所有未验证的邮箱',
+      label: t('outboxManager.validateBatch'),
+      tooltip: t('outboxManager.validateAllUnverifiedInGroup'),
       onClick: onValidateOutboxBatch
     },
     {
       name: 'deleteInvalid',
-      label: '删除无效',
-      tooltip: '删除当前组中验证失败的发件箱',
+      label: t('outboxManager.deleteInvalid'),
+      tooltip: t('outboxManager.deleteCurrentGroupInvalidOutboxes'),
       color: 'negative',
       onClick: onDeleteInvalidOutboxes
     }
@@ -72,10 +72,10 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
     // 提示是否删除
     if (rows.length === 1) {
-      const confirm = await confirmOperation('删除发件箱', `是否删除发件箱: ${rows[0].email}？`)
+      const confirm = await confirmOperation(t('outboxManager.deleteOutbox'), t('outboxManager.isDeleteCurrentOutbox', { message: rows[0]!.email }))
       if (!confirm) return
     } else {
-      const confirm = await confirmOperation('删除发件箱', `是否删除选中的 ${rows.length} 个发件箱？`)
+      const confirm = await confirmOperation(t('outboxManager.deleteOutbox'), t('outboxManager.isDeleteSelectedOutboxes', { count: rows.length }))
       if (!confirm) return
     }
 
@@ -87,7 +87,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       deleteRowById(row.id)
     })
     selectedRows.value = []
-    notifySuccess(`删除成功, 共删除 ${rows.length} 项`)
+    notifySuccess(t('outboxManager.deleteSuccess', { count: rows.length }))
   }
 
   // 更新发件箱
@@ -140,7 +140,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<IOutbox>(popupParams)
     if (!ok) return
 
@@ -166,33 +166,46 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       notifySuccess('验证成功')
       // 更新状态
       row.isValid = true
+      row.validFailReason = ''
       return
     }
 
     const fullMessage = `验证失败: ${message}`
-    console.log(fullMessage)
+    logger.error(fullMessage)
+
     // 验证失败
     notifyError(fullMessage)
+
     // 更新状态
     row.isValid = false
+    row.validFailReason = message
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function onValidateOutboxBatch (row: Record<string, any>) {
+    const confirm = await confirmOperation(t('confirmOperation'), t('outboxManager.isConfirmValidateBatch'))
+    if (!confirm) return
 
+    await notifyUntil(async () => {
+      // 向后端进行批量验证，通过 websocket 更新进度信息
+      return await validateAllInvalidOutboxes(row.emailGroupId as number, userInfoStore.smtpPasswordSecretKeys)
+    }, t('outboxManager.validateBatch'), t('outboxManager.validating'))
+
+    notifySuccess(t('outboxManager.validateBatchSuccess'))
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   async function onDeleteInvalidOutboxes (row: Record<string, any>) {
-    const confirm = await confirmOperation(t('confirmOperation'), t('outboxManager.doDeleteAllInvalidOutboxes'))
+    const confirm = await confirmOperation(t('deleteConfirm'), t('outboxManager.doDeleteAllInvalidOutboxes'))
     if (!confirm) return
 
     // 请求删除
     const outbox = row as IOutbox
     await deleteAllInvalidBoxesInGroup(outbox.emailGroupId as number)
-
     // 删除成功
     notifySuccess(t('deleteSuccess'))
+
+    // 重新刷新
+    refreshTable()
   }
 
   return { outboxContextMenuItems }

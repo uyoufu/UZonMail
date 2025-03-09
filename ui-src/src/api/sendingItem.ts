@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IRequestPagination } from 'src/compositions/types'
+import type { IRequestPagination } from 'src/compositions/types'
 import { httpClient } from './base/httpClient'
 
 export interface ISendingItem {

@@ -2,7 +2,7 @@
 export function clickEffect () {
   const balls: any[] = []
   let longPressed = false
-  // eslint-disable-next-line no-undef
+
   let longPress: string | number | NodeJS.Timeout | undefined
   let multiplier = 0
   let width: number, height: number
@@ -88,7 +88,7 @@ export function clickEffect () {
       this.vx = (this.multiplier + Math.random() * 0.5) * Math.cos(this.angle)
       this.vy = (this.multiplier + Math.random() * 0.5) * Math.sin(this.angle)
       this.r = randBetween(8, 12) + 3 * Math.random()
-      this.color = colours[Math.floor(Math.random() * colours.length)]
+      this.color = colours[Math.floor(Math.random() * colours.length)] as string
     }
 
     update () {

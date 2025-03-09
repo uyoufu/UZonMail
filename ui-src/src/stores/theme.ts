@@ -23,7 +23,7 @@ export const useThemeStore = defineStore('theme', {
  * @param userId
  * @returns
  */
-export async function pullUserUISettings (userId: string) {
+export function pullUserUISettings (userId: string) {
   return {
     userId,
     theme: 'dark'

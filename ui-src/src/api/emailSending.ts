@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { httpClient } from 'src/api//base/httpClient'
+import type { IEmailTemplate } from './emailTemplate'
+import type { IInbox, IOutbox } from './emailBox'
+import type { IEmailGroupListItem } from 'src/pages/emailManager/components/types'
 
 export interface IEmailCreateInfo {
   subjects: string, // 主题
-  templates: Record<string, any>[], // 模板 id
+  templates: IEmailTemplate[], // 模板 id
   data: Record<string, any>[], // 用户发件数据
-  outboxGroups: Record<string, any>[], // 发件人邮箱组
-  outboxes: Record<string, any>[], // 发件人邮箱
-  inboxGroups: Record<string, any>[], // 收件人邮箱组
-  inboxes: Record<string, any>[], // 收件人邮箱
-  ccBoxes: Record<string, any>[], // 抄送人邮箱
+  outboxGroups: IEmailGroupListItem[], // 发件人邮箱组
+  outboxes: IOutbox[], // 发件人邮箱
+  inboxGroups: IEmailGroupListItem[], // 收件人邮箱组
+  inboxes: IInbox[], // 收件人邮箱
+  ccBoxes: IInbox[], // 抄送人邮箱
   body: string, // 邮件正文
   // 附件必须先上传，此处保存的是附件的Id
   attachments: Record<string, any>[], // 附件

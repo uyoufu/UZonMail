@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Notify, QNotifyCreateOptions, Dialog } from 'quasar'
+
+import type { QNotifyCreateOptions } from 'quasar';
+import { Notify, Dialog } from 'quasar'
 import { i18n } from 'src/boot/i18n'
 const { t } = i18n.global
 /**
@@ -184,6 +185,8 @@ export function useProgressNotify (message: string, caption: string = '') {
   console.log(message, caption)
 }
 
+export type NotifyUntilUpdate = (caption?: string, message?: string) => void
+
 /**
  * 显示通知，直到执行完毕
  * @param runFunc 执行的方法
@@ -191,7 +194,7 @@ export function useProgressNotify (message: string, caption: string = '') {
  * @param caption 小标题
  * @returns
  */
-export async function notifyUntil<T> (runFunc: (update: (caption?: string, message?: string,) => void) => Promise<T>
+export async function notifyUntil<T> (runFunc: (update: NotifyUntilUpdate) => Promise<T>
   , message: string, caption: string = ''): Promise<T | null> {
   if (typeof runFunc !== 'function') return null
   const { stop, update } = useIndeterminateProgressNotify(message, caption)

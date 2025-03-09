@@ -4,7 +4,8 @@
   "editor.guides.bracketPairs": true,
   // 关闭VSCode在Save时候自动格式化，因为VSCode自带的格式化和ESlint规范并不兼容
   "editor.formatOnSave": false,
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  // "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   // 函数名后添加空格，与 eslint 规范兼容
   // 在代码开发时，可以使用 shift+alt+f 来格式化代码
   "typescript.format.insertSpaceBeforeFunctionParenthesis": true,

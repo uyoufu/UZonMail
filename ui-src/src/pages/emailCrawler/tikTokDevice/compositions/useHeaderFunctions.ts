@@ -1,11 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { IPopupDialogField, IPopupDialogParams, PopupDialogFieldType } from 'src/components/popupDialog/types'
+
+import type { IPopupDialogField, IPopupDialogParams } from 'src/components/popupDialog/types';
+import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 
 import { notifySuccess, showDialog } from 'src/utils/dialog'
-import { addNewRowType } from 'src/compositions/qTableUtils'
-import { ITikTokDevice, createTikTokDevice } from 'src/api/pro/tikTokDevice'
+import type { addNewRowType } from 'src/compositions/qTableUtils'
+import type { ITikTokDevice } from 'src/api/pro/tikTokDevice';
+import { createTikTokDevice } from 'src/api/pro/tikTokDevice'
 
-export async function getTikTokDeviceInfoFields (): Promise<IPopupDialogField[]> {
+export function getTikTokDeviceInfoFields (): IPopupDialogField[] {
   return [
     {
       name: 'name',
@@ -35,7 +37,7 @@ export async function getTikTokDeviceInfoFields (): Promise<IPopupDialogField[]>
  */
 export function useHeaderFunctions (addNewRow: addNewRowType<ITikTokDevice>) {
   async function onCreateTikTokDevice () {
-    const fields = await getTikTokDeviceInfoFields()
+    const fields = getTikTokDeviceInfoFields()
 
     const popupParams: IPopupDialogParams = {
       title: '新增TikTok设备',
@@ -44,7 +46,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<ITikTokDevice>) {
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<ITikTokDevice>(popupParams)
     if (!ok) return
     const { data: crawlerTaskInfo } = await createTikTokDevice(data)

@@ -46,7 +46,8 @@ const modelValue = defineModel({
 })
 
 // 选择模板数据
-import { IExcelColumnMapper, readExcelCore, writeExcel } from 'src/utils/file'
+import type { IExcelColumnMapper} from 'src/utils/file';
+import { readExcelCore, writeExcel } from 'src/utils/file'
 async function onSelectExcel () {
   const { files, sheetName, data } = await readExcelCore({
     sheetIndex: 0,
@@ -71,7 +72,7 @@ async function onSelectExcel () {
   }
 
   const firstFile = files[0]
-  fieldModelValue.value = `${firstFile.name} - ${sheetName}`
+  fieldModelValue.value = `${firstFile!.name} - ${sheetName}`
   modelValue.value = data
 }
 

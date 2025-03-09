@@ -85,7 +85,7 @@ async function onUserLogin () {
 
   logger.log('[Login] 登陆成功')
   // 跳转到主页
-  router.push({ path: '/' })
+  await router.push({ path: '/' })
 }
 
 // #region 显示版本号

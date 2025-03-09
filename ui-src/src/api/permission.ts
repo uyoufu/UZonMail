@@ -1,6 +1,6 @@
 import { httpClient } from 'src/api//base/httpClient'
-import { IRequestPagination } from 'src/compositions/types'
-import { IUserInfo } from 'src/stores/types'
+import type { IRequestPagination } from 'src/compositions/types'
+import type { IUserInfo } from 'src/stores/types'
 
 // #region 权限码
 export interface IPermissionCode {

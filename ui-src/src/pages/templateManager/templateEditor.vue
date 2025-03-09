@@ -55,7 +55,7 @@ onMounted(async () => {
   editorValue.value = templateData.content
 })
 import { removeHistory } from 'src/layouts/components/tags/routeHistories'
-import { IRouteHistory } from 'src/layouts/components/tags/types'
+import type { IRouteHistory } from 'src/layouts/components/tags/types'
 
 // 编辑器配置
 import { useWysiwygEditor } from './compositions'
@@ -75,15 +75,15 @@ Object.assign(editorDefinitions, {
     tip: '返回',
     icon: 'west',
     label: '',
-    handler: () => {
-      removeHistory(router, route as unknown as IRouteHistory, '/template/index')
+    handler: async () => {
+      await removeHistory(router, route as unknown as IRouteHistory, '/template/index')
     }
   }
 })
 
 editorToolbar.unshift(...[['back'],
-  ['templateName'],
-  ['save']])
+['templateName'],
+['save']])
 // 保存模板
 import domToImage from 'dom-to-image'
 import { uploadToStaticFile } from 'src/api/file'
@@ -97,7 +97,10 @@ async function saveTemplate () {
   // 生成缩略图并上传到服务器
   const blob = await new Promise((resolve, reject) => {
     const node = document.querySelector('.q-editor__content')
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
     if (!node) return reject('未找到编辑器内容')
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     domToImage.toBlob(node, {
       bgcolor: 'white'
     })

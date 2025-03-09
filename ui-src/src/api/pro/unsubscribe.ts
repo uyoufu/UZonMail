@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { httpClientPro } from 'src/api/base/httpClient'
-import { IRequestPagination } from 'src/compositions/types'
+import type { IRequestPagination } from 'src/compositions/types'
 
 export enum UnsubscibeType {
   /// <summary>

@@ -59,6 +59,11 @@ import { useScrollAreaStyle } from 'src/compositions/scrollUtils'
 import MenuTree from '../components/leftSidebar/menuTree.vue'
 import { getRouteId, useRouteHistories } from '../components/tags/routeHistories'
 
+// #region 路由
+import { useRoute } from 'vue-router'
+const $route = useRoute()
+// #endregion
+
 const drawer = ref(false)
 const miniState = ref(false)
 // const collapse = ref(false)

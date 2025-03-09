@@ -24,9 +24,10 @@
 </template>
 
 <script lang="ts" setup>
-import { QTableColumn, format } from 'quasar'
+import type { QTableColumn } from 'quasar';
+import { format } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import { formatDate } from 'src/utils/format'
 
@@ -81,12 +82,12 @@ const columns: QTableColumn[] = [
   }
 ]
 import { getFileUsagesCount, getFileUsagesData, deleteFileUsage, updateDisplayName } from 'src/api/file'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getFileUsagesCount(filterObj.filter)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getFileUsagesData(filterObj.filter, pagination)
   return data
@@ -94,7 +95,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, refreshTable, deleteRowById } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 
@@ -109,6 +110,7 @@ const { open: openFileDialog, onChange } = useFileDialog({
   directory: false // Select directories instead of files if set true
 })
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 onChange(async (files) => {
   if (!files) return
   await uploadFiles(Array.from(files))
@@ -137,6 +139,7 @@ async function onDrop (files: File[] | null) {
   await uploadFiles(files)
 }
 const { isOverDropZone } = useDropZone(dropZoneRef, {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   onDrop
   // specify the types of data to be received.
   // dataTypes: ['image/jpeg']
@@ -150,7 +153,7 @@ watch(isOverDropZone, () => {
 
 // #region 右键菜单
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
 const attachmentCtxMenuItems: IContextMenuItem[] = [
   {
     name: 'download',
@@ -215,9 +218,9 @@ async function onDownloadAttachment (row: Record<string, any>) {
   }
 
   // 使用旧式的下载方式
-  const baseUrl = `${config.baseUrl}${config.api}` as string
+  const baseUrl = `${config.baseUrl}${config.api}`
   const fileUrl = `${baseUrl}/file-reader/${fileReaderId}/stream`
-  saveFileSmart(row.displayName || row.fileName, fileUrl)
+  await saveFileSmart(row.displayName || row.fileName, fileUrl)
   notifySuccess('下载成功')
 }
 
@@ -267,7 +270,7 @@ async function shareAttachment (row: Record<string, any>) {
 
   const { data: objectReaderId } = await createObjectPersistentReader(row.id)
   // 生成全路径
-  const fullUrl = `${config.baseUrl}/api/pro/object-reader/stream/${objectReaderId}` as string
+  const fullUrl = `${config.baseUrl}/api/pro/object-reader/stream/${objectReaderId}`
   // 保存到剪切板
   await navigator.clipboard.writeText(fullUrl)
 

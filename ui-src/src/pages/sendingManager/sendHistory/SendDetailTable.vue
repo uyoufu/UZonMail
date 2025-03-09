@@ -69,11 +69,11 @@ watch(statusTab, () => {
 
 const sendingGroupId = ref(vueProps.sendingGroupId)
 
-import { QTableColumn } from 'quasar'
+import type { QTableColumn } from 'quasar'
 import { formatDate } from 'src/utils/format'
 
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
-import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
+import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
@@ -126,12 +126,12 @@ const columns: QTableColumn[] = [
   }
 ]
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getSendingItemsCount(sendingGroupId.value as number, filterObj.filter, statusTab.value)
   return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getSendingItemsData(sendingGroupId.value as number, filterObj.filter, statusTab.value, pagination)
   return data || []
@@ -139,20 +139,20 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, refreshTable } = useQTable({
   getRowsNumberCount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   onRequest
 })
 
 import { removeHistory } from 'src/layouts/components/tags/routeHistories'
-import { IRouteHistory } from 'src/layouts/components/tags/types'
+import type { IRouteHistory } from 'src/layouts/components/tags/types'
 const router = useRouter()
-function goBackToSendHistory () {
-  removeHistory(router, route as unknown as IRouteHistory, '/send-management/history')
+async function goBackToSendHistory () {
+  await removeHistory(router, route as unknown as IRouteHistory, '/send-management/history')
 }
 
 // 从路由中获取id
 const route = useRoute()
-onMounted(async () => {
+onMounted(() => {
   if (!route.query.sendingGroupId) return
   sendingGroupId.value = Number(route.query.sendingGroupId)
   // 触发更新
@@ -162,7 +162,8 @@ onMounted(async () => {
 // #region 发件进度相关
 import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 import { subscribeOne } from 'src/signalR/signalR'
-import { ISendingGroupProgressArg, ISendingItemStatusChangedArg, UzonMailClientMethods, SendingGroupProgressType } from 'src/signalR/types'
+import type { ISendingGroupProgressArg, ISendingItemStatusChangedArg } from 'src/signalR/types';
+import { UzonMailClientMethods, SendingGroupProgressType } from 'src/signalR/types'
 import { getSendingGroupRunningInfo, SendingGroupStatus } from 'src/api/sendingGroup'
 const sendingGroupProgressValue = ref(-1)
 const showProgressBar = computed(() => sendingGroupProgressValue.value > 0 && sendingGroupProgressValue.value < 1)
@@ -208,7 +209,8 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
  */
 import { useContextMenu } from './sendDetailContext'
 import { notifyError } from 'src/utils/dialog'
-import { IExcelColumnMapper, writeExcel, IExcelWriterParams } from 'src/utils/file'
+import type { IExcelColumnMapper, IExcelWriterParams } from 'src/utils/file';
+import { writeExcel } from 'src/utils/file'
 const { sendDetailContextItems, ContextMenu } = useContextMenu()
 
 // 导出

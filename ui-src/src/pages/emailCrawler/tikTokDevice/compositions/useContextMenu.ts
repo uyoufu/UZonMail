@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { deleteTikTokDevice, ITikTokDevice, updateTikTokDevice } from 'src/api/pro/tikTokDevice'
-import { IContextMenuItem } from 'src/components/contextMenu/types'
-import { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
+import type { ITikTokDevice } from 'src/api/pro/tikTokDevice';
+import { deleteTikTokDevice, updateTikTokDevice } from 'src/api/pro/tikTokDevice'
+import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 import { getTikTokDeviceInfoFields } from './useHeaderFunctions'
 import { confirmOperation, notifySuccess, showDialog } from 'src/utils/dialog'
-import { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 
 export function useContextMenu (addNewRow: addNewRowType<ITikTokDevice>, deleteRowById: deleteRowByIdType) {
   const contextMenuItems: IContextMenuItem<ITikTokDevice>[] = [
@@ -24,7 +25,7 @@ export function useContextMenu (addNewRow: addNewRowType<ITikTokDevice>, deleteR
   ]
 
   async function onUpdateCrawler (tikTokDeviceInfo: Record<string, any>) {
-    const fields = await getTikTokDeviceInfoFields()
+    const fields = getTikTokDeviceInfoFields()
 
     // 添加默认值
     fields.forEach(field => {
@@ -41,7 +42,7 @@ export function useContextMenu (addNewRow: addNewRowType<ITikTokDevice>, deleteR
     }
 
     // 弹出对话框
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const { ok, data } = await showDialog<ITikTokDevice>(popupParams)
     if (!ok) return
     await updateTikTokDevice(tikTokDeviceInfo.id, data)

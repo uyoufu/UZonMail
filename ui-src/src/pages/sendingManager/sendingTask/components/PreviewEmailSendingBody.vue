@@ -54,7 +54,7 @@ console.log('emailCreateInfo.data', props.emailCreateInfo.data)
 const userDataInboxes = props.emailCreateInfo.data.map((item) => item.inbox)
   .filter(x => x)
 if (userDataInboxes.length > 0) {
-  inboxes.push(...userDataInboxes.map(x => ({ email: x })))
+  inboxes.push(...userDataInboxes.map(x => ({ email: x } as IInbox)))
 }
 // 去重
 inboxes = Array.from(new Set(inboxes))
@@ -62,6 +62,7 @@ pagesCount.value = inboxes.length
 
 import { useInstanceRequestCache } from 'src/api/base/httpCache'
 import { getEmailTemplateById, getEmailTemplateByIdOrName } from 'src/api/emailTemplate'
+import { IInbox } from 'src/api/emailBox';
 const cacheKey = useInstanceRequestCache()
 // 主题
 function getSubjects () {
@@ -107,7 +108,7 @@ async function getEmailBody (inbox: string, inboxIndex: number) {
     // 查找模板
     const templateIndex = inboxIndex % props.emailCreateInfo.templates.length
     const template = props.emailCreateInfo.templates[templateIndex]
-    const { data } = await getEmailTemplateById(template.id, cacheKey)
+    const { data } = await getEmailTemplateById(template!.id as number, cacheKey)
 
     // 返回模板数据
     templateContent = data.content
@@ -121,13 +122,13 @@ const emailBody = ref('')
 const emailSubject = ref('')
 watch(currentPage, async () => {
   const index = currentPage.value - 1
-  const inbox = inboxes[index].email as string
+  const inbox = inboxes[index]!.email as string
 
   // subject 优先级：Excel数据/subject  > 界面/主题
   const userData = props.emailCreateInfo.data.find((x) => x.inbox === inbox)
   if (userData && userData.subject) emailSubject.value = userData.subject
   else {
-    emailSubject.value = subjects[index % subjects.length]
+    emailSubject.value = subjects[index % subjects.length] as string
   }
   if (userData && userData.inbox) currentInbox.value = userData.inbox
   else currentInbox.value = inbox
