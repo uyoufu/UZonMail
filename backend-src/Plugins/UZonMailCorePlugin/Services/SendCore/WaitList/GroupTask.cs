@@ -3,8 +3,6 @@ using UZonMail.Core.SignalRHubs.SendEmail;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.Utils.Database;
 using log4net;
-using UZonMail.DB.SQL.EmailSending;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.Core.Database.SQL.EmailSending;
 using UZonMail.DB.SQL;
 
@@ -15,6 +13,10 @@ using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL.Base;
 using StackExchange.Redis;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Core.Services.Unsubscribe;
+using UZonMail.DB.Utils;
 
 namespace UZonMail.Core.Services.EmailSending.WaitList
 {
@@ -253,11 +255,12 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
 
             // 对于取消订阅的邮件，进行标记
             var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, UserId);
-            var unsubscribedEmails = await sqlContext.UnsubscribeEmails.AsNoTracking()
-                .Where(x => x.OrganizationId == userInfo.OrganizationId)
-                .Where(x => !x.IsDeleted)
-                .Select(x => x.Email)
-                .ToListAsync();
+            var unsubscribeManager = sendingContext.Provider.GetService<IUnsubscribeManager>();
+            List<string> unsubscribedEmails = [];
+            if (unsubscribeManager != null)
+            {
+                unsubscribedEmails = await unsubscribeManager.GetUnsubscribedEmails(userInfo.OrganizationId);
+            }
             if (unsubscribedEmails.Count > 0)
             {
                 var unsubscribedSendingItemIds = toSendingItems.Where(x => x.Inboxes.Any(i => unsubscribedEmails.Contains(i.Email))).Select(x => x.Id).ToList();

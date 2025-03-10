@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.EmailSending;
-using UZonMail.DB.SQL;
+﻿using UZonMail.DB.SQL;
 using Microsoft.EntityFrameworkCore;
+using UZonMail.DB.SQL.Core.EmailSending;
 
 namespace UZonMail.Core.Services.SendCore.Utils
 {

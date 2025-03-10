@@ -2,8 +2,6 @@
 using System.Collections.Concurrent;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Utils.Database;
-using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Core.Services.EmailSending.WaitList;
 
 namespace UZonMail.Core.Services.SendCore.WaitList

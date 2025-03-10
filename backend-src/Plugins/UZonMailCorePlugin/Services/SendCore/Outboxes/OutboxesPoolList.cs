@@ -1,8 +1,6 @@
 ﻿using log4net;
 using System.Collections.Concurrent;
-using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.SendCore.Outboxes

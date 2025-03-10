@@ -3,18 +3,17 @@ using Newtonsoft.Json.Linq;
 using Quartz;
 using UZonMail.Core.Jobs;
 using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Utils.Database;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Utils.Web.Service;
 using UZonMail.Utils.Json;
 using UZonMail.Core.Database.SQL.EmailSending;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.Core.Services.SendCore;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.Emails;
 
 namespace UZonMail.Core.Services.EmailSending
 {
@@ -77,7 +76,7 @@ namespace UZonMail.Core.Services.EmailSending
                 await ctx.SaveChangesAsync();
 
                 // 获取用户设置
-                var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(ctx, sendingGroupData.UserId);
+                var userInfo = await CacheManager.Global.GetCache<UserInfoCache, SqlContext>(ctx, sendingGroupData.UserId);
                 var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(ctx, userInfo.OrganizationId);
 
                 // 保存发件箱

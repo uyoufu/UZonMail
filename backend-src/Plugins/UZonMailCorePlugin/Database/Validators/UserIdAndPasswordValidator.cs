@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using UZonMail.DB.SQL.Organization;
+using UZonMail.DB.SQL.Core.Organization;
 
 namespace UZonMail.Core.Database.Validators
 {

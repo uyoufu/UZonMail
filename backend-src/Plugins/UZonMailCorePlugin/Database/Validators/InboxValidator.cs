@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using System.Text.RegularExpressions;
-using UZonMail.DB.SQL.Emails;
+using UZonMail.DB.SQL.Core.Emails;
 
 namespace UZonMail.Core.Database.Validators
 {

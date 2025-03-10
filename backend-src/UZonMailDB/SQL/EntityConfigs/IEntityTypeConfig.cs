@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UZonMail.DB.SQL.Emails;
 
 namespace UZonMail.DB.SQL.EntityConfigs
 {

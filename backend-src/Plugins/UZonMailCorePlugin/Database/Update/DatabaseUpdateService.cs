@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using UZonMail.Core.Config.SubConfigs;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Settings;
+using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Database.Updater

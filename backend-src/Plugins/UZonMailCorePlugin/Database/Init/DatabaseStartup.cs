@@ -1,13 +1,8 @@
-﻿using UZonMail.Utils.Extensions;
-using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Utils.Database;
+﻿using UZonMail.Core.Utils.Database;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Organization;
-using UZonMail.DB.SQL.Files;
-using UZonMail.DB.SQL.EmailSending;
-using UZonMail.Core.Config;
-using UZonMail.DB.SQL.Settings;
 using UZonMail.Utils.Web.Service;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.Utils;
 
 namespace UZonMail.Core.Database.Init
 {

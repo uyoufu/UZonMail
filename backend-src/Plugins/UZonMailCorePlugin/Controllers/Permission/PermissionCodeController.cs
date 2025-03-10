@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Permission;
 using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.DB.SQL.Core.Permission;
 
 namespace UZonMail.Core.Controllers.Permission
 {

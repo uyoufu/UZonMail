@@ -3,7 +3,7 @@ using UZonMail.Core.Services.SendCore.Utils;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.SignalRHubs.SendEmail;
-using UZonMail.DB.SQL.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {

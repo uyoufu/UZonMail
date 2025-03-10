@@ -2,9 +2,9 @@
 using Quartz;
 using UZonMail.Utils.Web.Service;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
 using log4net;
 using UZonMail.Core.Services.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
 
 namespace UZonMail.Core.Jobs
 {

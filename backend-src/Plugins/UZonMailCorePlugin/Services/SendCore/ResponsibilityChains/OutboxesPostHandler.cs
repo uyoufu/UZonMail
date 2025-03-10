@@ -8,7 +8,8 @@ using UZonMail.Core.SignalRHubs.SendEmail;
 using UZonMail.Core.Utils.Database;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.Utils;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {

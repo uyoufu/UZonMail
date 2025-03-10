@@ -3,7 +3,6 @@ using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Common;
 using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.Settings;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Core.Services.Common;
 using UZonMail.DB.SQL;
@@ -14,6 +13,7 @@ using UZonMail.Core.Services.SendCore.Sender;
 using Microsoft.AspNetCore.SignalR;
 using UZonMail.Core.SignalRHubs;
 using UZonMail.Core.SignalRHubs.Extensions;
+using UZonMail.DB.SQL.Core.Emails;
 
 namespace UZonMail.Core.Controllers.Emails
 {

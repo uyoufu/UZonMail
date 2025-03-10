@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Organization;
+using UZonMail.DB.SQL.Core.Organization;
 
 namespace UZonMail.DB.Managers.Cache
 {
-    public class UserInfoCache : BaseCache
+    public class UserInfoCache : BaseDBCache<SqlContext>
     {
         /// <summary>
         /// key 为 userId

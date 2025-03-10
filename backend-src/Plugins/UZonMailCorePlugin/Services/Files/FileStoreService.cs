@@ -3,8 +3,8 @@ using UZonMail.Utils.Web.Service;
 using UZonMail.Core.Services.UserInfos;
 using UZonMail.Utils.Extensions;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Files;
 using UZonMail.Utils.Web.Exceptions;
+using UZonMail.DB.SQL.Core.Files;
 
 namespace UZonMail.Core.Services.Files
 {

@@ -10,11 +10,12 @@ using UZonMail.Core.Services.UserInfos;
 using UZonMail.Core.Utils.Database;
 using UZonMail.Core.Utils.Extensions;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Services.SendCore.Sender;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.Utils;
 
 namespace UZonMail.Core.Controllers.Emails
 {

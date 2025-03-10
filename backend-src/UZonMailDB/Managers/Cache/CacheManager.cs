@@ -1,8 +1,4 @@
 ﻿using log4net;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
-using UZonMail.DB.SQL.Settings;
 using UZonMail.DB.SQL;
 using System.Collections.Concurrent;
 
@@ -20,7 +16,7 @@ namespace UZonMail.DB.Managers.Cache
         /// </summary>
         public static CacheManager Global => _instance.Value;
 
-        private readonly ConcurrentDictionary<string, ICache> _settingsDic = [];
+        private readonly ConcurrentDictionary<string, IDBCache> _settingsDic = [];
 
         /// <summary>
         /// 获取完整的 Key
@@ -29,7 +25,7 @@ namespace UZonMail.DB.Managers.Cache
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public string GetFullKey<T>(string key) where T : ICache, new()
+        public string GetFullKey<T>(string key) where T : IDBCache, new()
         {
             var fullName = typeof(T).FullName;
             if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
@@ -48,7 +44,7 @@ namespace UZonMail.DB.Managers.Cache
         /// <param name="fullKey"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public string GetSubKey<T>(string fullKey) where T : ICache, new()
+        public string GetSubKey<T>(string fullKey) where T : IDBCache, new()
         {
             var fullName = typeof(T).FullName;
             if (string.IsNullOrEmpty(fullKey)) throw new ArgumentNullException(nameof(fullKey));
@@ -64,9 +60,10 @@ namespace UZonMail.DB.Managers.Cache
         /// </summary>
         /// <param name="objectIdKey"></param>
         /// <returns></returns>
-        public bool SetCacheDirty<T>(string objectIdKey) where T : ICache, new()
+        public bool SetCacheDirty<TResult>(string objectIdKey)
+            where TResult : IDBCache, new()
         {
-            var fullKey = GetFullKey<T>(objectIdKey);
+            var fullKey = GetFullKey<TResult>(objectIdKey);
             // 移除缓存数据
             if (!_settingsDic.TryGetValue(fullKey, out var value)) return false;
             value.SetDirty(true);
@@ -79,31 +76,62 @@ namespace UZonMail.DB.Managers.Cache
         /// <param name="db"></param>
         /// <param name="key">建议使用id</param>
         /// <returns></returns>
-        public async Task<T> GetCache<T>(SqlContext db, string key) where T : ICache, new()
+        public async Task<TResult> GetCache<TResult, TSqlContext>(TSqlContext db, string key)
+            where TSqlContext : SqlContextBase
+            where TResult : BaseDBCache<TSqlContext>, new()
         {
-            var fullKey = GetFullKey<T>(key);
+            var fullKey = GetFullKey<TResult>(key);
 
             if (!_settingsDic.TryGetValue(fullKey, out var value))
             {
-                value = new T();
-                var subKey = GetSubKey<T>(fullKey);
+                value = new TResult();
+                var subKey = GetSubKey<TResult>(fullKey);
                 value.SetKey(subKey);
                 _settingsDic.TryAdd(fullKey, value);
             }
-            await value.Update(db);
-            return (T)value;
+            await (value as TResult)!.Update(db);
+            return (TResult)value;
         }
 
         /// <summary>
         /// 获取缓存
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
         /// <param name="db"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public async Task<T> GetCache<T>(SqlContext db,long key) where T : ICache, new()
+        public async Task<TResult> GetCache<TResult, TSqlContext>(TSqlContext db, long key)
+            where TSqlContext : SqlContextBase
+            where TResult : BaseDBCache<TSqlContext>, new()
         {
-            return await GetCache<T>(db, key.ToString());
+            return await GetCache<TResult, TSqlContext>(db, key.ToString());
         }
+
+        #region SqlContext 重载
+        /// <summary>
+        /// 获取缓存
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="key">建议使用id</param>
+        /// <returns></returns>
+        public async Task<TResult> GetCache<TResult>(SqlContext db, string key)
+            where TResult : BaseDBCache<SqlContext>, new()
+        {
+            return await GetCache<TResult, SqlContext>(db, key);
+        }
+
+        /// <summary>
+        /// 获取缓存
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="db"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public async Task<TResult> GetCache<TResult>(SqlContext db, long key)
+            where TResult : BaseDBCache<SqlContext>, new()
+        {
+            return await GetCache<TResult, SqlContext>(db, key.ToString());
+        }
+        #endregion
     }
 }

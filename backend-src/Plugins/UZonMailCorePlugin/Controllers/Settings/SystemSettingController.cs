@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Settings.Request;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Settings;
+using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Settings

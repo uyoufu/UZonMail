@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using UZonMail.Utils.Web.Service;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Organization;
 using UZonMail.Core.SignalRHubs;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.Services.Cache;
-using UZonMail.DB.SQL.Permission;
 using UZonMail.Utils.Web.Access;
+using UZonMail.DB.SQL.Core.Permission;
 
 namespace UZonMail.Core.Services.Permission
 {

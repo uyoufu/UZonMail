@@ -8,7 +8,7 @@ namespace UZonMail.DB.MySql
     {
         private readonly MySqlConnectionConfig _mysqlConnectionConfig;
 
-        internal MySqlContext(DbContextOptions<SqlContext> options) : base(options)
+        internal MySqlContext(DbContextOptions options) : base(options)
         {
         }
 

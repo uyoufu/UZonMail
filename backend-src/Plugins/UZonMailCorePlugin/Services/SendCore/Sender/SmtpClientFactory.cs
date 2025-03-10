@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using Uamazing.Utils.Envs;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.DB.SQL.Emails;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender

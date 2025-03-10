@@ -1,15 +1,14 @@
-﻿using UZonMail.DB.SQL.Settings;
-using UZonMail.DB.SQL.Templates;
-using UZonMail.DB.SQL;
+﻿using UZonMail.DB.SQL;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using UZonMail.DB.SQL.Core.Templates;
 
 namespace UZonMail.DB.Managers.Cache
 {
     /// <summary>
     /// 用户模板缓存
     /// </summary>
-    public class UserTemplatesCache : BaseCache, IEnumerable<EmailTemplate>
+    public class UserTemplatesCache : BaseDBCache<SqlContext>, IEnumerable<EmailTemplate>
     {
         private List<EmailTemplate> _templates = [];
 
@@ -19,7 +18,8 @@ namespace UZonMail.DB.Managers.Cache
             if (!NeedUpdate) return;
             SetDirty(false);
 
-            var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(db, UserId);
+            var userInfo = await CacheManager.Global.GetCache<UserInfoCache, SqlContext>(db, UserId);
+
             // 按用户缓存代理
             _templates = await db.EmailTemplates
                 .AsNoTracking()

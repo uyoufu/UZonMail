@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Templates;
+using UZonMail.DB.SQL.Core.Templates;
 
 namespace UZonMail.Core.Services.SendCore.EmailWaitList
 {

@@ -7,7 +7,7 @@ namespace UZonMail.DB.SqLite
     {
         private readonly SqLiteConnectionConfig _sqLiteConnectionConfig;
 
-        internal SqLiteContext(DbContextOptions<SqlContext> options) : base(options)
+        internal SqLiteContext(DbContextOptions options) : base(options)
         {
         }
 

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Extensions;
+using UZonMail.DB.SQL.Core.Emails;
 
 namespace UZonMail.Core.Services.SendCore.Sender
 {
