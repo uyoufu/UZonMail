@@ -23,7 +23,7 @@ namespace UZonMail.DB.MySql
                 User = "uzon-mail"
             };
 
-            var optionsBuilder = new DbContextOptionsBuilder();
+            var optionsBuilder = new DbContextOptionsBuilder<SqlContext>();
             optionsBuilder.UseMySql(connection.ConnectionString, new MySqlServerVersion(connection.MysqlVersion));
 
             return new MySqlContext(optionsBuilder.Options);

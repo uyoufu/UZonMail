@@ -1,27 +1,28 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Configuration;
 using UZonMail.DB.SQL;
 
 namespace UZonMail.DB.MySql
 {
     public class MySqlContext : SqlContext
     {
-        private readonly MySqlConnectionConfig _mysqlConnectionConfig;
+        private readonly IConfiguration _configuration;
 
-        internal MySqlContext(DbContextOptions options) : base(options)
+        internal MySqlContext(DbContextOptions<SqlContext> options) : base(options)
         {
         }
 
+        [ActivatorUtilitiesConstructor]
         public MySqlContext(IConfiguration configuration)
         {
-            _mysqlConnectionConfig = new();
-            configuration.GetSection("Database:MySql").Bind(_mysqlConnectionConfig);
+            _configuration = configuration;
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            if (_mysqlConnectionConfig != null)
-                options.UseMySql(_mysqlConnectionConfig.ConnectionString, new MySqlServerVersion(_mysqlConnectionConfig.MysqlVersion));
+            SqlContextHelper.ConfiguringMySql(options, _configuration);
         }
     }
 }

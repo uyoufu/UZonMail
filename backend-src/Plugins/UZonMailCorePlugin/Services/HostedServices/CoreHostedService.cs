@@ -3,24 +3,26 @@ using UZonMail.DB.SQL;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using UZonMail.Core.Jobs;
-using UZonMail.Core.Database.Init;
+using UZonMail.Core.Database.Startup;
 using UZonMail.Core.Database.Updater;
 using UZonMail.Core.Config;
 using UZonMail.Utils.Database.Initializer;
+using UZonMail.Utils.Web.Service;
+using UZonMailService.Services.PostStartup;
 
 namespace UZonMail.Core.Services.HostedServices
 {
     /// <summary>
     /// 程序启动时，开始中断的发件任务
     /// </summary>
-    public class SendingHostedService(IServiceScopeFactory ssf) : BackgroundService
+    public class CoreHostedService(IServiceProvider serviceProvider, SqlContext context) : IHostedServiceStart, IScopedService<IHostedServiceStart>
     {
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public int Order => 1;
+
+        public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using var scope = ssf.CreateScope();
-            var serviceProvider = scope.ServiceProvider;
-            await InitDatabase(serviceProvider);
-            await InitScheduler(serviceProvider);
+            await InitDatabase();
+            await InitScheduler();
         }
 
         /// <summary>
@@ -28,19 +30,14 @@ namespace UZonMail.Core.Services.HostedServices
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <returns></returns>
-        private static async Task InitDatabase(IServiceProvider serviceProvider)
+        private async Task InitDatabase()
         {
-            // 数据库迁移
-            var context = serviceProvider.GetRequiredService<SqlContext>();
-            context.Database.Migrate();
-            await context.Database.EnsureCreatedAsync();
-
-            // 数据库初始化
-            var dbStartup = serviceProvider.GetRequiredService<DatabaseStartup>();
-            await dbStartup.Init();
+            // 数据库启动设置
+            var dbStartup = serviceProvider.GetRequiredService<DatabaseSetup>();
+            await dbStartup.Start();
 
             // 数据升级
-            var dataUpdater = serviceProvider.GetRequiredService<DatabaseUpdateService>();            
+            var dataUpdater = serviceProvider.GetRequiredService<DatabaseUpdateService>();
             await dataUpdater.Update();
         }
 
@@ -49,7 +46,7 @@ namespace UZonMail.Core.Services.HostedServices
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <returns></returns>
-        private static async Task InitScheduler(IServiceProvider serviceProvider)
+        private async Task InitScheduler()
         {
             var schdulerFactory = serviceProvider.GetRequiredService<ISchedulerFactory>();
             var scheduler = await schdulerFactory.GetScheduler();

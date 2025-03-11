@@ -52,7 +52,7 @@ namespace UZonMail.Core.Database.Updater
                 };
                 db.SystemSettings.Add(versionSetting);
             }
-            else
+            else if (versionSetting.StringValue != "0.0.0.0")
             {
                 // 判断是支持升级
                 var dbVersion = new Version(versionSetting.StringValue);

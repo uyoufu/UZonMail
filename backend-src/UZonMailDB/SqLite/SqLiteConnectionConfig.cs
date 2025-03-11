@@ -1,8 +1,9 @@
 ﻿using Microsoft.Data.Sqlite;
+using UZonMail.DB.SQL;
 
 namespace UZonMail.DB.SqLite
 {
-    public class SqLiteConnectionConfig
+    public class SqLiteConnectionConfig : IConnectionString
     {
         public bool Enable { get; set; } = false;
         public string DataSource { get; set; }

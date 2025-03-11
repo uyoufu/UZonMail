@@ -14,6 +14,7 @@ using UZonMail.Utils.Web.Filters;
 using UZonMail.DB.SQL;
 using UZonMail.DB.MySql;
 using UZonMail.DB.SqLite;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // 修改当前目录
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
@@ -190,11 +191,13 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = int.MaxValue;
 });
 
-// 加载服务
+// 加载本机服务
+services.AddServices();
+
+// 加载插件服务
 pluginLoader.UseServices(builder);
 
 var app = builder.Build();
-
 
 app.UseDefaultFiles();
 // 设置网站的根目录

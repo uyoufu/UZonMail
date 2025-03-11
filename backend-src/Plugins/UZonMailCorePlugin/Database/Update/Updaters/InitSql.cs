@@ -179,7 +179,7 @@ namespace UZonMail.Core.Database.Update.Updaters
                 UserId = adminUser.Id,
                 Roles = [orgAdminRole]
             };
-            db.Add(userRole);
+            db.UserRole.Add(userRole);
             await db.SaveChangesAsync();
         }
 

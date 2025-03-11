@@ -1,9 +1,11 @@
-﻿namespace UZonMail.DB.MySql
+﻿using UZonMail.DB.SQL;
+
+namespace UZonMail.DB.MySql
 {
     /// <summary>
     /// mysql 连接信息
     /// </summary>
-    public class MySqlConnectionConfig
+    public class MySqlConnectionConfig : IConnectionString
     {
         public bool Enable { get; set; } = false;
         public string Version { get; set; }

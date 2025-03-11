@@ -13,6 +13,7 @@ namespace UZonMail.DB.Managers.Cache
         private readonly static Lazy<CacheManager> _instance = new(() => new CacheManager());
         /// <summary>
         /// 全局缓存管理器
+        /// 需要自己处理更新
         /// </summary>
         public static CacheManager Global => _instance.Value;
 

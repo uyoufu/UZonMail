@@ -4,19 +4,19 @@ using UZonMail.Utils.Web.Service;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.DB.Utils;
 
-namespace UZonMail.Core.Database.Init
+namespace UZonMail.Core.Database.Startup
 {
     /// <summary>
     /// 初始化数据库
     /// 每次启动时，都需要执行
     /// </summary>
     /// <param name="db"></param>
-    public class DatabaseStartup(SqlContext db) : IScopedService
+    public class DatabaseSetup(SqlContext db) : IScopedService
     {
         /// <summary>
         /// 开始执行初始化
         /// </summary>
-        public async Task Init()
+        public async Task Start()
         {
             await ResetSendingGroup();
             await ResetSendingItemsStatus();

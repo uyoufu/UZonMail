@@ -21,7 +21,7 @@ namespace UZonMail.DB.SQL
 
         #region 初始化
         public SqlContext() { }
-        public SqlContext(DbContextOptions options) : base(options)
+        public SqlContext(DbContextOptions<SqlContext> options) : base(options)
         {
         }
 

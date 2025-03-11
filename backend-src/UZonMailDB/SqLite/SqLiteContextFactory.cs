@@ -12,9 +12,10 @@ namespace UZonMail.DB.SqLite
     {
         public SqLiteContext CreateDbContext(string[] args)
         {
+            Console.WriteLine("SqLiteContextFactory running...");
             Batteries.Init();
 
-            var optionsBuilder = new DbContextOptionsBuilder();
+            var optionsBuilder = new DbContextOptionsBuilder<SqlContext>();
             optionsBuilder.UseSqlite("Data Source=UZonMail/uzon-mail.db");
 
             return new SqLiteContext(optionsBuilder.Options);

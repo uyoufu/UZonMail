@@ -11,7 +11,6 @@ namespace UZonMail.Core
         public void UseServices(WebApplicationBuilder webApplicationBuilder)
         {
             var services = webApplicationBuilder.Services;
-
             // 绑定配置
             services.Configure<AppConfig>(webApplicationBuilder.Configuration);
             // 批量注册服务
