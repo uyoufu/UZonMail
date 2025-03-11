@@ -9,7 +9,7 @@ using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.DB.SQL.Core.Permission;
-using UZonMail.DB.Utils;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Controllers.Permission
 {

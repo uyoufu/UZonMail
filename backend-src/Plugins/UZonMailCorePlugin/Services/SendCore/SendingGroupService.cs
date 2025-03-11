@@ -25,7 +25,7 @@ namespace UZonMail.Core.Services.EmailSending
         , SendingThreadsManager tasksService
         , GroupTasksList waitList
         , OutboxesPoolList outboxesPoolList
-        //, ISchedulerFactory schedulerFactory
+        , ISchedulerFactory schedulerFactory
         , IServiceProvider serviceProvider
         ) : IScopedService
     {
@@ -253,24 +253,24 @@ namespace UZonMail.Core.Services.EmailSending
         /// <returns></returns>
         public async Task SendSchedule(SendingGroup sendingGroup)
         {
-            //var scheduler = await schedulerFactory.GetScheduler();
-            //var jobKey = new JobKey($"emailSending-{sendingGroup.Id}", "sendingGroup");
+            var scheduler = await schedulerFactory.GetScheduler();
+            var jobKey = new JobKey($"emailSending-{sendingGroup.Id}", "sendingGroup");
 
-            //var job = JobBuilder.Create<EmailSendingJob>()
-            //            .WithIdentity(jobKey)
-            //            .SetJobData(new JobDataMap
-            //            {
-            //                { "sendingGroupId", sendingGroup.Id },
-            //                { "smtpPasswordSecretKeys", string.Join(',',sendingGroup.SmtpPasswordSecretKeys) }
-            //            })
-            //            .Build();
+            var job = JobBuilder.Create<EmailSendingJob>()
+                        .WithIdentity(jobKey)
+                        .SetJobData(new JobDataMap
+                        {
+                            { "sendingGroupId", sendingGroup.Id },
+                            { "smtpPasswordSecretKeys", string.Join(',',sendingGroup.SmtpPasswordSecretKeys) }
+                        })
+                        .Build();
 
-            //var trigger = TriggerBuilder.Create()
-            //    .ForJob(jobKey)
-            //    .StartAt(new DateTimeOffset(sendingGroup.ScheduleDate))
-            //    .Build();
+            var trigger = TriggerBuilder.Create()
+                .ForJob(jobKey)
+                .StartAt(new DateTimeOffset(sendingGroup.ScheduleDate))
+                .Build();
 
-            //await scheduler.ScheduleJob(job, trigger);
+            await scheduler.ScheduleJob(job, trigger);
         }
 
         /// <summary>

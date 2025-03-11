@@ -6,10 +6,10 @@ using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.SignalRHubs.SendEmail;
 using UZonMail.Core.Utils.Database;
+using UZonMail.DB.Extensions;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.DB.Utils;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {

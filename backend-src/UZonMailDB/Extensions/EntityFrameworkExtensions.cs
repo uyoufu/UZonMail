@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Base;
 
-namespace UZonMail.DB.Utils
+namespace UZonMail.DB.Extensions
 {
     public static class EntityFrameworkExtensions
     {

@@ -2,7 +2,7 @@
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.DB.Utils;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Database.Startup
 {

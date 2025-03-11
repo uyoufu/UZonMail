@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Folder Include="SQL\EntityConfigs\Attributes\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -15,7 +15,7 @@ using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Services.SendCore.Sender;
 using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.Utils;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Controllers.Emails
 {

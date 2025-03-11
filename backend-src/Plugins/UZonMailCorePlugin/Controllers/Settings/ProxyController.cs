@@ -9,7 +9,7 @@ using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Utils.Database;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.DB.Utils;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Controllers.Settings
 {

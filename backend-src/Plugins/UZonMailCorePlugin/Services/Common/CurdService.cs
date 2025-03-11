@@ -5,7 +5,7 @@ using UZonMail.Utils.Web.Service;
 using UZonMail.Core.Utils.Database;
 using UZonMail.DB.SQL.Base;
 using UZonMail.DB.SQL;
-using UZonMail.DB.Utils;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Services.Common
 {
