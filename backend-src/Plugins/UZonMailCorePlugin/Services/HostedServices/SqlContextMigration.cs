@@ -8,7 +8,7 @@ namespace UZonMail.Core.Services.HostedServices
 {
     public class SqlContextMigration(SqlContext db) : IHostedServiceStart, IScopedService<IHostedServiceStart>
     {
-        public int Order => -1;
+        public int Order => -10000;
 
         public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
