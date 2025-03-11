@@ -1,14 +1,6 @@
-﻿using Quartz;
-using UZonMail.DB.SQL;
-using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Jobs;
-using UZonMail.Core.Database.Startup;
+﻿using UZonMail.Core.Database.Startup;
 using UZonMail.Core.Database.Updater;
-using UZonMail.Core.Config;
-using UZonMail.Utils.Database.Initializer;
 using UZonMail.Utils.Web.Service;
-using UZonMailService.Services.PostStartup;
 
 namespace UZonMail.Core.Services.HostedServices
 {

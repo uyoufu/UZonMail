@@ -2,7 +2,6 @@
 using Quartz;
 using UZonMail.Core.Jobs;
 using UZonMail.Utils.Web.Service;
-using UZonMailService.Services.PostStartup;
 
 namespace UZonMail.Core.Services.HostedServices
 {

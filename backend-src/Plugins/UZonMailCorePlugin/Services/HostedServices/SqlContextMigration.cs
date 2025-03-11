@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
-using UZonMailService.Services.PostStartup;
 
 namespace UZonMail.Core.Services.HostedServices
 {

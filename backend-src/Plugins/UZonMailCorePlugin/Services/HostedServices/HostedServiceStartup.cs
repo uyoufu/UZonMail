@@ -1,7 +1,7 @@
 ﻿
 using System.Runtime.Intrinsics.X86;
 
-namespace UZonMailService.Services.PostStartup
+namespace UZonMail.Core.Services.HostedServices
 {
     /// <summary>
     /// 服务启动后的后台服务

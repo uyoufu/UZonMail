@@ -130,20 +130,20 @@ if (Test-Path -Path $mainService -PathType Container) {
 }
 New-Item -Path $mainService -ItemType Directory -Force
 
-$serviceDist = $mainService
-dotnet publish -c Release -o $serviceDist -r $publishPlatform --self-contained false
+$serviceDest = $mainService
+dotnet publish -c Release -o $serviceDest -r $publishPlatform --self-contained false
 # 创建 public 目录
-New-Item -Path "$serviceDist/public" -ItemType Directory -Force
+New-Item -Path "$serviceDest/public" -ItemType Directory -Force
 # 创建 wwwwroot 目录
-New-Item -Path "$serviceDist/wwwroot" -ItemType Directory -Force
+New-Item -Path "$serviceDest/wwwroot" -ItemType Directory -Force
 # 创建 Plugins 目录
-New-Item -Path "$serviceDist/Plugins" -ItemType Directory -Force
+New-Item -Path "$serviceDest/Plugins" -ItemType Directory -Force
 # 创建 assembly 目录
-New-Item -Path "$serviceDist/Assembly" -ItemType Directory -Force
+New-Item -Path "$serviceDest/Assembly" -ItemType Directory -Force
 
 # 复制 Quartz/quartz-sqlite.sqlite3 到 data/db 目录中
-New-Item -Path "$serviceDist/data/db" -ItemType Directory  -ErrorAction SilentlyContinue
-Copy-Item -Path "$serviceSrc/Quartz/quartz-sqlite.sqlite3" -Destination "$serviceDist/data/db/quartz-sqlite.sqlite3" -Force
+New-Item -Path "$serviceDest/data/db" -ItemType Directory  -ErrorAction SilentlyContinue
+Copy-Item -Path "$serviceSrc/Quartz/quartz-sqlite.sqlite3" -Destination "$serviceDest/data/db/quartz-sqlite.sqlite3" -Force
 Write-Host "后端 UZonMailService 编译完成!" -ForegroundColor Green
 
 # 复制 scripts 目录中的 Dockerfile 和 docker-compose.yml 到编译目录
@@ -180,8 +180,27 @@ function Copy-Assembly {
     $dlls = Compare-Object -ReferenceObject $srcDlls -DifferenceObject $mainDlls -Property Name | Where-Object { $_.SideIndicator -eq '<=' }
     $targetDir = "$mainService/Assembly"
     foreach ($dll in $dlls) {
+        # 如果 $dll.Name 是为 Plugin.dll 结尾，则跳过
+        if ($dll.Name -match "Plugin.") {
+            continue
+        }
         Copy-Item -Path "$src/$($dll.Name)" -Destination $targetDir -Force
     }    
+}
+
+function Copy-Assets {
+    param(
+        [string]$src,
+        [string]$destRoot
+    )
+
+    # 复制 assets 到 destRoot 子目录
+    $srcName = Split-Path -Path $src -Leaf
+    $dest = Join-Path -Path $destRoot -ChildPath $srcName
+    New-Item -Path $dest -ItemType Directory -Force
+    Copy-Item -Path $src -Destination $dest -Recurse -Force
+    # 复制目录及其内容
+    Copy-Item -Path $src -Destination $dest -Recurse -Force    
 }
 
 # 编译后端 UZonMailCorePlugin
@@ -190,20 +209,20 @@ $uZonMailCorePlugin = 'UZonMailCorePlugin'
 Write-Host "开始编译后端 $uZonMailCorePlugin ..." -ForegroundColor Yellow
 $serviceSrc = Join-Path -Path $pluginsSrc -ChildPath $uZonMailCorePlugin
 # 使用 dotnet 编译
-$serviceDist = "$mainService/$uZonMailCorePlugin"
+$serviceDest = "$mainService/$uZonMailCorePlugin"
 Set-Location $serviceSrc
-dotnet publish -c Release -o $serviceDist -r $publishPlatform --self-contained false
+dotnet publish -c Release -o $serviceDest -r $publishPlatform --self-contained false
 # 复制依赖到根目录，复制库 到 Plugins 目录
-Copy-Assembly -src $serviceDist -exclude "$uZonMailCorePlugin.*"
+Copy-Assembly -src $serviceDest -exclude "$uZonMailCorePlugin.*"
 $uzonMailCorePluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailCorePlugin"
 New-Item -Path $uzonMailCorePluginPath -ItemType Directory -Force
-Copy-Item -Path "$serviceDist/$uZonMailCorePlugin.*" -Destination $uzonMailCorePluginPath -Force
+Copy-Item -Path "$serviceDest/$uZonMailCorePlugin.*" -Destination $uzonMailCorePluginPath -Force
 # 删除临时目录
-Remove-Item -Path $serviceDist -Recurse -Force
+Remove-Item -Path $serviceDest -Recurse -Force
 Write-Host "后端 $uZonMailCorePlugin 编译完成!" -ForegroundColor Green
 
-# 编译后端 UzonMailPro
-function New-Desktop {
+# 编译后端 UZonMailProPlugin
+function New-UZonMailProPlugin {
     $uZonMailProPlugin = 'UZonMailProPlugin'    
     # 使用 dotnet 编译
     Set-Location -Path $gitRoot
@@ -217,19 +236,26 @@ function New-Desktop {
         return
     }
     
-    $serviceDist = "$mainService/$uZonMailProPlugin"
+    $serviceDest = "$mainService/$uZonMailProPlugin"
     Set-Location $proPluginPath
-    dotnet publish -c Release -o $serviceDist -r $publishPlatform --self-contained false
-    # 复制依赖到根目录，复制库到 Plugins 目录
-    Copy-Assembly -src $serviceDist -exclude "$uZonMailProPlugin.*"
+    dotnet publish -c Release -o $serviceDest -r $publishPlatform --self-contained false
+    # 复制依赖到根目录
+    Copy-Assembly -src $serviceDest -exclude "$uZonMailProPlugin.*"
+    # 复制库到 Pro 插件目录  
     $uzonMailProPluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailProPlugin"
     New-Item -Path $uzonMailProPluginPath -ItemType Directory -Force
-    Copy-Item -Path "$serviceDist/$uZonMailProPlugin.*" -Destination $uzonMailProPluginPath -Force
+    Copy-Item -Path "$serviceDest/$uZonMailProPlugin.*" -Destination $uzonMailProPluginPath -Force
+    # 复制配置文件到 Pro 插件目录
+    $srcDirs = ("Scripts")
+    foreach ($srcDir in $srcDirs) {
+        Copy-Assets -src "$serviceDest/$srcDir" -destRoot $uzonMailProPluginPath
+    }
+
     # 删除临时目录
-    Remove-Item -Path $serviceDist -Recurse -Force
+    Remove-Item -Path $serviceDest -Recurse -Force
     Write-Host "后端 $uZonMailProPlugin 编译完成!" -ForegroundColor Green
 }
-New-Desktop
+New-UZonMailProPlugin
 
 # 复制前端编译结果到服务端指定位置
 $serviceWwwroot = Join-Path -Path $mainService -ChildPath "wwwroot"
@@ -246,7 +272,7 @@ $zipSrc = "$mainService/*"
 $UZonMailServiceDll = Join-Path -Path $mainService -ChildPath "UZonMailService.dll"
 $serviceVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($UZonMailServiceDll).FileVersion
 # 生成文件路径
-$zipDist = Join-Path -Path $gitRoot -ChildPath "build\uzonmail-service-$publishPlatform-$serviceVersion.zip"
+$zipDest = Join-Path -Path $gitRoot -ChildPath "build\uzonmail-service-$publishPlatform-$serviceVersion.zip"
 
 # 编译桌面端
 function Add-Desktop {
@@ -259,12 +285,12 @@ function Add-Desktop {
     Write-Host "桌面端编译中..." -ForegroundColor Yellow
     $desktopSrc = Join-Path -Path $backendSrc -ChildPath "UzonMailDesktop"
     Set-Location -Path $desktopSrc
-    $desktopDist = "$gitRoot/build/desktop"
+    $desktopDest = "$gitRoot/build/desktop"
     # 若存在，则删除
-    if (Test-Path -Path $desktopDist -PathType Container) {
-        Remove-Item -Path $desktopDist -Recurse -Force
+    if (Test-Path -Path $desktopDest -PathType Container) {
+        Remove-Item -Path $desktopDest -Recurse -Force
     }
-    dotnet publish -c Release -o $desktopDist -r $publishPlatform --self-contained false
+    dotnet publish -c Release -o $desktopDest -r $publishPlatform --self-contained false
 
     Write-Host "桌面端编译完成！" -ForegroundColor Green
 
@@ -272,18 +298,18 @@ function Add-Desktop {
     Write-Host "整理编译结果..." -ForegroundColor Yellow
 
     # 复制服务端
-    $svrDis = Join-Path -Path $desktopDist -ChildPath "service"
+    $svrDis = Join-Path -Path $desktopDest -ChildPath "service"
     New-Item -Path $svrDis -ItemType Directory -ErrorAction SilentlyContinue
     Copy-Item -Path $mainService/* -Destination $svrDis -Recurse -Force
 
     Write-Host "编译整理完成！" -ForegroundColor Green
 
     # 读取 desktop.exe 的版本号
-    $desktopExePath = Join-Path -Path $desktopDist -ChildPath "UzonMailDesktop.exe"
+    $desktopExePath = Join-Path -Path $desktopDest -ChildPath "UzonMailDesktop.exe"
     $buildVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($desktopExePath).FileVersion
     # 生成文件路径
-    $script:zipSrc = "$desktopDist/*"
-    $script:zipDist = Join-Path -Path $gitRoot -ChildPath "build\uzonmail-desktop-$publishPlatform-$buildVersion.zip"
+    $script:zipSrc = "$desktopDest/*"
+    $script:zipDest = Join-Path -Path $gitRoot -ChildPath "build\uzonmail-desktop-$publishPlatform-$buildVersion.zip"
 }
 Add-Desktop
 
@@ -293,7 +319,7 @@ if ($platform -eq "linux") {
     $zipSrc = $zipSrc.Replace("/*", "")
 }
 
-7z a -tzip $zipDist $zipSrc
+7z a -tzip $zipDest $zipSrc
 
 # linux 增加 docker 启动
 if ($platform -eq "linux") {
@@ -301,7 +327,7 @@ if ($platform -eq "linux") {
     $deployFiles = @('docker-deploy.sh', 'docker-compose.yml')
     foreach ($file in $deployFiles) {
         $dockerDeploy = Join-Path -Path $gitRoot -ChildPath "scripts/$file"
-        7z a -tzip $zipDist $dockerDeploy
+        7z a -tzip $zipDest $dockerDeploy
     }
 
     # 向压缩包中增加安装脚本
@@ -309,7 +335,7 @@ if ($platform -eq "linux") {
     $installFiles = @('install.sh', 'uzon-mail.service')
     foreach ($file in $installFiles) {
         $installFile = Join-Path -Path $linuxInstall -ChildPath $file
-        7z a -tzip $zipDist $installFile
+        7z a -tzip $zipDest $installFile
     }
 }
 
@@ -347,7 +373,7 @@ if ($docker) {
 
 # 回到根目录
 Set-Location -Path $sriptRoot
-Write-Host "编译完成：$zipDist" -ForegroundColor Green
+Write-Host "编译完成：$zipDest" -ForegroundColor Green
 
 # 返回编译后的文件路径
-return $zipDist
+return $zipDest
