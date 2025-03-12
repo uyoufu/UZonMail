@@ -1,4 +1,4 @@
-﻿namespace UZonMailService.Services.PostStartup
+﻿namespace UZonMail.Core.Services.HostedServices
 {
     public interface IHostedServiceStart
     {
