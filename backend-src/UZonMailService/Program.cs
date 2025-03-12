@@ -56,9 +56,6 @@ services.AddLogging(loggingBuilder =>
 {
     loggingBuilder.ClearProviders();
     loggingBuilder.AddLog4Net();
-
-    var logLevel = builder.Configuration.GetSection("Logging:LogLevel:Default").Get<LogLevel>();
-    loggingBuilder.AttachLevelToLog4Net(logLevel.ToString());
 });
 // 添加 http 日志
 services.AddHttpLogging(logging =>
@@ -73,6 +70,8 @@ services.AddHttpLogging(logging =>
 //// 参考：https://github.com/huorswords/Microsoft.Extensions.Logging.Log4Net.AspNetCore/blob/develop/samples/Net8.0/WebApi/Program.cs
 //builder.Logging.ClearProviders();
 //builder.Logging.AddLog4Net();
+// 将 logging 的日志级别映射到 log4net
+builder.AttachLevelToLog4Net();
 
 
 // 添加 httpClient
