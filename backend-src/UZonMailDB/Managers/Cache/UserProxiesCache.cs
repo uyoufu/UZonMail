@@ -1,10 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Emails;
-using UZonMail.DB.SQL.EmailSending;
-using UZonMail.DB.SQL.Settings;
-using UZonMail.DB.SQL.Templates;
+using UZonMail.DB.SQL.Core.Settings;
 
 namespace UZonMail.DB.Managers.Cache
 {
@@ -13,7 +10,7 @@ namespace UZonMail.DB.Managers.Cache
     /// 每隔一段时间要自动释放内存
     /// key 值为 userId
     /// </summary>
-    public class UserProxiesCache : BaseCache, IEnumerable<Proxy>
+    public class UserProxiesCache : BaseDBCache<SqlContext>, IEnumerable<Proxy>
     {
         public long UserId => LongValue;
         private List<Proxy> _proxies { get; set; } = [];

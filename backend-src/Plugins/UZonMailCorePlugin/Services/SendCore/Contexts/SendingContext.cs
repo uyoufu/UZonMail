@@ -3,7 +3,6 @@ using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.SignalRHubs;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.SendCore.Contexts

@@ -4,9 +4,9 @@ using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Emails.Models;
 using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.DB.SQL.Core.EmailSending;
 
 namespace UZonMail.Core.Controllers.Emails
 {

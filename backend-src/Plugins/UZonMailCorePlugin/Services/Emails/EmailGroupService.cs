@@ -1,11 +1,12 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.Core.Services.Common;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Utils.Database;
 using UZonMail.Utils.Web.Exceptions;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Services.Emails
 {

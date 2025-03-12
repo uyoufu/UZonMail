@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.Utils.Web.Service;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Organization;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Token;
 using Microsoft.Extensions.Options;
@@ -13,9 +12,10 @@ using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
 using UZonMail.Core.Services.Plugin;
 using UZonMail.Core.Services.Settings;
-using UZonMail.DB.SQL.Permission;
 using UZonMail.DB.Managers.Cache;
 using System.Security.Claims;
+using UZonMail.DB.SQL.Core.Organization;
+using UZonMail.DB.SQL.Core.Permission;
 
 namespace UZonMail.Core.Services.UserInfos
 {

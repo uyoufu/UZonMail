@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using UZonMail.Core.Config;
 using UZonMail.Core.Config.SubConfigs;
 using UZonMail.Core.Database.Updater;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Files;
-using UZonMail.DB.SQL.Organization;
-using UZonMail.DB.SQL.Permission;
+using UZonMail.DB.SQL.Core.Files;
+using UZonMail.DB.SQL.Core.Organization;
+using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.Utils.Extensions;
 
 namespace UZonMail.Core.Database.Update.Updaters
@@ -181,7 +179,7 @@ namespace UZonMail.Core.Database.Update.Updaters
                 UserId = adminUser.Id,
                 Roles = [orgAdminRole]
             };
-            db.Add(userRole);
+            db.UserRole.Add(userRole);
             await db.SaveChangesAsync();
         }
 

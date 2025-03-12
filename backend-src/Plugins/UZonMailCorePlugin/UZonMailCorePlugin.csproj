@@ -38,17 +38,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.1" />
-		<PackageReference Include="Microsoft.OpenApi" Version="1.6.22" />
-		<PackageReference Include="Quartz" Version="3.13.0" />
-		<PackageReference Include="StackExchange.Redis" Version="2.8.16" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.9.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.2" />
+		<PackageReference Include="Microsoft.OpenApi" Version="1.6.23" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.3.1" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\UzonMailDB\UzonMailDB.csproj" />
+	  <ProjectReference Include="..\..\UZonMailService\UZonMailService.csproj" />
 	  <ProjectReference Include="..\..\UZonMailUtils\UZonMailUtils.csproj" />
 	</ItemGroup>
 

@@ -2,7 +2,7 @@
 using Uamazing.Utils.Web.Token;
 using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Organization;
+using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.Utils.Web.Service;
 using UZonMail.Utils.Web.Token;
 

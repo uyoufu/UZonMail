@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Emails;
 
 namespace UZonMail.Core.Services.SendCore.WaitList
 {

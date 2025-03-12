@@ -9,12 +9,13 @@ using Microsoft.EntityFrameworkCore;
 using UZonMail.Core.Utils.Database;
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Organization;
 using UZonMail.Core.Database.Validators;
 using UZonMail.Core.Utils.Extensions;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.DB.SQL.Core.Organization;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Controllers.Users
 {

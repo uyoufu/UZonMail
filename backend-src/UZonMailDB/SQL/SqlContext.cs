@@ -1,16 +1,13 @@
 ﻿using log4net;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL.EmailCrawler;
-using UZonMail.DB.SQL.Emails;
-using UZonMail.DB.SQL.EmailSending;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.Files;
+using UZonMail.DB.SQL.Core.Organization;
+using UZonMail.DB.SQL.Core.Permission;
+using UZonMail.DB.SQL.Core.Settings;
+using UZonMail.DB.SQL.Core.Templates;
 using UZonMail.DB.SQL.EntityConfigs;
-using UZonMail.DB.SQL.Files;
-using UZonMail.DB.SQL.Organization;
-using UZonMail.DB.SQL.Permission;
-using UZonMail.DB.SQL.ReadingTracker;
-using UZonMail.DB.SQL.Settings;
-using UZonMail.DB.SQL.Templates;
-using UZonMail.DB.SQL.Unsubscribes;
 
 namespace UZonMail.DB.SQL
 {
@@ -18,7 +15,7 @@ namespace UZonMail.DB.SQL
     /// Sql 上下文
     /// 参考：https://learn.microsoft.com/zh-cn/ef/core/modeling/relationships/conventions
     /// </summary>
-    public class SqlContext : DbContext
+    public class SqlContext : SqlContextBase
     {
         private readonly ILog _logger = LogManager.GetLogger(typeof(SqlContext));
 
@@ -35,7 +32,6 @@ namespace UZonMail.DB.SQL
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
             new EntityTypeConfig().Configure(modelBuilder);
         }
         #endregion
@@ -66,22 +62,22 @@ namespace UZonMail.DB.SQL
         public DbSet<Proxy> Proxies { get; set; }
         public DbSet<OrganizationSetting> OrganizationSettings { get; set; }
 
-        public DbSet<EmailAnchor> EmailAnchors { get; set; }
-        public DbSet<EmailVisitHistory> EmailVisitHistories { get; set; }
-        public DbSet<IPInfo> IPInfos { get; set; }
+        //public DbSet<EmailAnchor> EmailAnchors { get; set; }
+        //public DbSet<EmailVisitHistory> EmailVisitHistories { get; set; }
+        //public DbSet<IPInfo> IPInfos { get; set; }
 
-        // 退定相关
-        public DbSet<UnsubscribeSetting> UnsubscribeSettings { get; set; }
-        public DbSet<UnsubscribePage> UnsubscribePages { get; set; }
-        public DbSet<UnsubscribeEmail> UnsubscribeEmails { get; set; }
-        public DbSet<UnsubscribeButton> UnsubscribeButtons { get; set; }
+        //// 退定相关
+        //public DbSet<UnsubscribeSetting> UnsubscribeSettings { get; set; }
+        //public DbSet<UnsubscribePage> UnsubscribePages { get; set; }
+        //public DbSet<UnsubscribeEmail> UnsubscribeEmails { get; set; }
+        //public DbSet<UnsubscribeButton> UnsubscribeButtons { get; set; }
 
-        // 爬虫相关
-        public DbSet<CrawlerTaskInfo> CrawlerTaskInfos { get; set; } // 爬虫任务
-        public DbSet<TiktokAuthor> TiktokAuthors { get; set; } // TikTok 作者信息
-        public DbSet<TikTokAuthorDiversification> TikTokAuthorDiversifications { get; set; } // TikTok 作者视频分类信息
-        public DbSet<CrawlerTaskResult> CrawlerTaskResults { get; set; }
-        public DbSet<TikTokDevice> TikTokDevices { get; set; }
+        //// 爬虫相关
+        //public DbSet<CrawlerTaskInfo> CrawlerTaskInfos { get; set; } // 爬虫任务
+        //public DbSet<TiktokAuthor> TiktokAuthors { get; set; } // TikTok 作者信息
+        //public DbSet<TikTokAuthorDiversification> TikTokAuthorDiversifications { get; set; } // TikTok 作者视频分类信息
+        //public DbSet<CrawlerTaskResult> CrawlerTaskResults { get; set; }
+        //public DbSet<TikTokDevice> TikTokDevices { get; set; }
         #endregion
 
         #region 测试

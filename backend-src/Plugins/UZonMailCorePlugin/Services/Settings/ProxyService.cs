@@ -2,8 +2,9 @@
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Settings;
 using UZonMail.Core.Utils.Database;
+using UZonMail.DB.SQL.Core.Settings;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Services.Settings
 {

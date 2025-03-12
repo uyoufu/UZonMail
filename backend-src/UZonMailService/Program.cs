@@ -12,19 +12,22 @@ using UZonMail.Utils.Web.Token;
 using Uamazing.Utils.Plugin;
 using UZonMail.Utils.Web.Filters;
 using UZonMail.DB.SQL;
+using UZonMail.DB.MySql;
+using UZonMail.DB.SqLite;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // 修改当前目录
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
 // 生成默认的配置文件
 var productConfig = "appsettings.Production.json";
-if(!File.Exists(productConfig))
+if (!File.Exists(productConfig))
 {
     File.WriteAllText(productConfig, "{\n}");
 }
 // 复制 quartz 数据库
 var quartzDb = "data/db/quartz-sqlite.sqlite3";
-if(!File.Exists(quartzDb))
+if (!File.Exists(quartzDb))
 {
     Directory.CreateDirectory(Path.GetDirectoryName(quartzDb));
     File.Copy("Quartz/quartz-sqlite.sqlite3", quartzDb);
@@ -107,7 +110,7 @@ services.AddSignalR();
 services.SetupSlugifyCaseRoute();
 
 // 注入数据库
-services.AddSqlContext();
+services.AddSqlContext<SqlContext, MySqlContext, SqLiteContext>(builder.Configuration);
 
 // 添加 HttpContextAccessor，以供 service 获取当前请求的用户信息
 services.AddHttpContextAccessor();
@@ -188,11 +191,13 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = int.MaxValue;
 });
 
-// 加载服务
+// 加载本机服务
+services.AddServices();
+
+// 加载插件服务
 pluginLoader.UseServices(builder);
 
 var app = builder.Build();
-
 
 app.UseDefaultFiles();
 // 设置网站的根目录

@@ -2,9 +2,8 @@
 using Newtonsoft.Json.Linq;
 using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
-using UZonMail.DB.SQL.Files;
-using UZonMail.DB.SQL.Settings;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.Files;
 using UZonMail.Utils.Json;
 
 namespace UZonMail.Core.Database.SQL.EmailSending

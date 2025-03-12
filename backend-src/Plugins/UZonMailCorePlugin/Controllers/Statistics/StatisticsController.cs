@@ -4,9 +4,9 @@ using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Statistics.Model;
 using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Emails;
-using UZonMail.DB.SQL.EmailSending;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.Emails;
 
 namespace UZonMail.Core.Controllers.Statistics
 {

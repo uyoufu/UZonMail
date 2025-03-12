@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Settings;
+using UZonMail.DB.SQL.Core.Settings;
 
 namespace UZonMail.DB.Managers.Cache
 {
@@ -8,7 +8,7 @@ namespace UZonMail.DB.Managers.Cache
     /// 后者的值会覆盖前者的值
     /// </summary>
     /// <param name="settings"></param>
-    public class OrganizationSettingCache : BaseCache
+    public class OrganizationSettingCache : BaseDBCache<SqlContext>
     {
         #region 接口实现
         public long OrganizationId => LongValue;

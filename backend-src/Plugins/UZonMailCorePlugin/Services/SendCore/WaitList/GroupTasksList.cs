@@ -5,7 +5,8 @@ using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Utils.Database;
-using UZonMail.DB.SQL.EmailSending;
+using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.SendCore.WaitList

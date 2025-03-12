@@ -15,97 +15,7 @@ namespace UZonMailService.Migrations.SqLite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
-
-            modelBuilder.Entity("DepartmentEmailTemplate", b =>
-                {
-                    b.Property<long>("EmailTemplateId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("ShareToOrganizationsId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("EmailTemplateId", "ShareToOrganizationsId");
-
-                    b.HasIndex("ShareToOrganizationsId");
-
-                    b.ToTable("DepartmentEmailTemplate");
-                });
-
-            modelBuilder.Entity("EmailTemplateSendingGroup", b =>
-                {
-                    b.Property<long>("SendingGroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("TemplatesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("SendingGroupId", "TemplatesId");
-
-                    b.HasIndex("TemplatesId");
-
-                    b.ToTable("EmailTemplateSendingGroup");
-                });
-
-            modelBuilder.Entity("EmailTemplateUser", b =>
-                {
-                    b.Property<long>("EmailTemplateId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("ShareToUsersId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("EmailTemplateId", "ShareToUsersId");
-
-                    b.HasIndex("ShareToUsersId");
-
-                    b.ToTable("EmailTemplateUser");
-                });
-
-            modelBuilder.Entity("FileUsageSendingGroup", b =>
-                {
-                    b.Property<long>("AttachmentsId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("SendingGroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("AttachmentsId", "SendingGroupId");
-
-                    b.HasIndex("SendingGroupId");
-
-                    b.ToTable("FileUsageSendingGroup");
-                });
-
-            modelBuilder.Entity("FileUsageSendingItem", b =>
-                {
-                    b.Property<long>("AttachmentsId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("SendingItemId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("AttachmentsId", "SendingItemId");
-
-                    b.HasIndex("SendingItemId");
-
-                    b.ToTable("FileUsageSendingItem");
-                });
-
-            modelBuilder.Entity("OutboxSendingGroup", b =>
-                {
-                    b.Property<long>("OutboxesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("SendingGroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("OutboxesId", "SendingGroupId");
-
-                    b.HasIndex("SendingGroupId");
-
-                    b.ToTable("OutboxSendingGroup");
-                });
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.13");
 
             modelBuilder.Entity("PermissionCodeRole", b =>
                 {
@@ -169,333 +79,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("IdAndName");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.CrawlerTaskInfo", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Deadline")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("OutboxGroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("ProxyId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("TikTokDeviceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CrawlerTaskInfos");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.CrawlerTaskResult", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("CrawlerTaskInfoId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("ExistExtraInfo")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsAttachingInbox")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("TikTokAuthorId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TikTokAuthorId");
-
-                    b.ToTable("CrawlerTaskResults");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.TikTokAuthorDiversification", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("DiversificationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("TikTokAuthorId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TikTokAuthorDiversifications");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.TikTokDevice", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DeviceId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsShared")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<string>("OdinId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TikTokDevices");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.TiktokAuthor", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("AvatarLarger")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AvatarMedium")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AvatarThumb")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CommentSetting")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("CrawledCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("DiggCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("DownloadSetting")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("DueSetting")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("FollowingAuthorId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("FollwerCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("FollwingCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("FreindCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Ftc")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("Heart")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("HeartCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Instagram")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsAdVirtual")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsEmbedBanned")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsParsed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Nickname")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<bool>("OpenFavorite")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Phone")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("PrivateAccount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Relation")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SecUid")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Secret")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Signature")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("StitchSetting")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Telegram")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("TtSeller")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("UniqueId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Verified")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("VideoCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("WhatsApp")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Youtube")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TiktokAuthors");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.EmailAddress", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.EmailAddress", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -527,7 +111,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("EmailAddress");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.SendingGroup", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -617,7 +201,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("SendingGroups");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.SendingItem", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -711,7 +295,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("SendingItems");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.SendingItemInbox", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItemInbox", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -761,7 +345,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("SendingItemInboxes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Emails.EmailGroup", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -813,7 +397,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("EmailGroups");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Emails.Inbox", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.Inbox", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -880,7 +464,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("Inboxes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Emails.Outbox", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.Outbox", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -974,7 +558,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("Outboxes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Files.FileBucket", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileBucket", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1013,7 +597,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("FileBuckets");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Files.FileObject", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileObject", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1060,7 +644,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("FileObjects");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Files.FileReader", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileReader", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1112,7 +696,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("FileReaders");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Files.FileUsage", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileUsage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1149,6 +733,12 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<long>("OwnerUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long?>("SendingGroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("SendingItemId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("UniqueName")
                         .HasColumnType("TEXT");
 
@@ -1158,10 +748,14 @@ namespace UZonMailService.Migrations.SqLite
 
                     b.HasIndex("OwnerUserId");
 
+                    b.HasIndex("SendingGroupId");
+
+                    b.HasIndex("SendingItemId");
+
                     b.ToTable("FileUsages");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Organization.Department", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.Department", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1172,6 +766,9 @@ namespace UZonMailService.Migrations.SqLite
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
+
+                    b.Property<long?>("EmailTemplateId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FullPath")
                         .IsRequired()
@@ -1203,10 +800,12 @@ namespace UZonMailService.Migrations.SqLite
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmailTemplateId");
+
                     b.ToTable("Departments");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Organization.User", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.User", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1225,6 +824,9 @@ namespace UZonMailService.Migrations.SqLite
                         .HasColumnType("TEXT");
 
                     b.Property<long>("DepartmentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("EmailTemplateId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")
@@ -1269,10 +871,12 @@ namespace UZonMailService.Migrations.SqLite
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmailTemplateId");
+
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Permission.PermissionCode", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.PermissionCode", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1311,7 +915,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("PermissionCodes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Permission.Role", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.Role", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1355,7 +959,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Permission.UserRoles", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.UserRoles", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1389,153 +993,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.ReadingTracker.EmailAnchor", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("FirstVisitDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("InboxEmails")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastVisitDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<string>("OutboxEmail")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("SendingGroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("SendingItemId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("VisitedCount")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EmailAnchors");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.ReadingTracker.EmailVisitHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long?>("EmailAnchorId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("IP")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmailAnchorId");
-
-                    b.ToTable("EmailVisitHistories");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.ReadingTracker.IPInfo", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("City")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Country")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("District")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IP")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ISP")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Latitude")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Longitude")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<string>("PostalCode")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Region")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TimeZone")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UsageType")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IP");
-
-                    b.ToTable("IPInfos");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Settings.OrganizationSetting", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.OrganizationSetting", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1590,7 +1048,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("OrganizationSettings");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Settings.Proxy", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.Proxy", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1644,7 +1102,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("Proxies");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Settings.SystemSetting", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.SystemSetting", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1691,7 +1149,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("SystemSettings");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Templates.EmailTemplate", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Templates.EmailTemplate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1722,6 +1180,9 @@ namespace UZonMailService.Migrations.SqLite
                         .HasColumnType("TEXT")
                         .HasColumnName("_id");
 
+                    b.Property<long?>("SendingGroupId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Thumbnail")
                         .HasColumnType("TEXT");
 
@@ -1730,263 +1191,20 @@ namespace UZonMailService.Migrations.SqLite
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SendingGroupId");
+
                     b.ToTable("EmailTemplates");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Unsubscribes.UnsubscribeButton", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ButtonHtml")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UnsubscribeButtons");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Unsubscribes.UnsubscribeEmail", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Host")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId", "Email");
-
-                    b.ToTable("UnsubscribeEmails");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Unsubscribes.UnsubscribePage", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("HtmlContent")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UnsubscribePages");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Unsubscribes.UnsubscribeSetting", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Enable")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ExternalUrl")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UnsubscribeButtonId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UnsubscribeSettings");
-                });
-
-            modelBuilder.Entity("DepartmentEmailTemplate", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Templates.EmailTemplate", null)
-                        .WithMany()
-                        .HasForeignKey("EmailTemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UZonMail.DB.SQL.Organization.Department", null)
-                        .WithMany()
-                        .HasForeignKey("ShareToOrganizationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("EmailTemplateSendingGroup", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.EmailSending.SendingGroup", null)
-                        .WithMany()
-                        .HasForeignKey("SendingGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UZonMail.DB.SQL.Templates.EmailTemplate", null)
-                        .WithMany()
-                        .HasForeignKey("TemplatesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("EmailTemplateUser", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Templates.EmailTemplate", null)
-                        .WithMany()
-                        .HasForeignKey("EmailTemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UZonMail.DB.SQL.Organization.User", null)
-                        .WithMany()
-                        .HasForeignKey("ShareToUsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("FileUsageSendingGroup", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Files.FileUsage", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UZonMail.DB.SQL.EmailSending.SendingGroup", null)
-                        .WithMany()
-                        .HasForeignKey("SendingGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("FileUsageSendingItem", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Files.FileUsage", null)
-                        .WithMany()
-                        .HasForeignKey("AttachmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UZonMail.DB.SQL.EmailSending.SendingItem", null)
-                        .WithMany()
-                        .HasForeignKey("SendingItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("OutboxSendingGroup", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Emails.Outbox", null)
-                        .WithMany()
-                        .HasForeignKey("OutboxesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UZonMail.DB.SQL.EmailSending.SendingGroup", null)
-                        .WithMany()
-                        .HasForeignKey("SendingGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("PermissionCodeRole", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Permission.PermissionCode", null)
+                    b.HasOne("UZonMail.DB.SQL.Core.Permission.PermissionCode", null)
                         .WithMany()
                         .HasForeignKey("PermissionCodesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Permission.Role", null)
+                    b.HasOne("UZonMail.DB.SQL.Core.Permission.Role", null)
                         .WithMany()
                         .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1995,33 +1213,22 @@ namespace UZonMailService.Migrations.SqLite
 
             modelBuilder.Entity("RoleUserRoles", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Permission.Role", null)
+                    b.HasOne("UZonMail.DB.SQL.Core.Permission.Role", null)
                         .WithMany()
                         .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Permission.UserRoles", null)
+                    b.HasOne("UZonMail.DB.SQL.Core.Permission.UserRoles", null)
                         .WithMany()
                         .HasForeignKey("UserRolesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailCrawler.CrawlerTaskResult", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.EmailCrawler.TiktokAuthor", "TiktokAuthor")
-                        .WithMany()
-                        .HasForeignKey("TikTokAuthorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("TiktokAuthor");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.SendingItem", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.EmailSending.SendingGroup", "SendingGroup")
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", "SendingGroup")
                         .WithMany()
                         .HasForeignKey("SendingGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -2030,15 +1237,15 @@ namespace UZonMailService.Migrations.SqLite
                     b.Navigation("SendingGroup");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.EmailSending.SendingItemInbox", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItemInbox", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Emails.Inbox", "Inbox")
+                    b.HasOne("UZonMail.DB.SQL.Core.Emails.Inbox", "Inbox")
                         .WithMany()
                         .HasForeignKey("InboxId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.EmailSending.SendingItem", "SendingItem")
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingItem", "SendingItem")
                         .WithMany()
                         .HasForeignKey("SendingItemId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -2049,9 +1256,9 @@ namespace UZonMailService.Migrations.SqLite
                     b.Navigation("SendingItem");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Emails.EmailGroup", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Organization.User", "User")
+                    b.HasOne("UZonMail.DB.SQL.Core.Organization.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -2060,18 +1267,18 @@ namespace UZonMailService.Migrations.SqLite
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Emails.Inbox", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.Inbox", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Emails.EmailGroup", null)
+                    b.HasOne("UZonMail.DB.SQL.Core.Emails.EmailGroup", null)
                         .WithMany("Inboxes")
                         .HasForeignKey("EmailGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Files.FileObject", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileObject", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Files.FileBucket", "FileBucket")
+                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileBucket", "FileBucket")
                         .WithMany()
                         .HasForeignKey("FileBucketId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -2080,9 +1287,9 @@ namespace UZonMailService.Migrations.SqLite
                     b.Navigation("FileBucket");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Files.FileReader", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileReader", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Files.FileObject", "FileObject")
+                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileObject", "FileObject")
                         .WithMany()
                         .HasForeignKey("FileObjectId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -2091,57 +1298,97 @@ namespace UZonMailService.Migrations.SqLite
                     b.Navigation("FileObject");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Files.FileUsage", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileUsage", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Files.FileObject", "FileObject")
+                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileObject", "FileObject")
                         .WithMany()
                         .HasForeignKey("FileObjectId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Organization.User", "OwnerUser")
+                    b.HasOne("UZonMail.DB.SQL.Core.Organization.User", "OwnerUser")
                         .WithMany()
                         .HasForeignKey("OwnerUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("SendingGroupId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingItem", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("SendingItemId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("FileObject");
 
                     b.Navigation("OwnerUser");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Permission.UserRoles", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.Department", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Organization.User", "User")
+                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
+                        .WithMany("ShareToOrganizations")
+                        .HasForeignKey("EmailTemplateId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.User", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
+                        .WithMany("ShareToUsers")
+                        .HasForeignKey("EmailTemplateId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.UserRoles", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.Organization.User", "User")
                         .WithOne("UserRoles")
-                        .HasForeignKey("UZonMail.DB.SQL.Permission.UserRoles", "UserId")
+                        .HasForeignKey("UZonMail.DB.SQL.Core.Permission.UserRoles", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.ReadingTracker.EmailVisitHistory", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Templates.EmailTemplate", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.ReadingTracker.EmailAnchor", null)
-                        .WithMany("VisitedHistories")
-                        .HasForeignKey("EmailAnchorId")
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                        .WithMany("Templates")
+                        .HasForeignKey("SendingGroupId")
                         .OnDelete(DeleteBehavior.NoAction);
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Emails.EmailGroup", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", b =>
+                {
+                    b.Navigation("Attachments");
+
+                    b.Navigation("Templates");
+                });
+
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
+                {
+                    b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
                     b.Navigation("Inboxes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Organization.User", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.User", b =>
                 {
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.ReadingTracker.EmailAnchor", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Templates.EmailTemplate", b =>
                 {
-                    b.Navigation("VisitedHistories");
+                    b.Navigation("ShareToOrganizations");
+
+                    b.Navigation("ShareToUsers");
                 });
 #pragma warning restore 612, 618
         }

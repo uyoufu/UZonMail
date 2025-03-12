@@ -1,20 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.Core.SignalRHubs.SendEmail;
 using UZonMail.Core.SignalRHubs.Extensions;
-using UZonMail.Core.Utils.Database;
 using log4net;
-using UZonMail.DB.SQL.EmailSending;
-using UZonMail.DB.SQL.Emails;
 using UZonMail.Core.Database.SQL.EmailSending;
 using UZonMail.DB.SQL;
-
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.EmailWaitList;
 using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL.Base;
-using StackExchange.Redis;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Core.Services.SendCore.Interfaces;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Services.EmailSending.WaitList
 {
@@ -251,26 +249,20 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
                 toSendingItems = [.. toSendingItems.FindAll(x => !invalidSendingItemIds.Contains(x.Id))];
             }
 
-            // 对于取消订阅的邮件，进行标记
-            var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, UserId);
-            var unsubscribedEmails = await sqlContext.UnsubscribeEmails.AsNoTracking()
-                .Where(x => x.OrganizationId == userInfo.OrganizationId)
-                .Where(x => !x.IsDeleted)
-                .Select(x => x.Email)
-                .ToListAsync();
-            if (unsubscribedEmails.Count > 0)
+            // 按注册的发件项过滤无效项
+            var sendingItemFilters = sendingContext.Provider.GetServices<ISendingItemFilter>();
+            var filteredInvalidIds = new List<long>();
+            foreach (var filter in sendingItemFilters)
             {
-                var unsubscribedSendingItemIds = toSendingItems.Where(x => x.Inboxes.Any(i => unsubscribedEmails.Contains(i.Email))).Select(x => x.Id).ToList();
-                if (unsubscribedSendingItemIds.Count > 0)
-                {
-                    // 更新邮件状态
-                    await sqlContext.SendingItems.UpdateAsync(x => unsubscribedSendingItemIds.Contains(x.Id),
-                                               x => x.SetProperty(y => y.Status, SendingItemStatus.Unsubscribed)
-                                                     .SetProperty(y => y.SendDate, DateTime.Now)
-                                                     .SetProperty(y => y.SendResult, "收件人已取消订阅"));
-                    toSendingItems = toSendingItems.FindAll(x => !unsubscribedSendingItemIds.Contains(x.Id));
-                }
+                var filterInvalidIds = await filter.GetInvalidSendingItemIds(toSendingItems);
+                filteredInvalidIds.AddRange(filterInvalidIds);
             }
+            var filteredInvalidIdsSet = filteredInvalidIds.ToHashSet();
+            if (filteredInvalidIdsSet.Count > 0)
+            {
+                toSendingItems = toSendingItems.FindAll(x => !filteredInvalidIdsSet.Contains(x.Id));
+            }
+
 
             // 更新待发件列表
             // 由于初始化时，不是并发的，不需要加锁
@@ -278,7 +270,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             _sendingItemMetas.AddRange(toSendingItemMetas);
 
             // 添加代理和模板
-            foreach(var toSendingItem in toSendingItems)
+            foreach (var toSendingItem in toSendingItems)
             {
                 // 添加特定模板
                 _usableTemplates.AddSendingItemTemplate(toSendingItem.Id, toSendingItem.EmailTemplateId);

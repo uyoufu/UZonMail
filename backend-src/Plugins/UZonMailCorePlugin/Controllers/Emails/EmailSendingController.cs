@@ -5,10 +5,11 @@ using UZonMail.Core.Controllers.Emails.Models;
 using UZonMail.Core.Services.EmailSending;
 using UZonMail.Core.Utils.Database;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.EmailSending;
 using UZonMail.Core.Database.Validators;
 using UZonMail.Core.Utils.Extensions;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Controllers.Emails
 {

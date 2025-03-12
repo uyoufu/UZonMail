@@ -5,10 +5,11 @@ using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Utils.Web.PagingQuery;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Settings;
-using UZonMail.DB.SQL.Emails;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Utils.Database;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.SQL.Core.Settings;
+using UZonMail.DB.Extensions;
 
 namespace UZonMail.Core.Controllers.Settings
 {

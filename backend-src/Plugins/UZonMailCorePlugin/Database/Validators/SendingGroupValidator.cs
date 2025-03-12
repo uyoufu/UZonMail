@@ -1,11 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-using Org.BouncyCastle.Utilities;
 using UZonMail.Utils.Results;
-using UZonMail.DB.SQL.Emails;
-using UZonMail.DB.SQL.EmailSending;
-using UZonMail.DB.SQL.Permission;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using UZonMail.DB.SQL.Core.EmailSending;
 
 namespace UZonMail.Core.Database.Validators
 {

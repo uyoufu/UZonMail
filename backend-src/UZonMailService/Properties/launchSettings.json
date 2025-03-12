@@ -9,7 +9,7 @@
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5180",
-      "workingDirectory": "$(ProjectDir)bin\\x64\\Debug\\net8.0"
+      "workingDirectory": "$(ProjectDir)bin\\x64\\Debug\\net9.0"
     },
     "IIS Express": {
       "commandName": "IISExpress",

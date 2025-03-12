@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Organization;
+using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.Utils.Web.Access;
 
 namespace UZonMail.Core.Services.Permission
