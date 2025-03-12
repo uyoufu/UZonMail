@@ -195,12 +195,8 @@ function Copy-Assets {
     )
 
     # 复制 assets 到 destRoot 子目录
-    $srcName = Split-Path -Path $src -Leaf
-    $dest = Join-Path -Path $destRoot -ChildPath $srcName
-    New-Item -Path $dest -ItemType Directory -Force
-    Copy-Item -Path $src -Destination $dest -Recurse -Force
     # 复制目录及其内容
-    Copy-Item -Path $src -Destination $dest -Recurse -Force    
+    Copy-Item -Path $src -Destination $destRoot -Recurse -Force    
 }
 
 # 编译后端 UZonMailCorePlugin

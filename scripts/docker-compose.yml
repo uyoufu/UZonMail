@@ -45,6 +45,7 @@ services:
     volumes:
       # - ./data/uzon-mail/appsettings.Production.json:/app/appsettings.Production.json # 若需修改系统配置时打开
       - ./data/uzon-mail/data:/app/data # 数据存储
+      - ./data/uzon-mail/wwwroot:/app/wwwroot # 前端文件
     networks:
       - uzon-network
     command: ["dotnet", "UZonMailService.dll"]
