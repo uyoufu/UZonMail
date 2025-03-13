@@ -26,7 +26,7 @@ export default {
 
   outboxManager: {
     importFromTxt: 'Txt 导入',
-    importFromTxtTooltip: '支持格式:\n1. 邮箱, 密码: test@gmail.com, 1234\n2. 邮箱, 密码, smtp地址, smtp端口: test@gmail.com, 1234, smtp.gmail.com, 465',
+    importFromTxtTooltip: "支持格式:\n1. 邮箱, 密码: test{'@'}gmail.com, 1234\n2. 邮箱, 密码, smtp地址, smtp端口: test{'@'}gmail.com, 1234, smtp.gmail.com, 465",
 
     doDeleteAllInvalidOutboxes: '是否删除当前组中所有验证失败的发件箱？',
     editCurrentOutbox: '编辑当前发件箱',
@@ -43,7 +43,7 @@ export default {
     deleteInvalid: '删除无效',
     deleteCurrentGroupInvalidOutboxes: '删除当前组中验证失败的发件箱',
     deleteOutbox: '删除发件箱',
-    isDeleteCurrentOutbox: '是否删除发件箱: {email}？',
+    isDeleteCurrentOutbox: '是否删除发件箱: {email} ?',
     isDeleteSelectedOutboxes: '是否删除选中的 {count} 个发件箱？',
     deleteSuccess: '删除成功, 共删除 {count} 项',
 
