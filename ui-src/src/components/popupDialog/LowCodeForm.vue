@@ -150,7 +150,7 @@ const props = defineProps({
 })
 
 // 是否为匹配到的类型
-const commonInputTypes = ["text", "password", "textarea", "email", "search", "tel", "file", "number", "url", "time", "date", "datetime-local"]
+const commonInputTypes = ["text", "textarea", "email", "search", "tel", "file", "number", "url", "time", "date", "datetime-local"]
 function isMatchedType (field: IPopupDialogField, types: string | string[]): boolean {
   if (Array.isArray(types)) return types.includes(field.type as string)
   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison

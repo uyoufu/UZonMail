@@ -16,8 +16,8 @@
           <ImportBtn label="Excel 导入" tooltip="导入发件箱" @click="onImportOutboxClick()" :disable="!isValidEmailGroup"
             tooltip-when-disabled="请先添加组" />
 
-          <ImportBtn :label="importFromTxtLable" :tooltip="importFromTxtTooltip" @click="onImportOutboxClick()"
-            :disable="!isValidEmailGroup" tooltip-when-disabled="请先添加组" />
+          <!-- <ImportBtn :label="importFromTxtLable" :tooltip="importFromTxtTooltip" @click="onImportOutboxClick()"
+            :disable="!isValidEmailGroup" tooltip-when-disabled="请先添加组" /> -->
         </div>
       </template>
 

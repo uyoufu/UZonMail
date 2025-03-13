@@ -187,7 +187,6 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     }
 
     // 弹出对话框
-
     const { ok, data } = await showDialog<IOutbox>(popupParams)
     if (!ok) return
     // 新建请求
