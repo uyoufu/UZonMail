@@ -4,6 +4,11 @@ namespace UZonMailService.Middlewares
 {
     public static class VueASPMiddlewareExtension
     {
+        /// <summary>
+        /// 配置 VueASP
+        /// </summary>
+        /// <param name="app"></param>
+        /// <returns></returns>
         public static IApplicationBuilder UseVueASP(this IApplicationBuilder app)
         {
             var vueMiddleware = new VueASPMiddleware(null);
@@ -45,6 +50,7 @@ namespace UZonMailService.Middlewares
         public async Task Invoke(HttpContext context, Func<Task> next)
         {
             await next();
+
             // 找到的，直接返回
             if (context.Response.StatusCode != 404) return;
 

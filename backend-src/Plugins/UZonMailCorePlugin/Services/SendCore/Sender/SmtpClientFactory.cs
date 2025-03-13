@@ -3,6 +3,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using System.Collections.Concurrent;
 using Uamazing.Utils.Envs;
+using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.DB.SQL.Core.Emails;
@@ -64,7 +65,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
 
                 // Note: only needed if the SMTP server requires authentication
                 // 进行鉴权
-                if (!Env.IsDebug)
+                var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
+                if (!debugConfig.IsDemo)
                     if (!string.IsNullOrEmpty(outbox.AuthPassword)) client.Authenticate(outbox.AuthUserName, outbox.AuthPassword);
 
                 _smptClients.TryAdd(key, client);

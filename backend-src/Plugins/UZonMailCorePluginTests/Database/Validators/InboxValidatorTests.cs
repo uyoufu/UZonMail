@@ -1,12 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UZonMail.Core.Database.Validators;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UZonMail.DB.SQL.Emails;
-using System.Data;
+﻿using System.Data;
+using UZonMail.DB.SQL.Core.Emails;
 
 namespace UZonMail.Core.Database.Validators.Tests
 {

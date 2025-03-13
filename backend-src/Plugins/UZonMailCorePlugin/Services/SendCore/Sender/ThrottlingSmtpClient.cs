@@ -42,9 +42,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 await Task.Delay(timeInverval);
             }
 
-            var sentMessage = "send by debug";
-            if (!Env.IsDebug)
-                sentMessage = await base.SendAsync(message, cancellationToken, progress);
+            var sentMessage = await base.SendAsync(message, cancellationToken, progress);
             return sentMessage;
         }
     }

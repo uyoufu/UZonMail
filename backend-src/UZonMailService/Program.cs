@@ -15,6 +15,10 @@ using UZonMail.DB.SQL;
 using UZonMail.DB.MySql;
 using UZonMail.DB.SqLite;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using log4net;
+using log4net.Core;
+using log4net.Repository.Hierarchy;
+using UZonMail.Utils.Log;
 
 // 修改当前目录
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
@@ -25,6 +29,7 @@ if (!File.Exists(productConfig))
 {
     File.WriteAllText(productConfig, "{\n}");
 }
+
 // 复制 quartz 数据库
 var quartzDb = "data/db/quartz-sqlite.sqlite3";
 if (!File.Exists(quartzDb))
@@ -47,7 +52,12 @@ var services = builder.Services;
 // services.UseSingleApp();
 
 // 日志
-services.AddLogging();
+services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.ClearProviders();
+    loggingBuilder.AddLog4Net();
+});
+// 添加 http 日志
 services.AddHttpLogging(logging =>
 {
     logging.LoggingFields = HttpLoggingFields.RequestProperties
@@ -56,9 +66,13 @@ services.AddHttpLogging(logging =>
     logging.RequestBodyLogLimit = 4096;
     logging.ResponseBodyLogLimit = 4096;
 });
-// log4net: https://github.com/huorswords/Microsoft.Extensions.Logging.Log4Net.AspNetCore/blob/develop/samples/Net8.0/WebApi/log4net.config
-builder.Logging.ClearProviders();
-builder.Logging.AddLog4Net();
+//// log4net: https://github.com/huorswords/Microsoft.Extensions.Logging.Log4Net.AspNetCore/blob/develop/samples/Net8.0/WebApi/log4net.config
+//// 参考：https://github.com/huorswords/Microsoft.Extensions.Logging.Log4Net.AspNetCore/blob/develop/samples/Net8.0/WebApi/Program.cs
+//builder.Logging.ClearProviders();
+//builder.Logging.AddLog4Net();
+// 将 logging 的日志级别映射到 log4net
+builder.AttachLevelToLog4Net();
+
 
 // 添加 httpClient
 services.AddHttpClient();

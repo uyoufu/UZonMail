@@ -525,6 +525,9 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<string>("ReplyToEmails")
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("SendingGroupId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("SentTotalToday")
                         .HasColumnType("INTEGER");
 
@@ -551,6 +554,8 @@ namespace UZonMailService.Migrations.SqLite
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SendingGroupId");
 
                     b.HasIndex("Email", "UserId")
                         .IsUnique();
@@ -1276,6 +1281,14 @@ namespace UZonMailService.Migrations.SqLite
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.Outbox", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                        .WithMany("Outboxes")
+                        .HasForeignKey("SendingGroupId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileObject", b =>
                 {
                     b.HasOne("UZonMail.DB.SQL.Core.Files.FileBucket", "FileBucket")
@@ -1365,6 +1378,8 @@ namespace UZonMailService.Migrations.SqLite
             modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", b =>
                 {
                     b.Navigation("Attachments");
+
+                    b.Navigation("Outboxes");
 
                     b.Navigation("Templates");
                 });

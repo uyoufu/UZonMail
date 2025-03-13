@@ -1,5 +1,6 @@
 ﻿
 using System.Runtime.Intrinsics.X86;
+using UZonMail.Core.Services.Config;
 
 namespace UZonMail.Core.Services.HostedServices
 {
