@@ -7,6 +7,7 @@ using UZonMail.DB.SQL;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Extensions;
 using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Core.Services.Config;
 
 namespace UZonMail.Core.Services.SendCore.Sender
 {
@@ -20,7 +21,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
     /// <param name="outbox"></param>
     /// <param name="smtpPasswordSecretKeys"></param>
     /// <param name="sqlContext"></param>
-    public class OutboxTestSender(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys, SqlContext sqlContext)
+    public class OutboxTestSender(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys, SqlContext sqlContext, DebugConfig debugConfig)
     {
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxTestSender));
 
@@ -52,7 +53,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 if (outbox.ProxyId > 0)
                 {
                     // 获取当前用户信息
-                    var user = await sqlContext.Users.AsNoTracking().Where(x=>x.Id == outbox.UserId).FirstOrDefaultAsync();
+                    var user = await sqlContext.Users.AsNoTracking().Where(x => x.Id == outbox.UserId).FirstOrDefaultAsync();
                     var proxy = await sqlContext.Proxies.Where(x => x.OrganizationId == user.OrganizationId)
                         .Where(x => x.Id == outbox.ProxyId)
                         .FirstOrDefaultAsync();
@@ -66,8 +67,10 @@ namespace UZonMail.Core.Services.SendCore.Sender
                     var password = outbox.Password.DeAES(smtpPasswordSecretKeys.Key, smtpPasswordSecretKeys.Iv);
                     client.Authenticate(string.IsNullOrEmpty(outbox.UserName) ? outbox.Email : outbox.UserName, password);
                 }
+                string sendResult = "fake sending by debug";
+                if (!debugConfig.IsDemo)
+                    sendResult = await client.SendAsync(message);
 
-                string sendResult = await client.SendAsync(message);
                 return new Result<string>(true, sendResult);
             }
             catch (Exception ex)

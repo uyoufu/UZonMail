@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.Core.Controllers.Users.Model;
+using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.SendCore.Sender;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Utils.Database;
@@ -12,7 +13,7 @@ using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.Emails
 {
-    public class EmailUtilsService(SqlContext db, TokenService tokenService) : IScopedService
+    public class EmailUtilsService(SqlContext db, TokenService tokenService, DebugConfig debugConfig) : IScopedService
     {
         /// <summary>
         /// 验证发件箱是否有效
@@ -34,7 +35,7 @@ namespace UZonMail.Core.Services.Emails
         public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
         {
             // 发送测试邮件
-            var outboxTestor = new OutboxTestSender(outbox, smtpPasswordSecretKeys, db);
+            var outboxTestor = new OutboxTestSender(outbox, smtpPasswordSecretKeys, db, debugConfig);
             var result = await outboxTestor.SendTest();
 
             // 更新数据库

@@ -28,7 +28,7 @@ namespace Uamazing.Utils.Plugin
         {
             _pluginDir = pluginDir;
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-            LoadPlugin();
+            LoadPlugins();
         }
 
         private List<string>? _allDllNames;
@@ -46,14 +46,16 @@ namespace Uamazing.Utils.Plugin
             }
 
             var absDllFullName = Path.GetFullPath(dllFullName);
-            var assembly = Assembly.LoadFile(absDllFullName);
+
+            // 有可能插件间相互引用，在此处也要进行插件加载
+            var assembly = LoadAssembly(absDllFullName);
             return assembly;
         }
 
         /// <summary>
         /// 开始加载插件
         /// </summary>
-        private void LoadPlugin()
+        private void LoadPlugins()
         {
             if (!Directory.Exists(_pluginDir))
             {
@@ -70,36 +72,50 @@ namespace Uamazing.Utils.Plugin
 
             // 加载插件
             foreach (var dllFullPath in _pluginDllFullPaths)
-            {
-                var dllName = Path.GetFileName(dllFullPath);
-                // 判断是否已经加载了
-                if (AppDomain.CurrentDomain.GetAssemblies().Any(x =>
+            {               
+                LoadAssembly(dllFullPath);
+            }
+        }
+
+        /// <summary>
+        /// 加载单个插件
+        /// </summary>
+        /// <param name="assemblyPath"></param>
+        private Assembly? LoadAssembly(string assemblyPath)
+        {
+            var dllName = Path.GetFileName(assemblyPath);
+
+            // 防止重复加载
+            var existPlugin = _pluginAssemblies.Find(x => Path.GetFileName(x.Location) == dllName);
+            if (existPlugin != null) return existPlugin;
+
+            // 判断是否存在
+            var existAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => Path.GetFileName(x.Location) == dllName);
+            if (existAssembly != null) return existAssembly;
+
+            var dll = Assembly.LoadFrom(assemblyPath);
+            // 判断是否是插件命名约定，若不是，直接返回
+            if (!assemblyPath.EndsWith("Plugin.dll")) return dll;
+
+            var thisType = typeof(PluginLoader);
+            var pluginTypes = dll.GetTypes().Where(x => !x.IsAbstract && typeof(IPlugin).IsAssignableFrom(x) && x != thisType).ToList();
+            if (pluginTypes.Count > 0) _pluginAssemblies.Add(dll);
+
+            var pluginName = Path.GetFileNameWithoutExtension(assemblyPath);
+            foreach (var pluginType in pluginTypes)
+            {               
+                if (Activator.CreateInstance(pluginType) is not IPlugin plugin)
                 {
-                    var fileName = Path.GetFileName(x.Location);
-                    return fileName == dllName;
-                }))
-                {
+                    _logger.Warn($"插件 {pluginName} 未实现 IPlugin 接口");
                     continue;
                 }
-                var dll = Assembly.LoadFrom(dllFullPath);
-                var thisType = typeof(PluginLoader);
-                var pluginTypes = dll.GetTypes().Where(x => !x.IsAbstract && typeof(IPlugin).IsAssignableFrom(x) && x != thisType).ToList();
-                if (pluginTypes.Count > 0) _pluginAssemblies.Add(dll);
 
-                foreach (var pluginType in pluginTypes)
-                {
-                    var pluginName = Path.GetFileNameWithoutExtension(dllFullPath);
-                    if (Activator.CreateInstance(pluginType) is not IPlugin plugin)
-                    {
-                        _logger.Warn($"插件 {pluginName} 未实现 IPlugin 接口");
-                        continue;
-                    }
-
-                    // 开始加载
-                    _plugins.Add(plugin);
-                    _logger.Info($"已加载插件: {pluginName}");
-                }
+                // 开始加载
+                _plugins.Add(plugin);                
             }
+            _logger.Info($"已加载插件: {pluginName}");
+
+            return dll;
         }
 
         public void AddApplicationPart(IMvcBuilder mvcBuilder)

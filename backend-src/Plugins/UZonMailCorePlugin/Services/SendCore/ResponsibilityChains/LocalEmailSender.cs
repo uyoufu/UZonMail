@@ -1,6 +1,7 @@
 ﻿using log4net;
 using MailKit.Net.Smtp;
 using MimeKit;
+using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Sender;
@@ -30,7 +31,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             if (!sendItem.Validate(out var status))
             {
                 // 数据验证失败，需要移除当前发件项，并标记数据验证失败
-                sendItem.SetStatus(SendItemMetaStatus.Error, "发件项数据验证失败，取消发件");                
+                sendItem.SetStatus(SendItemMetaStatus.Error, "发件项数据验证失败，取消发件");
                 return;
             }
 
@@ -111,11 +112,19 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
                 // throw new NullReferenceException("测试报错");
                 var client = clientResult.Data;
-                string sendResult = await client.SendAsync(message);
+
+                var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
+
+                string sendResult = "测试状态,虚拟发件";
+                if (!debugConfig.IsDemo)
+                {
+                    sendResult = await client.SendAsync(message);
+                }
+
                 _logger.Info($"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}");
 
                 // 标记邮件状态
-                sendItem.SetStatus(SendItemMetaStatus.Success, "ok");
+                sendItem.SetStatus(SendItemMetaStatus.Success, sendResult);
                 // 标记上下文状态
                 context.Status |= ContextStatus.Success;
                 return;
@@ -126,7 +135,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 if (smtpCommandException.ErrorCode == SmtpErrorCode.RecipientNotAccepted)
                 {
                     _logger.Warn(smtpCommandException);
-                    sendItem.SetStatus(SendItemMetaStatus.Error,smtpCommandException.Message);
+                    sendItem.SetStatus(SendItemMetaStatus.Error, smtpCommandException.Message);
                     return;
                 }
 

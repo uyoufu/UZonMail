@@ -21,6 +21,12 @@ namespace UZonMail.Utils.Log
             var logLevel = builder.Configuration.GetSection("Logging:LogLevel:Default").Get<LogLevel>();
             var hierarchy = (Hierarchy)LogManager.GetRepository();
             var rootLogger = hierarchy.Root;
+            var level = hierarchy.LevelMap[logLevel.ToString().ToUpper()];
+            if (level == null)
+            {
+                // 未识别到，不修改日志等级
+                return;
+            }
             rootLogger.Level = hierarchy.LevelMap[logLevel.ToString().ToUpper()];
             hierarchy.RaiseConfigurationChanged(EventArgs.Empty);
         }
