@@ -70,9 +70,10 @@ const statusStylesMap = computed(() => {
   return result
 })
 
+import _ from 'lodash'
 const statusStyle = computed(() => {
-  const statusStr = String(props.status).toLowerCase()
-  const statusLabel = t(`statusChip.${String(props.status)}`)
+  const statusStr = _.camelCase(String(props.status))
+  const statusLabel = t(`statusChip.${statusStr}`)
 
   logger.debug('[statusChip] statusStr:', statusLabel)
 
