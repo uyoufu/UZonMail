@@ -3,8 +3,9 @@
     <div class="column justify-start">
       <div>
         <span>授权类型:</span>
-        <span class="text-primary text-subtitle1 text-bold q-ml-sm">{{ formatLicenseType(activeInfo.licenseType)
-          }}</span>
+        <span class="text-primary text-subtitle1 text-bold q-ml-sm">
+          {{ formatLicenseType(activeInfo.licenseType) }}
+        </span>
       </div>
 
       <div>
@@ -19,7 +20,7 @@
     </div>
 
     <q-input standout="bg-primary" class="q-mt-md" label-color="white" v-model="license" dense @focus="onFocus"
-      @blur="onBlur" :label="licenseLabel">
+      @blur="onBlur" :label="licenseLabel" @keydown.enter="onActiveLicense">
       <template v-slot:append>
         <q-icon v-if="showActiveIcon" name="motion_photos_auto" @click="onActiveLicense" class="cursor-pointer"
           :color="activeIconColor">
@@ -35,9 +36,9 @@
 import logger from 'loglevel'
 
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
-import { confirmOperation, notifyError, notifySuccess } from 'src/utils/dialog'
+import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import dayjs from 'dayjs'
-import type { ILicenseInfo} from 'src/api/pro/license';
+import type { ILicenseInfo } from 'src/api/pro/license';
 import { LicenseType, updateLicenseInfo, getLicenseInfo, updateExistingLicenseInfo } from 'src/api/pro/license'
 
 const license = ref<string>('')
@@ -82,9 +83,11 @@ async function onActiveLicense () {
   const confirm = await confirmOperation('升级确认', '即将进行升级, 是否继续?')
   if (!confirm) return
 
-  // 调用升级接口
-  const { data: licenseInfo } = await updateLicenseInfo(license.value)
-  activeInfo.value = licenseInfo
+  await notifyUntil(async () => {
+    // 调用升级接口
+    const { data: licenseInfo } = await updateLicenseInfo(license.value)
+    activeInfo.value = licenseInfo
+  }, "企业版升级", '升级中...')
 
   // 重新拉取权限码
   const { data: { userInfo, token, access, installedPlugins } } = await userRelogin()
