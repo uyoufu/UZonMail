@@ -4,7 +4,7 @@
     <template v-for="(slot, slotName) in $slots">
       <slot :name="slotName"></slot>
     </template>
-    <AsyncTooltip :tooltip="tooltipValue" />
+    <AsyncTooltip :tooltip="tooltipValue" :cache="false" />
   </q-btn>
 </template>
 
