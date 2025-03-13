@@ -38,18 +38,18 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <summary>
         /// 创建一个发件任务
         /// </summary>
-        /// <param name="scopeServices"></param>
+        /// <param name="context"></param>
         /// <param name="sendingGroupId"></param>
         /// <param name="smtpPasswordSecretKeys"></param>
         /// <returns></returns>
-        public static async Task<GroupTask?> Create(SendingContext scopeServices
+        public static async Task<GroupTask?> Create(SendingContext context
         , long sendingGroupId
         , List<string> smtpPasswordSecretKeys
         )
         {
             GroupTask groupTask = new(sendingGroupId, smtpPasswordSecretKeys);
             // 初始化组
-            if (!await groupTask.InitSendingGroup(scopeServices)) return null;
+            if (!await groupTask.InitSendingGroup(context)) return null;
             return groupTask;
         }
 
@@ -167,7 +167,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <returns></returns>
         private async Task AddSharedOutboxToPool(SendingContext sendingContext, List<Outbox> outboxes, List<IdAndName>? outboxGroup)
         {
-            if (outboxes.Count == 0) return;
+            if (outboxes.Count == 0 && (outboxGroup == null || outboxGroup.Count == 0)) return;
             var container = sendingContext.Provider.GetRequiredService<OutboxesPoolList>();
 
             var outboxAddresses = outboxes.ConvertAll(x => new OutboxEmailAddress(x, SendingGroupId, SmtpPasswordSecretKeys, OutboxEmailAddressType.Shared));
@@ -225,7 +225,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             toSendingItems = toSendingItems.Where(x => !existIds.Contains(x.Id)).ToList();
 
             // 获取发件箱
-            HashSet<long> outboxIds = toSendingItems.Select(x => x.OutBoxId).Where(x => x > 0).ToHashSet();
+            HashSet<long> outboxIds = [.. toSendingItems.Select(x => x.OutBoxId).Where(x => x > 0)];
             var outboxes = await sqlContext.Outboxes.Where(x => outboxIds.Contains(x.Id)).ToListAsync();
 
             // 对于找不到发件项的邮件，给予标记非法
