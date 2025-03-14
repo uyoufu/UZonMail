@@ -2,6 +2,7 @@ import { setTimeoutAsync } from 'src/utils/tsUtils'
 import CollapseLeft from './CollapseLeft.vue'
 import type { QTable } from 'quasar'
 import logger from 'loglevel'
+import { Platform } from 'quasar'
 
 /**
  * 使用折叠左侧组件
@@ -15,6 +16,9 @@ export function useTableCollapseLeft (containerRef: Ref<InstanceType<typeof QTab
     top: '40%',
     left: `${offsetLeft}px`
   })
+
+  // 初始化折叠状态
+  updateSignal.value = !Platform.is.desktop
 
   function updateCollapseLocation () {
     if (!containerRef.value) return

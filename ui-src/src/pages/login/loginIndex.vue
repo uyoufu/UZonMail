@@ -1,12 +1,12 @@
 <template>
   <div class="column justify-center login-container bg-white">
-    <div class="row justify-center items-center q-mb-xl animated fadeIn slower col">
-      <q-icon :name="resolveSvgFullName('undraw_mention_re_k5xc')" size="220px"
+    <div class="row justify-center items-center  q-mb-xl animated fadeIn slower col" :class="mobileClass">
+      <q-icon :name="resolveSvgFullName('undraw_mention_re_k5xc')" :size="iconSize"
         class="q-pa-lg animated fadeInUp"></q-icon>
 
       <div
-        class="q-ma-md q-pa-lg column justify-center items-center border-radius-8 animated fadeInDown hover-card card-like"
-        style="width: 400px;" @keyup.enter="onUserLogin">
+        class="longin-main q-ma-md q-pa-lg column justify-center items-center border-radius-8 animated fadeInDown hover-card card-like"
+        @keyup.enter="onUserLogin">
         <div class="self-center q-mb-lg text-h5 text-secondary welcome-to-uzon-mail">Welcome to UZonMail</div>
 
         <q-input outlined class="full-width q-mb-md" standout v-model="userId" label="用户名">
@@ -104,6 +104,19 @@ const serverVersionClass = computed(() => {
   }
 })
 // #endregion
+
+// #region 手机兼容
+import { Platform } from 'quasar'
+const iconSize = computed(() => {
+  return Platform.is.desktop ? '220px' : '180px'
+})
+
+const mobileClass = computed(() => {
+  return {
+    'content-start': Platform.is.mobile,
+  }
+})
+// #endregion
 </script>
 
 <style lang="scss" scoped>
@@ -113,6 +126,10 @@ const serverVersionClass = computed(() => {
   left: 0;
   right: 0;
   bottom: 0;
+
+  .longin-main {
+    min-width: min(400px, 90%);
+  }
 
   .welcome-to-uzon-mail {
     background: -webkit-linear-gradient(315deg, #42d392 25%, #857bf0);

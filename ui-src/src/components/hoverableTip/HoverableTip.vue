@@ -1,6 +1,6 @@
 <template>
   <q-tooltip v-bind="$attrs" class="hoverable-tip q-pa-none" :model-value="showing" @update:model-value="onUpdate"
-    @mouseenter="onHover" @mouseleave="onLeave">
+    @mouseenter="onHover" @mouseleave="onLeave" :hide-delay="hideDelay">
     <slot></slot>
   </q-tooltip>
 </template>
@@ -9,6 +9,8 @@
 // 参考：https://github.com/quasarframework/quasar/discussions/13155
 import logger from 'loglevel'
 
+import { Platform } from 'quasar'
+const hideDelay = ref(Platform.is.desktop ? 0 : 1500)
 const showing = ref(false)
 const isHovered = ref(false)
 // you need to debounce update:modelValue handler
@@ -27,6 +29,7 @@ function onHover () {
   isHovered.value = showing.value
 }
 function onLeave () {
+  logger.debug('[hoverableTip] onHover')
   isHovered.value = false
   showing.value = false
 }

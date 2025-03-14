@@ -100,7 +100,7 @@ function factoryFn (files: readonly IUploadFile[]): Promise<QUploaderFactoryObje
   return new Promise((resolve) => {
     // Retrieve JWT token from your store.
     const token = userInfoStore.token
-    const uploadUrl = `${process.env.BASE_URL}${appConfig.api}/file/upload-file-object`
+    const uploadUrl = `${appConfig.baseUrl || process.env.BASE_URL}${appConfig.api}/file/upload-file-object`
     const result: QUploaderFactoryObject = {
       url: uploadUrl,
       method: 'POST',
