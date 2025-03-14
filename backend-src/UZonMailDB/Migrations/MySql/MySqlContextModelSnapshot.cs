@@ -8,7 +8,7 @@ using UZonMail.DB.MySql;
 
 #nullable disable
 
-namespace UZonMailService.Migrations.MySql
+namespace UZonMail.DB.Migrations.Mysql
 {
     [DbContext(typeof(MySqlContext))]
     partial class MySqlContextModelSnapshot : ModelSnapshot
