@@ -218,7 +218,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 // 设置 public 目录为静态文件目录
-var publicPath = Path.Combine(builder.Environment.ContentRootPath, "public");
+var publicPath = Path.Combine(builder.Environment.ContentRootPath, "data/public");
 Directory.CreateDirectory(publicPath);
 app.UseStaticFiles(new StaticFileOptions()
 {

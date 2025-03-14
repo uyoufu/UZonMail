@@ -37,7 +37,7 @@ namespace UZonMail.Core.Services.Files
         /// <param name="prefix"></param>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        private (string, string) GetObjectStorePath(FileBucket fileBucket,string fileName)
+        private (string, string) GetObjectStorePath(FileBucket fileBucket, string fileName)
         {
             // 年/月/日/文件名
             string relativePath = DateTime.Now.ToString("yyyy/MM/dd") + $"/{DateTime.Now.ToTimestamp()}_{fileName}";
@@ -74,7 +74,7 @@ namespace UZonMail.Core.Services.Files
                     // 获取存储位置
                     var defaultBucket = await GetDefaultBucket();
                     // 计算保存位置
-                    var (relativePath, fullPath) = GetObjectStorePath(defaultBucket,fileParams.File.FileName);
+                    var (relativePath, fullPath) = GetObjectStorePath(defaultBucket, fileParams.File.FileName);
                     // 保存文件
                     using var stream = new FileStream(fullPath, FileMode.Create);
                     fileParams.File.CopyTo(stream);
@@ -213,7 +213,7 @@ namespace UZonMail.Core.Services.Files
         /// <returns></returns>
         public (string, string) GetStaticFileDirectory()
         {
-            return (Path.Combine(env.ContentRootPath, "public"), "public");
+            return (Path.Combine(env.ContentRootPath, "data/public"), "public");
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace UZonMail.Core.Services.Files
             string baseDir = Path.GetDirectoryName(fullPath);
             if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
 
-            return (fullPath, $"public/{relativePath}".Replace('\\', '/'));
+            return (fullPath, $"data/public/{relativePath}".Replace('\\', '/'));
         }
     }
 }

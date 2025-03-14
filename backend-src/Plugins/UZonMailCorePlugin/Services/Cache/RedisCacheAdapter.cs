@@ -1,4 +1,5 @@
 ﻿
+using log4net;
 using StackExchange.Redis;
 using UZonMail.Utils.Json;
 
@@ -6,6 +7,7 @@ namespace UZonMail.Core.Services.Cache
 {
     public class RedisCacheAdapter : ICacheAdapter
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(RedisCacheAdapter));
         private ConnectionMultiplexer _redis;
         private IDatabaseAsync _db;
 
@@ -20,8 +22,9 @@ namespace UZonMail.Core.Services.Cache
             _redis.ConnectionRestored += (sender, args) =>
             {
                 // 链接成功
-                _db = _redis.GetDatabase(redisConfig.Database);
+                _logger.Info($"Redis: {redisConfig.ConnectionString} 连接成功!");
             };
+            _db = _redis.GetDatabase(redisConfig.Database);
         }
 
         public async Task<T?> GetAsync<T>(string key)
