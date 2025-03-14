@@ -1,5 +1,5 @@
 import type { AxiosProgressEvent } from 'axios'
-import { httpClient } from 'src/api//base/httpClient'
+import { httpClient } from 'src/api/base/httpClient'
 import type { IRequestPagination } from 'src/compositions/types'
 
 /**
