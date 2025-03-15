@@ -11,15 +11,20 @@ export default navbar(
       text: '使用文档',
       link: '/get-started',
       icon:'book',
+      prefix: '/guide/',
       children: [
         {
           text: '开始使用',
-          link: '/get-started'
+          link: 'README.md'
         },
         {
           text: '视频介绍',
           link: '/video-introduction'
-        }        
+        },
+        {
+          text: "Demo演示",
+          link:"https://uzon-mail.223434.xyz:2234/"
+        }       
       ]
     },
     {
