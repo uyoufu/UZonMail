@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using log4net;
+using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.MySql;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SqLite;
@@ -7,6 +8,7 @@ namespace UZonMail.DB.SQL
 {
     public static class UseSqlExtension
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(UseSqlExtension));
         /// <summary>
         /// 添加数据库上下文，优先使用 mysql
         /// 同时将 MySqlContext 或 SqLiteContext 绑定到 SqlContext
@@ -55,6 +57,7 @@ namespace UZonMail.DB.SQL
             configuration.GetSection("Database:MySql").Bind(mysqlConnectionConfig);
             if (mysqlConnectionConfig.Enable)
             {
+                _logger.Info($"使用 MySql 数据库: {mysqlConnectionConfig.ConnectionString}");
                 services.AddDbContext<T>();
                 return true;
             }
@@ -74,6 +77,7 @@ namespace UZonMail.DB.SQL
             configuration.GetSection("Database:SqLite").Bind(sqLiteConnectionConfig);
             if (sqLiteConnectionConfig.Enable)
             {
+                _logger.Info($"使用 SqLite 数据库: {sqLiteConnectionConfig.ConnectionString}");
                 services.AddDbContext<T>();
                 return true;
             }

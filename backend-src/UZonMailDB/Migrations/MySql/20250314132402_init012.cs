@@ -4,10 +4,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace UZonMailService.Migrations.MySql
+namespace UZonMail.DB.Migrations.Mysql
 {
     /// <inheritdoc />
-    public partial class initMysql : Migration
+    public partial class init012 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,44 +16,16 @@ namespace UZonMailService.Migrations.MySql
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Departments",
+                name: "EmailAddress",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
+                    Email = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: true)
+                    Name = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ParentId = table.Column<long>(type: "bigint", nullable: true),
-                    FullPath = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    IsSystem = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Departments", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "EmailTemplates",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Content = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Thumbnail = table.Column<string>(type: "longtext", nullable: true)
+                    _id = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -61,7 +33,7 @@ namespace UZonMailService.Migrations.MySql
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmailTemplates", x => x.Id);
+                    table.PrimaryKey("PK_EmailAddress", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -78,6 +50,8 @@ namespace UZonMailService.Migrations.MySql
                     RootDir = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDefault = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
@@ -89,61 +63,107 @@ namespace UZonMailService.Migrations.MySql
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Outboxes",
+                name: "IdAndName",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    SmtpHost = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SmtpPort = table.Column<int>(type: "int", nullable: false),
-                    UserName = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Password = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    EnableSSL = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ProxyId = table.Column<long>(type: "bigint", nullable: false),
-                    MaxSendCountPerDay = table.Column<int>(type: "int", nullable: false),
-                    SentTotalToday = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    EmailGroupId = table.Column<long>(type: "bigint", nullable: false),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Email = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Domain = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name = table.Column<string>(type: "longtext", nullable: true)
+                    Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Remark = table.Column<string>(type: "longtext", nullable: true)
+                    _id = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LinkCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Outboxes", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "RolePermissionCodes",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    RoleId = table.Column<long>(type: "bigint", nullable: false),
-                    PermissionCodeId = table.Column<long>(type: "bigint", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RolePermissionCodes", x => x.Id);
+                    table.PrimaryKey("PK_IdAndName", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "OrganizationSettings",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    MaxSendCountPerEmailDay = table.Column<int>(type: "int", nullable: false),
+                    MinOutboxCooldownSecond = table.Column<int>(type: "int", nullable: false),
+                    MaxOutboxCooldownSecond = table.Column<int>(type: "int", nullable: false),
+                    MaxSendingBatchSize = table.Column<int>(type: "int", nullable: false),
+                    MinInboxCooldownHours = table.Column<int>(type: "int", nullable: false),
+                    ReplyToEmails = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MaxRetryCount = table.Column<int>(type: "int", nullable: false),
+                    EnableEmailTracker = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    OrganizationId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrganizationSettings", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "PermissionCodes",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Code = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsNegative = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PermissionCodes", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Proxies",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    MatchRegex = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsShared = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Url = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    OrganizationId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Proxies", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -153,11 +173,19 @@ namespace UZonMailService.Migrations.MySql
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
+                    Name = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Icon = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PermissionCodesCount = table.Column<int>(type: "int", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    OrganizationId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,8 +204,14 @@ namespace UZonMailService.Migrations.MySql
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Body = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    OutboxGroups = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    OutboxesCount = table.Column<int>(type: "int", nullable: false),
                     Inboxes = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    InboxGroups = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    InboxesCount = table.Column<int>(type: "int", nullable: false),
                     CcBoxes = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     BccBoxes = table.Column<string>(type: "longtext", nullable: true)
@@ -195,6 +229,8 @@ namespace UZonMailService.Migrations.MySql
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     SendingType = table.Column<int>(type: "int", nullable: false),
                     ScheduleDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
@@ -217,6 +253,12 @@ namespace UZonMailService.Migrations.MySql
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     BoolValue = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IntValue = table.Column<int>(type: "int", nullable: false),
+                    LongValue = table.Column<long>(type: "bigint", nullable: false),
+                    DateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Json = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
@@ -224,56 +266,6 @@ namespace UZonMailService.Migrations.MySql
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SystemSettings", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "UserProxies",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Priority = table.Column<int>(type: "int", nullable: false),
-                    MatchRegex = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Proxy = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsShared = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserProxies", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "UserSettings",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    MaxSendCountPerEmailDay = table.Column<int>(type: "int", nullable: false),
-                    MinOutboxCooldownSecond = table.Column<int>(type: "int", nullable: false),
-                    MaxOutboxCooldownSecond = table.Column<int>(type: "int", nullable: false),
-                    MaxSendingBatchSize = table.Column<int>(type: "int", nullable: false),
-                    MinInboxCooldownHours = table.Column<int>(type: "int", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserSettings", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -291,6 +283,8 @@ namespace UZonMailService.Migrations.MySql
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LinkCount = table.Column<int>(type: "int", nullable: false),
                     Size = table.Column<long>(type: "bigint", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
@@ -307,115 +301,113 @@ namespace UZonMailService.Migrations.MySql
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "PermissionCodes",
+                name: "PermissionCodeRole",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Code = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    RoleId = table.Column<long>(type: "bigint", nullable: true),
-                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    PermissionCodesId = table.Column<long>(type: "bigint", nullable: false),
+                    RolesId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PermissionCodes", x => x.Id);
+                    table.PrimaryKey("PK_PermissionCodeRole", x => new { x.PermissionCodesId, x.RolesId });
                     table.ForeignKey(
-                        name: "FK_PermissionCodes_Roles_RoleId",
-                        column: x => x.RoleId,
+                        name: "FK_PermissionCodeRole_PermissionCodes_PermissionCodesId",
+                        column: x => x.PermissionCodesId,
+                        principalTable: "PermissionCodes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_PermissionCodeRole_Roles_RolesId",
+                        column: x => x.RolesId,
                         principalTable: "Roles",
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "EmailTemplates",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    OrganizationId = table.Column<long>(type: "bigint", nullable: false),
-                    DepartmentId = table.Column<long>(type: "bigint", nullable: false),
-                    UserId = table.Column<string>(type: "longtext", nullable: false)
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Content = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Thumbnail = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SendingGroupId = table.Column<long>(type: "bigint", nullable: true),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailTemplates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmailTemplates_SendingGroups_SendingGroupId",
+                        column: x => x.SendingGroupId,
+                        principalTable: "SendingGroups",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Outboxes",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    SmtpHost = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SmtpPort = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Password = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Avatar = table.Column<string>(type: "longtext", nullable: true)
+                    EnableSSL = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ProxyId = table.Column<long>(type: "bigint", nullable: false),
+                    MaxSendCountPerDay = table.Column<int>(type: "int", nullable: false),
+                    SentTotalToday = table.Column<int>(type: "int", nullable: false),
+                    ReplyToEmails = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ConnectionId = table.Column<string>(type: "longtext", nullable: true)
+                    Weight = table.Column<int>(type: "int", nullable: false),
+                    IsValid = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ValidFailReason = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ForbiddenToLogin = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsSuperAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsSystemUser = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    RoleId = table.Column<long>(type: "bigint", nullable: true),
+                    SendingGroupId = table.Column<long>(type: "bigint", nullable: true),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    EmailGroupId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    Email = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Domain = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Remark = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LinkCount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Outboxes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Users_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Roles",
+                        name: "FK_Outboxes_SendingGroups_SendingGroupId",
+                        column: x => x.SendingGroupId,
+                        principalTable: "SendingGroups",
                         principalColumn: "Id");
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "EmailTemplateSendingGroup",
-                columns: table => new
-                {
-                    SendingGroupId = table.Column<long>(type: "bigint", nullable: false),
-                    TemplatesId = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmailTemplateSendingGroup", x => new { x.SendingGroupId, x.TemplatesId });
-                    table.ForeignKey(
-                        name: "FK_EmailTemplateSendingGroup_EmailTemplates_TemplatesId",
-                        column: x => x.TemplatesId,
-                        principalTable: "EmailTemplates",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_EmailTemplateSendingGroup_SendingGroups_SendingGroupId",
-                        column: x => x.SendingGroupId,
-                        principalTable: "SendingGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "OutboxSendingGroup",
-                columns: table => new
-                {
-                    OutboxesId = table.Column<long>(type: "bigint", nullable: false),
-                    SendingGroupId = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OutboxSendingGroup", x => new { x.OutboxesId, x.SendingGroupId });
-                    table.ForeignKey(
-                        name: "FK_OutboxSendingGroup_Outboxes_OutboxesId",
-                        column: x => x.OutboxesId,
-                        principalTable: "Outboxes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OutboxSendingGroup_SendingGroups_SendingGroupId",
-                        column: x => x.SendingGroupId,
-                        principalTable: "SendingGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -447,12 +439,16 @@ namespace UZonMailService.Migrations.MySql
                     ProxyId = table.Column<long>(type: "bigint", nullable: false),
                     Data = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    EnableEmailTracker = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     SendDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     SendResult = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     TriedCount = table.Column<int>(type: "int", nullable: false),
                     ReceiptId = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ReadDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -481,6 +477,12 @@ namespace UZonMailService.Migrations.MySql
                     FileObjectId = table.Column<long>(type: "bigint", nullable: false),
                     ExpireDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
+                    VisitedCount = table.Column<int>(type: "int", nullable: false),
+                    FirstDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    LastDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    MaxVisitCount = table.Column<int>(type: "int", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
@@ -492,6 +494,81 @@ namespace UZonMailService.Migrations.MySql
                         name: "FK_FileReaders_FileObjects_FileObjectId",
                         column: x => x.FileObjectId,
                         principalTable: "FileObjects",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Departments",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ParentId = table.Column<long>(type: "bigint", nullable: true),
+                    FullPath = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    IsSystem = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    EmailTemplateId = table.Column<long>(type: "bigint", nullable: true),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Departments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Departments_EmailTemplates_EmailTemplateId",
+                        column: x => x.EmailTemplateId,
+                        principalTable: "EmailTemplates",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    OrganizationId = table.Column<long>(type: "bigint", nullable: false),
+                    DepartmentId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserName = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Password = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Avatar = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ConnectionId = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsSuperAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsSystsemUser = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Weight = table.Column<int>(type: "int", nullable: false),
+                    CreateBy = table.Column<long>(type: "bigint", nullable: false),
+                    EmailTemplateId = table.Column<long>(type: "bigint", nullable: true),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_EmailTemplates_EmailTemplateId",
+                        column: x => x.EmailTemplateId,
+                        principalTable: "EmailTemplates",
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -513,6 +590,8 @@ namespace UZonMailService.Migrations.MySql
                     ParentId = table.Column<int>(type: "int", nullable: false),
                     Order = table.Column<long>(type: "bigint", nullable: false),
                     IsDefault = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
@@ -543,6 +622,10 @@ namespace UZonMailService.Migrations.MySql
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     FileObjectId = table.Column<long>(type: "bigint", nullable: false),
                     IsPublic = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SendingGroupId = table.Column<long>(type: "bigint", nullable: true),
+                    SendingItemId = table.Column<long>(type: "bigint", nullable: true),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
@@ -556,6 +639,16 @@ namespace UZonMailService.Migrations.MySql
                         principalTable: "FileObjects",
                         principalColumn: "Id");
                     table.ForeignKey(
+                        name: "FK_FileUsages_SendingGroups_SendingGroupId",
+                        column: x => x.SendingGroupId,
+                        principalTable: "SendingGroups",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_FileUsages_SendingItems_SendingItemId",
+                        column: x => x.SendingItemId,
+                        principalTable: "SendingItems",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_FileUsages_Users_OwnerUserId",
                         column: x => x.OwnerUserId,
                         principalTable: "Users",
@@ -564,30 +657,25 @@ namespace UZonMailService.Migrations.MySql
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "UserRole",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: false),
-                    UserId1 = table.Column<long>(type: "bigint", nullable: false),
-                    RoleId1 = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    OrganizationId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => x.Id);
+                    table.PrimaryKey("PK_UserRole", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserRoles_Roles_RoleId1",
-                        column: x => x.RoleId1,
-                        principalTable: "Roles",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_UserRoles_Users_UserId1",
-                        column: x => x.UserId1,
+                        name: "FK_UserRole_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id");
                 })
@@ -603,6 +691,8 @@ namespace UZonMailService.Migrations.MySql
                     LastSuccessDeliveryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     LastBeDeliveredDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     MinInboxCooldownHours = table.Column<long>(type: "bigint", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -632,52 +722,25 @@ namespace UZonMailService.Migrations.MySql
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "FileUsageSendingGroup",
+                name: "RoleUserRoles",
                 columns: table => new
                 {
-                    AttachmentsId = table.Column<long>(type: "bigint", nullable: false),
-                    SendingGroupId = table.Column<long>(type: "bigint", nullable: false)
+                    RolesId = table.Column<long>(type: "bigint", nullable: false),
+                    UserRolesId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FileUsageSendingGroup", x => new { x.AttachmentsId, x.SendingGroupId });
+                    table.PrimaryKey("PK_RoleUserRoles", x => new { x.RolesId, x.UserRolesId });
                     table.ForeignKey(
-                        name: "FK_FileUsageSendingGroup_FileUsages_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "FileUsages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_RoleUserRoles_Roles_RolesId",
+                        column: x => x.RolesId,
+                        principalTable: "Roles",
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_FileUsageSendingGroup_SendingGroups_SendingGroupId",
-                        column: x => x.SendingGroupId,
-                        principalTable: "SendingGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "FileUsageSendingItem",
-                columns: table => new
-                {
-                    AttachmentsId = table.Column<long>(type: "bigint", nullable: false),
-                    SendingItemId = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FileUsageSendingItem", x => new { x.AttachmentsId, x.SendingItemId });
-                    table.ForeignKey(
-                        name: "FK_FileUsageSendingItem_FileUsages_AttachmentsId",
-                        column: x => x.AttachmentsId,
-                        principalTable: "FileUsages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_FileUsageSendingItem_SendingItems_SendingItemId",
-                        column: x => x.SendingItemId,
-                        principalTable: "SendingItems",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_RoleUserRoles_UserRole_UserRolesId",
+                        column: x => x.UserRolesId,
+                        principalTable: "UserRole",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -695,6 +758,8 @@ namespace UZonMailService.Migrations.MySql
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Role = table.Column<int>(type: "int", nullable: false),
                     SendDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    _id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -717,14 +782,19 @@ namespace UZonMailService.Migrations.MySql
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Departments_EmailTemplateId",
+                table: "Departments",
+                column: "EmailTemplateId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_EmailGroups_UserId",
                 table: "EmailGroups",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmailTemplateSendingGroup_TemplatesId",
-                table: "EmailTemplateSendingGroup",
-                column: "TemplatesId");
+                name: "IX_EmailTemplates_SendingGroupId",
+                table: "EmailTemplates",
+                column: "SendingGroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileObjects_FileBucketId",
@@ -747,19 +817,19 @@ namespace UZonMailService.Migrations.MySql
                 column: "OwnerUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FileUsageSendingGroup_SendingGroupId",
-                table: "FileUsageSendingGroup",
+                name: "IX_FileUsages_SendingGroupId",
+                table: "FileUsages",
                 column: "SendingGroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FileUsageSendingItem_SendingItemId",
-                table: "FileUsageSendingItem",
+                name: "IX_FileUsages_SendingItemId",
+                table: "FileUsages",
                 column: "SendingItemId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Inboxes_Email",
+                name: "IX_Inboxes_Email_UserId",
                 table: "Inboxes",
-                column: "Email",
+                columns: new[] { "Email", "UserId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -768,20 +838,37 @@ namespace UZonMailService.Migrations.MySql
                 column: "EmailGroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Outboxes_Email",
+                name: "IX_Outboxes_Email_UserId",
                 table: "Outboxes",
-                column: "Email",
+                columns: new[] { "Email", "UserId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_OutboxSendingGroup_SendingGroupId",
-                table: "OutboxSendingGroup",
+                name: "IX_Outboxes_SendingGroupId",
+                table: "Outboxes",
                 column: "SendingGroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PermissionCodes_RoleId",
+                name: "IX_PermissionCodeRole_RolesId",
+                table: "PermissionCodeRole",
+                column: "RolesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PermissionCodes_Code",
                 table: "PermissionCodes",
-                column: "RoleId");
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Roles_Name",
+                table: "Roles",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoleUserRoles_UserRolesId",
+                table: "RoleUserRoles",
+                column: "UserRolesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SendingItemInboxes_InboxId",
@@ -799,19 +886,15 @@ namespace UZonMailService.Migrations.MySql
                 column: "SendingGroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_RoleId1",
-                table: "UserRoles",
-                column: "RoleId1");
+                name: "IX_UserRole_UserId",
+                table: "UserRole",
+                column: "UserId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_UserId1",
-                table: "UserRoles",
-                column: "UserId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_RoleId",
+                name: "IX_Users_EmailTemplateId",
                 table: "Users",
-                column: "RoleId");
+                column: "EmailTemplateId");
         }
 
         /// <inheritdoc />
@@ -821,25 +904,31 @@ namespace UZonMailService.Migrations.MySql
                 name: "Departments");
 
             migrationBuilder.DropTable(
-                name: "EmailTemplateSendingGroup");
+                name: "EmailAddress");
 
             migrationBuilder.DropTable(
                 name: "FileReaders");
 
             migrationBuilder.DropTable(
-                name: "FileUsageSendingGroup");
+                name: "FileUsages");
 
             migrationBuilder.DropTable(
-                name: "FileUsageSendingItem");
+                name: "IdAndName");
 
             migrationBuilder.DropTable(
-                name: "OutboxSendingGroup");
+                name: "OrganizationSettings");
 
             migrationBuilder.DropTable(
-                name: "PermissionCodes");
+                name: "Outboxes");
 
             migrationBuilder.DropTable(
-                name: "RolePermissionCodes");
+                name: "PermissionCodeRole");
+
+            migrationBuilder.DropTable(
+                name: "Proxies");
+
+            migrationBuilder.DropTable(
+                name: "RoleUserRoles");
 
             migrationBuilder.DropTable(
                 name: "SendingItemInboxes");
@@ -848,22 +937,16 @@ namespace UZonMailService.Migrations.MySql
                 name: "SystemSettings");
 
             migrationBuilder.DropTable(
-                name: "UserProxies");
+                name: "FileObjects");
 
             migrationBuilder.DropTable(
-                name: "UserRoles");
+                name: "PermissionCodes");
 
             migrationBuilder.DropTable(
-                name: "UserSettings");
+                name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "EmailTemplates");
-
-            migrationBuilder.DropTable(
-                name: "FileUsages");
-
-            migrationBuilder.DropTable(
-                name: "Outboxes");
+                name: "UserRole");
 
             migrationBuilder.DropTable(
                 name: "Inboxes");
@@ -872,22 +955,19 @@ namespace UZonMailService.Migrations.MySql
                 name: "SendingItems");
 
             migrationBuilder.DropTable(
-                name: "FileObjects");
+                name: "FileBuckets");
 
             migrationBuilder.DropTable(
                 name: "EmailGroups");
 
             migrationBuilder.DropTable(
-                name: "SendingGroups");
-
-            migrationBuilder.DropTable(
-                name: "FileBuckets");
-
-            migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "EmailTemplates");
+
+            migrationBuilder.DropTable(
+                name: "SendingGroups");
         }
     }
 }

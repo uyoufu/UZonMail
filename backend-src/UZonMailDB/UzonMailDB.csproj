@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\MySql\" />
     <Folder Include="SQL\EntityConfigs\Attributes\" />
     <Folder Include="Utils\" />
   </ItemGroup>

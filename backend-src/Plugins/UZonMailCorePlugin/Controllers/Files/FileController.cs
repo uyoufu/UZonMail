@@ -8,13 +8,14 @@ using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.DB.SQL.Core.Files;
+using UZonMail.Core.Services.Config;
 
 namespace UZonMail.Core.Controllers.Files
 {
     /// <summary>
     /// 文件控制器
     /// </summary>
-    public class FileController(SqlContext db, FileStoreService fileStoreService, TokenService tokenService, IWebHostEnvironment env) : ControllerBaseV1
+    public class FileController(SqlContext db, FileStoreService fileStoreService, TokenService tokenService, DebugConfig debugConfig) : ControllerBaseV1
     {
         /// <summary>
         /// 获取文件ID
@@ -42,6 +43,10 @@ namespace UZonMail.Core.Controllers.Files
         [HttpPost("upload-file-object")]
         public async Task<ResponseResult<long>> UploadFileObject(ObjectFileUploaderBody fileParams)
         {
+            if (debugConfig.IsDemo)
+            {
+                return 0L.ToFailResponse("演示环境不支持上传文件");
+            }
             var userId = tokenService.GetUserSqlId();
             fileParams.File ??= Request.Form.Files.FirstOrDefault();
             FileUsage fileUsage = await fileStoreService.UploadFileObject(userId, fileParams);
@@ -87,6 +92,7 @@ namespace UZonMail.Core.Controllers.Files
 
         /// <summary>
         /// 上传到静态目录位置
+        /// 目前用于用户头像、缩略图上传
         /// </summary>
         /// <param name="fileParams"></param>
         /// <returns></returns>
