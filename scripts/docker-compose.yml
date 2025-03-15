@@ -2,58 +2,58 @@
 # 该文件是 uzon-mail 的 docker-compose 配置文件，使用时，在当前目录执行 docker-compose up -d 命令即可启动程序
 #
 
-version: '3.9'
 services:
-  # # mysql, 若要启用 sql 服务，请取消下面的注释
-  # uzon-mysql:
-  #   container_name: uzon-mysql
-  #   image: mysql:8.4.0
-  #   ports:
-  #     - 3306:3306
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: root3306
-  #     MYSQL_DATABASE: uzon-mail
-  #     MYSQL_USER: uzon-mail
-  #     MYSQL_PASSWORD: uzon-mail
-  #   volumes:
-  #     - ./data/db/data:/var/lib/mysql
-  #     - ./data/db/my.cnf:/etc/mysql/conf.d/my.cnf
-  #     - ./data/db/sql:/docker-entrypoint-initdb.d
-  #   restart: always
-  #   command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci 
-  #   networks:
-  #     - uzon-network
+  # mysql, 若要启用 sql 服务，请取消下面的注释
+  uzon-mysql:
+    container_name: uzon-mysql
+    image: mysql:8.4.0
+    # ports:
+    #   - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: mysqlRoot3306
+      MYSQL_DATABASE: uzon-mail
+      MYSQL_USER: uzon-mail
+      MYSQL_PASSWORD: uzon-mail
+    volumes:
+      - ./data/mysql/data:/var/lib/mysql
+      # - ./data/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      # - ./data/mysql/sql:/docker-entrypoint-initdb.d
+    restart: always
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - uzonmail_network
 
-  # # redis 缓存, 若要启用 redis 服务，请取消下面的注释
-  # uzon-redis:
-  #   container_name: uzon-redis
-  #   image: redis:7.2.5
-  #   ports:
-  #     - 6379:6379
-  #   volumes:
-  #     - ./data/redis/data:/data
-  #   restart: always
-  #   networks:
-  #     - uzon-network
+  # redis 缓存, 若要启用 redis 服务，请取消下面的注释
+  uzon-redis:
+    container_name: uzon-redis
+    image: redis:latest
+    # ports:
+    #   - 6379:6379
+    volumes:
+      - ./data/redis/data:/data
+    restart: always
+    networks:
+      - uzonmail_network
 
   # 程序主体
   uzon-mail:
     container_name: uzon-mail
     image: gmxgalens/uzon-mail:latest
     ports:
-      - 22345:22345
+      - 55080:22345
     volumes:
-      # - ./data/uzon-mail/appsettings.Production.json:/app/appsettings.Production.json # 若需修改系统配置时打开
-      - ./data/uzon-mail/data:/app/data # 数据存储
-      - ./data/uzon-mail/wwwroot:/app/wwwroot # 前端文件
+      - ./data/appsettings.Production.json:/app/appsettings.Production.json # 若需修改系统配置时打开
+      - ./data/data:/app/data # 数据存储
+      - ./data/app.config.json:/app/wwwroot/app.config.json # 前端文件
     networks:
-      - uzon-network
-    command: ["dotnet", "UZonMailService.dll"]
-    # depends_on:
-    #   - uzon-mysql
-    #   - uzon-redis
+      - nginx_network
+      - uzonmail_network
+    command: [ "dotnet", "UZonMailService.dll" ]
+    depends_on:
+      - uzon-mysql
+      - uzon-redis
 
 networks:
-  uzon-network:
-  uzon-mysql:
-  uzon-redis:
+  nginx_network:
+    external: true
+  uzonmail_network:

@@ -13,7 +13,7 @@ namespace UZonMail.Core.Services.Cache
 
         public RedisCacheAdapter(RedisConnectionConfig redisConfig)
         {
-            var _redis = ConnectionMultiplexer.Connect(redisConfig.ConnectionString);
+            _redis = ConnectionMultiplexer.Connect(redisConfig.ConnectionString);
             _redis.ConnectionFailed += (sender, args) =>
             {
                 // 链接失败
@@ -55,7 +55,7 @@ namespace UZonMail.Core.Services.Cache
         public async Task<bool> SetAsync<T>(string key, T? value)
         {
             // 将数据转为 json
-            return await _db.SetAddAsync(key, value.ToJson());
+            return await _db.StringSetAsync(key, value.ToJson());
         }
     }
 }
