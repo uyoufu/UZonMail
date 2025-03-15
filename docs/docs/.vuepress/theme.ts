@@ -19,6 +19,14 @@ export default hopeTheme({
 
   docsDir: "src",
 
+  // 导航栏布局
+  // https://theme-hope.vuejs.press/zh/guide/layout/navbar.html#%E5%B8%83%E5%B1%80%E9%85%8D%E7%BD%AE
+  navbarLayout:{
+    start: ["Brand"],
+    center: ["Links"],
+    end: ["Language", "Repo", "Outlook", "Search"],
+  },
+
   // 导航栏
   navbar,
 

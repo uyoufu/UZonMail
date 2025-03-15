@@ -1,8 +1,35 @@
 ---
 title: 历史版本
-
 editLink: false
 ---
+
+## 0.12.1
+
+> 更新日期: 2025-03-15
+
+### 新增功能
+
+1. 新增多语言切换(未完全适配)
+2. 部分页面手机端兼容
+3. 发件箱增加更多易用功能, 比如批量验证、批量删除无效
+4. 将 pro 插件完全从主体中独立
+
+### bug 修复
+
+1. 修复 docker 部署时异常 bug
+2. 修复 pro 版本，爬虫效率低或者报错问题
+3. 修复服务器部署后，导致无法发送附件
+4. 修复无法通过发件箱组发送邮件
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.12.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.1.0.zip)
+
+[uzonmail-service-win-x64-0.12.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.12.1.0.zip)
+
+[uzonmail-service-linux-x64-0.12.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.12.1.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
 ## 0.11.3
 
