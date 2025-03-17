@@ -16,6 +16,11 @@ namespace UZonMail.DB.SQL.Core.Settings
         public string Name { get; set; }
 
         /// <summary>
+        /// 说明
+        /// </summary>
+        public string? Description { get; set; }
+
+        /// <summary>
         /// 优先级
         /// 值越大，优先级越高，越先匹配
         /// </summary>
@@ -28,22 +33,20 @@ namespace UZonMail.DB.SQL.Core.Settings
         public string? MatchRegex { get; set; }
 
         /// <summary>
-        /// 说明
-        /// </summary>
-        public string? Description { get; set; }
-
-        /// <summary>
         /// 是否生效
         /// </summary>
         public bool IsActive { get; set; }
 
         /// <summary>
         /// 是否共享
+        /// 主要用于前端显示，实际上是根据组织 id 判断
+        /// 当修改共享状态时，需要同步更新组织 id
         /// </summary>
         public bool IsShared { get; set; }
 
         /// <summary>
         /// 代理设置地址
+        /// 格式：http://username:password@host:port
         /// </summary>
         public string Url { get; set; }
 

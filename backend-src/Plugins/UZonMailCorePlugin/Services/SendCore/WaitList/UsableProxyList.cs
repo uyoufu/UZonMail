@@ -41,7 +41,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
             if (_sendingItemProxies.TryGetValue(sendingItemId, out var proxyId))
             {
                 // 从所有的代理中查找
-                proxy = allProxies.Where(x=>x.Id == proxyId).FirstOrDefault(); 
+                proxy = allProxies.Where(x=>x.Id == proxyId).FirstOrDefault();
             }
             else
             {
