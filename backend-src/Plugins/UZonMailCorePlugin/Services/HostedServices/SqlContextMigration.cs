@@ -5,7 +5,7 @@ using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.HostedServices
 {
-    public class SqlContextMigration(SqlContext db) : IHostedServiceStart, IScopedService<IHostedServiceStart>
+    public class SqlContextMigration(SqlContext db) : IHostedServiceStart
     {
         public int Order => -10000;
 

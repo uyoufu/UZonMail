@@ -8,7 +8,7 @@ namespace UZonMail.Core.Services.HostedServices
     /// <summary>
     /// 重置定时器
     /// </summary>
-    public class ResetSchedulerService(ISchedulerFactory schedulerFactory) : IHostedServiceStart, IScopedService<IHostedServiceStart>
+    public class ResetSchedulerService(ISchedulerFactory schedulerFactory) : IHostedServiceStart
     {
         public int Order => 0;
 

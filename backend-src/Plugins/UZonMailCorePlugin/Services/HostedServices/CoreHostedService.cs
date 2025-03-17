@@ -7,7 +7,7 @@ namespace UZonMail.Core.Services.HostedServices
     /// <summary>
     /// 程序启动时，开始中断的发件任务
     /// </summary>
-    public class CoreHostedService(IServiceProvider serviceProvider) : IHostedServiceStart, IScopedService<IHostedServiceStart>
+    public class CoreHostedService(IServiceProvider serviceProvider) : IHostedServiceStart
     {
         public int Order => 0;
 

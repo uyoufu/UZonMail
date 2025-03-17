@@ -1,6 +1,8 @@
-﻿namespace UZonMail.Core.Services.HostedServices
+﻿using UZonMail.Utils.Web.Service;
+
+namespace UZonMail.Core.Services.HostedServices
 {
-    public interface IHostedServiceStart
+    public interface IHostedServiceStart : IScopedService<IHostedServiceStart>
     {
         /// <summary>
         /// 优先级

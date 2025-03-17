@@ -1,11 +1,12 @@
 ﻿using UZonMail.DB.SQL.Core.Settings;
+using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.SendCore.DynamicProxy
 {
     /// <summary>
     /// Proxy 工厂，通过工厂创建具体的代理
     /// </summary>
-    public interface IProxyFactory
+    public interface IProxyFactory : IScopedService<IProxyFactory>
     {
         /// <summary>
         /// 工厂优先级
