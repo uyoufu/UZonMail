@@ -25,6 +25,7 @@
   padding-bottom: 1px; // 调整这个值来控制线和文字的距离
   &:hover {
     border-bottom: 1px solid currentColor;
+    color: $primary;
   }
 }
 

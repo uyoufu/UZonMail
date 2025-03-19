@@ -11,6 +11,7 @@ declare module 'vue' {
     AsyncTooltip: typeof import('./src/components/asyncTooltip/AsyncTooltip.vue')['default']
     ButtonsGroup: typeof import('./src/components/buttonsGroup/ButtonsGroup.vue')['default']
     CancelBtn: typeof import('./src/components/quasarWrapper/buttons/CancelBtn.vue')['default']
+    ClickableText: typeof import('./src/components/clickableText/ClickableText.vue')['default']
     CollapseLeft: typeof import('./src/components/collapseLeft/CollapseLeft.vue')['default']
     CommonBtn: typeof import('./src/components/quasarWrapper/buttons/CommonBtn.vue')['default']
     ContextMenu: typeof import('./src/components/contextMenu/ContextMenu.vue')['default']
