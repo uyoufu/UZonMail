@@ -14,6 +14,23 @@ export interface IInbox {
   description?: string,
 }
 
+export enum OutboxStatus {
+  /// <summary>
+  /// 没有测试
+  /// </summary>
+  Unverified,
+
+  /// <summary>
+  /// 有效
+  /// </summary>
+  Valid,
+
+  /// <summary>
+  /// 不可用
+  /// </summary>
+  Invalid,
+}
+
 /**
  * 发件箱
  */
@@ -31,7 +48,7 @@ export interface IOutbox extends IInbox {
   replyToEmails?: string,
   enableSSL: boolean, // 是否使用 ssl
   isValid?: boolean,
-  status: number
+  status?: OutboxStatus
   validFailReason?: string
 }
 

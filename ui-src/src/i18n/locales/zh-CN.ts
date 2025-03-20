@@ -82,9 +82,11 @@ export default {
     read: '已读',
     instant: '即时',
     scheduled: '定时',
-    invalid: '无效',
     unsubscribed: '取消订阅',
     running: '运行中',
-    unknown: '未知'
+    unknown: '未知',
+    unverified: '未验证',
+    valid: '有效',
+    invalid: '无效',
   }
 }
