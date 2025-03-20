@@ -25,18 +25,12 @@ const props = defineProps({
 })
 
 const showEllipsis = computed(() => props.content && props.content.length > props.maxLength)
+import { useEllipsisTrimmer } from './useEllipsisTrimmer'
+const { ellipsisTrimmer } = useEllipsisTrimmer()
+
 const ellipsisContent = computed(() => {
   if (!showEllipsis.value) return props.content
-
-  // 按照方向截取
-  if (props.direction === 'start') {
-    return '...' + props.content.slice(props.content.length - props.maxLength)
-  } else if (props.direction === 'middle') {
-    const half = Math.floor(props.maxLength / 2)
-    return props.content.slice(0, half) + '...' + props.content.slice(props.content.length - half)
-  } else {
-    return props.content.slice(0, props.maxLength) + '...'
-  }
+  return ellipsisTrimmer(props.content, props.direction, props.maxLength)
 })
 const tooltips = computed(() => {
   if (!showEllipsis) return props.content

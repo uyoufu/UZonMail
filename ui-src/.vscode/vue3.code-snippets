@@ -95,7 +95,7 @@
       "import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'",
       "import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'",
       "import SearchInput from 'src/components/searchInput/SearchInput.vue'",
-      "import { formatDate } from 'src/utils/formate'",
+      "import { formatDate } from 'src/utils/format'",
       "",
       "const { indexColumn, QTableIndex } = useQTableIndex()",
       "const columns: QTableColumn[] = [",

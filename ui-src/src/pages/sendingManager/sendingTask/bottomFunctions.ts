@@ -3,7 +3,7 @@
 import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
-import type { IEmailCreateInfo} from 'src/api/emailSending';
+import type { IEmailCreateInfo } from 'src/api/emailSending';
 import { sendEmailNow, sendSchedule } from 'src/api/emailSending'
 import { useUserInfoStore } from 'src/stores/user'
 

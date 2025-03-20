@@ -10,8 +10,8 @@
           </q-tooltip>
         </q-btn>
 
-        <q-tabs class="shadow-1 border-radius-6" v-model="statusTab" dense active-color="secondary"
-          indicator-color="primary" align="left">
+        <q-tabs class="border-radius-6" v-model="statusTab" dense active-color="secondary" indicator-color="primary"
+          align="left">
           <q-tab class="q-px-xs border-radius-6" v-for="statusTabOption in statusTabOptions"
             :key="statusTabOption.value" :name="statusTabOption.value" :label="statusTabOption.label" />
         </q-tabs>

@@ -18,6 +18,7 @@ export interface IEmailCreateInfo {
   attachments: Record<string, any>[], // 附件
   smtpPasswordSecretKeys?: string[], // 发件人邮箱密码密钥, 发件时，需要由用户上传到服务器
   sendBatch: boolean, // 多个收件箱时，是否批量发送
+  proxyIds: number[], // 代理人id
 }
 
 /**

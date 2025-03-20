@@ -15,15 +15,9 @@
       <ContextMenu :items="sendingHistoryContextItems" :value="props.row" />
     </template>
 
-    <template v-slot:body-cell-id="props">
-      <q-td :props="props">
-        <div class="hover-underline" @click="openSendDetailDialog(props.row)">{{ props.value }}</div>
-      </q-td>
-    </template>
-
     <template v-slot:body-cell-subjects="props">
       <q-td :props="props">
-        <EllipsisContent :content="props.value" />
+        <ClickableText :text="props.value" @click="openSendDetailDialog(props.row)" />
       </q-td>
     </template>
 
@@ -45,7 +39,7 @@
 <script lang="ts" setup>
 import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
-import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
+import ClickableText from 'src/components/clickableText/ClickableText.vue'
 
 import { formatDate } from 'src/utils/format'
 

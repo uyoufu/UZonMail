@@ -4,7 +4,7 @@
     <template v-for="(slot, slotName) in $slots">
       <slot :name="slotName"></slot>
     </template>
-    <AsyncTooltip :tooltip="tooltip" />
+    <AsyncTooltip :tooltip="tooltip" :cache="cacheTip" />
   </q-btn>
 </template>
 
@@ -24,9 +24,17 @@ defineProps({
     type: String,
     default: ''
   },
+  // 是否缓存
+  cacheTip: {
+    type: Boolean,
+    default: true
+  },
+
+  // 可以是字符串，字符串数组，或者是一个返回字符串数组的函数
   tooltip: {
-    type: String,
-    default: ''
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: [Array, Function, String] as PropType<Array<any> | ((params?: object) => Promise<string[]>) | string>,
+    default: () => []
   },
   size: {
     type: String,

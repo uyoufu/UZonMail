@@ -56,12 +56,6 @@ const props = defineProps({
     default: undefined
   },
 
-  // 参数
-  params: {
-    type: Object,
-    default: () => { return {} }
-  },
-
   // 是否缓存
   cache: {
     type: Boolean,
@@ -70,8 +64,15 @@ const props = defineProps({
 
   // 可以是字符串，字符串数组，或者是一个返回字符串数组的函数
   tooltip: {
-    type: [Array, Function, String] as PropType<Array<string> | ((params?: object) => Promise<string[]>) | string>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: [Array, Function, String] as PropType<Array<any> | ((params?: object) => Promise<string[]>) | string>,
     default: () => []
+  },
+
+  // 传递给 tooltip 的参数
+  params: {
+    type: Object,
+    default: () => { return {} }
   },
 
   // 背景颜色
@@ -112,13 +113,22 @@ async function onTooltipBeforeShow () {
  * @param tooltip
  * @param params
  */
-async function generateTooltips (tooltip: Array<string> | ((params?: object) => Promise<string[]>) | string, params: object) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function generateTooltips (tooltip: Array<any> | ((params?: object) => Promise<string[]>) | string, params: object) {
   const tooltipResults: string[] = []
+  // 字符串
   if (typeof tooltip === 'string') {
     tooltipResults.push(tooltip)
-  } else if (Array.isArray(tooltip)) {
-    tooltipResults.push(...tooltip)
-  } else if (typeof tooltip === 'function') {
+  }
+  // 数组
+  else if (Array.isArray(tooltip)) {
+    for (const tempTip of tooltip) {
+      const resultsTemp = await generateTooltips(tempTip, params)
+      tooltipResults.push(...resultsTemp)
+    }
+  }
+  // 函数：函数或者会返回 string 或 string[]
+  else if (typeof tooltip === 'function') {
     const tipItems = await tooltip(params)
     const resultsTemp = await generateTooltips(tipItems, params)
     tooltipResults.push(...resultsTemp)
