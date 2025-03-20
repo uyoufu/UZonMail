@@ -6,7 +6,6 @@ using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.UserInfos;
 using UZonMail.Core.Services.Files;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Utils.Database;
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.DB.SQL;
 using UZonMail.Core.Database.Validators;
@@ -16,16 +15,17 @@ using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.DB.Extensions;
+using UZonMail.Core.Services.Config;
 
 namespace UZonMail.Core.Controllers.Users
 {
     /// <summary>
-    /// 用户
+    /// 用户相关
     /// </summary>
-    /// <remarks>
-    /// 构造函数
-    /// </remarks>
+    /// <param name="db"></param>
     /// <param name="userService"></param>
+    /// <param name="tokenService"></param>
+    /// <param name="fileStoreService"></param>
     public class UserController(SqlContext db, UserService userService, TokenService tokenService, FileStoreService fileStoreService) : ControllerBaseV1
     {
         /// <summary>

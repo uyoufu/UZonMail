@@ -11,6 +11,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
     /// </summary>
     public class ThrottlingSmtpClient(string email, int cooldownMilliseconds) : SmtpClient
     {
+        public int SentCount { get; private set; } = 0;
+
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ThrottlingSmtpClient));
 
         /// <summary>
@@ -43,6 +45,10 @@ namespace UZonMail.Core.Services.SendCore.Sender
             }
 
             var sentMessage = await base.SendAsync(message, cancellationToken, progress);
+
+            // 增加计数
+            SentCount++;
+
             return sentMessage;
         }
     }

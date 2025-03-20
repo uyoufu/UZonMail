@@ -2,6 +2,9 @@
 
 namespace UZonMail.Core.Services.HostedServices
 {
+    /// <summary>
+    /// 服务启动时执行
+    /// </summary>
     public interface IHostedServiceStart : IScopedService<IHostedServiceStart>
     {
         /// <summary>

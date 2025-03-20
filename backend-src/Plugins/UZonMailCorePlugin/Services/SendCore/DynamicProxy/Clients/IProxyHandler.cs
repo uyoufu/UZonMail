@@ -1,0 +1,43 @@
+﻿using MailKit.Net.Proxy;
+using UZonMail.DB.SQL.Core.Settings;
+
+namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
+{
+    /// <summary>
+    /// 代理解析器
+    /// </summary>
+    public interface IProxyHandler
+    {
+        /// <summary>
+        /// 代理操作器的 Id
+        /// 可取 Proxy.Id
+        /// </summary>
+        long Id { get; }
+
+        /// <summary>
+        /// 是否可用
+        /// </summary>
+        bool IsEnable();
+
+        /// <summary>
+        /// 是否匹配
+        /// </summary>
+        /// <param name="matchStr"></param>
+        /// <param name="limitCount">限制数量</param>
+        /// <returns></returns>
+        bool IsMatch(string matchStr, int limitCount);
+
+        /// <summary>
+        /// 异步获取代理客户端
+        /// </summary>
+        /// <param name="matchStr">每个客户端都有一个匹配规则，只有 matchStr 匹配到后，才会返回</param>
+        /// <returns></returns>
+        Task<IProxyClient?> GetProxyClientAsync(string matchStr);
+
+        /// <summary>
+        /// 更新代理操作器
+        /// </summary>
+        /// <param name="proxy"></param>
+        void Update(Proxy proxy);
+    }
+}

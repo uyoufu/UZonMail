@@ -43,9 +43,21 @@ namespace UZonMail.DB.Managers.Cache
         #endregion
 
         #region 代理属性
+        /// <summary>
+        /// 发送邮件的最大批次大小
+        /// </summary>
         public int MaxSendingBatchSize => Setting?.MaxSendingBatchSize ?? 0;
 
+        /// <summary>
+        /// 是否启用邮件跟踪器
+        /// </summary>
         public bool EnableEmailTracker => Setting?.EnableEmailTracker ?? false;
+
+        /// <summary>
+        /// 当发件x次时，更换IP
+        /// 为 0 时，表示不更换
+        /// </summary>
+        public int ChangeIpAfterEmailCount => Setting?.ChangeIpAfterEmailCount ?? 0;
         #endregion
     }
 }
