@@ -35,11 +35,16 @@
     <ObjectUploader v-model="emailInfo.attachments" v-model:need-upload="needUpload" label="附件" class="q-mx-sm q-mt-sm"
       style="width:auto" multiple />
 
-    <div class="row justify-end items-center q-ma-sm q-mt-lg">
-      <CommonBtn label="预览" color="accent" icon="view_carousel" tooltip="预览发件正文" @click="onPreviewClick" />
-      <CommonBtn label="定时发送" class="q-ml-sm" color="primary" icon="schedule" tooltip="定时发件"
-        @click="onScheduleSendClick" />
-      <OkBtn label="发送" class="q-ml-sm" icon="alternate_email" tooltip="立即发件" @click="onSendNowClick" />
+    <div class="row justify-between items-center q-ma-sm q-mt-lg">
+      <CommonBtn label="" :color="proxyBtnColor" icon="public" :tooltip="proxyBtnTooltip" @click="onProxyBtnClick"
+        :cache-tip="false" />
+
+      <div class="row justify-end items-center">
+        <CommonBtn label="预览" color="accent" icon="view_carousel" tooltip="预览发件正文" @click="onPreviewClick" />
+        <CommonBtn label="定时发送" class="q-ml-sm" color="primary" icon="schedule" tooltip="定时发件"
+          @click="onScheduleSendClick" />
+        <OkBtn label="发送" class="q-ml-sm" icon="alternate_email" tooltip="立即发件" @click="onSendNowClick" />
+      </div>
     </div>
   </div>
 </template>
@@ -68,7 +73,8 @@ const emailInfo: Ref<IEmailCreateInfo> = ref({
   body: '', // 邮件正文
   // 附件必须先上传，此处保存的是附件的Id
   attachments: [], // 附件
-  sendBatch: false
+  sendBatch: false,
+  proxyIds: []
 })
 
 // 编辑器配置
@@ -100,6 +106,11 @@ watch(() => emailInfo.value.outboxGroups, (newValue) => {
 const disableSendBatchCheckbox = computed(() => {
   return emailInfo.value.data.length === 0 && emailInfo.value.inboxes.length < 2 && emailInfo.value.outboxes.length < 2
 })
+
+// #region 代理相关
+import { useProxyAdder } from './useProxyAdder'
+const { proxyBtnTooltip, proxyBtnColor, onProxyBtnClick } = useProxyAdder(emailInfo)
+// #endregion
 </script>
 
 <style lang="scss" scoped>

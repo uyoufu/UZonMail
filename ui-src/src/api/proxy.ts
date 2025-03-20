@@ -103,6 +103,36 @@ export function getProxiesData (filter: string | undefined, pagination: IRequest
 }
 
 /**
+ * 获取代理数量
+ * @param filter
+ * @returns
+ */
+export function getEnabledProxiesCount (filter?: string) {
+  return httpClient.get<number>('/proxy/enabled/filtered-count', {
+    params: {
+      filter
+    }
+  })
+}
+
+/**
+ * 获取代理数据
+ * @param filter
+ * @param pagination
+ * @returns
+ */
+export function getEnabledProxiesData (filter: string | undefined, pagination: IRequestPagination) {
+  return httpClient.post<IProxy[]>('/proxy/enabled/filtered-data', {
+    params: {
+      filter
+    },
+    data: {
+      pagination
+    }
+  })
+}
+
+/**
  * 获取当前用户可用的代理
  * @returns
  */
