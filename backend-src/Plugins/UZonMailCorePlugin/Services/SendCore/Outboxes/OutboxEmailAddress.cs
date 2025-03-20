@@ -83,29 +83,35 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// </summary>
         public int MaxSendCountPerDay => _outbox.MaxSendCountPerDay;
 
-        private int _sentTotalToday;
         /// <summary>
-        /// 当前已发送数量
+        /// 当天合计发件
         /// 成功失败都被计算在内
         /// </summary>
-        public int SentTotalToday => _sentTotalToday;
+        public int SentTotalToday { get;private set; }
+
+        /// <summary>
+        /// 本次合计发件
+        /// </summary>
+        public int SentTotal { get; private set; }
 
         /// <summary>
         /// 递增发送数量
         /// 或跨越天数, 重置发送数量
+        /// 对于发件箱来说，是单线程，因此不需要考虑并发问题
         /// </summary>
         public void IncreaseSentCount()
         {
+            SentTotal++;
+
             // 重置每日发件量
             if (_startDate.Date != DateTime.Now.Date)
             {
                 _startDate = DateTime.Now;
-                _sentTotalToday = 0;
+                SentTotalToday = 0;
             }
             else
             {
-                // 防止并发增加
-                _sentTotalToday++;
+                SentTotalToday++;
             }
         }
 
@@ -181,7 +187,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             Id = outbox.Id;
 
             ReplyToEmails = outbox.ReplyToEmails.SplitBySeparators().Distinct().ToList();
-            _sentTotalToday = outbox.SentTotalToday;
+            SentTotalToday = outbox.SentTotalToday;
             Weight = outbox.Weight > 0 ? outbox.Weight : 1;
         }
         #endregion
@@ -268,7 +274,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <returns></returns>
         public bool IsLimited()
         {
-            return this._sentTotalToday >= this.MaxSendCountPerDay;
+            return this.SentTotalToday >= this.MaxSendCountPerDay;
         }
 
         /// <summary>

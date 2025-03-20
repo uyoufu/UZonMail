@@ -16,6 +16,7 @@ using UZonMail.DB.Managers.Cache;
 using System.Security.Claims;
 using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.DB.SQL.Core.Permission;
+using UZonMail.Core.Services.Config;
 
 namespace UZonMail.Core.Services.UserInfos
 {
@@ -23,7 +24,7 @@ namespace UZonMail.Core.Services.UserInfos
     /// 只在请求生命周期内有效的服务
     /// </summary>
     public class UserService(IServiceProvider serviceProvider, SqlContext db, IOptions<AppConfig> appConfig, PermissionService permission,
-        PluginService pluginService, TokenService tokenService) : IScopedService
+        PluginService pluginService, TokenService tokenService, DebugConfig debugConfig) : IScopedService
     {
         /// <summary>
         /// 判断用户是否存在
@@ -313,7 +314,7 @@ namespace UZonMail.Core.Services.UserInfos
         {
             var tokenClaimBuilders = serviceProvider.GetServices<ITokenClaimBuilder>();
             List<Claim> claims = [];
-            foreach(var claimBuilder in tokenClaimBuilders)
+            foreach (var claimBuilder in tokenClaimBuilders)
             {
                 var claimsTemp = await claimBuilder.Build(userInfo);
                 claims.AddRange(claimsTemp);
@@ -381,6 +382,8 @@ namespace UZonMail.Core.Services.UserInfos
         /// <returns></returns>
         public async Task<bool> ChangeUserPassword(long userId, ChangePasswordModel passwordModel)
         {
+            if (debugConfig.IsDemo) throw new KnownException("演示环境不允许修改密码");
+
             var oldPassword = passwordModel.OldPassword;
             var newPassword = passwordModel.NewPassword;
 

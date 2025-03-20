@@ -13,6 +13,7 @@ using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.DB.Extensions;
+using UZonMail.Core.Services.SendCore.DynamicProxy;
 
 namespace UZonMail.Core.Services.EmailSending.WaitList
 {
@@ -84,7 +85,8 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <summary>
         /// 可用的代理
         /// </summary>
-        private UsableProxyList _usableProxies;
+        private List<long> ProxyIds { get; set; } = [];
+
 
         /// <summary>
         /// 可用的模板
@@ -146,8 +148,12 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             // 邮件级别的发件箱在初始化发送项时，再添加
             await AddSharedOutboxToPool(sendingContext, sendingGroup.Outboxes, sendingGroup.OutboxGroups);
 
-            // 获取全部代理，代理是组织级别的
-            _usableProxies = new UsableProxyList(UserId);
+            // 保存所使用的代理
+            ProxyIds = sendingGroup.ProxyIds;
+
+            // 更新代理缓存
+            var proxyManager = sendingContext.Provider.GetRequiredService<ProxyManager>();
+            await proxyManager.UpdateUserProxies(sendingContext.Provider, UserId);
 
             // 获取所有的模板，模板是用户级别的
             _usableTemplates = new UsableTemplateList(UserId);
@@ -274,8 +280,9 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             {
                 // 添加特定模板
                 _usableTemplates.AddSendingItemTemplate(toSendingItem.Id, toSendingItem.EmailTemplateId);
+
                 // 添加特定代理
-                _usableProxies.AddSendingItemProxy(toSendingItem.Id, toSendingItem.ProxyId);
+                //_usableProxies.AddSendingItemProxy(toSendingItem.Id, toSendingItem.ProxyId);
             }
 
             // 更新当前发件组的数据 
@@ -340,7 +347,6 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
                 sendingGroup.SendStartDate = DateTime.Now;
             // 保存组状态
             await sqlContext.SaveChangesAsync();
-
 
             // 更新到当前类中
             _sendingGroup.Status = sendingGroup.Status;
@@ -408,8 +414,8 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             {
                 sendItemMeta = _sendingItemMetas.GetSendingMeta();
             }
+            if (sendItemMeta == null) return null;           
 
-            if (sendItemMeta == null) return null;
             // 如果已经包含 SendingItem, 说明初始化过了，直接返回
             if (sendItemMeta.Initialized)
             {
@@ -417,8 +423,11 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             }
             sendItemMeta.Initialized = true;
 
-            // 拉取发件项
+            // 添加局部使用的代理
             var sqlContext = sendingContext.SqlContext;
+            sendItemMeta.AvailableProxyIds = ProxyIds;
+
+            // 拉取发件项           
             sendItemMeta = await _sendingItemMetas.FillSendingItem(sqlContext, sendItemMeta);
 
             // 获取附件
@@ -434,11 +443,6 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
 
             // 添加最大重试次数
             await sendItemMeta.SetMaxRetryCount(sqlContext);
-
-            // 添加代理
-            // 代理与发件箱进行匹配            
-            var proxyInfo = await _usableProxies.GetProxy(sqlContext, sendItemMeta.SendingItemId, outbox.Email);
-            sendItemMeta.SetProxyInfo(proxyInfo);
 
             return sendItemMeta;
         }

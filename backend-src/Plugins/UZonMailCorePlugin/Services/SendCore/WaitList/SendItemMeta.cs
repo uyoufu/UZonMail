@@ -52,6 +52,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// 是否被删除
         /// </summary>
         public bool IsDeleted { get; set; } = false;
+
         #region 容器
         public SendingItemMetaList Parent { get; private set; }
         public void SetParent(SendingItemMetaList metaList)
@@ -68,7 +69,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <exception cref="NullReferenceException"></exception>
         public void Done()
         {
-            if(Parent==null)throw new NullReferenceException("未设置父容器");
+            if (Parent == null) throw new NullReferenceException("未设置父容器");
 
             if (Status.HasFlag(SendItemMetaStatus.Success))
             {
@@ -275,12 +276,32 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         }
 
         /// <summary>
-        /// 代理
+        /// 可用的代理，包括由数据或者发件箱指定的代理
         /// </summary>
-        public ProxyInfo? ProxyInfo { get; private set; }
-        public void SetProxyInfo(ProxyInfo? proxyInfo)
+        public List<long> AvailableProxyIds { get; set; } = [];
+
+        /// <summary>
+        /// 代理的 Id
+        /// </summary>
+        public long ProxyId
         {
-            ProxyInfo = proxyInfo;
+            get
+            {
+                if (Outbox == null && SendingItem == null) return 0;
+
+                // sendingItem 中的 proxyId 优先于 outbox 中的 proxyId
+                long proxyId = 0;
+                if (Outbox != null && Outbox.ProxyId > 0)
+                {
+                    proxyId = Outbox.ProxyId;
+                }
+                if (SendingItem != null && SendingItem.ProxyId > 0)
+                {
+                    proxyId = SendingItem.ProxyId;
+                }
+
+                return proxyId;
+            }
         }
 
         /// <summary>

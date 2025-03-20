@@ -63,7 +63,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             foreach (var kv in this)
             {
                 var groupTask = kv.Value;
-                return await groupTask.GetEmailItem(context);
+                var result = await groupTask.GetEmailItem(context);
+                if (result != null) return result;
             }
 
             return null;

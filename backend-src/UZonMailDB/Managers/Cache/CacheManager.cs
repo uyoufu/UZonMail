@@ -5,7 +5,10 @@ using System.Collections.Concurrent;
 namespace UZonMail.DB.Managers.Cache
 {
     /// <summary>
-    /// 数据库缓存管理器
+    /// 数据库缓存管理模块
+    /// 该模块的优点：
+    /// 1. 延迟数据加载
+    /// 2. 自动更新数据
     /// </summary>
     public class CacheManager
     {
@@ -59,16 +62,28 @@ namespace UZonMail.DB.Managers.Cache
         /// <summary>
         /// 标记 cache 需要更新
         /// </summary>
-        /// <param name="objectIdKey"></param>
+        /// <param name="stringKey"></param>
         /// <returns></returns>
-        public bool SetCacheDirty<TResult>(string objectIdKey)
+        public bool SetCacheDirty<TResult>(string stringKey)
             where TResult : IDBCache, new()
         {
-            var fullKey = GetFullKey<TResult>(objectIdKey);
+            var fullKey = GetFullKey<TResult>(stringKey);
             // 移除缓存数据
             if (!_settingsDic.TryGetValue(fullKey, out var value)) return false;
             value.SetDirty(true);
             return true;
+        }
+
+        /// <summary>
+        /// 标记需要更新
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool SetCacheDirty<TResult>(long key)
+            where TResult : IDBCache, new()
+        {
+            return SetCacheDirty<TResult>(key.ToString());
         }
 
         /// <summary>

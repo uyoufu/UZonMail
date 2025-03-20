@@ -56,6 +56,12 @@ namespace UZonMail.DB.SQL.Core.Settings
         public bool? EnableEmailTracker { get; set; }
 
         /// <summary>
+        /// 每 x 封邮件后，更换 IP
+        /// 为 0 表示不更换
+        /// </summary>
+        public int ChangeIpAfterEmailCount { get; set; }
+
+        /// <summary>
         /// 回复邮件地址列表
         /// </summary>
         [NotMapped]

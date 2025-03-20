@@ -151,6 +151,11 @@ namespace UZonMail.DB.SQL.Core.EmailSending
         public DateTime ScheduleDate { get; set; }
         #endregion
 
+        /// <summary>
+        /// 使用到的代理
+        /// </summary>
+        [JsonField]
+        public List<long> ProxyIds { get; set; } = [];
         #endregion
 
         #region 临时数据，不保存到数据库

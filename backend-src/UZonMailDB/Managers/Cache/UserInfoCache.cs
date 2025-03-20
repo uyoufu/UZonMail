@@ -5,6 +5,9 @@ using UZonMail.DB.SQL.Core.Organization;
 
 namespace UZonMail.DB.Managers.Cache
 {
+    /// <summary>
+    /// 用户信息缓存
+    /// </summary>
     public class UserInfoCache : BaseDBCache<SqlContext>
     {
         /// <summary>

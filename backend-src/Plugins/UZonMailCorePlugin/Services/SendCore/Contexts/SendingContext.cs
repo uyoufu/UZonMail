@@ -43,6 +43,7 @@ namespace UZonMail.Core.Services.SendCore.Contexts
         /// </summary>
         public SendItemMeta? EmailItem { get; set; }
         #endregion
+
         #endregion
     }
 }

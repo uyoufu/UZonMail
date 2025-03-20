@@ -106,14 +106,14 @@ namespace UZonMail.Core.Controllers.Settings
         }
 
         /// <summary>
-        /// 
+        /// 获取过滤后的数量
         /// </summary>
         /// <returns></returns>
         [HttpGet("filtered-count")]
         public async Task<ResponseResult<int>> GetFilteredCount(string filter)
         {
             var tokenPayloads = tokenService.GetTokenPayloads();
-            var dbSet = db.Proxies.Where(x => x.OrganizationId == tokenPayloads.OrganizationId || x.UserId == tokenPayloads.UserId);
+            var dbSet = db.Proxies.Where(x => (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared) || x.UserId == tokenPayloads.UserId);
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Url.Contains(filter));
@@ -133,7 +133,46 @@ namespace UZonMail.Core.Controllers.Settings
         public async Task<ResponseResult<List<Proxy>>> GetFilteredData(string filter, [FromBody] Pagination pagination)
         {
             var tokenPayloads = tokenService.GetTokenPayloads();
-            var dbSet = db.Proxies.Where(x => x.IsActive).Where(x => x.OrganizationId == tokenPayloads.OrganizationId || x.UserId == tokenPayloads.UserId);
+            var dbSet = db.Proxies.Where(x => x.IsActive).Where(x => (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared) || x.UserId == tokenPayloads.UserId);
+            if (!string.IsNullOrEmpty(filter))
+            {
+                dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Url.Contains(filter));
+            }
+            var results = await dbSet.Page(pagination).ToListAsync();
+            return results.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 获取过滤后的数量
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("enabled/filtered-count")]
+        public async Task<ResponseResult<int>> GetEnabledFilteredCount(string filter)
+        {
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var dbSet = db.Proxies.Where(x => (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared) || x.UserId == tokenPayloads.UserId)
+                .Where(x => x.IsActive);
+            if (!string.IsNullOrEmpty(filter))
+            {
+                dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Url.Contains(filter));
+            }
+
+            var count = await dbSet.CountAsync();
+            return count.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 获取过滤后的数据
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <param name="pagination"></param>
+        /// <returns></returns>
+        [HttpPost("enabled/filtered-data")]
+        public async Task<ResponseResult<List<Proxy>>> GetEnabledFilteredData(string filter, [FromBody] Pagination pagination)
+        {
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var dbSet = db.Proxies.Where(x => x.IsActive).Where(x => (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared) || x.UserId == tokenPayloads.UserId)
+                .Where(x => x.IsActive);
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Url.Contains(filter));

@@ -100,7 +100,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
             try
             {
-                var clientResult = await SmtpClientFactory.GetSmtpClientAsync(context, sendItem.Outbox, sendItem.ProxyInfo);
+                var smtpClientFactory = context.Provider.GetRequiredService<SmtpClientFactory>();
+                var clientResult = await smtpClientFactory.GetSmtpClientAsync(context);
                 // 若返回 null,说明这个发件箱不能建立 smtp 连接，对它进行取消
                 if (!clientResult)
                 {
