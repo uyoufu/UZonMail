@@ -32,6 +32,13 @@ const defaultStatusStyles = [
   { status: 'instant', label: '即时', color: 'primary', textColor: 'white', icon: '' },
   { status: 'scheduled', label: '定时', color: 'warning', textColor: 'white', icon: '' },
   { status: 'invalid', label: '无效', color: 'negative', textColor: 'white', icon: '' },
+  { status: 'valid', label: '有效', color: 'positive', textColor: 'white', icon: '' },
+  { status: 'unsubscribed', label: '未订阅', color: 'negative', textColor: 'white', icon: '' },
+  { status: 'subscribed', label: '已订阅', color: 'positive', textColor: 'white', icon: '' },
+  { status: 'blacklist', label: '黑名单', color: 'negative', textColor: 'white', icon: '' },
+  { status: 'whitelist', label: '白名单', color: 'positive', textColor: 'white', icon: '' },
+  { status: 'unverified', label: '未验证', color: 'negative', textColor: 'white', icon: '' },
+  { status: 'verified', label: '已验证', color: 'positive', textColor: 'white', icon: '' },
   { status: 'unsubscribed', label: '取消订阅', color: 'negative', textColor: 'white', icon: '' },
   { status: 'running', label: '运行中', color: 'secondary', textColor: 'white', icon: '' },
   { status: 'unknown', label: '未知', color: 'negative', textColor: 'white', icon: '' }
@@ -75,7 +82,7 @@ const statusStyle = computed(() => {
   const statusStr = _.camelCase(String(props.status))
   const statusLabel = t(`statusChip.${statusStr}`)
 
-  logger.debug('[statusChip] statusStr:', statusLabel)
+  logger.debug('[statusChip] statusStr/statusLabel:', statusStr, statusLabel)
 
   const statusMap = statusStylesMap.value[statusStr]
   if (!statusMap) {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IOutbox } from 'src/api/emailBox'
-import { deleteOutboxByIds, updateOutbox, validateOutbox } from 'src/api/emailBox'
+import { deleteOutboxByIds, OutboxStatus, updateOutbox, validateOutbox } from 'src/api/emailBox'
 import { deleteAllInvalidBoxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
 
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
@@ -166,6 +166,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       notifySuccess('验证成功')
       // 更新状态
       row.isValid = true
+      row.status = OutboxStatus.Valid
       row.validFailReason = ''
       return
     }
@@ -191,6 +192,9 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     }, t('outboxManager.validateBatch'), t('outboxManager.validating'))
 
     notifySuccess(t('outboxManager.validateBatchSuccess'))
+
+    // 重新刷新
+    refreshTable()
   }
 
 

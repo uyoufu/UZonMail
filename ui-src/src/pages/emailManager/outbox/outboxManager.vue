@@ -74,7 +74,7 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
 import { useQTable } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
-import { getOutboxesCount, getOutboxesData } from 'src/api/emailBox'
+import { getOutboxesCount, getOutboxesData, OutboxStatus } from 'src/api/emailBox'
 import type { IOutbox } from 'src/api/emailBox'
 import type { IEmailGroupListItem } from '../components/types'
 
@@ -190,18 +190,7 @@ const columns: QTableColumn[] = [
     label: t('outboxManager.col_status'),
     align: 'left',
     field: 'status',
-    format: (val: number) => {
-      switch (val) {
-        case 0:
-          return t('outboxStatus.none')
-        case 1:
-          return t('outboxStatus.success')
-        case 2:
-          return t('outboxStatus.failed')
-        default:
-          return t('outboxStatus.unknown')
-      }
-    },
+    format: v => OutboxStatus[v] as string,
     sortable: true
   }
 ]
