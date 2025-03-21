@@ -30,9 +30,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             var proxyGetter = new UserProxyGetter(sqlContext, userId);
             var proxies = await proxyGetter.GetUserProxies();
 
-            var proxyFactories = serviceProvider.GetServices<IProxyFactory>()
-                .OrderBy(x => x.Order)
-                .ToList();
+
 
             // 移除已经不存在的代理
             _proxyHandlers.Keys.Except(proxies.Select(x => x.Id))
@@ -40,6 +38,9 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
                 .ForEach(x => _proxyHandlers.TryRemove(x, out _));
 
             // 更新或新增代理
+            var proxyFactories = serviceProvider.GetServices<IProxyFactory>()
+               .OrderBy(x => x.Order)
+               .ToList();
             foreach (var proxy in proxies)
             {
                 // 若转换器已经存在，则更新
@@ -50,7 +51,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
                 }
 
                 // 若不存在，则新增                
-                var newHandler = CreateProxyHandler(proxyFactories, proxy);
+                var newHandler = await CreateProxyHandler(serviceProvider, proxyFactories, proxy);
                 if (newHandler == null) continue;
 
                 _proxyHandlers.TryAdd(newHandler.Id, newHandler);
@@ -63,14 +64,14 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         /// <param name="proxyFactories"></param>
         /// <param name="proxy"></param>
         /// <returns></returns>
-        private static IProxyHandler? CreateProxyHandler(List<IProxyFactory> proxyFactories, Proxy proxy)
+        private static async Task<IProxyHandler?> CreateProxyHandler(IServiceProvider serviceProvider, List<IProxyFactory> proxyFactories, Proxy proxy)
         {
             foreach (var factory in proxyFactories)
             {
-                var handler = factory.CreateProxy(proxy);
+                var handler = factory.CreateProxy(serviceProvider, proxy);
                 if (handler != null)
                 {
-                    return handler;
+                    return await handler;
                 }
             }
 
@@ -86,14 +87,14 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         /// <returns></returns>
         public IProxyHandler? RandomProxyHandler(List<long> ranges, string matchStr, int limitCount)
         {
-            if(ranges.Count==0)return null;
+            if (ranges.Count == 0) return null;
             if (_proxyHandlers.IsEmpty) return null;
 
             // 若 limitCount 小于等于 0，则不限制
             if (limitCount <= 0) limitCount = int.MaxValue;
 
             var enabledProxies = _proxyHandlers.Values
-                .Where(x=>ranges.Contains(x.Id))
+                .Where(x => ranges.Contains(x.Id))
                 .Where(x => x.IsEnable())
                 .Where(x => x.IsMatch(matchStr, limitCount))
                 .ToList();

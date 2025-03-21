@@ -26,7 +26,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxTestSender));
 
         /// <summary>
-        /// 发送测试
+        /// 测试不需要实际进行发件
+        /// [TODO]: 需要进行性能优化：1-同类型的验证进行复用 2-增加代理
         /// </summary>
         /// <returns></returns>
         public async Task<Result<string>> SendTest()
@@ -68,8 +69,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
                     client.Authenticate(string.IsNullOrEmpty(outbox.UserName) ? outbox.Email : outbox.UserName, password);
                 }
                 string sendResult = "fake sending by debug";
-                if (!debugConfig.IsDemo)
-                    sendResult = await client.SendAsync(message);
+                //if (!debugConfig.IsDemo)
+                //    sendResult = await client.SendAsync(message);
 
                 return new Result<string>(true, sendResult);
             }

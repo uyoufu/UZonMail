@@ -10,6 +10,6 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Proxies
     {
         public int Order => 0;
 
-        public abstract IProxyHandler? CreateProxy(Proxy proxy);
+        public abstract Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy);
     }
 }

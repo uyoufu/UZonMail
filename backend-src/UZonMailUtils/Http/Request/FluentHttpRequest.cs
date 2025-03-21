@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,6 +34,23 @@ namespace UZonMail.Utils.Http.Request
         public FluentHttpRequest WithHttpClient(HttpClient client)
         {
             _httpClient = client;
+            return this;
+        }
+
+        private HttpClientHandler _httpClientHandler;
+
+        /// <summary>
+        /// 设置代理
+        /// 设置代理时，会覆盖原来的 _httpClient
+        /// </summary>
+        /// <param name="proxyUrl"></param>
+        /// <returns></returns>
+        public FluentHttpRequest WithProxy(string proxyUrl)
+        {
+            if(string.IsNullOrEmpty(proxyUrl)) return this;
+
+            _httpClientHandler ??= new HttpClientHandler();
+            _httpClientHandler.WithProxy(proxyUrl);
             return this;
         }
 
@@ -123,6 +141,9 @@ namespace UZonMail.Utils.Http.Request
         public async Task<HttpResponseMessage> SendAsync()
         {
             BuildUri();
+
+            _httpClient ??= new HttpClient(_httpClientHandler);
+
             return await _httpClient.SendAsync(this);
         }
 
@@ -141,6 +162,22 @@ namespace UZonMail.Utils.Http.Request
 
             var content = await response.Content.ReadAsStringAsync();
             return content.JsonTo<JObject?>();
+        }
+
+        /// <summary>
+        /// 获取带有 Reponse 的结果
+        /// </summary>
+        /// <returns></returns>
+        public async Task<(JObject?, HttpResponseMessage)> GetJsonAsync2()
+        {
+            var response = await SendAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.Warn($"请求失败：{response.StatusCode}, 消息: {response.ReasonPhrase}");
+                return (default, response);
+            }
+            var content = await response.Content.ReadAsStringAsync();
+            return (content.JsonTo<JObject>(), response);
         }
     }
 }

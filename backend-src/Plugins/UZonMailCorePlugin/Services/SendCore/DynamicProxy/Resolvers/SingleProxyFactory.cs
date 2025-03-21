@@ -12,14 +12,16 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Proxies
 
         private static readonly List<string> _supportProtoco = ["http", "https", "socks4", "socks5"];
 
-        public IProxyHandler? CreateProxy(Proxy proxy)
+        public Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy)
         {
-            if(string.IsNullOrWhiteSpace(proxy.Url)) return null;
+            if (string.IsNullOrWhiteSpace(proxy.Url)) return null;
 
             var protocol = proxy.Url.ToLower().Split("://")[0];
             if (!_supportProtoco.Contains(protocol)) return null;
 
-            return new ProxyHandler(proxy);
+            var handler = serviceProvider.GetRequiredService<ProxyHandler>();
+            handler.Update(proxy);
+            return Task.FromResult<IProxyHandler?>(handler);
         }
     }
 }

@@ -52,4 +52,10 @@
 	  <ProjectReference Include="..\..\UZonMailUtils\UZonMailUtils.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="data\smtpConfig.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>
