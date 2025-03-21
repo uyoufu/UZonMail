@@ -208,6 +208,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
             var keys = _smptClients.Keys.ToList();
             if (keys.Count == 0) return;
 
+            _logger.Debug($"开始释放 SmtpClient");
+
             // 获取任务组
             var taskGroupIds = keys.Select(x => x.Split(":")[0]).Distinct().Select(x=> long.Parse(x)).ToList();
             foreach(var taskGroupId in taskGroupIds)
@@ -218,6 +220,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                     continue;
                 }
 
+                _logger.Info($"正在释放 {taskGroupId} 关联的 SmtpClient");
                 var pgPrefix = $"{taskGroupId}:";
                 var removingKeys = _smptClients.Keys.Where(x => x.StartsWith(pgPrefix)).ToList();
                 foreach (var key in removingKeys)

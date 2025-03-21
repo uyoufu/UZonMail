@@ -47,7 +47,7 @@ namespace UZonMail.Utils.Http.Request
         /// <returns></returns>
         public FluentHttpRequest WithProxy(string proxyUrl)
         {
-            if(string.IsNullOrEmpty(proxyUrl)) return this;
+            if (string.IsNullOrEmpty(proxyUrl)) return this;
 
             _httpClientHandler ??= new HttpClientHandler();
             _httpClientHandler.WithProxy(proxyUrl);
@@ -144,7 +144,29 @@ namespace UZonMail.Utils.Http.Request
 
             _httpClient ??= new HttpClient(_httpClientHandler);
 
-            return await _httpClient.SendAsync(this);
+            try
+            {
+                // 尝试发送请求
+                return await _httpClient.SendAsync(this);
+            }
+            catch (HttpRequestException ex)
+            {
+                // 捕获网络异常并返回自定义的 HttpResponseMessage
+                return new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.ServiceUnavailable, // 或其他适当的状态码
+                    ReasonPhrase = $"Request failed: {ex.Message}"
+                };
+            }
+            catch (Exception ex)
+            {
+                // 捕获其他异常并返回自定义的 HttpResponseMessage
+                return new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    ReasonPhrase = $"Unexpected error: {ex.Message}"
+                };
+            }
         }
 
         /// <summary>

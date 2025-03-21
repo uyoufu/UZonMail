@@ -13,7 +13,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
     /// 使用 DI 进行使用
     /// </summary>
     /// <param name="url"></param>
-    public class ProxyHandler: IProxyHandler
+    public class ProxyHandler : IProxyHandler
     {
         protected ProxyHandler() { }
 
@@ -73,21 +73,24 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         protected virtual async Task<bool> HealthCheck()
         {
             var validIpQueries = _iPQueries.Where(x => x.Enable).ToList();
-            if(validIpQueries.Count == 0)
+            if (validIpQueries.Count == 0)
             {
                 throw new Exception("没有可用的有效代理检测接口, 代理暂时无法使用，请联系开发者解决");
             }
 
             // 开始检测
-            foreach(var ipQuery in validIpQueries)
+            foreach (var ipQuery in validIpQueries)
             {
                 var ipResult = await ipQuery.GetIP(ProxyInfo.Url);
                 if (ipResult.Ok)
                 {
                     _isHealthy = Host.Equals(ipResult.Data);
+                    _logger.Debug($"代理 {Id} 检测通过");
                     return true;
                 }
             }
+
+            _logger.Debug($"代理 {Id} 检测失败");
             return false;
         }
         private Timer? _timer;
