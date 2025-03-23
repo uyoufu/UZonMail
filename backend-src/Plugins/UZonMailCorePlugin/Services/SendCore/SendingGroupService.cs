@@ -14,6 +14,9 @@ using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Core.Services.Emails;
+using UZonMail.Core.Controllers.Users.Model;
+using UZonMail.Utils.Web.Exceptions;
 
 namespace UZonMail.Core.Services.EmailSending
 {
@@ -37,9 +40,12 @@ namespace UZonMail.Core.Services.EmailSending
         public async Task<SendingGroup> CreateSendingGroup(SendingGroup sendingGroupData)
         {
             var userId = tokenService.GetUserSqlId();
-
             // 格式化 Excel 数据
             sendingGroupData.Data = await FormatExcelData(sendingGroupData.Data, userId);
+
+            // 进行发件箱的数据验证，验证失败时
+            await ValidateOutboxes(userId, sendingGroupData);
+
             // 使用事务
             await db.RunTransaction(async ctx =>
             {
@@ -179,6 +185,40 @@ namespace UZonMail.Core.Services.EmailSending
             }
 
             return results;
+        }
+
+        /// <summary>
+        /// 验证当前组中的所有发件箱
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="sendingGroupData"></param>
+        /// <returns></returns>
+        private async Task ValidateOutboxes(long userId, SendingGroup sendingGroupData)
+        {
+            var outboxIds = sendingGroupData.Outboxes.Select(x => x.Id).ToList();
+            var groupOutboxIds = sendingGroupData.OutboxGroups?.Select(x => x.Id).ToList() ?? [];
+            var dataOutboxIds = sendingGroupData.Data?.Select(x => x.SelectTokenOrDefault("outboxId", ""))
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Select(x => long.Parse(x)) ?? [];
+            var dataOutboxEmails = sendingGroupData.Data?.Select(x => x.SelectTokenOrDefault("outbox", ""))
+                .Where(x => !string.IsNullOrEmpty(x)) ?? [];
+
+            var allOutboxIds = outboxIds.Concat(groupOutboxIds).Concat(dataOutboxIds).ToList();
+            var outboxes = await db.Outboxes.AsNoTracking()
+                .Where(x => x.Status != OutboxStatus.Valid)
+                .Where(x => allOutboxIds.Contains(x.Id) || dataOutboxEmails.Contains(x.Email)).ToListAsync();
+
+            // 重新验证发件箱
+            var emailUtils = serviceProvider.GetRequiredService<EmailUtilsService>();
+            var smtpPasswordSecretKeys = SmtpPasswordSecretKeys.Create(sendingGroupData.SmtpPasswordSecretKeys);
+            foreach (var outbox in outboxes)
+            {
+                var result = await emailUtils.ValidateOutbox(outbox, smtpPasswordSecretKeys);
+                if (result.NotOk)
+                {
+                    throw new KnownException($"发件箱 {outbox.Email} 验证失败: {result.Message}");
+                }
+            }
         }
 
         /// <summary>

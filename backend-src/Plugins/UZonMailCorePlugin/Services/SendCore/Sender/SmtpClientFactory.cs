@@ -3,12 +3,15 @@ using MailKit.Net.Proxy;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using System.Collections.Concurrent;
+using System.Net.Sockets;
 using System.Timers;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.DynamicProxy;
+using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.DB.Managers.Cache;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
 using Timer = System.Timers.Timer;
@@ -75,29 +78,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
             var client = new ThrottlingSmtpClient(outbox.Email, 0);
             try
             {
-                // 获取代理
-                client.ProxyClient = await GetProxyClient(sendingContext);
-
-                // 对证书过期进行兼容处理
-                try
-                {
-                    client.Connect(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.Auto);
-                }
-                catch (SslHandshakeException ex)
-                {
-                    _logger.Warn(ex);
-                    // 证书过期
-                    client.Connect(outbox.SmtpHost, outbox.SmtpPort, SecureSocketOptions.None);
-                }
-
-                // Note: only needed if the SMTP server requires authentication
-                // 进行鉴权
-                var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
-                if (!debugConfig.IsDemo)
-                    if (!string.IsNullOrEmpty(outbox.AuthPassword)) client.Authenticate(outbox.AuthUserName, outbox.AuthPassword);
-
-                _smptClients.TryAdd(key, client);
-                return new Result<SmtpClient>() { Data = client };
+                var result = await ConnectSmtpClient(client, outbox, sendingContext, key);
+                return result;
             }
             catch (Exception ex)
             {
@@ -162,7 +144,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
 
 
         /// <summary>
-        /// 获取代理客户端
+        /// 获取代理客户端，返回时，会对是否可用进行验证
+        /// 不能频繁调用，因为内容会验证代理的可用性
         /// </summary>
         /// <param name="sendingContext"></param>
         /// <param name="tryCount"></param>
@@ -180,13 +163,13 @@ namespace UZonMail.Core.Services.SendCore.Sender
             var proxyHandler = await _proxyManager.GetProxyHandler(sendingContext);
             if (proxyHandler == null)
             {
-                _logger.Warn($"未能为 {outbox} 匹配到代理, 1 秒后重试...");
+                _logger.Warn($"未能为 {outbox.Email} 匹配到代理, 1 秒后重试...");
                 // 1 秒后重试
                 await Task.Delay(1000);
                 return await GetProxyClient(sendingContext, tryCount - 1);
             }
 
-
+            // [TODO]: 此处无法完全保证代理可用，因为代理 api 在使用过程中会失效，若检测不及时，则会导致发件失败
             var proxyClient = await proxyHandler.GetProxyClientAsync(sendingContext.Provider, outbox.Email);
             if (proxyClient == null)
             {
@@ -201,6 +184,53 @@ namespace UZonMail.Core.Services.SendCore.Sender
         }
 
         /// <summary>
+        /// 连接 smtp client
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="outbox"></param>
+        /// <param name="sendingContext"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        private async Task<Result<SmtpClient>> ConnectSmtpClient(ThrottlingSmtpClient client, OutboxEmailAddress outbox, SendingContext sendingContext, string key, int tryCount = 3)
+        {
+            // 获取代理
+            client.ProxyClient = await GetProxyClient(sendingContext);
+
+            // 测试在发件过程中，代理不可用的情况
+            //return new Result<SmtpClient>() { Data = client };
+
+            // 对证书过期进行兼容处理
+            try
+            {
+                client.Connect(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.Auto);
+            }
+            catch (SocketException ex)
+            {
+                // 说明建立连接失败，有可能是代理问题
+                if (client.ProxyClient == null) throw;
+
+                // 重新获取代理尝试一下
+                _logger.Warn($"初始化 {outbox.Email} SmtpClient 时，无法建议 Socket 连接，更换代理尝试，剩余尝试次数: {tryCount}");
+                return await ConnectSmtpClient(client, outbox, sendingContext, key, tryCount - 1);
+            }
+            catch (SslHandshakeException ex)
+            {
+                _logger.Warn(ex);
+                // 证书过期
+                client.Connect(outbox.SmtpHost, outbox.SmtpPort, SecureSocketOptions.None);
+            }
+
+            // Note: only needed if the SMTP server requires authentication
+            // 进行鉴权
+            var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
+            if (!debugConfig.IsDemo)
+                if (!string.IsNullOrEmpty(outbox.AuthPassword)) client.Authenticate(outbox.AuthUserName, outbox.AuthPassword);
+
+            _smptClients.TryAdd(key, client);
+            return new Result<SmtpClient>() { Data = client };
+        }
+
+        /// <summary>
         /// 手动释放发件任务的 smtp client
         /// </summary>
         public void DisposeSmtpClients()
@@ -211,11 +241,11 @@ namespace UZonMail.Core.Services.SendCore.Sender
             _logger.Debug($"开始释放 SmtpClient");
 
             // 获取任务组
-            var taskGroupIds = keys.Select(x => x.Split(":")[0]).Distinct().Select(x=> long.Parse(x)).ToList();
-            foreach(var taskGroupId in taskGroupIds)
+            var taskGroupIds = keys.Select(x => x.Split(":")[0]).Distinct().Select(x => long.Parse(x)).ToList();
+            foreach (var taskGroupId in taskGroupIds)
             {
                 // 判断是否存在任务组
-                if(_groupTaskList.ContainsKey(taskGroupId))
+                if (_groupTaskList.ContainsKey(taskGroupId))
                 {
                     continue;
                 }

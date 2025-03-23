@@ -1,4 +1,5 @@
 ﻿
+using log4net;
 using Newtonsoft.Json.Linq;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
@@ -11,8 +12,19 @@ namespace UZonMail.Core.Services.IPQueryMethods
     /// 来源：https://github.com/ihmily/ip-info-api?tab=readme-ov-file
     /// </summary>
     /// <param name="httpClient"></param>
-    public abstract class BaseIPQuery(HttpClient httpClient) : IIPQuery
+    public abstract class BaseIPQuery : IIPQuery
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(BaseIPQuery));
+
+        private readonly HttpClient _httpClient;
+        private readonly long _timeout = 2000;
+
+        public BaseIPQuery(HttpClient httpClient)
+        {
+            this._httpClient = httpClient;
+            this._httpClient.Timeout = TimeSpan.FromMilliseconds(_timeout);
+        }
+
         public bool Enable { get; private set; } = true;
 
         /// <summary>
@@ -36,12 +48,14 @@ namespace UZonMail.Core.Services.IPQueryMethods
                 return Result<string?>.Fail("IP 查询接口不可用");
 
             var response = await GetHttpRequestWithoutProxy()
+                .WithTimeout(_timeout)
                 .WithProxy(proxyUrl)
                 .SendAsync();
 
             // 未查找成功
             if (!response.IsSuccessStatusCode)
             {
+                _logger.Debug($"动态IP检测失败,{response.StatusCode}: {response.ReasonPhrase}");
                 return Result<string?>.Success(string.Empty);
             }
 
@@ -60,20 +74,25 @@ namespace UZonMail.Core.Services.IPQueryMethods
         protected abstract string? IPParser(string content);
 
         private DateTime _lastValidateTime = DateTime.MinValue;
+        private bool _validating = false;
         /// <summary>
         /// 不使用代理验证可访问性
         /// </summary>
         /// <returns></returns>
         private async Task<bool> Validate()
         {
+            if (Interlocked.Exchange(ref _validating, true)) return false;
+
+            _validating = true;
             _lastValidateTime = DateTime.Now;
 
             var response = await GetHttpRequestWithoutProxy()
-                .WithHttpClient(httpClient)
+                .WithHttpClient(_httpClient)
                 .SendAsync();
             if (!response.IsSuccessStatusCode)
             {
                 Enable = false;
+                _validating = false;
                 return false;
             }
 
@@ -81,10 +100,12 @@ namespace UZonMail.Core.Services.IPQueryMethods
             if (string.IsNullOrEmpty(content))
             {
                 Enable = false;
+                _validating = false;
                 return false;
             }
 
             Enable = true;
+            _validating = false;
             return true;
         }
     }

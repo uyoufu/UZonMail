@@ -9,7 +9,7 @@ namespace UZonMail.Core.Services.IPQueryMethods
         /// <summary>
         /// 最优先
         /// </summary>
-        public override int Order { get; } = -2;
+        public override int Order { get; } = 0;
 
         protected override FluentHttpRequest GetHttpRequestWithoutProxy()
         {

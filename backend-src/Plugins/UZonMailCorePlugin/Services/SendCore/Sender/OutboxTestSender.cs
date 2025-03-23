@@ -49,7 +49,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             message.Body = bodyBuilder.ToMessageBody();
             try
             {
-                var client = new SmtpClient();
+                using var client = new SmtpClient();
                 // 获取代理
                 if (outbox.ProxyId > 0)
                 {
@@ -59,7 +59,11 @@ namespace UZonMail.Core.Services.SendCore.Sender
                         .Where(x => x.Id == outbox.ProxyId)
                         .FirstOrDefaultAsync();
                     if (proxy != null)
-                        client.ProxyClient = proxy.ToProxyInfo().GetProxyClient(_logger);
+                    {
+                        // 从代理管理器中获取代理
+
+                        client.ProxyClient = proxy.ToProxyInfo()?.GetProxyClient(_logger);
+                    }
                 }
                 client.Connect(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL);
                 // 鉴权
@@ -69,6 +73,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
                     client.Authenticate(string.IsNullOrEmpty(outbox.UserName) ? outbox.Email : outbox.UserName, password);
                 }
                 string sendResult = "fake sending by debug";
+
+                // 测试发件，不需要真实发送，只需要验证授权即可
                 //if (!debugConfig.IsDemo)
                 //    sendResult = await client.SendAsync(message);
 

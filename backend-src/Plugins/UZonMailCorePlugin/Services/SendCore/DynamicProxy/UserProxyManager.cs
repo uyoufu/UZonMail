@@ -17,11 +17,6 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         private static readonly ILog _logger = LogManager.GetLogger(typeof(UserProxyManager));
         private readonly ConcurrentDictionary<long, IProxyHandler> _proxyHandlers = [];
 
-        public async Task Init(IServiceProvider serviceProvider)
-        {
-            await UpdateProxies(serviceProvider);
-        }
-
         public async Task UpdateProxies(IServiceProvider serviceProvider)
         {
             var sqlContext = serviceProvider.GetRequiredService<SqlContext>();
@@ -29,8 +24,6 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             // 获取用户所有的代理
             var proxyGetter = new UserProxyGetter(sqlContext, userId);
             var proxies = await proxyGetter.GetUserProxies();
-
-
 
             // 移除已经不存在的代理
             _proxyHandlers.Keys.Except(proxies.Select(x => x.Id))
@@ -68,10 +61,10 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         {
             foreach (var factory in proxyFactories)
             {
-                var handler = factory.CreateProxy(serviceProvider, proxy);
+                var handler = await factory.CreateProxy(serviceProvider, proxy);
                 if (handler != null)
                 {
-                    return await handler;
+                    return handler;
                 }
             }
 

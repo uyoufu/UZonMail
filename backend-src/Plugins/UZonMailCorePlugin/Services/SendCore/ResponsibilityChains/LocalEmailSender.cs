@@ -1,4 +1,5 @@
 ﻿using log4net;
+using MailKit;
 using MailKit.Net.Smtp;
 using MimeKit;
 using UZonMail.Core.Services.Config;
@@ -95,9 +96,22 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
             // 对 message 进行额外的设置
             var emailDecoratorParams = await sendItem.GetEmailDecoratorParams(context);
-            var mimeMessageDecorator = context.Provider.GetService<MimeMessageDecorateService>();
+            var mimeMessageDecorator = context.Provider.GetRequiredService<MimeMessageDecorateService>();
             message = await mimeMessageDecorator.Decorate(emailDecoratorParams, message);
 
+            await SendEmailAndTry(context, message);
+        }
+
+        /// <summary>
+        /// 发送邮件并重试
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="message"></param>
+        /// <param name="tryCount"></param>
+        /// <returns></returns>
+        private static async Task SendEmailAndTry(SendingContext context, MimeMessage message, int tryCount = 3)
+        {
+            SendItemMeta sendItem = context.EmailItem!;
             try
             {
                 var smtpClientFactory = context.Provider.GetRequiredService<SmtpClientFactory>();
@@ -115,9 +129,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 var client = clientResult.Data;
 
                 var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
-
                 string sendResult = "测试状态,虚拟发件";
-                if (!debugConfig.IsDemo)
+                if (debugConfig.IsDemo)
                 {
                     sendResult = await client.SendAsync(message);
                 }
@@ -128,8 +141,10 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 sendItem.SetStatus(SendItemMetaStatus.Success, sendResult);
                 // 标记上下文状态
                 context.Status |= ContextStatus.Success;
-                return;
             }
+            // 错误情况分类
+            // 1. 代理刚好失效，导致发生 ServiceNotConnectedException ，从而导致失败
+            // 2. 发件箱有问题
             catch (SmtpCommandException smtpCommandException)
             {
                 // 收件箱不可达
@@ -143,6 +158,22 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 // 发件箱有问题
                 sendItem.Outbox?.MarkShouldDispose(smtpCommandException.Message);
                 return;
+            }
+            catch (ServiceNotConnectedException ex)
+            {
+                // 已经重试多次，说明发件箱有问题
+                if (tryCount < 0)
+                {
+                    _logger.Error(ex);
+                    // 发件箱问题，返回失败
+                    sendItem.Outbox?.MarkShouldDispose(ex.Message);
+                    return;
+                }
+
+                // 代理无法连接到服务器
+                // 在发件前已经验证过邮件可用，此处应当作是代理出了问题
+                // 切换代理重试
+                await SendEmailAndTry(context, message, tryCount - 1);
             }
             catch (Exception error)
             {

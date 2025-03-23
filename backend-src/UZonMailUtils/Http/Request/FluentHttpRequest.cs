@@ -65,6 +65,19 @@ namespace UZonMail.Utils.Http.Request
             return this;
         }
 
+        private TimeSpan _timeout = TimeSpan.FromMicroseconds(5);
+        /// <summary>
+        /// 指定超时
+        /// 每个 HttpClient 只能设置一次超时
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        public FluentHttpRequest WithTimeout(long milliseconds)
+        {
+            _timeout = TimeSpan.FromMilliseconds(milliseconds);
+            return this;
+        }
+
         private string _url;
         /// <summary>
         /// 添加请求 URL
@@ -142,7 +155,10 @@ namespace UZonMail.Utils.Http.Request
         {
             BuildUri();
 
-            _httpClient ??= new HttpClient(_httpClientHandler);
+            _httpClient ??= new HttpClient(_httpClientHandler)
+                {
+                    Timeout = _timeout
+                };
 
             try
             {

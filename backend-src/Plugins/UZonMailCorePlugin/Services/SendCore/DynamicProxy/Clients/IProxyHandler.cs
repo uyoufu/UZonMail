@@ -39,6 +39,6 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// 更新代理操作器
         /// </summary>
         /// <param name="proxy"></param>
-        void Update(Proxy proxy);
+        void Update(Proxy proxy, int expireSeconds = int.MaxValue);
     }
 }

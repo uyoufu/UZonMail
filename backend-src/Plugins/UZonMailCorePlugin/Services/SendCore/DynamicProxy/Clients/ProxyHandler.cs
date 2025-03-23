@@ -70,12 +70,27 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// </summary>
         public long Id => ProxyInfo.Id;
 
+        /// <summary>
+        /// 是否是动态代理: 当过期时间小于 30 分钟时，判断为动态代理
+        /// 动态代理当检测不到时，就会自动停止检测
+        /// </summary>
+        public bool IsDynamic => _expireDate - DateTime.Now < TimeSpan.FromMinutes(30);
+
+        /// <summary>
+        /// 过期时间
+        /// </summary>
+        private DateTime _expireDate = DateTime.MaxValue;
+
         protected virtual async Task<bool> HealthCheck()
         {
             var validIpQueries = _iPQueries.Where(x => x.Enable).ToList();
             if (validIpQueries.Count == 0)
             {
-                throw new Exception("没有可用的有效代理检测接口, 代理暂时无法使用，请联系开发者解决");
+                _logger.Error("没有可用的有效代理检测接口, 代理将变得不稳定,请联系开发者解决");
+                // 使用过期日期进行判断
+                if (!_isHealthy) return false;
+                _isHealthy = _expireDate < DateTime.Now;
+                return false;
             }
 
             // 开始检测
@@ -85,25 +100,37 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 if (ipResult.Ok)
                 {
                     _isHealthy = Host.Equals(ipResult.Data);
-                    _logger.Debug($"代理 {Id} 检测通过");
-                    return true;
+                    _logger.Debug($"代理 {Id} 检测结果: {_isHealthy}");
+                    return _isHealthy;
                 }
             }
 
             _logger.Debug($"代理 {Id} 检测失败");
             return false;
         }
+
+        private int _healthCheckCount = 2;
         private Timer? _timer;
         /// <summary>
         /// 自动检测
         /// 每隔 1 分钟自动检测一次
+        /// 若是动态代理，最多检测 2 次
         /// </summary>
         protected virtual void AutoHealthCheck()
         {
             if (_timer != null) return;
             _timer = new Timer(async _ =>
             {
-                await HealthCheck();
+                // 动态代理，检测不到就停止检测
+                if (IsDynamic && !_isHealthy && _healthCheckCount < 0)
+                {
+                    _timer?.Dispose();
+                    _timer = null;
+                    return;
+                }
+
+                _isHealthy = await HealthCheck();
+                _healthCheckCount--;
             }, null, 0, 1000 * 30 * 1);
         }
         #endregion
@@ -192,10 +219,16 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
             return _proxyClient;
         }
 
-        public virtual void Update(Proxy proxy)
+        /// <summary>
+        /// 更新代理，并更新过期时间
+        /// </summary>
+        /// <param name="proxy"></param>
+        /// <param name="expireSeconds">单位秒</param>
+        public virtual void Update(Proxy proxy, int expireSeconds = int.MaxValue)
         {
             // 更新代理数据
             ProxyInfo = proxy;
+            _expireDate = DateTime.Now.AddSeconds(expireSeconds);
 
             // 将字符串转换为代理
             Uri uri = new(proxy.Url);
@@ -213,8 +246,8 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 Password = userInfos[1];
             }
 
-            // 强制检测
-            HealthCheck().Wait();
+            // 强制检测，可能拖慢启动速度
+            // HealthCheck().Wait();
 
             AutoHealthCheck();
         }

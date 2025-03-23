@@ -45,7 +45,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             {
                 // 新增并添加
                 manager = new UserProxyManager(userId);
-                await manager.Init(sendingContext.Provider);
+                await manager.UpdateProxies(sendingContext.Provider);
                 _userProxyManagers.TryAdd(userId, manager);
             }
 

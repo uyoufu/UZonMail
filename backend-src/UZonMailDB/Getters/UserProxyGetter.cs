@@ -17,7 +17,8 @@ namespace UZonMail.DB.Getters
             var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(db, userId);
             // 按用户缓存代理
             var results = await db.Proxies.AsNoTracking()
-                .Where(x=>x.IsActive) // 必须是激活状态
+                .Where(x => !x.IsDeleted)
+                .Where(x => x.IsActive) // 必须是激活状态
                 .Where(x => x.UserId == userId || (x.IsShared && x.OrganizationId == userInfo.OrganizationId))
                 .ToListAsync();
             return results;
