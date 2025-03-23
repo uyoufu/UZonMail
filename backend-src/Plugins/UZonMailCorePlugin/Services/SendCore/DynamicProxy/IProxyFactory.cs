@@ -19,7 +19,8 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         /// 创建代理
         /// </summary>
         /// <param name="proxy"></param>
+        /// <param name="serviceProvider"></param>
         /// <returns></returns>
-        public IProxyHandler? CreateProxy(Proxy proxy);
+        public Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy);
     }
 }

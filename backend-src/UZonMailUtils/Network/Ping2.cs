@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using log4net;
 
 namespace UZonMail.Utils.Network
 {
@@ -13,6 +14,7 @@ namespace UZonMail.Utils.Network
     /// <param name="pingCount"></param>
     public class Ping2(string host, int pingCount)
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(Ping2));
         private List<PingReply> _pingReplies = [];
 
         /// <summary>
@@ -26,8 +28,7 @@ namespace UZonMail.Utils.Network
                 _pingReplies.Clear();
                 using Ping ping = new();
                 try
-                {
-                    Console.WriteLine($"正在 Ping {host}，次数：{pingCount}");
+                {                    
                     for (int i = 0; i < pingCount; i++)
                     {
                         PingReply reply = ping.Send(host, 1000); // 超时时间为 1000 毫秒
@@ -36,11 +37,13 @@ namespace UZonMail.Utils.Network
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Ping 过程中发生错误: {ex.Message}");
+                    _logger.Warn($"Ping 过程中发生错误: {ex.Message}");
                 }
             });
-
-            return _pingReplies.Where(x => x.Status == IPStatus.Success).Count() > Math.Min(pingCount * 2 / 3, pingCount - 1);
+            
+            var ok = _pingReplies.Where(x => x.Status == IPStatus.Success).Count() > Math.Min(pingCount * 2 / 3, pingCount - 1);
+            _logger.Debug($"正在 Ping {host}，次数：{pingCount}, 状态: {ok}");
+            return ok;
         }
 
         /// <summary>

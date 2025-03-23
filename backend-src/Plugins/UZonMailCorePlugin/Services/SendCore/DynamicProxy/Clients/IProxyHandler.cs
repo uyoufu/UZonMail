@@ -1,12 +1,13 @@
 ﻿using MailKit.Net.Proxy;
 using UZonMail.DB.SQL.Core.Settings;
+using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 {
     /// <summary>
     /// 代理解析器
     /// </summary>
-    public interface IProxyHandler
+    public interface IProxyHandler : ITransientService
     {
         /// <summary>
         /// 代理操作器的 Id
@@ -32,7 +33,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// </summary>
         /// <param name="matchStr">每个客户端都有一个匹配规则，只有 matchStr 匹配到后，才会返回</param>
         /// <returns></returns>
-        Task<IProxyClient?> GetProxyClientAsync(string matchStr);
+        Task<IProxyClient?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr);
 
         /// <summary>
         /// 更新代理操作器

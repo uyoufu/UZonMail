@@ -32,6 +32,12 @@ namespace UZonMail.Core.Services.Emails
             return result;
         }
 
+        /// <summary>
+        /// 验证发件箱是否有效
+        /// </summary>
+        /// <param name="outbox"></param>
+        /// <param name="smtpPasswordSecretKeys"></param>
+        /// <returns></returns>
         public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
         {
             // 发送测试邮件

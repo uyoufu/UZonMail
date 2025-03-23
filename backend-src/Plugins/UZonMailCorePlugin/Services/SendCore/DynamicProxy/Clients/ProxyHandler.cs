@@ -3,20 +3,29 @@ using MailKit.Net.Proxy;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text.RegularExpressions;
+using UZonMail.Core.Services.IPQueryMethods;
 using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Network;
 
 namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 {
     /// <summary>
     /// 处理单个代理
+    /// 使用 DI 进行使用
     /// </summary>
     /// <param name="url"></param>
     public class ProxyHandler : IProxyHandler
     {
+        protected ProxyHandler() { }
+
+        private readonly IEnumerable<IIPQuery> _iPQueries;
+        public ProxyHandler(IEnumerable<IIPQuery> iPQueries)
+        {
+            _iPQueries = iPQueries;
+        }
+
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyHandler));
 
-        protected Proxy ProxyInfo { get; private set; }
+        public Proxy ProxyInfo { get; private set; }
 
         #region 协议相关
         /// <summary>
@@ -46,43 +55,56 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         #endregion
 
         #region 是否可用
-        private bool _pingOk = false;
+        private bool _isHealthy = false;
         /// <summary>
         /// 是否 ping 通
         /// </summary>
         /// <returns></returns>
         public virtual bool IsEnable()
         {
-            return ProxyInfo.IsActive && _pingOk;
+            return ProxyInfo.IsActive && _isHealthy;
         }
 
-        public long Id { get; private set; }
+        /// <summary>
+        /// Handler 的 Id
+        /// </summary>
+        public long Id => ProxyInfo.Id;
 
-        public async Task<bool> Ping(int pingCount = 3)
+        protected virtual async Task<bool> HealthCheck()
         {
-            Ping2 ping = new(Host, pingCount);
-            _pingOk = await ping.Ping();
-            return _pingOk;
+            var validIpQueries = _iPQueries.Where(x => x.Enable).ToList();
+            if (validIpQueries.Count == 0)
+            {
+                throw new Exception("没有可用的有效代理检测接口, 代理暂时无法使用，请联系开发者解决");
+            }
+
+            // 开始检测
+            foreach (var ipQuery in validIpQueries)
+            {
+                var ipResult = await ipQuery.GetIP(ProxyInfo.Url);
+                if (ipResult.Ok)
+                {
+                    _isHealthy = Host.Equals(ipResult.Data);
+                    _logger.Debug($"代理 {Id} 检测通过");
+                    return true;
+                }
+            }
+
+            _logger.Debug($"代理 {Id} 检测失败");
+            return false;
         }
         private Timer? _timer;
         /// <summary>
         /// 自动检测
         /// 每隔 1 分钟自动检测一次
         /// </summary>
-        protected void AutoPing()
+        protected virtual void AutoHealthCheck()
         {
             if (_timer != null) return;
             _timer = new Timer(async _ =>
             {
-                await Ping();
-            }, null, 0, 1000 * 60 * 1);
-        }
-        #endregion
-
-        #region 构造函数
-        public ProxyHandler(Proxy proxy)
-        {
-
+                await HealthCheck();
+            }, null, 0, 1000 * 30 * 1);
         }
         #endregion
 
@@ -142,7 +164,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public virtual async Task<IProxyClient?> GetProxyClientAsync(string matchStr)
+        public virtual async Task<IProxyClient?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr)
         {
             // 登记使用
             RecordUsage(matchStr);
@@ -173,7 +195,6 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         public virtual void Update(Proxy proxy)
         {
             // 更新代理数据
-            Id = proxy.Id;
             ProxyInfo = proxy;
 
             // 将字符串转换为代理
@@ -192,9 +213,10 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 Password = userInfos[1];
             }
 
-            // 先 ping 一次
-            Ping(1);
-            AutoPing();
+            // 强制检测
+            HealthCheck().Wait();
+
+            AutoHealthCheck();
         }
 
         #region 静态方法
