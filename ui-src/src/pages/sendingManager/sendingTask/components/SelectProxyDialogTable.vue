@@ -84,7 +84,6 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading } = useQTable({
   getRowsNumberCount,
-
   onRequest
 })
 </script>

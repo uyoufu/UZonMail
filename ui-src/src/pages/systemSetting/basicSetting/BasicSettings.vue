@@ -1,6 +1,7 @@
 <template>
   <q-list class="basic-settings-container">
     <SendSetting />
+    <ProxySetting />
     <UnsubscribeSetting v-if="isEnterpriseUser" />
   </q-list>
 </template>
@@ -8,6 +9,7 @@
 <script lang="ts" setup>
 import SendSetting from './expansionItems/SendSetting.vue'
 import UnsubscribeSetting from './expansionItems/UnsubscribeSetting.vue'
+import ProxySetting from './expansionItems/proxySettings/ProxySetting.vue'
 
 import { usePermission } from 'src/compositions/permission'
 const { hasEnterpriseAccess } = usePermission()

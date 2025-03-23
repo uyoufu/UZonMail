@@ -1,15 +1,21 @@
 <template>
   <q-dialog ref='dialogRef' @hide="onDialogHide" :persistent='true'>
     <q-card class='column justify-start q-pa-sm'>
-      <div class="text-subtitle1 q-mb-md text-primary">{{ title }}</div>
+      <div class="text-subtitle1 q-mb-md text-primary row items-center">
+        <div>
+          {{ title }}
+        </div>
+        <q-circular-progress v-if="existSendingGroupId" class="q-ml-sm" rounded indeterminate size="16px"
+          :thickness="0.3" color="primary" track-color="secondary" center-color="white">
+        </q-circular-progress>
+      </div>
 
-      <LinearProgress v-if="existSendingGroupId" size="40px" :value="progressValue" :width="400" />
+      <LinearProgress v-if="existSendingGroupId" size="32px" :value="progressValue" :width="400" />
 
       <div v-else class="width-400 column items-center q-mb-md">
         <q-circular-progress rounded indeterminate size="40px" :thickness="0.3" color="primary" track-color="secondary"
           center-color="white" class="q-mb-md">
         </q-circular-progress>
-
         <div>正在处理发件数据, 请稍候...</div>
       </div>
 
@@ -91,7 +97,8 @@ const existSendingGroupId = computed(() => {
   return sendingGroupIdRef.value
 })
 
-const progressValue = ref(0)
+// 显示一个初始值
+const progressValue = ref(0.01)
 
 // 发送进度
 import { subscribeOne } from 'src/signalR/signalR'
