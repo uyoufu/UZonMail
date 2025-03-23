@@ -9,6 +9,15 @@
 // 参考：https://github.com/quasarframework/quasar/discussions/13155
 import logger from 'loglevel'
 
+const hoverTipValue = defineModel('hoverTipValue', {
+  type: Boolean,
+  default: false
+})
+watch(hoverTipValue, (v) => {
+  logger.debug('[hoverableTip] hoverTipValue', v)
+  showing.value = v
+})
+
 import { Platform } from 'quasar'
 const hideDelay = ref(Platform.is.desktop ? 0 : 1500)
 const showing = ref(false)
@@ -22,7 +31,11 @@ const isHovered = ref(false)
 import { debounce } from 'quasar'
 const onUpdate = debounce((v) => {
   logger.debug('[hoverableTip] onUpdate', v, isHovered.value)
-  if (!isHovered.value) showing.value = v
+  if (!isHovered.value) {
+    showing.value = v
+    // 同步 modelValue 的值
+    hoverTipValue.value = v
+  }
 }, 150)
 function onHover () {
   logger.debug('[hoverableTip] onHover')

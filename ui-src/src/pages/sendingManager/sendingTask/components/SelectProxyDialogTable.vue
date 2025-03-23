@@ -14,6 +14,12 @@
       <QTableIndex :props="props" />
     </template>
 
+    <template v-slot:body-cell-url="props">
+      <q-td :props="props">
+        <EllipsisContent :content="props.value" :max-length="40" />
+      </q-td>
+    </template>
+
     <template v-slot:body-cell-userId="props">
       <q-td :props="props">
         {{ props.value }}
@@ -27,6 +33,8 @@ import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
+
+import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [

@@ -39,7 +39,7 @@ export interface IPopupDialogField {
   required?: boolean, // 是否必须
   validate?: (value: any, parsedValue: any) => Promise<IFunctionResult>, // 验证函数
   parser?: (value: any) => any, // 解析函数,在返回时，对数据进行转换
-  tooltip?: string, // 提示
+  tooltip?: Array<any> | ((params?: object) => Promise<string[]>) | string, // 提示
   disable?: boolean, // 是否禁用，一般用于仅显示数据,
 }
 

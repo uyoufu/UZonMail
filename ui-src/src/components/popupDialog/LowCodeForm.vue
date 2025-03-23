@@ -15,7 +15,6 @@
             <template v-if="field.icon" v-slot:prepend>
               <q-icon :name="field.icon" />
             </template>
-
             <AsyncTooltip :tooltip="field.tooltip" />
           </q-input>
 

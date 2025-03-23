@@ -38,8 +38,8 @@
       </div>
 
       <div class="row justify-start items-center q-mb-sm">
-        <q-checkbox dense toggle-indeterminate v-model="outboxSettingRef.enableEmailTracker" label="启用邮件跟踪"
-          color="secondary" class="q-ml-sm" keep-color>
+        <q-checkbox dense v-model="outboxSettingRef.enableEmailTracker" label="启用邮件跟踪" color="secondary" class="q-ml-sm"
+          keep-color>
           <AsyncTooltip tooltip="开启后，将跟踪邮件的查阅状态"></AsyncTooltip>
         </q-checkbox>
       </div>
@@ -50,7 +50,7 @@
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
-import type { IOrganizationSetting} from 'src/api/organizationSetting';
+import type { IOrganizationSetting } from 'src/api/organizationSetting';
 import { getCurrentOrganizationSetting, updateOrganizationSetting } from 'src/api/organizationSetting'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
@@ -93,7 +93,7 @@ const outboxSettingRef: Ref<IOrganizationSetting> = ref({
   maxSendingBatchSize: 20,
   minInboxCooldownHours: 0,
   replyToEmails: '',
-  enableEmailTracker: null
+  enableEmailTracker: false
 })
 // 获取设置
 let updateSettingSignal = true

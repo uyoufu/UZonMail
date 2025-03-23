@@ -1,4 +1,4 @@
-import type { IOutbox } from "src/api/emailBox"
+import { OutboxStatus, type IOutbox } from "src/api/emailBox"
 import { subscribeOne } from "src/signalR/signalR"
 import { UzonMailClientMethods } from "src/signalR/types"
 
@@ -19,7 +19,7 @@ export function useSignalR (updateExistOne: updateExistOneType) {
   function onOutboxStatusChanged (outbox: IOutbox) {
     logger.debug('[outboxSignalR] 发件箱状态变更', outbox)
 
-    if (outbox.status !== 1) {
+    if (outbox.status !== OutboxStatus.Valid) {
       notifyError(t('outboxManager.validateFailed', {
         email: outbox.email,
         reason: outbox.validFailReason

@@ -15,6 +15,18 @@
       <ContextMenu :items="proxyContextMenuItems" :value="props.row" />
     </template>
 
+    <template v-slot:body-cell-name="props">
+      <q-td :props="props">
+        <ClickableText :text="props.value" tooltip="单击编辑" @click="onModifyProxy(props.row)" />
+      </q-td>
+    </template>
+
+    <template v-slot:body-cell-url="props">
+      <q-td :props="props">
+        <EllipsisContent :content="props.value" :maxLength="40" direction="end" />
+      </q-td>
+    </template>
+
     <template v-slot:body-cell-isShared="props">
       <q-td :props="props">
         <q-toggle :disable="disableShareToggle(props.row)" color="secondary" dense v-model="props.row.isShared"
@@ -33,6 +45,8 @@ import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
+import ClickableText from 'src/components/clickableText/ClickableText.vue'
+import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
 
 // #region 表格定义
 const { indexColumn, QTableIndex } = useQTableIndex()
@@ -114,7 +128,7 @@ const { onCreateProxy, onToggleShareProxy } = useHeaderFunctions(addNewRow)
 
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import { useContextMenu } from './contextMenu'
-const { proxyContextMenuItems } = useContextMenu(deleteRowById)
+const { proxyContextMenuItems, onModifyProxy } = useContextMenu(deleteRowById)
 // #endregion
 
 // #region toggle 控制
