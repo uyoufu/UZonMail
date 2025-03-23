@@ -37,6 +37,7 @@ export function getCommonProxyFields (): IPopupDialogField[] {
       type: PopupDialogFieldType.text,
       label: '代理地址',
       placeholder: '格式：schema://username:password@host',
+      tooltip: ['代理格式:', 'schema://username:password@host', '支持的协议: http, https, socks5, socks4'],
       value: '',
       required: true,
       // eslint-disable-next-line @typescript-eslint/require-await

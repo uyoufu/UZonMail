@@ -10,7 +10,7 @@ tagline: ''
 
 actions:
   - text: 开始使用
-    link: /get-started
+    link: /guide/
     type: primary
 
   - text: 软件下载

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import logger from 'loglevel'
 
-import type { IProxy} from 'src/api/proxy';
+import type { IProxy } from 'src/api/proxy';
 import { deleteProxy, updateProxy, validateProxyName } from 'src/api/proxy'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { getCommonProxyFields } from './headerFuncs'
-import type { IPopupDialogParams} from 'src/components/popupDialog/types';
+import type { IPopupDialogParams } from 'src/components/popupDialog/types';
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 
@@ -20,7 +20,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
       tooltip: '编辑代理',
       icon: 'edit',
       vif: isOwner,
-      onClick: modifyProxy
+      onClick: onModifyProxy
     },
     {
       name: 'delete',
@@ -44,7 +44,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     return userInfo.userSqlId === proxyInfo.userId
   }
 
-  async function modifyProxy (proxyInfo: Record<string, any>) {
+  async function onModifyProxy (proxyInfo: Record<string, any>) {
     const proxyData = proxyInfo as IProxy
 
 
@@ -108,5 +108,5 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     await deleteProxy(proxyData.id)
     deleteRowById(proxyData.id)
   }
-  return { proxyContextMenuItems }
+  return { proxyContextMenuItems, onModifyProxy }
 }

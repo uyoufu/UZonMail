@@ -30,3 +30,25 @@ export function updateOrganizationSetting (organizationSetting: IOrganizationSet
     data: organizationSetting
   })
 }
+
+/**
+ * 获取更换IP后发送邮件的次数
+ * @returns
+ */
+export function getChangeIpAfterEmailCount () {
+  return httpClient.get<number>("/organization-setting/send-count-per-proxy-id"
+  )
+}
+
+/**
+ * 更新更换IP后发送邮件的次数
+ * @param count
+ * @returns
+ */
+export function updateChangeIpAfterEmailCount (count: number) {
+  return httpClient.put<boolean>("/organization-setting/send-count-per-proxy-id", {
+    params: {
+      count
+    }
+  })
+}

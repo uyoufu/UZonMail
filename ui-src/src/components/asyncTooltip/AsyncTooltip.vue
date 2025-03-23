@@ -1,14 +1,16 @@
 <template>
-  <q-tooltip ref="tooltipRef" :class="bgColor" :anchor="anchor" :self="self" transition-show="scale"
-    transition-hide="scale" @before-show="onTooltipBeforeShow" v-model="tooltipModel" max-width="40em">
-    <div v-for="tip in tooltips" :key="tip">{{ tip }}</div>
-  </q-tooltip>
+  <HoverableTip class="q-pa-sm" ref="tooltipRef" :class="bgColor" :anchor="anchor" :self="self" transition-show="scale"
+    transition-hide="scale" @before-show="onTooltipBeforeShow" v-model:hover-tip-value="tooltipModel" max-width="40em">
+    <div class="break-word" v-for="tip in tooltips" :key="tip">{{ tip }}</div>
+  </HoverableTip>
 </template>
 
 <script lang="ts" setup>
-import { QTooltip } from 'quasar'
+// import { QTooltip } from 'quasar'
 import type { PropType } from 'vue'
 import logger from 'loglevel'
+
+import HoverableTip from '../hoverableTip/HoverableTip.vue'
 
 /**
  * 说明
@@ -103,6 +105,7 @@ async function onTooltipBeforeShow () {
   // 过滤掉空值
   tooltips.value = tooltipResults.filter(item => item)
   if (!tooltips.value || tooltips.value.length === 0) {
+    logger.debug('[Tooltip] onTooltipBeforeShow hide tooltip', tooltips.value)
     // 隐藏不显示
     tooltipModel.value = false
   }
@@ -138,5 +141,14 @@ async function generateTooltips (tooltip: Array<any> | ((params?: object) => Pro
 
   return tooltipResults
 }
+
+
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.break-word {
+  word-break: break-all;
+  /* 强制在任意字符处换行 */
+  overflow-wrap: break-word;
+  /* 优先在单词边界换行 */
+}
+</style>
