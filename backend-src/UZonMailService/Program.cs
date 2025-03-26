@@ -48,6 +48,11 @@ var appOptions = new WebApplicationOptions
 var builder = WebApplication.CreateBuilder(appOptions);
 var services = builder.Services;
 
+
+// 查看当前环境
+Console.WriteLine($"Current Environment：{builder.Environment.EnvironmentName}");
+
+
 // 保证只有一个实例
 // services.UseSingleApp();
 

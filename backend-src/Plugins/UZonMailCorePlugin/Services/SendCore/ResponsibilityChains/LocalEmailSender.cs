@@ -131,7 +131,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             {      
                 var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
                 string sendResult = "测试状态,虚拟发件";
-                if (debugConfig.IsDemo)
+                if (!debugConfig.IsDemo)
                 {
                     sendResult = await client.SendAsync(message);
                 }

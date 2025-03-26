@@ -13,6 +13,8 @@ if ($platform -eq "linux") {
     $publishPlatform = "linux-x64"
 }
 
+# 指定环境变量
+$env:ASPNETCORE_ENVIRONMENT = "Production"
 
 # 遇到错误即退出
 $ErrorActionPreference = "Stop"
