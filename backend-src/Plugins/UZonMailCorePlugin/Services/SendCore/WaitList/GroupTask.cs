@@ -149,7 +149,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             await AddSharedOutboxToPool(sendingContext, sendingGroup.Outboxes, sendingGroup.OutboxGroups);
 
             // 保存所使用的代理
-            ProxyIds = sendingGroup.ProxyIds;
+            ProxyIds = sendingGroup.ProxyIds ?? [];
 
             // 更新代理缓存
             var proxyManager = sendingContext.Provider.GetRequiredService<ProxyManager>();
@@ -158,7 +158,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             // 获取所有的模板，模板是用户级别的
             _usableTemplates = new UsableTemplateList(UserId);
             // 添加组的通用模板
-            _usableTemplates.AddSendingGroupTemplates(_sendingGroup.Templates.ConvertAll(x => x.Id));
+            _usableTemplates.AddSendingGroupTemplates(_sendingGroup.Templates!.ConvertAll(x => x.Id));
 
             return true;
         }
@@ -414,7 +414,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             {
                 sendItemMeta = _sendingItemMetas.GetSendingMeta();
             }
-            if (sendItemMeta == null) return null;           
+            if (sendItemMeta == null) return null;
 
             // 如果已经包含 SendingItem, 说明初始化过了，直接返回
             if (sendItemMeta.Initialized)

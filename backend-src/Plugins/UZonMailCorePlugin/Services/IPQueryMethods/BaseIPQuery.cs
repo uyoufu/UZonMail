@@ -79,7 +79,7 @@ namespace UZonMail.Core.Services.IPQueryMethods
         /// 不使用代理验证可访问性
         /// </summary>
         /// <returns></returns>
-        private async Task<bool> Validate()
+        protected virtual async Task<bool> Validate()
         {
             if (Interlocked.Exchange(ref _validating, true)) return false;
 

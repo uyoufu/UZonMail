@@ -173,9 +173,10 @@ function Copy-Assembly {
     )
     
     # 获取 $mainService 目录中的 dll
-    $mainDlls = Get-ChildItem -Path "$mainService/*" | Where-Object { -not $_.PSIsContainer }
+    $mainDlls = Get-ChildItem -Path "$mainService/*" | Where-Object { -not $_.PSIsContainer } | Where-Object { $_.Extension -eq ".dll" }
     # 获取目标目录中的 dll
-    $srcDlls = Get-ChildItem -Path "$src/*" -Exclude $exclude | Where-Object { -not $_.PSIsContainer }
+    $srcDlls = Get-ChildItem -Path "$src/*" -Exclude $exclude | Where-Object { -not $_.PSIsContainer } | Where-Object { $_.Extension -eq ".dll" }
+
     # 比较两个目录中的 dll，去掉重复的 dll
     $dlls = Compare-Object -ReferenceObject $srcDlls -DifferenceObject $mainDlls -Property Name | Where-Object { $_.SideIndicator -eq '<=' }
     $targetDir = "$mainService/Assembly"

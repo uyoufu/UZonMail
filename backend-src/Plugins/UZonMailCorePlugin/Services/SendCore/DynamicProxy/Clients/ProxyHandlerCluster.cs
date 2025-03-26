@@ -27,7 +27,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// <returns></returns>
         protected abstract Task<List<ProxyHandler>> GetProxyHandlersAsync(IServiceProvider serviceProvider);
 
-        public override async Task<IProxyClient?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr)
+        public override async Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr)
         {
             // 移除不可用的代理客户端
             _handlers.RemoveAll(handler => !handler.IsEnable());
@@ -87,6 +87,13 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         public override bool IsEnable()
         {
             return true;
+        }
+
+        /// <summary>
+        /// 那张健康状态
+        /// </summary>
+        public override void MarkHealthless()
+        {            
         }
 
         /// <summary>

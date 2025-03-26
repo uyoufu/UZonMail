@@ -21,6 +21,11 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         bool IsEnable();
 
         /// <summary>
+        /// 标记为不健康，只有下一次 ping 通后才会恢复
+        /// </summary>
+        void MarkHealthless();
+
+        /// <summary>
         /// 是否匹配
         /// </summary>
         /// <param name="matchStr"></param>
@@ -33,7 +38,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// </summary>
         /// <param name="matchStr">每个客户端都有一个匹配规则，只有 matchStr 匹配到后，才会返回</param>
         /// <returns></returns>
-        Task<IProxyClient?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr);
+        Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr);
 
         /// <summary>
         /// 更新代理操作器

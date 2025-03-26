@@ -176,6 +176,9 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.Property<int>("OutboxesCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("ProxyIds")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("ScheduleDate")
                         .HasColumnType("datetime(6)");
 
@@ -1044,6 +1047,9 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasColumnType("bigint");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("ChangeIpAfterEmailCount")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime(6)");

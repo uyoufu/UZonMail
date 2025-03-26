@@ -3,6 +3,28 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.12.2
+
+> 更新日期: 2025-03-23
+
+### 新增功能
+
+1. 支持动态代理
+
+### bug 修复
+
+1. 修复和优化若干已知问题
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.12.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.2.0.zip)
+
+[uzonmail-service-win-x64-0.12.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.12.2.0.zip)
+
+[uzonmail-service-linux-x64-0.12.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.12.2.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.12.1
 
 > 更新日期: 2025-03-15

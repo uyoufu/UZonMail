@@ -4,6 +4,9 @@ using System.Net.Http;
 
 namespace UZonMail.Utils.Http
 {
+    /// <summary>
+    /// HttpClientHandler 扩展
+    /// </summary>
     public static class HttpClientHandlerExtension
     {
         /// <summary>

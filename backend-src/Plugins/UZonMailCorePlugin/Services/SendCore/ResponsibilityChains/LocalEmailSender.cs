@@ -5,6 +5,7 @@ using MimeKit;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.Core.Services.SendCore.Sender;
 using UZonMail.Core.Services.SendCore.WaitList;
 
@@ -112,22 +113,22 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
         private static async Task SendEmailAndTry(SendingContext context, MimeMessage message, int tryCount = 3)
         {
             SendItemMeta sendItem = context.EmailItem!;
-            try
+            var smtpClientFactory = context.Provider.GetRequiredService<SmtpClientFactory>();
+            var clientResult = await smtpClientFactory.GetSmtpClientAsync(context);
+            // 若返回 null,说明这个发件箱不能建立 smtp 连接，对它进行取消
+            if (!clientResult)
             {
-                var smtpClientFactory = context.Provider.GetRequiredService<SmtpClientFactory>();
-                var clientResult = await smtpClientFactory.GetSmtpClientAsync(context);
-                // 若返回 null,说明这个发件箱不能建立 smtp 连接，对它进行取消
-                if (!clientResult)
-                {
-                    _logger.Error($"发件箱 {sendItem.Outbox.Email} 错误。{clientResult.Message}");
-                    // 标记发件箱有问题
-                    context.OutboxAddress?.MarkShouldDispose(clientResult.Message);
-                    return;
-                }
+                _logger.Error($"发件箱 {sendItem.Outbox.Email} 错误。{clientResult.Message}");
+                // 标记发件箱有问题
+                context.OutboxAddress?.MarkShouldDispose(clientResult.Message);
+                return;
+            }
 
-                // throw new NullReferenceException("测试报错");
-                var client = clientResult.Data;
+            // throw new NullReferenceException("测试报错");
+            var client = clientResult.Data;
 
+            try
+            {      
                 var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
                 string sendResult = "测试状态,虚拟发件";
                 if (debugConfig.IsDemo)
@@ -172,7 +173,12 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
                 // 代理无法连接到服务器
                 // 在发件前已经验证过邮件可用，此处应当作是代理出了问题
-                // 切换代理重试
+                // 将当前代理标记为不可用
+                if(client.ProxyClient is ProxyClientAdapter clientAdapter)
+                {
+                    clientAdapter.MarkHealthless();
+                }
+
                 await SendEmailAndTry(context, message, tryCount - 1);
             }
             catch (Exception error)

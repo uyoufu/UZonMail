@@ -66,6 +66,14 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         }
 
         /// <summary>
+        /// 标记为不健康，只有下一次 ping 通后才会恢复
+        /// </summary>
+        public virtual void MarkHealthless()
+        {
+            _isHealthy = false;
+        }
+
+        /// <summary>
         /// Handler 的 Id
         /// </summary>
         public long Id => ProxyInfo.Id;
@@ -184,20 +192,21 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
             return true;
         }
 
-        private ProxyClient _proxyClient;
+        private ProxyClientAdapter _proxyClientAdapter;
 
         /// <summary>
         /// 生成代理客户端
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public virtual async Task<IProxyClient?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr)
+        public virtual async Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr)
         {
             // 登记使用
             RecordUsage(matchStr);
 
-            if (_proxyClient != null) return _proxyClient;
+            if (_proxyClientAdapter != null) return _proxyClientAdapter;
 
+            IProxyClient _proxyClient;
             NetworkCredential networkCredential = new(Username, Password);
             switch (Schema.ToLower())
             {
@@ -205,18 +214,23 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                     _proxyClient = new Socks5Client(Host, Port, networkCredential);
                     break;
                 case "http":
-                    return new HttpProxyClient(Host, Port, networkCredential);
+                    _proxyClient = new HttpProxyClient(Host, Port, networkCredential);
+                    break;
                 case "https":
-                    return new HttpsProxyClient(Host, Port, networkCredential);
+                    _proxyClient = new HttpsProxyClient(Host, Port, networkCredential);
+                    break;
                 case "socks4":
-                    return new Socks4Client(Host, Port, networkCredential);
+                    _proxyClient = new Socks4Client(Host, Port, networkCredential);
+                    break;
                 case "socks4a":
-                    return new Socks4aClient(Host, Port, networkCredential);
+                    _proxyClient = new Socks4aClient(Host, Port, networkCredential);
+                    break;
                 default:
                     _logger.Error($"不支持的代理协议: {Schema}");
-                    break;
+                    return null;
             }
-            return _proxyClient;
+            _proxyClientAdapter = new ProxyClientAdapter(this, _proxyClient);
+            return _proxyClientAdapter;
         }
 
         /// <summary>

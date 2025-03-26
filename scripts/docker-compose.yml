@@ -46,7 +46,6 @@ services:
       - ./data/data:/app/data # 数据存储
       - ./data/app.config.json:/app/wwwroot/app.config.json # 前端文件
     networks:
-      - nginx_network
       - uzonmail_network
     command: [ "dotnet", "UZonMailService.dll" ]
     depends_on:
@@ -54,6 +53,4 @@ services:
       - uzon-redis
 
 networks:
-  nginx_network:
-    external: true
   uzonmail_network:
