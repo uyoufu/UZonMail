@@ -152,13 +152,21 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// <returns></returns>
         private async Task<IProxyClient?> GetProxyClient(SendingContext sendingContext, int tryCount = 3)
         {
-            var outbox = sendingContext.EmailItem!.Outbox;
+            var emailItem = sendingContext.EmailItem!;
+            var outbox = emailItem.Outbox;
+            if (emailItem.AvailableProxyIds.Count == 0)
+            {
+                _logger.Debug($"邮箱 {outbox.Email} 未配置代理");
+                return null;
+            }
+           
             if (tryCount < 0)
             {
                 _logger.Warn($"邮箱 {outbox.Email} 获取代理失败，尝试次数已达上限");
                 return null;
             }
 
+            // 有的 smtpClient 可能不需要代理, 此处要进行判断
             // 获取代理
             var proxyHandler = await _proxyManager.GetProxyHandler(sendingContext);
             if (proxyHandler == null)
