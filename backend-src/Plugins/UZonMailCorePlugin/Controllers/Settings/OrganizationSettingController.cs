@@ -37,7 +37,7 @@ namespace UZonMail.Core.Controllers.Settings
                 {
                     OrganizationId = organizationId
                 };
-                db.Add(orgSetting);
+                db.OrganizationSettings.Add(orgSetting);
                 await db.SaveChangesAsync();
             }
 

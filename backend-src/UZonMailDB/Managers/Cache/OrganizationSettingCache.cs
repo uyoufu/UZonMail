@@ -36,7 +36,7 @@ namespace UZonMail.DB.Managers.Cache
             {
                 // 添加默认值
                 Setting = new OrganizationSetting();
-                db.Add(Setting);
+                db.OrganizationSettings.Add(Setting);
                 await db.SaveChangesAsync();
             }
         }

@@ -25,7 +25,7 @@ namespace UZonMail.Core.Controllers.Settings
                     Key = SystemSetting.BaseApiUrl,
                     StringValue = baseApiUrl
                 };
-                db.Add(setting);
+                db.SystemSettings.Add(setting);
             }
             else
             {

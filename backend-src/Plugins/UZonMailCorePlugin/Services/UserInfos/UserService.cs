@@ -63,7 +63,7 @@ namespace UZonMail.Core.Services.UserInfos
                     Type = DepartmentType.Organization,
                     FullPath = $"{parentOrganization.FullPath}/{orgName}"
                 };
-                ctx.Add(organization);
+                ctx.Departments.Add(organization);
                 await ctx.SaveChangesAsync();
             }
 
@@ -81,7 +81,7 @@ namespace UZonMail.Core.Services.UserInfos
                     Type = DepartmentType.Department,
                     FullPath = $"{organization.FullPath}/{orgName}"
                 };
-                ctx.Add(department);
+                ctx.Departments.Add(department);
                 await ctx.SaveChangesAsync();
             }
 
@@ -118,7 +118,7 @@ namespace UZonMail.Core.Services.UserInfos
                 {
                     UserId = userId,
                 };
-                ctx.Add(userRole);
+                ctx.UserRole.Add(userRole);
             }
 
             if (!userRole.Roles.Any(x => x.Equals(orgRole)))
@@ -169,7 +169,7 @@ namespace UZonMail.Core.Services.UserInfos
                      Type = UserType.Independent,
                      CreateBy = tokenService.GetUserSqlId(),
                  };
-                 ctx.Add(user);
+                 ctx.Users.Add(user);
                  await ctx.SaveChangesAsync();
 
                  // 为用户分配组织管理员

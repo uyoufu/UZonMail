@@ -103,7 +103,7 @@ namespace UZonMail.Core.Controllers.Emails
                 if (existOne != null)
                     throw new KnownException("已存在同名的模板");
 
-                db.Add(entity);
+                db.EmailTemplates.Add(entity);
                 await db.SaveChangesAsync();
                 // 更新缩略图
                 entity.Thumbnail = $"public/{entity.UserId}/template-thumbnails/{entity.Id}.png";

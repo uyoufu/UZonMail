@@ -49,7 +49,7 @@ namespace UZonMail.Core.Database.Update.Updaters
                     IsHidden = true,
                     Type = DepartmentType.Organization
                 };
-                db.Add(systemOrganization);
+                db.Departments.Add(systemOrganization);
             }
             // 判断是否有系统级部门
             string systemDpName = Department.SystemDepartmentName;
@@ -67,7 +67,7 @@ namespace UZonMail.Core.Database.Update.Updaters
                     IsHidden = true,
                     Type = DepartmentType.Department,
                 };
-                db.Add(systemDepartment);
+                db.Departments.Add(systemDepartment);
             }
             await db.SaveChangesAsync();
 
@@ -86,7 +86,7 @@ namespace UZonMail.Core.Database.Update.Updaters
                     IsSystsemUser = true,
                     IsHidden = true
                 };
-                db.Add(systemUser);
+                db.Users.Add(systemUser);
             }
             // 保存系统用户
             await db.SaveChangesAsync();
@@ -105,7 +105,7 @@ namespace UZonMail.Core.Database.Update.Updaters
                     IsHidden = false,
                     Type = DepartmentType.Organization
                 };
-                db.Add(defaultOrganization);
+                db.Departments.Add(defaultOrganization);
             }
 
             // 添加默认部门
@@ -122,7 +122,7 @@ namespace UZonMail.Core.Database.Update.Updaters
                     IsHidden = false,
                     Type = DepartmentType.Department
                 };
-                db.Add(defaultDepartment);
+                db.Departments.Add(defaultDepartment);
             }
             await db.SaveChangesAsync();
 
@@ -153,7 +153,7 @@ namespace UZonMail.Core.Database.Update.Updaters
                     if (!string.IsNullOrEmpty(adminUserConfig.Avatar)) adminUser.Avatar = adminUserConfig.Avatar;
                 }
 
-                db.Add(adminUser);
+                db.Users.Add(adminUser);
             }
             await db.SaveChangesAsync();
 
