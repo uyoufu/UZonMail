@@ -187,7 +187,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 return await GetProxyClient(sendingContext, tryCount - 1);
             }
 
-            _logger.Debug($"{outbox.Email} 开始使用代理 {proxyHandler.Id}");
+            _logger.Info($"{outbox.Email} 开始使用代理 {proxyHandler.Id}");
             return proxyClient;
         }
 
@@ -202,9 +202,9 @@ namespace UZonMail.Core.Services.SendCore.Sender
         private async Task<Result<SmtpClient>> ConnectSmtpClient(ThrottlingSmtpClient client, OutboxEmailAddress outbox, SendingContext sendingContext, string key, int tryCount = 3)
         {
             // 获取代理
-            client.ProxyClient = await GetProxyClient(sendingContext);
+            client.ProxyClient = await GetProxyClient(sendingContext);           
 
-            // 测试在发件过程中，代理不可用的情况
+            // 用于测试在发件过程中，代理不可用的情况
             //return new Result<SmtpClient>() { Data = client };
 
             // 对证书过期进行兼容处理

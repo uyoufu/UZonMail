@@ -2,6 +2,7 @@
 using MailKit.Net.Proxy;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using UZonMail.DB.SQL.Core.Settings;
 
@@ -13,7 +14,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
     public abstract class ProxyHandlerCluster : ProxyHandler
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyHandlerCluster));
-        private List<ProxyHandler> _handlers = [];
+        private ConcurrentDictionary<long, ProxyHandler> _handlers = [];
 
         /// <summary>
         /// 最小数量
@@ -29,20 +30,19 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 
         public override async Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr)
         {
-            // 移除不可用的代理客户端
-            _handlers.RemoveAll(handler => !handler.IsEnable());
+            DisposeHandler();
 
             // 判断是否有可用代理客户端，若没有，则更新
             if (_handlers.Count < _minimumCount)
             {
                 var updateTask = UpdateProxyHandlers(serviceProvider);
-                if (_handlers.Count == 0)
+                if (_handlers.IsEmpty)
                 {
                     await updateTask;
                 }
             }
 
-            if (_handlers.Count == 0)
+            if (_handlers.IsEmpty)
             {
                 _logger.Warn("没有可用的代理客户端");
                 return null;
@@ -50,7 +50,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 
             // 随机选择一个代理客户端
             var handler = _handlers[new Random().Next(0, _handlers.Count)];
-            return await handler.GetProxyClientAsync(serviceProvider,matchStr);
+            return await handler.GetProxyClientAsync(serviceProvider, matchStr);
         }
 
         private async Task UpdateProxyHandlers(IServiceProvider serviceProvider)
@@ -59,15 +59,14 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
             // 可能存在重复的代理
             foreach (var handler in handlers)
             {
-                var existOne = _handlers.FirstOrDefault(x => x.Id == handler.Id);
-                if (existOne != null)
+                if(_handlers.TryGetValue(handler.Id, out var existOne))
                 {
                     // 更新代理信息
                     existOne.Update(handler.ProxyInfo);
                 }
                 else
                 {
-                    _handlers.Add(handler);
+                    _handlers.TryAdd(handler.Id, handler);
                 }
             }
         }
@@ -93,7 +92,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// 那张健康状态
         /// </summary>
         public override void MarkHealthless()
-        {            
+        {
         }
 
         /// <summary>
@@ -108,6 +107,19 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         protected override void AutoHealthCheck()
         {
             // 不做任何操作
+        }
+
+        /// <summary>
+        /// 在调用时会自动处理
+        /// </summary>
+        public override void DisposeHandler()
+        {
+            // 移除不可用的代理客户端
+            var disabledHandlers = _handlers.Values.Where(x => !x.IsEnable());
+            foreach (var disabledHandler in disabledHandlers)
+            {
+                _handlers.TryRemove(disabledHandler.Id, out _);
+            }
         }
     }
 }

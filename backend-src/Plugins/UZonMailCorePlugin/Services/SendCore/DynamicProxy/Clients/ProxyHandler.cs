@@ -139,7 +139,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 
                 _isHealthy = await HealthCheck();
                 _healthCheckCount--;
-            }, null, 0, 1000 * 30 * 1);
+            }, null, 0, 1000 * 30); // 30s 检测一次
         }
         #endregion
 
@@ -264,6 +264,14 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
             // HealthCheck().Wait();
 
             AutoHealthCheck();
+        }
+
+        /// <summary>
+        /// 释放资源
+        /// </summary>
+        public virtual void DisposeHandler()
+        {
+            return;
         }
 
         #region 静态方法

@@ -7,7 +7,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
     /// <summary>
     /// 代理解析器
     /// </summary>
-    public interface IProxyHandler : ITransientService
+    public interface IProxyHandler : ITransientService, IProxyHandlerDisposer
     {
         /// <summary>
         /// 代理操作器的 Id

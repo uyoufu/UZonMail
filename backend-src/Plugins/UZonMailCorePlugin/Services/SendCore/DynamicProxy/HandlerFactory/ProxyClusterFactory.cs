@@ -1,7 +1,7 @@
 ﻿using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy.Proxies
+namespace UZonMail.Core.Services.SendCore.DynamicProxy.HandlerFactory
 {
     /// <summary>
     /// 代理组

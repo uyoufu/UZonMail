@@ -1,7 +1,7 @@
 ﻿using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy.Proxies
+namespace UZonMail.Core.Services.SendCore.DynamicProxy.HandlerFactory
 {
     /// <summary>
     /// 单个代理
@@ -12,7 +12,9 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Proxies
 
         private static readonly List<string> _supportProtoco = ["http", "https", "socks4", "socks5"];
 
-        public Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy)
+#pragma warning disable CS1998 // 异步方法缺少 "await" 运算符，将以同步方式运行
+        public async Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy)
+#pragma warning restore CS1998 // 异步方法缺少 "await" 运算符，将以同步方式运行
         {
             if (string.IsNullOrWhiteSpace(proxy.Url)) return null;
 
@@ -21,7 +23,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Proxies
 
             var handler = serviceProvider.GetRequiredService<ProxyHandler>();
             handler.Update(proxy);
-            return Task.FromResult<IProxyHandler?>(handler);
+            return handler;
         }
     }
 }

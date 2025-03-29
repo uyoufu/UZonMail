@@ -7,6 +7,7 @@ using System.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 
 namespace UZonMail.Utils.Log
 {
@@ -19,15 +20,18 @@ namespace UZonMail.Utils.Log
         public static void AttachLevelToLog4Net(this IHostApplicationBuilder builder)
         {
             var logLevel = builder.Configuration.GetSection("Logging:LogLevel:Default").Get<LogLevel>();
+
+            var log4netLevelNames = new List<string>() { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL", "ALL" };
+
             var hierarchy = (Hierarchy)LogManager.GetRepository();
             var rootLogger = hierarchy.Root;
-            var level = hierarchy.LevelMap[logLevel.ToString().ToUpper()];
+            var level = hierarchy.LevelMap[log4netLevelNames[(int)logLevel]];
             if (level == null)
             {
                 // 未识别到，不修改日志等级
                 return;
             }
-            rootLogger.Level = hierarchy.LevelMap[logLevel.ToString().ToUpper()];
+            rootLogger.Level = level;
             hierarchy.RaiseConfigurationChanged(EventArgs.Empty);
         }
     }

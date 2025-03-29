@@ -13,6 +13,12 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
     /// </summary>
     public class ProxyManager : ISingletonService
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyManager));
+        public ProxyManager()
+        {
+            DisposeHandlerAuto();
+        }
+
         private readonly ConcurrentDictionary<long, UserProxyManager> _userProxyManagers = new();
 
         /// <summary>
@@ -58,6 +64,25 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, userId);
             // 随机匹配代理
             return manager.RandomProxyHandler(sendingContext.EmailItem.AvailableProxyIds, outboxEmail, orgSetting.ChangeIpAfterEmailCount);
+        }
+
+
+        private Timer? _timer;
+        /// <summary>
+        /// 释放资源
+        /// </summary>
+        private void DisposeHandlerAuto()
+        {
+            if (_timer != null) return;
+
+            _timer = new Timer(_ =>
+            {
+                _logger.Info("开始自动释放代理处理器");
+                foreach (var manager in _userProxyManagers.Values)
+                {
+                    manager.DisposeHandler();
+                }
+            }, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
         }
     }
 }

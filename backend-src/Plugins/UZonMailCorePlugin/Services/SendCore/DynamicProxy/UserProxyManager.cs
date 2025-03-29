@@ -12,7 +12,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
     /// <summary>
     /// 用户代理管理器
     /// </summary>
-    public class UserProxyManager(long userId)
+    public class UserProxyManager(long userId) : IProxyHandlerDisposer
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(UserProxyManager));
         private readonly ConcurrentDictionary<long, IProxyHandler> _proxyHandlers = [];
@@ -113,6 +113,14 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         {
             _proxyHandlers.TryGetValue(proxyId, out var handler);
             return handler;
+        }
+
+        public void DisposeHandler()
+        {
+           foreach(var handler in _proxyHandlers.Values)
+            {
+                handler.DisposeHandler();
+            }
         }
     }
 }
