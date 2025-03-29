@@ -100,12 +100,12 @@ const props = defineProps({
 const header: ComputedRef<IFlatHeader> = computed(() => {
   if (props.groupType === 1) {
     return {
-      label: '发件箱',
+      label: '发件箱组',
       icon: 'group'
     }
   }
   return {
-    label: '收件箱',
+    label: '收件箱组',
     icon: 'group'
   }
 })

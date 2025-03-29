@@ -40,7 +40,12 @@ const progressValue = computed(() => {
   // 计算总进度
   return sendingGroups.value.reduce((prev, current) => prev + current.progress, 0) / sendingGroups.value.length
 })
+import { Platform } from 'quasar'
 const showProgress = computed(() => {
+  // 仅在桌面端显示
+  if (!Platform.is.desktop) {
+    return false
+  }
   return progressValue.value - 1 > -0.0001 || progressValue.value < 0.0001
 })
 onMounted(async () => {

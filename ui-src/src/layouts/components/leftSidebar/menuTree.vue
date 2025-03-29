@@ -1,5 +1,5 @@
 <template>
-  <q-list class="text-accent">
+  <q-list class="col text-accent hover-scroll full-height">
     <LogoItem />
     <q-separator />
     <MenuItem v-for="route in menuRoutes" :key="route.name" :routeRaw="route">
