@@ -2,11 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.Core.Controllers.Settings.Validators;
 using UZonMail.Core.Services.Permission;
 using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Utils.Extensions;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.ResponseModel;
 
@@ -49,6 +52,14 @@ namespace UZonMail.Core.Controllers.Settings
         [HttpPut]
         public async Task<ResponseResult<bool>> UpsertOrganizationSetting([FromBody] OrganizationSetting organizationSettings)
         {
+            // 进行数据验证
+            var validator = new OrganizationSettingValidator();
+            var vdResult = validator.Validate(organizationSettings);
+            if(!vdResult.IsValid)
+            {
+                return vdResult.ToErrorResponse<bool>();
+            }
+
             var userId = tokenService.GetUserSqlId();
             // 判断当前用户是否是组织管理员
             var isOrganization = await permissionService.HasOrganizationPermission(userId);

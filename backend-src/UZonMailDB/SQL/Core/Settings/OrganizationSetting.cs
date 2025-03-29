@@ -80,13 +80,15 @@ namespace UZonMail.DB.SQL.Core.Settings
         /// <returns></returns>
         public int GetCooldownMilliseconds()
         {
-            if (MinOutboxCooldownSecond == MaxOutboxCooldownSecond)
+            var min = Math.Max(0, MinOutboxCooldownSecond);
+            var max = Math.Max(0, MaxOutboxCooldownSecond);
+            if(max<= min)
             {
-                return MinOutboxCooldownSecond * 1000;
+                return min * 1000;
             }
 
             // 随机从 min 到 max 取值
-            return new Random().Next(MinOutboxCooldownSecond, MaxOutboxCooldownSecond) * 1000;
+            return new Random().Next(min, max) * 1000;
         }
     }
 }
