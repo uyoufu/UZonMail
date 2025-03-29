@@ -1,5 +1,5 @@
 <template>
-  <iframe class="uzon-mail-help" src="https://galens.uamazing.cn/posts/2020/2QMK677">
+  <iframe class="uzon-mail-help" src="https://uzonmail.pages.dev/guide/">
   </iframe>
 </template>
 
