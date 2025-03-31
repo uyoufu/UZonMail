@@ -16,6 +16,8 @@
 
 [在线Demo](https://uzon-mail.223434.xyz:2234)，账号/密码: admin/admin1234
 
+> 为了防止滥用，demo 版本不会进行真实发件
+
 <!--more-->
 
 ## 🍎特点
