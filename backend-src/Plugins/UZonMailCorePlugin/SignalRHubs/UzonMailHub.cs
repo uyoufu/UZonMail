@@ -32,7 +32,8 @@ namespace UZonMail.Core.SignalRHubs
 
             await base.OnConnectedAsync();
 
-            await Clients.User(userId).Notify(new Notify.NotifyMessage()
+            // 发送欢迎消息
+            await Clients.Caller.Notify(new Notify.NotifyMessage()
             {
                 Message = "欢迎使用 UzonMail !",
                 Type = Notify.NotifyType.success.ToString()
