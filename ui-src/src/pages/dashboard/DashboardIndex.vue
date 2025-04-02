@@ -57,7 +57,7 @@ onUnmounted(() => {
   })
 })
 
-import type { IEmailCount, IMonthlySendingInfo} from 'src/api/statistics';
+import type { IEmailCount, IMonthlySendingInfo } from 'src/api/statistics';
 import { getInboxEmailCountStatistics, getOutboxEmailCountStatistics, getMonthlySendingCountInfo } from 'src/api/statistics'
 const outboxesCount: Ref<IEmailCount[]> = ref([])
 // 渲染 outbox 数量柱状图
@@ -241,6 +241,11 @@ useResizeObserver(containerElementRef, () => {
     x.chart?.resize()
   })
 })
+
+// #region 版本检查
+import { useVersionChecker } from './useVersionChecker'
+useVersionChecker()
+// #endregion
 </script>
 
 <style lang="scss" scoped></style>

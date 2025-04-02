@@ -1,4 +1,4 @@
-import type { IDialogResult, IPopupDialogParams} from './types';
+import type { IDialogResult, IPopupDialogParams } from './types'
 import { PopupDialogFieldType } from './types'
 import { Dialog } from 'quasar'
 import LowCodeForm from './LowCodeForm.vue'
