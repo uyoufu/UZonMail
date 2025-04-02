@@ -209,7 +209,7 @@ namespace UZonMail.Core.Services.EmailSending
                 .Where(x => allOutboxIds.Contains(x.Id) || dataOutboxEmails.Contains(x.Email)).ToListAsync();
 
             // 重新验证发件箱
-            var emailUtils = serviceProvider.GetRequiredService<EmailUtilsService>();
+            var emailUtils = serviceProvider.GetRequiredService<EmailValidatorService>();
             var smtpPasswordSecretKeys = SmtpPasswordSecretKeys.Create(sendingGroupData.SmtpPasswordSecretKeys);
             foreach (var outbox in outboxes)
             {

@@ -13,7 +13,13 @@ using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.Emails
 {
-    public class EmailUtilsService(SqlContext db, TokenService tokenService, DebugConfig debugConfig) : IScopedService
+    /// <summary>
+    /// 邮箱验证服务
+    /// </summary>
+    /// <param name="db"></param>
+    /// <param name="tokenService"></param>
+    /// <param name="debugConfig"></param>
+    public class EmailValidatorService(SqlContext db, TokenService tokenService, DebugConfig debugConfig) : IScopedService
     {
         /// <summary>
         /// 验证发件箱是否有效
@@ -54,7 +60,7 @@ namespace UZonMail.Core.Services.Emails
             {
                 Ok = result.Ok,
                 Data = result.Ok,
-                Message = result.Message,
+                Message = $"[{outbox.Email}] {result.Message}",
             };
         }
     }

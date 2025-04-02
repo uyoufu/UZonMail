@@ -20,7 +20,7 @@ namespace UZonMail.Core.Controllers.Emails
     /// <summary>
     /// 邮件管理
     /// </summary>
-    public class EmailGroupController(SqlContext db, EmailGroupService groupService, TokenService tokenService, EmailUtilsService emailUtils,
+    public class EmailGroupController(SqlContext db, EmailGroupService groupService, TokenService tokenService, EmailValidatorService emailUtils,
         IHubContext<UzonMailHub, IUzonMailClient> hub) : ControllerBaseV1
     {
         /// <summary>

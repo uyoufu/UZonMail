@@ -3,13 +3,33 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.12.3
+
+> 更新日期: 2025-04-02
+
+### 新增功能
+
+1. 增加版本更新提醒
+2. 支持退出激活状态
+3. 增加对个人激活码的支持
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.12.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.3.0.zip)
+
+[uzonmail-service-win-x64-0.12.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.12.3.0.zip)
+
+[uzonmail-service-linux-x64-0.12.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.12.3.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.12.2
 
 > 更新日期: 2025-03-23
 
 ### 新增功能
 
-1. 支持动态代理
+1. 支持动态代理(目前仅支持 [易代理](http://www.ydaili.cn//main/register.aspx?str_code=80TL8T6X)，后期会继续增加)
 
 ### bug 修复
 

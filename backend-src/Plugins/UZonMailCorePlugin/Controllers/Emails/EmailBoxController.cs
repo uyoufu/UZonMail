@@ -23,7 +23,7 @@ namespace UZonMail.Core.Controllers.Emails
     /// 邮箱
     /// </summary>
     public class EmailBoxController(SqlContext db, TokenService tokenService, UserService userService,
-        EmailGroupService emailGroupService, EmailUtilsService emailUtils) : ControllerBaseV1
+        EmailGroupService emailGroupService, EmailValidatorService emailUtils) : ControllerBaseV1
     {
         /// <summary>
         /// 创建发件箱
