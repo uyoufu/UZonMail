@@ -19,16 +19,19 @@
       </div>
     </div>
 
-    <q-input standout="bg-primary" class="q-mt-md" label-color="white" v-model="license" dense @focus="onFocus"
-      @blur="onBlur" :label="licenseLabel" @keydown.enter="onActiveLicense">
+    <q-input standout="bg-primary" label-color="white" v-model="license" dense @focus="onFocus" @blur="onBlur"
+      :label="licenseLabel" @keydown.enter="onActiveLicense">
       <template v-slot:append>
         <q-icon v-if="showActiveIcon" name="motion_photos_auto" @click="onActiveLicense" class="cursor-pointer"
           :color="activeIconColor">
           <AsyncTooltip :tooltip="getActiveIconTooltip" :cache="false"></AsyncTooltip>
         </q-icon>
+
+        <q-icon v-if="showLicenseRemoveIcon" class="q-ml-sm" name="logout" color="negative" @click="onRemoveLicense">
+          <AsyncTooltip tooltip="退出激活状态" :cache="false"></AsyncTooltip>
+        </q-icon>
       </template>
     </q-input>
-
   </div>
 </template>
 
@@ -39,7 +42,7 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import dayjs from 'dayjs'
 import type { ILicenseInfo } from 'src/api/pro/license';
-import { LicenseType, updateLicenseInfo, getLicenseInfo, updateExistingLicenseInfo } from 'src/api/pro/license'
+import { LicenseType, updateLicenseInfo, getLicenseInfo, updateExistingLicenseInfo, removeLicense } from 'src/api/pro/license'
 
 const license = ref<string>('')
 
@@ -139,6 +142,24 @@ onMounted(async () => {
     activeInfo.value = licenseInfo
   }
 })
+// #endregion
+
+// #region 移除激活功能
+const showLicenseRemoveIcon = computed(() => {
+  return activeInfo.value.licenseType !== LicenseType.Community && isSuperAdmin
+})
+async function onRemoveLicense () {
+  const confirm = await confirmOperation('退出激活状态', '退出激活后，该系统下所有用户的高级功能将不可用，是否继续?')
+  if (!confirm) return
+
+  // 调用退出激活接口
+  const { data } = await removeLicense()
+  activeInfo.value = data
+  notifySuccess('已退出激活状态')
+
+  // 刷新页面
+  window.location.reload()
+}
 // #endregion
 </script>
 

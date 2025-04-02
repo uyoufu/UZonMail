@@ -74,3 +74,12 @@ export function updateExistingLicenseInfo () {
 export function getLicenseInfo () {
   return httpClientPro.get<ILicenseInfo>('/license')
 }
+
+/**
+ * 移除授权信息
+ * @returns
+ */
+export function removeLicense () {
+  return httpClientPro.delete<ILicenseInfo>('/license')
+}
+
