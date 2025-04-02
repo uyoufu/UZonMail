@@ -106,7 +106,7 @@ dir:
     // 默认使用内存缓存
     "Redis": {
       "Enable": false,
-      "Host": "localhost",
+      "Host": "uzon-redis",
       "Port": 6379,
       "Password": "",
       "Database": 0

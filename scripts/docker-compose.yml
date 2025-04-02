@@ -1,25 +1,28 @@
+# 
 # 说明
 # 该文件是 uzon-mail 的 docker-compose 配置文件，使用时，在当前目录执行 docker-compose up -d 命令即可启动程序
 #
 
 services:
-  # mysql, 若要启用 sql 服务，请取消下面的注释
+  # mysql 服务
   uzon-mysql:
     container_name: uzon-mysql
     image: mysql:8.4.0
+    # [可选]对外暴露端口，方便外部管理
+    # 本地端口:容器端口
+    # 若本机 3306 已使用，可更换成其它端口，例如 23306:3306
     # ports:
     #   - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: mysqlRoot3306
-      MYSQL_DATABASE: uzon-mail
-      MYSQL_USER: uzon-mail
-      MYSQL_PASSWORD: uzon-mail
+      MYSQL_ROOT_PASSWORD: mysqlRoot3306 # root 账号的密码
+      MYSQL_DATABASE: uzon-mail # 数据库名
+      MYSQL_USER: uzon-mail # 数据库用户名
+      MYSQL_PASSWORD: uzon-mail # 数据库密码
     volumes:
-      - ./data/mysql/data:/var/lib/mysql
-      # - ./data/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      # - ./data/mysql/sql:/docker-entrypoint-initdb.d
+      - ./data/mysql/data:/var/lib/mysql # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    # 连接到 uzonmail 主程序网络
     networks:
       - uzonmail_network
 
@@ -27,10 +30,13 @@ services:
   uzon-redis:
     container_name: uzon-redis
     image: redis:latest
+    # [可选]对外暴露端口，方便外部管理
+    # 本地端口:容器端口
+    # 若本机 6379 已使用，可更换成其它端口，例如 26379:3306
     # ports:
     #   - 6379:6379
     volumes:
-      - ./data/redis/data:/data
+      - ./data/redis/data:/data # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
     networks:
       - uzonmail_network
@@ -40,11 +46,11 @@ services:
     container_name: uzon-mail
     image: gmxgalens/uzon-mail:latest
     ports:
-      - 55080:22345
+      - 22345:22345
     volumes:
-      - ./data/appsettings.Production.json:/app/appsettings.Production.json # 若需修改系统配置时打开
+      - ./data/appsettings.Production.json:/app/appsettings.Production.json # 生产环境配置
       - ./data/data:/app/data # 数据存储
-      - ./data/app.config.json:/app/wwwroot/app.config.json # 前端文件
+      - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
     networks:
       - uzonmail_network
     command: [ "dotnet", "UZonMailService.dll" ]

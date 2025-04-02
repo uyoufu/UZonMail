@@ -37,8 +37,8 @@ services:
     # 对外暴露端口，方便外部管理
     # 本地端口:容器端口
     # 若本机 3306 已使用，可更换成其它端口，例如 23306:3306
-    ports:
-      - 3306:3306
+    # ports:
+    #  - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: mysqlRoot3306 # root 账号的密码
       MYSQL_DATABASE: uzon-mail # 数据库名
@@ -59,8 +59,8 @@ services:
     # 对外暴露端口，方便外部管理
     # 本地端口:容器端口
     # 若本机 6379 已使用，可更换成其它端口，例如 26379:3306
-    ports:
-      - 6379:6379
+    # ports:
+    #  - 6379:6379
     volumes:
       - ./data/redis/data:/data # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
@@ -88,24 +88,46 @@ networks:
   uzonmail_network:
 ```
 
-## 安装准备
+## 安装步骤
 
-在启动 docker 前，需要提前进行如下工作：
+### 创建数据目录
 
-1. 创建 docker compose 根目录
-2. 生成默认配置文件，根据实际情况进行修改
+在启动 docker 前，需要提前创建需要的工作目录(若有，可忽略)，
 
 按如下命令进行操作：
 
 ``` bash
 cd ~
-# 创建数据目录
+# 1. 创建数据目录
 mkdir -p apps/uzon-mail/data
-# 进入数据目录
+# 2. 进入数据目录
 cd apps/uzon-mail
+```
+
+### 下载 docker-compose 文件
+
+从 github 上下载 [docker-compose.yml](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts/docker-compose.yml) 到当前目录
+
+若无法下载，请手动创建文件 ~/apps/uzon-mail/docker-compose.yml，然后将上述 docker-compose 内容复制进去
+
+``` bash
+# 确保在 ~/apps/uzon-mail 目录中，然后执行下列命令
+wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts/docker-compose.yml
+```
+
+上述命令将会下载完整的 docker-compose 文件，具体的配置项说明请见文件内容。
+
+在文件里，你可以修改数据库的连接密码、可以将端口暴露到宿主机中进行管理。
+
+### 生成配置
+
+为了方便对服务器进行配置，需要在外部创建相应的挂载文件。为了使用安全，有一些参数必须在配置进行修改。
+
+``` bash
 # 生成前端配置文件, baseUrl 见配置章节
+# 此处的 baseUrl 需要修改为实际的域名地址
 echo '{
-  "baseUrl": "http:/localhost:22345",
+  "baseUrl": "http://localhost:22345",
   "api": "/api/v1",
   "signalRHub": "/hubs/uzonMailHub",
   "logger": {
@@ -114,14 +136,66 @@ echo '{
 }' > data/app.config.json
 
 # 生成后端配置文件
-echo '{}' > data/appsettings.Production.json
 # 该文件中有一些初始化配置项，建议跳转到 [后端配置] 章节阅读，添加必要项配置，然后继续
 # 当然也可以继续配置，后续再修改
+echo '{
+  // Secret 必须修改，防止被其它人伪装登陆
+  "TokenParams": {
+    "Secret": "640807f8983090349cca90b9640807f8983090349cca90b9",
+    "Issuer": "127.0.0.1",
+    "Audience": "UZonMail",
+    "Expire": 86400000
+  },
+  "User": {
+    // 每个用户在服务器的文件缓存位置，可以不修改
+    "CachePath": "users/{0}",
+    // 管理员用户名和密码, 只在第一次启动时初始化
+    "AdminUser": {
+      "UserId": "admin",
+      "Password": "admin1234",
+      "Avatar": ""
+    },
+    // 新建用户时的默认密码
+    "DefaultPassword": "uzonmail123"
+  },
+  // 数据库设置
+  // 将 Enable 设置为 true, 启用对应的数据库
+  // 程序优化使用 mysql
+  "Database": {
+    // 免安装的数据库，系统默认使用这个
+    "SqLite": {
+      "Enable": false,
+      "DataSource": "data/db/uzon-mail.db"
+    },
+    // 对于高并发场景，建议使用 mysql
+    "MySql": {
+      "Enable": true,
+      "Version": "8.4.0.0",
+      "Host": "",
+      "Port": 3306,
+      "Database": "uzon-mail",
+      "User": "uzon-mail",
+      "Password": "uzon-mail",
+      "Description": "程序会优先使用 mysql"
+    },
+    // 缓存数据库
+    // 默认使用内存缓存
+    "Redis": {
+      "Enable": true,
+      "Host": "uzon-redis",
+      "Port": 6379,
+      "Password": "",
+      "Database": 0
+    }
+  },
+}' > data/appsettings.Production.json
+```
 
-# 从 gitee 下载 docker-compose.yml 到当前目录
-# 若无法下载，请手动创建文件 ~/apps/uzon-mail/docker-compose.yml，然后将上述 docker-compose 内容复制进去
-wget https://gitee.com/uzonmail/UZonMail/raw/master/scripts/docker-compose.yml
+### 启动
 
+使用如下命令拉取更新并启动容器：
+
+``` bash
 # 拉取 docker 镜像
 # 此步骤可省略，直接调用下一个命令
 docker compose pull
