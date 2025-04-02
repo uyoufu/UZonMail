@@ -114,7 +114,8 @@ export function showHtmlDialog (title: string, html: string) {
       html: true,
       ok: {
         dense: true
-      }
+      },
+      persistent: true,
     }).onOk(() => {
       resolve(true)
     }).onCancel(() => {
