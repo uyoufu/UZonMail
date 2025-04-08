@@ -15,6 +15,7 @@ namespace Uamazing.Utils.Plugin
     /// <summary>
     /// 插件加载器
     /// 必须在 AddControllers 之前初始化
+    /// 需要保证每个插件只有一个 dll，否则可能出现重复加载的情况
     /// </summary>
     public class PluginLoader : IPlugin
     {
