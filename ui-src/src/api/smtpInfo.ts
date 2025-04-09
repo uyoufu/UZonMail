@@ -35,7 +35,7 @@ export function GuessSmtpInfoGet (email: string) {
  * @returns
  */
 export function GuessSmtpInfoPost (emails: string[]) {
-  return httpClient.post<ISmtpInfo>('/smtp-info/guess', {
+  return httpClient.post<ISmtpInfo[]>('/smtp-info/guess', {
     data: emails
   })
 }

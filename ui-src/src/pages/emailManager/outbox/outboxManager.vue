@@ -298,7 +298,7 @@ useSignalR(updateExistOne)
 // #region 邮箱导入功能
 import { useOutboxImporter } from './useOutboxImporter'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { onImportOutboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useOutboxImporter(emailGroupRef)
+const { onImportOutboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useOutboxImporter(emailGroupRef,addNewRow)
 // #endregion
 </script>
 
