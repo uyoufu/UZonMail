@@ -13,7 +13,7 @@ namespace UZonMail.Core.Database.Updater
     public class DatabaseUpdateService(IServiceProvider serviceProvider, SqlContext db, IConfiguration config) : IScopedService
     {
         private readonly static Version _minVersionSupport = new("0.10.0.0");
-        private readonly static Version _requiredVersion = new("0.11.1.0");
+        private readonly static Version _requiredVersion = new("0.12.4.0");
 
         private readonly string _settingKey = "DataVersion";
 
