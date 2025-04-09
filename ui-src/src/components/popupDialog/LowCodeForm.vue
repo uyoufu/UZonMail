@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide" :persistent="persistent">
+  <q-dialog ref="dialogRef" @hide="onDialogHide" :persistent="persistent" @keydown.enter="onOKClick">
     <q-card style="min-width: 250px;">
       <!--
         ... 内容
@@ -87,7 +87,7 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import PasswordInput from '../passwordInput/PasswordInput.vue'
 
 import type { PropType } from 'vue'
-import type { ICustomPopupButton, IPopupDialogField } from './types';
+import type { ICustomPopupButton, IPopupDialogField, IOnSetupParams } from './types';
 import { PopupDialogFieldType } from './types'
 import { notifyError } from 'src/utils/dialog'
 import type { IFunctionResult } from 'src/types'
@@ -116,6 +116,7 @@ const props = defineProps({
     type: Function as PropType<(params: Record<string, any>) => Promise<IFunctionResult>>,
     required: false
   },
+
   // 窗体保持
   persistent: {
     type: Boolean,
@@ -145,6 +146,12 @@ const props = defineProps({
   customBtns: {
     type: Array as PropType<Array<ICustomPopupButton>>,
     default: () => []
+  },
+
+  // 在初始化化时，调用
+  onSetup: {
+    type: Function as PropType<(params: IOnSetupParams) => void>,
+    required: false
   }
 })
 
@@ -228,7 +235,6 @@ const validFields = computed(() => {
     }
 
     // 对字段内容进行格式化，比如单选可能需要从数据源中获取
-
     results.push(field)
   }
 
@@ -342,6 +348,16 @@ async function onCustomBottonClicked (btn: ICustomPopupButton) {
   }
 
   await btn.onClick(fieldsModel.value)
+}
+// #endregion
+
+// #region 外部 setup 函数
+if (props.onSetup) {
+  // 调用函数
+  props.onSetup({
+    fieldsModel: fieldsModel,
+    fields: validFields
+  })
 }
 // #endregion
 </script>

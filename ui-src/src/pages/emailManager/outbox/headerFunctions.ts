@@ -1,21 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import type { IPopupDialogField, IPopupDialogParams } from 'src/components/popupDialog/types';
+import type { IOnSetupParams, IPopupDialogField, IPopupDialogParams } from 'src/components/popupDialog/types'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import type { IEmailGroupListItem } from '../components/types'
 
-import type { IOutbox } from 'src/api/emailBox';
+import type { IOutbox } from 'src/api/emailBox'
 import { createOutbox, createOutboxes } from 'src/api/emailBox'
+import { GuessSmtpInfoGet } from 'src/api/smtpInfo'
 
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { isEmail } from 'src/utils/validator'
 
 import { useUserInfoStore } from 'src/stores/user'
 import { aes } from 'src/utils/encrypt'
-import type { IExcelColumnMapper } from 'src/utils/file';
+import type { IExcelColumnMapper } from 'src/utils/file'
 import { readExcel, writeExcel } from 'src/utils/file'
-import type { IProxy } from 'src/api/proxy';
+import type { IProxy } from 'src/api/proxy'
 import { getUsableProxies } from 'src/api/proxy'
+import { debounce } from 'lodash'
 
 function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
   return aes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, password)
@@ -180,10 +182,31 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
 
   // 新建发件箱
   async function onNewOutboxClick () {
+    const GuessSmtpInfoGetDebounce = debounce(async (email: string, params: IOnSetupParams) => {
+      // 从服务器请求数据
+      const guessResult = await GuessSmtpInfoGet(email)
+
+      params.fieldsModel.value.smtpHost = guessResult.data.host
+      if (!params.fieldsModel.value.smtpPort)
+        params.fieldsModel.value.smtpPort = guessResult.data.port
+    }, 1000, {
+      trailing: true
+    })
+
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
       title: `新增发件箱 / ${emailGroup.value.label}`,
-      fields: await getOutboxFields(userInfoStore.smtpPasswordSecretKeys)
+      fields: await getOutboxFields(userInfoStore.smtpPasswordSecretKeys),
+      onSetup: (params) => {
+        watch(() => params.fieldsModel.value.email, async newValue => {
+          if (!newValue) return
+
+          const host = params.fieldsModel.value.smtpHost as string
+          if (host) return
+
+          await GuessSmtpInfoGetDebounce(newValue, params)
+        })
+      }
     }
 
     // 弹出对话框
@@ -235,8 +258,8 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     notifySuccess('模板下载成功')
   }
 
-  // 导入发件箱
-  async function onImportOutboxClick (emailGroupId: number | null = null) {
+  // 从 excel 导入
+  async function onImportOutboxFromExcelClicked (emailGroupId: number | null = null) {
     if (typeof emailGroupId !== 'number') emailGroupId = emailGroup.value.id as number
 
     const data = await readExcel({
@@ -278,6 +301,6 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
   return {
     onNewOutboxClick,
     onExportOutboxTemplateClick,
-    onImportOutboxClick
+    onImportOutboxFromExcelClicked
   }
 }

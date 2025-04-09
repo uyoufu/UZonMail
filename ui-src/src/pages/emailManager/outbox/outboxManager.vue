@@ -10,13 +10,10 @@
         <div class="row justify-start q-gutter-sm">
           <CreateBtn tooltip="新增发件箱" @click="onNewOutboxClick" :disable="!isValidEmailGroup"
             tooltip-when-disabled="请先添加组" />
-
-          <ExportBtn label="模板" tooltip="下载发件箱模板" @click="onExportOutboxTemplateClick" />
-
-          <ImportBtn label="Excel 导入" tooltip="导入发件箱" @click="onImportOutboxClick()" :disable="!isValidEmailGroup"
+          <ExportBtn label="" tooltip="下载发件箱模板" @click="onExportOutboxTemplateClick" />
+          <ImportBtn label="" tooltip="导入发件箱" @click="onImportOutboxFromExcelClicked()" :disable="!isValidEmailGroup"
             tooltip-when-disabled="请先添加组" />
-
-          <ImportBtn :label="importFromTxtLable" :tooltip="importFromTxtTooltip" @click="onImportOutboxClick()"
+          <ImportBtn label="" icon="description" :tooltip="importFromTxtTooltip" @click="onImportOutboxFromTxt()"
             :disable="!isValidEmailGroup" tooltip-when-disabled="请先添加组" />
         </div>
       </template>
@@ -236,7 +233,7 @@ function togglePasswordViewMode (data: IOutbox) {
 
 // #region 表头功能
 import { useHeaderFunction, getOutboxExcelDataMapper } from './headerFunctions'
-const { onNewOutboxClick, onExportOutboxTemplateClick, onImportOutboxClick } = useHeaderFunction(emailGroupRef, addNewRow)
+const { onNewOutboxClick, onExportOutboxTemplateClick, onImportOutboxFromExcelClicked } = useHeaderFunction(emailGroupRef, addNewRow)
 // #endregion
 
 // #region 数据右键菜单
@@ -249,10 +246,16 @@ import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { notifyError } from 'src/utils/dialog'
 const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
   {
-    name: 'import',
-    label: '导入',
+    name: 'importExcel',
+    label: '导入EXCEL',
     tooltip: '向当前组中导入收件箱',
-    onClick: value => onImportOutboxClick(value.id)
+    onClick: value => onImportOutboxFromExcelClicked(value.id)
+  } as IContextMenuItem,
+  {
+    name: 'importTxt',
+    label: '导入TXT',
+    tooltip: '向当前组中导入收件箱',
+    onClick: value => onImportOutboxFromTxt(value.id)
   },
   {
     name: 'export',
@@ -295,7 +298,7 @@ useSignalR(updateExistOne)
 // #region 邮箱导入功能
 import { useOutboxImporter } from './useOutboxImporter'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { onImportOutboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useOutboxImporter()
+const { onImportOutboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useOutboxImporter(emailGroupRef)
 // #endregion
 </script>
 

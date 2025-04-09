@@ -52,6 +52,11 @@ export interface ICustomPopupButton {
   onClick: (value: Record<string, any>) => Promise<void>
 }
 
+export interface IOnSetupParams {
+  fieldsModel: Ref<Record<string, any>>,
+  fields: ComputedRef<Array<IPopupDialogField>>,
+}
+
 /**
  * 弹出框参数
  */
@@ -69,7 +74,9 @@ export interface IPopupDialogParams {
   onOkMain?: (params: Record<string, any>) => Promise<void | boolean>,
   // 只有一列
   oneColumn?: boolean,
-  customBtns?: ICustomPopupButton[]
+  customBtns?: ICustomPopupButton[],
+  // 在 setup 中调用
+  onSetup?: (params: IOnSetupParams) => void,
 }
 
 /**
