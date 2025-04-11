@@ -1,7 +1,6 @@
 ---
 title: 支持作者
 sidebar: false
-
 editLink: false
 ---
 

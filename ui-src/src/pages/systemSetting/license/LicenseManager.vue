@@ -94,7 +94,7 @@ async function onActiveLicense () {
 
   // 重新拉取权限码
   const { data: { userInfo, token, access, installedPlugins } } = await userRelogin()
-  logger.debug('[Login] 用户重新登陆:', userInfo, token, access)
+  logger.debug('[Login] 用户重新登录:', userInfo, token, access)
 
   const userInfoStore = useUserInfoStore()
   userInfoStore.setInstalledPlugins(installedPlugins)

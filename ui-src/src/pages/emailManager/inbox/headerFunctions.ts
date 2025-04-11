@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import type { IPopupDialogParams} from 'src/components/popupDialog/types';
+import type { IPopupDialogParams } from 'src/components/popupDialog/types';
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { addNewRowType } from 'src/compositions/qTableUtils'
 
-import type { IInbox} from 'src/api/emailBox';
+import type { IInbox } from 'src/api/emailBox';
 import { createInbox, createInboxes } from 'src/api/emailBox'
 import { notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
-import type { IExcelColumnMapper} from 'src/utils/file';
+import type { IExcelColumnMapper } from 'src/utils/file';
 import { readExcel, writeExcel } from 'src/utils/file'
 import { isEmail } from 'src/utils/validator'
 import logger from 'loglevel'
@@ -76,7 +76,6 @@ export async function showNewInboxDialog (emailGroupLabel: string) {
   }
 
   // 弹出对话框
-
   return await showDialog<IInbox>(popupParams)
 }
 

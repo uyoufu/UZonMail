@@ -1,18 +1,52 @@
 <template>
   <div class="full-height full-width row items-start">
-    <EmailGroupList v-show="!isCollapseGroupList" v-model="emailGroupRef" :groupType="2"
-      class="q-card q-mr-sm full-height" style="min-width: 160px;" :contextMenuItems="groupCtxMenuItems" />
+    <EmailGroupList
+      v-show="!isCollapseGroupList"
+      v-model="emailGroupRef"
+      :groupType="2"
+      class="q-card q-mr-sm full-height"
+      style="min-width: 160px"
+      :contextMenuItems="groupCtxMenuItems"
+    />
 
-    <q-table ref="inboxTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
-      v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
-      @request="onTableRequest">
+    <q-table
+      ref="inboxTableRef"
+      class="col full-height"
+      :rows="rows"
+      :columns="columns"
+      row-key="id"
+      virtual-scroll
+      v-model:pagination="pagination"
+      dense
+      :loading="loading"
+      :filter="filter"
+      binary-state-sort
+      @request="onTableRequest"
+    >
       <template v-slot:top-left>
         <div class="row justify-start q-gutter-sm">
-          <CreateBtn tooltip="新增收件箱" @click="onNewInboxClick" :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组" />
-          <ExportBtn label="模板" tooltip="导出收件箱模板" @click="onExportInboxTemplateClick" />
-          <ImportBtn tooltip="导入收件箱" @click="onImportInboxClick()" :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组" />
+          <CreateBtn
+            tooltip="新增收件箱"
+            @click="onNewInboxClick"
+            :disable="!isValidEmailGroup"
+            tooltip-when-disabled="请先添加组"
+          />
+          <ExportBtn label="" tooltip="导出收件箱模板" @click="onExportInboxTemplateClick" />
+          <ImportBtn
+            label=""
+            tooltip="导入收件箱"
+            @click="onImportInboxClick()"
+            :disable="!isValidEmailGroup"
+            tooltip-when-disabled="请先添加组"
+          />
+          <ImportBtn
+            label=""
+            icon="description"
+            :tooltip="importFromTxtTooltip"
+            @click="onImportInboxFromTxt()"
+            :disable="!isValidEmailGroup"
+            tooltip-when-disabled="请先添加组"
+          />
         </div>
       </template>
 
@@ -37,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { QTableColumn } from 'quasar';
+import type { QTableColumn } from 'quasar'
 import { QTable } from 'quasar'
 import { formatDate } from 'src/utils/format'
 
@@ -105,15 +139,15 @@ const columns: QTableColumn[] = [
     label: '最近发件日期',
     align: 'left',
     field: 'lastSuccessDeliveryDate',
-    format: v => formatDate(v),
+    format: (v) => formatDate(v),
     sortable: true
   }
 ]
-async function getRowsNumberCount (filterObj: TTableFilterObject) {
+async function getRowsNumberCount(filterObj: TTableFilterObject) {
   const { data } = await getInboxesCount(emailGroupRef.value.id, filterObj.filter)
   return data
 }
-async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
+async function onRequest(filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getInboxesData(emailGroupRef.value.id, filterObj.filter, pagination)
   return data
 }
@@ -145,7 +179,7 @@ const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
     name: 'import',
     label: '导入',
     tooltip: '向当前组中导入收件箱',
-    onClick: value => onImportInboxClick(value.id)
+    onClick: (value) => onImportInboxClick(value.id)
   },
   {
     name: 'export',
@@ -154,17 +188,23 @@ const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
     onClick: exportAllInboxesInThisGroup
   }
 ])
+
 // 导出当前组中的所有的收件箱
 import { writeExcel } from 'src/utils/file'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function exportAllInboxesInThisGroup (group: Record<string, any>) {
+async function exportAllInboxesInThisGroup(group: Record<string, any>) {
   // 获取所有的收件箱
   const { data: count } = await getInboxesCount(group.id, '')
   if (!count) {
     notifyError('没有可导出项')
     return
   }
-  const { data: dataRows } = await getInboxesData(group.id, '', { sortBy: 'id', descending: false, skip: 0, limit: count })
+  const { data: dataRows } = await getInboxesData(group.id, '', {
+    sortBy: 'id',
+    descending: false,
+    skip: 0,
+    limit: count
+  })
   await writeExcel(dataRows, {
     fileName: `${group.name}-收件箱.xlsx`,
     sheetName: group.name,
@@ -172,6 +212,12 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
     strict: true
   })
 }
+// #endregion
+
+// #region 从文本导入邮箱
+import { useInboxImporter } from './useInboxImporter'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { onImportInboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useInboxImporter(emailGroupRef, addNewRow)
 // #endregion
 </script>
 

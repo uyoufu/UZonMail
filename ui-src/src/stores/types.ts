@@ -5,7 +5,7 @@ export enum UserType {
 
 export enum UserStatus {
   normal, // 正常
-  forbiddenLogin, // 禁止登陆
+  forbiddenLogin, // 禁止登录
 }
 
 // 用户信息

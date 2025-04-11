@@ -26,7 +26,7 @@ export default navbar(
           link:"https://uzon-mail.223434.xyz:2234/"
         }       
       ]
-    },
+    },   
     {
       text: '软件下载',
       link: '/versions',
@@ -46,6 +46,11 @@ export default navbar(
       text: '致谢名单',
       link: '/thanks-list',
       icon:'heart'
+    },
+    {
+      text: '版本对比',
+      link: '/price',
+      icon:'code-compare'
     }
   ]
 //   [

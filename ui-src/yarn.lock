@@ -1237,13 +1237,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/dom-to-image@npm:^2.6.7":
-  version: 2.6.7
-  resolution: "@types/dom-to-image@npm:2.6.7"
-  checksum: 10c0/2f5045f116fba81fade6df5f4c6435280a6bf693a10df4ef6b0b586339833e1fe70649ffa8dc2cd221e65c1a87bc81d4765a4b6ee30da457f2bc5be92de9aa90
-  languageName: node
-  linkType: hard
-
 "@types/estree@npm:1.0.6, @types/estree@npm:^1.0.0, @types/estree@npm:^1.0.6":
   version: 1.0.6
   resolution: "@types/estree@npm:1.0.6"
@@ -3320,13 +3313,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dom-to-image@npm:^2.6.0":
-  version: 2.6.0
-  resolution: "dom-to-image@npm:2.6.0"
-  checksum: 10c0/6c77851d2f301d2a4bbc3fa3f9d6f152bcc4f2a20b57185b9fa1fd81244c0c9a0c7f6deffb30461bba57d83f8b37d905fb5440d9bcda5b7221b968001a2c94fe
-  languageName: node
-  linkType: hard
-
 "dot-case@npm:^3.0.4":
   version: 3.0.4
   resolution: "dot-case@npm:3.0.4"
@@ -4875,6 +4861,13 @@ __metadata:
   bin:
     html-minifier-terser: cli.js
   checksum: 10c0/ffc97c17299d9ec30e17269781b816ea2fc411a9206fc9e768be8f2decb1ea1470892809babb23bb4e3ab1f64d606d97e1803bf526ae3af71edc0fd3070b94b9
+  languageName: node
+  linkType: hard
+
+"html-to-image@npm:^1.11.13":
+  version: 1.11.13
+  resolution: "html-to-image@npm:1.11.13"
+  checksum: 10c0/03bd7192d87b99499e37ff12a8e2b41ddce4cf8e33a93dfadff18df0f213434c7f1ba8328db2158f4805da07b7aec3c90aec3152908281153217e86784218b10
   languageName: node
   linkType: hard
 
@@ -8994,7 +8987,6 @@ __metadata:
     "@quasar/extras": "npm:^1.16.17"
     "@quasar/quasar-app-extension-testing-unit-vitest": "npm:^1.1.0"
     "@types/crypto-js": "npm:^4.2.2"
-    "@types/dom-to-image": "npm:^2.6.7"
     "@types/lodash": "npm:^4.17.16"
     "@types/node": "npm:^22.13.9"
     "@typescript-eslint/eslint-plugin": "npm:^8.26.0"
@@ -9007,7 +8999,6 @@ __metadata:
     axios: "npm:^1.8.1"
     crypto-js: "npm:^4.2.0"
     dayjs: "npm:^1.11.13"
-    dom-to-image: "npm:^2.6.0"
     echarts: "npm:^5.6.0"
     element-plus: "npm:^2.9.5"
     eslint: "npm:^9.21.0"
@@ -9017,6 +9008,7 @@ __metadata:
     eslint-plugin-promise: "npm:^7.2.1"
     eslint-plugin-vue: "npm:^10.0.0"
     globals: "npm:^16.0.0"
+    html-to-image: "npm:^1.11.13"
     lodash: "npm:^4.17.21"
     loglevel: "npm:^1.9.2"
     mockjs: "npm:^1.1.0"

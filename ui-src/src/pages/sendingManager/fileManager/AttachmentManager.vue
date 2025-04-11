@@ -265,7 +265,7 @@ import { createObjectPersistentReader } from 'src/api/pro/objectReader'
 async function shareAttachment (row: Record<string, any>) {
   console.log(row)
 
-  const confirm = await confirmOperation('分享确认', '分享后，其他人可以在不登陆的情况下，通过链接访问该文件，是否继续？')
+  const confirm = await confirmOperation('分享确认', '分享后，其他人可以在不登录的情况下，通过链接访问该文件，是否继续？')
   if (!confirm) return
 
   const { data: objectReaderId } = await createObjectPersistentReader(row.id)

@@ -95,7 +95,7 @@ export default class HttpClient {
         const response = error.response as AxiosResponse
         // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
         if (response.status === StatusCode.ClientErrorUnauthorized) {
-          // 退出登陆
+          // 退出登录
           await this.logout()
           return Promise.reject(error as Error)
         }
@@ -111,7 +111,7 @@ export default class HttpClient {
       })
   }
 
-  // 退出登陆
+  // 退出登录
   private async logout () {
     const store = useUserInfoStore()
     await store.logout()

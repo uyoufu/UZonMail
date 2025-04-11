@@ -41,6 +41,8 @@ export interface IPopupDialogField {
   parser?: (value: any) => any, // 解析函数,在返回时，对数据进行转换
   tooltip?: Array<any> | ((params?: object) => Promise<string[]>) | string, // 提示
   disable?: boolean, // 是否禁用，一般用于仅显示数据,
+  disableAutogrow?: boolean, // 当为 textarea 时，是否自动增长
+  classes?: string, // 自定义样式
 }
 
 /**
@@ -50,6 +52,11 @@ export interface ICustomPopupButton {
   label: string,
   color: string,
   onClick: (value: Record<string, any>) => Promise<void>
+}
+
+export interface IOnSetupParams {
+  fieldsModel: Ref<Record<string, any>>,
+  fields: ComputedRef<Array<IPopupDialogField>>,
 }
 
 /**
@@ -69,7 +76,9 @@ export interface IPopupDialogParams {
   onOkMain?: (params: Record<string, any>) => Promise<void | boolean>,
   // 只有一列
   oneColumn?: boolean,
-  customBtns?: ICustomPopupButton[]
+  customBtns?: ICustomPopupButton[],
+  // 在 setup 中调用
+  onSetup?: (params: IOnSetupParams) => void,
 }
 
 /**

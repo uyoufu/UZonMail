@@ -10,7 +10,7 @@ export interface IInbox {
   userId?: number,
   email: string,
   name?: string,
-  minInboxCooldownHours: number,
+  minInboxCooldownHours?: number,
   description?: string,
 }
 
