@@ -587,6 +587,50 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.ToTable("Outboxes");
                 });
 
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.SmtpInfo", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Domain")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("EnableSSL")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("_id");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SecurityProtocol")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SmtpInfos");
+                });
+
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileBucket", b =>
                 {
                     b.Property<long>("Id")

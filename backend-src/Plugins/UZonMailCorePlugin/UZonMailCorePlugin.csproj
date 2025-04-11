@@ -33,8 +33,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="data\init\smtpInfo.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Folder Include="Utils\Attributes\" />
 		<Folder Include="Utils\Helpers\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="data\init\smtpInfo.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -53,10 +63,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="data\HELO.txt">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="data\smtpConfig.txt">
+	  <None Update="data\init\HELO.txt">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

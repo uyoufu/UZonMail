@@ -1,0 +1,457 @@
+[
+	{
+		"domain": "hotmail.com",
+		"host": "smtp-mail.outlook.com",
+		"port": 25,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "163.com",
+		"host": "smtp.163.com",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "126.com",
+		"host": "smtp.126.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": false
+	},
+	{
+		"domain": "yeah.net",
+		"host": "smtp.yeah.net",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": false
+	},
+	{
+		"domain": "263.net",
+		"host": "smtp.263.net",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": false
+	},
+	{
+		"domain": "189.cn",
+		"host": "smtp.189.cn",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": false
+	},
+	{
+		"domain": "139.com",
+		"host": "smtp.139.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": false
+	},
+	{
+		"domain": "qq.com",
+		"host": "smtp.qq.com",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "orange.fr",
+		"host": "smtp.orange.fr",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": false
+	},
+	{
+		"domain": "gmail.com",
+		"host": "smtp.gmail.com",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "sina.com",
+		"host": "smtp.sina.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "outlook.com",
+		"host": "smtp-mail.outlook.com",
+		"port": 25,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "live.cn",
+		"host": "smtp-mail.outlook.com",
+		"port": 25,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "sina.cn",
+		"host": "smtp.sina.cn",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": false
+	},
+	{
+		"domain": "live.com",
+		"host": "smtp-mail.outlook.com",
+		"port": 25,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "aliyun.com",
+		"host": "smtp.aliyun.com",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": false
+	},
+	{
+		"domain": "foxmail.com",
+		"host": "smtp.qq.com",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "msn.com",
+		"host": "smtp-mail.outlook.com",
+		"port": 25,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "vip.qq.com",
+		"host": "smtp.qq.com",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "vip.163.com",
+		"host": "smtp.vip.163.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "sohu.com",
+		"host": "smtp.sohu.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "sogou.com",
+		"host": "smtp.sogou.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "vip.sina.com",
+		"host": "smtp.vip.sina.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "wo.com.cn",
+		"host": "smtp.wo.com.cn",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "icloud.com",
+		"host": "smtp.mail.me.com",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "163.net",
+		"host": "smtp.163.net",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "china.com",
+		"host": "smtp.china.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "cww.com",
+		"host": "smtp.china.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "eazier.com",
+		"host": "smtp.eazier.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "vip.sohu.com",
+		"host": "smtp.vip.sohu.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "sohu.net",
+		"host": "smtp.sohu.net",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "netease.com",
+		"host": "smtp.netease.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "tom.com",
+		"host": "smtp.tom.com",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.com.hk",
+		"host": "smtp.mail.yahoo.com.hk",
+		"port": 587,
+		"securityProtocol":10,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.com.mx",
+		"host": "smtp.mail.yahoo.com.mx",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.com.br",
+		"host": "smtp.mail.yahoo.com.br",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.com.ar",
+		"host": "smtp.mail.yahoo.com.ar",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.com.au",
+		"host": "smtp.mail.yahoo.com.au",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.co.kr",
+		"host": "smtp.mail.yahoo.co.kr",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.co.uk",
+		"host": "smtp.mail.yahoo.co.uk",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.co.jp",
+		"host": "smtp.mail.yahoo.co.jp",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.ca",
+		"host": "smtp.mail.yahoo.ca",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.dk",
+		"host": "smtp.mail.yahoo.dk",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.de",
+		"host": "smtp.mail.yahoo.de",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.fr",
+		"host": "smtp.mail.yahoo.fr",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.es",
+		"host": "smtp.mail.yahoo.es",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.it",
+		"host": "smtp.mail.yahoo.it",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.se",
+		"host": "smtp.mail.yahoo.se",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.no",
+		"host": "smtp.mail.yahoo.no",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.com",
+		"host": "smtp.mail.yahoo.com",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "yahoo.com.tw",
+		"host": "smtp.mail.yahoo.com.tw",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "mail.ru",
+		"host": "smtp.mail.ru",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "inbox.ru",
+		"host": "smtp.mail.ru",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "list.ru",
+		"host": "smtp.mail.ru",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "bk.ru",
+		"host": "smtp.mail.ru",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "mail.ua",
+		"host": "smtp.mail.ru",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "comcast.net",
+		"host": "smtp.comcast.net",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "wanadoo.fr",
+		"host": "smtp.orange.fr",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "aol.com",
+		"host": "smtp.aol.com",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "orange.net",
+		"host": "smtp.orange.net",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "orange.uk",
+		"host": "smtp.orange.co.uk",
+		"port": 25,
+		"securityProtocol": 1,
+		"enableSSL": true
+	},
+	{
+		"domain": "office365.com",
+		"host": "smtp.office365.com",
+		"port": 587,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "mail.com",
+		"host": "smtp.mail.com",
+		"port": 25,
+		"securityProtocol": 8,
+		"enableSSL": true
+	},
+	{
+		"domain": "gmx.com",
+		"host": "smtp.gmx.com",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	},
+	{
+		"domain": "naver.com",
+		"host": "smtp.naver.com",
+		"port": 465,
+		"securityProtocol": 2,
+		"enableSSL": true
+	}
+]

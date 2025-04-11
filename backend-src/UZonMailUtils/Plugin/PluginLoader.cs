@@ -35,9 +35,13 @@ namespace Uamazing.Utils.Plugin
         private List<string>? _allDllNames;
         private Assembly? CurrentDomain_AssemblyResolve(object? sender, ResolveEventArgs args)
         {
+            // 第一次调用时，获取所有的 dll 名称
             _allDllNames ??= [.. Directory.GetFiles("./", "*.dll", SearchOption.AllDirectories)];
 
             var dllName = args.Name.Split(',').First() + ".dll";
+
+            // 插件相互引用时，要到各自的目录中去加载
+            // TODO: 目前由插件自己控制，需保证不引用其它插件依赖
             var dllFullName = _allDllNames.Where(x => x.EndsWith(dllName)).FirstOrDefault();
 
             if(dllFullName == null)
