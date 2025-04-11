@@ -57,6 +57,10 @@ export default {
     col_proxy: '代理',
     col_status: '验证',
   },
+  inboxManager: {
+    importFromTxt: 'Txt 导入',
+    importFromTxtTooltip: "支持格式: 邮箱, 用户名, 最小发件间隔 \n 三者可以任意顺序排列 \n 例如: test{'@'}gmail.com, uzonmail, 1 \n 其中最小发件间隔单位为小时",
+  },
   outboxStatus: {
     none: '未验证',
     success: '成功',

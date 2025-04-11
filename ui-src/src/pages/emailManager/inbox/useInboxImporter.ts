@@ -100,8 +100,8 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
     return inbox
   }
 
-  const importFromTxtLable = t('outboxManager.importFromTxt')
-  const importFromTxtTooltip = t('outboxManager.importFromTxtTooltip').split('\n')
+  const importFromTxtLable = t('inboxManager.importFromTxt')
+  const importFromTxtTooltip = t('inboxManager.importFromTxtTooltip').split('\n')
   // #endregion
 
   return {
