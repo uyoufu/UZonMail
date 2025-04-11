@@ -41,6 +41,8 @@ export interface IPopupDialogField {
   parser?: (value: any) => any, // 解析函数,在返回时，对数据进行转换
   tooltip?: Array<any> | ((params?: object) => Promise<string[]>) | string, // 提示
   disable?: boolean, // 是否禁用，一般用于仅显示数据,
+  disableAutogrow?: boolean, // 当为 textarea 时，是否自动增长
+  classes?: string, // 自定义样式
 }
 
 /**

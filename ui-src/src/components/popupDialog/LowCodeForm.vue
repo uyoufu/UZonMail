@@ -1,6 +1,6 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide" :persistent="persistent" @keydown.enter="onOKClick">
-    <q-card style="min-width: 250px;">
+  <q-dialog ref="dialogRef" @hide="onDialogHide" :persistent="persistent" @keydown.enter="onEnterKeyPress">
+    <q-card class="low-code_form-container">
       <!--
         ... 内容
         ... 用q-card-section来做？
@@ -10,34 +10,34 @@
       <div class="q-py-md q-px-xs justify-start items-center" :class="getContainerClass()">
         <template v-for="field in validFields" :key="field.name">
           <q-input v-if="isMatchedType(field, commonInputTypes)" outlined class="q-mb-sm low-code__field q-px-sm"
-            standout dense v-model="fieldsModel[field.name]" :type="(field.type as any)" :label="field.label"
-            :placeholder="field.placeholder" :disable="field.disable">
+            :class="field.classes" standout dense v-model="fieldsModel[field.name]" :type="(field.type as any)"
+            :label="field.label" :placeholder="field.placeholder" :disable="field.disable">
             <template v-if="field.icon" v-slot:prepend>
               <q-icon :name="field.icon" />
             </template>
             <AsyncTooltip :tooltip="field.tooltip" />
           </q-input>
 
-          <q-input v-if="isMatchedType(field, ['textarea'])" outlined class="q-mb-sm low-code__field q-px-sm" standout
-            dense v-model="fieldsModel[field.name]" type="textarea" autogrow :label="field.label"
-            :disable="field.disable" :placeholder="field.placeholder || '可 Enter 换行'">
+          <q-input v-if="isMatchedType(field, ['textarea'])" outlined class="q-mb-sm low-code__field q-px-sm"
+            :class="field.classes" standout dense v-model="fieldsModel[field.name]" type="textarea"
+            :autogrow="!field.disableAutogrow" :label="field.label" :disable="field.disable"
+            :placeholder="field.placeholder || '可 Enter 换行'">
             <template v-if="field.icon" v-slot:prepend>
               <q-icon :name="field.icon" />
             </template>
-
             <AsyncTooltip :tooltip="field.tooltip" />
           </q-input>
 
-          <PasswordInput v-if="isMatchedType(field, 'password')" class="q-mb-sm low-code__field q-px-sm" no-icon
-            :label="field.label" v-model="fieldsModel[field.name]" dense>
+          <PasswordInput v-if="isMatchedType(field, 'password')" class="q-mb-sm low-code__field q-px-sm"
+            :class="field.classes" no-icon :label="field.label" v-model="fieldsModel[field.name]" dense>
             <AsyncTooltip :tooltip="field.tooltip" />
           </PasswordInput>
 
           <q-select v-if="isMatchedType(field, ['selectOne', 'selectMany'])" class="q-mb-sm low-code__field q-px-sm"
-            outlined v-model="fieldsModel[field.name]" :options="field.options" :label="field.label"
-            :disable="field.disable" dense :option-label="field.optionLabel" :option-value="field.optionValue"
-            options-dense :multiple="isMatchedType(field, 'selectMany')" :map-options="field.mapOptions"
-            :emit-value="field.emitValue">
+            :class="field.classes" outlined v-model="fieldsModel[field.name]" :options="field.options"
+            :label="field.label" :disable="field.disable" dense :option-label="field.optionLabel"
+            :option-value="field.optionValue" options-dense :multiple="isMatchedType(field, 'selectMany')"
+            :map-options="field.mapOptions" :emit-value="field.emitValue">
             <AsyncTooltip :tooltip="field.tooltip" />
             <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
               <q-item v-bind="itemProps">
@@ -52,12 +52,12 @@
             </template>
           </q-select>
 
-          <q-checkbox v-if="isMatchedType(field, 'boolean')" class="q-mb-sm low-code__field q-px-sm" dense keep-color
-            v-model="fieldsModel[field.name]" :label="field.label">
+          <q-checkbox v-if="isMatchedType(field, 'boolean')" class="q-mb-sm low-code__field q-px-sm"
+            :class="field.classes" dense keep-color v-model="fieldsModel[field.name]" :label="field.label">
             <AsyncTooltip anchor="bottom left" self="top start" :tooltip="field.tooltip" />
           </q-checkbox>
 
-          <div v-if="isMatchedType(field, 'editor')" class="q-mb-sm low-code__field q-px-sm">
+          <div v-if="isMatchedType(field, 'editor')" class="q-mb-sm low-code__field q-px-sm" :class="field.classes">
             <q-editor v-model="fieldsModel[field.name]" :definitions="editorDefinitions" :toolbar="editorToolbar"
               max-height="300px" placeholder="在此处输入模板内容, 变量使用 {{ }} 号包裹, 例如 {{ variableName }}">
             </q-editor>
@@ -360,9 +360,23 @@ if (props.onSetup) {
   })
 }
 // #endregion
+
+// #region Enter 快捷键
+async function onEnterKeyPress (event: KeyboardEvent) {
+  // 如果 target 是 textArea，则不处理
+  if (event.target && (event.target as HTMLElement).nodeName === 'TEXTAREA') {
+    return
+  }
+  await onOKClick()
+}
+// #endregion
 </script>
 
 <style lang="scss" scoped>
+.low-code_form-container {
+  min-width: 300px;
+}
+
 .low-code__container_2 {
   display: flex;
   flex-wrap: wrap;

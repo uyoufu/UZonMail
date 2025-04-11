@@ -37,7 +37,8 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
           type: PopupDialogFieldType.textarea,
           placeholder: '每行一个发件箱',
           value: '',
-          required: true
+          required: true,
+          disableAutogrow: true
         }
       ]
     }
