@@ -68,7 +68,7 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
 
     const newData: IOutbox[] = []
     for (const outboxText of outboxTexts) {
-      const outbox = __getNewOutboxData(outboxText, smtpInfos)
+      const outbox = __getNewOutboxData(emailGroupId, outboxText, smtpInfos)
       if (outbox) newData.push(outbox)
     }
 
@@ -84,8 +84,9 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
     notifySuccess('导入成功')
   }
 
-  function __getNewOutboxData (outboxTexts: string[], smtpInfos: ISmtpInfo[]): IOutbox | null {
+  function __getNewOutboxData (emailGroupId: number, outboxTexts: string[], smtpInfos: ISmtpInfo[]): IOutbox | null {
     const outbox: IOutbox = {
+      emailGroupId,
       email: '',
       smtpHost: '',
       smtpPort: 0,
