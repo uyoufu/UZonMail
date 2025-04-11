@@ -3,6 +3,40 @@ title: 历史版本
 editLink: false
 ---
 
+::: warning
+
+重要通知：
+
+2025-04-12 ~ 2024-04-13 期间将进行服务器维护，专业版本及以上功能将暂时无法使用，软件将无法下载。
+
+:::
+
+## 0.12.4
+
+> 更新日期：2025-04-11
+
+### 新增功能
+
+1. 增加通过粘贴文本导入发件箱、收件箱
+2. 添加发件箱时，默认智能补全
+3. 发件箱检测失败时，提示失败的发件箱号
+4. 优化侧边栏显示样式
+
+### bug 修复
+
+1. 修复模板中包含网络图片跨域时，无法保存问题
+2. 修复设置更新后，未及时更新问题
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.12.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.4.0.zip)
+
+[uzonmail-service-win-x64-0.12.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.12.4.0.zip)
+
+[uzonmail-service-linux-x64-0.12.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.12.4.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.12.3
 
 > 更新日期: 2025-04-02
