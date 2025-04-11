@@ -154,6 +154,7 @@ const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
     onClick: exportAllInboxesInThisGroup
   }
 ])
+
 // 导出当前组中的所有的收件箱
 import { writeExcel } from 'src/utils/file'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -173,6 +174,8 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
   })
 }
 // #endregion
+
+
 </script>
 
 <style lang="scss" scoped></style>

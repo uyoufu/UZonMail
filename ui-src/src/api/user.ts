@@ -12,7 +12,7 @@ export interface IUserLoginInfo {
 }
 
 /**
- * 用户登陆
+ * 用户登录
  * @returns
  */
 export function userLogin (userId: string, password: string) {
@@ -27,7 +27,7 @@ export function userLogin (userId: string, password: string) {
 }
 
 /**
- * 用户重新登陆
+ * 用户重新登录
  * 获取新的权限等数据
  * @returns
  */

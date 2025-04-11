@@ -138,7 +138,7 @@ export const useUserInfoStore = defineStore('userInfo', {
       return targetDenies.some(x => this.access.includes(x))
     },
 
-    // 退出登陆
+    // 退出登录
     async logout () {
       // 重置数据
       const tokenSession = useSessionStorage('token', '')
@@ -146,7 +146,7 @@ export const useUserInfoStore = defineStore('userInfo', {
       tokenSession.value = null
       accessSession.value = null
 
-      // 重定向到登陆页面
+      // 重定向到登录页面
       const router = useRouter()
       await router.push('/login')
     },

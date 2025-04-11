@@ -26,7 +26,7 @@ export function useContextMenu (addNewRow: (newRow: Record<string, any>) => void
     {
       name: 'forbidden',
       label: '禁用',
-      tooltip: '禁用后, 用户将无法登陆',
+      tooltip: '禁用后, 用户将无法登录',
       color: 'negative',
       vif: v => {
         console.log('forbidden', v, v.status, UserStatus.forbiddenLogin, v.status !== UserStatus.forbiddenLogin)
@@ -72,7 +72,7 @@ export function useContextMenu (addNewRow: (newRow: Record<string, any>) => void
   }
 
   async function onForbiddenLogin (userInfo: Record<string, any>) {
-    const confirm = await confirmOperation('禁用用户', `是否禁用用户 ${userInfo.userId} ? 禁用后，该用户将无法登陆，但现有发件任务不会中断`)
+    const confirm = await confirmOperation('禁用用户', `是否禁用用户 ${userInfo.userId} ? 禁用后，该用户将无法登录，但现有发件任务不会中断`)
     if (!confirm) return false
 
     await setUserStatus(userInfo.id, UserStatus.forbiddenLogin)
@@ -83,7 +83,7 @@ export function useContextMenu (addNewRow: (newRow: Record<string, any>) => void
   }
 
   async function onCancelForbidden (userInfo: Record<string, any>) {
-    const confirm = await confirmOperation('启用用户', `是否启用用户 ${userInfo.userId} ? 启用后，该用户将可以正常登陆`)
+    const confirm = await confirmOperation('启用用户', `是否启用用户 ${userInfo.userId} ? 启用后，该用户将可以正常登录`)
     if (!confirm) return false
 
     await setUserStatus(userInfo.id, UserStatus.normal)
