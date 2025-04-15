@@ -20,6 +20,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
         protected override async Task HandleCore(SendingContext context)
         {
+            _logger.Debug("线程调用本地发件器进行发件");
+
             // 如果前面失败了，跳过
             if (context.Status.HasFlag(ContextStatus.Fail))
                 return;

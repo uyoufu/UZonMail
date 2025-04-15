@@ -29,7 +29,10 @@ namespace UZonMail.Core.Services.SendCore.Sender
 
         private readonly ProxyManager _proxyManager;
         private readonly GroupTasksList _groupTaskList;
-        private readonly Timer _timer;
+
+        private readonly Timer _dispose_timer;
+        private readonly Timer _keepAlive_timer;
+
 
         public SmtpClientFactory(ProxyManager proxyManager, GroupTasksList groupTaskList)
         {
@@ -37,14 +40,35 @@ namespace UZonMail.Core.Services.SendCore.Sender
             _groupTaskList = groupTaskList;
 
             // 新建定时器，定时清理过期的 SmtpClient
-            _timer = new Timer(1000 * 60 * 5);
-            _timer.Elapsed += Timer_Elapsed;
-            _timer.Start();
-        }
+            _dispose_timer = new Timer(1000 * 60 * 5);
+            _dispose_timer.Elapsed += Timer_Elapsed;
+            _dispose_timer.Start();
 
+            // 新建定时器，对 smtp 连接进行保活
+            _keepAlive_timer = new Timer(1000 * 30); // 30s
+            _keepAlive_timer.Elapsed += KeepAliveTimer_Elapsed;
+        }
         private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
             DisposeSmtpClients();
+        }
+        private void KeepAliveTimer_Elapsed(object? sender, ElapsedEventArgs e)
+        {
+            _logger.Info("开始对缓存的 SMTP 连接进行保活");
+            Task.Run(async () =>
+            {
+                var keys = _smptClients.Keys.ToList();
+                foreach (var key in keys)
+                {
+                    if (!_smptClients.TryGetValue(key, out var client)) continue;
+                    if (!client.IsConnected)
+                    {
+                        _smptClients.TryRemove(key, out _);
+                    }
+
+                    await client.NoOpAsync();
+                }
+            });
         }
 
         /// <summary>
@@ -159,7 +183,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 _logger.Debug($"邮箱 {outbox.Email} 未配置代理");
                 return null;
             }
-           
+
             if (tryCount < 0)
             {
                 _logger.Warn($"邮箱 {outbox.Email} 获取代理失败，尝试次数已达上限");
@@ -202,7 +226,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
         private async Task<Result<SmtpClient>> ConnectSmtpClient(ThrottlingSmtpClient client, OutboxEmailAddress outbox, SendingContext sendingContext, string key, int tryCount = 3)
         {
             // 获取代理
-            client.ProxyClient = await GetProxyClient(sendingContext);           
+            client.ProxyClient = await GetProxyClient(sendingContext);
 
             // 用于测试在发件过程中，代理不可用的情况
             //return new Result<SmtpClient>() { Data = client };
@@ -248,7 +272,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
 
             _logger.Debug($"开始释放 SmtpClient");
 
-            // 获取任务组
+            // 按任务组进行清除
             var taskGroupIds = keys.Select(x => x.Split(":")[0]).Distinct().Select(x => long.Parse(x)).ToList();
             foreach (var taskGroupId in taskGroupIds)
             {
