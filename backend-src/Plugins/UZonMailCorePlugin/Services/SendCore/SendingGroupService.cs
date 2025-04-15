@@ -203,10 +203,11 @@ namespace UZonMail.Core.Services.EmailSending
             var dataOutboxEmails = sendingGroupData.Data?.Select(x => x.SelectTokenOrDefault("outbox", ""))
                 .Where(x => !string.IsNullOrEmpty(x)) ?? [];
 
-            var allOutboxIds = outboxIds.Concat(groupOutboxIds).Concat(dataOutboxIds).ToList();
+            var allOutboxIds = outboxIds.Concat(dataOutboxIds).ToList();
             var outboxes = await db.Outboxes.AsNoTracking()
                 .Where(x => x.Status != OutboxStatus.Valid)
-                .Where(x => allOutboxIds.Contains(x.Id) || dataOutboxEmails.Contains(x.Email)).ToListAsync();
+                .Where(x => allOutboxIds.Contains(x.Id) || dataOutboxEmails.Contains(x.Email) || groupOutboxIds.Contains(x.EmailGroupId))
+                .ToListAsync();
 
             // 重新验证发件箱
             var emailUtils = serviceProvider.GetRequiredService<EmailValidatorService>();

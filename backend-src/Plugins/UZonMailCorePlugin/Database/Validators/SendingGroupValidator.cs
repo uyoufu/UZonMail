@@ -66,7 +66,7 @@ namespace UZonMail.Core.Database.Validators
                 }
 
                 // 验证其它数据
-                if (sendingGroup.Outboxes.Count == 0 && excelDataInfo.OutboxStatus != ExcelDataStatus.All)
+                if (sendingGroup.Outboxes.Count == 0 && excelDataInfo.OutboxStatus != ExcelDataStatus.All && sendingGroup.OutboxGroups?.Count == 0)
                 {
                     return new ErrorResult<bool>("缺失发件箱，请在数据中指定发件箱或选择发件箱");
                 }
