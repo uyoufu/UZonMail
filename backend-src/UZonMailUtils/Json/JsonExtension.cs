@@ -11,7 +11,7 @@ namespace UZonMail.Utils.Json
 {
     public static class JsonExtension
     {
-        private readonly static JsonSerializerSettings _jsonSettings = new JsonSetting().WithCameCase();
+        public readonly static JsonSerializerSettings CameCaseJsonSettings = new JsonSetting().WithCameCase();
 
         /// <summary>
         /// object 对象转换成 json
@@ -20,7 +20,7 @@ namespace UZonMail.Utils.Json
         /// <returns></returns>
         public static string ToJson<T>(this T obj)
         {
-            return JsonConvert.SerializeObject(obj, _jsonSettings);
+            return JsonConvert.SerializeObject(obj, CameCaseJsonSettings);
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace UZonMail.Utils.Json
         /// <returns></returns>
         public static T? JsonTo<T>(this string json)
         {
-            return JsonConvert.DeserializeObject<T>(json, _jsonSettings);
+            return JsonConvert.DeserializeObject<T>(json, CameCaseJsonSettings);
         }
 
         /// <summary>

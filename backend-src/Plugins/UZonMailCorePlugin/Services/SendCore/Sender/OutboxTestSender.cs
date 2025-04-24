@@ -8,6 +8,10 @@ using UZonMail.Utils.Results;
 using UZonMail.Utils.Extensions;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Core.Services.Config;
+using UZonMail.DB.MySql;
+using MailKit.Net.Proxy;
+using UZonMail.Core.Utils.FluentMailkit;
+using MailKit.Security;
 
 namespace UZonMail.Core.Services.SendCore.Sender
 {
@@ -21,69 +25,89 @@ namespace UZonMail.Core.Services.SendCore.Sender
     /// <param name="outbox"></param>
     /// <param name="smtpPasswordSecretKeys"></param>
     /// <param name="sqlContext"></param>
-    public class OutboxTestSender(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys, SqlContext sqlContext, DebugConfig debugConfig)
+    public class OutboxTestSender(SqlContext sqlContext)
     {
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxTestSender));
 
         /// <summary>
-        /// 测试不需要实际进行发件
-        /// [TODO]: 需要进行性能优化：1-同类型的验证进行复用 2-增加代理
+        /// 测试发件箱
+        /// 不会真实发件，只会进行连接测试
         /// </summary>
         /// <returns></returns>
-        public async Task<Result<string>> SendTest()
+        public async Task<Result<string>> SendTest(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
+        {
+            // 解析密码
+            string smtpPassword = string.Empty;
+            if (!string.IsNullOrEmpty(outbox.Password))
+                smtpPassword = outbox.Password.DeAES(smtpPasswordSecretKeys.Key, smtpPasswordSecretKeys.Iv);
+
+            ProxyClient? proxyClient = null;
+            // 获取代理
+            if (outbox.ProxyId > 0)
+            {
+                // 获取当前用户信息
+                var user = await sqlContext.Users.AsNoTracking().Where(x => x.Id == outbox.UserId).FirstOrDefaultAsync();
+                var proxy = await sqlContext.Proxies.Where(x => x.OrganizationId == user.OrganizationId)
+                    .Where(x => x.Id == outbox.ProxyId)
+                    .FirstOrDefaultAsync();
+                if (proxy != null)
+                {
+                    // 从代理管理器中获取代理
+                    proxyClient = proxy.ToProxyInfo()?.GetProxyClient(_logger);
+                }
+            }
+
+            var smtpUsername = string.IsNullOrEmpty(outbox.UserName) ? outbox.Email : outbox.UserName;
+            return  SendTest(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL, smtpUsername, smtpPassword, proxyClient);
+        }
+
+        /// <summary>
+        /// 测试发件箱
+        /// TODO: 需要进行性能优化：1-同类型的验证进行复用
+        /// </summary>
+        /// <param name="outboxName"></param>
+        /// <param name="outboxEmail"></param>
+        /// <param name="smtpHost"></param>
+        /// <param name="smtpPort"></param>
+        /// <param name="enableSSL"></param>
+        /// <param name="smtpUserName"></param>
+        /// <param name="smtpPassword"></param>
+        /// <param name="proxyClient"></param>
+        /// <returns></returns>
+        public Result<string> SendTest(string smtpHost, int smtpPort, bool enableSSL,
+            string smtpUserName, string smtpPassword, IProxyClient? proxyClient = null)
         {
             // 参考：https://github.com/jstedfast/MailKit/tree/master/Documentation/Examples
-            // 本机发件逻辑
-            var message = new MimeMessage();
-            var mailbox = new MailboxAddress(outbox.Name, outbox.Email);
-            // 发件人
-            message.From.Add(mailbox);
-            // 主题
-            message.Subject = "SMTP Testing";
-            message.To.Add(mailbox);
-            // 正文
-            BodyBuilder bodyBuilder = new()
-            {
-                HtmlBody = "This email is for SMTP Testing from UZonMail"
-            };
-            message.Body = bodyBuilder.ToMessageBody();
+            using var client = new SmtpClient();
+            client.ProxyClient = proxyClient;
+
+            string sendResult = $"{smtpUserName} test success";
             try
             {
-                using var client = new SmtpClient();
-                // 获取代理
-                if (outbox.ProxyId > 0)
-                {
-                    // 获取当前用户信息
-                    var user = await sqlContext.Users.AsNoTracking().Where(x => x.Id == outbox.UserId).FirstOrDefaultAsync();
-                    var proxy = await sqlContext.Proxies.Where(x => x.OrganizationId == user.OrganizationId)
-                        .Where(x => x.Id == outbox.ProxyId)
-                        .FirstOrDefaultAsync();
-                    if (proxy != null)
-                    {
-                        // 从代理管理器中获取代理
-
-                        client.ProxyClient = proxy.ToProxyInfo()?.GetProxyClient(_logger);
-                    }
-                }
-                client.Connect(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL);
+                client.Connect(smtpHost, smtpPort, enableSSL ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.Auto);
                 // 鉴权
-                if (!string.IsNullOrEmpty(outbox.Password))
+                if (!string.IsNullOrEmpty(smtpPassword))
                 {
-                    var password = outbox.Password.DeAES(smtpPasswordSecretKeys.Key, smtpPasswordSecretKeys.Iv);
-                    client.Authenticate(string.IsNullOrEmpty(outbox.UserName) ? outbox.Email : outbox.UserName, password);
+                    client.Authenticate(smtpUserName, smtpPassword);
+                }                
+                return Result<string>.Success(sendResult);
+            }
+            catch (SslHandshakeException ex)
+            {
+                _logger.Warn(ex);
+                // 可能是证书过期
+                client.Connect(smtpHost, smtpPort, SecureSocketOptions.None);
+                // 鉴权
+                if (!string.IsNullOrEmpty(smtpPassword))
+                {
+                    client.Authenticate(smtpUserName, smtpPassword);
                 }
-                string sendResult = "fake sending by debug";
-
-                // 测试发件，不需要真实发送，只需要验证授权即可
-                //if (!debugConfig.IsDemo)
-                //    sendResult = await client.SendAsync(message);
-
-                return new Result<string>(true, sendResult);
+                return Result<string>.Success(sendResult);
             }
             catch (Exception ex)
             {
                 _logger.Warn(ex);
-                return new Result<string>(false, ex.Message, ex.Message);
+                return Result<string>.Fail(ex.Message);
             }
         }
     }

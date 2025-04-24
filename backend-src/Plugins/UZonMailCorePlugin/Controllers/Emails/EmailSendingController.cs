@@ -94,7 +94,8 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             // 移除发件组任务
-            sendingService.RemoveSendingGroupTaskOnly(sendingGroup);
+            await sendingService.RemoveSendingGroupTask(sendingGroup);
+
             // 更新状态
             await db.SendingGroups.UpdateAsync(x => x.Id == sendingGroupId, x => x.SetProperty(y => y.Status, SendingGroupStatus.Pause));
             await db.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending,
@@ -117,7 +118,7 @@ namespace UZonMail.Core.Controllers.Emails
             if (sendingGroup == null)
             {
                 return false.ToFailResponse("发件组不存在");
-            }            
+            }
 
             sendingGroup.SmtpPasswordSecretKeys = smtpSecretKeys.SmtpPasswordSecretKeys;
 
@@ -146,7 +147,7 @@ namespace UZonMail.Core.Controllers.Emails
             if (sendingGroup.Status == SendingGroupStatus.Sending)
             {
                 // 取消发件
-                sendingService.RemoveSendingGroupTaskOnly(sendingGroup);
+                await sendingService.RemoveSendingGroupTask(sendingGroup);
             }
 
             // 更新状态

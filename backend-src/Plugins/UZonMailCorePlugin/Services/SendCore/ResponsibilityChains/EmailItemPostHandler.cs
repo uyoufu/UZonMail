@@ -31,7 +31,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 if (emailItem.TriedCount >= emailItem.MaxRetryCount)
                 {
                     // 说明已经达到了最大重试次数
-                    emailItem.SetStatus(SendItemMetaStatus.Error, $"重试已达最大次数 {emailItem.MaxRetryCount}");
+                    emailItem.SetStatus(SendItemMetaStatus.Error, $"当前邮箱重试已达最大次数 {emailItem.MaxRetryCount}");
                 }
             }
 

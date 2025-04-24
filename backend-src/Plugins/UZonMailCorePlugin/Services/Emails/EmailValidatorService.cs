@@ -47,8 +47,8 @@ namespace UZonMail.Core.Services.Emails
         public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
         {
             // 发送测试邮件
-            var outboxTestor = new OutboxTestSender(outbox, smtpPasswordSecretKeys, db, debugConfig);
-            var result = await outboxTestor.SendTest();
+            var outboxTestor = new OutboxTestSender(db);
+            var result = await outboxTestor.SendTest(outbox, smtpPasswordSecretKeys);
 
             // 更新数据库
             await db.Outboxes.UpdateAsync(x => x.Id == outbox.Id,

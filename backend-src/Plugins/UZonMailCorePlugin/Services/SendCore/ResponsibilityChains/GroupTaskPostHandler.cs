@@ -26,7 +26,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             if (!emailItem.IsErrorOrSuccess()) return;
 
             // 向数据库中保存状态
-            var sqlContext = context.SqlContext;            
+            var sqlContext = context.SqlContext;
             var sendingGroup = await SendingGroupUpdater.UpdateSendingGroupSentInfo(sqlContext, emailItem.SendingItem.SendingGroupId);
 
             var lastMessage = $"[{context.OutboxAddress.Email}] -> [{string.Join(",", emailItem.Inboxes.Select(x => x.Email))}]";
@@ -44,18 +44,10 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
             // 若是最后一封邮件，要标记办结
             if (!groupTasksList.TryGetValue(outbox.UserId, out var groupTasks)) return;
-            if(groupTasks.TryRemove(sendingGroup.Id,out _))
+            if (groupTasks.TryRemove(sendingGroup.Id, out _))
             {
-                // 标记办结
-                sendingGroup.Status = SendingGroupStatus.Finish;
-                sendingGroup.SendEndDate = DateTime.Now;
-                await sqlContext.SaveChangesAsync();
-
-                // 通知发件组发送完成                
-                await client.SendingGroupProgressChanged(new SendingGroupProgressArg(sendingGroup, context.GroupTaskStartDate)
-                {
-                    ProgressType = ProgressType.End
-                });
+                var finisher = context.Provider.GetRequiredService<SendingGroupFinisher>();
+                await finisher.MarkSendingGroupFinished(sendingGroup.Id, context.GroupTaskStartDate);                
             }
         }
     }

@@ -120,7 +120,8 @@ namespace UZonMail.Core.Services.SendCore
                     typeof(GroupTaskPostHandler), // 发件任务回调
                     typeof(OutboxesPostHandler), // 发件箱回调
                     typeof(OutboxCooler), // 发件箱冷却重置
-                    typeof(OutboxUnlocker) // 发件箱解锁
+                    typeof(OutboxUnlocker), // 发件箱解锁
+                    typeof(SmtpClientDisposer) // 释放 smtp 连接
                 } 
                 .Select(provider.GetRequiredService)
                 .Where(x => x != null)

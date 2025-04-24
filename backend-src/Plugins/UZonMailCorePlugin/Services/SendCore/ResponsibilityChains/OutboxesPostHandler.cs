@@ -5,7 +5,6 @@ using UZonMail.Core.Services.SendCore.Utils;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.SignalRHubs.SendEmail;
-using UZonMail.Core.Utils.Database;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
@@ -169,16 +168,9 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 // 更新发件组成功的数据
                 var removedSendingGroup = await SendingGroupUpdater.UpdateSendingGroupSentInfo(sqlContext, sendingGroupId);
 
-                // 修改发件组状态
-                removedSendingGroup.Status = SendingGroupStatus.Finish;
-                removedSendingGroup.SendEndDate = DateTime.Now;
-                await sqlContext.SaveChangesAsync();
-
-                // 通知发件组发送完成                
-                await client.SendingGroupProgressChanged(new SendingGroupProgressArg(removedSendingGroup, sendingContext.GroupTaskStartDate)
-                {
-                    ProgressType = ProgressType.End
-                });
+                // 标记结束
+                var finisher = sendingContext.Provider.GetRequiredService<SendingGroupFinisher>();
+                await finisher.MarkSendingGroupFinished(removedSendingGroup.Id, sendingContext.GroupTaskStartDate);
             }
         }
     }

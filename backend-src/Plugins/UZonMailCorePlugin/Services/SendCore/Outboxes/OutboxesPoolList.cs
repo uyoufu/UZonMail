@@ -76,9 +76,9 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// 移除组对应的发件箱
         /// </summary>
         /// <returns></returns>
-        public bool RemoveOutbox(long userId, long sendingGroupId)
+        public List<OutboxEmailAddress> RemoveOutbox(long userId, long sendingGroupId)
         {
-            if (!this.TryGetValue(userId, out var userPool)) return true;
+            if (!this.TryGetValue(userId, out var userPool)) return [];
             return userPool.RemoveOutboxesBySendingGroup(sendingGroupId);
         }
 
@@ -91,6 +91,21 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         {
             if(!this.TryGetValue(userId, out var userPool)) return false;
             return userPool.ExistOutboxes(sendingGroupId);
+        }
+
+        /// <summary>
+        /// 是否存在发作箱
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public bool ExistOutbox(string email)
+        {
+            foreach(var userPool in this.Values)
+            {
+                if (userPool.ContainsKey(email)) return true;
+            }
+
+            return false;
         }
     }
 }

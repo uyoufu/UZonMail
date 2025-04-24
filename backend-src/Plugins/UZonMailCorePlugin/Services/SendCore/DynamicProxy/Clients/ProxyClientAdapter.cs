@@ -44,6 +44,11 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         {
             proxyHandler.MarkHealthless();
         }
+
+        /// <summary>
+        /// 是否可用
+        /// </summary>
+        public bool IsEnable => proxyHandler.IsEnable();
         #endregion
     }
 }

@@ -12,8 +12,15 @@ namespace UZonMail.Core.Database.Updater
     /// <param name="db"></param>
     public class DatabaseUpdateService(IServiceProvider serviceProvider, SqlContext db, IConfiguration config) : IScopedService
     {
+        /// <summary>
+        /// 自动升级时，要求的数据库最低版本
+        /// </summary>
         private readonly static Version _minVersionSupport = new("0.10.0.0");
-        private readonly static Version _requiredVersion = new("0.12.4.0");
+
+        /// <summary>
+        /// 当前需要的数据库版本
+        /// </summary>
+        private readonly static Version _requiredVersion = new("0.13.0.1");
 
         private readonly string _settingKey = "DataVersion";
 

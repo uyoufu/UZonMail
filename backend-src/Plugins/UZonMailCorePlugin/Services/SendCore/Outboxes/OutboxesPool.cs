@@ -70,19 +70,23 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// </summary>
         /// <param name="sendingGroupId"></param>
         /// <returns></returns>
-        public bool RemoveOutboxesBySendingGroup(long sendingGroupId)
+        public List<OutboxEmailAddress> RemoveOutboxesBySendingGroup(long sendingGroupId)
         {
-            var outboxes = this.Values;
-            foreach (var outbox in outboxes)
+            List<OutboxEmailAddress> results = [];
+            var keys = this.Keys.ToList();
+            foreach (var email in keys)
             {
+                if(!this.TryGetValue(email, out var outbox)) continue;
+
                 outbox.RemoveSendingGroup(sendingGroupId);
                 if (outbox.Working) continue;
 
                 // 移除
-                this.TryRemove(outbox.Email, out _);
+                this.RemoveOutbox(outbox);
+                results.Add(outbox);
             }
 
-            return true;
+            return results;
         }
 
         /// <summary>
@@ -118,6 +122,11 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         public bool ExistOutboxes(long sendingGroupId)
         {
             return this.Values.Any(x => !x.ShouldDispose && x.ContainsSendingGroup(sendingGroupId));
+        }
+
+        public bool ExistOutbox(string email)
+        {
+            return this.ContainsKey(email);
         }
     }
 }

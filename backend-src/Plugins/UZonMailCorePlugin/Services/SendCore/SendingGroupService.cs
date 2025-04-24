@@ -18,6 +18,7 @@ using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Utils.Web.Exceptions;
 using log4net;
+using UZonMail.Core.Services.SendCore.Sender;
 
 namespace UZonMail.Core.Services.EmailSending
 {
@@ -29,6 +30,7 @@ namespace UZonMail.Core.Services.EmailSending
         , SendingThreadsManager tasksService
         , GroupTasksList waitList
         , OutboxesPoolList outboxesPoolList
+        , SmtpClientFactory clientFactory
         , ISchedulerFactory schedulerFactory
         , IServiceProvider serviceProvider
         ) : IScopedService
@@ -325,15 +327,25 @@ namespace UZonMail.Core.Services.EmailSending
         /// <summary>
         /// 移除发件任务
         /// 里面不会修改发件组和发件项的状态
+        /// 因为移除可能是暂停、停止等不同的状态
         /// </summary>
         /// <returns></returns>
-        public void RemoveSendingGroupTaskOnly(SendingGroup sendingGroup)
+        public Task RemoveSendingGroupTask(SendingGroup sendingGroup)
         {
             // 找到关联的发件箱移除
-            outboxesPoolList.RemoveOutbox(sendingGroup.UserId, sendingGroup.Id);
+            var removedOutboxes = outboxesPoolList.RemoveOutbox(sendingGroup.UserId, sendingGroup.Id);
+
+            // 移除关联的客户端
+            foreach(var outbox in removedOutboxes)
+            {
+                // 释放发件箱
+                clientFactory.DisposeSmtpClients(outbox.Email);
+            }            
 
             // 移除任务
             waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);
+
+            return Task.CompletedTask;
         }
     }
 }

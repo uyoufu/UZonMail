@@ -1241,8 +1241,17 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasColumnType("longtext")
                         .HasColumnName("_id");
 
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("StringValue")
                         .HasColumnType("longtext");
+
+                    b.Property<int?>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 

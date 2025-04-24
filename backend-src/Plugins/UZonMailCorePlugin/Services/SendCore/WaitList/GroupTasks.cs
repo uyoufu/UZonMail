@@ -14,9 +14,10 @@ namespace UZonMail.Core.Services.SendCore.WaitList
     /// 构造函数
     /// </remarks>
     /// <param name="userId"></param>
-    public class GroupTasks(long userId) : ConcurrentDictionary<long, GroupTask>
+    public class GroupTasks(long userId)
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasks));
+        private readonly ConcurrentDictionary<long, GroupTask> _tasks = [];
 
         /// <summary>
         /// 用户 id
@@ -60,7 +61,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         public async Task<SendItemMeta?> GetEmailItem(SendingContext context)
         {
             // 依次获取发件项
-            foreach (var kv in this)
+            foreach (var kv in _tasks)
             {
                 var groupTask = kv.Value;
                 var result = await groupTask.GetEmailItem(context);
@@ -75,7 +76,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             if (outbox.UserId != UserId) return false;
 
             // 依次获取发件项
-            foreach (var kv in this)
+            foreach (var kv in _tasks)
             {
                 var groupTask = kv.Value;
                 var match = groupTask.MatchEmailItem(outbox);
@@ -84,5 +85,30 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
             return false;
         }
+
+        #region 实现 ConcurrentDictionary 需要的接口
+        public bool IsEmpty => _tasks.IsEmpty;
+
+        public int Count => _tasks.Count;
+
+        public bool TryAdd(long key, GroupTask value)
+        {
+            return _tasks.TryAdd(key, value);
+        }
+
+        public bool TryGetValue(long key, out GroupTask value)
+        {
+            return _tasks.TryGetValue(key, out value);
+        }
+
+        public bool TryRemove(long key, out GroupTask value)
+        {
+            if (!_tasks.TryRemove(key, out value)) return false;
+
+            // 添加到消息队列，对消息进行处理
+
+            return true;
+        }
+        #endregion
     }
 }

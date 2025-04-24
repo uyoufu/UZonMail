@@ -10,33 +10,8 @@ using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Settings
 {
-    public class SystemSettingController(SqlContext db, SystemSettingService settingService) : ControllerBaseV1
+    public class UserSettingController(SqlContext db, TokenService tokenService, SystemSettingService settingService) : ControllerBaseV1
     {
-        [HttpPut("base-api-url")]
-        public async Task<ResponseResult<bool>> UpdateBaseApiUrl([FromBody] UpdateBaseApiUrlBody dataParams)
-        {
-            var baseApiUrl = dataParams.BaseApiUrl;
-            if (string.IsNullOrEmpty(baseApiUrl)) return false.ToFailResponse("baseUrl不能为空");
-
-            // 开始更新
-            var setting = await db.SystemSettings.FirstOrDefaultAsync(x => x.Key == SystemSetting.BaseApiUrl);
-            if (setting == null)
-            {
-                setting = new SystemSetting
-                {
-                    Key = SystemSetting.BaseApiUrl,
-                    StringValue = baseApiUrl
-                };
-                db.SystemSettings.Add(setting);
-            }
-            else
-            {
-                setting.StringValue = baseApiUrl;
-            }
-            await db.SaveChangesAsync();
-            return true.ToSuccessResponse();
-        }
-
         /// <summary>
         /// 更新系统设置
         /// </summary>
@@ -51,8 +26,10 @@ namespace UZonMail.Core.Controllers.Settings
                 return false.ToFailResponse("key不能为空");
             }
 
+            var userId = tokenService.GetUserSqlId();
+
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value);
+            await settingService.UpdateSystemSetting(key, value, userId, type: SystemSettingType.User);
             return true.ToSuccessResponse();
         }
 
@@ -71,7 +48,8 @@ namespace UZonMail.Core.Controllers.Settings
             }
 
             // 开始更新
-            await settingService.UpdateSystemSettingJson(key, value);
+            var userId = tokenService.GetUserSqlId();
+            await settingService.UpdateSystemSettingJson(key, value, userId, type: SystemSettingType.User);
             return true.ToSuccessResponse();
         }
 
@@ -82,9 +60,9 @@ namespace UZonMail.Core.Controllers.Settings
             {
                 return false.ToFailResponse("key不能为空");
             }
-
+            var userId = tokenService.GetUserSqlId();
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value);
+            await settingService.UpdateSystemSetting(key, value, userId, type: SystemSettingType.User);
             return true.ToSuccessResponse();
         }
 
@@ -101,9 +79,9 @@ namespace UZonMail.Core.Controllers.Settings
             {
                 return false.ToFailResponse("key不能为空");
             }
-
+            var userId = tokenService.GetUserSqlId();
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value);
+            await settingService.UpdateSystemSetting(key, value, userId, type: SystemSettingType.User);
             return true.ToSuccessResponse();
         }
 
@@ -120,8 +98,8 @@ namespace UZonMail.Core.Controllers.Settings
             {
                 return ResponseResult<SystemSetting?>.Fail("key不能为空");
             }
-
-            var settings = await settingService.GetSystemSetting(key);
+            var userId = tokenService.GetUserSqlId();
+            var settings = await settingService.GetSystemSetting(key, userId);
             return settings.ToSuccessResponse();
         }
 
@@ -137,8 +115,8 @@ namespace UZonMail.Core.Controllers.Settings
             {
                 return new JObject().ToFailResponse("keys不能为空");
             }
-
-            var result = await settingService.GetSystemSettings(keys);
+            var userId = tokenService.GetUserSqlId();
+            var result = await settingService.GetSystemSettings(keys, userId);
 
             return result.ToSuccessResponse();
         }

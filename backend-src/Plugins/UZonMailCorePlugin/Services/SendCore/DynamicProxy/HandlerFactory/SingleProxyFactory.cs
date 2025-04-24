@@ -12,18 +12,23 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.HandlerFactory
 
         private static readonly List<string> _supportProtoco = ["http", "https", "socks4", "socks5"];
 
-#pragma warning disable CS1998 // 异步方法缺少 "await" 运算符，将以同步方式运行
-        public async Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy)
-#pragma warning restore CS1998 // 异步方法缺少 "await" 运算符，将以同步方式运行
+        /// <summary>
+        /// 接口中定义了的是异步方法
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="proxy"></param>
+        /// <returns></returns>
+        public Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy)
         {
-            if (string.IsNullOrWhiteSpace(proxy.Url)) return null;
+            if (string.IsNullOrWhiteSpace(proxy.Url)) return Task.FromResult<IProxyHandler?>(null);
 
             var protocol = proxy.Url.ToLower().Split("://")[0];
-            if (!_supportProtoco.Contains(protocol)) return null;
+            if (!_supportProtoco.Contains(protocol)) return Task.FromResult<IProxyHandler?>(null);
 
             var handler = serviceProvider.GetRequiredService<ProxyHandler>();
             handler.Update(proxy);
-            return handler;
+
+            return Task.FromResult<IProxyHandler?>(handler);
         }
     }
 }

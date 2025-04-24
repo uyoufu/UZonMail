@@ -26,8 +26,11 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 context.Status |= ContextStatus.Fail;
                 context.Status |= ContextStatus.ShouldExitThread;
             }
-
-            _logger.Debug($"线程申请发件箱成功：{address!.Email}");
+            else
+            {
+                _logger.Debug($"线程申请发件箱成功：{address!.Email}");
+            }
+            
             return;
         }
     }

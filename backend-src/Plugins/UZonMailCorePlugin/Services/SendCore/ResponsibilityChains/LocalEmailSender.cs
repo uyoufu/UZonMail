@@ -130,7 +130,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             var client = clientResult.Data;
 
             try
-            {      
+            {
                 var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
                 string sendResult = "测试状态,虚拟发件";
                 if (!debugConfig.IsDemo)
@@ -176,7 +176,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 // 代理无法连接到服务器
                 // 在发件前已经验证过邮件可用，此处应当作是代理出了问题
                 // 将当前代理标记为不可用
-                if(client.ProxyClient is ProxyClientAdapter clientAdapter)
+                if (client.ProxyClient is ProxyClientAdapter clientAdapter)
                 {
                     clientAdapter.MarkHealthless();
                 }
