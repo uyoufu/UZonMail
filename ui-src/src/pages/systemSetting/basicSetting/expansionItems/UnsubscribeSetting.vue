@@ -1,11 +1,23 @@
 <template>
-  <q-expansion-item popup icon="unsubscribe" label="退订设置" caption="进行退订相关的设置"
-    header-class="text-primary card-like-borderless" @before-show="onBeforeShow" group="settings1">
+  <q-expansion-item
+    popup
+    icon="unsubscribe"
+    label="退订设置"
+    caption="进行退订相关的设置"
+    header-class="text-primary card-like-borderless"
+    @before-show="onBeforeShow"
+    group="settings1"
+  >
     <div class="column justify-start q-mb-sm q-pa-md">
       <div class="row justify-start items-center">
         <span>启用退订</span>
-        <q-checkbox class="q-ml-sm" color="secondary" keep-color v-model="unsubscribeSetting.enable"
-          left-label></q-checkbox>
+        <q-checkbox
+          class="q-ml-sm"
+          color="secondary"
+          keep-color
+          v-model="unsubscribeSetting.enable"
+          left-label
+        ></q-checkbox>
       </div>
 
       <div v-if="unsubscribeSetting.enable" class="row justify-start items-center">
@@ -20,8 +32,15 @@
           </q-radio>
         </div>
 
-        <q-input v-if="unsubscribeSetting.type" class="q-ml-md" outlined standout
-          v-model="unsubscribeSetting.externalUrl" dense label="退订链接">
+        <q-input
+          v-if="unsubscribeSetting.type"
+          class="q-ml-md"
+          outlined
+          standout
+          v-model="unsubscribeSetting.externalUrl"
+          dense
+          label="退订链接"
+        >
           <template v-slot:prepend>
             <q-icon name="http" color="secondary" />
           </template>
@@ -33,7 +52,7 @@
         <UnsubscribePage class="col" />
       </div>
 
-      <OkBtn label="保存" class="self-start q-mt-xs" style="margin-left: 70px;" @click="onUnsubscribeSettingSave" />
+      <OkBtn label="保存" class="self-start q-mt-xs" style="margin-left: 70px" @click="onUnsubscribeSettingSave" />
     </div>
   </q-expansion-item>
 </template>
@@ -48,7 +67,7 @@ import { setTimeoutAsync } from 'src/utils/tsUtils'
 import logger from 'loglevel'
 import { notifySuccess } from 'src/utils/dialog'
 
-import type { IUnsubscribeSettings } from 'src/api/pro/unsubscribe';
+import type { IUnsubscribeSettings } from 'src/api/pro/unsubscribe'
 import { getUnsubscribeSettings, updateUnsubscribeSettings } from 'src/api/pro/unsubscribe'
 
 const unsubscribeSetting: Ref<IUnsubscribeSettings> = ref({
@@ -61,7 +80,7 @@ const unsubscribeSetting: Ref<IUnsubscribeSettings> = ref({
 // 获取设置
 const userInfoStore = useUserInfoStore()
 const isInitializing = ref(false)
-async function onBeforeShow () {
+async function onBeforeShow() {
   // 获取设置
   logger.debug('[setting] request unsubescribe setting', userInfoStore)
   isInitializing.value = true
@@ -74,10 +93,14 @@ async function onBeforeShow () {
   isInitializing.value = false
 }
 
-watch(unsubscribeSetting, (newVal) => {
-  if (isInitializing.value) return
-  logger.debug('[setting] update unsubscribe setting', newVal)
-}, { deep: true })
+watch(
+  unsubscribeSetting,
+  (newVal) => {
+    if (isInitializing.value) return
+    logger.debug('[setting] update unsubscribe setting', newVal)
+  },
+  { deep: true }
+)
 
 const enableUnsubscribePageSetting = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
@@ -86,7 +109,7 @@ const enableUnsubscribePageSetting = computed(() => {
 
 // #region 保存设置
 import { updateServerBaseApiUrl } from 'src/api/systemSetting'
-async function onUnsubscribeSettingSave () {
+async function onUnsubscribeSettingSave() {
   await updateUnsubscribeSettings(unsubscribeSetting.value.id, unsubscribeSetting.value)
   // 保存前端的 url
   if (unsubscribeSetting.value.enable) {

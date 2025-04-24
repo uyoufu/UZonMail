@@ -30,5 +30,8 @@ export interface IResponseData<T> {
  */
 export interface IAxiosRequestConfig<T = any> extends AxiosRequestConfig<T> {
   // 缓存的 Key
-  cacheKey?: string
+  cacheKey?: string,
+  // 如果返回值非 200, 不触发错误，直接返回
+  passError?: boolean,
+  stopNotifyError?: boolean
 }

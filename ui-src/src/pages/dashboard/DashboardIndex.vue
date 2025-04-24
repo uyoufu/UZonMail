@@ -1,12 +1,12 @@
 <template>
   <div ref="containerElementRef" class="row justify-around q-pt-sm">
-    <div class="flex-auto-column q-pa-sm" style="height: 250px;">
+    <div class="col-auto-2 q-pa-sm" style="height: 250px;">
       <div id="chart-outbox" class="full-height full-width card-like"></div>
     </div>
-    <div class="flex-auto-column q-pa-sm" style="height: 250px;">
+    <div class="col-auto-2 q-pa-sm" style="height: 250px;">
       <div id="chart-inbox" class="full-height full-width card-like"></div>
     </div>
-    <div id="chart-monthly" class="flex-auto-column q-pa-sm card-like q-ma-sm" style="height: 250px;"></div>
+    <div id="chart-monthly" class="col-auto-2 q-pa-sm card-like q-ma-sm" style="height: 250px;"></div>
   </div>
 </template>
 

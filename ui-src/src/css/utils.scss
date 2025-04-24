@@ -208,14 +208,31 @@
   cursor: text;
 }
 
+// MARK: flex 布局
 // #region flex 布局
 // 默认一列，大于 600 时，两列
-.flex-auto-column {
+.col-auto-2 {
   width: 0px; // echarts 需要这个属性来触发变化
   flex: 1 1 100%;
 
-  @media screen and (min-width: 600px) {
+  @media screen and (min-width: 576px) {
     flex: 1 1 50%;
+  }
+}
+
+// 在 1~4 列之间动态变换
+.col-auto-4 {
+  width: 100%;
+  padding: 4px;
+
+  @media (min-width: 576px) {
+    width: 50%;
+  }
+  @media (min-width: 768px) {
+    width: 33.33%;
+  }
+  @media (min-width: 992px) {
+    width: 25%;
   }
 }
 // #endregion
