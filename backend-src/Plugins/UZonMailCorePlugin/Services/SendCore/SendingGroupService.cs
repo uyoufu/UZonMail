@@ -17,6 +17,7 @@ using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Utils.Web.Exceptions;
+using log4net;
 
 namespace UZonMail.Core.Services.EmailSending
 {
@@ -32,6 +33,8 @@ namespace UZonMail.Core.Services.EmailSending
         , IServiceProvider serviceProvider
         ) : IScopedService
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(SendingGroupService));
+
         /// <summary>
         /// 创建发送组
         /// </summary>
@@ -39,6 +42,8 @@ namespace UZonMail.Core.Services.EmailSending
         /// <returns></returns>
         public async Task<SendingGroup> CreateSendingGroup(SendingGroup sendingGroupData)
         {
+            _logger.Info("开始创建发送任务");
+
             var userId = tokenService.GetUserSqlId();
             // 格式化 Excel 数据
             sendingGroupData.Data = await FormatExcelData(sendingGroupData.Data, userId);
@@ -124,6 +129,7 @@ namespace UZonMail.Core.Services.EmailSending
                 return await ctx.SaveChangesAsync();
             });
 
+            _logger.Info("发送任务创建成功");
             return sendingGroupData;
         }
 
@@ -195,6 +201,7 @@ namespace UZonMail.Core.Services.EmailSending
         /// <returns></returns>
         private async Task ValidateOutboxes(long userId, SendingGroup sendingGroupData)
         {
+            _logger.Debug("开始验证发件箱");
             var outboxIds = sendingGroupData.Outboxes.Select(x => x.Id).ToList();
             var groupOutboxIds = sendingGroupData.OutboxGroups?.Select(x => x.Id).ToList() ?? [];
             var dataOutboxIds = sendingGroupData.Data?.Select(x => x.SelectTokenOrDefault("outboxId", ""))
@@ -203,10 +210,11 @@ namespace UZonMail.Core.Services.EmailSending
             var dataOutboxEmails = sendingGroupData.Data?.Select(x => x.SelectTokenOrDefault("outbox", ""))
                 .Where(x => !string.IsNullOrEmpty(x)) ?? [];
 
-            var allOutboxIds = outboxIds.Concat(groupOutboxIds).Concat(dataOutboxIds).ToList();
+            var allOutboxIds = outboxIds.Concat(dataOutboxIds).ToList();
             var outboxes = await db.Outboxes.AsNoTracking()
                 .Where(x => x.Status != OutboxStatus.Valid)
-                .Where(x => allOutboxIds.Contains(x.Id) || dataOutboxEmails.Contains(x.Email)).ToListAsync();
+                .Where(x => allOutboxIds.Contains(x.Id) || dataOutboxEmails.Contains(x.Email) || groupOutboxIds.Contains(x.EmailGroupId))
+                .ToListAsync();
 
             // 重新验证发件箱
             var emailUtils = serviceProvider.GetRequiredService<EmailValidatorService>();
@@ -219,6 +227,7 @@ namespace UZonMail.Core.Services.EmailSending
                     throw new KnownException($"发件箱 {outbox.Email} 验证失败: {result.Message}");
                 }
             }
+            _logger.Debug("发件箱验证通过");
         }
 
         /// <summary>

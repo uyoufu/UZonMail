@@ -62,22 +62,8 @@ namespace UZonMail.DB.SQL
         public DbSet<Proxy> Proxies { get; set; }
         public DbSet<OrganizationSetting> OrganizationSettings { get; set; }
 
-        //public DbSet<EmailAnchor> EmailAnchors { get; set; }
-        //public DbSet<EmailVisitHistory> EmailVisitHistories { get; set; }
-        //public DbSet<IPInfo> IPInfos { get; set; }
-
-        //// 退定相关
-        //public DbSet<UnsubscribeSetting> UnsubscribeSettings { get; set; }
-        //public DbSet<UnsubscribePage> UnsubscribePages { get; set; }
-        //public DbSet<UnsubscribeEmail> UnsubscribeEmails { get; set; }
-        //public DbSet<UnsubscribeButton> UnsubscribeButtons { get; set; }
-
-        //// 爬虫相关
-        //public DbSet<CrawlerTaskInfo> CrawlerTaskInfos { get; set; } // 爬虫任务
-        //public DbSet<TiktokAuthor> TiktokAuthors { get; set; } // TikTok 作者信息
-        //public DbSet<TikTokAuthorDiversification> TikTokAuthorDiversifications { get; set; } // TikTok 作者视频分类信息
-        //public DbSet<CrawlerTaskResult> CrawlerTaskResults { get; set; }
-        //public DbSet<TikTokDevice> TikTokDevices { get; set; }
+        // 设置相关
+        public DbSet<SmtpInfo> SmtpInfos { get; set; }
         #endregion
 
         #region 测试

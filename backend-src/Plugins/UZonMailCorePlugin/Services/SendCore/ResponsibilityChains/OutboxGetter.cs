@@ -1,4 +1,5 @@
-﻿using UZonMail.Core.Services.SendCore.Contexts;
+﻿using log4net;
+using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
@@ -9,8 +10,11 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
     /// <param name="container"></param>
     public class OutboxGetter(OutboxesPoolList container) : AbstractSendingHandler
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(OutboxGetter));
         protected override async Task HandleCore(SendingContext context)
         {
+            _logger.Debug("线程开始申请发件箱");
+
             // 获取发件箱
             var address = container.GetOutbox();
             // 保存到 context 中
@@ -23,6 +27,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 context.Status |= ContextStatus.ShouldExitThread;
             }
 
+            _logger.Debug($"线程申请发件箱成功：{address!.Email}");
             return;
         }
     }

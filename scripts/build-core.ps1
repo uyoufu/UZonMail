@@ -199,26 +199,41 @@ function Copy-Assets {
 
     # 复制 assets 到 destRoot 子目录
     # 复制目录及其内容
+    write-host "复制 $src 到 $destRoot" -ForegroundColor Yellow
     Copy-Item -Path $src -Destination $destRoot -Recurse -Force    
 }
 
-# 编译后端 UZonMailCorePlugin
-$pluginsSrc = Join-Path -Path $backendSrc -ChildPath "Plugins"
-$uZonMailCorePlugin = 'UZonMailCorePlugin'
-Write-Host "开始编译后端 $uZonMailCorePlugin ..." -ForegroundColor Yellow
-$serviceSrc = Join-Path -Path $pluginsSrc -ChildPath $uZonMailCorePlugin
-# 使用 dotnet 编译
-$serviceDest = "$mainService/$uZonMailCorePlugin"
-Set-Location $serviceSrc
-dotnet publish -c Release -o $serviceDest -r $publishPlatform --self-contained false
-# 复制依赖到根目录，复制库 到 Plugins 目录
-Copy-Assembly -src $serviceDest -exclude "$uZonMailCorePlugin.*"
-$uzonMailCorePluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailCorePlugin"
-New-Item -Path $uzonMailCorePluginPath -ItemType Directory -Force
-Copy-Item -Path "$serviceDest/$uZonMailCorePlugin.*" -Destination $uzonMailCorePluginPath -Force
-# 删除临时目录
-Remove-Item -Path $serviceDest -Recurse -Force
-Write-Host "后端 $uZonMailCorePlugin 编译完成!" -ForegroundColor Green
+
+function New-UZonMailCorePlugin {
+    # 编译后端 UZonMailCorePlugin
+    $pluginsSrc = Join-Path -Path $backendSrc -ChildPath "Plugins"
+    $uZonMailCorePlugin = 'UZonMailCorePlugin'
+    Write-Host "开始编译后端 $uZonMailCorePlugin ..." -ForegroundColor Yellow
+    $serviceSrc = Join-Path -Path $pluginsSrc -ChildPath $uZonMailCorePlugin
+    # 使用 dotnet 编译
+    $serviceDest = "$mainService/$uZonMailCorePlugin"
+    Set-Location $serviceSrc
+    dotnet publish -c Release -o $serviceDest -r $publishPlatform --self-contained false
+    Write-Host "后端 $serviceDest 编译完成!" -ForegroundColor Green
+
+    # 复制依赖到根目录，复制库 到 Plugins 目录
+    Copy-Assembly -src $serviceDest -exclude "$uZonMailCorePlugin.*"
+    $uzonMailCorePluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailCorePlugin"
+    New-Item -Path $uzonMailCorePluginPath -ItemType Directory -Force
+    Copy-Item -Path "$serviceDest/$uZonMailCorePlugin.*" -Destination $uzonMailCorePluginPath -Force
+
+    # 复制配置文件到插件目录
+    $srcDirs = ("data")
+    foreach ($srcDir in $srcDirs) {
+        Copy-Assets -src "$serviceDest/$srcDir" -destRoot $uzonMailCorePluginPath
+    }
+
+    # 删除临时目录
+    Remove-Item -Path $serviceDest -Recurse -Force
+    Write-Host "后端 $uZonMailCorePlugin 编译完成!" -ForegroundColor Green
+
+}
+New-UZonMailCorePlugin
 
 # 编译后端 UZonMailProPlugin
 function New-UZonMailProPlugin {
@@ -244,6 +259,7 @@ function New-UZonMailProPlugin {
     $uzonMailProPluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailProPlugin"
     New-Item -Path $uzonMailProPluginPath -ItemType Directory -Force
     Copy-Item -Path "$serviceDest/$uZonMailProPlugin.*" -Destination $uzonMailProPluginPath -Force
+
     # 复制配置文件到 Pro 插件目录
     $srcDirs = ("Scripts")
     foreach ($srcDir in $srcDirs) {

@@ -88,6 +88,7 @@ namespace UZonMail.Core.Controllers.Settings
                 exist.EnableEmailTracker = organizationSettings.EnableEmailTracker;
             }
             await db.SaveChangesAsync();
+            // 更新缓存
             CacheManager.Global.SetCacheDirty<OrganizationSettingCache>(exist.OrganizationId);
 
             return true.ToSuccessResponse();

@@ -1,4 +1,5 @@
-﻿using UZonMail.Core.Services.SendCore.Contexts;
+﻿using log4net;
+using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.WaitList;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
@@ -8,8 +9,12 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
     /// </summary>
     public class EmailItemGetter(GroupTasksList groupTasksList) : AbstractSendingHandler
     {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(EmailItemGetter));
+
         protected override async Task HandleCore(SendingContext context)
         {
+            _logger.Debug("线程开始申请发件项");
+
             // 如果前面失败了，这一步就不执行
             if (context.Status.HasFlag(ContextStatus.Fail))
                 return;
@@ -26,7 +31,9 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             if(emailItem == null)
             {
                 context.Status |= ContextStatus.Fail;
-            }            
+            }
+
+            _logger.Debug("线程申请发件项成功");
         }
     }
 }
