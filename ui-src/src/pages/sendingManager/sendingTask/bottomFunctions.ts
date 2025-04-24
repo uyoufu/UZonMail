@@ -116,7 +116,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
         return false
       }
 
-      if (emailInfo.value.outboxes.length === 0 && outboxStatus < 2) {
+      if (emailInfo.value.outboxes.length === 0 && emailInfo.value.outboxGroups.length == 0 && outboxStatus < 2) {
         // 没有发件
         notifyError('数据中发件箱缺失，请在数据中指定发件箱或选择发件箱')
         return false

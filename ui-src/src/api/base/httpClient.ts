@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { AxiosInstance, AxiosResponse } from 'axios'
 import axios from 'axios'
 
 import type { IAxiosRequestConfig, IHttpClientOptions, IResponseData } from './types'
@@ -70,19 +70,26 @@ export default class HttpClient {
 
       const data = response.data as IResponseData<any>
       // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-      if (data.code !== StatusCode.SuccessOK) {
-        // 处理错误
-        if (this._options.notifyError) {
-          // 提示错误
-          notifyError(data.message)
-        }
+      if (data.code === StatusCode.SuccessOK)
+        return response
 
-        // 返回错误
-        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-        return Promise.reject(data)
+      // 非 200 状态码，进行提示
+      const config = response.config as IAxiosRequestConfig<any>
+
+      // 处理错误
+      if (this._options.notifyError && !config.stopNotifyError) {
+        // 提示错误
+        notifyError(data.message)
       }
-      // 其它非 200 状态码
-      return response
+
+      // 允许通过错误，返回结果
+      if (config.passError)
+        return response
+
+      // 返回错误
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+      return Promise.reject(data)
+
     },
       // 当 response.status 不是 200 时触发
       async (error) => {
@@ -118,7 +125,7 @@ export default class HttpClient {
   }
 
   // 格式化配置
-  private formatConfig (config?: AxiosRequestConfig): AxiosRequestConfig {
+  private formatConfig (config?: IAxiosRequestConfig): IAxiosRequestConfig {
     const baseURL = this.getBaseUrl()
 
     const newConfig = {
@@ -150,7 +157,7 @@ export default class HttpClient {
    * @param config
    * @returns
    */
-  async request<R, D = any> (config: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async request<R, D = any> (config: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.request<R, AxiosResponse<IResponseData<R>, D>, D>(config)
     return this.destructureAxiosResponse(responseData)
@@ -191,7 +198,7 @@ export default class HttpClient {
    * @param config
    * @returns
    */
-  async delete<R, D = any> (url: string, config?: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async delete<R, D = any> (url: string, config?: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.delete<R, AxiosResponse<IResponseData<R>, D>, D>(url, config)
     return this.destructureAxiosResponse(responseData)
@@ -203,7 +210,7 @@ export default class HttpClient {
    * @param config
    * @returns
    */
-  async head<R, D = any> (url: string, config?: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async head<R, D = any> (url: string, config?: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.head<R, AxiosResponse<IResponseData<R>, D>, D>(url, config)
     return this.destructureAxiosResponse(responseData)
@@ -215,7 +222,7 @@ export default class HttpClient {
    * @param config
    * @returns
    */
-  async options<R, D = any> (url: string, config?: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async options<R, D = any> (url: string, config?: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.options<R, AxiosResponse<IResponseData<R>, D>, D>(url, config)
     return this.destructureAxiosResponse(responseData)
@@ -227,7 +234,7 @@ export default class HttpClient {
    * @param config
    * @returns
    */
-  async post<R, D = any> (url: string, config?: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async post<R, D = any> (url: string, config?: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.post<R, AxiosResponse<IResponseData<R>, D>, D>(url, config?.data, config)
     return this.destructureAxiosResponse(responseData)
@@ -239,7 +246,7 @@ export default class HttpClient {
    * @param config
    * @returns
    */
-  async put<R, D = any> (url: string, config?: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async put<R, D = any> (url: string, config?: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.put<R, AxiosResponse<IResponseData<R>, D>, D>(url, config?.data, config)
     return this.destructureAxiosResponse(responseData)
@@ -251,19 +258,19 @@ export default class HttpClient {
    * @param config
    * @returns
    */
-  async patch<R, D = any> (url: string, config?: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async patch<R, D = any> (url: string, config?: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.patch<R, AxiosResponse<IResponseData<R>, D>, D>(url, config?.data, config)
     return this.destructureAxiosResponse(responseData)
   }
 
-  async postForm<R, D = any> (url: string, config?: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async postForm<R, D = any> (url: string, config?: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.postForm<R, AxiosResponse<IResponseData<R>, D>, D>(url, config?.data, config)
     return this.destructureAxiosResponse(responseData)
   }
 
-  async patchForm<R, D = any> (url: string, config?: AxiosRequestConfig<D>): Promise<IResponseData<R>> {
+  async patchForm<R, D = any> (url: string, config?: IAxiosRequestConfig<D>): Promise<IResponseData<R>> {
     config = this.formatConfig(config)
     const responseData = await this._axios.patchForm<R, AxiosResponse<IResponseData<R>, D>, D>(url, config?.data, config)
     return this.destructureAxiosResponse(responseData)
