@@ -26,5 +26,17 @@
         /// 负数表示不限制
         /// </summary>
         public long MinInboxCooldownHours { get; set; } = -1;
+
+        /// <summary>
+        /// 状态
+        /// 可选是为了兼容老版本
+        /// </summary>
+        public InboxStatus? Status { get; set; }
+
+        /// <summary>
+        /// 验证失败原因
+        /// 可选是为了兼容老版本
+        /// </summary>
+        public string? ValidFailReason { get; set; }
     }
 }

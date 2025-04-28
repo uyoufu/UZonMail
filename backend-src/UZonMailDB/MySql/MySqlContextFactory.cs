@@ -16,7 +16,7 @@ namespace UZonMail.DB.MySql
             {
                 Database = "uzon-mail",
                 Enable = true,
-                Host = "",
+                Host = "127.0.0.1",
                 Password = "uzon-mail",
                 Port = 3306,
                 Version = "8.4.0.0",

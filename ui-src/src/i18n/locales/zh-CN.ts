@@ -32,7 +32,7 @@ export default {
     editCurrentOutbox: '编辑当前发件箱',
     deleteCurrentOrSelection: '删除当前或选中的发件箱',
     validate: '验证',
-    sendTestToMe: '向自己发送一封邮件，以此测试发件箱的有效性',
+    sendTestToMe: '验证当前或选中发件箱',
     validateBatch: '批量验证',
     validateAllUnverifiedInGroup: '批量验证当前组中所有未验证的邮箱',
     isConfirmValidateBatch: '是否验证当前组中所有未验证的邮箱？',

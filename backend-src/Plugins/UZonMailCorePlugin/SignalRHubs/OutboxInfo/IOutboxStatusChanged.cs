@@ -9,5 +9,7 @@ namespace UZonMail.Core.SignalRHubs.OutboxInfo
     public interface IOutboxStatusChanged
     {
         Task OutboxStatusChanged(Outbox outbox);
+
+        Task InboxStatusChanged(Inbox inbox);
     }
 }

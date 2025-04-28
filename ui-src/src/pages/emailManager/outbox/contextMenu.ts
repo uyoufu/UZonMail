@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IOutbox } from 'src/api/emailBox'
 import { deleteOutboxByIds, OutboxStatus, updateOutbox, validateOutbox } from 'src/api/emailBox'
-import { deleteAllInvalidBoxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
+import { deleteAllInvalidoutboxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
 
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/popupDialog/types'
@@ -204,7 +204,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
     // 请求删除
     const outbox = row as IOutbox
-    await deleteAllInvalidBoxesInGroup(outbox.emailGroupId as number)
+    await deleteAllInvalidoutboxesInGroup(outbox.emailGroupId as number)
     // 删除成功
     notifySuccess(t('deleteSuccess'))
 
