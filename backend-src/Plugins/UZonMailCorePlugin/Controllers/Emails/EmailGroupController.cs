@@ -20,7 +20,8 @@ namespace UZonMail.Core.Controllers.Emails
     /// <summary>
     /// 邮件管理
     /// </summary>
-    public class EmailGroupController(SqlContext db, EmailGroupService groupService, TokenService tokenService, EmailValidatorService emailUtils,
+    public class EmailGroupController(SqlContext db, EmailGroupService groupService, TokenService tokenService,
+        OutboxValidateService outboxValidator,
         IHubContext<UzonMailHub, IUzonMailClient> hub) : ControllerBaseV1
     {
         /// <summary>
@@ -107,7 +108,7 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="outboxIds"></param>
         /// <returns></returns>
         [HttpDelete("{groupId:long}/invalid-outboxes")]
-        public async Task<ResponseResult<bool>> DeleteAllInvalidBoxesInGroup(long groupId)
+        public async Task<ResponseResult<bool>> DeleteAllInvalidOutboxesInGroup(long groupId)
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
@@ -131,15 +132,33 @@ namespace UZonMail.Core.Controllers.Emails
             foreach (var outbox in outboxes)
             {
                 // 发送测试邮件
-                var vdResult = await emailUtils.ValidateOutbox(outbox, smtpPasswordSecretKeys);
+                // 已在内部保存修改
+                var vdResult = await outboxValidator.ValidateOutbox(outbox, smtpPasswordSecretKeys);
 
                 outbox.Status = vdResult.Ok ? OutboxStatus.Valid : OutboxStatus.Invalid;
                 outbox.ValidFailReason = vdResult.Message;
                 outbox.IsValid = vdResult.Ok;
 
                 // 推送验证结果
-                client.OutboxStatusChanged(outbox);
+                await client.OutboxStatusChanged(outbox);
             }
+            return true.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 删除组中所有无效的收件箱
+        /// </summary>
+        /// <param name="outboxIds"></param>
+        /// <returns></returns>
+        [HttpDelete("{groupId:long}/invalid-inboxes")]
+        public async Task<ResponseResult<bool>> DeleteAllInvalidInboxesInGroup(long groupId)
+        {
+            // 判断是否属于自己的组
+            var userId = tokenService.GetUserSqlId();
+            var emailBoxes = db.Inboxes.Where(x => x.EmailGroupId == groupId && x.UserId == userId && x.Status != InboxStatus.Valid);
+            db.Inboxes.RemoveRange(emailBoxes);
+            await db.SaveChangesAsync();
+
             return true.ToSuccessResponse();
         }
     }

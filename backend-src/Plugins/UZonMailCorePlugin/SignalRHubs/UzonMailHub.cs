@@ -25,7 +25,7 @@ namespace UZonMail.Core.SignalRHubs
                 if (!_userConnectionIds.TryGetValue(userId, out var connectionIds))
                 {
                     connectionIds = [];
-                    _userConnectionIds[userId] = connectionIds;
+                    _userConnectionIds.TryAdd(userId, connectionIds);
                 }
                 connectionIds.Add(Context.ConnectionId);
             }

@@ -30,7 +30,10 @@ namespace UZonMail.Core.Services.Settings
                 .Select(x => x.Json)
                 .FirstOrDefaultAsync();
 
-            var setting = settingJson!.ToObject<SystemSmtpNotificationSetting>();
+            // 不存在时，返回默认
+            if(settingJson==null)return new SystemSmtpNotificationSetting();
+
+            var setting = settingJson.ToObject<SystemSmtpNotificationSetting>();
             if (setting == null) return new SystemSmtpNotificationSetting();
 
             return setting;

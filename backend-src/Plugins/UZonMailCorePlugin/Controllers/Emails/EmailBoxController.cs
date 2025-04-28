@@ -23,7 +23,7 @@ namespace UZonMail.Core.Controllers.Emails
     /// 邮箱
     /// </summary>
     public class EmailBoxController(SqlContext db, TokenService tokenService, UserService userService,
-        EmailGroupService emailGroupService, EmailValidatorService emailUtils) : ControllerBaseV1
+        EmailGroupService emailGroupService, OutboxValidateService emailUtils) : ControllerBaseV1
     {
         /// <summary>
         /// 创建发件箱
@@ -383,7 +383,6 @@ namespace UZonMail.Core.Controllers.Emails
             return true.ToSuccessResponse();
         }
 
-
         /// <summary>
         /// 获取邮箱数量
         /// </summary>
@@ -446,6 +445,23 @@ namespace UZonMail.Core.Controllers.Emails
         {
             var emailBox = await db.Inboxes.FirstOrDefaultAsync(x => x.Id == emailBoxId) ?? throw new KnownException("邮箱不存在");
             emailBox.IsDeleted = true;
+            await db.SaveChangesAsync();
+
+            return true.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 批量删除多个收件箱
+        /// </summary>
+        /// <param name="inboxIds"></param>
+        /// <returns></returns>
+        [HttpDelete("inboxes/ids")]
+        public async Task<ResponseResult<bool>> DeleteInboxByIds([FromBody] List<string> inboxIds)
+        {
+            var userId = tokenService.GetUserSqlId();
+
+            var emailBox = db.Inboxes.Where(x => x.UserId == userId && inboxIds.Contains(x.ObjectId));
+            db.Inboxes.RemoveRange(emailBox);
             await db.SaveChangesAsync();
 
             return true.ToSuccessResponse();

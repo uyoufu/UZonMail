@@ -219,7 +219,7 @@ namespace UZonMail.Core.Services.EmailSending
                 .ToListAsync();
 
             // 重新验证发件箱
-            var emailUtils = serviceProvider.GetRequiredService<EmailValidatorService>();
+            var emailUtils = serviceProvider.GetRequiredService<OutboxValidateService>();
             var smtpPasswordSecretKeys = SmtpPasswordSecretKeys.Create(sendingGroupData.SmtpPasswordSecretKeys);
             foreach (var outbox in outboxes)
             {
