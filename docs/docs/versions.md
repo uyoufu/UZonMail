@@ -20,7 +20,7 @@ editLink: false
 
 [uzonmail-desktop-win-x64-0.13.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.13.0.0.zip)
 
-[uzonmail-service-win-x64-0.13.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.113.0.0.zip)
+[uzonmail-service-win-x64-0.13.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.13.0.0.zip)
 
 [uzonmail-service-linux-x64-0.13.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.13.0.0.zip)
 
