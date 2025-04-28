@@ -29,8 +29,13 @@ namespace UZonMail.Core.Services.Settings
                 .Where(x => x.Key == _systemSmtpNotificationSettingKey)
                 .Select(x => x.Json)
                 .FirstOrDefaultAsync();
+            // 为空时，返回默认值
+            if (settingJson == null) return new SystemSmtpNotificationSetting();
 
-            var setting = settingJson!.ToObject<SystemSmtpNotificationSetting>();
+            // 不存在时，返回默认
+            if(settingJson==null)return new SystemSmtpNotificationSetting();
+
+            var setting = settingJson.ToObject<SystemSmtpNotificationSetting>();
             if (setting == null) return new SystemSmtpNotificationSetting();
 
             return setting;
