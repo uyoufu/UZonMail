@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IInbox} from 'src/api/emailBox';
+import type { IInbox } from 'src/api/emailBox';
 import { deleteInboxById, updateInbox } from 'src/api/emailBox'
+import { validateAllInvalidInboxes } from 'src/api/pro/emailVerify'
 
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/popupDialog/types'
@@ -9,20 +10,7 @@ import { getInboxFields } from './headerFunctions'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 
 export function useContextMenu (deleteRowById: (id?: number) => void) {
-  // 删除发件箱
-  async function deleteInbox (row: Record<string, any>) {
-    const inbox = row as IInbox
-    // 提示是否删除
-    const confirm = await confirmOperation('删除收件箱', `是否删除收件箱: ${inbox.email}？`)
-    if (!confirm) return
 
-    await deleteInboxById(inbox.id as number)
-
-    // 开始删除
-    deleteRowById(inbox.id)
-
-    notifySuccess('删除成功')
-  }
 
   // 更新发件箱
   async function onUpdateInbox (row: Record<string, any>) {
@@ -77,13 +65,60 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
       onClick: onUpdateInbox
     },
     {
+      name: 'validateSelected',
+      label: '验证',
+      tooltip: '验证当前或选中的发件箱',
+      onClick: deleteInbox,
+      vif: () => false
+    },
+    {
+      name: 'validateAll',
+      label: '批量验证',
+      tooltip: '批量验证当前组中的所有未验证过的发件箱',
+      onClick: onValidateAllInvalidInboxes,
+      vif: () => false
+    },
+    {
       name: 'delete',
       label: '删除',
       tooltip: '删除当前发件箱',
       color: 'negative',
       onClick: deleteInbox
-    }
+    },
+    {
+      name: 'deleteInvalid',
+      label: '删除无效',
+      tooltip: '删除所有验证无效项',
+      color: 'negative',
+      onClick: deleteInbox,
+      vif: () => false
+    },
   ]
+
+  // #region 验证
+  async function onValidateAllInvalidInboxes (row: Record<string, any>) {
+    const inbox = row as IInbox
+    await validateAllInvalidInboxes(inbox.emailGroupId as number)
+  }
+  // #endregion
+
+
+  // #region  删除
+  // 删除发件箱
+  async function deleteInbox (row: Record<string, any>) {
+    const inbox = row as IInbox
+    // 提示是否删除
+    const confirm = await confirmOperation('删除收件箱', `是否删除收件箱: ${inbox.email}？`)
+    if (!confirm) return
+
+    await deleteInboxById(inbox.id as number)
+
+    // 开始删除
+    deleteRowById(inbox.id)
+
+    notifySuccess('删除成功')
+  }
+  // #endregion
 
   return { inboxContextMenuItems }
 }

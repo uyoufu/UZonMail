@@ -61,7 +61,7 @@ export function deleteEmailGroupById (groupId: number) {
  * 删除所有无效的发件箱
  * @returns
  */
-export function deleteAllInvalidBoxesInGroup (groupId: number) {
+export function deleteAllInvalidoutboxesInGroup (groupId: number) {
   return httpClient.delete<boolean>(`/email-group/${groupId}/invalid-outboxes`)
 }
 
