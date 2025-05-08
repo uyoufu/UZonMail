@@ -11,6 +11,10 @@ export function usePermission () {
     return hasPermission('*')
   })
 
+  const isOrganizationAdmin = computed(() => {
+    return hasPermission("organizationAdmin")
+  })
+
   const hasPermission = store.hasPermission.bind(store)
   const hasPermissionOr = store.hasPermissionOr.bind(store)
 
@@ -36,6 +40,7 @@ export function usePermission () {
     hasPermission,
     hasPermissionOr,
     isSuperAdmin,
+    isOrganizationAdmin,
     hasProfessionAccess,
     hasEnterpriseAccess
   }
