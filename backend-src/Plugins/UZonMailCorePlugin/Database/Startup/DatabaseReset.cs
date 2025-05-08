@@ -11,7 +11,7 @@ namespace UZonMail.Core.Database.Startup
     /// 每次启动时，都需要执行
     /// </summary>
     /// <param name="db"></param>
-    public class DatabaseSetup(SqlContext db) : IScopedService
+    public class DatabaseReset(SqlContext db) : IScopedService
     {
         /// <summary>
         /// 开始执行初始化

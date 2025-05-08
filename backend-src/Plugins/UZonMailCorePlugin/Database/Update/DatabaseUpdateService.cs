@@ -48,16 +48,16 @@ namespace UZonMail.Core.Database.Updater
             config.GetSection("User")?.Bind(userConfig);
 
             // 获取数据版本
-            var versionSetting = await db.SystemSettings.FirstOrDefaultAsync(x => x.Key == _settingKey);
+            var versionSetting = await db.AppSettings.FirstOrDefaultAsync(x => x.Key == _settingKey);
             if (versionSetting == null)
             {
                 // 初始化版本
-                versionSetting = new SystemSetting
+                versionSetting = new AppSetting
                 {
                     Key = _settingKey,
                     StringValue = "0.0.0.0"
                 };
-                db.SystemSettings.Add(versionSetting);
+                db.AppSettings.Add(versionSetting);
             }
             else if (versionSetting.StringValue != "0.0.0.0")
             {

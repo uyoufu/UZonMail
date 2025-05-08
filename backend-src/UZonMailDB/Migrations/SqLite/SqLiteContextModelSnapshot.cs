@@ -1049,19 +1049,22 @@ namespace UZonMailService.Migrations.SqLite
                     b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.OrganizationSetting", b =>
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.AppSetting", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ChangeIpAfterEmailCount")
+                    b.Property<bool>("BoolValue")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool?>("EnableEmailTracker")
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("IntValue")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")
@@ -1070,22 +1073,14 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<bool>("IsHidden")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MaxOutboxCooldownSecond")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Json")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("MaxRetryCount")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("MaxSendCountPerEmailDay")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MaxSendingBatchSize")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MinInboxCooldownHours")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MinOutboxCooldownSecond")
+                    b.Property<long>("LongValue")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ObjectId")
@@ -1096,15 +1091,18 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<long>("OrganizationId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Priority")
+                    b.Property<string>("StringValue")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Type")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ReplyToEmails")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.ToTable("OrganizationSettings");
+                    b.ToTable("AppSettings");
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.Proxy", b =>
@@ -1159,62 +1157,6 @@ namespace UZonMailService.Migrations.SqLite
                     b.HasKey("Id");
 
                     b.ToTable("Proxies");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.SystemSetting", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("BoolValue")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("IntValue")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Json")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("LongValue")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("StringValue")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SystemSettings");
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Templates.EmailTemplate", b =>

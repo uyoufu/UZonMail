@@ -1,18 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL.Base;
+using UZonMail.Core.Services.Settings.Core;
+using UZonMail.Utils.Extensions;
 
-namespace UZonMail.DB.SQL.Core.Settings
+namespace UZonMail.Core.Services.Settings.Model
 {
-    public class OrganizationSetting : OrgId
+    /// <summary>
+    /// 发送设置
+    /// </summary>
+    public class SendingSetting : BaseSettingModel
     {
-        /// <summary>
-        /// 优先级
-        /// 优先级大的覆盖小的
-        /// 同等优先级，按选择顺序进行覆盖，后者覆盖前者
-        /// </summary>
-        public int Priority { get; set; }        
-
         /// <summary>
         /// 每日每个发件箱最大发送次数
         /// 为 0 时表示不限制
@@ -37,7 +33,7 @@ namespace UZonMail.DB.SQL.Core.Settings
         /// <summary>
         /// 收件箱最小收件间隔时间，单位小时
         /// </summary>
-        public int MinInboxCooldownHours { get; set; }
+        public int MinInboxCooldownHours { get; set; } = -1;
 
         /// <summary>
         /// 回复的邮箱地址, 多个邮箱用逗号分隔
@@ -49,11 +45,6 @@ namespace UZonMail.DB.SQL.Core.Settings
         /// 若为 0 则不重试
         /// </summary>
         public int MaxRetryCount { get; set; } = 3;
-
-        /// <summary>
-        /// 发送邮件跟踪器
-        /// </summary>
-        public bool? EnableEmailTracker { get; set; }
 
         /// <summary>
         /// 每 x 封邮件后，更换 IP
@@ -82,13 +73,24 @@ namespace UZonMail.DB.SQL.Core.Settings
         {
             var min = Math.Max(0, MinOutboxCooldownSecond);
             var max = Math.Max(0, MaxOutboxCooldownSecond);
-            if(max<= min)
+            if (max <= min)
             {
                 return min * 1000;
             }
 
             // 随机从 min 到 max 取值
             return new Random().Next(min, max) * 1000;
+        }
+
+        protected override void InitValue()
+        {
+            MaxSendCountPerEmailDay = GetIntValue(nameof(MaxSendCountPerEmailDay), 0);
+            MinOutboxCooldownSecond = GetIntValue(nameof(MinOutboxCooldownSecond), 5);
+            MaxSendingBatchSize = GetIntValue(nameof(MaxSendingBatchSize), 20);
+            MinInboxCooldownHours = GetIntValue(nameof(MinInboxCooldownHours), 0);
+            ReplyToEmails = GetStringValue(nameof(ReplyToEmails), string.Empty);
+            MaxRetryCount = GetIntValue(nameof(MaxRetryCount), 3);           
+            ChangeIpAfterEmailCount = GetIntValue(nameof(ChangeIpAfterEmailCount), 0);
         }
     }
 }

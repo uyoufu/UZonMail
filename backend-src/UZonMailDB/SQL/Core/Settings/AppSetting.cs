@@ -4,7 +4,7 @@ using UZonMail.DB.SQL.Base;
 
 namespace UZonMail.DB.SQL.Core.Settings
 {
-    public enum SystemSettingType
+    public enum AppSettingType
     {
         System = 1,
         Organization = 2,
@@ -15,7 +15,7 @@ namespace UZonMail.DB.SQL.Core.Settings
     /// 系统级设置全系统只此一份
     /// 每一条记录是一个设置项
     /// </summary>
-    public class SystemSetting : SqlId
+    public class AppSetting : SqlId
     {
         /// <summary>
         /// 用户 Id
@@ -25,13 +25,13 @@ namespace UZonMail.DB.SQL.Core.Settings
         /// <summary>
         /// 组织 Id
         /// </summary>
-        public long OrganizationId { get; set; }
+        public long OrganizationId { get; set; } = 0;
 
         /// <summary>
         /// 系统设置类型
         /// 为空是为了兼容旧数据
         /// </summary>
-        public SystemSettingType? Type { get; set; } = SystemSettingType.System;
+        public AppSettingType? Type { get; set; } = AppSettingType.System;
 
         /// <summary>
         /// 名称

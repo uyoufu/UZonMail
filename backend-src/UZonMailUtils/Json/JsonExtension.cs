@@ -24,6 +24,17 @@ namespace UZonMail.Utils.Json
         }
 
         /// <summary>
+        /// 转换成 JToken
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static JToken ToJToken<T>(this T obj)
+        {
+            return JToken.FromObject(obj, JsonSerializer.Create(CameCaseJsonSettings));
+        }
+
+        /// <summary>
         /// 将 json 转换成指定类型的值
         /// </summary>
         /// <typeparam name="T"></typeparam>

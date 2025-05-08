@@ -6,6 +6,8 @@ using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.Plugin;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
+using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
@@ -247,9 +249,11 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         public async Task<EmailDecoratorParams> GetEmailDecoratorParams(SendingContext sendingContext)
         {
             var outbox = sendingContext.OutboxAddress;
-            var userCache = await CacheManager.Global.GetCache<UserInfoCache>(sendingContext.SqlContext, outbox.UserId);
-            var orgSettingCache = await CacheManager.Global.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, userCache.OrganizationId);
-            return new EmailDecoratorParams(orgSettingCache, SendingItem, outbox.Email);
+
+            var orgSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()
+                .GetSetting<SendingSetting>(sendingContext.SqlContext, outbox.UserId);
+
+            return new EmailDecoratorParams(orgSetting, SendingItem, outbox.Email);
         }
         #endregion
 
@@ -267,12 +271,9 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// 默认不重试，0
         /// </summary>
         public int MaxRetryCount { get; private set; }
-        public async Task SetMaxRetryCount(SqlContext sqlContext)
+        public async Task SetMaxRetryCount(int maxRetryCount)
         {
-            var userId = SendingItem.UserId;
-            var userReader = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, userId);
-            var organizationSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sqlContext, userReader.OrganizationId);
-            MaxRetryCount = organizationSetting?.Setting?.MaxRetryCount ?? 0;
+            MaxRetryCount = maxRetryCount;
         }
 
         /// <summary>
@@ -318,22 +319,13 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// 回信人
         /// </summary>
         public List<string> ReplyToEmails { get; private set; } = [];
-        public async Task SetReplyToEmails(SqlContext sqlContext, List<string> replyToEmails)
+        public void SetReplyToEmails(List<string> replyToEmails, List<string> globalReplyToEmails)
         {
             ReplyToEmails = replyToEmails;
             if (replyToEmails != null && replyToEmails.Count > 0) return;
 
-            // 赋予回信人
-            var userId = SendingItem.UserId;
-            var userReader = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, userId);
-            var organizationSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sqlContext, userReader.OrganizationId);
-            if (organizationSetting == null || organizationSetting.Setting == null)
-            {
-                ReplyToEmails = [];
-                return;
-            }
             // 使用全局回复               
-            ReplyToEmails = organizationSetting.Setting.ReplyToEmailsList;
+            ReplyToEmails = globalReplyToEmails;
 
         }
         #endregion

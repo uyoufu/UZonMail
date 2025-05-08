@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
+using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
@@ -14,8 +16,12 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
     public class ProxyManager : ISingletonService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyManager));
-        public ProxyManager()
+        private readonly AppSettingsManager _settingsService;
+
+        public ProxyManager(AppSettingsManager settingsService)
         {
+            _settingsService = settingsService;
+
             DisposeHandlerAuto();
         }
 
@@ -61,9 +67,33 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
                 return manager.GetProxyHandler(sendingContext.EmailItem.ProxyId);
             }
 
-            var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, userId);
+            var orgSetting = await _settingsService.GetSetting<SendingSetting>(sendingContext.SqlContext, userId);            
             // 随机匹配代理
-            return manager.RandomProxyHandler(sendingContext.EmailItem.AvailableProxyIds, outboxEmail, orgSetting.ChangeIpAfterEmailCount);
+            return manager.RandomProxyHandler(outboxEmail, orgSetting.ChangeIpAfterEmailCount, sendingContext.EmailItem.AvailableProxyIds);
+        }
+
+        /// <summary>
+        /// 随机匹配用户下的代理
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="userId"></param>
+        /// <param name="matchStr"></param>
+        /// <returns></returns>
+        public async Task<IProxyHandler?> GetProxyHander(IServiceProvider serviceProvider, long userId,string matchStr)
+        {
+            if (!_userProxyManagers.TryGetValue(userId, out var manager))
+            {
+                // 新增并添加
+                manager = new UserProxyManager(userId);
+                await manager.UpdateProxies(serviceProvider);
+                _userProxyManagers.TryAdd(userId, manager);
+            }
+
+            var sqlContext = serviceProvider.GetRequiredService<SqlContext>();
+            var orgSetting = await _settingsService.GetSetting<SendingSetting>(sqlContext, userId);
+
+            // 随机匹配代理
+            return manager.RandomProxyHandler(matchStr, orgSetting.ChangeIpAfterEmailCount);
         }
 
 

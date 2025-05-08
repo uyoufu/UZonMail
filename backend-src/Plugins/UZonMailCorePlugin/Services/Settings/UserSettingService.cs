@@ -16,8 +16,8 @@ namespace UZonMail.Core.Services.Settings
         /// <returns></returns>
         public async Task<string?> GetNotificationRecipientEmail(long userId)
         {
-            var email = await db.SystemSettings
-                .Where(x => x.Type == SystemSettingType.User && x.UserId == userId)
+            var email = await db.AppSettings
+                .Where(x => x.Type == AppSettingType.User && x.UserId == userId)
                 .Where(x => x.Key == _notificationRecipientEmailKey)
                 .Select(x => x.StringValue)
                 .FirstOrDefaultAsync();

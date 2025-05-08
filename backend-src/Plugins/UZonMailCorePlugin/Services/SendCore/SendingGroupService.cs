@@ -19,6 +19,7 @@ using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Utils.Web.Exceptions;
 using log4net;
 using UZonMail.Core.Services.SendCore.Sender;
+using UZonMail.Core.Services.Settings.Model;
 
 namespace UZonMail.Core.Services.EmailSending
 {
@@ -31,6 +32,7 @@ namespace UZonMail.Core.Services.EmailSending
         , GroupTasksList waitList
         , OutboxesPoolList outboxesPoolList
         , SmtpClientFactory clientFactory
+        , AppSettingsManager settingsService
         , ISchedulerFactory schedulerFactory
         , IServiceProvider serviceProvider
         ) : IScopedService
@@ -89,8 +91,7 @@ namespace UZonMail.Core.Services.EmailSending
                 await ctx.SaveChangesAsync();
 
                 // 获取用户设置
-                var userInfo = await CacheManager.Global.GetCache<UserInfoCache, SqlContext>(ctx, sendingGroupData.UserId);
-                var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(ctx, userInfo.OrganizationId);
+                var orgSetting = await settingsService.GetSetting<SendingSetting>(ctx, sendingGroupData.UserId);
 
                 // 保存发件箱
                 await SaveInboxes(sendingGroupData.Data, sendingGroupData.UserId);
