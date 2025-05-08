@@ -1,23 +1,11 @@
 <template>
-  <q-expansion-item
-    popup
-    icon="unsubscribe"
-    label="退订设置"
-    caption="进行退订相关的设置"
-    header-class="text-primary card-like-borderless"
-    @before-show="onBeforeShow"
-    group="settings1"
-  >
+  <q-expansion-item v-model="expanded" popup icon="unsubscribe" label="退订设置" caption="进行退订相关的设置"
+    header-class="text-primary card-like-borderless" @before-show="onBeforeShow" group="settings1">
     <div class="column justify-start q-mb-sm q-pa-md">
       <div class="row justify-start items-center">
         <span>启用退订</span>
-        <q-checkbox
-          class="q-ml-sm"
-          color="secondary"
-          keep-color
-          v-model="unsubscribeSetting.enable"
-          left-label
-        ></q-checkbox>
+        <q-checkbox class="q-ml-sm" color="secondary" keep-color v-model="unsubscribeSetting.enable"
+          left-label></q-checkbox>
       </div>
 
       <div v-if="unsubscribeSetting.enable" class="row justify-start items-center">
@@ -32,15 +20,8 @@
           </q-radio>
         </div>
 
-        <q-input
-          v-if="unsubscribeSetting.type"
-          class="q-ml-md"
-          outlined
-          standout
-          v-model="unsubscribeSetting.externalUrl"
-          dense
-          label="退订链接"
-        >
+        <q-input v-if="unsubscribeSetting.type" class="q-ml-md" outlined standout
+          v-model="unsubscribeSetting.externalUrl" dense label="退订链接">
           <template v-slot:prepend>
             <q-icon name="http" color="secondary" />
           </template>
@@ -70,8 +51,15 @@ import { notifySuccess } from 'src/utils/dialog'
 import type { IUnsubscribeSettings } from 'src/api/pro/unsubscribe'
 import { getUnsubscribeSettings, updateUnsubscribeSettings } from 'src/api/pro/unsubscribe'
 
+const props = defineProps({
+  // 设置类型
+  settingType: {
+    type: Number as PropType<AppSettingType>,
+    default: AppSettingType.System
+  }
+})
+
 const unsubscribeSetting: Ref<IUnsubscribeSettings> = ref({
-  id: 0,
   enable: false,
   type: 0,
   externalUrl: ''
@@ -79,38 +67,35 @@ const unsubscribeSetting: Ref<IUnsubscribeSettings> = ref({
 
 // 获取设置
 const userInfoStore = useUserInfoStore()
-const isInitializing = ref(false)
-async function onBeforeShow() {
+const expanded = ref(false)
+async function onBeforeShow () {
   // 获取设置
   logger.debug('[setting] request unsubescribe setting', userInfoStore)
-  isInitializing.value = true
-
   // 从后端请求退订设置
-  const { data } = await getUnsubscribeSettings()
+  const { data } = await getUnsubscribeSettings(props.settingType)
   unsubscribeSetting.value = data
 
   await setTimeoutAsync(10)
-  isInitializing.value = false
 }
-
-watch(
-  unsubscribeSetting,
-  (newVal) => {
-    if (isInitializing.value) return
-    logger.debug('[setting] update unsubscribe setting', newVal)
-  },
-  { deep: true }
-)
+watch(() => props.settingType, async () => {
+  if (!expanded.value) return
+  await onBeforeShow()
+})
 
 const enableUnsubscribePageSetting = computed(() => {
+  if (!isOrganizationAdmin.value) return false
+  // 只有组织设置才有退订页面设置
+  if (props.settingType !== AppSettingType.Organization) return false
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   return unsubscribeSetting.value.enable && unsubscribeSetting.value.type === 0
 })
 
-// #region 保存设置
+// #region 保存前端 url
 import { updateServerBaseApiUrl } from 'src/api/systemSetting'
-async function onUnsubscribeSettingSave() {
-  await updateUnsubscribeSettings(unsubscribeSetting.value.id, unsubscribeSetting.value)
+import { AppSettingType } from 'src/api/appSetting'
+async function onUnsubscribeSettingSave () {
+  await updateUnsubscribeSettings(unsubscribeSetting.value, props.settingType)
   // 保存前端的 url
   if (unsubscribeSetting.value.enable) {
     await updateServerBaseApiUrl()
@@ -118,6 +103,11 @@ async function onUnsubscribeSettingSave() {
 
   notifySuccess('保存成功')
 }
+// #endregion
+
+// #region 用户权限
+import { usePermission } from 'src/compositions/permission'
+const { isOrganizationAdmin } = usePermission()
 // #endregion
 </script>
 

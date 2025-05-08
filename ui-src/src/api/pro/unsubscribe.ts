@@ -1,6 +1,7 @@
 
 import { httpClientPro } from 'src/api/base/httpClient'
 import type { IRequestPagination } from 'src/compositions/types'
+import type { AppSettingType } from '../appSetting'
 
 export enum UnsubscibeType {
   /// <summary>
@@ -15,8 +16,6 @@ export enum UnsubscibeType {
 }
 
 export interface IUnsubscribeSettings {
-  id: number,
-
   /// <summary>
   /// 是否启用退订
   /// </summary>
@@ -74,8 +73,12 @@ export function isUnsubscribed (token: string) {
  * 获取退定设置
  * @returns
  */
-export function getUnsubscribeSettings () {
-  return httpClientPro.get<IUnsubscribeSettings>('/unsubscribe')
+export function getUnsubscribeSettings (settingType: AppSettingType) {
+  return httpClientPro.get<IUnsubscribeSettings>('/unsubscribe/setting', {
+    params: {
+      type: settingType
+    }
+  })
 }
 
 /**
@@ -84,8 +87,13 @@ export function getUnsubscribeSettings () {
  * @param data
  * @returns
  */
-export function updateUnsubscribeSettings (settingId: number, data: IUnsubscribeSettings) {
-  return httpClientPro.put<boolean>(`/unsubscribe/${settingId}`, { data })
+export function updateUnsubscribeSettings (data: IUnsubscribeSettings, settingType: AppSettingType) {
+  return httpClientPro.put<boolean>('/unsubscribe/setting', {
+    data,
+    params: {
+      type: settingType
+    }
+  })
 }
 
 /**
