@@ -454,8 +454,14 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<string>("Remark")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("Status")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("UserId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ValidFailReason")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

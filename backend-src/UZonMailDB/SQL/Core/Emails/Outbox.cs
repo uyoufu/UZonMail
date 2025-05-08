@@ -73,6 +73,7 @@
 
         /// <summary>
         /// 验证失败原因
+        /// 可选是为了兼容老版本
         /// </summary>
         public string? ValidFailReason { get; set; }
     }

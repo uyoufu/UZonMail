@@ -20,7 +20,7 @@ namespace UZonMail.Core.Database.Updater
         /// <summary>
         /// 当前需要的数据库版本
         /// </summary>
-        private readonly static Version _requiredVersion = new("0.13.0.1");
+        private readonly static Version _requiredVersion = new("0.13.0.4");
 
         private readonly string _settingKey = "DataVersion";
 

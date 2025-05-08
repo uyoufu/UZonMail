@@ -19,7 +19,7 @@ namespace UZonMail.Core.Services.Emails
     /// <param name="db"></param>
     /// <param name="tokenService"></param>
     /// <param name="debugConfig"></param>
-    public class EmailValidatorService(SqlContext db, TokenService tokenService, DebugConfig debugConfig) : IScopedService
+    public class OutboxValidateService(SqlContext db, TokenService tokenService, DebugConfig debugConfig) : IScopedService
     {
         /// <summary>
         /// 验证发件箱是否有效

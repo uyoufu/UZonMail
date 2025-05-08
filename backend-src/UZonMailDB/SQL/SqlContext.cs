@@ -8,6 +8,7 @@ using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.DB.SQL.Core.Templates;
 using UZonMail.DB.SQL.EntityConfigs;
+using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.DB.SQL
 {
@@ -15,7 +16,7 @@ namespace UZonMail.DB.SQL
     /// Sql 上下文
     /// 参考：https://learn.microsoft.com/zh-cn/ef/core/modeling/relationships/conventions
     /// </summary>
-    public class SqlContext : SqlContextBase
+    public class SqlContext : SqlContextBase, IScopedService
     {
         private readonly ILog _logger = LogManager.GetLogger(typeof(SqlContext));
 

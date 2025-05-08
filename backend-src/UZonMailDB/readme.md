@@ -8,8 +8,18 @@ z uzonmaildb
 
 1. Mysql
 
-dotnet ef migrations add addSmtpInfo --context MysqlContext --output-dir Migrations/Mysql -v
+dotnet ef migrations add addInboxStatus --context MysqlContext --output-dir Migrations/Mysql -v
 
 2. SqLite
 
-dotnet ef migrations add addSmtpInfo --context SqLiteContext --output-dir Migrations/SqLite -v
+dotnet ef migrations add addInboxStatus --context SqLiteContext --output-dir Migrations/SqLite -v
+
+## 取消数据迁移
+
+1. Mysql
+
+dotnet ef migrations remove --context MysqlContext -v
+
+2. SqLite
+
+dotnet ef migrations remove --context SqLiteContext -v
