@@ -5,7 +5,7 @@ import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { resendSendingItem } from 'src/api/emailSending'
 import type { ISendingItem } from 'src/api/sendingItem';
 import { SendingItemStatus, getSendingItemBody } from 'src/api/sendingItem'
-import { confirmOperation, notifySuccess, showHtmlDialog } from 'src/utils/dialog'
+import { confirmOperation, notifySuccess, showHtmlDialog2 } from 'src/utils/dialog'
 import { useUserInfoStore } from 'src/stores/user'
 
 export function useContextMenu () {
@@ -35,7 +35,7 @@ export function useContextMenu () {
     }
 
     // 显示
-    await showHtmlDialog('邮件 ' + email.id, email.content)
+    await showHtmlDialog2('邮件: ' + email.id, email.content)
   }
   const sendDetailContextItems: IContextMenuItem[] = [
     {

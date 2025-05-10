@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
-// import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
-// import SendDetailDialog from './SendDetailDialog.vue'
 import type { ISendingGroupHistory } from 'src/api/sendingGroup';
 import { SendingGroupStatus } from 'src/api/sendingGroup'
 import { pauseSending, restartSending, cancelSending, resendSendingGroup } from 'src/api/emailSending'

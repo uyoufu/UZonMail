@@ -48,3 +48,18 @@ export async function showComponentDialog<T = Record<string, any>> (component: C
     })
   })
 }
+
+import HtmlDialog from './HtmlDialog.vue'
+/**
+ * 显示 html 内容
+ * 相较于 utils/dialog.ts 的 showHtmlDialog，对样式进行了优化
+ * @param title
+ * @param html
+ * @returns
+ */
+export async function showHtmlDialog2 (title: string, html: string) {
+  return await showComponentDialog(HtmlDialog, {
+    title,
+    html
+  })
+}

@@ -21,6 +21,7 @@ declare module 'vue' {
     ExportBtn: typeof import('./src/components/quasarWrapper/buttons/ExportBtn.vue')['default']
     FilesUploaderPopup: typeof import('./src/components/uploader/FilesUploaderPopup.vue')['default']
     HoverableTip: typeof import('./src/components/hoverableTip/HoverableTip.vue')['default']
+    HtmlDialog: typeof import('./src/components/popupDialog/HtmlDialog.vue')['default']
     ImageCropper: typeof import('./src/components/imageCropper/ImageCropper.vue')['default']
     ImportBtn: typeof import('./src/components/quasarWrapper/buttons/ImportBtn.vue')['default']
     LinearProgress: typeof import('./src/components/Progress/LinearProgress.vue')['default']

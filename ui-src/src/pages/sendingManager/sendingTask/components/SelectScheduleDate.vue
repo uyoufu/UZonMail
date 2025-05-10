@@ -41,8 +41,8 @@ import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 import { notifyError } from 'src/utils/dialog'
 function onOkClick () {
   // 验证日期是否大于当前日期
-  if (dayjs(modelValue.value).isBefore(dayjs().add(3, 'minute'))) {
-    notifyError('指定发送时间至少推迟 3分钟')
+  if (dayjs(modelValue.value).isBefore(dayjs().add(1, 'minute'))) {
+    notifyError('指定发送时间至少推迟 1分钟')
     return
   }
 

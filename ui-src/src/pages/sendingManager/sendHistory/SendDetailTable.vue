@@ -17,7 +17,7 @@
         </q-tabs>
 
         <!-- <div class="text-subtitle1">发件明细</div> -->
-        <ExportBtn outline tooltip="导出当前数据" @click="onExportCurrentSendingItems"></ExportBtn>
+        <ExportBtn flat tooltip="导出当前数据" @click="onExportCurrentSendingItems"></ExportBtn>
       </div>
     </template>
 

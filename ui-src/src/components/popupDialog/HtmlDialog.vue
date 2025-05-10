@@ -1,7 +1,8 @@
 <template>
-  <q-dialog ref='dialogRef' @hide="onDialogHide">
-    <q-card class='column items-center items-start'>
-      <SendingDetailTable :sending-group-id="props.sendingGroupId" />
+  <q-dialog ref='dialogRef' @hide="onDialogHide" :persistent="false">
+    <q-card class='column items-start q-pa-sm'>
+      <div class="text-subtitle1 text-primary text-bold full-width">{{ title }}</div>
+      <div v-html="html" class="flex"></div>
     </q-card>
   </q-dialog>
 </template>
@@ -18,15 +19,21 @@ defineEmits([
   // （组件将通过useDialogPluginComponent()发出）
   ...useDialogPluginComponent.emits
 ])
-const { dialogRef, onDialogHide /* , onDialogOK, onDialogCancel */ } = useDialogPluginComponent()
+const { dialogRef, onDialogHide/* , onDialogOK, onDialogCancel */ } = useDialogPluginComponent()
 
-const props = defineProps({
-  sendingGroupId: {
-    type: Number,
+defineProps({
+  // 标题
+  title: {
+    type: String,
+    default: () => 'HTML'
+  },
+
+  // 内容
+  html: {
+    type: String,
     required: true
   }
 })
-import SendingDetailTable from './SendDetailTable.vue'
 </script>
 
 <style lang='scss' scoped></style>
