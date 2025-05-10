@@ -22,6 +22,96 @@ namespace UZonMail.DB.Migrations.Mysql
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("DepartmentEmailTemplate", b =>
+                {
+                    b.Property<long>("EmailTemplateId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ShareToOrganizationsId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("EmailTemplateId", "ShareToOrganizationsId");
+
+                    b.HasIndex("ShareToOrganizationsId");
+
+                    b.ToTable("DepartmentEmailTemplate");
+                });
+
+            modelBuilder.Entity("EmailTemplateSendingGroup", b =>
+                {
+                    b.Property<long>("SendingGroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TemplatesId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("SendingGroupId", "TemplatesId");
+
+                    b.HasIndex("TemplatesId");
+
+                    b.ToTable("EmailTemplateSendingGroup");
+                });
+
+            modelBuilder.Entity("EmailTemplateUser", b =>
+                {
+                    b.Property<long>("EmailTemplateId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ShareToUsersId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("EmailTemplateId", "ShareToUsersId");
+
+                    b.HasIndex("ShareToUsersId");
+
+                    b.ToTable("EmailTemplateUser");
+                });
+
+            modelBuilder.Entity("FileUsageSendingGroup", b =>
+                {
+                    b.Property<long>("AttachmentsId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SendingGroupId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("AttachmentsId", "SendingGroupId");
+
+                    b.HasIndex("SendingGroupId");
+
+                    b.ToTable("FileUsageSendingGroup");
+                });
+
+            modelBuilder.Entity("FileUsageSendingItem", b =>
+                {
+                    b.Property<long>("AttachmentsId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SendingItemId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("AttachmentsId", "SendingItemId");
+
+                    b.HasIndex("SendingItemId");
+
+                    b.ToTable("FileUsageSendingItem");
+                });
+
+            modelBuilder.Entity("OutboxSendingGroup", b =>
+                {
+                    b.Property<long>("OutboxesId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SendingGroupId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("OutboxesId", "SendingGroupId");
+
+                    b.HasIndex("SendingGroupId");
+
+                    b.ToTable("OutboxSendingGroup");
+                });
+
             modelBuilder.Entity("PermissionCodeRole", b =>
                 {
                     b.Property<long>("PermissionCodesId")
@@ -356,10 +446,6 @@ namespace UZonMail.DB.Migrations.Mysql
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InboxId");
-
-                    b.HasIndex("SendingItemId");
-
                     b.ToTable("SendingItemInboxes");
                 });
 
@@ -555,9 +641,6 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.Property<string>("ReplyToEmails")
                         .HasColumnType("longtext");
 
-                    b.Property<long?>("SendingGroupId")
-                        .HasColumnType("bigint");
-
                     b.Property<int>("SentTotalToday")
                         .HasColumnType("int");
 
@@ -584,8 +667,6 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SendingGroupId");
 
                     b.HasIndex("Email", "UserId")
                         .IsUnique();
@@ -820,12 +901,6 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.Property<long>("OwnerUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("SendingGroupId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("SendingItemId")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("UniqueName")
                         .HasColumnType("longtext");
 
@@ -834,10 +909,6 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.HasIndex("FileObjectId");
 
                     b.HasIndex("OwnerUserId");
-
-                    b.HasIndex("SendingGroupId");
-
-                    b.HasIndex("SendingItemId");
 
                     b.ToTable("FileUsages");
                 });
@@ -855,9 +926,6 @@ namespace UZonMail.DB.Migrations.Mysql
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
-
-                    b.Property<long?>("EmailTemplateId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("FullPath")
                         .IsRequired()
@@ -889,8 +957,6 @@ namespace UZonMail.DB.Migrations.Mysql
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmailTemplateId");
-
                     b.ToTable("Departments");
                 });
 
@@ -915,9 +981,6 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasColumnType("datetime(6)");
 
                     b.Property<long>("DepartmentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("EmailTemplateId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsDeleted")
@@ -961,8 +1024,6 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EmailTemplateId");
 
                     b.ToTable("Users");
                 });
@@ -1237,9 +1298,6 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasColumnType("longtext")
                         .HasColumnName("_id");
 
-                    b.Property<long?>("SendingGroupId")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Thumbnail")
                         .HasColumnType("longtext");
 
@@ -1248,9 +1306,97 @@ namespace UZonMail.DB.Migrations.Mysql
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SendingGroupId");
-
                     b.ToTable("EmailTemplates");
+                });
+
+            modelBuilder.Entity("DepartmentEmailTemplate", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("EmailTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UZonMail.DB.SQL.Core.Organization.Department", null)
+                        .WithMany()
+                        .HasForeignKey("ShareToOrganizationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EmailTemplateSendingGroup", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                        .WithMany()
+                        .HasForeignKey("SendingGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("TemplatesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EmailTemplateUser", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("EmailTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UZonMail.DB.SQL.Core.Organization.User", null)
+                        .WithMany()
+                        .HasForeignKey("ShareToUsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FileUsageSendingGroup", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileUsage", null)
+                        .WithMany()
+                        .HasForeignKey("AttachmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                        .WithMany()
+                        .HasForeignKey("SendingGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FileUsageSendingItem", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileUsage", null)
+                        .WithMany()
+                        .HasForeignKey("AttachmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingItem", null)
+                        .WithMany()
+                        .HasForeignKey("SendingItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OutboxSendingGroup", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.Emails.Outbox", null)
+                        .WithMany()
+                        .HasForeignKey("OutboxesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                        .WithMany()
+                        .HasForeignKey("SendingGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PermissionCodeRole", b =>
@@ -1294,25 +1440,6 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.Navigation("SendingGroup");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItemInbox", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Core.Emails.Inbox", "Inbox")
-                        .WithMany()
-                        .HasForeignKey("InboxId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingItem", "SendingItem")
-                        .WithMany()
-                        .HasForeignKey("SendingItemId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Inbox");
-
-                    b.Navigation("SendingItem");
-                });
-
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
                     b.HasOne("UZonMail.DB.SQL.Core.Organization.User", "User")
@@ -1331,14 +1458,6 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasForeignKey("EmailGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.Outbox", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
-                        .WithMany("Outboxes")
-                        .HasForeignKey("SendingGroupId")
-                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileObject", b =>
@@ -1377,35 +1496,9 @@ namespace UZonMail.DB.Migrations.Mysql
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
-                        .WithMany("Attachments")
-                        .HasForeignKey("SendingGroupId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingItem", null)
-                        .WithMany("Attachments")
-                        .HasForeignKey("SendingItemId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.Navigation("FileObject");
 
                     b.Navigation("OwnerUser");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.Department", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
-                        .WithMany("ShareToOrganizations")
-                        .HasForeignKey("EmailTemplateId")
-                        .OnDelete(DeleteBehavior.NoAction);
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.User", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
-                        .WithMany("ShareToUsers")
-                        .HasForeignKey("EmailTemplateId")
-                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.UserRoles", b =>
@@ -1419,28 +1512,6 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Templates.EmailTemplate", b =>
-                {
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
-                        .WithMany("Templates")
-                        .HasForeignKey("SendingGroupId")
-                        .OnDelete(DeleteBehavior.NoAction);
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", b =>
-                {
-                    b.Navigation("Attachments");
-
-                    b.Navigation("Outboxes");
-
-                    b.Navigation("Templates");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
-                {
-                    b.Navigation("Attachments");
-                });
-
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
                     b.Navigation("Inboxes");
@@ -1449,13 +1520,6 @@ namespace UZonMail.DB.Migrations.Mysql
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.User", b =>
                 {
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Templates.EmailTemplate", b =>
-                {
-                    b.Navigation("ShareToOrganizations");
-
-                    b.Navigation("ShareToUsers");
                 });
 #pragma warning restore 612, 618
         }

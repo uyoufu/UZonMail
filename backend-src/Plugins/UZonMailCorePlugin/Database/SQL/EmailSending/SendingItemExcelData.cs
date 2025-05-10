@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using UZonMail.Utils.Json;
 using UZonMail.Utils.Extensions;
+using UZonMail.Utils.Web.Exceptions;
 
 namespace UZonMail.Core.Database.SQL.EmailSending
 {
@@ -32,6 +33,22 @@ namespace UZonMail.Core.Database.SQL.EmailSending
             AttachmentNames = row.SelectTokenOrDefault("attachmentNames", string.Empty).SplitBySeparators().Where(x => !string.IsNullOrEmpty(x)).ToList();
 
             // 其它的数据为用户自定义数据
+            // 验证 cc 和 bcc 是否符合邮箱格式
+            foreach(var cc in CC)
+            {
+                if (!cc.IsEmail())
+                {
+                    throw new KnownException($"抄送邮箱格式不正确: {cc}");
+                }
+            }
+
+            foreach (var bcc in BCC)
+            {
+                if (!bcc.IsEmail())
+                {
+                    throw new KnownException($"密送邮箱格式不正确: {bcc}");
+                }
+            }
         }
 
         // 发件箱

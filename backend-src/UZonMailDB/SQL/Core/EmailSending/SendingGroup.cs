@@ -44,7 +44,7 @@ namespace UZonMail.DB.SQL.Core.EmailSending
         /// 发件箱
         /// 不包含数据中的发件箱
         /// </summary>
-        public List<Outbox> Outboxes { get; set; }
+        public List<Outbox> Outboxes { get; set; } = [];
 
         /// <summary>
         /// 发件箱组

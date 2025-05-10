@@ -1,21 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.ComponentModel.DataAnnotations.Schema;
-using UZonMail.DB.SQL.Base;
+﻿using UZonMail.DB.SQL.Base;
 using UZonMail.DB.SQL.Core.Emails;
 
 namespace UZonMail.DB.SQL.Core.EmailSending
 {
     /// <summary>
     /// 发件项与发件箱对应的表
+    /// 可以通过该表查询最新的发件时间和收件时间
     /// </summary>
     public class SendingItemInbox : OrgId
     {
         public long SendingItemId { get; set; }
-        public SendingItem SendingItem { get; set; }
 
         public long InboxId { get; set; }
-        public Inbox Inbox { get; set; }
 
         /// <summary>
         /// 收件邮箱

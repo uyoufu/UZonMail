@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UZonMail.DB.SqLite;
 
 #nullable disable
 
-namespace UZonMailService.Migrations.SqLite
+namespace UZonMail.DB.Migrations.SqLite
 {
     [DbContext(typeof(SqLiteContext))]
-    partial class SqLiteContextModelSnapshot : ModelSnapshot
+    [Migration("20250510020323_fixManyToMany")]
+    partial class fixManyToMany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.13");
@@ -430,6 +433,10 @@ namespace UZonMailService.Migrations.SqLite
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("InboxId");
+
+                    b.HasIndex("SendingItemId");
 
                     b.ToTable("SendingItemInboxes");
                 });
@@ -1391,6 +1398,25 @@ namespace UZonMailService.Migrations.SqLite
                         .IsRequired();
 
                     b.Navigation("SendingGroup");
+                });
+
+            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItemInbox", b =>
+                {
+                    b.HasOne("UZonMail.DB.SQL.Core.Emails.Inbox", "Inbox")
+                        .WithMany()
+                        .HasForeignKey("InboxId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingItem", "SendingItem")
+                        .WithMany()
+                        .HasForeignKey("SendingItemId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Inbox");
+
+                    b.Navigation("SendingItem");
                 });
 
             modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using UZonMail.DB.SQL.EntityConfigs;
 
 namespace UZonMail.DB.SQL
@@ -18,7 +19,6 @@ namespace UZonMail.DB.SQL
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            new EntityTypeConfig().Configure(modelBuilder);
         }
         #endregion
     }

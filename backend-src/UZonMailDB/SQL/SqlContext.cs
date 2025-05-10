@@ -26,13 +26,11 @@ namespace UZonMail.DB.SQL
         {
         }
 
-        /// <summary>
-        /// 配置数据库
-        /// </summary>
-        /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // 调用配置
             new EntityTypeConfig().Configure(modelBuilder);
         }
         #endregion

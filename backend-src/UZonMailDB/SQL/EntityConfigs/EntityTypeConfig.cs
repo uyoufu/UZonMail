@@ -10,7 +10,7 @@ namespace UZonMail.DB.SQL.EntityConfigs
     /// <summary>
     /// 通用的实体配置
     /// </summary>
-    internal class EntityTypeConfig : IEntityTypeConfig
+    public class EntityTypeConfig
     {
         public void Configure(ModelBuilder modelBuilder)
         {
@@ -21,8 +21,8 @@ namespace UZonMail.DB.SQL.EntityConfigs
             }
 
             // 应用配置，参考：https://learn.microsoft.com/zh-cn/ef/core/modeling/#applying-all-configurations-in-an-assembly
-            // 8.0.13 版本后不再需要此配置, 会自动加载
-            // modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            var assembly = Assembly.GetCallingAssembly();
+            modelBuilder.ApplyConfigurationsFromAssembly(assembly);
 
             // 对所有的实体配置 json 转换
             modelBuilder.AddJsonFields();

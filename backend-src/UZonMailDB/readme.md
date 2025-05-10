@@ -8,11 +8,11 @@ z uzonmaildb
 
 1. Mysql
 
-dotnet ef migrations add removeOrgSetting --context MysqlContext --output-dir Migrations/Mysql -v
+dotnet ef migrations add perfSendingItemInbox --context MysqlContext --output-dir Migrations/Mysql -v
 
 2. SqLite
 
-dotnet ef migrations add removeOrgSetting --context SqLiteContext --output-dir Migrations/SqLite -v
+dotnet ef migrations add perfSendingItemInbox --context SqLiteContext --output-dir Migrations/SqLite -v
 
 ## 取消数据迁移
 

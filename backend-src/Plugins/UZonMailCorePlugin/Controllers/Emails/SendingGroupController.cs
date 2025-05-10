@@ -52,6 +52,7 @@ namespace UZonMail.Core.Controllers.Emails
                 .Select(x => new SendingGroup()
                 {
                     Id = x.Id,
+                    ObjectId = x.ObjectId,
                     Subjects = x.Subjects,
                     SendingType = x.SendingType,
                     Status = x.Status,
@@ -107,6 +108,39 @@ namespace UZonMail.Core.Controllers.Emails
             var result = await db.SendingGroups.FirstOrDefaultAsync(x => x.Id == sendingGroupId && x.UserId == userId);
             if (result == null) return new ErrorResponse<SendingGroupStatusInfo>("邮箱组不存在");
             return new SendingGroupStatusInfo(result).ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 获取发件组的原始数据
+        /// </summary>
+        /// <param name="sendingGroupObjId"></param>
+        /// <returns></returns>
+        [HttpGet("{sendingGroupObjId:length(24)}")]
+        public async Task<ResponseResult<SendingGroup>> GetSendingGroup(string sendingGroupObjId)
+        {
+            var userId = tokenService.GetUserSqlId();
+            // 只能获取自己的发件组数据
+            var sendingGroup = await db.SendingGroups.Where(x => x.UserId == userId && x.ObjectId == sendingGroupObjId)
+                .Include(x => x.Outboxes)
+                .Include(x => x.Templates)
+                .Include(x => x.Attachments)                
+                .FirstOrDefaultAsync();
+            if (sendingGroup == null)
+                return ResponseResult<SendingGroup>.Fail("未找到发件组模板");
+
+            // 获取文件
+            if (sendingGroup.Attachments!=null && sendingGroup.Attachments.Count>0)
+            {
+                var fileObjectIds = sendingGroup.Attachments.Select(x => x.Id);
+                var fileObjects = db.FileObjects.Where(x => fileObjectIds.Contains(x.Id));
+                foreach(var attachment in sendingGroup.Attachments)
+                {
+                    var fileObject = fileObjects.FirstOrDefault(x => x.Id == attachment.Id);
+                    attachment.FileObject = fileObject;
+                }
+            }
+
+            return sendingGroup.ToSuccessResponse();
         }
     }
 }

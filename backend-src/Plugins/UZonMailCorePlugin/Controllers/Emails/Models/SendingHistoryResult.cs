@@ -14,6 +14,7 @@ namespace UZonMail.Core.Controllers.Emails.Models
         public SendingHistoryResult(SendingGroup sendingGroup)
         {
             Id = sendingGroup.Id;
+            ObjectId = sendingGroup.ObjectId;
             UserId = sendingGroup.UserId;
             Subjects = sendingGroup.Subjects;
             TemplatesCount = sendingGroup.Templates != null ? sendingGroup.Templates.Count : 0;
@@ -34,7 +35,7 @@ namespace UZonMail.Core.Controllers.Emails.Models
             ScheduleDate = sendingGroup.ScheduleDate;
             TotalCount = sendingGroup.TotalCount;
             SuccessCount = sendingGroup.SuccessCount;
-            SentCount = sendingGroup.SentCount;
+            SentCount = sendingGroup.SentCount;            
         }
     }
 }

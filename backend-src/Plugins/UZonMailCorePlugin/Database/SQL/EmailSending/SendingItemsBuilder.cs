@@ -106,6 +106,7 @@ namespace UZonMail.Core.Database.SQL.EmailSending
                 sendingItemInboxRelations.AddRange(temps);
             }
             db.SendingItemInboxes.AddRange(sendingItemInboxRelations);
+            await db.SaveChangesAsync();
 
             return sendingIitemes;
         }
@@ -171,6 +172,7 @@ namespace UZonMail.Core.Database.SQL.EmailSending
         /// <returns></returns>
         private async Task<List<SendingItem>> GenerateSendingItems(List<EmailAddress> inboxes)
         {
+            // 合并发件的情况
             if (group.SendBatch
                 && group.Outboxes.Count == 1
                 && (group.Data == null || group.Data.Count == 0)

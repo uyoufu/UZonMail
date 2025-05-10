@@ -10,7 +10,7 @@ namespace UZonMail.DB.SQL.Core.EmailSending
     {
         /// <summary>
         /// 邮箱地址
-        /// 最后发件时，以便该地址为准
+        /// 最后发件时，以该地址为准
         /// </summary>
         public string Email { get; set; }
 

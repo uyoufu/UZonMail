@@ -10,6 +10,7 @@ using UZonMail.Core.Utils.Extensions;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.DB.Extensions;
+using UZonMail.Core.Services.Settings;
 
 namespace UZonMail.Core.Controllers.Emails
 {
