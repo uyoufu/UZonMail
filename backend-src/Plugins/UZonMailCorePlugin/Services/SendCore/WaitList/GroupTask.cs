@@ -14,6 +14,8 @@ using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.DB.Extensions;
 using UZonMail.Core.Services.SendCore.DynamicProxy;
+using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
 
 namespace UZonMail.Core.Services.EmailSending.WaitList
 {
@@ -379,8 +381,9 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             // 赋予发件箱
             sendItemMeta.SetOutbox(outboxEmailAddress);
 
-            var sqlContext = sendingContext.SqlContext;
-            await sendItemMeta.SetReplyToEmails(sqlContext, outboxEmailAddress.ReplyToEmails);
+            var sendingSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()
+                .GetSetting<SendingSetting>(sendingContext.SqlContext, sendItemMeta.SendingItem.UserId);
+            sendItemMeta.SetReplyToEmails(outboxEmailAddress.ReplyToEmails, sendingSetting.ReplyToEmailsList);
 
             // 推送开始发件
             var client = sendingContext.HubClient.GetUserClient(UserId);
@@ -442,7 +445,9 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             sendItemMeta.SetSubject(subject);
 
             // 添加最大重试次数
-            await sendItemMeta.SetMaxRetryCount(sqlContext);
+            var sendingSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()
+                .GetSetting<SendingSetting>(sqlContext, sendItemMeta.SendingItem.UserId);
+            await sendItemMeta.SetMaxRetryCount(sendingSetting.MaxRetryCount);
 
             return sendItemMeta;
         }

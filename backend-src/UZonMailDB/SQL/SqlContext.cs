@@ -59,9 +59,8 @@ namespace UZonMail.DB.SQL
         public DbSet<SendingItem> SendingItems { get; set; }
         public DbSet<SendingItemInbox> SendingItemInboxes { get; set; }
 
-        public DbSet<SystemSetting> SystemSettings { get; set; }
+        public DbSet<AppSetting> AppSettings { get; set; }
         public DbSet<Proxy> Proxies { get; set; }
-        public DbSet<OrganizationSetting> OrganizationSettings { get; set; }
 
         // 设置相关
         public DbSet<SmtpInfo> SmtpInfos { get; set; }

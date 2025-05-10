@@ -10,7 +10,12 @@ using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Settings
 {
-    public class SystemSettingController(SqlContext db, SystemSettingService settingService) : ControllerBaseV1
+    /// <summary>
+    /// 系统级设置, 为 AppSetting 的一个子集
+    /// </summary>
+    /// <param name="db"></param>
+    /// <param name="settingService"></param>
+    public class SystemSettingController(SqlContext db, AppSettingService settingService) : ControllerBaseV1
     {
         [HttpPut("base-api-url")]
         public async Task<ResponseResult<bool>> UpdateBaseApiUrl([FromBody] UpdateBaseApiUrlBody dataParams)
@@ -19,15 +24,15 @@ namespace UZonMail.Core.Controllers.Settings
             if (string.IsNullOrEmpty(baseApiUrl)) return false.ToFailResponse("baseUrl不能为空");
 
             // 开始更新
-            var setting = await db.SystemSettings.FirstOrDefaultAsync(x => x.Key == SystemSetting.BaseApiUrl);
+            var setting = await db.AppSettings.FirstOrDefaultAsync(x => x.Key == AppSetting.BaseApiUrl);
             if (setting == null)
             {
-                setting = new SystemSetting
+                setting = new AppSetting
                 {
-                    Key = SystemSetting.BaseApiUrl,
+                    Key = AppSetting.BaseApiUrl,
                     StringValue = baseApiUrl
                 };
-                db.SystemSettings.Add(setting);
+                db.AppSettings.Add(setting);
             }
             else
             {
@@ -52,7 +57,7 @@ namespace UZonMail.Core.Controllers.Settings
             }
 
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value);
+            await settingService.UpdateAppSetting(key, value);
             return true.ToSuccessResponse();
         }
 
@@ -71,7 +76,7 @@ namespace UZonMail.Core.Controllers.Settings
             }
 
             // 开始更新
-            await settingService.UpdateSystemSettingJson(key, value);
+            await settingService.UpdateAppSetting(key, value);
             return true.ToSuccessResponse();
         }
 
@@ -84,7 +89,7 @@ namespace UZonMail.Core.Controllers.Settings
             }
 
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value);
+            await settingService.UpdateAppSetting(key, value);
             return true.ToSuccessResponse();
         }
 
@@ -103,7 +108,7 @@ namespace UZonMail.Core.Controllers.Settings
             }
 
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value);
+            await settingService.UpdateAppSetting(key, value);
             return true.ToSuccessResponse();
         }
 
@@ -114,33 +119,15 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="keys"></param>
         /// <returns>设置的对象</returns>
         [HttpGet("kv")]
-        public async Task<ResponseResult<SystemSetting?>> GetSystemSetting(string key)
+        public async Task<ResponseResult<AppSetting?>> GetSystemSetting(string key)
         {
             if (string.IsNullOrEmpty(key))
             {
-                return ResponseResult<SystemSetting?>.Fail("key不能为空");
+                return ResponseResult<AppSetting?>.Fail("key不能为空");
             }
 
-            var settings = await settingService.GetSystemSetting(key);
+            var settings = await settingService.GetAppSetting(key,AppSettingType.System);
             return settings.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 获取系统设置
-        /// </summary>
-        /// <param name="keys"></param>
-        /// <returns>设置的对象</returns>
-        [HttpGet("kvs")]
-        public async Task<ResponseResult<JObject>> GetSystemSettings(string keys)
-        {
-            if (string.IsNullOrEmpty(keys))
-            {
-                return new JObject().ToFailResponse("keys不能为空");
-            }
-
-            var result = await settingService.GetSystemSettings(keys);
-
-            return result.ToSuccessResponse();
         }
     }
 }

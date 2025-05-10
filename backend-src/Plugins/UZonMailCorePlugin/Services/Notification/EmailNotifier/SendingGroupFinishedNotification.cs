@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
 using UZonMail.Core.Utils.FluentMailkit;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
@@ -12,14 +13,14 @@ namespace UZonMail.Core.Services.Notification.EmailNotification
     /// </summary>
     /// <param name="systemSetting"></param>
     /// <param name="userSetting"></param>
-    public class SendingGroupFinishedNotification(SqlContext db, SystemSettingService systemSetting, UserSettingService userSetting) : IScopedService
+    public class SendingGroupFinishedNotification(SqlContext db, AppSettingService systemSetting, UserSettingService userSetting,AppSettingsManager settingsManager) : IScopedService
     {
         public static readonly string NotificationTemplateKey = "sendingGroupFinishedNotificationTemplate";
 
         public async Task Notify(SendingGroup sendingGroup)
         {
             // 发送项目组完成通知
-            var settings = await systemSetting.GetSmtpNotificationSetting();
+            var settings = await settingsManager.GetSetting<SmtpNotificationSetting>(db, sendingGroup.UserId);
             if (!settings.IsValid)
                 return;
 
@@ -30,7 +31,7 @@ namespace UZonMail.Core.Services.Notification.EmailNotification
             if (!email.Contains('@')) return;
 
             // 获取发件内容
-            var template = await db.SystemSettings.FirstOrDefaultAsync(x => x.Key == NotificationTemplateKey);
+            var template = await db.AppSettings.FirstOrDefaultAsync(x => x.Key == NotificationTemplateKey);
             if (template == null || string.IsNullOrEmpty(template.StringValue))
             {
                 return;

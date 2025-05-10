@@ -1,13 +1,14 @@
 ﻿using System;
+using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Email;
 
 namespace UZonMail.Core.Services.Plugin
 {
-    public class EmailDecoratorParams(OrganizationSettingCache settingReader, SendingItem sendingItem, string outboxEmail) : IEmailDecoratorParams
+    public class EmailDecoratorParams(SendingSetting sendingSetting, SendingItem sendingItem, string outboxEmail) : IEmailDecoratorParams
     {
-        public OrganizationSettingCache SettingsReader { get; } = settingReader;
+        public SendingSetting SendingSetting { get; } = sendingSetting;
 
         public SendingItem SendingItem { get; } = sendingItem;
 

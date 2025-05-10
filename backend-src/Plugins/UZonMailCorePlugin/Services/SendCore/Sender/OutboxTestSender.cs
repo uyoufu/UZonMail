@@ -77,6 +77,24 @@ namespace UZonMail.Core.Services.SendCore.Sender
         public Result<string> SendTest(string smtpHost, int smtpPort, bool enableSSL,
             string smtpUserName, string smtpPassword, IProxyClient? proxyClient = null)
         {
+            // 判断参数是否正确
+            if (string.IsNullOrEmpty(smtpHost))
+            {
+                return Result<string>.Fail("SMTP 服务器地址不能为空");
+            }
+            if (smtpPort <= 0 || smtpPort> 65535)
+            {
+                return Result<string>.Fail("SMTP 端口号不正确");
+            }
+            if (string.IsNullOrEmpty(smtpUserName))
+            {
+                return Result<string>.Fail("SMTP 用户名不能为空");
+            }
+            if (string.IsNullOrEmpty(smtpPassword))
+            {
+                return Result<string>.Fail("SMTP 密码不能为空");
+            }
+
             // 参考：https://github.com/jstedfast/MailKit/tree/master/Documentation/Examples
             using var client = new SmtpClient();
             client.ProxyClient = proxyClient;

@@ -14,7 +14,7 @@ namespace UZonMail.Core.Services.HostedServices
         public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             // 数据库启动设置
-            var dbStartup = serviceProvider.GetRequiredService<DatabaseSetup>();
+            var dbStartup = serviceProvider.GetRequiredService<DatabaseReset>();
             await dbStartup.Start();
 
             // 数据升级

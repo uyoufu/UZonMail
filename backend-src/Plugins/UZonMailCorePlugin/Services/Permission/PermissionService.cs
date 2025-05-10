@@ -111,7 +111,7 @@ namespace UZonMail.Core.Services.Permission
         {
             var permissionCodes = await GetUserPermissionCodes(userId);
             // * 代表所有权限
-            if (permissionCode.Contains("*")) return true;
+            if (permissionCode.Contains(PermissionCode.SuperAdminPermissionCode)) return true;
 
             return permissionCodes.Contains(permissionCode);
         }
@@ -119,6 +119,11 @@ namespace UZonMail.Core.Services.Permission
         public async Task<bool> HasOrganizationPermission(long userId)
         {
             return await HasPermission(userId, PermissionCode.OrganizationPermissionCode);
+        }
+
+        public async Task<bool> HasSuperAdminPermission(long userId)
+        {
+            return await HasPermission(userId, PermissionCode.SuperAdminPermissionCode);
         }
 
         /// <summary>

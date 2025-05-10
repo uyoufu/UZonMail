@@ -11,6 +11,8 @@ using UZonMail.Core.Services.SendCore.DynamicProxy;
 using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
@@ -34,13 +36,15 @@ namespace UZonMail.Core.Services.SendCore.Sender
 
         private readonly ProxyManager _proxyManager;
         private readonly GroupTasksList _groupTaskList;
+        private readonly AppSettingsManager _settingsService;
 
         private readonly Timer _timer;
 
-        public SmtpClientFactory(ProxyManager proxyManager, GroupTasksList groupTaskList)
+        public SmtpClientFactory(ProxyManager proxyManager, GroupTasksList groupTaskList, AppSettingsManager settingsService)
         {
             _proxyManager = proxyManager;
             _groupTaskList = groupTaskList;
+            _settingsService = settingsService;
 
             // 新建定时器，对 smtp 连接进行保活
             _timer = new Timer(1000 * 30); // 30s
@@ -133,7 +137,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// 是否应使用代理
         /// </summary>
         /// <returns></returns>
-        private static async Task<bool> ShouldUseProxy(SendingContext sendingContext)
+        private async Task<bool> ShouldUseProxy(SendingContext sendingContext)
         {
             // 判断发件项是否指定了代理
             // 指定代理，不需要更换
@@ -144,7 +148,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             }
 
             // 未设置代理更换时，不更换代理
-            var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, sendingContext.EmailItem.UserId);
+            var orgSetting = await _settingsService.GetSetting<SendingSetting>(sendingContext.SqlContext, sendingContext.EmailItem.UserId);
             if (orgSetting.ChangeIpAfterEmailCount <= 0)
             {
                 return true;
@@ -176,7 +180,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// <param name="client"></param>
         /// <param name="sendingContext"></param>
         /// <returns></returns>
-        private static async Task<bool> CheckSmtpClientAvailable(ThrottlingSmtpClient client, SendingContext sendingContext)
+        private async Task<bool> CheckSmtpClientAvailable(ThrottlingSmtpClient client, SendingContext sendingContext)
         {
             if (!client.IsConnected)
             {
@@ -204,7 +208,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             // 指定了代理，但是没有设置更换 IP 的次数，返回正常
             // 这种情况，代理可能会失败，要同时考虑
             // 未设置代理更换时，不更换代理
-            var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sendingContext.SqlContext, sendingContext.EmailItem.UserId);
+            var orgSetting = await _settingsService.GetSetting<SendingSetting>(sendingContext.SqlContext, sendingContext.EmailItem.UserId);
             if (orgSetting.ChangeIpAfterEmailCount <= 0)
             {
                 return true;
@@ -243,8 +247,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
             }
 
             // 有的 smtpClient 可能不需要代理, 此处要进行判断
-            var proxyId = sendingContext.EmailItem!.ProxyId;
-            if (proxyId <= 0)
+            var availableProxyIds = sendingContext.EmailItem!.AvailableProxyIds;
+            if (availableProxyIds.Count==0)
             {
                 // 未配置代理，直接返回
                 return null;

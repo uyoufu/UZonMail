@@ -1,16 +1,12 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Quartz.Impl.AdoJobStore.Common;
+using UZonMail.Core.Services.Notification.EmailNotification;
 using UZonMail.Core.SignalRHubs;
+using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.SignalRHubs.SendEmail;
-using UZonMail.DB.MySql;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
-using UZonMail.Core.SignalRHubs.Extensions;
-using UZonMail.Core.Controllers.Settings.Models;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Notification.EmailNotification;
 
 namespace UZonMail.Core.Services.SendCore.Utils
 {

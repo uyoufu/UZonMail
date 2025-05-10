@@ -34,6 +34,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             var proxyFactories = serviceProvider.GetServices<IProxyFactory>()
                .OrderBy(x => x.Order)
                .ToList();
+
             foreach (var proxy in proxies)
             {
                 // 若转换器已经存在，则更新
@@ -74,34 +75,34 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         /// <summary>
         /// 随机一个可用代理
         /// </summary>
-        /// <param name="ranges">指定代理的范围</param>
         /// <param name="matchStr"></param>
         /// <param name="limitCount">限制每个matchStr对应的使用次数</param>
+        /// <param name="ranges">指定代理的范围, 为空时，默认所有</param>
         /// <returns></returns>
-        public IProxyHandler? RandomProxyHandler(List<long> ranges, string matchStr, int limitCount)
+        public IProxyHandler? RandomProxyHandler(string matchStr, int limitCount, List<long>? ranges = null)
         {
-            if (ranges.Count == 0) return null;
             if (_proxyHandlers.IsEmpty) return null;
 
             // 若 limitCount 小于等于 0，则不限制
             if (limitCount <= 0) limitCount = int.MaxValue;
 
-            var enabledProxies = _proxyHandlers.Values
-                .Where(x => ranges.Contains(x.Id))
-                .Where(x => x.IsEnable())
-                .Where(x => x.IsMatch(matchStr, limitCount))
-                .ToList();
+            var enabledProxies = _proxyHandlers.Values.AsEnumerable();
+            if (ranges != null) enabledProxies = enabledProxies.Where(x => ranges.Contains(x.Id));
+            var rangedProxies = enabledProxies
+            .Where(x => x.IsEnable())
+            .Where(x => x.IsMatch(matchStr, limitCount))
+            .ToList();
 
             // 随机一个代理
-            if (enabledProxies.Count == 0)
+            if (rangedProxies.Count == 0)
             {
                 _logger.Debug($"未能为 {matchStr} 匹配到代理");
                 return null;
             }
 
             // 返回一个随机代理
-            var randomIndex = new Random().Next(0, enabledProxies.Count);
-            return enabledProxies[randomIndex];
+            var randomIndex = new Random().Next(0, rangedProxies.Count);
+            return rangedProxies[randomIndex];
         }
 
         /// <summary>
@@ -117,7 +118,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
 
         public void DisposeHandler()
         {
-           foreach(var handler in _proxyHandlers.Values)
+            foreach (var handler in _proxyHandlers.Values)
             {
                 handler.DisposeHandler();
             }

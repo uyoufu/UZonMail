@@ -25,10 +25,10 @@ namespace UZonMail.Core.Database.Update.Updaters
 
             var template = await File.ReadAllTextAsync(templatePath);
 
-            var systemSetting = await db.SystemSettings.FirstOrDefaultAsync(x => x.Key == SendingGroupFinishedNotification.NotificationTemplateKey);
+            var systemSetting = await db.AppSettings.FirstOrDefaultAsync(x => x.Key == SendingGroupFinishedNotification.NotificationTemplateKey);
             if (systemSetting == null)
             {
-                db.SystemSettings.Add(new SystemSetting()
+                db.AppSettings.Add(new AppSetting()
                 {
                     Key = SendingGroupFinishedNotification.NotificationTemplateKey,
                     StringValue = template,

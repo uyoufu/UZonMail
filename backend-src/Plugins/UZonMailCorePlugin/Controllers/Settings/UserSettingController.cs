@@ -10,7 +10,13 @@ using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Settings
 {
-    public class UserSettingController(SqlContext db, TokenService tokenService, SystemSettingService settingService) : ControllerBaseV1
+    /// <summary>
+    /// 用户级设置
+    /// </summary>
+    /// <param name="db"></param>
+    /// <param name="tokenService"></param>
+    /// <param name="settingService"></param>
+    public class UserSettingController(SqlContext db, TokenService tokenService, AppSettingService settingService) : ControllerBaseV1
     {
         /// <summary>
         /// 更新系统设置
@@ -19,7 +25,7 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("string")]
-        public async Task<ResponseResult<bool>> UpdateSystemSetting(string key, string value)
+        public async Task<ResponseResult<bool>> UpdateUserSetting(string key, string value)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -29,7 +35,7 @@ namespace UZonMail.Core.Controllers.Settings
             var userId = tokenService.GetUserSqlId();
 
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value, userId, type: SystemSettingType.User);
+            await settingService.UpdateAppSetting(key, value, type: AppSettingType.User);
             return true.ToSuccessResponse();
         }
 
@@ -40,7 +46,7 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("json")]
-        public async Task<ResponseResult<bool>> UpdateSystemSettingJson(string key, [FromBody] JToken value)
+        public async Task<ResponseResult<bool>> UpdateUserSettingJson(string key, [FromBody] JToken value)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -49,12 +55,12 @@ namespace UZonMail.Core.Controllers.Settings
 
             // 开始更新
             var userId = tokenService.GetUserSqlId();
-            await settingService.UpdateSystemSettingJson(key, value, userId, type: SystemSettingType.User);
+            await settingService.UpdateAppSetting(key, value, type: AppSettingType.User);
             return true.ToSuccessResponse();
         }
 
         [HttpPut("boolean")]
-        public async Task<ResponseResult<bool>> UpdateSystemSetting(string key, bool value)
+        public async Task<ResponseResult<bool>> UpdateUserSetting(string key, bool value)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -62,7 +68,7 @@ namespace UZonMail.Core.Controllers.Settings
             }
             var userId = tokenService.GetUserSqlId();
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value, userId, type: SystemSettingType.User);
+            await settingService.UpdateAppSetting(key, value, type: AppSettingType.User);
             return true.ToSuccessResponse();
         }
 
@@ -73,7 +79,7 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("long")]
-        public async Task<ResponseResult<bool>> UpdateSystemSetting(string key, long value)
+        public async Task<ResponseResult<bool>> UpdateUserSetting(string key, long value)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -81,7 +87,7 @@ namespace UZonMail.Core.Controllers.Settings
             }
             var userId = tokenService.GetUserSqlId();
             // 开始更新
-            await settingService.UpdateSystemSetting(key, value, userId, type: SystemSettingType.User);
+            await settingService.UpdateAppSetting(key, value, AppSettingType.User);
             return true.ToSuccessResponse();
         }
 
@@ -92,33 +98,15 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="keys"></param>
         /// <returns>设置的对象</returns>
         [HttpGet("kv")]
-        public async Task<ResponseResult<SystemSetting?>> GetSystemSetting(string key)
+        public async Task<ResponseResult<AppSetting?>> GetUserSetting(string key)
         {
             if (string.IsNullOrEmpty(key))
             {
-                return ResponseResult<SystemSetting?>.Fail("key不能为空");
+                return ResponseResult<AppSetting?>.Fail("key不能为空");
             }
-            var userId = tokenService.GetUserSqlId();
-            var settings = await settingService.GetSystemSetting(key, userId);
+
+            var settings = await settingService.GetAppSetting(key, AppSettingType.User);
             return settings.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 获取系统设置
-        /// </summary>
-        /// <param name="keys"></param>
-        /// <returns>设置的对象</returns>
-        [HttpGet("kvs")]
-        public async Task<ResponseResult<JObject>> GetSystemSettings(string keys)
-        {
-            if (string.IsNullOrEmpty(keys))
-            {
-                return new JObject().ToFailResponse("keys不能为空");
-            }
-            var userId = tokenService.GetUserSqlId();
-            var result = await settingService.GetSystemSettings(keys, userId);
-
-            return result.ToSuccessResponse();
         }
     }
 }

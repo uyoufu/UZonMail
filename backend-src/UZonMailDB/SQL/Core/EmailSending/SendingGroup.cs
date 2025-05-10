@@ -215,7 +215,7 @@ namespace UZonMail.DB.SQL.Core.EmailSending
 
         public void Configure(EntityTypeBuilder<SendingGroup> builder)
         {
-            builder.HasMany(x => x.Templates).WithMany();            
+            builder.HasMany(x => x.Templates).WithMany();
             builder.HasMany(x => x.Attachments).WithMany();
             builder.HasMany(x => x.Outboxes).WithMany();
         }

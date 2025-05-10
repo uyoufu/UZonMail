@@ -3,6 +3,8 @@ using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.Utils;
 using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.SignalRHubs.SendEmail;
 using UZonMail.DB.Extensions;
@@ -12,7 +14,7 @@ using UZonMail.DB.SQL.Core.EmailSending;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {
-    public class OutboxesPostHandler(GroupTasksList groupTasksList, OutboxesPoolList outboxesPoolList) : AbstractSendingHandler
+    public class OutboxesPostHandler(GroupTasksList groupTasksList, OutboxesPoolList outboxesPoolList, AppSettingsManager settingsService) : AbstractSendingHandler
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(OutboxesPostHandler));
 
@@ -84,8 +86,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
         /// </summary>
         private async Task CheckOutboxSentCountLimit(SqlContext sqlContext, OutboxEmailAddress outbox)
         {
-            var userInfo = await CacheManager.Global.GetCache<UserInfoCache>(sqlContext, outbox.UserId);
-            var orgSetting = await CacheManager.Global.GetCache<OrganizationSettingCache>(sqlContext, userInfo.OrganizationId);
+            var orgSetting = await settingsService.GetSetting<SendingSetting>(sqlContext, outbox.UserId);
 
             // 本身有限制时，若已经达到发送上限，则不再发送
             var overflowLimit = false;
@@ -97,7 +98,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 }
             }
             // 本身没限制，使用系统的限制
-            else if (orgSetting.Setting.MaxSendCountPerEmailDay > 0 && outbox.SentTotalToday >= orgSetting.Setting.MaxSendCountPerEmailDay)
+            else if (orgSetting.MaxSendCountPerEmailDay > 0 && outbox.SentTotalToday >= orgSetting.MaxSendCountPerEmailDay)
             {
                 overflowLimit = true;
             }
@@ -154,7 +155,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                     // 推送发送组进度
                     await client.SendingGroupProgressChanged(new SendingGroupProgressArg(sendingGroup, sendingContext.GroupTaskStartDate));
                     continue;
-                };
+                }
+                ;
 
                 // 发件组不存在任何发件箱时，需要移除整个发件组
                 if (!groupTasks.TryRemove(sendingGroupId, out var removedGroupTask)) continue;
