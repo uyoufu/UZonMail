@@ -3,6 +3,36 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.14.0
+
+> 更新日期：2025-05-10
+
+::: warning
+
+由于数据库变动较大，本次更新不兼容老版本数据
+
+:::
+
+### 新增功能
+
+1. 设置拆分为系统、组织、用户设置，方便多用户管理
+2. 发件历史中新增【复制发件】功能，可从既有的发件任务中发起新的发件任务
+3. 专业版新增新的代理测活服务，提升专业版使用体验
+
+### bug 修复
+
+1. 修复向多个用户发件时，附件丢失的 bug
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.14.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.0.0.zip)
+
+[uzonmail-service-win-x64-0.14.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.14.0.0.zip)
+
+[uzonmail-service-linux-x64-0.14.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.14.0.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.13.0
 
 > 更新日期：2025-04-24
