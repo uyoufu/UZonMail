@@ -62,6 +62,8 @@
 </template>
 
 <script lang="ts" setup>
+import logger from 'loglevel'
+
 defineProps({
   label: {
     type: String,
@@ -70,12 +72,16 @@ defineProps({
 })
 
 import { fileSha256 } from 'src/utils/file'
-import type { IUploadFile, IUploadResult, TFileSha256Callback } from 'src/utils/file'
+import type { IObsUploadedFile, IObsUploadedResult, IFileSha256Callback } from 'src/utils/file'
 // 定义 v-model
 const modelValue = defineModel({
-  type: Array as PropType<IUploadResult[]>,
+  type: Array as PropType<IObsUploadedResult[]>,
   default: () => []
 })
+watch(modelValue, (newValue) => {
+  addObsFile(newValue)
+})
+
 // 初始化显示
 // 显示已经上传的文件信息
 onMounted(() => {
@@ -83,11 +89,21 @@ onMounted(() => {
   // 后期有需要再实现
 })
 
+function addObsFile (files: IObsUploadedResult[]) {
+  // 获取不存在的项
+  const shas = uploaderRef.value.uploadedFiles.map(x => x.__sha256)
+  const newFiles = files.filter(x => !shas.includes(x.__sha256))
+
+  logger.debug('[objectUploader] modelValue changed:', files, shas, newFiles)
+  uploaderRef.value.addFiles(newFiles.map(x => x as File))
+}
+
+
 import type { QUploaderFactoryObject } from 'quasar';
 import { QUploader } from 'quasar'
 const uploaderRef: Ref<QUploader> = ref(null as unknown as QUploader)
 onMounted(() => {
-  console.log('uploaderRef:', uploaderRef.value)
+  logger.debug('[objectUploader] uploaderRef:', uploaderRef.value)
 })
 
 // 上传地址配置
@@ -95,8 +111,8 @@ import { useUserInfoStore } from 'src/stores/user'
 const userInfoStore = useUserInfoStore()
 import { useConfig } from 'src/config'
 const appConfig = useConfig()
-function factoryFn (files: readonly IUploadFile[]): Promise<QUploaderFactoryObject> {
-  console.log('uploader factory called:', files)
+function factoryFn (files: readonly IObsUploadedFile[]): Promise<QUploaderFactoryObject> {
+  logger.debug('[objectUploader] uploader factory called:', files)
   return new Promise((resolve) => {
     // Retrieve JWT token from your store.
     const token = userInfoStore.token
@@ -119,18 +135,25 @@ function factoryFn (files: readonly IUploadFile[]): Promise<QUploaderFactoryObje
 import { getFileUsageId } from 'src/api/file'
 
 const vm = getCurrentInstance()
-function sha256Callback (params: TFileSha256Callback) {
+function sha256Callback (params: IFileSha256Callback) {
   params.file.__progressLabel = params.progressLabel
   // 强制刷新
   vm?.proxy?.$forceUpdate()
 }
 
-async function onFileAdded (files: readonly IUploadFile[]) {
+async function onFileAdded (files: readonly IObsUploadedFile[]) {
   // 计算文件的 sha256 值，若已经上传过，则直接修改文件状态
-  console.log('files:', files)
+  logger.debug('[objectUploader] onFileAdded files:', files, uploaderRef.value.queuedFiles)
   if (!uploaderRef.value) return
 
   for (const file of files) {
+    if (file.__fileUsageId) {
+      // 说明是原始数据，进行恢复
+      // 修改文件状态
+      uploaderRef.value.updateFileStatus(file, 'uploaded', file.size)
+      continue
+    }
+
     // 计算 hash 值
     const sha256 = await fileSha256(file, sha256Callback)
     // 保存 hash
@@ -151,7 +174,7 @@ async function onFileAdded (files: readonly IUploadFile[]) {
     // 添加到已上传文件列表
     // @ts-expect-error 允许直接修改
     uploaderRef.value.uploadedFiles.push(file)
-    // console.log('queuedFiles:', uploaderRef.value.queuedFiles)
+    logger.debug('[objectUploader] queuedFiles:', uploaderRef.value.queuedFiles)
     // 保存到结果中
     updateModelValue(file)
   }
@@ -163,8 +186,8 @@ const canUpload = computed(() => {
 
 // 文件上传后的操作
 import { notifyError } from 'src/utils/dialog'
-function onFileUploaded ({ files, xhr }: { files: readonly IUploadFile[], xhr: XMLHttpRequest }) {
-  const file = files[0] as IUploadFile
+function onFileUploaded ({ files, xhr }: { files: readonly IObsUploadedFile[], xhr: XMLHttpRequest }) {
+  const file = files[0] as IObsUploadedFile
   const response = JSON.parse(xhr.responseText)
   if (!response.ok) {
     notifyError(response.message)
@@ -177,10 +200,10 @@ function onFileUploaded ({ files, xhr }: { files: readonly IUploadFile[], xhr: X
   // 更新 v-model 值
   updateModelValue(file)
 }
-function updateModelValue (file: IUploadFile) {
+function updateModelValue (file: IObsUploadedFile) {
   if (modelValue.value.find(x => x.__sha256 === file.__sha256)) return
 
-  const result: IUploadResult = {
+  const result: IObsUploadedResult = {
     __fileName: file.name,
     __sha256: file.__sha256,
     __key: file.__key,

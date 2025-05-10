@@ -1,6 +1,6 @@
 import type { IEmailCreateInfo } from "src/api/emailSending"
 import { showComponentDialog } from "src/utils/dialog"
-import SelectProxyDialog from "./components/SelectProxyDialog.vue"
+import SelectProxyDialog from "../components/SelectProxyDialog.vue"
 
 export function useProxyAdder (emailInfo: Ref<IEmailCreateInfo>) {
   const existProxy = computed(() => {

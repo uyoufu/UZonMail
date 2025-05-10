@@ -7,7 +7,7 @@
 
         <q-table class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
           v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
-          @request="onTableRequest" selection="multiple" v-model:selected="selected">
+          @request="onTableRequest" selection="multiple" v-model:selected="selectedEmails">
           <template v-slot:top-left>
             <div class="row justify-start q-gutter-sm">
               <CreateBtn v-if="showNewTempInboxBtn" tooltip="新增临时收件箱" @click="onNewTempInboxClick" />
@@ -114,18 +114,18 @@ const columns: QTableColumn[] = [
 ]
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 // 选择结果
-const selected: Ref<IInbox[]> = ref([])
-// 初始化选择结果
-selected.value.push(...props.initEmailBoxes)
+const selectedEmails: Ref<IInbox[]> = ref([])
+// 更新选择结果
+selectedEmails.value.push(...props.initEmailBoxes)
 const selectedGroups: Ref<IEmailGroupListItem[]> = ref([])
 selectedGroups.value.push(...props.initEmailGroups)
 
 // 若是选择已选中，需要单独处理
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   if (emailGroupRef.value.name === 'selected') {
-    if (!filterObj.filter) return selected.value.length
+    if (!filterObj.filter) return selectedEmails.value.length
     const regex = new RegExp(filterObj.filter, 'i')
-    return selected.value.filter(x => x.email.match(regex)).length
+    return selectedEmails.value.filter(x => x.email.match(regex)).length
   }
   if (props.emailBoxType === 0) {
     const { data } = await getOutboxesCount(emailGroupRef.value.id, filterObj.filter)
@@ -137,7 +137,7 @@ async function getRowsNumberCount (filterObj: TTableFilterObject) {
 }
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   if (emailGroupRef.value.name === 'selected') {
-    let results = selected.value
+    let results = selectedEmails.value
     if (filterObj.filter) {
 
       const regex = new RegExp(filterObj.filter, 'i')
@@ -176,7 +176,7 @@ async function onNewTempInboxClick () {
   if (!ok) return
 
   // 若在选择集中，提示错误
-  if (selected.value.some(x => x.email === data.email)) {
+  if (selectedEmails.value.some(x => x.email === data.email)) {
     notifyError('已存在相同邮箱')
     return
   }
@@ -187,7 +187,7 @@ async function onNewTempInboxClick () {
   // 向当前数据中添加
   addNewRow(newInbox)
   // 向当选择集中添加
-  selected.value.push(newInbox)
+  selectedEmails.value.push(newInbox)
 }
 
 // 底部确认
@@ -195,7 +195,7 @@ import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 function onOKClick () {
   const result = {
-    selectedEmails: selected.value,
+    selectedEmails: selectedEmails.value,
     selectedGroups: selectedGroups.value
   }
   // console.log('dialog closed:', result)

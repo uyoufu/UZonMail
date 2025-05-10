@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { httpClient } from 'src/api//base/httpClient'
 import type { IRequestPagination } from 'src/compositions/types'
@@ -63,13 +64,14 @@ export interface ISendingGroupInfo {
   sendStartDate: string, // 发送开始时间
   sendingType?: SendingGroupType, // 发送类型
   scheduleDate?: string, // 计划发送时间
-  createDate?: string
+  createDate?: string,
 }
 
 /**
  * 发送组历史
  */
 export interface ISendingGroupHistory extends ISendingGroupInfo {
+  objectId: string,
   templatesCount: number, // 模板数量
   outboxesCount: number, // 发件人邮箱数量
   ccBoxesCount: number, // 抄送人邮箱数量
@@ -147,4 +149,20 @@ export interface ISendingGroupStatusInfo {
  */
 export function getSendingGroupRunningInfo (sendingGroupId: number) {
   return httpClient.get<ISendingGroupStatusInfo>(`/sending-group/${sendingGroupId}/status-info`)
+}
+
+export interface ISendingGroupFull extends ISendingGroupInfo {
+  objectId: string,
+  templates: Record<string, any>[], // 模板
+  outboxes: Record<string, any>[], // 发件人邮箱
+  attachments: Record<string, any>[], // 收件人邮箱
+}
+
+/**
+ * 获取发件组信息
+ * @param sendingGroupObjId
+ * @returns
+ */
+export function getSendingGroup (sendingGroupObjId: string) {
+  return httpClient.get<ISendingGroupFull>(`/sending-group/${sendingGroupObjId}`)
 }

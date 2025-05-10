@@ -23,6 +23,8 @@
 </template>
 
 <script lang="ts" setup>
+import logger from 'loglevel'
+
 const props = defineProps({
   icon: {
     type: String,
@@ -71,6 +73,8 @@ import { createAbstractLabel } from 'src/utils/labelHelper'
 import SelectEmailBoxDialog from './SelectEmailBoxDialog.vue'
 
 async function onSelectOutboxes () {
+  logger.debug('[SelectEmailBox] onSelectOutboxes', modelValue.value, selectedGroupsModelValue.value)
+
   const { ok, data } = await showComponentDialog<{
     selectedEmails: IInbox[],
     selectedGroups: IEmailGroupListItem[]
@@ -98,18 +102,30 @@ async function onSelectOutboxes () {
   })
   selectedGroupsModelValue.value = selectedGroupsResults
 
+  formatFieldLabel()
+}
+
+// #region 格式化显示
+function formatFieldLabel () {
   let unitLabel = '个邮箱'
   if (selectedGroupsModelValue.value.length > 0) {
     unitLabel = '个分组和邮箱'
   }
-  const labels = selectedGroupsResults.map(x => `组-${x.name}`)
-  if (selectedEmailsResults.length > 0) {
-    labels.push(...selectedEmailsResults.map(x => x.email))
+  const labels = selectedGroupsModelValue.value.map(x => `组-${x.name}`)
+  if (modelValue.value.length > 0) {
+    labels.push(...modelValue.value.map(x => x.email))
   }
 
   const label = createAbstractLabel(labels, 5, unitLabel)
   fieldModelValue.value = label
 }
+watch(modelValue, () => {
+  formatFieldLabel()
+})
+watch(selectedGroupsModelValue, () => {
+  formatFieldLabel()
+})
+// #endregion
 </script>
 
 <style lang="scss" scoped></style>

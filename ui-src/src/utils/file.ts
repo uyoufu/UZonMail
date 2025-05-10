@@ -372,20 +372,35 @@ export async function writeExcel (rows: any[], params: IExcelWriterParams) {
 
 // #region 文件上传相关
 
-export interface IUploadResult {
+export interface IObsUploadedResult {
   // 该字段用于在初始化时使用
   __fileName?: string,
   __sha256?: string
   __key?: string,
   __sizeLabel?: string,
   __progressLabel?: string,
-  __fileUsageId?: string | number
+  __fileUsageId?: string | number,
+}
+
+export interface IFileObject {
+  createDate: string,
+  fileBucket: string,
+  fileBucketId: number,
+  id: number,
+  isDeleted: boolean,
+  isHidden: boolean,
+  lastModifyDate: string,
+  linkCount: number,
+  objectId: string,
+  path: string,
+  sha256: string,
+  size: number
 }
 
 /**
  * 上传的文件
  */
-export interface IUploadFile extends IUploadResult, File {
+export interface IObsUploadedFile extends IObsUploadedResult, File {
   __img?: string,
   __src?: string,
 }
@@ -393,12 +408,12 @@ export interface IUploadFile extends IUploadResult, File {
 /**
  * hash 计算回调
  */
-export interface TFileSha256Callback {
+export interface IFileSha256Callback {
   progressLabel: string
   process: number
   computed: number
   total: number
-  file: IUploadFile,
+  file: IObsUploadedFile,
   end: boolean
 }
 
@@ -411,7 +426,7 @@ export interface TFileSha256Callback {
  * @param progressStep 回调进度的步长，默认为 5 %
  * @returns
  */
-export function fileSha256 (file: File, callback?: (params: TFileSha256Callback) => void, progressStep: number = 5): Promise<string> {
+export function fileSha256 (file: File, callback?: (params: IFileSha256Callback) => void, progressStep: number = 5): Promise<string> {
   console.log('getSha256:', file)
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
