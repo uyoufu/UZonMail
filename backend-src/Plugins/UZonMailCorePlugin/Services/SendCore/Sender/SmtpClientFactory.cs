@@ -247,8 +247,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
             }
 
             // 有的 smtpClient 可能不需要代理, 此处要进行判断
-            var proxyId = sendingContext.EmailItem!.ProxyId;
-            if (proxyId <= 0)
+            var availableProxyIds = sendingContext.EmailItem!.AvailableProxyIds;
+            if (availableProxyIds.Count==0)
             {
                 // 未配置代理，直接返回
                 return null;
