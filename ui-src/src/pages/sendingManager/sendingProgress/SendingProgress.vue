@@ -20,8 +20,9 @@
       </div>
 
       <div v-if="existSendingGroupId" class="row justify-end q-mt-md q-gutter-sm">
-        <CancelBtn @click="OnCancelSending" tooltip="取消发件" />
-        <CommonBtn @click="onToggleTaskSending" :label="toggleLabel" :tooltip="toggleTooltip" />
+        <CancelBtn :loading="isSendingCanceling" @click="OnCancelSending" tooltip="取消发件" />
+        <CommonBtn :loading="isSendingToggling" @click="onToggleTaskSending" :label="toggleLabel"
+          :tooltip="toggleTooltip" />
         <OkBtn @click="onSendBackGround" label="后台" tooltip="在后台发件" />
       </div>
 
@@ -48,7 +49,7 @@ import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 
-import { confirmOperation, notifyError, notifySuccess } from 'src/utils/dialog'
+import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 
 import logger from 'loglevel'
 
@@ -68,7 +69,7 @@ const props = defineProps({
 
   title: {
     type: String,
-    default: () => '发送进度'
+    default: () => '正在发件'
   }
 })
 
@@ -81,7 +82,9 @@ onMounted(async () => {
       sendingGroupIdRef.value = groupDoc.id
     } catch (error) {
       logger.error(error)
-      notifyError((error as Error).message)
+
+      // 错误已经在 api 中提示
+      // notifyError((error as Error).message)
       // 关闭进度
       onDialogCancel()
       return
@@ -131,11 +134,16 @@ subscribeOne(UzonMailClientMethods.sendingGroupProgressChanged, onEmailGroupSend
 
 // 取消发件
 import { cancelSending, pauseSending, restartSending } from 'src/api/emailSending'
+const isSendingCanceling = ref(false)
 async function OnCancelSending () {
   const confirm = await confirmOperation('取消发件', '确定取消发件吗？')
   if (!confirm) return
+
+  isSendingCanceling.value = true
   // 开始取消
   await cancelSending(sendingGroupIdRef.value as number)
+  isSendingCanceling.value = false
+
   notifySuccess('取消成功')
   // 关闭窗体
   onDialogCancel()
@@ -150,7 +158,9 @@ const toggleTooltip = computed(() => {
 })
 import { useUserInfoStore } from 'src/stores/user'
 const userInfoStore = useUserInfoStore()
+const isSendingToggling = ref(false)
 async function onToggleTaskSending () {
+  isSendingToggling.value = true
   // 向服务器发送暂停/继续请求
   if (isSendingPause.value) {
     await restartSending(sendingGroupIdRef.value as number, userInfoStore.smtpPasswordSecretKeys)
@@ -158,6 +168,7 @@ async function onToggleTaskSending () {
     await pauseSending(sendingGroupIdRef.value as number)
   }
 
+  isSendingToggling.value = false
   isSendingPause.value = !isSendingPause.value
 }
 const router = useRouter()

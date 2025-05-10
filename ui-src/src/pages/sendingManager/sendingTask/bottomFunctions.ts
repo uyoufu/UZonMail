@@ -8,7 +8,7 @@ import { sendEmailNow, sendSchedule } from 'src/api/emailSending'
 import { useUserInfoStore } from 'src/stores/user'
 
 import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
-import PreviewEmailSendingBody from './components/PreviewEmailSendingBody.vue'
+import PreviewSendingDialog from './components/PreviewSendingDialog.vue'
 import SendingProgress from '../sendingProgress/SendingProgress.vue'
 import SelectScheduleDate from './components/SelectScheduleDate.vue'
 
@@ -176,7 +176,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
     // 1. 正文优先级：用户数据/正文 > 用户数据/模板 > 界面/正文 > 界面/模板
     // 2. 变量参数只能从用户数据中提取
     // 3. 主题优先级: 用户数据/主题 > 界面/主题
-    await showComponentDialog(PreviewEmailSendingBody, {
+    await showComponentDialog(PreviewSendingDialog, {
       emailCreateInfo: emailInfo.value
     })
   }

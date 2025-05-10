@@ -1,5 +1,5 @@
 <template>
-  <q-chip v-bind="$attrs" square dense :color="statusStyle.color" :text-color="statusStyle.textColor"
+  <q-chip v-bind="$attrs" dense :color="statusStyle.color" :text-color="statusStyle.textColor"
     :label="statusStyle.label">
     <slot name="default"></slot>
   </q-chip>
@@ -30,7 +30,7 @@ const defaultStatusStyles = [
   { status: 'forbiddenLogin', label: '禁用', color: 'negative', textColor: 'white', icon: '' },
   { status: 'read', label: '已读', color: 'positive', textColor: 'white', icon: '' },
   { status: 'instant', label: '即时', color: 'primary', textColor: 'white', icon: '' },
-  { status: 'scheduled', label: '定时', color: 'warning', textColor: 'white', icon: '' },
+  { status: 'scheduled', label: '定时', color: 'orange', textColor: 'white', icon: '' },
   { status: 'invalid', label: '无效', color: 'negative', textColor: 'white', icon: '' },
   { status: 'valid', label: '有效', color: 'positive', textColor: 'white', icon: '' },
   { status: 'unsubscribed', label: '未订阅', color: 'negative', textColor: 'white', icon: '' },
@@ -56,7 +56,7 @@ const props = defineProps({
 })
 
 // 将 props.statusStyles 进行格式化
-const colors = ['primary', 'secondary', 'accent', 'negative', 'info', 'warning', 'positive', 'white', 'grey-3']
+const colors = ['primary', 'secondary', 'accent', 'negative', 'info', 'orange', 'positive', 'white', 'grey-3']
 const statusStylesMap = computed(() => {
   const result: Record<string, IStatusChipItem> = {}
 

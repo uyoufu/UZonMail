@@ -34,7 +34,7 @@ const props = defineProps({
 })
 import { uploadFileObject } from 'src/api/file'
 import dayjs from 'dayjs'
-import { fileSha256, TFileSha256Callback } from 'src/utils/file'
+import { fileSha256, IFileSha256Callback } from 'src/utils/file'
 import { AxiosProgressEvent } from 'axios'
 
 interface IProgressInfo {
@@ -110,7 +110,7 @@ const updateProgressInfo = throttle((index: number, message: string, transferred
 }, 300)
 onMounted(async () => {
   let index = 0
-  function sha256Callback (callbackData: TFileSha256Callback) {
+  function sha256Callback (callbackData: IFileSha256Callback) {
     updateProgressInfo(index, `正在计算 ${callbackData.file.name} 哈希值`, callbackData.computed, callbackData.file.size, true)
   }
 

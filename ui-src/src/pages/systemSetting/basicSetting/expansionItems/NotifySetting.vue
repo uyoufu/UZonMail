@@ -108,7 +108,7 @@ async function onValidateNotificationEmail () {
     settings.value.isValid = true
   }, "通知设置保存", '正在验证邮箱...')
 
-  notifySuccess('验证并保存成功')
+  notifySuccess('保存成功')
 }
 // #endregion
 

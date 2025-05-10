@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
-// import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
-// import SendDetailDialog from './SendDetailDialog.vue'
 import type { ISendingGroupHistory } from 'src/api/sendingGroup';
 import { SendingGroupStatus } from 'src/api/sendingGroup'
 import { pauseSending, restartSending, cancelSending, resendSendingGroup } from 'src/api/emailSending'
@@ -13,6 +11,51 @@ import { useUserInfoStore } from 'src/stores/user'
  */
 export function useContextMenu () {
   const router = useRouter()
+  const sendingHistoryContextItems: IContextMenuItem[] = [
+    {
+      name: 'detail',
+      label: '发件明细',
+      tooltip: '查看发件明细',
+      onClick: openSendDetailDialog as any
+    },
+    {
+      name: 'pause',
+      label: '暂停发件',
+      tooltip: '暂停发件',
+      onClick: onPauseSending as any,
+      vif: canPauseSending as any
+    },
+    {
+      name: 'start',
+      label: '开始发件',
+      tooltip: '开始发件',
+      vif: canRestart as any,
+      onClick: onRestartSending as any
+    },
+    {
+      name: 'startForFailed',
+      label: '失败重发',
+      tooltip: '对失败项进行重发',
+      vif: canResend as any,
+      onClick: onResendSendingGroup as any
+    },
+    {
+      name: 'cancelSchedule',
+      label: '取消计划',
+      tooltip: '取消计划发件',
+      color: 'negative',
+      vif: canCancel as any,
+      onClick: onCancelSending as any
+    },
+    {
+      name: 'newSendingTaskWithTemplate',
+      label: '复制发件',
+      tooltip: '复制该数据作为模板并新建发件',
+      onClick: onNewSendingTaskWithTemplate as any
+    }
+  ]
+
+
   // 打开发件明细
   async function openSendDetailDialog (data: ISendingGroupHistory) {
     // 跳转到发件明细页面
@@ -89,49 +132,16 @@ export function useContextMenu () {
     // 更新进度
     data.status = SendingGroupStatus.Sending
   }
-  const sendingHistoryContextItems: IContextMenuItem[] = [
-    {
-      name: 'detail',
-      label: '明细',
-      tooltip: '查看发件明细',
-      onClick: openSendDetailDialog as any
-    },
-    {
-      name: 'pause',
-      label: '暂停',
-      tooltip: '暂停发件',
-      onClick: onPauseSending as any,
-      vif: canPauseSending as any
-    },
-    {
-      name: 'start',
-      label: '开始',
-      tooltip: '重新开始发件',
-      vif: canRestart as any,
-      onClick: onRestartSending as any
-    },
-    {
-      name: 'startForFailed',
-      label: '重发',
-      tooltip: '失败重发',
-      vif: canResend as any,
-      onClick: onResendSendingGroup as any
-    },
-    {
-      name: 'cancelSchedule',
-      label: '取消',
-      tooltip: '取消计划发件',
-      color: 'negative',
-      vif: canCancel as any,
-      onClick: onCancelSending as any
-    }
-    // {
-    //   name: 'viewRawData',
-    //   label: '详细',
-    //   tooltip: '查看该发件组的原始数据',
-    //   onClick: openSendDetailDialog
-    // }
-  ]
+
+
+  async function onNewSendingTaskWithTemplate (data: ISendingGroupHistory) {
+    await router.push({
+      name: 'sendingTask',
+      query: {
+        sendingGroupTemplateId: data.objectId
+      }
+    })
+  }
 
   return {
     openSendDetailDialog,

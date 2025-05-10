@@ -108,8 +108,13 @@ const disableSendBatchCheckbox = computed(() => {
 })
 
 // #region 代理相关
-import { useProxyAdder } from './useProxyAdder'
+import { useProxyAdder } from './compositions/useProxyAdder'
 const { proxyBtnTooltip, proxyBtnColor, onProxyBtnClick } = useProxyAdder(emailInfo)
+// #endregion
+
+// #region 使用模板
+import { useSendingGroupTemplate } from './compositions/useSendingGroupTemplate'
+useSendingGroupTemplate(emailInfo)
 // #endregion
 </script>
 

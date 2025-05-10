@@ -3,6 +3,7 @@ import type { QNotifyCreateOptions } from 'quasar';
 import { Notify, Dialog } from 'quasar'
 import { i18n } from 'src/boot/i18n'
 const { t } = i18n.global
+
 /**
  * 错误
  * @param opts
@@ -127,7 +128,7 @@ export function showHtmlDialog (title: string, html: string) {
 }
 
 // #region 对 components/popupDialog/PopupDialog.ts 进行导出，统一弹窗调用位置
-export { showDialog, showComponentDialog } from 'src/components/popupDialog/PopupDialog'
+export { showDialog, showComponentDialog, showHtmlDialog2 } from 'src/components/popupDialog/PopupDialog'
 // #endregion
 
 export function useIndeterminateProgressNotify (message: string, caption: string = '') {
