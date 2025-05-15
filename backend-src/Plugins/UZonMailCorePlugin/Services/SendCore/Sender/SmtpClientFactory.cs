@@ -2,6 +2,7 @@
 using MailKit.Net.Proxy;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Identity.Client;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Timers;
@@ -318,8 +319,25 @@ namespace UZonMail.Core.Services.SendCore.Sender
             // 进行鉴权
             var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
             if (!debugConfig.IsDemo)
-                if (!string.IsNullOrEmpty(outbox.AuthPassword)) client.Authenticate(outbox.AuthUserName, outbox.AuthPassword);
+            {
+                if (outbox.AuthType==OutboxAuthType.Credential && !string.IsNullOrEmpty(outbox.AuthPassword))
+                {
+                    await client.AuthenticateAsync(outbox.AuthUserName, outbox.AuthPassword);
+                }
 
+                //if (outbox.AuthType==OutboxAuthType.OAuth2)
+                //{
+                //    var cca = ConfidentialClientApplicationBuilder
+                //        .Create(outbox.ClientId)
+                //        .WithClientSecret(outbox.AuthPassword)
+                //        .WithAdfsAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"))
+                //        .Build();
+
+                //    var scopes = new[] { "https://outlook.office365.com/.default" };
+                //    var result = await cca.AcquireTokenForClient(scopes).ExecuteAsync();
+                //    await client.AuthenticateAsync(new SaslMechanismOAuth2("your-email@outlook.com", result.AccessToken));
+                //}
+            }
             // 添加到缓存中
             _smptClients.TryAdd(client.GetClientKey(), client);
 

@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Management;
@@ -9,7 +9,7 @@ namespace UZonMailDesktop.Utils
     /// <summary>
     /// 后台服务
     /// </summary>
-    internal class BackService
+    internal class BackEndService(IConfiguration configuration)
     {
         private readonly string ServiceName = "UzonMailService";
 
@@ -18,10 +18,10 @@ namespace UZonMailDesktop.Utils
             return Process.GetProcesses().Where(x => x.ProcessName == ServiceName).ToList();
         }
 
-        public void StartBackService()
+        public void Start()
         {
             // 关闭非当前目录中的后台服务
-            CloseBackServiceIfNotSelf();
+            CloseExist();
 
             // 判断是否有后台服务，若有，则不再启动
             var processes = GetUzonMailProcesses();
@@ -60,7 +60,7 @@ namespace UZonMailDesktop.Utils
         /// <summary>
         /// 关闭非当前目录中的后台服务
         /// </summary>
-        public void CloseBackServiceIfNotSelf()
+        public void CloseIfNotSelf()
         {
             var processes = GetUzonMailProcesses();
             string servicePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "service");
@@ -88,7 +88,7 @@ namespace UZonMailDesktop.Utils
         /// <summary>
         /// 关闭后台服务
         /// </summary>
-        public void CloseAllBackService()
+        public void CloseAll()
         {
             // 查找进程名为 UZonMailService 的进程并杀死
             var processes = GetUzonMailProcesses();
@@ -101,17 +101,18 @@ namespace UZonMailDesktop.Utils
         /// <summary>
         /// 当窗口关闭时调用
         /// </summary>
-        public void OnWindowsClosing()
+        public void CloseExist()
         {
             // 获取配置
-            var keepBackService = ConfigurationManager.AppSettings["keepBackService"];
+            var keepBackService = configuration.GetSection("KeepBackEndAliveWhenExit").Value;
+
             if(bool.TryParse(keepBackService, out bool keep) && keep)
             {
-                CloseBackServiceIfNotSelf();
+                CloseIfNotSelf();
             }
             else
             {
-                CloseAllBackService();
+                CloseAll();
             }
         }
     }

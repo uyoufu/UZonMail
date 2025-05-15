@@ -49,6 +49,8 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// </summary>
         public int Weight { get; private set; }
 
+        public OutboxAuthType AuthType => _outbox.AuthType;
+
         /// <summary>
         /// 授权用户名
         /// </summary>
@@ -57,8 +59,12 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             get { return string.IsNullOrEmpty(_outbox.UserName) ? _outbox.Email : _outbox.UserName; }
         }
 
+        public string ClientId => _outbox.ClientId ?? string.Empty;
+
+        public string TenantId => _outbox.TenantId ?? string.Empty;
+
         /// <summary>
-        /// 授权密码
+        /// 授权密码或者 OAuth 的 secrete
         /// </summary>
         public string? AuthPassword { get; private set; }
 
@@ -128,7 +134,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <summary>
         /// 错误原因
         /// </summary>
-        public string ErroredMessage { get; private set; }
+        public string ErroredMessage { get; private set; } = "";
 
         /// <summary>
         /// 是否应释放

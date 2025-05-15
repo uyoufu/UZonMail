@@ -8,6 +8,9 @@ using System.Windows;
 
 namespace UZonMailDesktop.MVVM
 {
+    /// <summary>
+    /// WebView2 扩展类
+    /// </summary>
     public class WebView2Extensions
     {
         public static readonly DependencyProperty BindableSourceProperty =

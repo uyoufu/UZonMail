@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMailDesktop.Models
+namespace UZonMailDesktop.Modules.EnvDetector
 {
-    internal interface IDetectRuntimeEnv
+    internal interface IRuntimeEnvDetector
     {
         /// <summary>
         /// 名称
@@ -14,9 +14,9 @@ namespace UZonMailDesktop.Models
         string Name { get;}
 
         /// <summary>
-        /// 检查环境
+        /// 环境是否已安装
         /// </summary>
-        bool DetectEnv();
+        Lazy<bool> IsInstalled { get; }
 
         /// <summary>
         /// 失败后显示的消息

@@ -38,7 +38,6 @@ namespace UZonMail.Core.Controllers.Users
             if (string.IsNullOrEmpty(userId)) throw new KnownException("用户 ID 不能为空");
             var existUser = await userService.ExistUser(userId);
             if (existUser) throw new KnownException($"用户 ID: {userId} 已经存在");
-
             return true.ToSuccessResponse();
         }
 
