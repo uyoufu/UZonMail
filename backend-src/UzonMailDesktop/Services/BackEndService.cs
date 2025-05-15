@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Management;
 using System.Windows;
+using MessageBox = System.Windows.MessageBox;
 
 namespace UZonMailDesktop.Utils
 {

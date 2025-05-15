@@ -93,10 +93,10 @@ namespace UZonMailDesktop.Pages
             return true;
         }
 
-        private WindowsSystemTray? _notifyIcon;
+        private ISystemTrayIcon? _notifyIcon;
         private void ShowTrayIcon()
         {
-            _notifyIcon = new WindowsSystemTray(View as Window);
+            _notifyIcon = new SystemTrayWinfom(View as Window);
         }
     }
 }

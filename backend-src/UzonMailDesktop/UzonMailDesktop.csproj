@@ -6,10 +6,15 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>Resource\uzon-mail.ico</ApplicationIcon>
 		<FileVersion>0.14.0.0</FileVersion>
 		<AssemblyVersion>0.14.0.0</AssemblyVersion>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Pages\Tray\SystemTrayWpf.cs" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="Resource\uzon-mail.ico">
@@ -18,8 +23,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />

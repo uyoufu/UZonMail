@@ -13,7 +13,7 @@ namespace UZonMailDesktop.Pages.Tray
     /// <summary>
     /// windows 托盘功能
     /// </summary>
-    internal class WindowsSystemTray
+    internal class SystemTrayWpf : ISystemTrayIcon
     {
         private TaskbarIcon _notifyIcon;
         private Window _window;
@@ -22,7 +22,7 @@ namespace UZonMailDesktop.Pages.Tray
         /// 加载托盘
         /// </summary>
         /// <param name="window"></param>
-        public WindowsSystemTray(Window window)
+        public SystemTrayWpf(Window window)
         {
             _window = window;
             _window.Closing += Window_Closing;
@@ -45,14 +45,11 @@ namespace UZonMailDesktop.Pages.Tray
                 Header = "退出",
                 Command = new RelayCommand(() =>
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    if (MessageBox.Show(_window, "即将退出宇正群邮, 是否继续?", "温馨提醒", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes) == MessageBoxResult.Yes)
                     {
-                        if (MessageBox.Show(_window, "即将退出宇正群邮, 是否继续?", "温馨提醒", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes) == MessageBoxResult.Yes)
-                        {
-                            // 退出应用
-                            Environment.Exit(0);
-                        }
-                    });
+                        // 退出应用
+                        Environment.Exit(0);
+                    }
                 })
             });
 
@@ -78,7 +75,7 @@ namespace UZonMailDesktop.Pages.Tray
             {
                 Icon = new Icon("./Resource/uzon-mail.ico"),
                 ContextMenu = ctxMenu,
-                ToolTipText = "宇正群邮运行中...",
+                ToolTipText = window.Title,
                 Visibility = Visibility.Visible,
                 LeftClickCommand = leftClickCommand
             };
