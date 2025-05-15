@@ -320,10 +320,13 @@ namespace UZonMail.Core.Services.SendCore.Sender
             var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
             if (!debugConfig.IsDemo)
             {
-                if (outbox.AuthType==OutboxAuthType.Credential && !string.IsNullOrEmpty(outbox.AuthPassword))
-                {
-                    await client.AuthenticateAsync(outbox.AuthUserName, outbox.AuthPassword);
-                }
+                await client.AuthenticateAsync(outbox.AuthUserName, outbox.AuthPassword);
+
+                // TODO: OAuth2 后期兼容
+                //if (outbox.AuthType==OutboxAuthType.Credential && !string.IsNullOrEmpty(outbox.AuthPassword))
+                //{
+                   
+                //}
 
                 //if (outbox.AuthType==OutboxAuthType.OAuth2)
                 //{

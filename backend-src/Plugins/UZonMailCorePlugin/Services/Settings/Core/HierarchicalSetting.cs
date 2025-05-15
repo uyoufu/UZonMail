@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
+using UZonMail.Utils.Extensions;
 
 namespace UZonMail.Core.Services.Settings.Core
 {
@@ -123,11 +124,13 @@ namespace UZonMail.Core.Services.Settings.Core
         /// 顺序：子->父
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
+        /// <param name="key">key会自动转换成 cameCase</param>
         /// <returns></returns>
         public List<T?> GetValues<T>(string key)
         {
             List<T?> results = [];
+            key = key.ToCamelCase();
+
             var value = this[key];
             if (value != null)
             {

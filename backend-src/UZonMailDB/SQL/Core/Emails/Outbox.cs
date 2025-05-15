@@ -5,7 +5,7 @@
     /// </summary>
     public class Outbox : EmailBox
     {
-        public OutboxAuthType AuthType { get; set; } = OutboxAuthType.Credential;
+        //public OutboxAuthType AuthType { get; set; } = OutboxAuthType.Credential;
 
         /// <summary>
         /// SMTP 服务器地址
@@ -29,15 +29,15 @@
         /// </summary>
         public string Password { get; set; }
 
-        /// <summary>
-        /// 使用 OAuth 2.0 认证时的 Client Id
-        /// </summary>
-        public string? ClientId { get; set; }
+        ///// <summary>
+        ///// 使用 OAuth 2.0 认证时的 Client Id
+        ///// </summary>
+        //public string? ClientId { get; set; }
 
-        /// <summary>
-        /// 使用 OAuth 2.0 认证时的 Tenant Id
-        /// </summary>
-        public string? TenantId { get; set; }
+        ///// <summary>
+        ///// 使用 OAuth 2.0 认证时的 Tenant Id
+        ///// </summary>
+        //public string? TenantId { get; set; }
 
         /// <summary>
         /// 是否启用 SSL
