@@ -3,6 +3,28 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.14.1
+
+> 更新日期：2025-05-15
+
+### 新增功能
+
+1. 桌面端支持关闭到系统托盘区，当程序退出时，将同步退出后端进程
+
+### bug 修复
+
+1. 修复设置读取异常导致回信人为空
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.14.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.1.0.zip)
+
+[uzonmail-service-win-x64-0.14.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.14.1.0.zip)
+
+[uzonmail-service-linux-x64-0.14.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.14.1.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.14.0
 
 > 更新日期：2025-05-10
