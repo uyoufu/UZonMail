@@ -9,6 +9,11 @@
         <AsyncTooltip v-if="!readonly" tooltip="右键可添加分组" />
       </q-item-section>
       <ContextMenu v-if="!readonly" :items="headerContextMenuItems"></ContextMenu>
+      <q-item-section v-if="!readonly" side>
+        <q-btn icon="add" dense flat size="md" @click.stop="onCreateEmailGroup">
+          <AsyncTooltip tooltip="添加分组" />
+        </q-btn>
+      </q-item-section>
     </q-item>
 
     <q-item class="plain-list__item q-mt-xs">

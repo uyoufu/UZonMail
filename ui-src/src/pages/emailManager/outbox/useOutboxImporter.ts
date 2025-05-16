@@ -68,7 +68,7 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
 
     const newData: IOutbox[] = []
     for (const outboxText of outboxTexts) {
-      const outbox = __getNewOutboxData(emailGroupId, outboxText, smtpInfos)
+      const outbox = __buildOutboxData(emailGroupId, outboxText, smtpInfos)
       if (outbox) newData.push(outbox)
     }
 
@@ -84,7 +84,14 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
     notifySuccess('导入成功')
   }
 
-  function __getNewOutboxData (emailGroupId: number, outboxTexts: string[], smtpInfos: ISmtpInfo[]): IOutbox | null {
+  /**
+   * 构建发件箱数据
+   * @param emailGroupId
+   * @param outboxTexts
+   * @param smtpInfos
+   * @returns
+   */
+  function __buildOutboxData (emailGroupId: number, outboxTexts: string[], smtpInfos: ISmtpInfo[]): IOutbox | null {
     const outbox: IOutbox = {
       emailGroupId,
       email: '',
@@ -95,20 +102,33 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
       enableSSL: true
     }
 
-    // 获取邮箱
-    const email = outboxTexts.find(x => x.includes('@'))
-    if (!email) return null
-    outbox.email = email
+    const tempOutboxTexts = [...outboxTexts]
 
+    // 获取邮箱
+    const emailIndex = outboxTexts.findIndex(x => x.includes('@'))
+    if (emailIndex < 0) return null
+    outbox.email = outboxTexts[emailIndex] as string
+    tempOutboxTexts.splice(emailIndex, 1)
+
+    // 获取端口号
+    const smtpPortIndex = tempOutboxTexts.findIndex(x => Number(x) < 65536 && Number(x) > 0)
+    if (smtpPortIndex) {
+      outbox.smtpPort = Number(tempOutboxTexts[smtpPortIndex])
+      tempOutboxTexts.splice(smtpPortIndex, 1)
+    }
+
+    // 获取 host
+    const domainRegex = /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+){1,}\.[a-zA-Z]{2,}$/
+    const smtpHostIndex = outboxTexts.findIndex(x => domainRegex.test(x))
+    if (smtpHostIndex > -1) {
+      outbox.smtpHost = outboxTexts[smtpHostIndex] as string
+      tempOutboxTexts.splice(smtpHostIndex, 1)
+    }
+
+    // 获取密码
     const smtpPassword = outboxTexts.find(x => !x.includes('@') && !x.includes("smtp.") && isNaN(Number(x)))
     if (!smtpPassword) return null
     outbox.password = smtpPassword
-
-    const smtpHost = outboxTexts.find(x => x.includes('smtp.'))
-    if (smtpHost) outbox.smtpHost = smtpHost
-
-    const smtpPort = outboxTexts.find(x => Number(x) < 65536 && Number(x) > 0)
-    if (smtpPort) outbox.smtpPort = Number(smtpPort)
 
     // 对明文密码加密
     outbox.password = aes(userInfoStore.smtpPasswordSecretKeys[0] as string, userInfoStore.smtpPasswordSecretKeys[1] as string, outbox.password)
