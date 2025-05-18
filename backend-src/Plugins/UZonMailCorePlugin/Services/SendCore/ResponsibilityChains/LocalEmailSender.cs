@@ -42,7 +42,6 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             // 参考：https://github.com/jstedfast/MailKit/tree/master/Documentation/Examples
             // 本机发件逻辑
             var message = new MimeMessage();
-
             // 发件人
             message.From.Add(new MailboxAddress(sendItem.Outbox.Name, sendItem.Outbox.Email));
             // 收件人、抄送、密送           

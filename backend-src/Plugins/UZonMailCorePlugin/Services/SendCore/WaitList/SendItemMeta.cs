@@ -203,6 +203,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
             // 替换变量
             HtmlBody = ReplaceVariables(_bodyOrigin);
+
             // 调用修饰器添加额外的值
             HtmlBody = await StartDecorators(sendingContext, HtmlBody);
         }
