@@ -6,14 +6,14 @@
     </template>
 
     <template v-slot:control>
-      <div class="full-width no-outline">
+      <div class="full-width no-outline" @dblclick="onSelectEmailTemplates">
         <div class="text-grey-7"> {{ fieldText }}</div>
       </div>
     </template>
 
     <template v-slot:append>
       <div class="row justify-end">
-        <q-btn round dense flat icon="add" class="q-ml-sm" @click.prevent="onSelectEmailTemplates" color="grey-7">
+        <q-btn round dense flat icon="add" class="q-ml-sm" @click.stop="onSelectEmailTemplates" color="grey-7">
           <q-tooltip>
             选择模板
           </q-tooltip>

@@ -5,7 +5,7 @@
     </template>
 
     <template v-slot:control>
-      <div class="full-width no-outline">
+      <div class="full-width no-outline" @dblclick="onSelectExcel">
         <div class="text-grey-7"> {{ fieldText }}</div>
       </div>
     </template>
@@ -26,7 +26,7 @@
           </q-tooltip>
         </q-btn>
 
-        <q-btn round dense flat icon="add" class="q-ml-sm" @click.prevent="onSelectExcel" color="grey-7">
+        <q-btn round dense flat icon="add" class="q-ml-sm" @click.stop="onSelectExcel" color="grey-7">
           <q-tooltip>
             选择数据
           </q-tooltip>
@@ -46,7 +46,7 @@ const modelValue = defineModel({
 })
 
 // 选择模板数据
-import type { IExcelColumnMapper} from 'src/utils/file';
+import type { IExcelColumnMapper } from 'src/utils/file';
 import { readExcelCore, writeExcel } from 'src/utils/file'
 async function onSelectExcel () {
   const { files, sheetName, data } = await readExcelCore({

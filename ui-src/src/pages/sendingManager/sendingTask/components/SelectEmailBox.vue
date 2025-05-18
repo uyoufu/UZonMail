@@ -5,14 +5,14 @@
     </template>
 
     <template v-slot:control>
-      <div class="full-width no-outline">
+      <div class="full-width no-outline" @dblclick="onSelectOutboxes">
         <div class="text-grey-7"> {{ fieldText }}</div>
       </div>
     </template>
 
     <template v-slot:append>
       <div class="row justify-end">
-        <q-btn round dense flat icon="add" class="q-ml-sm" @click.prevent="onSelectOutboxes" color="grey-7">
+        <q-btn round dense flat icon="add" class="q-ml-sm" @click.stop="onSelectOutboxes" color="grey-7">
           <q-tooltip>
             选择邮箱
           </q-tooltip>
