@@ -34,11 +34,11 @@ services:
   uzon-mysql:
     container_name: uzon-mysql
     image: mysql:8.4.0
-    # 对外暴露端口，方便外部管理
+    # [可选]对外暴露端口，方便外部管理
     # 本地端口:容器端口
     # 若本机 3306 已使用，可更换成其它端口，例如 23306:3306
     # ports:
-    #  - 3306:3306
+    #   - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: mysqlRoot3306 # root 账号的密码
       MYSQL_DATABASE: uzon-mail # 数据库名
@@ -50,22 +50,22 @@ services:
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     # 连接到 uzonmail 主程序网络
     networks:
-      - uzonmail_network
+      - uzon_mysql_network
 
   # redis 缓存, 若要启用 redis 服务，请取消下面的注释
   uzon-redis:
     container_name: uzon-redis
     image: redis:latest
-    # 对外暴露端口，方便外部管理
+    # [可选]对外暴露端口，方便外部管理
     # 本地端口:容器端口
     # 若本机 6379 已使用，可更换成其它端口，例如 26379:3306
     # ports:
-    #  - 6379:6379
+    #   - 6379:6379
     volumes:
       - ./data/redis/data:/data # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
     networks:
-      - uzonmail_network
+      - uzon_redis_network
 
   # 程序主体
   uzon-mail:
@@ -79,12 +79,16 @@ services:
       - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
     networks:
       - uzonmail_network
+      - uzon_mysql_network
+      - uzon_redis_network
     command: [ "dotnet", "UZonMailService.dll" ]
     depends_on:
       - uzon-mysql
       - uzon-redis
 
 networks:
+  uzon_mysql_network:
+  uzon_redis_network:
   uzonmail_network:
 ```
 
@@ -171,7 +175,7 @@ echo '{
     "MySql": {
       "Enable": true,
       "Version": "8.4.0.0",
-      "Host": "",
+      "Host": "uzon-mysql",
       "Port": 3306,
       "Database": "uzon-mail",
       "User": "uzon-mail",

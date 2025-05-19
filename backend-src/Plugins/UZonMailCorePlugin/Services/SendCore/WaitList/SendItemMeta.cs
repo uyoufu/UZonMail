@@ -1,9 +1,10 @@
 ﻿using log4net;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 using System.Text.RegularExpressions;
 using UZonMail.Core.Database.SQL.EmailSending;
-using UZonMail.Core.Services.Emails;
-using UZonMail.Core.Services.Plugin;
+using UZonMail.Core.Services.EmailDecorator;
+using UZonMail.Core.Services.EmailDecorator.Interfaces;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.Settings;
@@ -201,32 +202,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         {
             _bodyOrigin = htmlBody;
 
-            // 替换变量
-            HtmlBody = ReplaceVariables(_bodyOrigin);
-
             // 调用修饰器添加额外的值
             HtmlBody = await StartDecorators(sendingContext, HtmlBody);
-        }
-
-        /// <summary>
-        /// 替换变量
-        /// </summary>
-        /// <param name="originText"></param>
-        /// <returns></returns>
-        private string ReplaceVariables(string originText)
-        {
-            if (string.IsNullOrEmpty(originText)) return originText;
-            // 替换正文变量
-            if (BodyData == null) return originText;
-
-            foreach (var item in BodyData)
-            {
-                if (item.Value == null) continue;
-                // 使用正则进行替换
-                var regex = new Regex(@"\{\{\s*" + item.Key + @"\s*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-                originText = regex.Replace(originText, item.Value.ToString());
-            }
-            return originText;
         }
 
         /// <summary>
@@ -238,7 +215,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         private async Task<string> StartDecorators(SendingContext sendingContext, string htmlBody)
         {
             var decoratorParams = await GetEmailDecoratorParams(sendingContext);
-            var decorateService = sendingContext.Provider.GetRequiredService<EmailBodyDecorateService>();
+            var decorateService = sendingContext.Provider.GetRequiredService<EmailContentDecorateService>();
             return await decorateService.Decorate(decoratorParams, htmlBody);
         }
 
@@ -254,7 +231,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             var orgSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()
                 .GetSetting<SendingSetting>(sendingContext.SqlContext, outbox.UserId);
 
-            return new EmailDecoratorParams(orgSetting, SendingItem, outbox.Email);
+            return new EmailDecoratorParams(orgSetting, this, outbox.Email);
         }
         #endregion
 
