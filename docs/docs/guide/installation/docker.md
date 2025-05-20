@@ -130,7 +130,6 @@ wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts
 ``` bash
 # 生成前端配置文件, baseUrl 见配置章节
 echo '{
-  // 此处的 baseUrl 需要修改为实际的域名地址
   "baseUrl": "http://localhost:22345",
   "api": "/api/v1",
   "signalRHub": "/hubs/uzonMailHub",
