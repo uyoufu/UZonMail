@@ -37,5 +37,6 @@ declare module 'vue' {
     StatusChip: typeof import('./src/components/statusChip/StatusChip.vue')['default']
     TableIndex: typeof import('./src/components/tableComponents/TableIndex.vue')['default']
     UserAvatar: typeof import('./src/components/userAvatar/UserAvatar.vue')['default']
+    UTabs: typeof import('./src/components/quasarWrapper/UTabs.vue')['default']
   }
 }

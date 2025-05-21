@@ -1,30 +1,30 @@
-import { hopeTheme } from "vuepress-theme-hope";
+import { hopeTheme } from 'vuepress-theme-hope'
 
-import navbar from "./navbar.js";
-import sidebar from "./sidebar.js";
+import navbar from './navbar.js'
+import sidebar from './sidebar.js'
 
 export default hopeTheme({
-  hostname: "https://uzonmail.pages.dev/",
+  hostname: 'https://uzonmail.pages.dev/',
 
   author: {
-    name: "galens",
-    url: "galens.uamazing.cn",
+    name: 'galens',
+    url: 'galens.uamazing.cn'
   },
 
-  iconAssets: "fontawesome-with-brands",
+  iconAssets: 'fontawesome-with-brands',
 
-  logo: "/images/logo.svg",
+  logo: '/images/logo.svg',
 
-  repo: "uyoufu/UZonMail",
+  repo: 'uyoufu/UZonMail',
 
-  docsDir: "src",
+  docsDir: 'src',
 
   // 导航栏布局
   // https://theme-hope.vuejs.press/zh/guide/layout/navbar.html#%E5%B8%83%E5%B1%80%E9%85%8D%E7%BD%AE
-  navbarLayout:{
-    start: ["Brand"],
-    center: ["Links"],
-    end: ["Language", "Repo", "Outlook", "Search"],
+  navbarLayout: {
+    start: ['Brand'],
+    center: ['Links'],
+    end: ['Language', 'Repo', 'Outlook', 'Search']
   },
 
   // 导航栏
@@ -34,14 +34,14 @@ export default hopeTheme({
   sidebar,
 
   // 页脚
-  footer: "Apache-2.0 license | Copyright © 2021-persent UZonMail",
+  footer: 'Apache-2.0 license | Copyright © 2021-persent UZonMail',
   displayFooter: true,
 
   // 加密配置
   encrypt: {
     config: {
-      "/demo/encrypt.html": ["1234"],
-    },
+      '/demo/encrypt.html': ['1234']
+    }
   },
 
   // 多语言配置
@@ -69,22 +69,22 @@ export default hopeTheme({
     spoiler: true,
     stylize: [
       {
-        matcher: "Recommended",
+        matcher: 'Recommended',
         replacer: ({ tag }) => {
-          if (tag === "em")
+          if (tag === 'em')
             return {
-              tag: "Badge",
-              attrs: { type: "tip" },
-              content: "Recommended",
-            };
-        },
-      },
+              tag: 'Badge',
+              attrs: { type: 'tip' },
+              content: 'Recommended'
+            }
+        }
+      }
     ],
     sub: true,
     sup: true,
     tabs: true,
     tasklist: true,
-    vPre: true,
+    vPre: true
 
     // 取消注释它们如果你需要 TeX 支持
     // markdownMath: {
@@ -128,16 +128,16 @@ export default hopeTheme({
   plugins: {
     // 注意: 仅用于测试! 你必须自行生成并在生产环境中使用自己的评论服务
     comment: {
-      provider: "Giscus",
-      repo: "vuepress-theme-hope/giscus-discussions",
-      repoId: "R_kgDOG_Pt2A",
-      category: "Announcements",
-      categoryId: "DIC_kwDOG_Pt2M4COD69",
+      provider: 'Giscus',
+      repo: 'vuepress-theme-hope/giscus-discussions',
+      repoId: 'R_kgDOG_Pt2A',
+      category: 'Announcements',
+      categoryId: 'DIC_kwDOG_Pt2M4COD69'
     },
 
     components: {
-      components: ["Badge", "VPCard"],
-    },
+      components: ['Badge', 'VPCard', 'BiliBili', 'PDF']
+    }
 
     // 如果你需要 PWA。安装 @vuepress/plugin-pwa 并取消下方注释
     // pwa: {
@@ -195,5 +195,5 @@ export default hopeTheme({
     //     ],
     //   },
     // },
-  },
-});
+  }
+})

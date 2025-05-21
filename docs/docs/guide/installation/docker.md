@@ -8,6 +8,10 @@ order: 5
 
 请放心，Docker Compose 不是什么新技术，没有难度，它只是一些安装配置的集合，一言概之就是，它能简化你部署流程，跟着以下教程，无脑配置即可。
 
+## 视频教程
+
+<BiliBili bvid="BV1JLJqziEd5" />
+
 ## 连接到 Ubuntu
 
 使用 ssh 连接到 Ubuntu 上，在 windows 中可以直接打开 PowerShell 使用。

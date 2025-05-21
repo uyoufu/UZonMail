@@ -77,7 +77,7 @@ defineEmits([
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent<IEmailTemplate[]>()
 
 // 模板接口
-import { useEmailTemplateTable } from 'pages/templateManager/compositions'
+import { useEmailTemplateTable } from 'pages/sourceManager/templateManager/compositions'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 const { pagination, rows, filter, onTableRequest, loading, getTemplateImage } = useEmailTemplateTable()
 

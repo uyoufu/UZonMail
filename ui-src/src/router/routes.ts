@@ -92,7 +92,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/template',
     component: NormalLayout,
     meta: {
-      label: '模板管理',
+      label: '模板数据',
       icon: 'article'
     },
     redirect: '/template-manage/index',
@@ -101,11 +101,21 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         name: 'emailTemplates',
         path: 'index',
         meta: {
-          icon: 'article',
+          icon: 'chrome_reader_mode',
           label: '模板管理',
           noCache: true
         },
-        component: () => import('pages/templateManager/emailTemplates.vue')
+        component: () => import('pages/sourceManager/templateManager/emailTemplates.vue')
+      },
+      {
+        name: 'functionVariable',
+        path: 'variable',
+        meta: {
+          icon: 'data_object',
+          label: '函数变量',
+          noCache: true
+        },
+        component: () => import('pages/sourceManager/variableManager/functionVariable.vue')
       },
       {
         name: 'templateEditor',
@@ -115,7 +125,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           label: '模板编辑',
           noMenu: true
         },
-        component: () => import('pages/templateManager/templateEditor.vue')
+        component: () => import('pages/sourceManager/templateManager/templateEditor.vue')
       }
     ]
   },

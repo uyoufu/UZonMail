@@ -1,12 +1,6 @@
 <template>
   <div>
-    <q-tabs v-if="showSettingTabs" v-model="settingType" align="left" dense class="text-grey q-mb-sm"
-      active-color="primary" indicator-color="primary" narrow-indicator>
-      <q-tab v-for="settingType in settingTypes" :key="settingType.name" :name="settingType.name"
-        :label="settingType.label">
-        <AsyncTooltip :tooltip="settingType.tooltip" />
-      </q-tab>
-    </q-tabs>
+    <UTabs v-if="showSettingTabs" v-model="settingType" :tabs="settingTypes"></UTabs>
 
     <q-list class="basic-settings-container">
       <NotifySetting :setting-type="currentSettingType?.type" />
@@ -19,9 +13,9 @@
 
 <script lang="ts" setup>
 import { AppSettingType } from 'src/api/appSetting'
-import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import NotifySetting from './expansionItems/NotifySetting.vue'
 import SendSetting from './expansionItems/SendSetting.vue'
+import UTabs from 'src/components/quasarWrapper/UTabs.vue'
 
 import EmailTrackingSetting from './expansionItems/EmailTrackingSetting.vue'
 import UnsubscribeSetting from './expansionItems/UnsubscribeSetting.vue'
