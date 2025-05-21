@@ -1,0 +1,8 @@
+{
+  "baseUrl": "http://localhost:22345",
+  "api": "/api/v1",
+  "signalRHub": "/hubs/uzonMailHub",
+  "logger": {
+    "level": "info"
+  }
+}
