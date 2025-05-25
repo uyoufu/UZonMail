@@ -442,7 +442,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
 
             // 设置主题
             var subject = GetSubject(sendItemMeta.BodyData);
-            sendItemMeta.SetSubject(subject);
+            await sendItemMeta.SetSubject(sendingContext, subject);
 
             // 添加最大重试次数
             var sendingSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()

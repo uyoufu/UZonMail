@@ -6,7 +6,7 @@ namespace UZonMail.Core.Services.EmailDecorator
     /// <summary>
     /// 通用字段替换
     /// </summary>
-    public class FieldsDecorator : IContentDecroator
+    public class FieldsDecorator : IContentDecroator, IVariableResolver
     {
         // 更早执行
         public int Order { get; } = -1;
@@ -17,16 +17,24 @@ namespace UZonMail.Core.Services.EmailDecorator
             if (string.IsNullOrEmpty(originContent)) return Task.FromResult(originContent);
 
             var bodyData = decoratorParams.SendItemMeta.BodyData;
-
             // 替换正文变量
             if (bodyData == null) return Task.FromResult(originContent);
-            foreach (var item in bodyData)
+
+            // 获取内容中的变量
+            var variables = EmailVariableHelper.GetAllVariableNames(originContent);
+            if (variables.Count == 0) return Task.FromResult(originContent);
+
+            foreach (var variable in variables)
             {
-                if (item.Value == null) continue;
+                // 判断是否存在值
+                var value = bodyData.ContainsKey(variable) ? bodyData[variable] : null;
+                if (value == null) continue;
+
                 // 使用正则进行替换
-                var regex = new Regex(@"\{\{\s*" + item.Key + @"\s*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-                originContent = regex.Replace(originContent, item.Value.ToString());
+                var regex = new Regex(@"\{\{\s*" + variable + @"\s*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                originContent = regex.Replace(originContent, value.ToString());
             }
+
             return Task.FromResult(originContent);
         }
     }
