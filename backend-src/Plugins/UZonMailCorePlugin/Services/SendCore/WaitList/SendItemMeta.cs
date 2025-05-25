@@ -196,27 +196,17 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
 
         #region HTML 正文原始内容
-        private string _bodyOrigin;
+        private string _originBody;
         public string HtmlBody { get; private set; } = string.Empty;
         public async Task SetHtmlBody(SendingContext sendingContext, string htmlBody)
         {
-            _bodyOrigin = htmlBody;
+            _originBody = htmlBody;
+            HtmlBody = htmlBody;
 
             // 调用修饰器添加额外的值
-            HtmlBody = await StartDecorators(sendingContext, HtmlBody);
-        }
-
-        /// <summary>
-        /// 调用正文装饰器
-        /// </summary>
-        /// <param name="sendingContext"></param>
-        /// <param name="htmlBody"></param>
-        /// <returns></returns>
-        private async Task<string> StartDecorators(SendingContext sendingContext, string htmlBody)
-        {
             var decoratorParams = await GetEmailDecoratorParams(sendingContext);
             var decorateService = sendingContext.Provider.GetRequiredService<EmailContentDecorateService>();
-            return await decorateService.Decorate(decoratorParams, htmlBody);
+            HtmlBody = await decorateService.Decorate(decoratorParams, htmlBody);
         }
 
         /// <summary>
@@ -235,13 +225,20 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         }
         #endregion
 
+        private string _originSubject = string.Empty;
         /// <summary>
         /// 主题
         /// </summary>
-        public string Subject { get; private set; } = string.Empty;
-        public void SetSubject(string subject)
+        public string Subject { get; private set; }
+        public async Task SetSubject(SendingContext sendingContext, string subject)
         {
+            _originSubject = subject;
             Subject = subject;
+
+            // 调用修饰器进行变量替换
+            var decoratorParams = await GetEmailDecoratorParams(sendingContext);
+            var decorateService = sendingContext.Provider.GetRequiredService<EmailContentDecorateService>();
+            Subject = await decorateService.ResolveVariables(decoratorParams, _originSubject);
         }
 
         /// <summary>

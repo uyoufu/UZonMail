@@ -91,7 +91,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 
         protected virtual async Task<bool> HealthCheck()
         {
-            var validIpQueries = _iPQueries.Where(x => x.Enable).ToList();
+            var validIpQueries = _iPQueries.Where(x => x.Enable).OrderBy(x=>x.Order).ToList();
             if (validIpQueries.Count == 0)
             {
                 _logger.Error("没有可用的有效代理检测接口, 代理将变得不稳定,请联系开发者解决");
@@ -111,6 +111,8 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                     _logger.Debug($"代理 {Id} 检测结果: {_isHealthy}");
                     return _isHealthy;
                 }
+
+                // 如果多次失败，说明不可用，直接标记
             }
 
             _logger.Debug($"代理 {Id} 检测失败");

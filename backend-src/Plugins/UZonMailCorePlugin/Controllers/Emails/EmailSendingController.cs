@@ -1,26 +1,57 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Emails.Models;
-using UZonMail.Core.Services.EmailSending;
-using UZonMail.Core.Utils.Database;
-using UZonMail.DB.SQL;
-using UZonMail.Core.Database.Validators;
-using UZonMail.Core.Utils.Extensions;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.DB.Extensions;
+using UZonMail.Core.Controllers.Emails.Models;
+using UZonMail.Core.Database.Validators;
+using UZonMail.Core.Services.EmailDecorator;
+using UZonMail.Core.Services.EmailDecorator.Interfaces;
+using UZonMail.Core.Services.EmailSending;
+using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
+using UZonMail.Core.Utils.Extensions;
+using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Emails
 {
     /// <summary>
     /// 发件相关接口
     /// </summary>
-    public class EmailSendingController(SqlContext db
-        , SendingGroupService sendingService
+    public class EmailSendingController(SqlContext db,
+        SendingGroupService sendingService, TokenService tokenService,
+        EmailContentDecorateService decorateService
         ) : ControllerBaseV1
     {
+        /// <summary>
+        /// 预览发件项
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("preview")]
+        public async Task<ResponseResult<SendingItemPreview>> PreviewSendingItem([FromBody] SendingItemPreview data)
+        {
+            // 对数据进行替换
+            var userId = tokenService.GetUserSqlId();
+
+            var sendingItem = new SendingItem()
+            {
+                UserId = userId,
+                Subject = data.Subject,
+                Content = data.Body,
+                Data = data.Data,
+                Inboxes = [new EmailAddress() { Email = data.Inbox }]
+            };
+
+            var sendItemMeta = new SendItemMeta(0);
+            sendItemMeta.SetSendingItem(sendingItem);
+            var decoratorParams = new EmailDecoratorParams(new SendingSetting(), sendItemMeta, "out@test.com");
+            data.Subject = await decorateService.ResolveVariables(decoratorParams, data.Subject);
+            data.Body = await decorateService.ResolveVariables(decoratorParams, data.Body);
+            return data.ToSuccessResponse();
+        }
+
         /// <summary>
         /// 
         /// </summary>

@@ -10,6 +10,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 {
     /// <summary>
     /// 代理客户端集群基类
+    /// 动态代理使用该类
     /// </summary>
     public abstract class ProxyHandlerCluster : ProxyHandler
     {
@@ -48,8 +49,8 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 return null;
             }
 
-            // 随机选择一个代理客户端
-            var handler = _handlers[new Random().Next(0, _handlers.Count)];
+            // 随机选择一个代理客户端           
+            var handler = _handlers.Values.ToList()[new Random().Next(0, _handlers.Count)];
             return await handler.GetProxyClientAsync(serviceProvider, matchStr);
         }
 
