@@ -1,6 +1,6 @@
 <template>
-  <q-tooltip v-bind="$attrs" class="hoverable-tip q-pa-none" :model-value="showing" @update:model-value="onUpdate"
-    @mouseenter="onHover" @mouseleave="onLeave" :hide-delay="hideDelay">
+  <q-tooltip v-bind="$attrs" class="hoverable-tip q-pa-none hover-scroll" :model-value="showing" max-height="30vh"
+    @update:model-value="onUpdate" @mouseenter="onHover" @mouseleave="onLeave" :hide-delay="hideDelay">
     <slot></slot>
   </q-tooltip>
 </template>

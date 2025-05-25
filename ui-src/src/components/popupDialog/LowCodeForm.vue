@@ -304,6 +304,8 @@ async function onOKClick () {
       if (typeof field.validate === 'function') {
         const fieldVdResult = await field.validate(fieldValue, fieldsModel.value[field.name])
         if (!fieldVdResult.ok) {
+          // 恢复失败项
+          fieldsModel.value[field.name] = fieldValue // 恢复原值
           // 提示错误
           notifyError(fieldVdResult.message ? `${fieldVdResult.message}` : `${field.label} 数据格式错误`)
           return
@@ -314,7 +316,7 @@ async function onOKClick () {
     // 对所有的结果进行转换
     // 后期有需要再增加
 
-    // 根据结果，调用所有参数的验证函数
+    // 根据结果，调用全局验证函数
     if (typeof props.validate === 'function') {
       const modelVdResult = await props.validate(fieldsModel.value)
       if (!modelVdResult.ok) {
@@ -397,5 +399,10 @@ async function onEnterKeyPress (event: KeyboardEvent) {
     flex: 1 1 100%;
     min-width: 300px;
   }
+}
+
+:deep(.low-code__field textarea) {
+  max-height: 300px;
+  overflow-y: auto;
 }
 </style>

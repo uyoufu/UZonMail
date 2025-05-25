@@ -22,7 +22,8 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import type { IContextMenuItem } from './types'
 const props = defineProps({
   items: {
-    type: Array as PropType<IContextMenuItem[]>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: Array as PropType<IContextMenuItem<any>[]>,
     required: true
   },
   value: {

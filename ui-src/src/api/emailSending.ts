@@ -21,6 +21,26 @@ export interface IEmailCreateInfo {
   proxyIds: number[], // 代理人id
 }
 
+export interface ISendingItemPreview {
+  subject: string, // 主题
+  body: string, // 邮件正文
+  data: Record<string, any>, // 用户发件数据
+  inbox: string, // 收件人邮箱
+  ccBoxes: string[], // 抄送人邮箱
+  bccBoxes: string[], // 密送人邮箱
+}
+
+/**
+ * 预览发件项
+ * @param data
+ * @returns
+ */
+export function previewSendingItem (data: ISendingItemPreview) {
+  return httpClient.post<ISendingItemPreview>('/email-sending/preview', {
+    data
+  })
+}
+
 /**
  * 立即发件
  * @param userId

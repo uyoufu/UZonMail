@@ -59,6 +59,10 @@
   overflow-y: auto;
 }
 
+.scroll-x {
+  overflow-x: auto;
+}
+
 .scroll_pretty {
   &::-webkit-scrollbar-track-piece {
     background: #d3dce6;
@@ -80,11 +84,13 @@
 
   /* 隐藏滚动条*/
   &::-webkit-scrollbar {
-    width: 0px;
+    width: 0px;   // 垂直滚动条宽度
+    height: 0px;  // 水平滚动条高度
   }
 
   &:hover::-webkit-scrollbar {
     width: 5px;
+    height: 5px;
     background-color: transparent;
   }
 
@@ -142,6 +148,21 @@
 }
 .height-600 {
   height: 600px;
+}
+.max-height-200 {
+  max-width: 200px;
+}
+.max-height-300 {
+  max-width: 300px;
+}
+.max-height-400 {
+  max-width: 400px;
+}
+.max-height-500 {
+  max-width: 500px;
+}
+.max-height-600 {
+  max-width: 600px;
 }
 
 .width-200 {
