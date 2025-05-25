@@ -108,14 +108,15 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         component: () => import('pages/sourceManager/templateManager/emailTemplates.vue')
       },
       {
-        name: 'functionVariable',
+        name: 'variableManager',
         path: 'variable',
         meta: {
           icon: 'data_object',
-          label: '函数变量',
-          noCache: true
+          label: '变量管理',
+          noCache: true,
+          access: ['professional', 'enterprise']
         },
-        component: () => import('pages/sourceManager/variableManager/functionVariable.vue')
+        component: () => import('pages/sourceManager/variableManager/variableManagerIndex.vue')
       },
       {
         name: 'templateEditor',

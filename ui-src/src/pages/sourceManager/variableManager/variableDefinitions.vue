@@ -3,7 +3,7 @@
     v-model:pagination="pagination" selection="multiple" v-model:selected="selectedRows" dense :loading="loading"
     :filter="filter" binary-state-sort @request="onTableRequest">
     <template v-slot:top-left>
-      <CreateBtn @click="onNewDataSource" />
+      <CreateBtn @click="onNewVariableDefinition" />
     </template>
 
     <template v-slot:top-right>
@@ -39,7 +39,7 @@ const columns: QTableColumn[] = [
   {
     name: 'name',
     required: true,
-    label: '数据名',
+    label: '变量名',
     align: 'left',
     field: 'name',
     sortable: true
@@ -53,12 +53,11 @@ const columns: QTableColumn[] = [
     sortable: true
   },
   {
-    name: 'value',
+    name: 'functionBody',
     required: true,
-    label: '数据值',
+    label: '表达式',
     align: 'left',
-    field: 'value',
-    format: (val) => JSON.stringify(val, null, 2) || '',
+    field: 'functionBody',
     sortable: true
   },
   {
@@ -72,16 +71,16 @@ const columns: QTableColumn[] = [
   }
 ]
 
-import { getJsVariableSourcesCount, getJsVariableSourcesData } from 'src/api/pro/jsVariable'
+import { getJsFunctionDefinitionsCount, getJsFunctionDefinitionsData } from 'src/api/pro/jsFunctionDefinition'
 
 
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
-  const { data } = await getJsVariableSourcesCount(filterObj.filter)
+  const { data } = await getJsFunctionDefinitionsCount(filterObj.filter)
   return data || 0
 }
 
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
-  const { data } = await getJsVariableSourcesData(filterObj.filter, pagination)
+  const { data } = await getJsFunctionDefinitionsData(filterObj.filter, pagination)
   return data || []
 }
 
@@ -93,8 +92,8 @@ const { pagination, rows, filter, onTableRequest, loading, selectedRows,
 
 // #region 右键菜单
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
-import { useDataSourceContext } from './useDataSourceContext'
-const { dataSourceContextMenuItems, onNewDataSource } = useDataSourceContext(addNewRow, getSelectedRows, deleteRowById)
+import { useVariableDefinitionContext } from './useVariableDefinitionContext'
+const { dataSourceContextMenuItems, onNewVariableDefinition } = useVariableDefinitionContext(addNewRow, getSelectedRows, deleteRowById)
 // #endregion
 </script>
 

@@ -11,7 +11,7 @@
 
       <q-separator class="q-mb-sm" />
 
-      <div class="q-pb-md col scroll-y" v-html="emailBody"></div>
+      <div class="q-pb-md col hover-scroll full-width" v-html="emailBody"></div>
 
       <q-pagination v-if="pagesCount > 1" class="self-center q-pt-sm" v-model="currentPage" :max="pagesCount"
         :max-pages="6" boundary-numbers size="md" padding="0px" />
@@ -21,6 +21,7 @@
 
 <script lang='ts' setup>
 // 预览邮件发件正文
+// 为了与后端结果保持一致，预览的变量替换部分在后端处理
 
 /**
  * warning: 该组件一个弹窗的示例，不可直接使用
@@ -35,7 +36,7 @@ defineEmits([
 ])
 const { dialogRef, onDialogHide /* , onDialogOK, onDialogCancel */ } = useDialogPluginComponent()
 
-import { IEmailCreateInfo } from 'src/api/emailSending'
+import { IEmailCreateInfo, ISendingItemPreview, previewSendingItem } from 'src/api/emailSending'
 const props = defineProps({
   emailCreateInfo: {
     type: Object as PropType<IEmailCreateInfo>,
@@ -135,6 +136,20 @@ watch(currentPage, async () => {
 
   const body = await getEmailBody(currentInbox.value, index)
   emailBody.value = body || ''
+
+  // 从服务器解析变量
+  const previewData: ISendingItemPreview = {
+    inbox,
+    subject: emailSubject.value,
+    body: emailBody.value,
+    data: userData || {},
+    // cc 与 bcc 暂不适配
+    ccBoxes: [],
+    bccBoxes: []
+  }
+  const { data: previewResult } = await previewSendingItem(previewData)
+  emailSubject.value = previewResult.subject
+  emailBody.value = previewResult.body
 }, {
   immediate: true
 })

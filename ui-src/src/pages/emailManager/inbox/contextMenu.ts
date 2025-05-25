@@ -10,8 +10,6 @@ import { getInboxFields } from './headerFunctions'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 
 export function useContextMenu (deleteRowById: (id?: number) => void) {
-
-
   // 更新发件箱
   async function onUpdateInbox (row: Record<string, any>) {
     const inbox = row as IInbox
