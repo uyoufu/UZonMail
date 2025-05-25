@@ -78,7 +78,7 @@ const emailInfo: Ref<IEmailCreateInfo> = ref({
 })
 
 // 编辑器配置
-import { useWysiwygEditor } from 'src/pages/templateManager/compositions'
+import { useWysiwygEditor } from 'src/pages/sourceManager/templateManager/compositions'
 const { editorDefinitions, editorToolbar } = useWysiwygEditor()
 
 // 底部功能按钮
