@@ -102,6 +102,12 @@ watch(() => emailInfo.value.outboxes, (newValue) => {
 watch(() => emailInfo.value.outboxGroups, (newValue) => {
   if (newValue.length > 0) emailInfo.value.sendBatch = false
 })
+// 格式化 body，可能有一些无用的字符, 比如 \n, <br>
+watch(() => emailInfo.value.body, (newValue) => {
+  // 去除所有标签和空白字符
+  const text = newValue.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim()
+  if (text.length === 0) emailInfo.value.body = ''
+})
 
 const disableSendBatchCheckbox = computed(() => {
   return emailInfo.value.data.length === 0 && emailInfo.value.inboxes.length < 2 && emailInfo.value.outboxes.length < 2
