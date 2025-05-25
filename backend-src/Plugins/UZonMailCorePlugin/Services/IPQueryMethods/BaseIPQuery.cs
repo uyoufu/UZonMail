@@ -25,7 +25,7 @@ namespace UZonMail.Core.Services.IPQueryMethods
             this._httpClient.Timeout = TimeSpan.FromMilliseconds(_timeout);
         }
 
-        public bool Enable { get; private set; } = true;
+        public bool Enable { get; set; } = true;
 
         /// <summary>
         /// 序号
