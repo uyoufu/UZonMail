@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { AxiosInstance, AxiosResponse } from 'axios'
 import axios from 'axios'
+import logger from 'loglevel'
 
 import type { IAxiosRequestConfig, IHttpClientOptions, IResponseData } from './types'
 import { useUserInfoStore } from 'src/stores/user'
@@ -93,9 +94,12 @@ export default class HttpClient {
     },
       // 当 response.status 不是 200 时触发
       async (error) => {
-        console.log('response error:', error)
+        logger.error('[HttpClient] Response error:', error)
         if (!error.response && error.code) {
-          notifyError(error.code)
+          // 当不阻止错误通知时，进行提示
+          if (!error.config.stopNotifyError)
+            notifyError(error.code)
+
           return Promise.reject(error as Error)
         }
 
@@ -107,11 +111,13 @@ export default class HttpClient {
           return Promise.reject(error as Error)
         }
 
-        if (!response.data) {
-          // 其它错误，进行提示，后端返回的错误，都会进行消息展示
-          notifyError(response.statusText)
-        } else {
-          notifyError(error.message)
+        if (!error.config.stopNotifyError) {
+          if (!response.data) {
+            // 其它错误，进行提示，后端返回的错误，都会进行消息展示
+            notifyError(response.statusText)
+          } else {
+            notifyError(error.message)
+          }
         }
 
         return Promise.reject(error as Error)
