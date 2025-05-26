@@ -5,13 +5,16 @@
     </q-item-section>
 
     <q-item-section>
-      <h6>宇正群邮</h6>
+      <h6>{{ systemConfig.name }}</h6>
     </q-item-section>
   </q-item>
 </template>
 
 <script lang="ts" setup>
 import { resolveSvgFullName } from 'src/utils/svgHelper'
+
+import { useSystemConfig } from './compositions/useSystemConfig'
+const { systemConfig } = useSystemConfig()
 </script>
 
 <style lang="scss" scoped></style>

@@ -7,7 +7,8 @@
       <div
         class="longin-main q-ma-md q-pa-lg column justify-center items-center border-radius-8 animated fadeInDown hover-card card-like"
         @keyup.enter="onUserLogin">
-        <div class="self-center q-mb-lg text-h5 text-secondary welcome-to-uzon-mail">Welcome to UZonMail</div>
+        <div class="self-center q-mb-lg text-h5 text-secondary welcome-to-uzon-mail">{{ systemConfig.loginWelcome }}
+        </div>
 
         <q-input outlined class="full-width q-mb-md" standout v-model="userId" label="用户名">
           <template v-slot:prepend>
@@ -116,6 +117,11 @@ const mobileClass = computed(() => {
     'content-start': Platform.is.mobile,
   }
 })
+// #endregion
+
+// #region 显示的系统信息
+import { useSystemConfig } from 'src/layouts/components/leftSidebar/compositions/useSystemConfig'
+const { systemConfig } = useSystemConfig()
 // #endregion
 </script>
 
