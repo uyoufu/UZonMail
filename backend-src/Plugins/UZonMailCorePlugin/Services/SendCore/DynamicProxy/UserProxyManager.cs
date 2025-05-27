@@ -1,6 +1,7 @@
 ﻿using log4net;
 using Microsoft.Extensions.FileSystemGlobbing;
 using System.Collections.Concurrent;
+using System.Linq;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.DB.Getters;
@@ -15,7 +16,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
     public class UserProxyManager(long userId) : IProxyHandlerDisposer
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(UserProxyManager));
-        private readonly ConcurrentDictionary<long, IProxyHandler> _proxyHandlers = [];
+        private readonly ConcurrentDictionary<string, IProxyHandler> _proxyHandlers = [];
 
         public async Task UpdateProxies(IServiceProvider serviceProvider)
         {
@@ -26,7 +27,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             var proxies = await proxyGetter.GetUserProxies();
 
             // 移除已经不存在的代理
-            _proxyHandlers.Keys.Except(proxies.Select(x => x.Id))
+            _proxyHandlers.Keys.Except(proxies.Select(x => x.ObjectId))
                 .ToList()
                 .ForEach(x => _proxyHandlers.TryRemove(x, out _));
 
@@ -38,7 +39,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             foreach (var proxy in proxies)
             {
                 // 若转换器已经存在，则更新
-                if (_proxyHandlers.TryGetValue(proxy.Id, out var existOne))
+                if (_proxyHandlers.TryGetValue(proxy.ObjectId, out var existOne))
                 {
                     existOne.Update(proxy);
                     continue;
@@ -87,7 +88,11 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             if (limitCount <= 0) limitCount = int.MaxValue;
 
             var enabledProxies = _proxyHandlers.Values.AsEnumerable();
-            if (ranges != null) enabledProxies = enabledProxies.Where(x => ranges.Contains(x.Id));
+            if (ranges != null)
+            {
+                var strRanges = ranges.Select(x => x.ToString()).ToList();
+                enabledProxies = enabledProxies.Where(x => strRanges.Contains(x.Id));
+            }
             var rangedProxies = enabledProxies
             .Where(x => x.IsEnable())
             .Where(x => x.IsMatch(matchStr, limitCount))
@@ -112,7 +117,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         /// <returns></returns>
         public IProxyHandler? GetProxyHandler(long proxyId)
         {
-            _proxyHandlers.TryGetValue(proxyId, out var handler);
+            _proxyHandlers.TryGetValue(proxyId.ToString(), out var handler);
             return handler;
         }
 

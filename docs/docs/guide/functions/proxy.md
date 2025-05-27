@@ -36,8 +36,9 @@ order: 3
 
 > 以下排名不分先后顺序
 
-| 序号 | 代理                                                         | 备注                       |
-| ---- | ------------------------------------------------------------ | -------------------------- |
-| 1    | [易代理，请通过该链接注册来持作者](http://www.ydaili.cn//main/register.aspx?str_code=80TL8T6X) | 无                         |
-| 2    | [ip2world](https://www.ip2world.com/)                        | 国外的代理，不支持国内使用 |
+| 序号 | 代理                                                         | 支持协议 | 备注                       |
+| ---- | ------------------------------------------------------------ | -------- | -------------------------- |
+| 1    | [易代理](http://www.ydaili.cn//main/register.aspx?str_code=80TL8T6X) | http     | 无                         |
+| 2    | [ip2world](https://www.ip2world.com/?ref=Y2NFJBM3CP)         | http     | 国外的代理，不支持国内使用 |
+| 3    | [ipfox](https://referral.ipfoxy.com/EpH8pH)                  | socks5   | 无                         |
 

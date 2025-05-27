@@ -76,7 +76,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// <summary>
         /// Handler 的 Id
         /// </summary>
-        public long Id => ProxyInfo.Id;
+        public string Id => ProxyInfo.Id > 0 ? ProxyInfo.Id.ToString() : ProxyInfo.ObjectId;
 
         /// <summary>
         /// 是否是动态代理: 当过期时间小于 30 分钟时，判断为动态代理
@@ -91,7 +91,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 
         protected virtual async Task<bool> HealthCheck()
         {
-            var validIpQueries = _iPQueries.Where(x => x.Enable).OrderBy(x=>x.Order).ToList();
+            var validIpQueries = _iPQueries.Where(x => x.Enable).OrderBy(x => x.Order).ToList();
             if (validIpQueries.Count == 0)
             {
                 _logger.Error("没有可用的有效代理检测接口, 代理将变得不稳定,请联系开发者解决");
