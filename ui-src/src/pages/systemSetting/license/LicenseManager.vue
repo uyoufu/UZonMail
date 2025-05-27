@@ -92,6 +92,15 @@ async function onActiveLicense () {
     activeInfo.value = licenseInfo
   }, "企业版升级", '升级中...')
 
+  // 更新用户权限
+  await updateUserAccess()
+
+  // 更新路由
+  notifySuccess('升级成功!')
+  window.location.reload()
+}
+
+async function updateUserAccess () {
   // 重新拉取权限码
   const { data: { userInfo, token, access, installedPlugins } } = await userRelogin()
   logger.debug('[Login] 用户重新登录:', userInfo, token, access)
@@ -100,10 +109,6 @@ async function onActiveLicense () {
   userInfoStore.setInstalledPlugins(installedPlugins)
   userInfoStore.setUserLoginInfo(userInfo, token, access)
   routeStore.resetDynamicRoutes()
-
-  // 更新路由
-  notifySuccess('升级成功!')
-  window.location.reload()
 }
 
 // #region  激活信息
@@ -155,6 +160,10 @@ async function onRemoveLicense () {
   // 调用退出激活接口
   const { data } = await removeLicense()
   activeInfo.value = data
+
+  // 更新用户权限
+  await updateUserAccess()
+
   notifySuccess('已退出激活状态')
 
   // 刷新页面
