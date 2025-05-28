@@ -114,7 +114,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'data_object',
           label: '变量管理',
           noCache: true,
-          access: ['professional', 'enterprise']
+          access: ['professional']
         },
         component: () => import('pages/sourceManager/variableManager/variableManagerIndex.vue')
       },
