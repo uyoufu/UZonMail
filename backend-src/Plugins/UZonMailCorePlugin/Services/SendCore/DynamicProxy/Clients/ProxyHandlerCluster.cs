@@ -15,7 +15,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
     public abstract class ProxyHandlerCluster : ProxyHandler
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyHandlerCluster));
-        private readonly ConcurrentDictionary<long, ProxyHandler> _handlers = [];
+        private readonly ConcurrentDictionary<string, ProxyHandler> _handlers = [];
 
         /// <summary>
         /// 最小数量

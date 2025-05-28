@@ -10,10 +10,11 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
     public interface IProxyHandler : ITransientService, IProxyHandlerDisposer
     {
         /// <summary>
-        /// 代理操作器的 Id
-        /// 可取 Proxy.Id
+        /// 代理操作器的 Id, 该 id 应是唯一的
+        /// 对于单个代理，该 id 为 Proxy.Id
+        /// 对于动态代理，该 id 为 Host
         /// </summary>
-        long Id { get; }
+        string Id { get; }
 
         /// <summary>
         /// 是否可用
