@@ -106,8 +106,11 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
             {
                 var ipResult = await ipQuery.GetIP(ProxyInfo.Url);
                 if (ipResult.Ok)
-                {
-                    _isHealthy = Host.Equals(ipResult.Data);
+                {      
+                    // 网络通即说明使用了代理
+                    // _isHealthy = Host.Equals(ipResult.Data);
+
+                    _isHealthy = true;
                     _logger.Debug($"代理 {Id} 检测结果: {_isHealthy}");
                     return _isHealthy;
                 }

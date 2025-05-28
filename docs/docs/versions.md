@@ -3,6 +3,30 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.14.2.2
+
+> 更新日期：2025-05-28
+
+### 新增功能
+
+1. 新增 [ipfox](https://referral.ipfoxy.com/EpH8pH) 动态代理支持
+
+### bug 修复
+
+1. 修复专业版本没有变量管理功能的 bug
+2. 修复激活码退出后，前端刷新失败的bug
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.2.2.zip)
+
+[uzonmail-service-win-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.14.2.2.zip)
+
+[uzonmail-service-linux-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.14.2.2.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
+
 ## 0.14.2
 
 > 更新日期：2025-05-25
@@ -10,7 +34,7 @@ editLink: false
 ### 新增功能
 
 1. 主题和正文支持 js 函数和自定义变量(专业版本)
-2. 增加对 [ip2World] 动态代理的支持
+2. 增加对  [ip2world](https://www.ip2world.com/?ref=Y2NFJBM3CP) 动态代理的支持
 3. 新建发件时，支持双击打开弹窗
 4. 优化手机端页面样式显示
 
