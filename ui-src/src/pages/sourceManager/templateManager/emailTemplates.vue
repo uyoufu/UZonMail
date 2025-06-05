@@ -76,6 +76,8 @@ async function onImportTemplateFromHtml () {
   const { ok, data: buffer, files } = await selectFile()
   if (!ok) return
 
+  notifySuccess('请保证文件格式为 utf-8 编码的文本文件')
+
   // 获取第一个文件
   const file = files?.item(0)
   const templateName = file?.name.substring(0, file.name.lastIndexOf('.')) || '未命名'
