@@ -2,12 +2,12 @@
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.IPQueryMethods
+namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
 {
     /// <summary>
     /// IP 查询接口的基类
     /// </summary>
-    public interface IIPQuery : ISingletonService<IIPQuery>
+    public interface IProxyTester : ISingletonService<IProxyTester>
     {
         /// <summary>
         /// 是否可用
@@ -18,6 +18,11 @@ namespace UZonMail.Core.Services.IPQueryMethods
         /// 排序号
         /// </summary>
         int Order { get; }
+
+        /// <summary>
+        /// 类型
+        /// </summary>
+        ProxyTesterType TesterType { get; }
 
         /// <summary>
         /// 获取 IP

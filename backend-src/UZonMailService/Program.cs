@@ -1,24 +1,21 @@
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http.Features;
 using Quartz;
-using UZonMail.Utils.Helpers;
-using UZonMailService.Middlewares;
-using Microsoft.AspNetCore.HttpLogging;
-using UZonMail.Utils.Web;
-using UZonMail.Utils.Web.Token;
+using System.Security.Claims;
 using Uamazing.Utils.Plugin;
-using UZonMail.Utils.Web.Filters;
-using UZonMail.DB.SQL;
 using UZonMail.DB.MySql;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SqLite;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using log4net;
-using log4net.Core;
-using log4net.Repository.Hierarchy;
+using UZonMail.Utils.Database.Redis;
+using UZonMail.Utils.Helpers;
 using UZonMail.Utils.Log;
+using UZonMail.Utils.Web;
+using UZonMail.Utils.Web.Filters;
+using UZonMail.Utils.Web.Token;
+using UZonMailService.Middlewares;
 
 // 修改当前目录
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
@@ -151,7 +148,9 @@ services.AddQuartzHostedService(
 // 配置 jwt 验证
 var tokenParams = new TokenParams();
 builder.Configuration.GetSection("TokenParams").Bind(tokenParams);
-services.AddJWTAuthentication(tokenParams.UniqueSecret);
+var redisConfig = new RedisConnectionConfig();
+builder.Configuration.GetSection("Database:Redis").Bind(redisConfig);
+services.AddJWTAuthentication(tokenParams.UniqueSecret, redisConfig);
 
 // 配置接口鉴权策略
 services.AddAuthorizationBuilder()

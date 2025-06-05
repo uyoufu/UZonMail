@@ -10,7 +10,7 @@ namespace UZonMailDesktop.Utils
     /// <summary>
     /// 后台服务
     /// </summary>
-    internal class BackEndService(IConfiguration configuration)
+    public class BackEndService(IConfiguration configuration)
     {
         private readonly string ServiceName = "UzonMailService";
 

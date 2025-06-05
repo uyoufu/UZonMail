@@ -2,15 +2,15 @@
 using System.Text.RegularExpressions;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.IPQueryMethods
+namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
 {
     /// <summary>
     /// 纯文本解析器
     /// </summary>
     /// <param name="httpClient"></param>
-    public abstract class PlainTextParser(HttpClient httpClient) : BaseIPQuery(httpClient)
+    public abstract class PlainTextParser(HttpClient httpClient, ProxyTesterType testerType) : BaseProxyTester(httpClient, testerType)
     {
-        protected override string? IPParser(string content)
+        protected override string? RetrieveIP(string content)
         {
             if (string.IsNullOrEmpty(content))
                 return string.Empty;

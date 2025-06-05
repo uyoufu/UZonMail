@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Interop;
+using UZonMailDesktop.Utils;
 
 namespace UZonMailDesktop.Pages.Tray
 {
@@ -13,7 +14,7 @@ namespace UZonMailDesktop.Pages.Tray
     /// windows 托盘功能
     /// 比 wpf 版本快
     /// </summary>
-    public class SystemTrayWinfom : ISystemTrayIcon
+    public class SystemTrayWinfom(BackEndService backEndService) : ISystemTrayIcon
     {
         private NotifyIcon _notifyIcon = null;
         private Window _window;
@@ -22,7 +23,7 @@ namespace UZonMailDesktop.Pages.Tray
         /// 加载托盘
         /// </summary>
         /// <param name="window"></param>
-        public SystemTrayWinfom(Window window)
+        public void Start(Window window)
         {
             _window = window;
             _window.Closing += Window_Closing;
@@ -79,6 +80,9 @@ namespace UZonMailDesktop.Pages.Tray
         {
             if (System.Windows.MessageBox.Show("即将退出宇正群邮, 是否继续?", "温馨提醒", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes) == MessageBoxResult.Yes)
             {
+                // 关闭后台程序
+                backEndService.CloseExist();
+
                 // 退出应用
                 Environment.Exit(0);
             }

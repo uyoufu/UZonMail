@@ -3,7 +3,7 @@ using MailKit.Net.Proxy;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text.RegularExpressions;
-using UZonMail.Core.Services.IPQueryMethods;
+using UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters;
 using UZonMail.DB.SQL.Core.Settings;
 
 namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
@@ -17,10 +17,15 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
     {
         protected ProxyHandler() { }
 
-        private readonly IEnumerable<IIPQuery> _iPQueries;
-        public ProxyHandler(IEnumerable<IIPQuery> iPQueries)
+        private readonly List<IProxyTester> _iPQueries;
+
+        /// <summary>
+        /// 参数从 DI 注入
+        /// </summary>
+        /// <param name="iPQueries"></param>
+        public ProxyHandler(IEnumerable<IProxyTester> iPQueries)
         {
-            _iPQueries = iPQueries;
+            _iPQueries = iPQueries.ToList();
         }
 
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyHandler));
@@ -88,10 +93,23 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// 过期时间
         /// </summary>
         private DateTime _expireDate = DateTime.MaxValue;
+        private ProxyTesterType _testerType = ProxyTesterType.All;
+        private void SetProxyTesterType(ProxyTesterType testerType)
+        {
+            if(testerType.HasFlag(ProxyTesterType.All))
+            {
+                _testerType = Enum.GetValues<ProxyTesterType>().Aggregate((a, b) => a | b);
+                return;
+            }
+
+            _testerType = testerType;
+        }
 
         protected virtual async Task<bool> HealthCheck()
         {
-            var validIpQueries = _iPQueries.Where(x => x.Enable).OrderBy(x => x.Order).ToList();
+            var validIpQueries = _iPQueries.Where(x => x.Enable)
+                .Where(x => x.TesterType.HasFlag(_testerType))
+                .OrderBy(x => x.Order).ToList();
             if (validIpQueries.Count == 0)
             {
                 _logger.Error("没有可用的有效代理检测接口, 代理将变得不稳定,请联系开发者解决");
@@ -101,12 +119,12 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 return false;
             }
 
-            // 开始检测
+            // 开始检测            
             foreach (var ipQuery in validIpQueries)
             {
                 var ipResult = await ipQuery.GetIP(ProxyInfo.Url);
                 if (ipResult.Ok)
-                {      
+                {
                     // 网络通即说明使用了代理
                     // _isHealthy = Host.Equals(ipResult.Data);
 
@@ -114,8 +132,6 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                     _logger.Debug($"代理 {Id} 检测结果: {_isHealthy}");
                     return _isHealthy;
                 }
-
-                // 如果多次失败，说明不可用，直接标记
             }
 
             _logger.Debug($"代理 {Id} 检测失败");
@@ -243,10 +259,11 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// </summary>
         /// <param name="proxy"></param>
         /// <param name="expireSeconds">单位秒</param>
-        public virtual void Update(Proxy proxy, int expireSeconds = int.MaxValue)
+        public virtual void Update(Proxy proxy, ProxyTesterType testerType = ProxyTesterType.All, int expireSeconds = int.MaxValue)
         {
             // 更新代理数据
             ProxyInfo = proxy;
+            SetProxyTesterType(testerType);
             _expireDate = DateTime.Now.AddSeconds(expireSeconds);
 
             // 将字符串转换为代理
