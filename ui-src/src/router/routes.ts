@@ -294,7 +294,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         name: 'PermissionManager',
         path: 'permission',
         meta: {
-          icon: 'key',
+          icon: 'badge',
           label: '权限管理',
           access: ['admin', 'enterprise']
         },
@@ -328,6 +328,16 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
             component: () => import('pages/systemSetting/permission/userRoleManager/UserRole.vue')
           }
         ]
+      },
+      {
+        name: 'ApiAccess',
+        path: 'api-access',
+        meta: {
+          icon: 'key',
+          label: 'API 授权',
+          access: ['admin', 'enterprise']
+        },
+        component: () => import('pages/systemSetting/apiAccess/ApiAccess.vue')
       },
       {
         name: 'SoftwareLicense',
