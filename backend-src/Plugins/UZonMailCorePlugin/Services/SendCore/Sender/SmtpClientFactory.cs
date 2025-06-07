@@ -11,6 +11,7 @@ using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.DynamicProxy;
 using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.Core.Services.SendCore.Outboxes;
+using UZonMail.Core.Services.SendCore.Sender.Authentication;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
@@ -38,14 +39,16 @@ namespace UZonMail.Core.Services.SendCore.Sender
         private readonly ProxyManager _proxyManager;
         private readonly GroupTasksList _groupTaskList;
         private readonly AppSettingsManager _settingsService;
+        private readonly SmtpAuthenticationManager _authenticationManager;
 
         private readonly Timer _timer;
 
-        public SmtpClientFactory(ProxyManager proxyManager, GroupTasksList groupTaskList, AppSettingsManager settingsService)
+        public SmtpClientFactory(ProxyManager proxyManager, GroupTasksList groupTaskList, AppSettingsManager settingsService, SmtpAuthenticationManager authenticationManager)
         {
             _proxyManager = proxyManager;
             _groupTaskList = groupTaskList;
             _settingsService = settingsService;
+            _authenticationManager = authenticationManager;
 
             // 新建定时器，对 smtp 连接进行保活
             _timer = new Timer(1000 * 30); // 30s
@@ -249,7 +252,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
 
             // 有的 smtpClient 可能不需要代理, 此处要进行判断
             var availableProxyIds = sendingContext.EmailItem!.AvailableProxyIds;
-            if (availableProxyIds.Count==0)
+            if (availableProxyIds.Count == 0)
             {
                 // 未配置代理，直接返回
                 return null;
@@ -320,26 +323,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
             if (!debugConfig.IsDemo)
             {
-                await client.AuthenticateAsync(outbox.AuthUserName, outbox.AuthPassword);
-
-                // TODO: OAuth2 后期兼容
-                //if (outbox.AuthType==OutboxAuthType.Credential && !string.IsNullOrEmpty(outbox.AuthPassword))
-                //{
-                   
-                //}
-
-                //if (outbox.AuthType==OutboxAuthType.OAuth2)
-                //{
-                //    var cca = ConfidentialClientApplicationBuilder
-                //        .Create(outbox.ClientId)
-                //        .WithClientSecret(outbox.AuthPassword)
-                //        .WithAdfsAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"))
-                //        .Build();
-
-                //    var scopes = new[] { "https://outlook.office365.com/.default" };
-                //    var result = await cca.AcquireTokenForClient(scopes).ExecuteAsync();
-                //    await client.AuthenticateAsync(new SaslMechanismOAuth2("your-email@outlook.com", result.AccessToken));
-                //}
+                await _authenticationManager.AuthenticateAsync(client, outbox);
             }
             // 添加到缓存中
             _smptClients.TryAdd(client.GetClientKey(), client);

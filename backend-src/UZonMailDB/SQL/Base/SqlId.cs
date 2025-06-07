@@ -8,7 +8,6 @@ namespace UZonMail.DB.SQL.Base
     /// <summary>
     /// 所有数据库的基类
     /// </summary>
-    [Index(nameof(ObjectId), IsUnique = true)]
     public class SqlId : ISoftDelete
     {
         /// <summary>

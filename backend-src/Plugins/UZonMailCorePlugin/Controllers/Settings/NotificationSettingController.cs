@@ -8,6 +8,7 @@ using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.SendCore.Sender;
+using UZonMail.Core.Services.SendCore.Sender.Authentication;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.SQL;
@@ -22,7 +23,7 @@ namespace UZonMail.Core.Controllers.Settings
     /// 通知设置
     /// </summary>
     /// <param name="db"></param>
-    public class NotificationSettingController(SqlContext db, AppSettingService settingService,AppSettingsManager settingsManager) : ControllerBaseV1
+    public class NotificationSettingController(SqlContext db, AppSettingService settingService, AppSettingsManager settingsManager, SmtpAuthenticationManager authenticationManager) : ControllerBaseV1
     {
         /// <summary>
         /// 获取发件通知设置
@@ -50,8 +51,8 @@ namespace UZonMail.Core.Controllers.Settings
         public async Task<ResponseResult<bool>> UpdateSmtpNotificationSetting([FromBody] SmtpNotificationSetting smtpSettings, AppSettingType type = AppSettingType.System)
         {
             // 开始验证
-            var outboxTestor = new OutboxTestSender(db);
-            var result = outboxTestor.SendTest(smtpSettings.SmtpHost, smtpSettings.SmtpPort, true, smtpSettings.Email, smtpSettings.Password);
+            var outboxTestor = new OutboxTestSender(db, authenticationManager);
+            var result = await outboxTestor.SendTest(smtpSettings.SmtpHost, smtpSettings.SmtpPort, true, smtpSettings.Email, smtpSettings.Email, smtpSettings.Password);
 
             // 验证通过后，更新数据库
             smtpSettings.IsValid = result.Ok;

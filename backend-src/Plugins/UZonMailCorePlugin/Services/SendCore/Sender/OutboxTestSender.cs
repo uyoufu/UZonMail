@@ -12,6 +12,8 @@ using UZonMail.DB.MySql;
 using MailKit.Net.Proxy;
 using UZonMail.Core.Utils.FluentMailkit;
 using MailKit.Security;
+using UZonMail.Core.Services.SendCore.Sender.Authentication;
+using System.Threading.Tasks;
 
 namespace UZonMail.Core.Services.SendCore.Sender
 {
@@ -25,7 +27,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
     /// <param name="outbox"></param>
     /// <param name="smtpPasswordSecretKeys"></param>
     /// <param name="sqlContext"></param>
-    public class OutboxTestSender(SqlContext sqlContext)
+    public class OutboxTestSender(SqlContext sqlContext, SmtpAuthenticationManager authenticationManager)
     {
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxTestSender));
 
@@ -58,7 +60,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             }
 
             var smtpUsername = string.IsNullOrEmpty(outbox.UserName) ? outbox.Email : outbox.UserName;
-            return  SendTest(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL, smtpUsername, smtpPassword, proxyClient);
+            return await SendTest(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL, outbox.Email, smtpUsername, smtpPassword, proxyClient);
         }
 
         /// <summary>
@@ -74,15 +76,15 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// <param name="smtpPassword"></param>
         /// <param name="proxyClient"></param>
         /// <returns></returns>
-        public Result<string> SendTest(string smtpHost, int smtpPort, bool enableSSL,
-            string smtpUserName, string smtpPassword, IProxyClient? proxyClient = null)
+        public async Task<Result<string>> SendTest(string smtpHost, int smtpPort, bool enableSSL,
+            string email, string smtpUserName, string smtpPassword, IProxyClient? proxyClient = null)
         {
             // 判断参数是否正确
             if (string.IsNullOrEmpty(smtpHost))
             {
                 return Result<string>.Fail("SMTP 服务器地址不能为空");
             }
-            if (smtpPort <= 0 || smtpPort> 65535)
+            if (smtpPort <= 0 || smtpPort > 65535)
             {
                 return Result<string>.Fail("SMTP 端口号不正确");
             }
@@ -107,7 +109,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 if (!string.IsNullOrEmpty(smtpPassword))
                 {
                     client.Authenticate(smtpUserName, smtpPassword);
-                }                
+                }
                 return Result<string>.Success(sendResult);
             }
             catch (SslHandshakeException ex)
@@ -118,6 +120,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 // 鉴权
                 if (!string.IsNullOrEmpty(smtpPassword))
                 {
+                    await authenticationManager.AuthenticateAsync(client, email, smtpUserName, smtpPassword);
                     client.Authenticate(smtpUserName, smtpPassword);
                 }
                 return Result<string>.Success(sendResult);

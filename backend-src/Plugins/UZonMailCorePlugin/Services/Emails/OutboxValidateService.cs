@@ -2,6 +2,7 @@
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.SendCore.Sender;
+using UZonMail.Core.Services.SendCore.Sender.Authentication;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Utils.Database;
 using UZonMail.DB.Extensions;
@@ -19,7 +20,7 @@ namespace UZonMail.Core.Services.Emails
     /// <param name="db"></param>
     /// <param name="tokenService"></param>
     /// <param name="debugConfig"></param>
-    public class OutboxValidateService(SqlContext db, TokenService tokenService, DebugConfig debugConfig) : IScopedService
+    public class OutboxValidateService(SqlContext db, TokenService tokenService, DebugConfig debugConfig, SmtpAuthenticationManager authenticationManager) : IScopedService
     {
         /// <summary>
         /// 验证发件箱是否有效
@@ -47,7 +48,7 @@ namespace UZonMail.Core.Services.Emails
         public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
         {
             // 发送测试邮件
-            var outboxTestor = new OutboxTestSender(db);
+            var outboxTestor = new OutboxTestSender(db, authenticationManager);
             var result = await outboxTestor.SendTest(outbox, smtpPasswordSecretKeys);
 
             // 更新数据库
