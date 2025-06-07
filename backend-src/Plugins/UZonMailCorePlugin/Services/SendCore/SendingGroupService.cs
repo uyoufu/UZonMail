@@ -20,6 +20,10 @@ using UZonMail.Utils.Web.Exceptions;
 using log4net;
 using UZonMail.Core.Services.SendCore.Sender;
 using UZonMail.Core.Services.Settings.Model;
+using UZonMail.Core.Database.Validators;
+using UZonMail.Core.Utils.Extensions;
+using UZonMail.Utils.Web.ResponseModel;
+using Uamazing.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Services.EmailSending
 {
@@ -326,6 +330,45 @@ namespace UZonMail.Core.Services.EmailSending
         }
 
         /// <summary>
+        /// 立即发件或者计划发件
+        /// 根据 scheduleDate 进行判断
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ResponseResult<SendingGroup>> StartSending(SendingGroup sendingData)
+        {
+            var sendingGroupValidator = new SendingGroupValidator();
+            var vdResult = sendingGroupValidator.Validate(sendingData);
+            // 校验数据
+            if (!vdResult.IsValid)
+            {
+                return vdResult.ToErrorResponse<SendingGroup>();
+            }
+
+            var isSchedule = sendingData.ScheduleDate > DateTime.Now.AddMinutes(1);
+
+            // 创建发件组
+            sendingData.SendingType = isSchedule ? SendingGroupType.Scheduled : SendingGroupType.Instant;
+            var sendingGroup = await CreateSendingGroup(sendingData);
+
+            // 判断是立即发件还是计划发件
+            if (isSchedule)
+            {
+                await SendSchedule(sendingGroup);
+            }
+            else
+            {
+                await SendNow(sendingGroup);
+            }
+
+            return new SendingGroup()
+            {
+                Id = sendingGroup.Id,
+                ObjectId = sendingGroup.ObjectId,
+                TotalCount = sendingGroup.TotalCount
+            }.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 移除发件任务
         /// 里面不会修改发件组和发件项的状态
         /// 因为移除可能是暂停、停止等不同的状态
@@ -337,11 +380,11 @@ namespace UZonMail.Core.Services.EmailSending
             var removedOutboxes = outboxesPoolList.RemoveOutbox(sendingGroup.UserId, sendingGroup.Id);
 
             // 移除关联的客户端
-            foreach(var outbox in removedOutboxes)
+            foreach (var outbox in removedOutboxes)
             {
                 // 释放发件箱
                 clientFactory.DisposeSmtpClients(outbox.Email);
-            }            
+            }
 
             // 移除任务
             waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);

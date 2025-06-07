@@ -18,6 +18,8 @@ namespace UZonMail.DB.SQL.Core.EmailSending
     public class SendingGroup : SqlId, IEntityTypeConfiguration<SendingGroup>
     {
         #region EF 定义
+        public SendingGroupSourceType SourceType { get; set; } = SendingGroupSourceType.Manual;
+
         /// <summary>
         /// 用户名
         /// </summary>

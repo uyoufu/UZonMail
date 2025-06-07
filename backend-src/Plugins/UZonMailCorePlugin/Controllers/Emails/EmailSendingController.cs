@@ -59,25 +59,8 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpPost("now")]
         public async Task<ResponseResult<SendingGroup>> SendNow([FromBody] SendingGroup sendingData)
         {
-            var sendingGroupValidator = new SendingGroupValidator();
-            var vdResult = sendingGroupValidator.Validate(sendingData);
-            // 校验数据
-            if (!vdResult.IsValid)
-            {
-                return vdResult.ToErrorResponse<SendingGroup>();
-            }
-
-            // 创建发件组
-            sendingData.SendingType = SendingGroupType.Instant;
-            var sendingGroup = await sendingService.CreateSendingGroup(sendingData);
-            db.ChangeTracker.Clear();
-            await sendingService.SendNow(sendingGroup);
-
-            return new SendingGroup()
-            {
-                Id = sendingGroup.Id,
-                TotalCount = sendingGroup.TotalCount
-            }.ToSuccessResponse();
+            sendingData.ScheduleDate = DateTime.MinValue;
+            return await sendingService.StartSending(sendingData);
         }
 
         /// <summary>
@@ -89,25 +72,7 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<SendingGroup>> SendSchedule([FromBody] SendingGroup sendingData)
         {
             // 校验数据
-            var sendingGroupValidator = new SendingGroupValidator();
-            var vdResult = sendingGroupValidator.Validate(sendingData);
-            // 校验数据
-            if (!vdResult.IsValid)
-            {
-                return vdResult.ToErrorResponse<SendingGroup>();
-            }
-
-            sendingData.SendingType = SendingGroupType.Scheduled;
-
-            // 创建发件组
-            var sendingGroup = await sendingService.CreateSendingGroup(sendingData);
-            await sendingService.SendSchedule(sendingGroup);
-
-            return new SendingGroup()
-            {
-                Id = sendingGroup.Id,
-                TotalCount = sendingGroup.TotalCount
-            }.ToSuccessResponse();
+            return await sendingService.StartSending(sendingData);
         }
 
         /// <summary>
