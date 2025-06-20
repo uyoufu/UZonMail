@@ -91,6 +91,17 @@ namespace UZonMail.Utils.Http.Request
             return this;
         }
 
+        /// <summary>
+        /// 添加表单数据
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns></returns>
+        public FluentHttpRequest WithFormContent(Dictionary<string, string> form)
+        {
+            Content = new FormUrlEncodedContent(form);
+            return this;
+        }
+
         public readonly Dictionary<string, Parameter> _parameters = [];
         public List<Parameter> Parameters => _parameters.Values.ToList();
 
@@ -156,9 +167,9 @@ namespace UZonMail.Utils.Http.Request
             BuildUri();
 
             _httpClient ??= new HttpClient(_httpClientHandler)
-                {
-                    Timeout = _timeout
-                };
+            {
+                Timeout = _timeout
+            };
 
             try
             {
@@ -176,13 +187,16 @@ namespace UZonMail.Utils.Http.Request
             }
             catch (Exception ex)
             {
+                // 获取内容
+                _logger.Error(ex.Message);               
+
                 // 捕获其他异常并返回自定义的 HttpResponseMessage
                 return new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.InternalServerError,
                     ReasonPhrase = $"Unexpected error: {ex.Message}"
                 };
-            }
+            }            
         }
 
         /// <summary>
@@ -191,15 +205,21 @@ namespace UZonMail.Utils.Http.Request
         /// <returns></returns>
         public async Task<JObject?> GetJsonAsync()
         {
+            return await GetJsonAsync<JObject>();
+        }
+
+        public async Task<T?> GetJsonAsync<T>()
+        {
             var response = await SendAsync();
             if (!response.IsSuccessStatusCode)
             {
-                _logger.Warn($"请求失败：{response.StatusCode}, 消息: {response.ReasonPhrase}");
+                var message  = await response.Content.ReadAsStringAsync();
+                _logger.Warn($"请求失败：{response.StatusCode}, 原因: {response.ReasonPhrase}, 消息：{message}");
                 return default;
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            return content.JsonTo<JObject?>();
+            return content.JsonTo<T?>();
         }
 
         /// <summary>

@@ -115,7 +115,7 @@ namespace UZonMail.Core.Services.SendCore
                 {
                     typeof(OutboxGetter), // 获取发件箱
                     typeof(EmailItemGetter), // 获取邮件
-                    typeof(LocalEmailSender), // 开始发件
+                    typeof(LocalEmailSendingHandler), // 开始发件
                     typeof(EmailItemPostHandler), // 发件回调
                     typeof(GroupTaskPostHandler), // 发件任务回调
                     typeof(OutboxesPostHandler), // 发件箱回调

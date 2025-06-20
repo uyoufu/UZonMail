@@ -1,20 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Settings.Validators;
-using UZonMail.Core.Controllers.Users.Model;
-using UZonMail.Core.Services.Config;
-using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.SendCore.Sender;
-using UZonMail.Core.Services.SendCore.Sender.Authentication;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Json;
 using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Settings
@@ -23,7 +13,7 @@ namespace UZonMail.Core.Controllers.Settings
     /// 通知设置
     /// </summary>
     /// <param name="db"></param>
-    public class NotificationSettingController(SqlContext db, AppSettingService settingService, AppSettingsManager settingsManager, SmtpAuthenticationManager authenticationManager) : ControllerBaseV1
+    public class NotificationSettingController(SqlContext db, AppSettingService settingService, AppSettingsManager settingsManager, EmailSendersManager sendersManager) : ControllerBaseV1
     {
         /// <summary>
         /// 获取发件通知设置
@@ -50,9 +40,11 @@ namespace UZonMail.Core.Controllers.Settings
         [HttpPut()]
         public async Task<ResponseResult<bool>> UpdateSmtpNotificationSetting([FromBody] SmtpNotificationSetting smtpSettings, AppSettingType type = AppSettingType.System)
         {
+            var emailSender = sendersManager.GetEmailSender(smtpSettings.Email);
+
             // 开始验证
-            var outboxTestor = new OutboxTestSender(db, authenticationManager);
-            var result = await outboxTestor.SendTest(smtpSettings.SmtpHost, smtpSettings.SmtpPort, true, smtpSettings.Email, smtpSettings.Email, smtpSettings.Password);
+            var authenticateClient = emailSender.GetAuthenticateClient();
+            var result = await authenticateClient.AuthenticateTestAsync(smtpSettings.Email, smtpSettings.Email, smtpSettings.Password, null, smtpSettings.SmtpHost, smtpSettings.SmtpPort, true);
 
             // 验证通过后，更新数据库
             smtpSettings.IsValid = result.Ok;

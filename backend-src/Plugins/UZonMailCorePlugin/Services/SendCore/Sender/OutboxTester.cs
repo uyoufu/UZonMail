@@ -1,19 +1,13 @@
 ﻿using log4net;
-using MailKit.Net.Smtp;
-using Microsoft.EntityFrameworkCore;
-using MimeKit;
-using UZonMail.Core.Controllers.Users.Model;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Results;
-using UZonMail.Utils.Extensions;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Core.Services.Config;
-using UZonMail.DB.MySql;
 using MailKit.Net.Proxy;
-using UZonMail.Core.Utils.FluentMailkit;
 using MailKit.Security;
-using UZonMail.Core.Services.SendCore.Sender.Authentication;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using UZonMail.Core.Controllers.Users.Model;
+using UZonMail.Core.Services.SendCore.Sender.Smtp;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Utils.Extensions;
+using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender
 {
@@ -27,9 +21,9 @@ namespace UZonMail.Core.Services.SendCore.Sender
     /// <param name="outbox"></param>
     /// <param name="smtpPasswordSecretKeys"></param>
     /// <param name="sqlContext"></param>
-    public class OutboxTestSender(SqlContext sqlContext, SmtpAuthenticationManager authenticationManager)
+    public class OutboxTester(SqlContext sqlContext)
     {
-        private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxTestSender));
+        private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxTester));
 
         /// <summary>
         /// 测试发件箱
@@ -98,17 +92,17 @@ namespace UZonMail.Core.Services.SendCore.Sender
             }
 
             // 参考：https://github.com/jstedfast/MailKit/tree/master/Documentation/Examples
-            using var client = new SmtpClient();
+            using var client = new ThrottlingSmtpClient(email, 0);
             client.ProxyClient = proxyClient;
 
             string sendResult = $"{smtpUserName} test success";
             try
             {
-                client.Connect(smtpHost, smtpPort, enableSSL ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.Auto);
+                await client.ConnectAsync(smtpHost, smtpPort, enableSSL);
                 // 鉴权
                 if (!string.IsNullOrEmpty(smtpPassword))
                 {
-                    client.Authenticate(smtpUserName, smtpPassword);
+                    await client.AuthenticateAsync(email, smtpUserName, smtpPassword);
                 }
                 return Result<string>.Success(sendResult);
             }
@@ -116,12 +110,11 @@ namespace UZonMail.Core.Services.SendCore.Sender
             {
                 _logger.Warn(ex);
                 // 可能是证书过期
-                client.Connect(smtpHost, smtpPort, SecureSocketOptions.None);
+                await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.None);
                 // 鉴权
                 if (!string.IsNullOrEmpty(smtpPassword))
                 {
-                    await authenticationManager.AuthenticateAsync(client, email, smtpUserName, smtpPassword);
-                    client.Authenticate(smtpUserName, smtpPassword);
+                    await client.AuthenticateAsync(email, smtpUserName, smtpPassword);
                 }
                 return Result<string>.Success(sendResult);
             }

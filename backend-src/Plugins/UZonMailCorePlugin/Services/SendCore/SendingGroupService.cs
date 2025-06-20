@@ -18,12 +18,12 @@ using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Utils.Web.Exceptions;
 using log4net;
-using UZonMail.Core.Services.SendCore.Sender;
 using UZonMail.Core.Services.Settings.Model;
 using UZonMail.Core.Database.Validators;
 using UZonMail.Core.Utils.Extensions;
 using UZonMail.Utils.Web.ResponseModel;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.Core.Services.SendCore.Sender.Smtp;
 
 namespace UZonMail.Core.Services.EmailSending
 {

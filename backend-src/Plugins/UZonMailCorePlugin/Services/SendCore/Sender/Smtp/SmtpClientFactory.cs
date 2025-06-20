@@ -2,7 +2,6 @@
 using MailKit.Net.Proxy;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Identity.Client;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Timers;
@@ -11,17 +10,14 @@ using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.DynamicProxy;
 using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.Sender.Authentication;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
 using Timer = System.Timers.Timer;
 
-namespace UZonMail.Core.Services.SendCore.Sender
+namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// 按发件任务缓存 SmtpClient, 因此发件完成后，要手动进行释放
@@ -39,16 +35,14 @@ namespace UZonMail.Core.Services.SendCore.Sender
         private readonly ProxyManager _proxyManager;
         private readonly GroupTasksList _groupTaskList;
         private readonly AppSettingsManager _settingsService;
-        private readonly SmtpAuthenticationManager _authenticationManager;
 
         private readonly Timer _timer;
 
-        public SmtpClientFactory(ProxyManager proxyManager, GroupTasksList groupTaskList, AppSettingsManager settingsService, SmtpAuthenticationManager authenticationManager)
+        public SmtpClientFactory(ProxyManager proxyManager, GroupTasksList groupTaskList, AppSettingsManager settingsService)
         {
             _proxyManager = proxyManager;
             _groupTaskList = groupTaskList;
             _settingsService = settingsService;
-            _authenticationManager = authenticationManager;
 
             // 新建定时器，对 smtp 连接进行保活
             _timer = new Timer(1000 * 30); // 30s
@@ -300,7 +294,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             // 对证书过期进行兼容处理
             try
             {
-                client.Connect(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.Auto);
+                await client.ConnectAsync(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL);
             }
             catch (SocketException ex)
             {
@@ -315,7 +309,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             {
                 _logger.Warn(ex);
                 // 证书过期
-                client.Connect(outbox.SmtpHost, outbox.SmtpPort, SecureSocketOptions.None);
+                await client.ConnectAsync(outbox.SmtpHost, outbox.SmtpPort, SecureSocketOptions.None);
             }
 
             // Note: only needed if the SMTP server requires authentication
@@ -323,7 +317,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
             if (!debugConfig.IsDemo)
             {
-                await _authenticationManager.AuthenticateAsync(client, outbox);
+                await client.AuthenticateAsync(outbox.Email, outbox.AuthUserName, outbox.AuthPassword);                
             }
             // 添加到缓存中
             _smptClients.TryAdd(client.GetClientKey(), client);

@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.Sender
+﻿namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// SmtpClient 的 Key 对象

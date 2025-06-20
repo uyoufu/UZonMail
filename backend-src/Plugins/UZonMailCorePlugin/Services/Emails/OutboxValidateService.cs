@@ -2,12 +2,11 @@
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.SendCore.Sender;
-using UZonMail.Core.Services.SendCore.Sender.Authentication;
 using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Utils.Database;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Utils.Web.Service;
@@ -20,7 +19,7 @@ namespace UZonMail.Core.Services.Emails
     /// <param name="db"></param>
     /// <param name="tokenService"></param>
     /// <param name="debugConfig"></param>
-    public class OutboxValidateService(SqlContext db, TokenService tokenService, DebugConfig debugConfig, SmtpAuthenticationManager authenticationManager) : IScopedService
+    public class OutboxValidateService(SqlContext db, TokenService tokenService, DebugConfig debugConfig, EmailSendersManager sendersManager) : IScopedService
     {
         /// <summary>
         /// 验证发件箱是否有效
@@ -47,9 +46,16 @@ namespace UZonMail.Core.Services.Emails
         /// <returns></returns>
         public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
         {
-            // 发送测试邮件
-            var outboxTestor = new OutboxTestSender(db, authenticationManager);
-            var result = await outboxTestor.SendTest(outbox, smtpPasswordSecretKeys);
+            var emailSender = sendersManager.GetEmailSender(outbox.Email);
+
+            // 开始验证
+            var smtpPassword = outbox.Password;
+            if (!string.IsNullOrEmpty(smtpPassword))
+            {
+                smtpPassword = outbox.Password.DeAES(smtpPasswordSecretKeys.Key, smtpPasswordSecretKeys.Iv);
+            }
+            var authenticateClient = emailSender.GetAuthenticateClient();
+            var result = await authenticateClient.AuthenticateTestAsync(outbox.Email, outbox.UserName, smtpPassword, null, outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL);
 
             // 更新数据库
             await db.Outboxes.UpdateAsync(x => x.Id == outbox.Id,
