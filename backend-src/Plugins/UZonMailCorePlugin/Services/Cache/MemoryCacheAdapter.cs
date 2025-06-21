@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using UZonMail.Utils.Database.Redis;
 
 namespace UZonMail.Core.Services.Cache
 {
@@ -23,6 +24,13 @@ namespace UZonMail.Core.Services.Cache
             return _cache.TryGetValue(key, out _);
         }
 
+        public async Task<bool> KeyDeleteAsync(string key)
+        {
+            // 删除指定的 key
+            _cache.Remove(key);
+            return true;
+        }
+
         public async Task RemoveByPrefix(string prefix)
         {
             var keyResults = _cache.Keys.Select(x => new { keyStr = x.ToString(), key = x })
@@ -34,9 +42,13 @@ namespace UZonMail.Core.Services.Cache
             }
         }
 
-        public async Task<bool> SetAsync<T>(string key, T? value)
+        public async Task<bool> SetAsync<T>(string key, T? value, TimeSpan? absoluteExpirationRelativeToNow)
         {
-            _cache.Set(key, value);
+            if (absoluteExpirationRelativeToNow == null)
+                _cache.Set(key, value);
+            else
+                _cache.Set(key, value, (TimeSpan)absoluteExpirationRelativeToNow);
+
             return true;
         }
     }

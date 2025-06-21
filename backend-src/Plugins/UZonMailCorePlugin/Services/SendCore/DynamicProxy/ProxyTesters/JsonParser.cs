@@ -2,15 +2,15 @@
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.IPQueryMethods
+namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
 {
     /// <summary>
     /// json 解析器
     /// </summary>
     /// <param name="httpClient"></param>
-    public abstract class JsonParser(HttpClient httpClient) : BaseIPQuery(httpClient)
+    public abstract class JsonParser(HttpClient httpClient, ProxyTesterType testerType) : BaseProxyTester(httpClient, testerType)
     {
-        protected override string? IPParser(string content)
+        protected override string? RetrieveIP(string content)
         {
             if (string.IsNullOrEmpty(content))
                 return string.Empty;
@@ -19,7 +19,7 @@ namespace UZonMail.Core.Services.IPQueryMethods
             if (json == null)
                 return string.Empty;
 
-            return json.SelectTokenOrDefault<string>(GetJsonPathOfIP(), string.Empty);
+            return json.SelectTokenOrDefault(GetJsonPathOfIP(), string.Empty);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.Cache
+﻿namespace UZonMail.Utils.Database.Redis
 {
     /// <summary>
     /// Redis 连接配置

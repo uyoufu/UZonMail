@@ -1,6 +1,6 @@
 ﻿using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.Sender;
+using UZonMail.Core.Services.SendCore.Sender.Smtp;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {

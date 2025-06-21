@@ -273,6 +273,9 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<int>("SentCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SourceType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 

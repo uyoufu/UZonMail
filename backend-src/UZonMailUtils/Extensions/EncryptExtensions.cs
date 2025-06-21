@@ -85,7 +85,7 @@ namespace UZonMail.Utils.Extensions
         /// 计算字符串的 SHA256 值
         /// </summary>
         /// <param name="plainText"></param>
-        /// <param name="cycle">循环的次数</param>
+        /// <param name="cycle">额外的循环的次数</param>
         /// <returns></returns>
         public static string Sha256(this string plainText, int cycle = 0)
         {
@@ -158,6 +158,8 @@ namespace UZonMail.Utils.Extensions
         /// AES 加密
         /// </summary>
         /// <param name="plainText"></param>
+        /// <param name="key"></param>
+        /// <param name="iv"></param>
         /// <returns></returns>
         public static string AES(this string plainText, string key, string iv)
         {

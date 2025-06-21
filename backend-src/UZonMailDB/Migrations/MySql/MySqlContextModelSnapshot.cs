@@ -284,6 +284,9 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.Property<int>("SentCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("SourceType")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 

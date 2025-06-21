@@ -14,6 +14,8 @@ using Microsoft.OpenApi.Models;
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.Extensions.Hosting;
+using System.IdentityModel.Tokens.Jwt;
+using UZonMail.Utils.Database.Redis;
 
 namespace UZonMail.Utils.Web
 {
@@ -204,9 +206,18 @@ namespace UZonMail.Utils.Web
         /// </summary>
         /// <param name="services"></param>
         /// <param name="secretKey"></param>
+        /// <param name="redisConnection">若传递该参数，会进行 token 黑名单验证</param>
         /// <returns></returns>
-        public static IServiceCollection AddJWTAuthentication(this IServiceCollection services, string secretKey)
+        public static IServiceCollection AddJWTAuthentication(this IServiceCollection services, string secretKey, RedisConnectionConfig? redisConnection = null)
         {
+            // reids 缓存
+            RedisCacheAdapter? redisCache = null;
+            if (redisConnection != null && redisConnection.Enable)
+            {
+                // 初始化 Redis
+                redisCache = new RedisCacheAdapter(redisConnection);
+            }
+
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -249,6 +260,19 @@ namespace UZonMail.Utils.Web
                             context.Token = accessToken;
                         }
                         return Task.CompletedTask;
+                    },
+                    OnTokenValidated = async context =>
+                    {
+                        if (redisCache == null || !redisCache.Enable) return;
+                        var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+                        if (string.IsNullOrEmpty(jti)) return;
+
+                        // 查询黑名单
+                        var isBlacklisted = await redisCache.KeyExistsAsync($"jwt:blacklist:{jti}");
+                        if (isBlacklisted)
+                        {
+                            context.Fail("Token has been deprecated!");
+                        }
                     }
                 };
             });

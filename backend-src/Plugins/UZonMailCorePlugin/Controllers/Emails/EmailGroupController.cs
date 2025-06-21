@@ -1,19 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Common;
-using UZonMail.Core.Services.Emails;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Core.Services.Common;
-using UZonMail.DB.SQL;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Users.Model;
-using UZonMail.Core.Services.SendCore.Sender;
-using Microsoft.AspNetCore.SignalR;
+using UZonMail.Core.Services.Emails;
+using UZonMail.Core.Services.Settings;
 using UZonMail.Core.SignalRHubs;
 using UZonMail.Core.SignalRHubs.Extensions;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Utils.Web.Exceptions;
+using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Emails
 {

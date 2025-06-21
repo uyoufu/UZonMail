@@ -11,7 +11,7 @@ using UZonMailDesktop.Utils;
 
 namespace UZonMailDesktop.Pages
 {
-    internal class ShellViewModel(IContainer ioc, IConfiguration configuration, BackEndService backEndService) : RouterConductor(ioc)
+    internal class ShellViewModel(IContainer ioc, IConfiguration configuration, BackEndService backEndService, SystemTrayWinfom systemTray) : RouterConductor(ioc)
     {
         private string _title;
         public string Title
@@ -93,10 +93,9 @@ namespace UZonMailDesktop.Pages
             return true;
         }
 
-        private ISystemTrayIcon? _notifyIcon;
         private void ShowTrayIcon()
         {
-            _notifyIcon = new SystemTrayWinfom(View as Window);
+            systemTray.Start(View as Window);
         }
     }
 }

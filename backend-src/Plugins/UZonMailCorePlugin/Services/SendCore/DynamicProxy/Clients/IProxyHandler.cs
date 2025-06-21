@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Proxy;
+using UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
 
@@ -45,6 +46,6 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// 更新代理操作器
         /// </summary>
         /// <param name="proxy"></param>
-        void Update(Proxy proxy, int expireSeconds = int.MaxValue);
+        void Update(Proxy proxy, ProxyTesterType testerType = ProxyTesterType.All, int expireSeconds = int.MaxValue);
     }
 }

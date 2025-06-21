@@ -2,7 +2,6 @@
 using MailKit.Net.Proxy;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Identity.Client;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Timers;
@@ -14,13 +13,11 @@ using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
 using Timer = System.Timers.Timer;
 
-namespace UZonMail.Core.Services.SendCore.Sender
+namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// 按发件任务缓存 SmtpClient, 因此发件完成后，要手动进行释放
@@ -85,7 +82,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// </summary>
         /// <param name="outbox"></param>
         /// <returns></returns>
-        public async Task<Result<SmtpClient>> GetSmtpClientAsync(SendingContext sendingContext)
+        public async Task<Result<ThrottlingSmtpClient>> GetSmtpClientAsync(SendingContext sendingContext)
         {
             var outbox = sendingContext.EmailItem!.Outbox;
 
@@ -99,7 +96,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 var available = await CheckSmtpClientAvailable(existClient, sendingContext);
                 if (available)
                 {
-                    return new Result<SmtpClient>() { Data = existClient };
+                    return new Result<ThrottlingSmtpClient>() { Data = existClient };
                 }
 
                 // 说明客户端不可用了，需要移除
@@ -114,7 +111,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
             // 当代理失效，但是用户又选择代理时，可能会影响效率，后期进行优化
 
             // TODO: 此处应该不需要限制频率，因为发件箱处已经处理了，后期测试后再决定是否添加
-            var client = new ThrottlingSmtpClient(outbox.Email, 0);
+            var client = sendingContext.Provider.GetRequiredService<ThrottlingSmtpClient>();
+            client.SetParams(outbox.Email, 0);
             try
             {
                 var result = await SetProxyAndConnectSmtpClient(client, outbox, sendingContext);
@@ -125,7 +123,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
                 _logger.Warn(ex);
                 client.Disconnect(true);
                 client.Dispose();
-                return new Result<SmtpClient>()
+                return new Result<ThrottlingSmtpClient>()
                 {
                     Ok = false,
                     Message = ex.Message,
@@ -249,7 +247,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
 
             // 有的 smtpClient 可能不需要代理, 此处要进行判断
             var availableProxyIds = sendingContext.EmailItem!.AvailableProxyIds;
-            if (availableProxyIds.Count==0)
+            if (availableProxyIds.Count == 0)
             {
                 // 未配置代理，直接返回
                 return null;
@@ -288,7 +286,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// <param name="sendingContext"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        private async Task<Result<SmtpClient>> SetProxyAndConnectSmtpClient(ThrottlingSmtpClient client, OutboxEmailAddress outbox, SendingContext sendingContext, int tryCount = 3)
+        private async Task<Result<ThrottlingSmtpClient>> SetProxyAndConnectSmtpClient(ThrottlingSmtpClient client, OutboxEmailAddress outbox, SendingContext sendingContext, int tryCount = 3)
         {
             // 获取代理
             var proxyAdapter = await GetProxyClient(sendingContext);
@@ -297,7 +295,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             // 对证书过期进行兼容处理
             try
             {
-                client.Connect(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.Auto);
+                await client.ConnectAsync(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL);
             }
             catch (SocketException ex)
             {
@@ -312,7 +310,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
             {
                 _logger.Warn(ex);
                 // 证书过期
-                client.Connect(outbox.SmtpHost, outbox.SmtpPort, SecureSocketOptions.None);
+                await client.ConnectAsync(outbox.SmtpHost, outbox.SmtpPort, SecureSocketOptions.None);
             }
 
             // Note: only needed if the SMTP server requires authentication
@@ -320,31 +318,12 @@ namespace UZonMail.Core.Services.SendCore.Sender
             var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
             if (!debugConfig.IsDemo)
             {
-                await client.AuthenticateAsync(outbox.AuthUserName, outbox.AuthPassword);
-
-                // TODO: OAuth2 后期兼容
-                //if (outbox.AuthType==OutboxAuthType.Credential && !string.IsNullOrEmpty(outbox.AuthPassword))
-                //{
-                   
-                //}
-
-                //if (outbox.AuthType==OutboxAuthType.OAuth2)
-                //{
-                //    var cca = ConfidentialClientApplicationBuilder
-                //        .Create(outbox.ClientId)
-                //        .WithClientSecret(outbox.AuthPassword)
-                //        .WithAdfsAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"))
-                //        .Build();
-
-                //    var scopes = new[] { "https://outlook.office365.com/.default" };
-                //    var result = await cca.AcquireTokenForClient(scopes).ExecuteAsync();
-                //    await client.AuthenticateAsync(new SaslMechanismOAuth2("your-email@outlook.com", result.AccessToken));
-                //}
+                await client.AuthenticateAsync(outbox.Email, outbox.AuthUserName, outbox.AuthPassword);                
             }
             // 添加到缓存中
             _smptClients.TryAdd(client.GetClientKey(), client);
 
-            return new Result<SmtpClient>() { Data = client };
+            return new Result<ThrottlingSmtpClient>() { Data = client };
         }
 
         /// <summary>

@@ -92,7 +92,7 @@ namespace UZonMail.Core.Utils.FluentMailkit
 
         public FluentEmail ConnectTo(string smptHost,int smtpPort,bool useSsl)
         {
-            _smtpClient.Connect(smptHost, smtpPort, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.Auto);
+            _smtpClient.Connect(smptHost, smtpPort, useSsl);
             return this;
         }
 

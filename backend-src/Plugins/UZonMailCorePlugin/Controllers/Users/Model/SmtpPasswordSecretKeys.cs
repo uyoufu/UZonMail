@@ -8,12 +8,12 @@ namespace UZonMail.Core.Controllers.Users.Model
     public class SmtpPasswordSecretKeys
     {
         /// <summary>
-        /// 密钥
+        /// 密钥（Key）
         /// </summary>
         public string Key { get; set; }
 
         /// <summary>
-        /// 
+        /// 初始化向量（IV）
         /// </summary>
         public string Iv { get; set; }
 
