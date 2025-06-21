@@ -19,3 +19,8 @@ export interface IUserInfo {
   organizationId: number,
   departmentId: number
 }
+
+export interface IUserEncryptKeys {
+  key: string,
+  iv: string
+}

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSessionStorage } from '@vueuse/core'
-import type { IUserInfo } from './types'
+import type { IUserEncryptKeys, IUserInfo } from './types'
 import { useRouter } from 'src/router/index'
 import logger from 'loglevel'
 
@@ -74,7 +74,7 @@ export const useUserInfoStore = defineStore('userInfo', {
       return {
         key: keys[0] as string,
         iv: keys[1] as string
-      }
+      } as IUserEncryptKeys
     },
 
     /**
