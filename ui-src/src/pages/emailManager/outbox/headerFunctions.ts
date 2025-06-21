@@ -5,10 +5,10 @@ import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { IOutbox } from 'src/api/emailBox'
-import { createOutbox, createOutboxes, startOutlookDelegateAuthorization } from 'src/api/emailBox'
+import { createOutbox, createOutboxes } from 'src/api/emailBox'
 import { GuessSmtpInfoGet } from 'src/api/smtpInfo'
 
-import { notifyError, notifySuccess, notifyWarning } from 'src/utils/dialog'
+import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { isEmail } from 'src/utils/validator'
 
 import { useUserInfoStore } from 'src/stores/user'
@@ -260,7 +260,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     notifySuccess('新增发件箱成功')
 
     // 进行 outlook 委托授权
-    await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
+    tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
   }
 
   // 导出模板

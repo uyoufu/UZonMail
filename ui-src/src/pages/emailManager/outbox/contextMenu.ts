@@ -155,7 +155,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     notifySuccess('更新成功')
 
     // 尝试进行 outlook 委托授权
-    await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
+    tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
   }
 
   async function onValidateOutbox (row: Record<string, any>) {
