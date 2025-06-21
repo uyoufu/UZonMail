@@ -3,6 +3,30 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.15.0
+
+> 更新日期：2025-06-21
+
+### 新增功能
+
+1. 支持通过 outlook refresh_token 发件。client_id 填写到用户名栏，token 填写到密码栏。
+2. 企业版本增加 api 管理功能
+3. 将前端的配置统一到后端进行修改。支持在配置 `appsettings.Production.json` 中添加 `BaseUrl` 来修复前端 `app.config.json` 中的 `baseUrl` 字段。
+
+### bug 修复
+
+1. 修复申请 ssl 证书时，前端无法验证 .well-known 结果的bug 
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.15.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.0.0.zip)
+
+[uzonmail-service-win-x64-0.15.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.15.0.0.zip)
+
+[uzonmail-service-linux-x64-0.15.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.15.0.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.14.2.2
 
 > 更新日期：2025-05-28
