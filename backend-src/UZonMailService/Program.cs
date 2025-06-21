@@ -170,19 +170,10 @@ services.AddCors(options =>
     // 获取跨域配置
     string[]? corsConfig = configuration.GetSection("Cors").Get<string[]>();
 
-    // 获取当前主机的地址
-    var hostIPs = NetworkHelper.GetCurrentHostIPs();
-    var port = configuration.GetSection("Http:Port").Get<int>();
-    var hostUrls = hostIPs.Select(x => $"http://{x}:{port}").ToList();
-    List<string> cors = [$"http://127.0.0.1:{port}", $"http://localhost:{port}", "http://localhost:9000"];
-    cors.AddRange(hostUrls);
-
-    if (corsConfig?.Length > 0) cors.AddRange(corsConfig);
-
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins([.. cors])
+            policy.WithOrigins([.. corsConfig])
             .AllowAnyMethod()
             .AllowAnyHeader();
         });
