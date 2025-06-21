@@ -6,7 +6,6 @@ using UZonMail.Core.Services.Settings;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Utils.Web.Service;
@@ -19,7 +18,7 @@ namespace UZonMail.Core.Services.Emails
     /// <param name="db"></param>
     /// <param name="tokenService"></param>
     /// <param name="debugConfig"></param>
-    public class OutboxValidateService(SqlContext db, TokenService tokenService, DebugConfig debugConfig, EmailSendersManager sendersManager) : IScopedService
+    public class OutboxValidateService(IServiceProvider serviceProvider, SqlContext db, TokenService tokenService, DebugConfig debugConfig, EmailSendersManager sendersManager) : IScopedService
     {
         /// <summary>
         /// 验证发件箱是否有效
@@ -47,15 +46,7 @@ namespace UZonMail.Core.Services.Emails
         public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
         {
             var emailSender = sendersManager.GetEmailSender(outbox.Email);
-
-            // 开始验证
-            var smtpPassword = outbox.Password;
-            if (!string.IsNullOrEmpty(smtpPassword))
-            {
-                smtpPassword = outbox.Password.DeAES(smtpPasswordSecretKeys.Key, smtpPasswordSecretKeys.Iv);
-            }
-            var authenticateClient = emailSender.GetAuthenticateClient();
-            var result = await authenticateClient.AuthenticateTestAsync(outbox.Email, outbox.UserName, smtpPassword, null, outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL);
+            var result = await emailSender.TestOutbox(serviceProvider, outbox);
 
             // 更新数据库
             await db.Outboxes.UpdateAsync(x => x.Id == outbox.Id,

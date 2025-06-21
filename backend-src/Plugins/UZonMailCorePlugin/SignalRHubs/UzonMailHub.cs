@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
+using UZonMail.Core.Controllers.Users.Model;
+using UZonMail.Core.Services.Encrypt;
 
 namespace UZonMail.Core.SignalRHubs
 {
     /// <summary>
     /// 邮件发送进度 Hub
     /// </summary>
-    public class UzonMailHub : Hub<IUzonMailClient>
+    public partial class UzonMailHub(EncryptService encryptService) : Hub<IUzonMailClient>
     {
         // 使用一个字典来跟踪用户的连接
         // 有可能同一个用户同时打开多个浏览器窗口

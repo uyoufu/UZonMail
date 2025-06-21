@@ -17,6 +17,7 @@ using System.Security.Claims;
 using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.Core.Services.Config;
+using UZonMail.Core.Services.Encrypt;
 
 namespace UZonMail.Core.Services.UserInfos
 {
@@ -255,7 +256,7 @@ namespace UZonMail.Core.Services.UserInfos
         }
 
         /// <summary>
-        /// 用户登陆
+        /// 用户登录
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="password">密码为原值</param>
@@ -266,7 +267,6 @@ namespace UZonMail.Core.Services.UserInfos
             password = password.Sha256();
             User user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId && x.Password == password)
                 ?? throw new KnownException("用户名或密码错误");
-
             return await UserSignIn(user);
         }
 

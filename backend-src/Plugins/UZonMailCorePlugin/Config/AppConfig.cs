@@ -1,4 +1,5 @@
 ﻿using UZonMail.Core.Config.SubConfigs;
+using UZonMail.Utils.Web.Service;
 using UZonMail.Utils.Web.Token;
 
 namespace UZonMail.Core.Config
@@ -6,7 +7,7 @@ namespace UZonMail.Core.Config
     /// <summary>
     /// 程序所有的配置
     /// </summary>
-    public class AppConfig
+    public class AppConfig()
     {
         public DatabaseConfig DataBase { get; set; }
         public HttpConfig Http { get; set; }

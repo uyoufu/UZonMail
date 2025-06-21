@@ -219,7 +219,18 @@ var app = builder.Build();
 
 app.UseDefaultFiles();
 // 设置网站的根目录
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions()
+{
+    ServeUnknownFileTypes = true,
+    OnPrepareResponse = (ctx) =>
+    {
+        // 特别兼容 .well-known 的情况
+        if (ctx.Context.Request.Path.StartsWithSegments("/.well-known"))
+        {
+            ctx.Context.Response.ContentType = "text/plain";
+        }
+    }
+});
 
 // 设置 public 目录为静态文件目录
 var publicPath = Path.Combine(builder.Environment.ContentRootPath, "data/public");

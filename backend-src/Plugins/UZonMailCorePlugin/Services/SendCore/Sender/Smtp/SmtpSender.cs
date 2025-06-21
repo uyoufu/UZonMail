@@ -1,18 +1,24 @@
 ﻿using log4net;
 using MailKit;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using MimeKit;
 using UZonMail.Core.Services.Config;
+using UZonMail.Core.Services.Encrypt;
 using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.Core.Services.SendCore.DynamicProxy;
 using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// 本机邮件发送器
     /// </summary>
-    public class SmtpSender : IEmailSender
+    public class SmtpSender(IServiceProvider provider, EncryptService encryptService, ProxyManager proxyManager) : IEmailSender
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpSender));
 
@@ -23,16 +29,24 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             return true;
         }
 
-        public IAuthenticateClient GetAuthenticateClient()
-        {
-            return new ThrottlingSmtpClient(string.Empty, 0);
-        }
-
+        /// <summary>
+        /// 发送邮件
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public async Task SendAsync(SendingContext context, MimeMessage message)
         {
             await SendAsync(context, message, 3);
         }
 
+        /// <summary>
+        /// 发送邮件
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="message"></param>
+        /// <param name="tryCount"></param>
+        /// <returns></returns>
         private static async Task SendAsync(SendingContext context, MimeMessage message, int tryCount)
         {
             SendItemMeta sendItem = context.EmailItem!;
@@ -49,7 +63,6 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 
             // throw new NullReferenceException("测试报错");
             var client = clientResult.Data;
-
             try
             {
                 var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
@@ -110,6 +123,86 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 // 发件箱问题，返回失败
                 sendItem.Outbox?.MarkShouldDispose(error.Message);
                 return;
+            }
+        }
+
+        /// <summary>
+        /// 验证发件箱
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="outbox">密码应是加密后的字符串</param>
+        /// <returns></returns>
+        public async Task<Result<string>> TestOutbox(IServiceProvider scopeServiceProvider, Outbox outbox)
+        {
+            var client = provider.GetRequiredService<ThrottlingSmtpClient>();
+            client.SetParams(string.Empty, 0);
+
+            var email = outbox.Email;
+            var smtpHost = outbox.SmtpHost;
+            var smtpPort = outbox.SmtpPort;
+            var smtpUserName = string.IsNullOrEmpty(outbox.UserName) ? outbox.Email : outbox.UserName;
+            var smtpPassword = encryptService.DecryptOutboxSecret(outbox.UserId, outbox.Password);
+            var enableSSL = outbox.EnableSSL;
+
+            // 判断参数是否正确
+            if (string.IsNullOrEmpty(smtpHost))
+            {
+                return Result<string>.Fail("SMTP 服务器地址不能为空");
+            }
+            if (smtpPort <= 0 || smtpPort > 65535)
+            {
+                return Result<string>.Fail("SMTP 端口号不正确");
+            }
+            if (string.IsNullOrEmpty(smtpUserName))
+            {
+                return Result<string>.Fail("SMTP 用户名不能为空");
+            }
+            if (string.IsNullOrEmpty(smtpPassword))
+            {
+                return Result<string>.Fail("SMTP 密码不能为空");
+            }
+
+            // 获取代理客户端
+            // 参考：https://github.com/jstedfast/MailKit/tree/master/Documentation/Examples
+            if (outbox.ProxyId > 0)
+            {
+                var proxyHandler = await proxyManager.GetProxyHandler(scopeServiceProvider, outbox.UserId, email, outbox.ProxyId);
+                if (proxyHandler != null)
+                    client.ProxyClient = await proxyHandler.GetProxyClientAsync(scopeServiceProvider, email);
+            }
+
+            string sendResult = $"{smtpUserName} test success";
+            try
+            {
+                await client.ConnectAsync(smtpHost, smtpPort, enableSSL);
+                // 鉴权
+                if (!string.IsNullOrEmpty(smtpPassword))
+                {
+                    await client.AuthenticateAsync(email, smtpUserName, smtpPassword);
+                }
+                return Result<string>.Success(sendResult);
+            }
+            catch (SslHandshakeException ex)
+            {
+                _logger.Warn(ex);
+                // 可能是证书过期
+                await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.None);
+                // 鉴权
+                if (!string.IsNullOrEmpty(smtpPassword))
+                {
+                    await client.AuthenticateAsync(email, smtpUserName, smtpPassword);
+                }
+                return Result<string>.Success(sendResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex);
+                return Result<string>.Fail(ex.Message);
+            }
+            finally
+            {
+                // 断开连接
+                await client.DisconnectAsync(true);
             }
         }
     }

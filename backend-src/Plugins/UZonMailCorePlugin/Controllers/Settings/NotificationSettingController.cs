@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.Core.Services.Encrypt;
 using UZonMail.Core.Services.SendCore.Sender;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.ResponseModel;
 
@@ -13,7 +15,9 @@ namespace UZonMail.Core.Controllers.Settings
     /// 通知设置
     /// </summary>
     /// <param name="db"></param>
-    public class NotificationSettingController(SqlContext db, AppSettingService settingService, AppSettingsManager settingsManager, EmailSendersManager sendersManager) : ControllerBaseV1
+    public class NotificationSettingController(IServiceProvider serviceProvider,
+        SqlContext db, AppSettingService settingService, TokenService tokenService,
+        AppSettingsManager settingsManager, EmailSendersManager sendersManager, EncryptService encryptService) : ControllerBaseV1
     {
         /// <summary>
         /// 获取发件通知设置
@@ -42,9 +46,20 @@ namespace UZonMail.Core.Controllers.Settings
         {
             var emailSender = sendersManager.GetEmailSender(smtpSettings.Email);
 
+            var userId = tokenService.GetUserSqlId();
+
+            var outbox = new Outbox()
+            {
+                UserId = userId,
+                Email = smtpSettings.Email,
+                UserName = string.Empty,
+                Password = encryptService.EncryptOutboxSecret(userId, smtpSettings.Password),
+                SmtpHost = smtpSettings.SmtpHost,
+                SmtpPort = smtpSettings.SmtpPort,
+                EnableSSL = true
+            };
             // 开始验证
-            var authenticateClient = emailSender.GetAuthenticateClient();
-            var result = await authenticateClient.AuthenticateTestAsync(smtpSettings.Email, smtpSettings.Email, smtpSettings.Password, null, smtpSettings.SmtpHost, smtpSettings.SmtpPort, true);
+            var result = await emailSender.TestOutbox(serviceProvider, outbox);
 
             // 验证通过后，更新数据库
             smtpSettings.IsValid = result.Ok;

@@ -1,6 +1,10 @@
 ﻿using MimeKit;
+using UZonMail.Core.Services.Encrypt;
 using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
+using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender
 {
@@ -33,6 +37,6 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// 获取验证客户端
         /// </summary>
         /// <returns></returns>
-        IAuthenticateClient GetAuthenticateClient();
+        Task<Result<string>> TestOutbox(IServiceProvider scopeServiceProvider, Outbox outbox);
     }
 }

@@ -82,7 +82,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// </summary>
         /// <param name="outbox"></param>
         /// <returns></returns>
-        public async Task<Result<SmtpClient>> GetSmtpClientAsync(SendingContext sendingContext)
+        public async Task<Result<ThrottlingSmtpClient>> GetSmtpClientAsync(SendingContext sendingContext)
         {
             var outbox = sendingContext.EmailItem!.Outbox;
 
@@ -96,7 +96,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 var available = await CheckSmtpClientAvailable(existClient, sendingContext);
                 if (available)
                 {
-                    return new Result<SmtpClient>() { Data = existClient };
+                    return new Result<ThrottlingSmtpClient>() { Data = existClient };
                 }
 
                 // 说明客户端不可用了，需要移除
@@ -111,7 +111,8 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             // 当代理失效，但是用户又选择代理时，可能会影响效率，后期进行优化
 
             // TODO: 此处应该不需要限制频率，因为发件箱处已经处理了，后期测试后再决定是否添加
-            var client = new ThrottlingSmtpClient(outbox.Email, 0);
+            var client = sendingContext.Provider.GetRequiredService<ThrottlingSmtpClient>();
+            client.SetParams(outbox.Email, 0);
             try
             {
                 var result = await SetProxyAndConnectSmtpClient(client, outbox, sendingContext);
@@ -122,7 +123,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 _logger.Warn(ex);
                 client.Disconnect(true);
                 client.Dispose();
-                return new Result<SmtpClient>()
+                return new Result<ThrottlingSmtpClient>()
                 {
                     Ok = false,
                     Message = ex.Message,
@@ -285,7 +286,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// <param name="sendingContext"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        private async Task<Result<SmtpClient>> SetProxyAndConnectSmtpClient(ThrottlingSmtpClient client, OutboxEmailAddress outbox, SendingContext sendingContext, int tryCount = 3)
+        private async Task<Result<ThrottlingSmtpClient>> SetProxyAndConnectSmtpClient(ThrottlingSmtpClient client, OutboxEmailAddress outbox, SendingContext sendingContext, int tryCount = 3)
         {
             // 获取代理
             var proxyAdapter = await GetProxyClient(sendingContext);
@@ -322,7 +323,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             // 添加到缓存中
             _smptClients.TryAdd(client.GetClientKey(), client);
 
-            return new Result<SmtpClient>() { Data = client };
+            return new Result<ThrottlingSmtpClient>() { Data = client };
         }
 
         /// <summary>
