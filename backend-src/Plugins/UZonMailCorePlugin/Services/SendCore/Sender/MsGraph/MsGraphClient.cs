@@ -184,6 +184,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             // 判断是否有 SMTP.Send 权限
             if (!jsonResult.Scope.Contains("Mail.Send"))
                 throw new AuthenticationException($"{clientId} 缺失 Mail.Send 权限");
+
             return jsonResult;
         }
 
