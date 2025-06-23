@@ -52,7 +52,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.2" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.72.0" />
-		<PackageReference Include="Microsoft.OpenApi" Version="1.6.23" />
 		<PackageReference Include="Quartz" Version="3.14.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.3.1" />

@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.IPQueryMethods
+namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
 {
     /// <summary>
     /// 基于 http://httpbin.org/ip 实现的 IP 查询
     /// </summary>
-    public class HttpBinIPQuery(HttpClient httpClient) : JsonParser(httpClient)
+    public class HttpBinIPQuery(HttpClient httpClient) : JsonParser(httpClient, ProxyTesterType.All)
     {
         private readonly string _apiUrl = "http://httpbin.org/ip";
 

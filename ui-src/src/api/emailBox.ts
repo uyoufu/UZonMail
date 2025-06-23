@@ -59,7 +59,7 @@ export interface IOutbox extends IInbox {
  * @returns
  */
 export function createOutbox (outbox: IOutbox) {
-  return httpClient.post<IOutbox[]>('/email-box/outbox', {
+  return httpClient.post<IOutbox>('/email-box/outbox', {
     data: outbox
   })
 }
@@ -85,6 +85,12 @@ export function updateOutbox (outboxId: number, outbox: IOutbox) {
     data: outbox
   })
 }
+
+// #region outlook 个人用户委托授权
+export function startOutlookDelegateAuthorization (outboxId: number) {
+  return httpClient.post<string>(`/outlook-authorization/${outboxId}`)
+}
+// #endregion
 
 /**
  * 验证发件箱

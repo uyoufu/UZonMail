@@ -4,7 +4,6 @@ using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
-using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 
@@ -53,23 +52,42 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             var userId = sendingContext.EmailItem.UserId;
             var outboxEmail = sendingContext.EmailItem.Outbox.Email;
 
+            return await GetProxyHandler(sendingContext.Provider, userId, outboxEmail, sendingContext.EmailItem.ProxyId, sendingContext.EmailItem.AvailableProxyIds);
+        }
+
+        /// <summary>
+        /// 返回指定代理
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="userId"></param>
+        /// <param name="outboxEmail"></param>
+        /// <param name="proxyId"></param>
+        /// <returns></returns>
+        public async Task<IProxyHandler?> GetProxyHandler(IServiceProvider serviceProvider, long userId, string outboxEmail, long proxyId, List<long> availableProxyIds = null)
+        {
             if (!_userProxyManagers.TryGetValue(userId, out var manager))
             {
                 // 新增并添加
                 manager = new UserProxyManager(userId);
-                await manager.UpdateProxies(sendingContext.Provider);
+                await manager.UpdateProxies(serviceProvider);
                 _userProxyManagers.TryAdd(userId, manager);
             }
 
-            if (sendingContext.EmailItem.ProxyId > 0)
+            if (proxyId > 0)
             {
                 // 返回特定的代理
-                return manager.GetProxyHandler(sendingContext.EmailItem.ProxyId);
+                return manager.GetProxyHandler(proxyId);
+            }
+            if (availableProxyIds == null || availableProxyIds.Count == 0)
+            {
+                return null;
             }
 
-            var orgSetting = await _settingsService.GetSetting<SendingSetting>(sendingContext.SqlContext, userId);            
+            var sqlContext = serviceProvider.GetRequiredService<SqlContext>();
+            var orgSetting = await _settingsService.GetSetting<SendingSetting>(sqlContext, userId);
+
             // 随机匹配代理
-            return manager.RandomProxyHandler(outboxEmail, orgSetting.ChangeIpAfterEmailCount, sendingContext.EmailItem.AvailableProxyIds);
+            return manager.RandomProxyHandler(outboxEmail, orgSetting.ChangeIpAfterEmailCount, availableProxyIds);
         }
 
         /// <summary>
@@ -79,7 +97,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         /// <param name="userId"></param>
         /// <param name="matchStr"></param>
         /// <returns></returns>
-        public async Task<IProxyHandler?> GetProxyHander(IServiceProvider serviceProvider, long userId,string matchStr)
+        public async Task<IProxyHandler?> GetProxyHander(IServiceProvider serviceProvider, long userId, string matchStr)
         {
             if (!_userProxyManagers.TryGetValue(userId, out var manager))
             {

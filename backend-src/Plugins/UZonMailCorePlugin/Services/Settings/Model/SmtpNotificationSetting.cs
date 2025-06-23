@@ -8,6 +8,7 @@
 
         public int SmtpPort { get; set; }
 
+        // 该密码是明文存储的
         public string Password { get; set; }
 
         public bool IsValid { get; set; } = false;

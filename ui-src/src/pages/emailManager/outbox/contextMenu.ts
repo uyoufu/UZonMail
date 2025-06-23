@@ -16,6 +16,8 @@ import type { getSelectedRowsType } from 'src/compositions/qTableUtils'
 import { useI18n } from 'vue-i18n'
 import logger from 'loglevel'
 
+import { tryOutlookDelegateAuthorization } from './headerFunctions'
+
 /**
  * 获取smtp密码
  * @param IOutbox
@@ -151,6 +153,9 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     Object.assign(outbox, data, { decryptedPassword: false, showPassword: false })
 
     notifySuccess('更新成功')
+
+    // 尝试进行 outlook 委托授权
+    tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
   }
 
   async function onValidateOutbox (row: Record<string, any>) {

@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { userLogin } from 'src/api/user'
+import { userLogin, updateUserEncryptKeys } from 'src/api/user'
 
 import { useUserInfoStore } from 'src/stores/user'
 import { useRoutesStore } from 'src/stores/routes'
@@ -83,6 +83,9 @@ async function onUserLogin () {
   userInfoStore.setUserLoginInfo(userInfo, token, access)
   userInfoStore.setSecretKey(md5(password.value))
   routeStore.resetDynamicRoutes()
+
+  const encryptKeys = userInfoStore.userEncryptKeys
+  await updateUserEncryptKeys(encryptKeys.key, encryptKeys.iv)
 
   logger.log('[Login] 登录成功')
   // 跳转到主页

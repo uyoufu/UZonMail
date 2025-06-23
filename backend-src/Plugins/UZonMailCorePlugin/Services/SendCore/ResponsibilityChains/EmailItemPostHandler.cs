@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Sender;
+using UZonMail.Core.Services.SendCore.Sender.Smtp;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.SignalRHubs.SendEmail;
-using UZonMail.Core.Utils.Database;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL.Core.EmailSending;
 

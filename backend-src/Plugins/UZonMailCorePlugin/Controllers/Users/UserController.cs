@@ -1,21 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.ResponseModel;
+using Microsoft.EntityFrameworkCore;
+using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.Core.Controllers.Users.Model;
+using UZonMail.Core.Database.Validators;
+using UZonMail.Core.Services.Encrypt;
+using UZonMail.Core.Services.Files;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.UserInfos;
-using UZonMail.Core.Services.Files;
-using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Controllers.Users.Model;
-using UZonMail.DB.SQL;
-using UZonMail.Core.Database.Validators;
 using UZonMail.Core.Utils.Extensions;
+using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Organization;
+using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
-using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.DB.SQL.Core.Organization;
-using UZonMail.DB.Extensions;
-using UZonMail.Core.Services.Config;
+using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Users
 {
@@ -26,7 +26,8 @@ namespace UZonMail.Core.Controllers.Users
     /// <param name="userService"></param>
     /// <param name="tokenService"></param>
     /// <param name="fileStoreService"></param>
-    public class UserController(SqlContext db, UserService userService, TokenService tokenService, FileStoreService fileStoreService) : ControllerBaseV1
+    public class UserController(SqlContext db, UserService userService, TokenService tokenService,
+        FileStoreService fileStoreService, EncryptService encryptService) : ControllerBaseV1
     {
         /// <summary>
         /// UserId 是否已经被使用
@@ -82,6 +83,7 @@ namespace UZonMail.Core.Controllers.Users
         }
 
         /// <summary>
+        /// 用于重新登录
         /// 更新登陆用户信息
         /// </summary>
         /// <param name="user"></param>
@@ -93,6 +95,21 @@ namespace UZonMail.Core.Controllers.Users
             var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId) ?? throw new KnownException("用户不存在");
             var loginResult = await userService.UserSignIn(user);
             return loginResult.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 更新用户的 SMTP 密码密钥
+        /// 服务器只保存在内存中，不进行持久化保存
+        /// 在用户登录后应调用该接口来更新密钥，以便加密和解密 SMTP 密码
+        /// </summary>
+        /// <param name="secretKeys"></param>
+        /// <returns></returns>
+        [HttpPut("encrypt-keys")]
+        public async Task<ResponseResult<bool>> UpdateUserEncryptKeys([FromBody] SmtpPasswordSecretKeys secretKeys)
+        {
+            var userId = tokenService.GetUserSqlId();
+            encryptService.UpdateUserEncryptKeys(userId, secretKeys);
+            return true.ToSuccessResponse();
         }
 
         /// <summary>

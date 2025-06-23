@@ -5,24 +5,25 @@ using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
 using UZonMail.Utils.Results;
 
-namespace UZonMail.Core.Services.IPQueryMethods
+namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
 {
     /// <summary>
-    /// IP 查询接口的基类
+    /// 代理查询基类
     /// 来源：https://github.com/ihmily/ip-info-api?tab=readme-ov-file
     /// </summary>
     /// <param name="httpClient"></param>
-    public abstract class BaseIPQuery : IIPQuery
+    public abstract class BaseProxyTester : IProxyTester
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(BaseIPQuery));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(BaseProxyTester));
 
         private readonly HttpClient _httpClient;
         private readonly long _timeout = 2000;
 
-        public BaseIPQuery(HttpClient httpClient)
+        public BaseProxyTester(HttpClient httpClient,ProxyTesterType testerType)
         {
-            this._httpClient = httpClient;
-            this._httpClient.Timeout = TimeSpan.FromMilliseconds(_timeout);
+            _httpClient = httpClient;
+            _httpClient.Timeout = TimeSpan.FromMilliseconds(_timeout);
+            TesterType = testerType;
         }
 
         public bool Enable { get; set; } = true;
@@ -31,6 +32,11 @@ namespace UZonMail.Core.Services.IPQueryMethods
         /// 序号
         /// </summary>
         public virtual int Order { get; } = 0;
+
+        /// <summary>
+        /// 代理查询类型
+        /// </summary>
+        public ProxyTesterType TesterType { get; private set; }
 
         /// <summary>
         /// 获取当前 IP
@@ -60,7 +66,7 @@ namespace UZonMail.Core.Services.IPQueryMethods
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            var resultIP = IPParser(content);
+            var resultIP = RetrieveIP(content);
             return Result<string?>.Success(resultIP);
         }
 
@@ -71,7 +77,7 @@ namespace UZonMail.Core.Services.IPQueryMethods
         /// </summary>
         /// <param name="content"></param>
         /// <returns></returns>
-        protected abstract string? IPParser(string content);
+        protected abstract string? RetrieveIP(string content);
 
         private DateTime _lastValidateTime = DateTime.MinValue;
         private bool _validating = false;

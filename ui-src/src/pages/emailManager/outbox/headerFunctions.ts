@@ -12,12 +12,13 @@ import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { isEmail } from 'src/utils/validator'
 
 import { useUserInfoStore } from 'src/stores/user'
-import { aes } from 'src/utils/encrypt'
+import { aes, deAes } from 'src/utils/encrypt'
 import type { IExcelColumnMapper } from 'src/utils/file'
 import { readExcel, writeExcel } from 'src/utils/file'
 import type { IProxy } from 'src/api/proxy'
 import { getUsableProxies } from 'src/api/proxy'
 import { debounce } from 'lodash'
+import type { IUserEncryptKeys } from 'src/stores/types'
 
 function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
   return aes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, password)
@@ -77,7 +78,6 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
       label: 'smtp密码',
       type: PopupDialogFieldType.password,
       required: true,
-
       parser: (value: any) => {
         const pwd = String(value)
         // 对密码进行加密
@@ -175,7 +175,45 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
   ]
 }
 
+/**
+ * 进行 Outlook 委托授权
+ * 当满足条件时，才会执行
+ * @param outbox
+ * @param encryptKeys
+ * @returns
+ */
+export function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptKeys: IUserEncryptKeys) {
+  if (!outbox.email.toLowerCase().includes("@outlook.com")) return
 
+  // 判断是否采用个人委托授权
+  if (!outbox.userName || outbox.userName.includes('/')) return
+
+  // 密钥必须小于 80 位
+  // 否则可能是 refreshToken
+  const plainPassword = deAes(encryptKeys.key, encryptKeys.iv, outbox.password)
+  if (plainPassword.length > 80) return
+
+  // TODO: 未完全实现
+  return
+  // notifyWarning("检测到您使用的是个人 Outlook 邮箱，需要进行委托授权，请批准")
+
+  // const { data: authorizationUrl } = await startOutlookDelegateAuthorization(outbox.id as number)
+  // if (!authorizationUrl) {
+  //   notifyError("获取委托授权地址失败，请稍后重试")
+  //   return
+  // }
+
+  // // 在新页面打开授权链接
+  // window.open(authorizationUrl, '_blank')
+  // notifySuccess("已打开委托授权页面，请完成授权")
+}
+
+/**
+ * 使用发件箱头部功能
+ * @param emailGroup
+ * @param addNewRow
+ * @returns
+ */
 export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
   addNewRow: (newRow: Record<string, any>) => void) {
   const userInfoStore = useUserInfoStore()
@@ -220,6 +258,9 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     addNewRow(outbox)
 
     notifySuccess('新增发件箱成功')
+
+    // 进行 outlook 委托授权
+    tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
   }
 
   // 导出模板

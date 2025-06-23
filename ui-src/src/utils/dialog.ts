@@ -45,6 +45,27 @@ export function notifySuccess (opts: QNotifyCreateOptions | string | undefined):
 }
 
 /**
+ * 警告通知
+ * @param opts
+ * @returns
+ */
+export function notifyWarning (opts: QNotifyCreateOptions | string | undefined): void {
+  if (!opts) return
+
+  let inputOptions = opts
+  if (typeof opts === 'string') { inputOptions = { message: t(opts) } }
+
+  const appNotifyOptions: QNotifyCreateOptions = {
+    color: 'warning',
+    icon: 'circle_notifications',
+    position: 'top'
+  }
+
+  const fullOptions = Object.assign(appNotifyOptions, inputOptions)
+  Notify.create(fullOptions)
+}
+
+/**
  * 根据传递的 type 来智能识别消息类型
  * @param opts
  * @returns

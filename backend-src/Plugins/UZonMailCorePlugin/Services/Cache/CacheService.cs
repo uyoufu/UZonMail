@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using UZonMail.Utils.Json;
+﻿using UZonMail.Utils.Database.Redis;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.Cache
@@ -14,6 +11,7 @@ namespace UZonMail.Core.Services.Cache
     public class CacheService : ISingletonService, ICacheAdapter
     {
         private ICacheAdapter _cacheAdapter;
+        public bool IsRedis { get; private set; }
 
         /// <summary>
         /// 缓存服务单例
@@ -26,6 +24,7 @@ namespace UZonMail.Core.Services.Cache
             if (redisConfig.Enable)
             {
                 _cacheAdapter = new RedisCacheAdapter(redisConfig);
+                IsRedis = true;
                 return;
             }
 
@@ -39,13 +38,14 @@ namespace UZonMail.Core.Services.Cache
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <param name="value"></param>
+        /// <param name="absoluteExpirat">过期日期</param>
         /// <returns></returns>
-        public async Task<bool> SetAsync<T>(string key, T? value)
+        public async Task<bool> SetAsync<T>(string key, T? value, TimeSpan? absoluteExpirationRelativeToNow = null)
         {
             if (string.IsNullOrEmpty(key) || value == null)
                 return false;
 
-           return await _cacheAdapter.SetAsync(key, value);
+            return await _cacheAdapter.SetAsync(key, value, absoluteExpirationRelativeToNow);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace UZonMail.Core.Services.Cache
             if (string.IsNullOrEmpty(key))
                 return false;
 
-           return await _cacheAdapter.KeyExistsAsync(key);
+            return await _cacheAdapter.KeyExistsAsync(key);
         }
 
         /// <summary>
@@ -86,6 +86,17 @@ namespace UZonMail.Core.Services.Cache
                 return;
 
             await _cacheAdapter.RemoveByPrefix(prefix);
+        }
+
+        /// <summary>
+        /// 按照 key 删除缓存
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<bool> KeyDeleteAsync(string key)
+        {
+            return await _cacheAdapter.KeyDeleteAsync(key);
         }
     }
 }

@@ -15,6 +15,6 @@ namespace UZonMail.Utils.Web.ResponseModel
         public int Code { get; set; } = (int)HttpStatusCode.OK;
 
         public static ResponseResult<T> Success(T data) => new() { Ok = false, Message = "ok", Data = data };
-        public static ResponseResult<T> Fail(string message) => new() { Ok = false, Message = message,Code = (int)HttpStatusCode.BadRequest };
+        public static ResponseResult<T> Fail(string message, HttpStatusCode code = HttpStatusCode.BadRequest, T data = default) => new() { Ok = false, Message = message, Code = (int)code, Data = data };
     }
 }

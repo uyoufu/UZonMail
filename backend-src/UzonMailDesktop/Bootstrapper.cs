@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UZonMailDesktop.Pages;
+using UZonMailDesktop.Pages.Tray;
 using UZonMailDesktop.Utils;
 
 namespace UZonMailDesktop
@@ -37,6 +38,7 @@ namespace UZonMailDesktop
 
             // 注册服务
             builder.Bind<BackEndService>().ToSelf().InSingletonScope();
+            builder.Bind<SystemTrayWinfom>().ToSelf().InSingletonScope();
         }
 
         protected override void Configure()

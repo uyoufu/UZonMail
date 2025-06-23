@@ -29,7 +29,7 @@ namespace UZonMail.Utils.Web.Token
                 audience: tokenParam.Audience,
                 claims: claims,
                 notBefore: DateTime.Now,
-                expires: DateTime.Now.AddMinutes(1440),
+                expires: tokenParam.ExpireDate,
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );
 

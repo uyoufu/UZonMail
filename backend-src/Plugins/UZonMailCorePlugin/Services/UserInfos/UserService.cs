@@ -17,6 +17,7 @@ using System.Security.Claims;
 using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.Core.Services.Config;
+using UZonMail.Core.Services.Encrypt;
 
 namespace UZonMail.Core.Services.UserInfos
 {
@@ -255,7 +256,7 @@ namespace UZonMail.Core.Services.UserInfos
         }
 
         /// <summary>
-        /// 用户登陆
+        /// 用户登录
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="password">密码为原值</param>
@@ -266,7 +267,6 @@ namespace UZonMail.Core.Services.UserInfos
             password = password.Sha256();
             User user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId && x.Password == password)
                 ?? throw new KnownException("用户名或密码错误");
-
             return await UserSignIn(user);
         }
 
@@ -309,17 +309,39 @@ namespace UZonMail.Core.Services.UserInfos
         /// 生成 token
         /// </summary>
         /// <param name="userInfo"></param>
+        /// <param name="expireMilliseconds">等于 0 时表示使用默认值</param>
+        /// <param name="extraClaims">额外传递的 claims</param>
         /// <returns></returns>
-        private async Task<string> GenerateToken(User userInfo)
+        public async Task<string> GenerateToken(User userInfo, long expireMilliseconds = 0, IEnumerable<Claim>? extraClaims = null)
+        {
+            var expireDate = expireMilliseconds > 0 ? DateTime.Now.AddMilliseconds(expireMilliseconds) : DateTime.MaxValue;
+            return await GenerateToken(userInfo, expireDate, extraClaims);
+        }
+
+        public async Task<string> GenerateToken(User userInfo, DateTime expireDate, IEnumerable<Claim>? extraClaims = null)
         {
             var tokenClaimBuilders = serviceProvider.GetServices<ITokenClaimBuilder>();
             List<Claim> claims = [];
+            if (extraClaims != null)
+            {
+                claims.AddRange(extraClaims);
+            }
+
             foreach (var claimBuilder in tokenClaimBuilders)
             {
                 var claimsTemp = await claimBuilder.Build(userInfo);
                 claims.AddRange(claimsTemp);
             }
-            string token = JWTToken.CreateToken(appConfig.Value.TokenParams, claims);
+
+            var tokenParams = appConfig.Value.TokenParams.Clone();
+            // 若
+            if (expireDate > DateTime.Now)
+                tokenParams.ExpireDate = expireDate;
+            else if (tokenParams.Expire > 0)
+                tokenParams.ExpireDate = DateTime.Now.AddMilliseconds(tokenParams.Expire);
+            else tokenParams.ExpireDate = DateTime.MinValue;
+
+            string token = JWTToken.CreateToken(tokenParams, claims);
             return token;
         }
 

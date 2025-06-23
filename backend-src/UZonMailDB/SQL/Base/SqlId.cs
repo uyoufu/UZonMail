@@ -1,4 +1,5 @@
-﻿using Sigin.ObjectId;
+﻿using Microsoft.EntityFrameworkCore;
+using Sigin.ObjectId;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

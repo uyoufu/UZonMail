@@ -35,6 +35,22 @@ export function userRelogin () {
   return httpClient.put<IUserLoginInfo>('/user/sign-in')
 }
 
+/**
+ * 更新用户的 AES 密钥
+ * 用于加密发件箱的密码
+ * @param key
+ * @param iv
+ * @returns
+ */
+export function updateUserEncryptKeys (key: string, iv: string) {
+  return httpClient.put<boolean>('/user/encrypt-keys', {
+    data: {
+      key,
+      iv
+    }
+  })
+}
+
 // 检查用户ID是否存在
 export function checkUserId (userId: string) {
   return httpClient.get<boolean>('/user/check-user-id', {
