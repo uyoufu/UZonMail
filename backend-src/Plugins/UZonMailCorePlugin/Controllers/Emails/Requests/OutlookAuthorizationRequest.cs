@@ -1,4 +1,5 @@
-﻿using UZonMail.Utils.Http.Request;
+﻿using Microsoft.AspNetCore.Authorization;
+using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.Service;
 
@@ -31,7 +32,7 @@ namespace UZonMail.Core.Controllers.Emails.Requests
             WithUrl("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
             AddQuery("redirect_uri", $"{baseUrl.Trim('/')}/api/v1/outlook-authorization/code");
             AddQuery("response_type", "code");
-            AddQuery("reponse_mode", "query");
+            AddQuery("response_mode", "query");
             AddQuery("scope", string.Join(" ", _sendScopes));
         }
 
@@ -46,6 +47,7 @@ namespace UZonMail.Core.Controllers.Emails.Requests
         /// </summary>
         /// <param name="outboxId"></param>
         /// <returns></returns>
+        [AllowAnonymous]
         public OutlookAuthorizationRequest WithState(long outboxId)
         {
             AddQuery("state", outboxId.ToString());

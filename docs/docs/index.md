@@ -36,6 +36,9 @@ highlights:
       - title: 阅读跟踪
         details: 支持跟踪邮件的阅读状态
 
+      - title: 支持Outlook
+        details: 支持 Outlook OAuth2 验证发件
+
       - title: 自带爬虫, 外贸神器
         details: 一次任务中允许添加任意多个收件箱。
 

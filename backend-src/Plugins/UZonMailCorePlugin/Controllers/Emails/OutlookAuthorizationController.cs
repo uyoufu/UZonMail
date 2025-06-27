@@ -32,6 +32,7 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             var uri = serviceProvider.GetRequiredService<OutlookAuthorizationRequest>()
+                .WithClientId(outbox.UserName)
                 .WithState(outbox.Id)
                 .BuildUri();
 
