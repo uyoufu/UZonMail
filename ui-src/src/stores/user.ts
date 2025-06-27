@@ -7,12 +7,12 @@ import logger from 'loglevel'
 // options 方式定义
 export const useUserInfoStore = defineStore('userInfo', {
   state: () => ({
-    token: useSessionStorage('token', '').value,
-    access: useSessionStorage('access', []).value as string[],
-    secretKey: useSessionStorage('secretKey', '').value,
-    installedPlugins: useSessionStorage('installedPlugins', [] as string[]).value,
-    userInfo: useSessionStorage('userInfo', {}).value as IUserInfo,
-    locale: useSessionStorage('locale', navigator.language).value
+    token: useSessionStorage('token', ''),
+    access: useSessionStorage('access', [] as string[]),
+    secretKey: useSessionStorage('secretKey', ''),
+    installedPlugins: useSessionStorage('installedPlugins', [] as string[]),
+    userInfo: useSessionStorage('userInfo', {} as IUserInfo),
+    locale: useSessionStorage('locale', navigator.language)
   }),
   getters: {
     // 用户数据库的 id
@@ -89,28 +89,19 @@ export const useUserInfoStore = defineStore('userInfo', {
   actions: {
     setToken (token: string) {
       this.token = token
-      // 保存到 session 中，方便刷新后恢复
-      const tokenSession = useSessionStorage('token', '')
-      logger.debug('[UserStore] setToken: ', token, tokenSession.value)
-      tokenSession.value = token
     },
 
     setUserInfo (userInfo: IUserInfo) {
       this.userInfo = userInfo
-      useSessionStorage('userInfo', this.userInfo).value = userInfo
     },
 
     setAccess (access: string[]) {
       this.access = access
-      const accessSession = useSessionStorage('access', access)
-      accessSession.value = access
     },
 
     setInstalledPlugins (installedPlugins: string[]) {
       if (!installedPlugins) installedPlugins = []
       this.installedPlugins = installedPlugins
-      const installedPluginsSession = useSessionStorage('installedPlugins', installedPlugins)
-      installedPluginsSession.value = installedPlugins
     },
 
     appendAccess (access: string[]) {
@@ -129,7 +120,6 @@ export const useUserInfoStore = defineStore('userInfo', {
     // 保存用户自己的密钥
     setSecretKey (key: string) {
       this.secretKey = key
-      useSessionStorage('secretKey', this.secretKey).value = key
     },
 
     /**
@@ -166,11 +156,8 @@ export const useUserInfoStore = defineStore('userInfo', {
 
     // 退出登录
     async logout () {
-      // 重置数据
-      const tokenSession = useSessionStorage('token', '')
-      const accessSession = useSessionStorage('access', [])
-      tokenSession.value = null
-      accessSession.value = null
+      this.token = ''
+      this.access = []
 
       // 重定向到登录页面
       const router = useRouter()
@@ -184,7 +171,6 @@ export const useUserInfoStore = defineStore('userInfo', {
      */
     updateUserAvatar (avatarUrl: string) {
       this.userInfo.avatar = avatarUrl
-      useSessionStorage('userInfo', {}).value = this.userInfo
     },
 
     /**
@@ -193,7 +179,6 @@ export const useUserInfoStore = defineStore('userInfo', {
      */
     setLocale (locale: string) {
       this.locale = locale
-      useSessionStorage('locale', navigator.language).value = locale
     }
   }
 })
