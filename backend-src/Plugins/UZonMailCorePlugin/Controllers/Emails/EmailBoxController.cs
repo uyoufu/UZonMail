@@ -1,21 +1,20 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.ResponseModel;
+using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Core.Database.Validators;
 using UZonMail.Core.Services.Emails;
+using UZonMail.Core.Services.Encrypt;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.UserInfos;
-using UZonMail.Core.Utils.Database;
 using UZonMail.Core.Utils.Extensions;
+using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
-using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.SendCore.Sender;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.Extensions;
+using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Emails
 {
@@ -23,7 +22,7 @@ namespace UZonMail.Core.Controllers.Emails
     /// 邮箱
     /// </summary>
     public class EmailBoxController(SqlContext db, TokenService tokenService, UserService userService,
-        EmailGroupService emailGroupService, OutboxValidateService emailUtils) : ControllerBaseV1
+        EmailGroupService emailGroupService, OutboxValidateService emailUtils,EncryptService encryptService) : ControllerBaseV1
     {
         /// <summary>
         /// 创建发件箱
@@ -465,6 +464,21 @@ namespace UZonMail.Core.Controllers.Emails
             await db.SaveChangesAsync();
 
             return true.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 获取加密后的发件箱密码
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        [HttpGet("encrypt-password")]
+        public async Task<ResponseResult<string>> EncryptOutboxPassword(string password)
+        {
+            var userId = tokenService.GetUserSqlId();
+            if (string.IsNullOrEmpty(password)) throw new KnownException("密码不能为空");
+
+            var encryptedResult = encryptService.EncryptOutboxSecret(userId,password);
+            return encryptedResult.ToSuccessResponse();
         }
     }
 }

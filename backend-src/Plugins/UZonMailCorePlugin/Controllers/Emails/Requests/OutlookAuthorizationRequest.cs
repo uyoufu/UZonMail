@@ -14,18 +14,18 @@ namespace UZonMail.Core.Controllers.Emails.Requests
     /// </summary>
     public class OutlookAuthorizationRequest : FluentHttpRequest, ITransientService
     {
-        private static readonly List<string> _sendScopes = [
+        public static readonly List<string> SendScopes = [
                 "offline_access",
-                "Mail.Send", //  替代 SMTP 发件权限 
+                "Mail.Send", //  替代 SMTP 发件权限
                 //"Mail.Read"  // 替代 IMAP 收件权限
             ];
 
         public OutlookAuthorizationRequest(HttpClient httpClient, IConfiguration configuration)
         {
             var baseUrl = configuration.GetValue<string>("BaseUrl");
-            if(string.IsNullOrEmpty(baseUrl))
+            if (string.IsNullOrEmpty(baseUrl))
             {
-               throw new KnownException("BaseUrl 配置不能为空，请检查配置文件。");
+                throw new KnownException("BaseUrl 配置不能为空，请检查配置文件。");
             }
 
             WithHttpClient(httpClient);
@@ -33,7 +33,7 @@ namespace UZonMail.Core.Controllers.Emails.Requests
             AddQuery("redirect_uri", $"{baseUrl.Trim('/')}/api/v1/outlook-authorization/code");
             AddQuery("response_type", "code");
             AddQuery("response_mode", "query");
-            AddQuery("scope", string.Join(" ", _sendScopes));
+            AddQuery("scope", string.Join(" ", SendScopes));
         }
 
         public OutlookAuthorizationRequest WithClientId(string clientId)
@@ -45,12 +45,12 @@ namespace UZonMail.Core.Controllers.Emails.Requests
         /// <summary>
         /// 通过 state 进行回调
         /// </summary>
-        /// <param name="outboxId"></param>
+        /// <param name="outboxObjectId"></param>
         /// <returns></returns>
         [AllowAnonymous]
-        public OutlookAuthorizationRequest WithState(long outboxId)
+        public OutlookAuthorizationRequest WithState(string outboxObjectId)
         {
-            AddQuery("state", outboxId.ToString());
+            AddQuery("state", outboxObjectId);
             return this;
         }
     }

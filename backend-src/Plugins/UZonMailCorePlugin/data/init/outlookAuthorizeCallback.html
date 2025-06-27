@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>授权结果</title>
+</head>
+
+<body>
+  <div style="text-align: center; padding: 100px;">
+    <h2></h2>
+    <p>窗口将自动关闭...</p>
+  </div>
+
+  <script>
+      const authorizeResult = {{ authorizeResult }};
+    const isAuthorizeSuccess = authorizeResult.ok
+
+    // 修改 h3 中的内容
+    const resultElement = document.querySelector('h2');
+    resultElement.style.color = isAuthorizeSuccess ? '#42b883' : '#ff7a7a';
+    resultElement.textContent = isAuthorizeSuccess ? '授权成功!' : '授权失败!';
+
+    // 获取 URL 参数
+    if (isAuthorizeSuccess) {
+      // 授权失败
+      window.opener?.postMessage({
+        type: 'OUTLOOK_AUTH_SUCCESS',
+        data: authorizeResult
+      }, window.location.origin);
+    } else {
+      // 授权成功，可以在这里调用后端 API 完成最终的 token 交换
+      // 然后通知父窗口
+      window.opener?.postMessage({
+        type: 'OUTLOOK_AUTH_FAILURE',
+        data: isAuthorizeSuccess,
+        data: authorizeResult
+      }, window.location.origin);
+    }
+
+    // 延迟关闭窗口，给 postMessage 时间传递
+    setTimeout(() => {
+      window.close();
+    }, 1000);
+  </script>
+</body>
+
+</html>

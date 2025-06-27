@@ -179,7 +179,8 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
                     { "grant_type", "refresh_token"},
                     { "scope", "https://graph.microsoft.com/.default"}
                 });
-            var jsonResult = await fluentHttpRequest.GetJsonAsync<AuthenticationResult2>();
+            var jsonResult = await fluentHttpRequest.GetJsonAsync<AuthenticationResult2>() 
+                ?? throw new AuthenticationException($"{clientId} 请求授权失败");
 
             // 判断是否有 SMTP.Send 权限
             if (!jsonResult.Scope.Contains("Mail.Send"))
