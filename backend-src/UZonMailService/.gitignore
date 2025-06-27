@@ -3,3 +3,4 @@ public
 obj
 quartz-sqlite.sqlite3
 *.db
+appsettings.Development.json

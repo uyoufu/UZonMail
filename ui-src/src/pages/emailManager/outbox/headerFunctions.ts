@@ -5,10 +5,10 @@ import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { IOutbox } from 'src/api/emailBox'
-import { createOutbox, createOutboxes } from 'src/api/emailBox'
+import { createOutbox, createOutboxes, startOutlookDelegateAuthorization } from 'src/api/emailBox'
 import { GuessSmtpInfoGet } from 'src/api/smtpInfo'
 
-import { notifyError, notifySuccess } from 'src/utils/dialog'
+import { notifyError, notifySuccess, notifyWarning } from 'src/utils/dialog'
 import { isEmail } from 'src/utils/validator'
 
 import { useUserInfoStore } from 'src/stores/user'
@@ -182,7 +182,7 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
  * @param encryptKeys
  * @returns
  */
-export function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptKeys: IUserEncryptKeys) {
+export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptKeys: IUserEncryptKeys) {
   if (!outbox.email.toLowerCase().includes("@outlook.com")) return
 
   // 判断是否采用个人委托授权
@@ -193,19 +193,23 @@ export function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptKeys: I
   const plainPassword = deAes(encryptKeys.key, encryptKeys.iv, outbox.password)
   if (plainPassword.length > 80) return
 
-  // TODO: 未完全实现
-  return
-  // notifyWarning("检测到您使用的是个人 Outlook 邮箱，需要进行委托授权，请批准")
 
-  // const { data: authorizationUrl } = await startOutlookDelegateAuthorization(outbox.id as number)
-  // if (!authorizationUrl) {
-  //   notifyError("获取委托授权地址失败，请稍后重试")
-  //   return
-  // }
+  notifyWarning("检测到您使用的是个人 Outlook 邮箱，需要进行委托授权，请批准")
 
-  // // 在新页面打开授权链接
-  // window.open(authorizationUrl, '_blank')
-  // notifySuccess("已打开委托授权页面，请完成授权")
+  const { data: authorizationUrl } = await startOutlookDelegateAuthorization(outbox.id as number)
+  if (!authorizationUrl) {
+    notifyError("获取委托授权地址失败，请稍后重试")
+    return
+  }
+
+  window.open(
+    authorizationUrl,
+    'outlook-auth',
+    'width=600,height=700,scrollbars=yes,resizable=yes'
+  )
+
+  // 在新页面打开授权链接
+  notifySuccess("已打开委托授权页面，请完成授权")
 }
 
 /**
@@ -260,7 +264,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     notifySuccess('新增发件箱成功')
 
     // 进行 outlook 委托授权
-    tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
+    await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
   }
 
   // 导出模板
