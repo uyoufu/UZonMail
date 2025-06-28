@@ -3,6 +3,40 @@ title: 历史版本
 editLink: false
 ---
 
+## 0.15.1
+
+> 更新时期：2025-06-28
+
+### 新增功能
+
+1. 支持配置 outlook 的 ClientId 进行统一授权发件，需要在后端 `appsettings.Production.json` 添加 `MicrosoftEntraApp`，具体格式如下：
+
+   ``` json
+   {
+     "MicrosoftEntraApp": {
+       "ClientId": "",
+       "TenantId": "",
+       "ClientSecret": ""
+     }
+   }
+   ```
+
+2. 优化发件箱、收件箱批量上传逻辑，支持邮箱格式异常继续上传
+
+### bug 修复
+
+1. 修复邮件跟踪部分数据未保存的 bug
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.15.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.1.0.zip)
+
+[uzonmail-service-win-x64-0.15.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.15.1.0.zip)
+
+[uzonmail-service-linux-x64-0.15.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.15.1.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.15.0
 
 > 更新日期：2025-06-21
