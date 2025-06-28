@@ -1,7 +1,7 @@
 ---
-title: Outlook 发件
-icon: globe
-order: 4
+title: Outlook发件
+icon: at
+order: 5
 ---
 
 Outlook 于 2025 年 09 月全面淘汰，因此若要使用 Outlook 邮箱发件，需要使用微软提供的 Graph 方式。
