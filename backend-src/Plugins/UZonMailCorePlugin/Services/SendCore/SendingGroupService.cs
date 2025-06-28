@@ -1,36 +1,35 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using log4net;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Quartz;
-using UZonMail.Core.Jobs;
-using UZonMail.Core.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Service;
-using UZonMail.Utils.Json;
-using UZonMail.Core.Database.SQL.EmailSending;
-using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.Core.Services.SendCore;
-using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Core.Services.Emails;
-using UZonMail.Core.Controllers.Users.Model;
-using UZonMail.Utils.Web.Exceptions;
-using log4net;
-using UZonMail.Core.Services.Settings.Model;
-using UZonMail.Core.Database.Validators;
-using UZonMail.Core.Utils.Extensions;
-using UZonMail.Utils.Web.ResponseModel;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.Core.Database.SQL.EmailSending;
+using UZonMail.Core.Database.Validators;
+using UZonMail.Core.Jobs;
+using UZonMail.Core.Services.Config;
+using UZonMail.Core.Services.Emails;
+using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.Sender.Smtp;
+using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
+using UZonMail.Core.Utils.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Json;
+using UZonMail.Utils.Web.Exceptions;
+using UZonMail.Utils.Web.ResponseModel;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.EmailSending
+namespace UZonMail.Core.Services.SendCore
 {
     /// <summary>
     /// 发送组服务
     /// </summary>
     public class SendingGroupService(SqlContext db
+        , DebugConfig debugConfig
         , TokenService tokenService
         , SendingThreadsManager tasksService
         , GroupTasksList waitList
@@ -166,7 +165,7 @@ namespace UZonMail.Core.Services.EmailSending
             JArray results = [];
             foreach (var token in data)
             {
-                var outboxEmail = token.SelectTokenOrDefault<string>("outbox", "");
+                var outboxEmail = token.SelectTokenOrDefault("outbox", "");
                 if (!string.IsNullOrEmpty(outboxEmail))
                 {
                     // 获取 outboxId
@@ -182,8 +181,8 @@ namespace UZonMail.Core.Services.EmailSending
                     }
                 }
 
-                var templateId = token.SelectTokenOrDefault<int>("templateId", 0);
-                var templateName = token.SelectTokenOrDefault<string>("templateName", "");
+                var templateId = token.SelectTokenOrDefault("templateId", 0);
+                var templateName = token.SelectTokenOrDefault("templateName", "");
                 var templateEntity = templates.FirstOrDefault(x => x.Id == templateId || x.Name == templateName);
 
                 if (templateEntity == null)
@@ -287,12 +286,23 @@ namespace UZonMail.Core.Services.EmailSending
         /// <summary>
         /// 立即发件
         /// sendingGroup 需要提供 SmtpPasswordSecretKeys 参数
+        /// 所有的发送都从该接口触发
         /// </summary>
         /// <param name="sendingGroup"></param>
         /// <param name="sendItemIds">若有值，则只会发送这部分邮件</param>
         /// <returns></returns>
         public async Task SendNow(SendingGroup sendingGroup, List<long>? sendItemIds = null)
         {
+            if (debugConfig.IsDemo)
+            {
+                // 限制最多只能发 10 条
+                var sendingImtesCount = await db.SendingItems.CountAsync(x => x.SendingGroupId == sendingGroup.Id);
+                if (sendingImtesCount > 5)
+                {
+                    throw new KnownException("示例环境最多群发 5 条");
+                }
+            }
+
             // 创建新的上下文
             var sendingContext = new SendingContext(serviceProvider);
             // 添加到发件列表

@@ -5,7 +5,7 @@ using UZonMail.Core.Controllers.Emails.Models;
 using UZonMail.Core.Database.Validators;
 using UZonMail.Core.Services.EmailDecorator;
 using UZonMail.Core.Services.EmailDecorator.Interfaces;
-using UZonMail.Core.Services.EmailSending;
+using UZonMail.Core.Services.SendCore;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;

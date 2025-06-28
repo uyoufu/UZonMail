@@ -65,13 +65,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             var client = clientResult.Data;
             try
             {
-                var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
-                string sendResult = "测试状态,虚拟发件";
-                if (!debugConfig.IsDemo)
-                {
-                    sendResult = await client.SendAsync(message);
-                }
-
+                var sendResult = await client.SendAsync(message);
                 _logger.Info($"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}");
 
                 // 标记邮件状态

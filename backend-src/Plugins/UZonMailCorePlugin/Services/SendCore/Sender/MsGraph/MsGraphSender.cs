@@ -47,14 +47,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             {
                 // 验证授权并保存 refreshToken
                 await client.AuthenticateAsync(outbox.Email, outbox.OutlookClientId, outbox.AuthPassword, outbox.UserId, context.SqlContext);
-
-                var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
-                string sendResult = "测试状态,虚拟发件";
-                if (!debugConfig.IsDemo)
-                {
-                    sendResult = await client.SendAsync(message);
-                }
-
+                var sendResult = await client.SendAsync(message);
                 _logger.Info($"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}");
 
                 // 标记邮件状态
@@ -88,7 +81,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             // 若需要，后期增加
             try
             {
-                var decryptedPassword = encryptService.DecryptOutboxSecret(outbox.UserId, outbox.Password);                
+                var decryptedPassword = encryptService.DecryptOutboxSecret(outbox.UserId, outbox.Password);
                 await client.AuthenticateAsync(outbox.Email, outbox.UserName, decryptedPassword, outbox.UserId, db);
                 return Result<string>.Success("success");
             }
