@@ -31,7 +31,7 @@ function getSmtpPassword (outbox: IOutbox, smtpPasswordSecretKeys: string[]) {
 export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType, refreshTable: () => void) {
   const { t } = useI18n()
 
-  const outboxContextMenuItems: IContextMenuItem[] = [
+  const outboxContextMenuItems: IContextMenuItem<IOutbox>[] = [
     {
       name: 'edit',
       label: t('edit'),
@@ -43,7 +43,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       label: t('delete'),
       tooltip: t('outboxManager.deleteCurrentOrSelection'),
       color: 'negative',
-      onClick: deleteOutbox
+      onClick: onDeleteOutbox
     },
     {
       name: 'validate',
@@ -63,13 +63,20 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       tooltip: t('outboxManager.deleteCurrentGroupInvalidOutboxes'),
       color: 'negative',
       onClick: onDeleteInvalidOutboxes
-    }
+    },
+    {
+      name: 'outlookDelegateAuthorization',
+      label: t('outboxManager.outlookDelegateAuthorization'),
+      tooltip: t('outboxManager.outlookDelegateAuthorization'),
+      onClick: onRequestOutlookDelegateAuthorization,
+      vif: row => !!(row.email && row.email.toLowerCase().endsWith('@outlook.com'))
+    },
   ]
 
   const userInfoStore = useUserInfoStore()
 
   // 删除发件箱
-  async function deleteOutbox (row: Record<string, any>) {
+  async function onDeleteOutbox (row: Record<string, any>) {
     const { rows, selectedRows } = getSelectedRows(row)
 
     // 提示是否删除
@@ -90,6 +97,18 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     })
     selectedRows.value = []
     notifySuccess(t('outboxManager.deleteSuccess', { count: rows.length }))
+  }
+
+  /**
+   * 进行 Outlook 委托授权
+   * @param outbox
+   */
+  async function onRequestOutlookDelegateAuthorization (outbox: IOutbox) {
+    // 清除密码，重新进行授权
+    if (!outbox.userName)
+      outbox.password = ""
+
+    await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
   }
 
   // 更新发件箱

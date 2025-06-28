@@ -47,6 +47,8 @@ export default {
     isDeleteSelectedOutboxes: '是否删除选中的 {count} 个发件箱？',
     deleteSuccess: '删除成功, 共删除 {count} 项',
 
+    outlookDelegateAuthorization: 'Outlook授权',
+
     col_outbox: '发件箱',
     col_outboxUserName: '名称(发件人姓名)',
     col_smtpAddress: 'SMTP地址',

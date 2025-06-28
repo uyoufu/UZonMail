@@ -16,6 +16,8 @@ export function aes (key: string, iv: string, data: string | object) {
       console.log('error:', error)
     }
   }
+  if (!data) return ''
+
   // 统一将传入的字符串转成UTF8编码
   const dataWordArray = CryptoJS.enc.Utf8.parse(data as string) // 需要加密的数据
   const keyHex = CryptoJS.enc.Utf8.parse(key) // 秘钥

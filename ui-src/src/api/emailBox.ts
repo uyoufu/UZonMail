@@ -140,6 +140,15 @@ export function getOutboxesData (groupId: number | undefined, filter: string | u
 }
 
 /**
+ * 获取发件箱信息
+ * @param outboxId
+ * @returns
+ */
+export function getOutboxInfo (outboxId: number) {
+  return httpClient.get<IOutbox>(`/email-box/outboxes/${outboxId}`)
+}
+
+/**
  * 通过 id 删除邮箱
  * @param emailBoxId
  * @returns

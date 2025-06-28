@@ -5,7 +5,7 @@ import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { IOutbox } from 'src/api/emailBox'
-import { createOutbox, createOutboxes, startOutlookDelegateAuthorization } from 'src/api/emailBox'
+import { createOutbox, createOutboxes, startOutlookDelegateAuthorization, getOutboxInfo } from 'src/api/emailBox'
 import { GuessSmtpInfoGet } from 'src/api/smtpInfo'
 
 import { notifyError, notifySuccess, notifyWarning } from 'src/utils/dialog'
@@ -77,11 +77,22 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
       name: 'password',
       label: 'smtp密码',
       type: PopupDialogFieldType.password,
-      required: true,
       parser: (value: any) => {
         const pwd = String(value)
         // 对密码进行加密
         return encryptPassword(smtpPasswordSecretKeys, pwd)
+      },
+      validate: (value: any, parsedValue: any, allValues: Record<string, any>) => {
+        if (allValues.email && allValues.email.toLowerCase().includes("@outlook.com")) {
+          // 如果是 Outlook 邮箱，则允许为空
+          return {
+            ok: true
+          }
+        }
+        return {
+          ok: value && value.length > 0,
+          message: 'smtp密码不能为空'
+        }
       },
       value: ''
     },
@@ -185,16 +196,19 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
 export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptKeys: IUserEncryptKeys) {
   if (!outbox.email.toLowerCase().includes("@outlook.com")) return
 
-  // 判断是否采用个人委托授权
-  if (!outbox.userName || outbox.userName.includes('/')) return
+  // // 判断是否采用个人委托授权
+  // if (!outbox.userName || outbox.userName.includes('/')) return
 
   // 密钥必须小于 80 位
   // 否则可能是 refreshToken
   const plainPassword = deAes(encryptKeys.key, encryptKeys.iv, outbox.password)
-  if (plainPassword.length > 80) return
+  if (plainPassword.length > 80) {
+    notifySuccess('该邮箱已换取 refreshToken, 无需进行委托授权')
+    return
+  }
 
 
-  notifyWarning("检测到您使用的是个人 Outlook 邮箱，需要进行委托授权，请批准")
+  notifyWarning("检测到个人 Outlook 邮箱，需要进行委托授权，请批准")
 
   const { data: authorizationUrl } = await startOutlookDelegateAuthorization(outbox.id as number)
   if (!authorizationUrl) {
@@ -202,14 +216,33 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptK
     return
   }
 
-  window.open(
+  const win = window.open(
     authorizationUrl,
     'outlook-auth',
     'width=600,height=700,scrollbars=yes,resizable=yes'
   )
 
-  // 在新页面打开授权链接
-  notifySuccess("已打开委托授权页面，请完成授权")
+  if (!win) {
+    notifyError('请允许浏览器弹出窗口')
+    return
+  }
+
+  const waitingPromise = new Promise<void>((resolve) => {
+    const interval = setInterval(() => {
+      if (win.closed) {
+        clearInterval(interval)
+        resolve()
+      }
+    }, 200)
+  })
+
+  await waitingPromise
+
+  // 更新发件箱的数据
+  const { data: newOutbox } = await getOutboxInfo(outbox.id as number)
+  outbox.password = newOutbox.password
+
+  notifySuccess('委托授权结束')
 }
 
 /**

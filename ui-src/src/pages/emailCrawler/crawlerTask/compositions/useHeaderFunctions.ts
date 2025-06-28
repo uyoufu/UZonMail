@@ -1,5 +1,5 @@
 
-import type { IPopupDialogField, IPopupDialogParams} from 'src/components/popupDialog/types';
+import type { IPopupDialogField, IPopupDialogParams } from 'src/components/popupDialog/types';
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import dayjs from 'dayjs'
 
@@ -109,7 +109,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<ICrawlerTaskInfo>) 
     // 保存到 rows 中
     addNewRow(crawlerTaskInfo)
 
-    notifySuccess('新增发件箱成功')
+    notifySuccess('新增爬虫任务成功')
   }
 
   return {

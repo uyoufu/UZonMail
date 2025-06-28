@@ -16,7 +16,8 @@ export default {
   htmlContentRequired: 'Html content is required',
   unsubscribePageHasAreadyExist: 'Unsubscribe page for this language already exists',
   outboxManager: {
-    doDeleteAllInvalidOutboxes: 'Do you want to delete all invalid outboxes in the current group?'
+    doDeleteAllInvalidOutboxes: 'Do you want to delete all invalid outboxes in the current group?',
+    outlookDelegateAuthorization: 'Outlook delegate authorization',
   },
   statusChip: {
     false: 'No',

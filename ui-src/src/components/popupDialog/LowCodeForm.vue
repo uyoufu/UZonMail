@@ -302,7 +302,7 @@ async function onOKClick () {
 
       // 验证函数
       if (typeof field.validate === 'function') {
-        const fieldVdResult = await field.validate(fieldValue, fieldsModel.value[field.name])
+        const fieldVdResult = await field.validate(fieldValue, fieldsModel.value[field.name], fieldsModel.value)
         if (!fieldVdResult.ok) {
           // 恢复失败项
           fieldsModel.value[field.name] = fieldValue // 恢复原值

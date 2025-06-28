@@ -81,20 +81,20 @@ export async function showNewInboxDialog (emailGroupLabel: string) {
 
 
 export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType) {
-  // 新建发件箱
+  // 新建收件箱
   async function onNewInboxClick () {
-    // 新增发件箱
+    // 新增收件箱
     // 弹出对话框
 
     const { ok, data } = await showNewInboxDialog(emailGroup.value.label)
     if (!ok) return
     // 添加邮箱组
     data.emailGroupId = emailGroup.value.id
-    const { data: outbox } = await createInbox(data)
+    const { data: inbox } = await createInbox(data)
     // 保存到 rows 中
-    addNewRow(outbox)
+    addNewRow(inbox)
 
-    notifySuccess('新增发件箱成功')
+    notifySuccess('新增收件箱成功')
   }
 
   // 导出模板
