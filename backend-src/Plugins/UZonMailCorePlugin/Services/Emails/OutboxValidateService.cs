@@ -24,16 +24,15 @@ namespace UZonMail.Core.Services.Emails
         /// 验证发件箱是否有效
         /// </summary>
         /// <param name="outboxId"></param>
-        /// <param name="smtpPasswordSecretKeys"></param>
         /// <returns></returns>
         /// <exception cref="KnownException"></exception>
-        public async Task<ResponseResult<bool>> ValidateOutbox(long outboxId, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
+        public async Task<ResponseResult<bool>> ValidateOutbox(long outboxId)
         {
             // 只能测试属于自己的发件箱
             var userId = tokenService.GetUserSqlId();
 
             var outbox = await db.Outboxes.FirstOrDefaultAsync(x => x.Id == outboxId && x.UserId == userId) ?? throw new KnownException("发件箱不存在");
-            var result = await ValidateOutbox(outbox, smtpPasswordSecretKeys);
+            var result = await ValidateOutbox(outbox);
             return result;
         }
 
@@ -41,9 +40,8 @@ namespace UZonMail.Core.Services.Emails
         /// 验证发件箱是否有效
         /// </summary>
         /// <param name="outbox"></param>
-        /// <param name="smtpPasswordSecretKeys"></param>
         /// <returns></returns>
-        public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox, SmtpPasswordSecretKeys smtpPasswordSecretKeys)
+        public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox)
         {
             var emailSender = sendersManager.GetEmailSender(outbox.Email);
             var result = await emailSender.TestOutbox(serviceProvider, outbox);

@@ -10,6 +10,7 @@ using UZonMail.Core.Services.Encrypt;
 using UZonMail.Core.Services.SendCore.Sender.MsGraph;
 using UZonMail.Core.Services.Settings;
 using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Json;
 using UZonMail.Utils.Web.ResponseModel;
 
@@ -46,6 +47,7 @@ namespace UZonMail.Core.Controllers.Emails
             var uri = serviceProvider.GetRequiredService<OutlookAuthorizationRequest>()
                 .WithClientId(graphParams.ClientId)
                 .WithState(outbox.ObjectId)
+                .WithEmail(outbox.Email)
                 .BuildUri();
 
             return uri.ToString().ToSuccessResponse();
@@ -76,12 +78,11 @@ namespace UZonMail.Core.Controllers.Emails
                 _outlookAuthorizeCallbackPage = await System.IO.File.ReadAllTextAsync(smtpInfoPath);
             }
 
-            // 解析密码
+            // 解析用户名和密码
             var plainPassword = encryptService.DecryptOutboxSecret(outbox.UserId, outbox.Password);
             var graphParams = serviceProvider.GetRequiredService<MsGraphParamsResolver>();
-            graphParams.SetGraphInfo(outbox.UserName,plainPassword);
+            graphParams.SetGraphInfo(outbox.UserName, plainPassword);
 
-           
             var request = serviceProvider.GetRequiredService<OutlookRefreshokenRequest>()
                .WithFormData(graphParams.ClientId, graphParams.ClientSecret, code);
 
@@ -98,8 +99,12 @@ namespace UZonMail.Core.Controllers.Emails
                 // 保存结果
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var authResult = responseContent.JsonTo<AuthenticationResult2>();
-                var newPassword = encryptService.EncryptOutboxSecret(outbox.UserId, authResult.RefreshToken);
-                outbox.Password = newPassword;
+
+                graphParams.SetRefreshToken(authResult?.RefreshToken);
+                
+                var encryptedPassword = encryptService.EncryptOutboxSecret(outbox.UserId, graphParams.GetPasswordForDB());
+                outbox.Password = encryptedPassword;
+                outbox.Status = OutboxStatus.Valid;
                 await db.SaveChangesAsync();
             }
             else

@@ -117,7 +117,7 @@ namespace UZonMail.Core.Controllers.Emails
         }
 
         [HttpPut("{groupId:long}/invalid-outbox/validate")]
-        public async Task<ResponseResult<bool>> ValidateAllInvalidOutboxes(long groupId, [FromBody] SmtpPasswordSecretKeys smtpPasswordSecretKeys)
+        public async Task<ResponseResult<bool>> ValidateAllInvalidOutboxes(long groupId)
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
@@ -130,7 +130,7 @@ namespace UZonMail.Core.Controllers.Emails
             {
                 // 发送测试邮件
                 // 已在内部保存修改
-                var vdResult = await outboxValidator.ValidateOutbox(outbox, smtpPasswordSecretKeys);
+                var vdResult = await outboxValidator.ValidateOutbox(outbox);
 
                 outbox.Status = vdResult.Ok ? OutboxStatus.Valid : OutboxStatus.Invalid;
                 outbox.ValidFailReason = vdResult.Message;
