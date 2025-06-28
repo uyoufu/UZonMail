@@ -8,7 +8,7 @@ import type { addNewRowType } from 'src/compositions/qTableUtils'
 
 import type { IInbox } from 'src/api/emailBox';
 import { createInbox, createInboxes } from 'src/api/emailBox'
-import { notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
+import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import type { IExcelColumnMapper } from 'src/utils/file';
 import { readExcel, writeExcel } from 'src/utils/file'
 import { isEmail } from 'src/utils/validator'
@@ -116,7 +116,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
     notifySuccess('模板下载成功')
   }
 
-  // 导入发件箱
+  // 导入收件箱
   async function onImportInboxClick (emailGroupId: number | null = null) {
     if (typeof emailGroupId !== 'number') emailGroupId = emailGroup.value.id as number
     logger.debug(`[Inbox] import inboxes, emailGroupId: ${emailGroupId}, currentEmailGroupId: ${emailGroup.value.id}`)
@@ -132,25 +132,40 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
       return
     }
 
-    // 添加组
+    const validRows: IInbox[] = []
+    // 添加组id
     for (const row of data) {
       // 验证 email 格式
       if (!isEmail(row.email)) {
         notifyError(`邮箱格式错误: ${row.email}`)
-        return
+        continue
       }
 
       // 添加组 id
       row.emailGroupId = emailGroupId || emailGroup.value.id
+      validRows.push(row as IInbox)
+    }
+
+    if (validRows.length === 0) {
+      notifyError('没有有效的收件箱数据')
+    }
+
+    // 判断是否数据相等
+    if (validRows.length < data.length) {
+      const continueImport = await confirmOperation('数据异常确认', '部分数据格式错误，是否继续导入？')
+      if (!continueImport) {
+        notifyError('导入已取消')
+        return
+      }
     }
 
     // 向服务器请求新增
     await notifyUntil(async (update) => {
       // 对数据分批处理
-      for (let i = 0; i < data.length; i += 100) {
-        update(`导入中... [${i}/${data.length}]`)
-        const partData = data.slice(i, i + 100)
-        const { data: inboxes } = await createInboxes(partData as IInbox[])
+      for (let i = 0; i < validRows.length; i += 100) {
+        update(`导入中... [${i}/${validRows.length}]`)
+        const partData = validRows.slice(i, i + 100)
+        const { data: inboxes } = await createInboxes(partData)
 
         if (emailGroupId === emailGroup.value.id) {
           inboxes.forEach(x => {

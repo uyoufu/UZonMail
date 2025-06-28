@@ -353,7 +353,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
       return
     }
 
-    const validRows = []
+    const validRows: IOutbox[] = []
     // 对密码进行加密
     for (const row of data) {
       // 验证邮箱是否正确
@@ -366,7 +366,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
 
       row.password = encryptPassword(userInfoStore.smtpPasswordSecretKeys, row.password)
       row.emailGroupId = emailGroupId || emailGroup.value.id
-      validRows.push(row)
+      validRows.push(row as IOutbox)
     }
 
     if (validRows.length === 0) {
@@ -383,7 +383,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     }
 
     // 向服务器请求新增
-    const { data: outboxes } = await createOutboxes(validRows as IOutbox[])
+    const { data: outboxes } = await createOutboxes(validRows)
 
     if (emailGroupId === emailGroup.value.id) {
       outboxes.forEach(x => {
