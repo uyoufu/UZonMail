@@ -8,7 +8,7 @@ import type { IOutbox } from 'src/api/emailBox'
 import { createOutbox, createOutboxes, startOutlookDelegateAuthorization, getOutboxInfo } from 'src/api/emailBox'
 import { GuessSmtpInfoGet } from 'src/api/smtpInfo'
 
-import { notifyError, notifySuccess, notifyWarning } from 'src/utils/dialog'
+import { confirmOperation, notifyError, notifySuccess, notifyWarning } from 'src/utils/dialog'
 import { isEmail } from 'src/utils/validator'
 
 import { useUserInfoStore } from 'src/stores/user'
@@ -19,6 +19,8 @@ import type { IProxy } from 'src/api/proxy'
 import { getUsableProxies } from 'src/api/proxy'
 import { debounce } from 'lodash'
 import type { IUserEncryptKeys } from 'src/stores/types'
+
+import logger from 'loglevel'
 
 function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
   return aes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, password)
@@ -351,21 +353,37 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
       return
     }
 
+    const validRows = []
     // 对密码进行加密
     for (const row of data) {
       // 验证邮箱是否正确
       // 验证 email 格式
       if (!isEmail(row.email)) {
+        logger.info(`邮箱格式错误: ${row.email}`)
         notifyError(`邮箱格式错误: ${row.email}`)
-        return
+        continue
       }
 
       row.password = encryptPassword(userInfoStore.smtpPasswordSecretKeys, row.password)
       row.emailGroupId = emailGroupId || emailGroup.value.id
+      validRows.push(row)
+    }
+
+    if (validRows.length === 0) {
+      notifyError('没有有效的发件箱数据')
+    }
+
+    // 判断是否数据相等
+    if (validRows.length < data.length) {
+      const continueImport = await confirmOperation('数据异常确认', '部分数据格式错误，是否继续导入？')
+      if (!continueImport) {
+        notifyError('导入已取消')
+        return
+      }
     }
 
     // 向服务器请求新增
-    const { data: outboxes } = await createOutboxes(data as IOutbox[])
+    const { data: outboxes } = await createOutboxes(validRows as IOutbox[])
 
     if (emailGroupId === emailGroup.value.id) {
       outboxes.forEach(x => {
@@ -373,7 +391,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
       })
     }
 
-    notifySuccess('导入成功')
+    notifySuccess(`导入成功，共导入 ${outboxes.length} 项`)
   }
 
   return {
