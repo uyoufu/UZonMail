@@ -56,9 +56,10 @@ UZonmail 提供两种发件方式：
    **特别注意**：
 
    1. 重定向 URI 中要选择 [公共客户端/本机(移动和桌面)]
-   2. 当是桌面端时，重定向的 url 为 `http://localhost:22345/api/v1/outlook-authorization/code`
+   2. 当是桌面端时，重定向的 url 为 `http://localhost:2234/api/v1/outlook-authorization/code`
    3. 当是服务器部署时，将地址改成服务器的域名地址
    4. 不支持局域网内部署
+   5. 若是 443 端口，可以省略
 
 3. 设置 API 权限
 
