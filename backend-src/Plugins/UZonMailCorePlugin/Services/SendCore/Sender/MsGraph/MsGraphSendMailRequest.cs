@@ -8,8 +8,6 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         public MsGraphSendMailRequest()
         {
             WithMethod(HttpMethod.Post);
-            // 仅用户登录的授权
-            // WithUrl("https://graph.microsoft.com/v1.0/me/sendMail");
         }
 
         public MsGraphSendMailRequest WithAccessToken(string accessToken)

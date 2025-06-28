@@ -105,7 +105,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 existClient.DisconnectAsync(true);
             }
 
-            _logger.Debug($"初始化 SmtpClient: {outbox.AuthUserName}");
+            _logger.Debug($"初始化 SmtpClient: {outbox.SmtpAuthUserName}");
 
             // 获取代理，若代理为空，则不使用代理
             // 当代理失效，但是用户又选择代理时，可能会影响效率，后期进行优化
@@ -318,7 +318,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
             if (!debugConfig.IsDemo)
             {
-                await client.AuthenticateAsync(outbox.Email, outbox.AuthUserName, outbox.AuthPassword);                
+                await client.AuthenticateAsync(outbox.Email, outbox.SmtpAuthUserName, outbox.AuthPassword);                
             }
             // 添加到缓存中
             _smptClients.TryAdd(client.GetClientKey(), client);

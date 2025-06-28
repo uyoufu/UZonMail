@@ -225,10 +225,9 @@ namespace UZonMail.Core.Services.EmailSending
 
             // 重新验证发件箱
             var emailUtils = serviceProvider.GetRequiredService<OutboxValidateService>();
-            var smtpPasswordSecretKeys = SmtpPasswordSecretKeys.Create(sendingGroupData.SmtpPasswordSecretKeys);
             foreach (var outbox in outboxes)
             {
-                var result = await emailUtils.ValidateOutbox(outbox, smtpPasswordSecretKeys);
+                var result = await emailUtils.ValidateOutbox(outbox);
                 if (result.NotOk)
                 {
                     throw new KnownException($"发件箱 {outbox.Email} 验证失败: {result.Message}");

@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Users.Model;
 using UZonMail.Core.Database.Validators;
 using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.Encrypt;
@@ -270,9 +269,9 @@ namespace UZonMail.Core.Controllers.Emails
         /// <returns></returns>
         /// <exception cref="KnownException"></exception>
         [HttpPut("outbox/{outboxId:long}/validation")]
-        public async Task<ResponseResult<bool>> ValidateOutbox(long outboxId, [FromBody] SmtpPasswordSecretKeys smtpPasswordSecretKeys)
+        public async Task<ResponseResult<bool>> ValidateOutbox(long outboxId)
         {
-            var result = await emailUtils.ValidateOutbox(outboxId, smtpPasswordSecretKeys);
+            var result = await emailUtils.ValidateOutbox(outboxId);
             // 让前端自己处理错误
             result.Ok = true;
             return result;
@@ -345,6 +344,19 @@ namespace UZonMail.Core.Controllers.Emails
             }
             var results = await dbSet.Page(pagination).ToListAsync();
             return results.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 获取发件箱信息
+        /// </summary>
+        /// <param name="outboxId"></param>
+        /// <returns></returns>
+        [HttpGet("outboxes/{outboxId:long}")]
+        public async Task<ResponseResult<Outbox>> GetOutboxInfo(long outboxId)
+        {
+            var userId = tokenService.GetUserSqlId();
+            var outbox = await db.Outboxes.Where(x => x.Id == outboxId && x.UserId == userId).FirstOrDefaultAsync();
+            return outbox.ToSuccessResponse();
         }
 
         /// <summary>

@@ -52,10 +52,16 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <summary>
         /// 授权用户名
         /// </summary>
-        public string? AuthUserName
+        public string? SmtpAuthUserName
         {
             get { return string.IsNullOrEmpty(_outbox.UserName) ? _outbox.Email : _outbox.UserName; }
         }
+
+        /// <summary>
+        /// Outlook 的授权用户名
+        /// 实际当成 clientId 在使用
+        /// </summary>
+        public string OutlookClientId => _outbox.UserName ?? string.Empty;
 
         //public OutboxAuthType AuthType => _outbox.AuthType;
 
@@ -93,7 +99,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// 当天合计发件
         /// 成功失败都被计算在内
         /// </summary>
-        public int SentTotalToday { get;private set; }
+        public int SentTotalToday { get; private set; }
 
         /// <summary>
         /// 本次合计发件

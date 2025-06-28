@@ -15,8 +15,12 @@ namespace UZonMail.Core.Controllers.Emails.Requests
     public class OutlookAuthorizationRequest : FluentHttpRequest, ITransientService
     {
         public static readonly List<string> SendScopes = [
+                // 可以获取刷新令牌    
+                "openid",
                 "offline_access",
+                // 发送邮箱需要
                 "Mail.Send", //  替代 SMTP 发件权限
+                //"Mail.Send.Shared",
                 //"Mail.Read"  // 替代 IMAP 收件权限
             ];
 
@@ -34,6 +38,7 @@ namespace UZonMail.Core.Controllers.Emails.Requests
             AddQuery("response_type", "code");
             AddQuery("response_mode", "query");
             AddQuery("scope", string.Join(" ", SendScopes));
+            AddQuery("prompt", "login");
         }
 
         public OutlookAuthorizationRequest WithClientId(string clientId)
@@ -47,10 +52,15 @@ namespace UZonMail.Core.Controllers.Emails.Requests
         /// </summary>
         /// <param name="outboxObjectId"></param>
         /// <returns></returns>
-        [AllowAnonymous]
         public OutlookAuthorizationRequest WithState(string outboxObjectId)
         {
             AddQuery("state", outboxObjectId);
+            return this;
+        }
+
+        public OutlookAuthorizationRequest WithEmail(string email)
+        {
+            AddQuery("login_hint", email);
             return this;
         }
     }

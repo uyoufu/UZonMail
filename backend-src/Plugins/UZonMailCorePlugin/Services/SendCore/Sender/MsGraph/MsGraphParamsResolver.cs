@@ -1,4 +1,5 @@
-﻿using UZonMail.Core.Config.SubConfigs;
+﻿using MailKit.Security;
+using UZonMail.Core.Config.SubConfigs;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
@@ -23,25 +24,35 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             configuration.GetRequiredSection("MicrosoftEntraApp").Bind(_msEntraApp);
         }
 
+        /// <summary>
+        /// 使用默认的 Microsoft Entra 应用程序
+        /// </summary>
+        private bool _useDefaultApp = false;
 
-        public string ClientId { get;private set; }
+        public string ClientId { get; private set; }
 
         public string? TenantId { get; private set; }
 
-        public string? ClientSecret { get;private set; }
+        public string? ClientSecret { get; private set; }
 
         public string? RefreshToken { get; private set; }
+
+        /// <summary>
+        /// 是否存在 RefreshToken
+        /// </summary>
+        public bool HasRefreshToken => !string.IsNullOrEmpty(RefreshToken);
 
         /// <summary>
         /// 设置 Graph 的信息
         /// </summary>
         /// <param name="userName"></param>
         /// <param name="plainPassword"></param>
-        public void SetGraphInfo(string? userName,string? plainPassword=null)
+        public void SetGraphInfo(string? userName, string? plainPassword = null)
         {
             // 用户名为空, 使用系统默认
             if (string.IsNullOrEmpty(userName))
             {
+                _useDefaultApp = true;
                 userName = _msEntraApp.ClientId;
             }
 
@@ -63,13 +74,12 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             {
                 throw new ArgumentException("用户名格式不正确，应为 client_id 或 client_id/tenant_id");
             }
-            
+
             // 判断 clientId 是否为默认值
-            if(ClientId==_msEntraApp.ClientId)
+            if (ClientId == _msEntraApp.ClientId)
             {
                 TenantId = _msEntraApp.TenantId;
                 ClientSecret = _msEntraApp.ClientSecret;
-                return;
             }
 
             if (string.IsNullOrEmpty(plainPassword)) return;
@@ -105,6 +115,56 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             else
             {
                 throw new ArgumentException("密码格式不正确，应为 refresh_token 或 refresh_token/client_secret");
+            }
+        }
+
+        public void SetRefreshToken(string? refreshToken)
+        {
+            RefreshToken = refreshToken;
+        }
+
+        /// <summary>
+        /// 获取保存到数据库的 userName
+        /// </summary>
+        /// <returns></returns>
+        public string GetUserNameForDB()
+        {
+            if (_useDefaultApp) return string.Empty;
+
+            return string.IsNullOrEmpty(TenantId) ? ClientId : $"{ClientId}/{TenantId}";
+        }
+
+        /// <summary>
+        /// 获取保存到数据库的密码
+        /// </summary>
+        /// <returns></returns>
+        public string GetPasswordForDB()
+        {
+            var clientSecret = ClientSecret;
+            // 如果是默认值，则不向前端暴露
+            if (_useDefaultApp)
+            {
+                clientSecret = null;
+            }
+
+            var existsRefreshToken = !string.IsNullOrEmpty(RefreshToken);
+            var existsClientSecret = !string.IsNullOrEmpty(clientSecret);
+
+            if (existsRefreshToken && existsClientSecret)
+            {
+                return $"{RefreshToken}/{clientSecret}";
+            }
+            else if (existsRefreshToken)
+            {
+                return RefreshToken!;
+            }
+            else if (existsClientSecret)
+            {
+                return clientSecret!;
+            }
+            else
+            {
+                return string.Empty;
             }
         }
     }
