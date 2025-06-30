@@ -36,9 +36,10 @@ order: 3
 
 > 以下排名不分先后顺序
 
-| 序号 | 代理                                                         | 支持协议 | 备注                       |
-| ---- | ------------------------------------------------------------ | -------- | -------------------------- |
-| 1    | [易代理](http://www.ydaili.cn//main/register.aspx?str_code=80TL8T6X) | http     | 无                         |
-| 2    | [ip2world](https://www.ip2world.com/?ref=Y2NFJBM3CP)         | http     | 国外的代理，不支持国内使用 |
-| 3    | [ipfox](https://referral.ipfoxy.com/EpH8pH)                  | socks5   | 无                         |
+| 序号 | 代理                                                         | 支持协议    | 备注                       | 格式示例                                                     |
+| ---- | ------------------------------------------------------------ | ----------- | -------------------------- | ------------------------------------------------------------ |
+| 1    | [易代理](http://www.ydaili.cn//main/register.aspx?str_code=80TL8T6X) | http/socks5 | 无                         | http://api1.ydaili.cn/tools/MeasureApi.ashx?action=EAPI&secret=YourSecret&number=10&orderId=YourOrderID&format=json |
+| 2    | [ip2world](https://www.ip2world.com/?ref=Y2NFJBM3CP)         | http/socks5 | 国外的代理，不支持国内使用 | http://api.proxy.ip2world.com/getProxyIp?lb=4&return_type=json&protocol=https&num=2 |
+| 3    | [ipfox](https://referral.ipfoxy.com/EpH8pH)                  | http/socks5 | 无                         | https://api.ipfoxy.com/ip/dynamic-api/ips?count=1&host=gate-sg.ipfoxy.io&port=58688&type=json&token=YourToken&period=1 |
+| 4    | [IPIDEA](https://share.ipidea.net/uzonmail)                  | http/socks5 | 国外代理                   | http://api.proxy.ipidea.io/getBalanceProxyIp?num=100&return_type=json&lb=4&sb=0&flow=1&regions=&protocol=socks5 |
 

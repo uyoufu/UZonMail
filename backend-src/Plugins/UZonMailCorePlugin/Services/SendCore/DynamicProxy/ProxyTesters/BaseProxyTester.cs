@@ -17,7 +17,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
         private static readonly ILog _logger = LogManager.GetLogger(typeof(BaseProxyTester));
 
         private readonly HttpClient _httpClient;
-        private readonly long _timeout = 2000;
+        private readonly long _timeout = 5000;
 
         public BaseProxyTester(HttpClient httpClient,ProxyTesterType testerType)
         {

@@ -25,7 +25,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// <param name="iPQueries"></param>
         public ProxyHandler(IEnumerable<IProxyTester> iPQueries)
         {
-            _iPQueries = iPQueries.ToList();
+            _iPQueries = [.. iPQueries];
         }
 
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyHandler));
