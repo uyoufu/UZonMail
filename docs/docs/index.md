@@ -6,8 +6,6 @@ heroImage: /images/hero.svg
 heroText: UZonMail
 tagline: ''
 
-
-
 actions:
   - text: 开始使用
     link: /guide/
