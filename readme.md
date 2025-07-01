@@ -14,7 +14,7 @@
 3. 批量发送资条
 4. 批量发送发票
 
-[在线Demo](https://uzon-mail.223434.xyz:2234)，账号/密码: admin/admin1234
+[在线Demo](https://maildemo.uzoncloud.com:2234)，账号/密码: admin/admin1234
 
 > 为了防止滥用，demo 版本不会进行真实发件
 
@@ -83,5 +83,5 @@
 
 ## 🍒更多文档
 
-详细文档已迁移至：[https://uzonmail.pages.dev/](https://uzonmail.pages.dev/)
+详细文档已迁移至：[https://mail.uzoncloud.com/](https://mail.uzoncloud.com/)
 

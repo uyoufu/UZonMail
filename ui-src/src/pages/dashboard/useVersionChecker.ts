@@ -14,8 +14,8 @@ export function useVersionChecker () {
     if (!allowVersionChecking.value) return
 
     // 检查最新版本信息
-    // 从官方的仓库中下载：https://uzonmail.pages.dev/versions.html
-    const res = await fetch('https://uzonmail.pages.dev/versions.html')
+    // 从官方的仓库中下载：https://mail.uzoncloud.com/versions.html
+    const res = await fetch('https://mail.uzoncloud.com/versions.html')
     const data = await res.text()
     if (!data) return
 

@@ -323,7 +323,7 @@ editLink: false
 
 1. 增加 TikTok 邮箱爬虫
 
-   ![image-20250129102009655](https://oss.223434.xyz:2234/public/files/images/image-20250129102009655.png)
+   ![image-20250129102009655](https://oss.uzoncloud.com:2234/public/files/images/image-20250129102009655.png)
 
 ### bug 修复
 

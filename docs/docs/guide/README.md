@@ -18,7 +18,7 @@ order: 1
 
 ::: tip
 开源地址：[UZonMail](https://github.com/GalensGan/UZonMail)
-在线Demo: [https://uzon-mail.223434.xyz:2234/](https://uzon-mail.223434.xyz:2234/)，用户名/密码：admin/admin1234
+在线Demo: [https://maildemo.uzoncloud.com:2234/](https://maildemo.uzoncloud.com:2234/)，用户名/密码：admin/admin1234
 :::
 
 ## 主要功能

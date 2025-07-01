@@ -23,7 +23,7 @@ export default navbar(
         },
         {
           text: "Demo演示",
-          link:"https://uzon-mail.223434.xyz:2234/"
+          link:"https://maildemo.uzoncloud.com:2234/"
         }       
       ]
     },   

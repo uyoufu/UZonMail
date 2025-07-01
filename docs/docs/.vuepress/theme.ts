@@ -4,7 +4,7 @@ import navbar from './navbar.js'
 import sidebar from './sidebar.js'
 
 export default hopeTheme({
-  hostname: 'https://uzonmail.pages.dev/',
+  hostname: 'https://mail.uzoncloud.com/',
 
   author: {
     name: 'galens',

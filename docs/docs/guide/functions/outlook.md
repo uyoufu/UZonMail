@@ -17,7 +17,7 @@ UZonmail 提供两种发件方式：
 
 其它参数保持默认(其它参数没用，默认即可)
 
-![image-20250628161219594](https://oss.223434.xyz:2234/public/files/images/image-20250628161219594.png)
+![image-20250628161219594](https://oss.uzoncloud.com:2234/public/files/images/image-20250628161219594.png)
 
 添加后，请务必进行验证。由于有的 ClientId 没有发件权限，即使有 RefreshToken 也无法使用。
 
@@ -47,11 +47,11 @@ UZonmail 提供两种发件方式：
 
    进入后如图所示:
 
-   ![image-20250628153130413](https://oss.223434.xyz:2234/public/files/images/image-20250628153130413.png)
+   ![image-20250628153130413](https://oss.uzoncloud.com:2234/public/files/images/image-20250628153130413.png)
 
 2. 单击 [应用注册/+新注册](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/CreateApplicationBlade/quickStartType~/null/isMSAApp~/false) 注册一个应用
 
-   ![image-20250628153552853](https://oss.223434.xyz:2234/public/files/images/image-20250628153552853.png)
+   ![image-20250628153552853](https://oss.uzoncloud.com:2234/public/files/images/image-20250628153552853.png)
 
    **特别注意**：
 
@@ -65,7 +65,7 @@ UZonmail 提供两种发件方式：
 
    注册完成后，返回 [应用注册](https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/RegisteredApps) 界面，切换到 [所有应用程序]，单击刚刚创建的程序进行设置界面
 
-   ![image-20250628154403007](https://oss.223434.xyz:2234/public/files/images/image-20250628154403007.png)
+   ![image-20250628154403007](https://oss.uzoncloud.com:2234/public/files/images/image-20250628154403007.png)
 
    从侧边栏切换到 [API 权限] -> [+添加权限] -> [ Microsoft Graph] -> [委托的权限] 额外添加以下权限：
 
@@ -75,17 +75,17 @@ UZonmail 提供两种发件方式：
 
    操作如下图所示：
 
-   ![image-20250628154724024](https://oss.223434.xyz:2234/public/files/images/image-20250628154724024.png)
+   ![image-20250628154724024](https://oss.uzoncloud.com:2234/public/files/images/image-20250628154724024.png)
 
 4. 授权管理员同意 [应该是可选，未测试]
 
    单击 API 权限界面中的 [授予管理员同意]
 
-   ![image-20250628155230619](https://oss.223434.xyz:2234/public/files/images/image-20250628155230619.png)
+   ![image-20250628155230619](https://oss.uzoncloud.com:2234/public/files/images/image-20250628155230619.png)
 
 5. 侧边栏切换到 [概述] 获取 ClientId
 
-   ![image-20250628155444957](https://oss.223434.xyz:2234/public/files/images/image-20250628155444957.png)
+   ![image-20250628155444957](https://oss.uzoncloud.com:2234/public/files/images/image-20250628155444957.png)
 
 ### 配置后端
 
@@ -94,7 +94,7 @@ UZonmail 提供两种发件方式：
 ``` json
 {
   // 指定后端接口地址
-  "BaseUrl": "https://uzon-mail.223434.xyz:2234",
+  "BaseUrl": "https://maildemo.uzoncloud.com:2234",
   // 用于设置 Outlook 授权参数
   "MicrosoftEntraApp": {
     "ClientId": "xxxxx", // 你的 ClientId
@@ -110,7 +110,7 @@ UZonmail 提供两种发件方式：
 
 如下图所示：
 
-![image-20250628161936418](https://oss.223434.xyz:2234/public/files/images/image-20250628161936418.png)
+![image-20250628161936418](https://oss.uzoncloud.com:2234/public/files/images/image-20250628161936418.png)
 
 保存后，会触发委托授权流程，按提示操作后，就可以进行发件了。
 

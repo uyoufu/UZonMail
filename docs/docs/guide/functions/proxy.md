@@ -10,15 +10,15 @@ order: 3
 
 1. 在【代理管理】中添加代理
 
-   ![image-20250323172703801](https://oss.223434.xyz:2234/public/files/images/image-20250323172703801.png)
+   ![image-20250323172703801](https://oss.uzoncloud.com:2234/public/files/images/image-20250323172703801.png)
 
 2. 在基础设置中设置每个发件箱使用单个代理可发件的数量
 
-   ![image-20250323172051104](https://oss.223434.xyz:2234/public/files/images/image-20250323172051104.png)
+   ![image-20250323172051104](https://oss.uzoncloud.com:2234/public/files/images/image-20250323172051104.png)
 
 3. 在新建发件页面，选择需要使用的代理
 
-   ![image-20250323172154711](https://oss.223434.xyz:2234/public/files/images/image-20250323172154711.png)
+   ![image-20250323172154711](https://oss.uzoncloud.com:2234/public/files/images/image-20250323172154711.png)
 
 ## 支持的代理
 

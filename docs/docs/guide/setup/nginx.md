@@ -15,10 +15,10 @@ upstream uzonmail_upstream {
 server {
   listen 443 ssl;
   # 实际域名
-  server_name uzon-mail.223434.xyz;
+  server_name uzon-mail.uzoncloud.com;
   # ssl
-  ssl_certificate /etc/nginx/cert/223434.xyz.cert;
-  ssl_certificate_key /etc/nginx/cert/223434.xyz.key;
+  ssl_certificate /etc/nginx/cert/uzoncloud.com.cert;
+  ssl_certificate_key /etc/nginx/cert/uzoncloud.com.key;
   ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
   ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:!MD5;
   ssl_session_timeout 5m;

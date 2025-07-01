@@ -1,5 +1,5 @@
 <template>
-  <iframe class="uzon-mail-help" src="https://uzonmail.pages.dev/guide/">
+  <iframe class="uzon-mail-help" src="https://mail.uzoncloud.com/guide/">
   </iframe>
 </template>
 
