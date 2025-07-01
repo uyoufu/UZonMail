@@ -2,4 +2,4 @@
 User-agent:*
 Disallow:
 
-Sitemap: https://uzonmail.pages.dev/sitemap.xml
+Sitemap: https://mail.uzoncloud.com/sitemap.xml
