@@ -1,16 +1,16 @@
-import { defineUserConfig } from "vuepress";
+import { defineUserConfig } from 'vuepress'
 
-import theme from "./theme.js";
+import theme from './theme.js'
 
 export default defineUserConfig({
-  base: "/",
+  base: '/',
 
   lang: 'zh-CN',
-  title: '宇正群邮',
-  description: '一个开源强大的邮件批量发送系统',
-
-  theme,
+  title: '宇正群邮 - 邮件群发|邮件群发软件|邮件营销软件|开源邮件群发|最好用的邮件群发软件',
+  description:
+    '宇正群邮是一款开源的邮件群发软件，提供邮件群发、邮件营销、邮箱爬取、任意变量等诸多功能。支持所有类型邮箱账号，包括Outlook的OAuth2。原生企业级品质，支持多端用户，支持Windows、Linux、MacOS等操作系统, 支持服务器部署。原生多线程并发，支持多账号同时使用，性能强劲。多年持续迭代更新优化，已被外贸营销、教育培训、财务会计等多个行业广泛使用。',
+  theme
 
   // 和 PWA 一起启用
   // shouldPrefetch: false,
-});
+})
