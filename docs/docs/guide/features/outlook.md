@@ -56,7 +56,7 @@ UZonmail 提供两种发件方式：
    **特别注意**：
 
    1. 重定向 URI 中要选择 [公共客户端/本机(移动和桌面)]
-   2. 当是桌面端时，重定向的 url 为 `http://localhost:2234/api/v1/outlook-authorization/code`
+   2. 当是桌面端时，重定向的 url 为 `http://localhost:22345/api/v1/outlook-authorization/code`
    3. 当是服务器部署时，将地址改成服务器的域名地址
    4. 不支持局域网内部署
    5. 若是 443 端口，可以省略
@@ -93,9 +93,13 @@ UZonmail 提供两种发件方式：
 
 ``` json
 {
+  // xxx 其它配置
+
   // 指定后端接口地址
-  "BaseUrl": "https://maildemo.uzoncloud.com:2234",
-  // 用于设置 Outlook 授权参数
+  // 如果是桌面端，请删除该字段
+  // 如果是服务器端，请根据自己实际地址进行配置，格式为 https://域名:端口
+  "BaseUrl": "https://maildemo.uzoncloud.com:22345",
+  // 用于设置 outlook、hotmail 授权参数
   "MicrosoftEntraApp": {
     "ClientId": "xxxxx", // 你的 ClientId
     "TenantId": "", // 为空

@@ -1,12 +1,12 @@
 ---
-title: 简介
+title: 软件简介
 icon: ranking-star
 order: 1
 ---
 
-![宇正群邮登录页](https://obs.uamazing.cn:52443/public/files/images/uzon-mail-login-2.png)
-
 本软件名为 "宇正群邮 (UZonMail)"，是一款开源免费的邮件群发软件，提供邮件群发、邮件营销、邮箱爬取、任意变量等诸多功能。支持所有类型邮箱账号，包括Outlook的OAuth2。原生企业级品质，支持多端用户，支持Windows、Linux、MacOS等操作系统, 支持服务器部署。原生多线程并发，支持多账号同时使用，性能强劲。多年持续迭代更新优化，已被外贸营销、教育培训、财务会计等多个行业广泛使用。
+
+![宇正群邮登录页](https://obs.uamazing.cn:52443/public/files/images/uzon-mail-login-2.png)
 
 常见的应用场景有：
 
@@ -100,3 +100,5 @@ order: 1
 3. Linux
 4. Docker
 5. MacOS
+
+感谢使用宇正群邮，愿它助你 **邮件群发一朝起，业务乘风天地宽！**

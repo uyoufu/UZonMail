@@ -1,6 +1,6 @@
 ---
-title: 编译
-icon: terminal
+title: 代码编译
+icon: code
 order: 10
 ---
 
@@ -32,7 +32,7 @@ order: 10
    | windows server | ./build-win-server.ps1      | build/uzonmail-service-win-x64-version.zip |
    | linux server   | ./build-linux.ps1           | build/uzonmail-linux-x64-version.zip       |
    | docker         | 在进行 linux 编译时，会自动编译 | docker 镜像，镜像名为 uzon-mail:latest     |
-   |全部            | ./build-all.ps1 | 一次编译上述所有平台|
+   | 全部            | ./build-all.ps1 | 一次编译上述所有平台|
 
    编译成功截图：
 

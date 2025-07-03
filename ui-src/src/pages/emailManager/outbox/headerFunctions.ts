@@ -26,6 +26,14 @@ function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
   return aes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, password)
 }
 
+export function isExchangeEmail (email: string): boolean {
+  // 判断是否是 Exchange 邮箱
+  const domains = ['outlook.com', 'hotmail.com']
+  const emailDomain = email.trim().split('@')[1]?.toLowerCase()
+  if (!emailDomain) return false
+  return domains.includes(emailDomain)
+}
+
 /**
  * 获取发件箱字段
  * @param smtpPasswordSecretKeys
@@ -85,7 +93,7 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
         return encryptPassword(smtpPasswordSecretKeys, pwd)
       },
       validate: (value: any, parsedValue: any, allValues: Record<string, any>) => {
-        if (allValues.email && allValues.email.toLowerCase().includes("@outlook.com")) {
+        if (isExchangeEmail(allValues.email)) {
           // 如果是 Outlook 邮箱，则允许为空
           return {
             ok: true
@@ -196,7 +204,7 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
  * @returns
  */
 export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptKeys: IUserEncryptKeys) {
-  if (!outbox.email.toLowerCase().includes("@outlook.com")) return
+  if (!isExchangeEmail(outbox.email)) return
 
   // // 判断是否采用个人委托授权
   // if (!outbox.userName || outbox.userName.includes('/')) return
