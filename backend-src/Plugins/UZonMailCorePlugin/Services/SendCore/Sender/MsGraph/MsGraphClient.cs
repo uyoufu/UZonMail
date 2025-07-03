@@ -4,6 +4,7 @@ using MailKit.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using MimeKit;
+using Newtonsoft.Json.Linq;
 using System.Net;
 using UZonMail.Core.Services.Encrypt;
 using UZonMail.DB.Extensions;
@@ -11,6 +12,7 @@ using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Http.Request;
+using UZonMail.Utils.Json;
 using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
@@ -187,8 +189,23 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
                 .WithMethod(HttpMethod.Post)
                 .WithUrl(token_url)
                 .WithFormContent(formContent);
-            var jsonResult = await fluentHttpRequest.GetJsonAsync<AuthenticationResult2>()
-                ?? throw new AuthenticationException($"{clientId} 请求授权失败");
+
+            var response = await fluentHttpRequest.SendAsync();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                // 表示没有成功请求到授权
+                _logger.Error($"{clientId} 请求授权失败: {responseContent}");
+                // 获取错误信息
+                var errorMessage = JObject.Parse(responseContent).SelectTokenOrDefault("error_description", "未知错误");
+                throw new AuthenticationException(errorMessage);
+            }
+            var jsonResult = responseContent.JsonTo<AuthenticationResult2>();
+            if (jsonResult == null)
+            {
+                _logger.Warn($"{clientId} 请求授权失败:{responseContent}");
+                throw new AuthenticationException("返回结果非预期值");
+            }
 
             // 判断是否有 SMTP.Send 权限
             if (!jsonResult.Scope.Contains("Mail.Send"))
