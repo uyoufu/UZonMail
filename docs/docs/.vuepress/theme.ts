@@ -7,8 +7,8 @@ export default hopeTheme({
   hostname: 'https://mail.uzoncloud.com/',
 
   author: {
-    name: 'galens',
-    url: 'galens.uamazing.cn'
+    name: 'uyoufu',
+    url: 'https://uyoufu.uzoncloud.com/'
   },
 
   iconAssets: 'fontawesome-with-brands',
@@ -26,6 +26,9 @@ export default hopeTheme({
     center: ['Links'],
     end: ['Language', 'Repo', 'Outlook', 'Search']
   },
+
+  // navbarAutoHide: 'always',
+  hideSiteNameOnMobile: false,
 
   // 导航栏
   navbar,
@@ -56,6 +59,7 @@ export default hopeTheme({
   markdown: {
     align: true,
     attrs: true,
+    breaks: true,
     codeTabs: true,
     component: true,
     demo: true,
@@ -64,6 +68,7 @@ export default hopeTheme({
     imgLazyload: true,
     imgSize: true,
     include: true,
+    linkify: true,
     mark: true,
     plantuml: true,
     spoiler: true,
@@ -126,13 +131,13 @@ export default hopeTheme({
 
   // 在这里配置主题提供的插件
   plugins: {
+    seo: true,
+    sitemap: true,
+
     // 注意: 仅用于测试! 你必须自行生成并在生产环境中使用自己的评论服务
     comment: {
-      provider: 'Giscus',
-      repo: 'vuepress-theme-hope/giscus-discussions',
-      repoId: 'R_kgDOG_Pt2A',
-      category: 'Announcements',
-      categoryId: 'DIC_kwDOG_Pt2M4COD69'
+      provider: 'Waline',
+      serverURL: 'https://uzonmail-comment.uzoncloud.com'
     },
 
     components: {

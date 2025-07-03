@@ -1,9 +1,9 @@
 ---
-title: 概述
+title: 概览
 icon: book-open-reader
 order: 1
 dir:
-  text: 功能介绍
+  text: 功能说明
   order: 4
   icon: bars
 ---

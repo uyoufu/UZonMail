@@ -45,7 +45,7 @@ highlights:
         details: 采用 mysql、redis 数据库，支持多用户，大并发。支持Windows、Linux、MacOS操作系统, 支持服务器私有化部署。
 
   # - header: 我们的优势
-  #   image: /images/hero.svg
+  #   image: /images/blog.svg
   #   bgImage: /assets/image/stacked-peaks-haikei.svg
   #   bgImageDark: /assets/image/stacked-peaks-haikei2.svg
   #   highlights:

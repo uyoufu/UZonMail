@@ -1,11 +1,11 @@
 ---
-title: 后端配置
+title: 后端
 icon: sliders
 order: 1
 dir:
-  text: 配置
+  text: 配置说明
   order: 2
-  icon: gear
+  icon: gears
 ---
 
 本文介绍在进行服务器部署时，需要涉及到的配置修改。桌面端或者局域网内使用，可以忽略。
