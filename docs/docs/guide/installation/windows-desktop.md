@@ -2,6 +2,7 @@
 title: Windows 10+
 icon: fab fa-windows
 order: 3
+description: 宇正群邮 Windows 桌面版安装教程，详细介绍如何在 Windows 10、Windows 7 等系统上部署宇正群邮邮件群发软件。支持开源邮件群发、邮件营销软件，助力企业和个人高效邮件群发，体验最好用的邮件群发软件。
 ---
 
 Windows 桌面版本有两种安装方式，一种是像 Windows Server 那样，仅安装服务端，然后通过 Web 使用；另一种是直接使用带有 UI 的桌面版本。

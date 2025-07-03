@@ -2,6 +2,7 @@
 title: Outlook发件
 icon: at
 order: 5
+description: 宇正群邮（UZonMail）Outlook发件指南，详细介绍如何通过微软Graph方式配置和使用Outlook邮箱进行邮件群发。支持开源邮件群发、邮件营销、企业级邮件群发场景，是最好用的邮件群发软件。
 ---
 
 Outlook 于 2025 年 09 月全面淘汰，因此若要使用 Outlook 邮箱发件，需要使用微软提供的 Graph 方式。
@@ -96,8 +97,9 @@ UZonmail 提供两种发件方式：
   // xxx 其它配置
 
   // 指定后端接口地址
-  // 如果是桌面端，请删除该字段
+  // 如果是桌面端，请删除该字段, 可以不用配置
   // 如果是服务器端，请根据自己实际地址进行配置，格式为 https://域名:端口
+  // 若是本机 wsl docker 部署，wsl 的网络应设置为 mirror 模式
   "BaseUrl": "https://maildemo.uzoncloud.com:22345",
   // 用于设置 outlook、hotmail 授权参数
   "MicrosoftEntraApp": {

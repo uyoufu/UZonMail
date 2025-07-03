@@ -18,7 +18,7 @@ actions:
 
 highlights:
   - header: 一款好用的 邮件群发 APP
-    description: '现代化UI、企业级性能、多端适配，让邮件群发变得无限可能!'
+    description: '现代化UI、企业级性能、多端适配，致力于成为最好用的邮件群发软件!'
     features:
       - title: 多发件箱并发
         details: 允许添加任意多个发件人进行同时发件, 采用多线程并发发送, 发件人越多，发件速度越快。

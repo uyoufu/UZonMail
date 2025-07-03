@@ -2,6 +2,7 @@
 title: Docker
 icon: fab fa-docker
 order: 5
+description: 宇正群邮 Docker 安装教程，详细讲解如何在 Ubuntu 等环境下使用 Docker Compose 部署宇正群邮邮件群发软件。支持开源邮件群发、邮件营销软件，适用于企业和个人，助力高效邮件群发，体验最好用的邮件群发解决方案。
 ---
 
 本文将介绍如何使用 Docker Compose 在 Ubuntu 中进行安装，若是其它宿主机或者其它安装方式，可以将本文发给 DeepSeek 让其帮你转换。

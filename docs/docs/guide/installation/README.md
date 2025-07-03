@@ -6,7 +6,7 @@ dir:
   text: 开始使用
   order: 2
   icon: hourglass-start
-description: ""
+description: 宇正群邮软件下载页面，提供开源邮件群发、邮件营销软件多平台版本下载，支持 Windows、Linux、MacOS、Docker 等，助力企业和个人高效邮件群发，体验最好用的邮件群发软件。
 ---
 
 宇正群邮是一款支持多端使用的邮件群发软件，它支持以下平台：

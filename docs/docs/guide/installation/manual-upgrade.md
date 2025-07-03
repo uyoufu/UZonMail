@@ -2,9 +2,10 @@
 title: 手动升级
 icon: server
 order: 8
+description: 宇正群邮邮件群发软件手动升级教程，详细介绍如何手动升级宇正群邮，适用于开源邮件群发、邮件营销软件用户，助力企业和个人高效管理和升级最好用的邮件群发软件。
 ---
 
-本节将介绍如何进行升级
+本节将介绍如何对宇正群邮进行手动升级。
 
 ## 发现新版本
 
@@ -21,10 +22,12 @@ order: 8
 4. 还原 `appsettings.Production.json` 文件
 
 
+> 桌面端在关闭软件后，直接覆盖即可, 若没有修改配置，可不用备份。
+
 
 ::: info
 
-从 0.15.x 版本开始，`wwwroot/app.config.json` 中的 `baseUrl` 可以通过在 `appsettings.Production.json` 文件中添加 `BaseUrl` 进行设置。示例如下：
+从 0.15.x 版本开始，`wwwroot/app.config.json` 中的 `baseUrl` 可以通过在 `appsettings.Production.json` 文件中添加 `BaseUrl` 进行设置, `wwwroot/app.config.json` 可以直接使用默认值即可。示例如下：
 
 ``` json
 {
