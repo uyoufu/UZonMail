@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Sender.Smtp;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
 
@@ -12,7 +11,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// Graph 客户端工厂
         /// key: 发件箱地址
         /// </summary>
-        private ConcurrentDictionary<string, MsGraphClient> _clients = new();
+        private readonly ConcurrentDictionary<string, MsGraphClient> _clients = new();
 
         /// <summary>
         /// 获取 smtp 客户端

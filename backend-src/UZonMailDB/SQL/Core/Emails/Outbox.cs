@@ -88,5 +88,13 @@
         /// 可选是为了兼容老版本
         /// </summary>
         public string? ValidFailReason { get; set; }
+
+
+        public static bool IsExchangeEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return false;
+            var domain = email.Trim().Split("@").Last().ToLower();
+            return new List<string>() { "outlook.com", "hotmail.com" }.Contains(domain);
+        }
     }
 }

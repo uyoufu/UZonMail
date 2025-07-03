@@ -6,6 +6,7 @@ using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
@@ -18,7 +19,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
 
         public bool IsMatch(string outbox)
         {
-            return outbox.Contains("@outlook.com", StringComparison.CurrentCultureIgnoreCase);
+            return Outbox.IsExchangeEmail(outbox);
         }
 
         /// <summary>

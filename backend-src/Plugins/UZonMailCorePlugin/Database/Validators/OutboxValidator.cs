@@ -16,10 +16,10 @@ namespace UZonMail.Core.Database.Validators
             RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("请输入正确的 Email");
             RuleFor(x => x.Password).Must((outbox, password) =>
             {
-                if (outbox.Email.ToLower().EndsWith("@outlook.com"))
+                if (Outbox.IsExchangeEmail(outbox.Email))
                 {
                     // 若没有 userName，则不需要密码
-                    return string.IsNullOrEmpty(outbox.UserName);
+                    return !(string.IsNullOrEmpty(outbox.UserName) ^ string.IsNullOrEmpty(outbox.Password));
                 }
 
                 return !string.IsNullOrEmpty(password);
