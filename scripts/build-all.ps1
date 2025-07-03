@@ -19,23 +19,31 @@ Write-Host "-------------------------linux server 编译完成(3/4)-------------
 Write-Host ""
 
 # 上传到网络
-$paths = @($winDesktop[-1], $winServer[-1], $linuxServer[-1])
-Write-Host "4. 开始上传到网络 ..." -ForegroundColor Yellow
-$results = @()
-foreach ($path in $paths) {
-  # 判断文件存在
-  if (-not (Test-Path $path)) {
-    Write-Host "$path 不存在！" -ForegroundColor Red
-    continue
+# 若存在 od 命令，则使用 od 命令上传
+function New-Oss {  
+  $paths = @($winDesktop[-1], $winServer[-1], $linuxServer[-1])
+  Write-Host "4. 开始上传到网络 ..." -ForegroundColor Yellow
+  $results = @()
+  foreach ($path in $paths) {
+    # 判断文件存在
+    if (-not (Test-Path $path)) {
+      Write-Host "$path 不存在！" -ForegroundColor Red
+      continue
+    }
+
+    # 开始上传
+    $result = od minio soft -p $path
+    # 获取最后一行作为结果
+    $results += $result[-1]
   }
 
-  # 开始上传
-  $result = od minio soft -p $path
-  # 获取最后一行作为结果
-  $results += $result[-1]
+  # 输出地址
+  Write-Host "-------------------------上传到网络完成(4/4)-------------------------" -ForegroundColor Green
+  Write-Host "上传结果：" -ForegroundColor Green
+  $results
 }
 
-# 输出地址
-Write-Host "-------------------------上传到网络完成(4/4)-------------------------" -ForegroundColor Green
-Write-Host "上传结果：" -ForegroundColor Green
-$results
+if (Get-Command od -ErrorAction SilentlyContinue) {
+  New-Oss
+}
+
