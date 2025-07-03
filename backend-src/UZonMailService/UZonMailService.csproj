@@ -26,7 +26,6 @@
 
 	<ItemGroup>
 		<Content Remove="appsettings.Development.json" />
-		<Content Remove="appsettings.Production.json" />
 		<Content Remove="log4net.config" />
 	</ItemGroup>
 
@@ -49,9 +48,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="appsettings.Production.json">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 		<None Include="appsettings.Development.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
