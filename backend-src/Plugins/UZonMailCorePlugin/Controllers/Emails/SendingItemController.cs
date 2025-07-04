@@ -18,7 +18,7 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="filter"></param>
         /// <returns></returns>
         [HttpGet("filtered-count")]
-        public async Task<ResponseResult<int>> GetEmailTemplatesCount(long sendingGroupId, string filter, SendingItemStatus itemStatus)
+        public async Task<ResponseResult<int>> GetEmailTemplatesCount(long sendingGroupId, string filter, int itemStatus)
         {
             var userId = tokenService.GetUserSqlId();
             // 只能获取自己的发件历史
@@ -29,21 +29,23 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             var dbSet = db.SendingItems.Where(x => x.SendingGroupId == sendingGroupId);
-            if (itemStatus > 0)
+            if (itemStatus >= 0)
             {
-                if (itemStatus == SendingItemStatus.Success)
+                var itemStatusEnum = (SendingItemStatus)itemStatus;
+                if (itemStatusEnum == SendingItemStatus.Success)
                 {
                     dbSet = dbSet.Where(x => x.Status >= SendingItemStatus.Success);
                 }
-                else if (itemStatus == SendingItemStatus.Failed)
+                else if (itemStatusEnum == SendingItemStatus.Failed)
                 {
                     dbSet = dbSet.Where(x => x.Status <= SendingItemStatus.Cancel);
                 }
                 else
                 {
-                    dbSet = dbSet.Where(x => x.Status == itemStatus);
+                    dbSet = dbSet.Where(x => x.Status == itemStatusEnum);
                 }
             }
+
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Subject.Contains(filter) || x.ToEmails.Contains(filter) || x.FromEmail.Contains(filter));
@@ -60,7 +62,7 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<SendingItem>>> GetEmailTemplatesData(long sendingGroupId, string filter, Pagination pagination, SendingItemStatus itemStatus)
+        public async Task<ResponseResult<List<SendingItem>>> GetEmailTemplatesData(long sendingGroupId, string filter, Pagination pagination, int itemStatus)
         {
             var userId = tokenService.GetUserSqlId();
             // 只能获取自己的发件历史
@@ -71,17 +73,24 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             var dbSet = db.SendingItems.Where(x => x.SendingGroupId == sendingGroupId);
-            if (itemStatus > 0)
+
+            if (itemStatus >= 0)
             {
-                if (itemStatus == SendingItemStatus.Success)
+                var itemStatusEnum = (SendingItemStatus)itemStatus;
+                if (itemStatusEnum == SendingItemStatus.Success)
                 {
-                    dbSet = dbSet.Where(x => x.Status == SendingItemStatus.Success || x.Status == SendingItemStatus.Read);
+                    dbSet = dbSet.Where(x => x.Status >= SendingItemStatus.Success);
+                }
+                else if (itemStatusEnum == SendingItemStatus.Failed)
+                {
+                    dbSet = dbSet.Where(x => x.Status <= SendingItemStatus.Cancel);
                 }
                 else
                 {
-                    dbSet = dbSet.Where(x => x.Status == itemStatus);
+                    dbSet = dbSet.Where(x => x.Status == itemStatusEnum);
                 }
             }
+
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Subject.Contains(filter) || x.ToEmails.Contains(filter) || x.FromEmail.Contains(filter));
