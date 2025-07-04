@@ -27,6 +27,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2849.39" />
+		<PackageReference Include="Panuon.WPF.UI" Version="1.3.0.2" />
 		<PackageReference Include="Stylet" Version="1.3.7" />
 		<PackageReference Include="System.Management" Version="8.0.0" />
 	</ItemGroup>

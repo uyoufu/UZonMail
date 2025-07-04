@@ -1,13 +1,17 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Panuon.WPF.UI;
 using StyletIoC;
+using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Forms;
 using UZonMailDesktop.Modules.EnvDetector;
 using UZonMailDesktop.Pages.Conductors;
 using UZonMailDesktop.Pages.MissingEnv;
 using UZonMailDesktop.Pages.Tray;
 using UZonMailDesktop.Pages.Webview;
 using UZonMailDesktop.Utils;
+using MessageBox = System.Windows.MessageBox;
 
 namespace UZonMailDesktop.Pages
 {
@@ -43,6 +47,17 @@ namespace UZonMailDesktop.Pages
         {
             base.OnInitialActivate();
 
+            // 验证是否已经启动了
+            var currentProcess = Process.GetCurrentProcess();
+            var desktopProcess = Process.GetProcesses().Where(x => x.ProcessName == "UZonMailDesktop" && x.Id != currentProcess.Id).FirstOrDefault();
+            if (desktopProcess != null)
+            {
+                // 提示已经启动，直接退出
+                MessageBoxX.Show("不能重复运行", "温馨提示");
+                // 打开原来的程序
+                Environment.Exit(0);
+            }
+
             if (!VerifyEnv()) return;
 
             // 启动后台服务
@@ -66,7 +81,7 @@ namespace UZonMailDesktop.Pages
             backEndService.CloseExist();
             base.OnClose();
         }
-        
+
         private bool VerifyEnv()
         {
             // 验证环境

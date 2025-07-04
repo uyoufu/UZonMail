@@ -12,11 +12,9 @@ namespace UZonMailDesktop.Utils
     /// </summary>
     public class BackEndService(IConfiguration configuration)
     {
-        private readonly string ServiceName = "UzonMailService";
-
-        private List<Process> GetUzonMailProcesses()
+        private static List<Process> GetUZonMailProcesses()
         {
-            return Process.GetProcesses().Where(x => x.ProcessName == ServiceName).ToList();
+            return Process.GetProcesses().Where(x => x.ProcessName == "UZonMailService").ToList();
         }
 
         public void Start()
@@ -25,7 +23,7 @@ namespace UZonMailDesktop.Utils
             CloseExist();
 
             // 判断是否有后台服务，若有，则不再启动
-            var processes = GetUzonMailProcesses();
+            var processes = GetUZonMailProcesses();
             if (processes.Count > 0)
             {
                 return;
@@ -63,7 +61,7 @@ namespace UZonMailDesktop.Utils
         /// </summary>
         public void CloseIfNotSelf()
         {
-            var processes = GetUzonMailProcesses();
+            var processes = GetUZonMailProcesses();
             string servicePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "service");
 
             foreach (var process in processes)
@@ -92,7 +90,7 @@ namespace UZonMailDesktop.Utils
         public void CloseAll()
         {
             // 查找进程名为 UZonMailService 的进程并杀死
-            var processes = GetUzonMailProcesses();
+            var processes = GetUZonMailProcesses();
             foreach (var item in processes)
             {
                 item.Kill();

@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Stylet;
 using StyletIoC;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UZonMailDesktop.Pages;
 using UZonMailDesktop.Pages.Tray;
 using UZonMailDesktop.Utils;
