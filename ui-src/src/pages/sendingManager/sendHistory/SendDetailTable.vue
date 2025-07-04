@@ -60,6 +60,7 @@ const statusTab = ref(-1)
 const statusTabOptions = [
   { label: '全部', value: -1 },
   { label: '发送中', value: SendingItemStatus.Pending },
+  { label: '未发送', value: SendingItemStatus.Created },
   { label: '成功', value: SendingItemStatus.Success },
   { label: '失败', value: SendingItemStatus.Failed }
 ]
