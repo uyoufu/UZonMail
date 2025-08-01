@@ -17,6 +17,6 @@ namespace UZonMail.DB.PostgreSql
         /// <summary>
         /// 连接字符串
         /// </summary>
-        public string ConnectionString => $"Server={Host};Port={Port};Database={Database};User={User};Password={Password};";        
+        public string ConnectionString => $"Host={Host};Port={Port};Database={Database};Username={User};Password={Password};";        
     }
 }
