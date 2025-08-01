@@ -9,7 +9,8 @@ description: 宇正群邮 Windows Server 安装教程，详细介绍如何在 Wi
 
 ## 环境安装
 
-安装 [runtime-aspnetcore-9.0.2-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.2-windows-x64-installer)
+1. 安装 [.NET runtime-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-9.0.7-windows-x64-installer)
+2. 安装 [.NET runtime-aspnetcore-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.7-windows-x64-installer)
 
 ## 软件下载
 

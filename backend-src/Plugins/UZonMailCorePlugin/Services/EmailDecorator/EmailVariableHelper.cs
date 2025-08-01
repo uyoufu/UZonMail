@@ -13,7 +13,7 @@ namespace UZonMail.Core.Services.EmailDecorator
         public static List<string> GetAllVariableNames(string content)
         {
             // 获取内容中的变量
-            var matches = Regex.Matches(content, @"\{\{\s*(.*?)\s*\}\}");
+            var matches = Regex.Matches(content, @"\{\{\s*([\p{L}\p{N}_]+)\s*\}\}",RegexOptions.None);
             var variables = matches.Select(m => m.Groups[1].Value)
                 .Distinct()
                 .ToList();

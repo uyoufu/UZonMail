@@ -142,6 +142,11 @@ New-Item -Path "$serviceDest/wwwroot" -ItemType Directory -Force
 New-Item -Path "$serviceDest/Plugins" -ItemType Directory -Force
 # 创建 assembly 目录
 New-Item -Path "$serviceDest/Assembly" -ItemType Directory -Force
+# 删除 appsettings.Development.json 文件
+$developSettingPath = Join-Path -Path $serviceDest -ChildPath "appsettings.Development.json"
+if (Test-Path -Path $developSettingPath -PathType Leaf) {
+    Remove-Item -Path $developSettingPath -Force
+}
 
 # 复制 Quartz/quartz-sqlite.sqlite3 到 data/db 目录中
 New-Item -Path "$serviceDest/data/db" -ItemType Directory  -ErrorAction SilentlyContinue
@@ -153,7 +158,6 @@ $scriptFiles = @("Dockerfile", "docker-compose.yml")
 foreach ($file in $scriptFiles) {
     Copy-Item -Path "$gitRoot/scripts/$file" -Destination $mainService -Force
 }
-
 
 # 添加 windows 服务
 function Add-WindowsService {
@@ -306,6 +310,11 @@ function Add-Desktop {
         Remove-Item -Path $desktopDest -Recurse -Force
     }
     dotnet publish -c Release -o $desktopDest -r $publishPlatform --self-contained false
+    # 删除 appsettings.Development.json 文件
+    $developSettingPath = Join-Path -Path $desktopDest -ChildPath "appsettings.Development.json"
+    if (Test-Path -Path $developSettingPath -PathType Leaf) {
+        Remove-Item -Path $developSettingPath -Force
+    }
 
     Write-Host "桌面端编译完成！" -ForegroundColor Green
 

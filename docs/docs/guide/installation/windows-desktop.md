@@ -13,7 +13,7 @@ Windows 桌面版本有两种安装方式，一种是像 Windows Server 那样�
 
 Web 方式按如下步骤进行安装：
 
-1. 安装 [ASP.NET Core Runtime 9，单击下载](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.2-windows-x64-installer)
+1. 安装 [.NET runtime-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-9.0.7-windows-x64-installer)和 [.NET runtime-aspnetcore-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.7-windows-x64-installer)
 
 2. 从历史版本中下载 `uzonmail-desktop-win-x64` 版本，解压
 
@@ -32,8 +32,8 @@ Web 方式按如下步骤进行安装：
 
 Windows 10 及以上系统按如下步骤进行安装
 
-1. 安装 [ASP.NET Core Runtime 9，单击下载](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.2-windows-x64-installer)
-2. 安装 [.NET Desktop Runtime 9](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-9.0.2-windows-x64-installer)(一般系统自带)
+1. 安装 [.NET runtime-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-9.0.7-windows-x64-installer)和 [.NET runtime-aspnetcore-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.7-windows-x64-installer)
+2. 安装 [.NET runtime-desktop-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-9.0.7-windows-x64-installer)(一般系统自带)
 3. 安装 [Webview2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)(有 edge 浏览器，一般都自带)
 4. 从历史版本中下载 `uzonmail-desktop-win-x64` 版本，解压
 5. 打开 `UZonMailDesktop.exe` 开始使用

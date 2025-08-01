@@ -7,6 +7,7 @@ using Quartz;
 using System.Security.Claims;
 using Uamazing.Utils.Plugin;
 using UZonMail.DB.MySql;
+using UZonMail.DB.PostgreSql;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SqLite;
 using UZonMail.Utils.Database.Redis;
@@ -126,7 +127,7 @@ services.AddSignalR();
 services.SetupSlugifyCaseRoute();
 
 // 注入数据库
-services.AddSqlContext<SqlContext, MySqlContext, SqLiteContext>(builder.Configuration);
+services.AddSqlContext<SqlContext, PostgreSqlContext, MySqlContext, SqLiteContext>(builder.Configuration);
 
 // 添加 HttpContextAccessor，以供 service 获取当前请求的用户信息
 services.AddHttpContextAccessor();

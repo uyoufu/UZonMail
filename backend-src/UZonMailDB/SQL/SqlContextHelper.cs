@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.MySql;
+using UZonMail.DB.PostgreSql;
 using UZonMail.DB.SqLite;
 
 namespace UZonMail.DB.SQL
@@ -40,6 +41,19 @@ namespace UZonMail.DB.SQL
             var _mysqlConnectionConfig = new MySqlConnectionConfig();
             configuration.GetSection("Database:MySql").Bind(_mysqlConnectionConfig);
             options.UseMySql(_mysqlConnectionConfig.ConnectionString, new MySqlServerVersion(_mysqlConnectionConfig.MysqlVersion));
+        }
+
+        /// <summary>
+        /// 配置 PostgreSql
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="configuration"></param>
+        public static void ConfiguringPostgreSql(DbContextOptionsBuilder options, IConfiguration configuration)
+        {
+            if (options.IsConfigured) return;
+            var postgreSqlConnectionConfig = new PostgreSqlConnectionConfig();
+            configuration.GetSection("Database:PostgreSql").Bind(postgreSqlConnectionConfig);
+            options.UseNpgsql(postgreSqlConnectionConfig.ConnectionString);
         }
     }
 }
