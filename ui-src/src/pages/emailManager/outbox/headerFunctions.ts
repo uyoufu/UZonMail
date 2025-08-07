@@ -362,12 +362,18 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     }
 
     const validRows: IOutbox[] = []
+
     // 对密码进行加密
-    for (const row of data) {
+    for (const [index, row] of data.entries()) {
+      if (!row.email) {
+        logger.info(`第 ${index + 1} 行数据邮箱为空`)
+        continue
+      }
+
       // 验证邮箱是否正确
       // 验证 email 格式
       if (!isEmail(row.email)) {
-        logger.info(`邮箱格式错误: ${row.email}`)
+        logger.info(`邮箱格式错误:`, row)
         notifyError(`邮箱格式错误: ${row.email}`)
         continue
       }
@@ -378,7 +384,8 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     }
 
     if (validRows.length === 0) {
-      notifyError('没有有效的发件箱数据')
+      notifyError('没有有效的发件箱数据,请核查表头是否正确')
+      return
     }
 
     // 判断是否数据相等

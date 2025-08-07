@@ -127,10 +127,11 @@ async function onMenuItemClick (event: Event, item: IContextMenuItem) {
 
 <style lang="scss" scoped>
 .active-item {
+  scale: 1;
+  transition: scale 0.3s;
   &:hover {
     // 放大
     scale: 1.1;
-    transition: all 0.3s;
   }
 }
 </style>
