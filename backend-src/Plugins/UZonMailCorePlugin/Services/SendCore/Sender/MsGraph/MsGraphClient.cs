@@ -1,19 +1,17 @@
 ﻿using log4net;
 using MailKit.Net.Proxy;
 using MailKit.Security;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using MimeKit;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.Encrypt;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
-using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
 {
@@ -22,7 +20,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
     /// </summary>
     /// <param name="email"></param>
     /// <param name="cooldownMilliseconds"></param>
-    public class MsGraphClient(EncryptService encryptService, IConfiguration configuration) : IEmailSendingClient
+    public class MsGraphClient(EncryptService encryptService, IConfiguration configuration, DebugConfig debugConfig) : IEmailSendingClient
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(MsGraphClient));
         private static HttpClient _httpClient = new();
@@ -222,6 +220,11 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// <returns></returns>
         public async Task<string> SendAsync(MimeMessage mimeMessage)
         {
+            if (debugConfig.PreventSending)
+            {
+                return "调试模式中已阻止真实发件";
+            }
+
             var encodedEmail = Uri.EscapeDataString(_email);
 
             var apiPath = _authenticationResult!.IsPersonalAccount ? "me" : $"users{encodedEmail}";
