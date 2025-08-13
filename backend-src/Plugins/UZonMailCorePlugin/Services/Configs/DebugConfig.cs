@@ -13,6 +13,11 @@ namespace UZonMail.Core.Services.Config
         /// </summary>
         public bool IsDemo { get; set; }
 
+        /// <summary>
+        /// 是否阻止发送邮件
+        /// </summary>
+        public bool PreventSending { get; set; }
+
         public DebugConfig(IConfiguration configuration)
         {
             configuration.GetSection("Debug").Bind(this);
