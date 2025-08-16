@@ -10,7 +10,7 @@
 		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
 		<LangVersion>13.0</LangVersion>
 		<FileVersion>0.16.1.0</FileVersion>
-		<AssemblyVersion>0.16.0.0</AssemblyVersion>
+		<AssemblyVersion>0.16.1.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
