@@ -40,7 +40,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// </summary>
         private static readonly int _minTimeIntervalMilliseconds = 0;
 
-        private DateTime _lastDate = DateTime.Now.AddDays(-10);
+        private DateTime _lastDate = DateTime.UtcNow.AddDays(-10);
 
         private static SecureSocketOptions GuessSecureSocketOptions(int port, bool enableSSL)
         {
@@ -68,7 +68,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// <returns></returns>
         public override async Task<string> SendAsync(MimeMessage message, CancellationToken cancellationToken, ITransferProgress progress = null)
         {
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
             var timeInverval = (int)(now - _lastDate).TotalMilliseconds;
             _lastDate = now;
             int controlValue = Math.Max(_cooldownMilliseconds, _minTimeIntervalMilliseconds);

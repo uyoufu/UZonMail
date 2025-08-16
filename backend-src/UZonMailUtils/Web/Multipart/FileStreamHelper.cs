@@ -70,7 +70,7 @@ namespace UZonMail.Utils.Web.Multipart
                         // 保存文件名
                         formAccumulator.Append("fileName", fileName);
                         // 对 fileName 作特殊处理，防止名称有特殊符号
-                        var safeFileName = WebUtility.HtmlEncode($"{DateTime.Now.ToTimestamp()}_{WebUtility.HtmlEncode(fileName)}");
+                        var safeFileName = WebUtility.HtmlEncode($"{DateTime.UtcNow.ToTimestamp()}_{WebUtility.HtmlEncode(fileName)}");
                         formAccumulator.Append("safeFileName", safeFileName);
 
                         var loadBufferBytes = 1024;//这个是每一次从Http请求的section中读出文件数据的大小，单位是Byte即字节，这里设置为1024的意思是，每次从Http请求的section数据流中读取出1024字节的数据到服务器内存中，然后写入下面targetFileStream的文件流中，可以根据服务器的内存大小调整这个值。这样就避免了一次加载所有上传文件的数据到服务器内存中，导致服务器崩溃。

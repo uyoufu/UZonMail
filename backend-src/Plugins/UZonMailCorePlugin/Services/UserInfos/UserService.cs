@@ -314,7 +314,7 @@ namespace UZonMail.Core.Services.UserInfos
         /// <returns></returns>
         public async Task<string> GenerateToken(User userInfo, long expireMilliseconds = 0, IEnumerable<Claim>? extraClaims = null)
         {
-            var expireDate = expireMilliseconds > 0 ? DateTime.Now.AddMilliseconds(expireMilliseconds) : DateTime.MaxValue;
+            var expireDate = expireMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(expireMilliseconds) : DateTime.MaxValue;
             return await GenerateToken(userInfo, expireDate, extraClaims);
         }
 
@@ -335,10 +335,10 @@ namespace UZonMail.Core.Services.UserInfos
 
             var tokenParams = appConfig.Value.TokenParams.Clone();
             // 若
-            if (expireDate > DateTime.Now)
+            if (expireDate > DateTime.UtcNow)
                 tokenParams.ExpireDate = expireDate;
             else if (tokenParams.Expire > 0)
-                tokenParams.ExpireDate = DateTime.Now.AddMilliseconds(tokenParams.Expire);
+                tokenParams.ExpireDate = DateTime.UtcNow.AddMilliseconds(tokenParams.Expire);
             else tokenParams.ExpireDate = DateTime.MinValue;
 
             string token = JWTToken.CreateToken(tokenParams, claims);

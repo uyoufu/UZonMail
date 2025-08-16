@@ -40,7 +40,7 @@ namespace UZonMail.Core.Services.Files
         private (string, string) GetObjectStorePath(FileBucket fileBucket, string fileName)
         {
             // 年/月/日/文件名
-            string relativePath = DateTime.Now.ToString("yyyy/MM/dd") + $"/{DateTime.Now.ToTimestamp()}_{fileName}";
+            string relativePath = DateTime.UtcNow.ToString("yyyy/MM/dd") + $"/{DateTime.UtcNow.ToTimestamp()}_{fileName}";
             string fullPath = Path.Combine(fileBucket.RootDir, relativePath);
 
             // 创建父目录

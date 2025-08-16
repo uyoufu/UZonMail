@@ -87,7 +87,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// 是否是动态代理: 当过期时间小于 30 分钟时，判断为动态代理
         /// 动态代理当检测不到时，就会自动停止检测
         /// </summary>
-        public bool IsDynamic => _expireDate - DateTime.Now < TimeSpan.FromMinutes(30);
+        public bool IsDynamic => _expireDate - DateTime.UtcNow < TimeSpan.FromMinutes(30);
 
         /// <summary>
         /// 过期时间
@@ -115,7 +115,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 _logger.Error("没有可用的有效代理检测接口, 代理将变得不稳定,请联系开发者解决");
                 // 使用过期日期进行判断
                 if (!_isHealthy) return false;
-                _isHealthy = _expireDate < DateTime.Now;
+                _isHealthy = _expireDate < DateTime.UtcNow;
                 return false;
             }
 
@@ -264,7 +264,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
             // 更新代理数据
             ProxyInfo = proxy;
             SetProxyTesterType(testerType);
-            _expireDate = DateTime.Now.AddSeconds(expireSeconds);
+            _expireDate = DateTime.UtcNow.AddSeconds(expireSeconds);
 
             // 将字符串转换为代理
             Uri uri = new(proxy.Url);

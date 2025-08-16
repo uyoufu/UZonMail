@@ -1185,6 +1185,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tinymce/tinymce-vue@npm:^6.3.0":
+  version: 6.3.0
+  resolution: "@tinymce/tinymce-vue@npm:6.3.0"
+  peerDependencies:
+    tinymce: ^8.0.0 || ^7.0.0 || ^6.0.0 || ^5.5.1
+    vue: ^3.0.0
+  peerDependenciesMeta:
+    tinymce:
+      optional: true
+  checksum: 10c0/74788a25aae071e1cb2f1ad91e41f9eda6ba0aa8846e687745ea2846d117fd42fd63bd8a23f44f32d31528a8fb1b28d182b07ee27f82f3f48f0d97cbc7ec41a6
+  languageName: node
+  linkType: hard
+
 "@types/body-parser@npm:*":
   version: 1.19.5
   resolution: "@types/body-parser@npm:1.19.5"
@@ -8986,6 +8999,7 @@ __metadata:
     "@quasar/cli": "npm:^2.5.0"
     "@quasar/extras": "npm:^1.16.17"
     "@quasar/quasar-app-extension-testing-unit-vitest": "npm:^1.1.0"
+    "@tinymce/tinymce-vue": "npm:^6.3.0"
     "@types/crypto-js": "npm:^4.2.2"
     "@types/lodash": "npm:^4.17.16"
     "@types/node": "npm:^22.13.9"

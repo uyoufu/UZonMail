@@ -68,7 +68,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             // tempKey 保证数据修改后，会继续验证
             var inputMd5 = $"{email}-{username}-{password}".MD5();
             if (AuthenticationResult != null
-                && AuthenticationResult.ExpireAt > DateTime.Now
+                && AuthenticationResult.ExpireAt > DateTime.UtcNow
                 && _authenticateInputMd5 == inputMd5) return;
             _authenticateInputMd5 = inputMd5;
 

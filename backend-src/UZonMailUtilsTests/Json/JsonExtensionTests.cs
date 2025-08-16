@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMail.Utils.Json.Tests
+namespace UZonMailUtilsTests.Json
 {
     [TestClass()]
     public class JsonExtensionTests

@@ -93,7 +93,7 @@ namespace UZonMail.Core.Controllers.Emails
             if (emailGroup == null) return false.ToFailResponse("未找到该邮件组");
 
             // 将组进行重命名
-            emailGroup.Name += "_deletedAt" + DateTime.Now.ToString("D");
+            emailGroup.Name += "_deletedAt" + DateTime.UtcNow.ToString("D");
             emailGroup.IsDeleted = true;
             await db.SaveChangesAsync();
             return true.ToSuccessResponse();

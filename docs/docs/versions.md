@@ -4,6 +4,30 @@ editLink: false
 description: 本页收录了宇正群邮所有历史发布版本。宇正群邮是一款开源免费的邮件群发软件，支持邮件群发、邮件营销、邮箱爬取、变量替换等功能，兼容所有邮箱账号（含Outlook OAuth2），支持Windows、Linux、MacOS及服务器部署。多线程并发，支持多账号，性能强劲，持续迭代优化，被外贸、教育、财务等行业广泛认可。宇正群邮致力于成为最好用的邮件群发软件，是企业和个人邮件营销的首选开源邮件群发解决方案。
 ---
 
+## 0.16.1
+
+> 更新时期：2025-08-16
+
+### 新增功能
+
+1. 强化模板和正文编辑器，支持直接拖动添加图片，支持表格、编辑图片等高级功能
+
+### bug 修复
+
+1. 修复模板直接复制 html 内容时，无法保存的 bug
+2. 修复服务器时间与UI时间显示不一致问题
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.16.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.1.0.zip)
+
+[uzonmail-service-win-x64-0.16.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.16.1.0.zip)
+
+[uzonmail-service-linux-x64-0.16.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.16.1.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
+
 ## 0.16.0
 
 > 更新时期：2025-08-01

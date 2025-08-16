@@ -227,7 +227,7 @@ namespace UZonMail.Core.Controllers.Users
             if (file == null) throw new KnownException("文件不能为空");
 
             var userId = tokenService.GetUserSqlId();
-            var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(userId.ToString(), "avatar", DateTime.Now.ToTimestamp() + "_" + file.FileName);
+            var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(userId.ToString(), "avatar", DateTime.UtcNow.ToTimestamp() + "_" + file.FileName);
 
             // 清除原来的头像文件
             string baseDir = Path.GetDirectoryName(fullPath) ?? throw new KnownException("文件路径错误");

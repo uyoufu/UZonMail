@@ -13,7 +13,7 @@ namespace UZonMail.DB.SQL.Core.Files
         {
             FileObjectId = fileUsage.FileObjectId;
             UserId = fileUsage.OwnerUserId;
-            ExpireDate = DateTime.Now.AddMinutes(2);
+            ExpireDate = DateTime.UtcNow.AddMinutes(2);
             FileName = fileUsage.DisplayName ?? fileUsage.FileName;
         }
 

@@ -33,7 +33,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <summary>
         /// 开始日期
         /// </summary>
-        private DateTime _startDate = DateTime.Now;
+        private DateTime _startDate = DateTime.UtcNow;
         #endregion
 
         #region 公开属性
@@ -116,9 +116,9 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             SentTotal++;
 
             // 重置每日发件量
-            if (_startDate.Date != DateTime.Now.Date)
+            if (_startDate.Date != DateTime.UtcNow.Date)
             {
-                _startDate = DateTime.Now;
+                _startDate = DateTime.UtcNow;
                 SentTotalToday = 0;
             }
             else
@@ -193,7 +193,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             }
 
 
-            CreateDate = DateTime.Now;
+            CreateDate = DateTime.UtcNow;
             Email = outbox.Email;
             Name = outbox.Name;
             Id = outbox.Id;

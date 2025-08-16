@@ -103,7 +103,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <summary>
         /// 任务开始日期
         /// </summary>
-        private readonly DateTime _startDate = DateTime.Now;
+        private readonly DateTime _startDate = DateTime.UtcNow;
         #endregion
 
 
@@ -250,7 +250,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
                 // 更新邮件状态
                 await sqlContext.SendingItems.UpdateAsync(x => invalidSendingItemIds.Contains(x.Id),
                     x => x.SetProperty(y => y.Status, SendingItemStatus.Invalid)
-                        .SetProperty(y => y.SendDate, DateTime.Now)
+                        .SetProperty(y => y.SendDate, DateTime.UtcNow)
                         .SetProperty(y => y.SendResult, "指定的发件箱已被删除"));
 
                 // 过滤掉无效的发件箱项
@@ -346,7 +346,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             sendingGroup.SentCount = allSendingItems.Count(x => x.Status <= SendingItemStatus.Cancel) + sendingGroup.SuccessCount;
             // 开始发送日期
             if (sendingGroup.SendStartDate == DateTime.MinValue)
-                sendingGroup.SendStartDate = DateTime.Now;
+                sendingGroup.SendStartDate = DateTime.UtcNow;
             // 保存组状态
             await sqlContext.SaveChangesAsync();
 

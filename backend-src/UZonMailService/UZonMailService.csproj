@@ -9,7 +9,7 @@
 		<ServerGarbageCollection>false</ServerGarbageCollection>
 		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
 		<LangVersion>13.0</LangVersion>
-		<FileVersion>0.16.0.0</FileVersion>
+		<FileVersion>0.16.1.0</FileVersion>
 		<AssemblyVersion>0.16.0.0</AssemblyVersion>
 	</PropertyGroup>
 
