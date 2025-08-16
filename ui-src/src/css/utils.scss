@@ -84,8 +84,8 @@
 
   /* 隐藏滚动条*/
   &::-webkit-scrollbar {
-    width: 0px;   // 垂直滚动条宽度
-    height: 0px;  // 水平滚动条高度
+    width: 0px; // 垂直滚动条宽度
+    height: 0px; // 水平滚动条高度
   }
 
   &:hover::-webkit-scrollbar {
@@ -254,6 +254,17 @@
   }
   @media (min-width: 992px) {
     width: 25%;
+  }
+}
+// #endregion
+
+// #region 鼠标相关
+.clickable {
+  cursor: pointer;
+  padding: 4px;
+  &:hover {
+    border-radius: 4px;
+    background-color: $grey-12;
   }
 }
 // #endregion
