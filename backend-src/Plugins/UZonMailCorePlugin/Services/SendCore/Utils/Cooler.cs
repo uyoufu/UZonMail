@@ -9,7 +9,7 @@ namespace UZonMail.Core.Services.SendCore.Utils
     public class Cooler
     {
         private readonly static ILog _logger = LogManager.GetLogger(typeof(Cooler));
-        private DateTime _startDate = DateTime.Now;
+        private DateTime _startDate = DateTime.UtcNow;
         private Timer? _timer = null;
 
         /// <summary>

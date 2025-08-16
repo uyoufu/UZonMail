@@ -17,7 +17,7 @@ namespace UZonMail.Core.Services.SendCore.Utils
             var sendingGroup = await db.SendingGroups.FirstAsync(x=>x.Id == sendingGroupId);
             // 标记办结
             sendingGroup.Status = SendingGroupStatus.Finish;
-            sendingGroup.SendEndDate = DateTime.Now;
+            sendingGroup.SendEndDate = DateTime.UtcNow;
             await db.SaveChangesAsync();
 
             // 通知发件组发送完成       

@@ -26,7 +26,7 @@ namespace UZonMail.DB.SQL.Base
         /// <summary>
         /// 创建日期
         /// </summary>
-        public DateTime CreateDate { get; set; } = DateTime.Now;
+        public DateTime CreateDate { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// 是否被删除了

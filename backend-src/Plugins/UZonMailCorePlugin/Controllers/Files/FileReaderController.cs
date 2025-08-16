@@ -51,7 +51,7 @@ namespace UZonMail.Core.Controllers.Files
             if (fileReader == null) return NotFound();
 
             // 判断是否过期
-            if (fileReader.ExpireDate < DateTime.Now)
+            if (fileReader.ExpireDate < DateTime.UtcNow)
             {
                 db.FileReaders.Remove(fileReader);
                 await db.SaveChangesAsync();

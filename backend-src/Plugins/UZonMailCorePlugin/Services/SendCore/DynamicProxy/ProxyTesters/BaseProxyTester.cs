@@ -46,7 +46,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
         public async Task<Result<string?>> GetIP(string proxyUrl)
         {
             // 每天自动验证一次
-            if (DateTime.Now.Date != _lastValidateTime.Date)
+            if (DateTime.UtcNow.Date != _lastValidateTime.Date)
             {
                 await Validate();
             }
@@ -90,7 +90,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
             if (Interlocked.Exchange(ref _validating, true)) return false;
 
             _validating = true;
-            _lastValidateTime = DateTime.Now;
+            _lastValidateTime = DateTime.UtcNow;
 
             var response = await GetHttpRequestWithoutProxy()
                 .WithHttpClient(_httpClient)

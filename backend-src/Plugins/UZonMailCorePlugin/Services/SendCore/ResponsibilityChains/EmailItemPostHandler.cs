@@ -71,20 +71,20 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             data.Status = success ? SendingItemStatus.Success : SendingItemStatus.Failed;
             data.SendResult = message;
             data.TriedCount = emailItem.TriedCount;
-            data.SendDate = DateTime.Now;
+            data.SendDate = DateTime.UtcNow;
             // 解析邮件 id
             data.ReceiptId = new ResultParser(message).GetReceiptId();
 
             // 更新 sendingItemInbox 状态
             await db.SendingItemInboxes.UpdateAsync(x => x.SendingItemId == emailItem.SendingItemId,
                 x => x.SetProperty(y => y.FromEmail, outbox.Email)
-                    .SetProperty(y => y.SendDate, DateTime.Now)
+                    .SetProperty(y => y.SendDate, DateTime.UtcNow)
                 );
 
             // 更新收件箱的最近收件日期
             await db.Inboxes.UpdateAsync(x => emailItem.Inboxes.Select(x => x.Id).Contains(x.Id),
-                               x => x.SetProperty(y => y.LastBeDeliveredDate, DateTime.Now)
-                                .SetProperty(y => y.LastSuccessDeliveryDate, DateTime.Now));
+                               x => x.SetProperty(y => y.LastBeDeliveredDate, DateTime.UtcNow)
+                                .SetProperty(y => y.LastSuccessDeliveryDate, DateTime.UtcNow));
 
             await db.SaveChangesAsync();
 

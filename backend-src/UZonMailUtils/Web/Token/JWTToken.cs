@@ -28,7 +28,7 @@ namespace UZonMail.Utils.Web.Token
                 issuer: tokenParam.Issuer,
                 audience: tokenParam.Audience,
                 claims: claims,
-                notBefore: DateTime.Now,
+                notBefore: DateTime.UtcNow,
                 expires: tokenParam.ExpireDate,
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );

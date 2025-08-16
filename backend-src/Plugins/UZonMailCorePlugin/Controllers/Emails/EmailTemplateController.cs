@@ -88,11 +88,11 @@ namespace UZonMail.Core.Controllers.Emails
                     if (existOne.Thumbnail.Contains('?'))
                     {
                         // 包含?号，将后面的值替换
-                        existOne.Thumbnail = existOne.Thumbnail.Substring(0, existOne.Thumbnail.IndexOf('?')) + $"?v={DateTime.Now.ToTimestamp()}";
+                        existOne.Thumbnail = existOne.Thumbnail.Substring(0, existOne.Thumbnail.IndexOf('?')) + $"?v={DateTime.UtcNow.ToTimestamp()}";
                     }
                     else
                     {
-                        existOne.Thumbnail = existOne.Thumbnail + $"?v={DateTime.Now}";
+                        existOne.Thumbnail = existOne.Thumbnail + $"?v={DateTime.UtcNow}";
                     }
                 }
 

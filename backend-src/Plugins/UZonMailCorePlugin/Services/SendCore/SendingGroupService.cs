@@ -353,7 +353,7 @@ namespace UZonMail.Core.Services.SendCore
                 return vdResult.ToErrorResponse<SendingGroup>();
             }
 
-            var isSchedule = sendingData.ScheduleDate > DateTime.Now.AddMinutes(1);
+            var isSchedule = sendingData.ScheduleDate > DateTime.UtcNow.AddMinutes(1);
 
             // 创建发件组
             sendingData.SendingType = isSchedule ? SendingGroupType.Scheduled : SendingGroupType.Instant;
