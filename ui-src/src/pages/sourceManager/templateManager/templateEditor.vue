@@ -132,11 +132,9 @@ async function onBackToTemplateManager () {
 // #endregion
 
 
-
 // #region tinymce 相关配置
 // 详细配置说明参考: https://juejin.cn/post/7377335032354947126
 import TinymceEditor from '@tinymce/tinymce-vue'
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tinymceEditor = ref<any>(null)
 const tinymceInit = {
@@ -151,7 +149,29 @@ const tinymceInit = {
   setup: (editor: any) => {
     tinymceEditor.value = editor
   }
+  // TODO: 此实现有 Bug, 后期再实现
+
+  // images_upload_handler: (blobInfo: any, progress: (value: number) => void) => {
+  //   logger.debug('[tinymce] 上传图片:', blobInfo, blobInfo.blobUri(), progress)
+
+  //   // 判断是否是域名部署
+  //   const config = useConfig()
+  //   if (!config.baseUrl.startsWith('https') || config.baseUrl.indexOf(":") > -1) {
+  //     logger.info('[tinymce] 当前配置不支持图片上传, 仅支持域名部署')
+  //     return new Promise((resolve) => {
+  //       resolve(blobInfo.blobUri())
+  //     })
+  //   }
+
+  //   logger.debug('[tinymce] 开始上传图片到服务器')
+  //   return ''
+  // }
 }
+
+// 上传图片到服务器
+
+// 上传本地图片
+
 // #endregion
 </script>
 
