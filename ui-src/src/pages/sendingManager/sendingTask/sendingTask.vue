@@ -1,5 +1,5 @@
 <template>
-  <div class="card-like column q-pa-md scroll-y no-wrap">
+  <div class="card-like column q-pa-md hover-scroll no-wrap">
     <q-input v-model="emailInfo.subjects" autogrow label="主题" dense
       placeholder="请输入邮件主题(若需要随机主题，多个主题之间请使用分号 ; 进行分隔或者单独一行)" class="email-subject q-mb-sm" style="max-height:200px">
       <template v-slot:before>
@@ -27,10 +27,8 @@
     <SelectEmailBox v-model="emailInfo.ccBoxes" :emailBoxType="1" icon="settings_accessibility" label="抄送人"
       placeholder="请选择抄送人 (可选)" class="q-mb-sm" icon-color="secondary" />
 
-    <q-editor v-model="emailInfo.body" :definitions="editorDefinitions" :toolbar="editorToolbar"
-      class="column no-wrap q-pa-xs flex q-ma-sm" style="max-height: 300px;"
-      placeholder="在此处输入模板内容, 变量使用 {{ }} 号包裹, 例如 {{ variableName }}">
-    </q-editor>
+    <TemplateEditor class="q-pa-xs q-ma-sm" v-model="emailInfo.body" :show-title-bar="false" :height="300">
+    </TemplateEditor>
 
     <ObjectUploader v-model="emailInfo.attachments" v-model:need-upload="needUpload" label="附件" class="q-mx-sm q-mt-sm"
       style="width:auto" multiple />
@@ -55,6 +53,7 @@ import SelectEmailBox from './components/SelectEmailBox.vue'
 import SelectEmailData from './components/SelectEmailData.vue'
 import ObjectUploader from 'components/uploader/ObjectUploader.vue'
 import AsyncTooltip from 'components/asyncTooltip/AsyncTooltip.vue'
+import TemplateEditor from 'src/pages/sourceManager/templateManager/templateEditor.vue'
 
 import { useBottomFunctions } from './bottomFunctions'
 
@@ -76,10 +75,6 @@ const emailInfo: Ref<IEmailCreateInfo> = ref({
   sendBatch: false,
   proxyIds: []
 })
-
-// 编辑器配置
-import { useWysiwygEditor } from 'src/pages/sourceManager/templateManager/compositions'
-const { editorDefinitions, editorToolbar } = useWysiwygEditor()
 
 // 底部功能按钮
 const { needUpload, OkBtn, CommonBtn, onPreviewClick, onScheduleSendClick, onSendNowClick } = useBottomFunctions(emailInfo)
@@ -128,5 +123,11 @@ useSendingGroupTemplate(emailInfo)
 .email-subject :deep(textarea) {
   max-height: 120px;
   overflow-y: auto;
+}
+
+.template-editor-container {
+  height: 250px;
+  max-height: 300px;
+  border: 2px solid $grey-12
 }
 </style>
