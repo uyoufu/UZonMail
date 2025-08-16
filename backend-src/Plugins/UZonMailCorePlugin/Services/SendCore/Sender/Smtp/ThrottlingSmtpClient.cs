@@ -1,11 +1,10 @@
 ﻿using log4net;
 using MailKit;
-using MailKit.Net.Proxy;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
-using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 {
@@ -13,7 +12,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
     /// 具有发件速率限制的 smtp 客户端
     /// 代理与客户端是绑定的
     /// </summary>
-    public class ThrottlingSmtpClient() : SmtpClient, IEmailSendingClient
+    public class ThrottlingSmtpClient(DebugConfig debugConfig) : SmtpClient, IEmailSendingClient
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ThrottlingSmtpClient));
 
@@ -81,7 +80,15 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 await Task.Delay(delayMs);
             }
 
-            var sentMessage = await base.SendAsync(message, cancellationToken, progress);
+            string? sentMessage;
+            if (debugConfig.PreventSending)
+            {
+                sentMessage = "调试模式中已阻止真实发件";
+            }
+            else
+            {
+                sentMessage = await base.SendAsync(message, cancellationToken, progress);
+            }
 
             // 增加本身计数
             SentCount++;
