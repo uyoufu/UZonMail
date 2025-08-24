@@ -16,8 +16,8 @@ import { ElementPlusResolver, QuasarResolver } from 'unplugin-vue-components/res
 import { useConfig } from 'src/config/index'
 
 // mock:https://github.com/vbenjs/vite-plugin-mock/blob/main/README.zh_CN.md
-export default defineConfig(async (ctx) => {
-  const userConfig = await useConfig(ctx)
+export default defineConfig((ctx) => {
+  const userConfig = useConfig(ctx)
 
   return {
     eslint: {
@@ -36,7 +36,7 @@ export default defineConfig(async (ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['config.ts', 'quasar-lang-pack', 'i18n', 'axios', 'logger'],
+    boot: ['config.ts', 'quasar-lang-pack', 'i18n', 'axios', 'logger', "dayjs"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ['app.scss'],
