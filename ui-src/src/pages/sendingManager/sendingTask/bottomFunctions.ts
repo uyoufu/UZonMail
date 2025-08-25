@@ -3,6 +3,7 @@
 import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
+import { formatDateToUTC } from 'src/utils/format'
 import type { IEmailCreateInfo } from 'src/api/emailSending';
 import { sendEmailNow, sendSchedule } from 'src/api/emailSending'
 import { useUserInfoStore } from 'src/stores/user'
@@ -157,12 +158,12 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
     console.log('email info:', emailInfo.value)
 
     // 选择日期
-    const { ok, data } = await showComponentDialog<string>(SelectScheduleDate)
+    const { ok, data: scheduleDate } = await showComponentDialog<string>(SelectScheduleDate)
     if (!ok) return
 
     // 将数据传到后台发送
     await sendSchedule(Object.assign({ smtpPasswordSecretKeys: userInfoStore.smtpPasswordSecretKeys }, emailInfo.value, {
-      scheduleDate: data
+      scheduleDate: formatDateToUTC(scheduleDate) // 转换成带时区的字符串
     }))
 
     notifySuccess('定时发送已预约')

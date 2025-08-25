@@ -330,6 +330,7 @@ namespace UZonMail.Core.Services.SendCore
                         })
                         .Build();
 
+            // 先指定为 Unspecified，再转为本地时间
             var trigger = TriggerBuilder.Create()
                 .ForJob(jobKey)
                 .StartAt(new DateTimeOffset(sendingGroup.ScheduleDate))

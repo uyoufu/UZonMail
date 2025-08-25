@@ -21,7 +21,7 @@ namespace UZonMail.Core.Services.EmailDecorator
             if (bodyData == null) return Task.FromResult(originContent);
 
             // 获取内容中的变量
-            var variables = EmailVariableHelper.GetAllVariableNames(originContent);
+            var variables = EmailVariableHelper.GetAllVariableContents(originContent);
             if (variables.Count == 0) return Task.FromResult(originContent);
 
             foreach (var variable in variables)
