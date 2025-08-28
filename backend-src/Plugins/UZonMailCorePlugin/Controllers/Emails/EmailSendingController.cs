@@ -151,6 +151,12 @@ namespace UZonMail.Core.Controllers.Emails
             await db.SendingGroups.UpdateAsync(x => x.Id == sendingGroupId, x => x.SetProperty(y => y.Status, SendingGroupStatus.Cancel));
             await db.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending, x => x.SetProperty(y => y.Status, SendingItemStatus.Cancel));
 
+            // 若是计划发件，则取消计划
+            if (sendingGroup.SendingType == SendingGroupType.Scheduled)
+            {
+                await sendingService.RemoveSendSchedule(sendingGroup.Id);
+            }
+
             return true.ToSuccessResponse();
         }
 
