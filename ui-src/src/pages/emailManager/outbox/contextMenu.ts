@@ -16,7 +16,7 @@ import type { getSelectedRowsType } from 'src/compositions/qTableUtils'
 import { useI18n } from 'vue-i18n'
 import logger from 'loglevel'
 
-import { tryOutlookDelegateAuthorization, isExchangeEmail } from './headerFunctions'
+import { tryOutlookDelegateAuthorization, isExchangeOutbox } from './headerFunctions'
 
 /**
  * 获取smtp密码
@@ -69,7 +69,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       label: t('outboxManager.outlookDelegateAuthorization'),
       tooltip: t('outboxManager.outlookDelegateAuthorization'),
       onClick: onRequestOutlookDelegateAuthorization,
-      vif: row => isExchangeEmail(row.email)
+      vif: row => isExchangeOutbox(row.smtpHost, row.email)
     },
   ]
 
