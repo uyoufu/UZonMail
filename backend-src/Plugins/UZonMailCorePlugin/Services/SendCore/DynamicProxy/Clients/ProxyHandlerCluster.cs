@@ -136,6 +136,14 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 return 5;
             return int.Parse(match.Groups[1].Value);
         }
+
+        protected string GetProtocol(string url)
+        {
+            var match = Regex.Match(url, "protocol=(socks4|socks5|http|https)");
+            if (!match.Success)
+                return "socks5";
+            return match.Groups[1].Value;
+        }
         #endregion
     }
 }

@@ -61,8 +61,8 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
             // 未查找成功
             if (!response.IsSuccessStatusCode)
             {
-                _logger.Debug($"动态IP检测失败,{response.StatusCode}: {response.ReasonPhrase}");
-                return Result<string?>.Success(string.Empty);
+                _logger.Debug($"动态代理 {proxyUrl} 检测失败,{response.StatusCode}: {response.ReasonPhrase}");
+                return Result<string?>.Fail(string.Empty);
             }
 
             var content = await response.Content.ReadAsStringAsync();

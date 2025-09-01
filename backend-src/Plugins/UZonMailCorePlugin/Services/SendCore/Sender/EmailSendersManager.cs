@@ -14,10 +14,10 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// </summary>
         /// <param name="outboxEmail"></param>
         /// <returns></returns>
-        public IEmailSender GetEmailSender(string outboxEmail)
+        public IEmailSender GetEmailSender(string outboxEmail, string smtpHost)
         {
             // 调用发件器进行发件
-            return emailSenders.Where(x => x.IsMatch(outboxEmail))
+            return emailSenders.Where(x => x.IsMatch(outboxEmail, smtpHost))
                 .OrderBy(x => x.Order)
                 .First();
         }
