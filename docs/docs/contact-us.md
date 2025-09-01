@@ -16,7 +16,9 @@ QQ 和 QQ 群会不定时查看，所以不会很及时。
 
 ## 🌶️技术支持
 
-QQ  群：[877458612(目前已满)](https://qun.qq.com/universal-share/share?ac=1&authKey=wq5gssAz7rE0ZYcxxlfrcMHhPFI0NUiiNtHjjogGt1FE739DoXyx%2Bt2cK7A0%2BMid&busi_data=eyJncm91cENvZGUiOiI4Nzc0NTg2MTIiLCJ0b2tlbiI6IlF2QjhHU08wUTl5YzhZT002VjNRMUxUM0NNMi85OFBBcDBYcWxab3RRWlM5eTg4Wm1hRzVvNVVla1VueElQV3YiLCJ1aW4iOiIyNjA4Mjc0MDAifQ%3D%3D&data=8B1ZPZjm_l7lhrW8InlmsQFF_HhEE8m_W-kFgAPq5irVe82UiEFYgmNVj_tbZwPVgrlHU659jvmW9SJfdTOmkA&svctype=4&tempid=h5_group_info)
+QQ  1群：[877458612 (已满)](https://qm.qq.com/q/xe3923GZ9Y)
+
+QQ  2群：[124340073](https://qm.qq.com/q/L6S6EMyKIM)
 
 公众号: 逛逛开源界 (WanderOpenSource)
 

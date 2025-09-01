@@ -27,6 +27,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             var proxies = await proxyGetter.GetUserProxies();
 
             // 移除已经不存在的代理
+            // 移除不可用的代理集
             _proxyHandlers.Keys.Except(proxies.Select(x => x.ObjectId))
                 .ToList()
                 .ForEach(x => _proxyHandlers.TryRemove(x, out _));

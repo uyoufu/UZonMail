@@ -24,9 +24,9 @@ namespace UZonMail.Core.Database.Startup
 
         private async Task ResetSendingGroup()
         {
-            // 将所有的 Sending 或者 Create 状态的发件组重置为 Finish
-            await db.SendingGroups.UpdateAsync(x => x.Status == SendingGroupStatus.Sending
-                || x.Status == SendingGroupStatus.Created
+            // 将所有的 Sending 或者 Created 状态的即时发件组重置为 Finish
+            await db.SendingGroups.UpdateAsync(x => x.SendingType == SendingGroupType.Instant
+                && (x.Status == SendingGroupStatus.Sending || x.Status == SendingGroupStatus.Created)
             , obj => obj.SetProperty(x => x.Status, SendingGroupStatus.Finish)
                 .SetProperty(x => x.LastMessage, "系统被中断")
             );

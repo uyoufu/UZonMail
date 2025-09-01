@@ -340,6 +340,18 @@ namespace UZonMail.Core.Services.SendCore
         }
 
         /// <summary>
+        /// 移除发件计划
+        /// </summary>
+        /// <param name="sendingGroupId"></param>
+        /// <returns></returns>
+        public async Task RemoveSendSchedule(long sendingGroupId)
+        {
+            var scheduler = await schedulerFactory.GetScheduler();
+            var jobKey = new JobKey($"emailSending-{sendingGroupId}", "sendingGroup");
+            await scheduler.DeleteJob(jobKey);
+        }
+
+        /// <summary>
         /// 立即发件或者计划发件
         /// 根据 scheduleDate 进行判断
         /// </summary>

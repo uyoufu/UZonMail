@@ -21,7 +21,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// 最小数量
         /// 当小于这个数量时，就会重新获取代理
         /// </summary>
-        private readonly int _minimumCount = 3;
+        private readonly int _minimumCount = 1;
 
         /// <summary>
         /// 获取 IP 地址
@@ -90,7 +90,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         }
 
         /// <summary>
-        /// 那张健康状态
+        /// 标记非健康状态
         /// </summary>
         public override void MarkHealthless()
         {
@@ -122,5 +122,28 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 _handlers.TryRemove(disabledHandler.Id, out _);
             }
         }
+
+        #region 工具类
+        /// <summary>
+        /// 默认为 5 分钟
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        protected int GetExpireMinutes(string url)
+        {
+            var match = Regex.Match(url, "expireMinutes=(\\d+)");
+            if (!match.Success)
+                return 5;
+            return int.Parse(match.Groups[1].Value);
+        }
+
+        protected string GetProtocol(string url)
+        {
+            var match = Regex.Match(url, "protocol=(socks4|socks5|http|https)");
+            if (!match.Success)
+                return "socks5";
+            return match.Groups[1].Value;
+        }
+        #endregion
     }
 }
