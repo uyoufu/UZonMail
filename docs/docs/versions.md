@@ -10,7 +10,6 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 新增功能
 
-1. 新增 [流冠]() 动态代理支持
 2. 支持 outlook 使用代理发件（当 smtp 地址非 smtp.outlook.com 时有效）
 
 ### bug 修复
