@@ -51,12 +51,12 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// <summary>
         /// 用户名
         /// </summary>
-        public string? Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         /// <summary>
         /// 密码
         /// </summary>
-        public string? Password { get; set; }
+        public string Password { get; set; } = string.Empty;
         #endregion
 
         #region 是否可用
@@ -134,6 +134,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
                 }
             }
 
+            _isHealthy = false;
             _logger.Debug($"代理 {Id} 检测失败");
             return false;
         }

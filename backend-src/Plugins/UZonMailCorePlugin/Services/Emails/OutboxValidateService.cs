@@ -43,7 +43,7 @@ namespace UZonMail.Core.Services.Emails
         /// <returns></returns>
         public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox)
         {
-            var emailSender = sendersManager.GetEmailSender(outbox.Email);
+            var emailSender = sendersManager.GetEmailSender(outbox.Email,outbox.SmtpHost);
             var result = await emailSender.TestOutbox(serviceProvider, outbox);
 
             // 更新数据库

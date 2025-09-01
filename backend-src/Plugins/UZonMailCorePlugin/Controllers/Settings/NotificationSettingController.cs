@@ -44,7 +44,7 @@ namespace UZonMail.Core.Controllers.Settings
         [HttpPut()]
         public async Task<ResponseResult<bool>> UpdateSmtpNotificationSetting([FromBody] SmtpNotificationSetting smtpSettings, AppSettingType type = AppSettingType.System)
         {
-            var emailSender = sendersManager.GetEmailSender(smtpSettings.Email);
+            var emailSender = sendersManager.GetEmailSender(smtpSettings.Email, smtpSettings.SmtpHost);
 
             var userId = tokenService.GetUserSqlId();
 

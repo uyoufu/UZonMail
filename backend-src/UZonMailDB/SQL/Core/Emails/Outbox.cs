@@ -89,12 +89,30 @@
         /// </summary>
         public string? ValidFailReason { get; set; }
 
-
-        public static bool IsExchangeEmail(string email)
+        /// <summary>
+        /// 判断是否是 Exchange 邮箱
+        /// 1. 发件箱是 Exchange 邮箱
+        /// 2. smtp 地址为空或者 smtp 地址包含 outlook 或者 hotmail
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="smtpHost"></param>
+        /// <returns></returns>
+        public static bool IsExchangeEmail(string email, string smtpHost = "")
         {
             if (string.IsNullOrEmpty(email)) return false;
             var domain = email.Trim().Split("@").Last().ToLower();
-            return new List<string>() { "outlook.com", "hotmail.com" }.Contains(domain);
+            var exchangeDomains = new List<string>() { "outlook.com", "hotmail.com" };
+            if (!exchangeDomains.Contains(domain))
+            {
+                return false;
+            }
+
+            // 判断 smtpHost
+            if (string.IsNullOrEmpty(smtpHost)) return true;
+
+            // 判断 smtpHost 是否是 exchange
+            smtpHost = smtpHost.ToLower();
+            return exchangeDomains.Any(x => smtpHost.EndsWith(x));
         }
     }
 }

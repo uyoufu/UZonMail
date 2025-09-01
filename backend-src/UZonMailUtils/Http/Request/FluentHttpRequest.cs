@@ -107,17 +107,33 @@ namespace UZonMail.Utils.Http.Request
 
         public FluentHttpRequest AddQuery(string name, string value)
         {
-            _parameters.Remove(name);
+            var key = $"query:{name}";
+            _parameters.Remove(key);
             var query = new UrlQuery(name, value);
-            _parameters.Add(query.Key, query);
+            _parameters.Add(key, query);
             return this;
         }
 
         public FluentHttpRequest AddParam(string name, string value)
         {
-            _parameters.Remove(name);
+            var key = $"param:{name}";
+            _parameters.Remove(key);
             var param = new UrlParam(name, value);
+            _parameters.Add(key, param);
             return this;
+        }
+
+        public Parameter? GetParameter(string name)
+        {
+            var queryKey = $"query:{name}";
+            if (_parameters.TryGetValue(queryKey, out var value1))
+                return value1;
+
+            var paramKey = $"param:{name}";
+            if (_parameters.TryGetValue(paramKey, out var value2))
+                return value2;
+
+            return default;
         }
 
         public FluentHttpRequest AddHeader(string name, string value)

@@ -19,11 +19,11 @@ namespace UZonMail.Core.Services.SendCore.Sender
         int Order { get; }
 
         /// <summary>
-        /// 是否匹配当前的 outbox
+        /// 是否匹配当前的 email
         /// </summary>
-        /// <param name="outbox"></param>
+        /// <param name="email"></param>
         /// <returns></returns>
-        bool IsMatch(string outbox);
+        bool IsMatch(string email, string smtpHost);
 
         /// <summary>
         /// 开发发送邮件

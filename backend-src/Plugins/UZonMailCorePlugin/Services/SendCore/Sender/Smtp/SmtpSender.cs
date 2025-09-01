@@ -24,7 +24,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 
         public int Order => int.MaxValue;
 
-        public bool IsMatch(string outbox)
+        public bool IsMatch(string email,string smtpHost)
         {
             return true;
         }

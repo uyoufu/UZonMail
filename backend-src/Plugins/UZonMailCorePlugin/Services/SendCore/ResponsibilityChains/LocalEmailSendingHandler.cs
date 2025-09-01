@@ -38,7 +38,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             var mimeMessage = await CreateMimeMessage(context);
 
             // 调用发件器进行发件
-            var emailSender = sendersManager.GetEmailSender(sendItem.Outbox.Email);
+            var emailSender = sendersManager.GetEmailSender(sendItem.Outbox.Email,sendItem.Outbox.SmtpHost);
             if (emailSender == null)
             {
                 _logger.Error($"没有找到匹配的邮件发送器，发件箱：{sendItem.Outbox.Email}");
