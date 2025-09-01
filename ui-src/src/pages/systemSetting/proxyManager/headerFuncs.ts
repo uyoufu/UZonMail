@@ -7,6 +7,8 @@ import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
 
+// TODO: 不支持动态代理提示
+
 /**
  * 代替 URL.canParse 方法
  * @param urlStr
