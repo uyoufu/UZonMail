@@ -102,7 +102,6 @@ namespace UZonMail.Core.Services.SendCore
             Interlocked.Increment(ref _runningTasksCount);
 
             _logger.Info($"线程 {Environment.CurrentManagedThreadId} 开始工作 ...");
-
             while (true)
             {
                 var provider = scope.ServiceProvider;

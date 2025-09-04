@@ -26,12 +26,35 @@ function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
   return aes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, password)
 }
 
+// 判断是否是 Exchange 邮箱
 export function isExchangeEmail (email: string): boolean {
   // 判断是否是 Exchange 邮箱
-  const domains = ['outlook.com', 'hotmail.com']
   const emailDomain = email.trim().split('@')[1]?.toLowerCase()
   if (!emailDomain) return false
-  return domains.includes(emailDomain)
+
+  return isExchangeDomain(emailDomain)
+}
+
+// 判断是否是 Exchange 邮箱域名
+export function isExchangeDomain (domain: string): boolean {
+  if (!domain) return false
+
+  const domains = ['outlook.com', 'hotmail.com']
+  const emailDomain = domain.trim().toLowerCase()
+  if (!emailDomain) return false
+  return domains.some(x => emailDomain.endsWith(x))
+}
+
+// 判断是否是 Exchange 发件箱
+export function isExchangeOutbox (smtpHost: string, email: string): boolean {
+  if (!isExchangeEmail(email))
+    return false
+
+  // 判断 smtp 地址
+  if (smtpHost && !isExchangeDomain(smtpHost))
+    return false
+
+  return true
 }
 
 /**
@@ -205,6 +228,11 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
  */
 export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptKeys: IUserEncryptKeys) {
   if (!isExchangeEmail(outbox.email)) return
+  // 存在但非 Exchange 地址
+  if (outbox.smtpHost && !isExchangeDomain(outbox.smtpHost)) {
+    notifyWarning('检测到 Outlook 邮箱，但 SMTP 地址不是 Exchange 地址，跳过委托授权')
+    return
+  }
 
   // // 判断是否采用个人委托授权
   // if (!outbox.userName || outbox.userName.includes('/')) return
