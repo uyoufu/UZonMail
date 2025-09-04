@@ -1,12 +1,9 @@
-﻿using UZonMail.Utils.Extensions;
-using UZonMail.Core.Utils.Database;
-using log4net;
-using UZonMail.Core.Services.SendCore.Utils;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.Core.Services.SendCore.Contexts;
+﻿using log4net;
 using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Core.Services.SendCore.Utils;
 using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Extensions;
 
 namespace UZonMail.Core.Services.SendCore.Outboxes
 {
@@ -20,8 +17,6 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxEmailAddress));
 
         #region 私有变量
-        private readonly object _lock = new();
-
         // 发件箱数据
         private Outbox _outbox;
 

@@ -132,7 +132,7 @@ namespace UZonMail.Core.Services.Settings.Core
             key = key.ToCamelCase();
 
             var value = this[key];
-            if (value != null)
+            if (value != null && value.Type != JTokenType.Null)
             {
                 var tValue = value.ToObject<T>();
                 // 值非空，添加到结果中
@@ -164,7 +164,7 @@ namespace UZonMail.Core.Services.Settings.Core
             if (value != null) results.Add(value);
 
             var parentValue = Parent?.ToObjects<T>();
-            if(parentValue!=null)results.AddRange(parentValue);
+            if (parentValue != null) results.AddRange(parentValue);
 
             return results;
         }
