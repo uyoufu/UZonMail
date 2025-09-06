@@ -130,7 +130,7 @@ namespace UZonMail.Core.Services.SendCore
                 await chainHandlers.First().Handle(sendingContext);
 
                 // 根据返回值，判断线程是否需要继续
-                if (sendingContext.Status.HasFlag(ContextStatus.ShouldExitThread))
+                if (sendingContext.Status.HasFlag(ContextStatus.ShouldExitTask))
                 {
                     _logger.Info($"线程 {Environment.CurrentManagedThreadId} 结束工作 ...");
                     break;

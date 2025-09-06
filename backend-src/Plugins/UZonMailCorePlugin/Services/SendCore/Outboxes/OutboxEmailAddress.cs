@@ -139,6 +139,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
 
         /// <summary>
         /// 是否应释放
+        /// 只有发件箱无法再次被使用时，才会被标记为应释放
         /// </summary>
         public bool ShouldDispose { get; private set; } = false;
 
@@ -146,14 +147,14 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// 工作中
         /// 当没有发送目标后，working 为 false
         /// </summary>
-        public bool Working => _sendingTargetIds.Count > 0;
+        public bool IsWorking => _sendingTargetIds.Count > 0;
 
         /// <summary>
         /// 是否可用
         /// </summary>
         public bool Enable
         {
-            get => !ShouldDispose && !_isCooling && !_usingLock.IsLocked && Working;
+            get => !ShouldDispose && !_isCooling && !_usingLock.IsLocked && IsWorking;
         }
         #endregion
 
@@ -340,6 +341,17 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             ErroredMessage = erroredMessage;
             ShouldDispose = true;
         }
+
+
+        private int _taskId = 0;
+        public void SetTaskId(int taskId)
+        {
+            _taskId = taskId;
+        }
+        /// <summary>
+        /// 是否正在任务中运行
+        /// </summary>
+        public bool IsRunningInTask => _taskId > 0;
         #endregion
     }
 }

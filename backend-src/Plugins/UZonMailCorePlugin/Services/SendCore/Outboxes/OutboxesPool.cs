@@ -79,7 +79,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
                 if(!this.TryGetValue(email, out var outbox)) continue;
 
                 outbox.RemoveSendingGroup(sendingGroupId);
-                if (outbox.Working) continue;
+                if (outbox.IsWorking) continue;
 
                 // 移除
                 this.RemoveOutbox(outbox);
