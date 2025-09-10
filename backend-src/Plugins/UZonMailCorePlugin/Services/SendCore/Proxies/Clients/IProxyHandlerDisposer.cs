@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
+﻿namespace UZonMail.Core.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// 代理处理器释放器

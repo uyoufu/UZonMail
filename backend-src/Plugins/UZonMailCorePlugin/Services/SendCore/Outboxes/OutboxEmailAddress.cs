@@ -12,13 +12,13 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
     /// 该地址可能仅用于部分发件箱
     /// 也有可能是用于通用发件
     /// </summary>
-    public class OutboxEmailAddress : EmailAddress, IWeight
+    public class OutboxEmailAddress : EmailAddress
     {
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxEmailAddress));
 
         #region 私有变量
         // 发件箱数据
-        private Outbox _outbox;
+        public Outbox Outbox { get; private set; }
 
         /// <summary>
         /// 发送目录的 id
@@ -37,7 +37,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <summary>
         /// 用户 ID
         /// </summary>
-        public long UserId => _outbox.UserId;
+        public long UserId => Outbox.UserId;
 
         /// <summary>
         /// 权重
@@ -49,14 +49,14 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// </summary>
         public string? SmtpAuthUserName
         {
-            get { return string.IsNullOrEmpty(_outbox.UserName) ? _outbox.Email : _outbox.UserName; }
+            get { return string.IsNullOrEmpty(Outbox.UserName) ? Outbox.Email : Outbox.UserName; }
         }
 
         /// <summary>
         /// Outlook 的授权用户名
         /// 实际当成 clientId 在使用
         /// </summary>
-        public string OutlookClientId => _outbox.UserName ?? string.Empty;
+        public string OutlookClientId => Outbox.UserName ?? string.Empty;
 
         //public OutboxAuthType AuthType => _outbox.AuthType;
 
@@ -72,23 +72,23 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <summary>
         /// SMTP 服务器地址
         /// </summary>
-        public string SmtpHost => _outbox.SmtpHost;
+        public string SmtpHost => Outbox.SmtpHost;
 
         /// <summary>
         /// SMTP 端口
         /// </summary>
-        public int SmtpPort => _outbox.SmtpPort;
+        public int SmtpPort => Outbox.SmtpPort;
 
         /// <summary>
         /// 开启 SSL
         /// </summary>
-        public bool EnableSSL => _outbox.EnableSSL;
+        public bool EnableSSL => Outbox.EnableSSL;
 
         /// <summary>
         /// 单日最大发送数量
         /// 为 0 时表示不限制
         /// </summary>
-        public int MaxSendCountPerDay => _outbox.MaxSendCountPerDay;
+        public int MaxSendCountPerDay => Outbox.MaxSendCountPerDay;
 
         /// <summary>
         /// 当天合计发件
@@ -125,7 +125,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <summary>
         /// 代理 Id
         /// </summary>
-        public long ProxyId => _outbox.ProxyId;
+        public long ProxyId => Outbox.ProxyId;
 
         /// <summary>
         /// 回复至邮箱
@@ -154,7 +154,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// </summary>
         public bool Enable
         {
-            get => !ShouldDispose && !_isCooling && !_usingLock.IsLocked && IsWorking;
+            get => !ShouldDispose && IsWorking;
         }
         #endregion
 
@@ -169,7 +169,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <param name="sendingItemIds"></param>
         public OutboxEmailAddress(Outbox outbox, long sendingGroupId, List<string> smtpPasswordSecretKeys, OutboxEmailAddressType type, List<long> sendingItemIds = null)
         {
-            _outbox = outbox;
+            Outbox = outbox;
             AuthPassword = outbox.Password.DeAES(smtpPasswordSecretKeys.First(), smtpPasswordSecretKeys.Last());
             Type = type;
 
@@ -218,59 +218,6 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             {
                 _sendingTargetIds.Add(targetId);
             }
-        }
-        #endregion
-
-        #region 使用和冷却状态切换
-        // 使用状态锁
-        private readonly Locker _usingLock = new();
-
-        // 标志
-        private bool _isCooling = false;
-
-        /// <summary>
-        /// 锁定使用权
-        /// </summary>
-        /// <returns></returns>
-        public bool LockUsing()
-        {
-            return _usingLock.Lock();
-        }
-
-        /// <summary>
-        /// 释放使用权
-        /// 需要在程序逻辑最后一刻才释放
-        /// </summary>
-        public void UnlockUsing()
-        {
-            _usingLock.Unlock();
-        }
-
-        /// <summary>
-        /// 设置冷却
-        /// 若设置失败，则返回 false
-        /// </summary>
-        /// <returns></returns>
-        private void ChangeCoolingSate(bool cooling)
-        {
-            _isCooling = cooling;
-        }
-
-        private readonly Cooler _emailCooler = new();
-        /// <summary>
-        /// 进入冷却状态
-        /// </summary>
-        /// <param name="cooldownMilliseconds"></param>
-        /// <param name="threadsManager"></param>
-        public void StartCooling(long cooldownMilliseconds, SendingThreadsManager threadsManager)
-        {
-            ChangeCoolingSate(true);
-            _emailCooler.StartCooling(cooldownMilliseconds, () =>
-            {
-                ChangeCoolingSate(false);
-                threadsManager.StartSending(1);
-                _logger.Debug($"发件箱 {Email} 退出冷却状态");
-            });
         }
         #endregion
 

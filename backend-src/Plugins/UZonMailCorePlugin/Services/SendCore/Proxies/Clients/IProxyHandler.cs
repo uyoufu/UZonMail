@@ -1,9 +1,8 @@
-﻿using MailKit.Net.Proxy;
-using UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters;
+﻿using UZonMail.Core.Services.SendCore.Proxies.ProxyTesters;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
+namespace UZonMail.Core.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// 代理解析器
@@ -30,22 +29,24 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// <summary>
         /// 是否匹配
         /// </summary>
-        /// <param name="matchStr"></param>
-        /// <param name="limitCount">限制数量</param>
+        /// <param name="email"></param>
         /// <returns></returns>
-        bool IsMatch(string matchStr, int limitCount);
+        bool IsMatch(string email);
 
         /// <summary>
         /// 异步获取代理客户端
         /// </summary>
-        /// <param name="matchStr">每个客户端都有一个匹配规则，只有 matchStr 匹配到后，才会返回</param>
+        /// <param name="email">每个客户端都有一个匹配规则，只有 matchStr 匹配到后，才会返回</param>
         /// <returns></returns>
-        Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr);
+        Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider serviceProvider, string email);
 
         /// <summary>
         /// 更新代理操作器
         /// </summary>
         /// <param name="proxy"></param>
-        void Update(Proxy proxy, ProxyTesterType testerType = ProxyTesterType.All, int expireSeconds = int.MaxValue);
+        /// <param name="proxyZoneType"></param>
+        /// <param name="expireSeconds"></param>
+        /// <param name="maxUsedCountPerDomain">单个 domain 的最大使用数</param>
+        void Update(Proxy proxy, ProxyZoneType proxyZoneType = ProxyZoneType.Default, int expireSeconds = int.MaxValue, int maxUsedCountPerDomain = -1, long userId = 0);
     }
 }

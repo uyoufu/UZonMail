@@ -1,20 +1,14 @@
 ﻿using log4net;
 using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Utils;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.MySql;
 using UZonMail.DB.SQL;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {
-    /// <summary>
-    /// 发件箱冷却器
-    /// </summary>
-    public class OutboxCooler(SendingThreadsManager sendingThreadsManager, SqlContext sqlContext, AppSettingsManager settingsService) : AbstractSendingHandler
+    public class OutboxSendingSpeedController(SqlContext sqlContext, AppSettingsManager settingsService) : AbstractSendingHandler
     {
-        private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxCooler));
+        private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxSendingSpeedController));
         protected override async Task HandleCore(SendingContext context)
         {
             // 没有成功，不需要冷却
@@ -33,7 +27,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             if (cooldownMilliseconds <= 0) return;
 
             _logger.Info($"发件箱 {outbox.Email} 进入冷却状态，冷却时间 {cooldownMilliseconds} 毫秒");
-            outbox.StartCooling(cooldownMilliseconds, sendingThreadsManager);
+            await Task.Delay(cooldownMilliseconds);
+            _logger.Info($"发件箱 {outbox.Email} 冷却结束");
         }
     }
 }

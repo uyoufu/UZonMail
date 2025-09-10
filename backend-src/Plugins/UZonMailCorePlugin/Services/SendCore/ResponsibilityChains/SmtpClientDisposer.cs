@@ -7,7 +7,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
     /// <summary>
     /// SmtpClient 释放
     /// </summary>
-    public class SmtpClientDisposer(SmtpClientFactory clientFactory, OutboxesPoolList outboxesPoolList) : AbstractSendingHandler
+    public class SmtpClientDisposer(SmtpClientsManager clientFactory, OutboxesManager outboxesPoolList) : AbstractSendingHandler
     {
         protected override Task HandleCore(SendingContext context)
         {

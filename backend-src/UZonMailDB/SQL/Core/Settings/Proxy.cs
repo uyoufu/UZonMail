@@ -34,8 +34,9 @@ namespace UZonMail.DB.SQL.Core.Settings
 
         /// <summary>
         /// 是否生效
+        /// 默认生效
         /// </summary>
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
         /// <summary>
         /// 是否共享

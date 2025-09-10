@@ -3,10 +3,10 @@ using MailKit.Net.Proxy;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text.RegularExpressions;
-using UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters;
+using UZonMail.Core.Services.SendCore.Proxies.ProxyTesters;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
+namespace UZonMail.Core.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// 处理单个代理
@@ -17,13 +17,13 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
     {
         protected ProxyHandler() { }
 
-        private readonly List<IProxyTester> _iPQueries;
+        private readonly List<IProxyHealthChecker> _iPQueries;
 
         /// <summary>
         /// 参数从 DI 注入
         /// </summary>
         /// <param name="iPQueries"></param>
-        public ProxyHandler(IEnumerable<IProxyTester> iPQueries)
+        public ProxyHandler(IEnumerable<IProxyHealthChecker> iPQueries)
         {
             _iPQueries = [.. iPQueries];
         }
@@ -93,22 +93,24 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// 过期时间
         /// </summary>
         private DateTime _expireDate = DateTime.MaxValue;
-        private ProxyTesterType _testerType = ProxyTesterType.All;
-        private void SetProxyTesterType(ProxyTesterType testerType)
+        private ProxyZoneType _testerType = ProxyZoneType.Default;
+        /// <summary>
+        /// 设置代理健康检测类型
+        /// </summary>
+        /// <param name="testerType"></param>
+        private void SetProxyTesterType(ProxyZoneType testerType)
         {
-            if(testerType.HasFlag(ProxyTesterType.All))
+            if (testerType.HasFlag(ProxyZoneType.Default))
             {
-                _testerType = Enum.GetValues<ProxyTesterType>().Aggregate((a, b) => a | b);
                 return;
             }
-
             _testerType = testerType;
         }
 
-        protected virtual async Task<bool> HealthCheck()
+        public virtual async Task<bool> HealthCheck()
         {
             var validIpQueries = _iPQueries.Where(x => x.Enable)
-                .Where(x => x.TesterType.HasFlag(_testerType))
+                .Where(x => x.ProxyZoneType.HasFlag(_testerType))
                 .OrderBy(x => x.Order).ToList();
             if (validIpQueries.Count == 0)
             {
@@ -161,28 +163,36 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
 
                 _isHealthy = await HealthCheck();
                 _healthCheckCount--;
-            }, null, 0, 1000 * 30); // 30s 检测一次
+            }, null, 0, 1000 * 20); // 30s 检测一次
         }
         #endregion
 
         #region 使用历史记录
+        private int _maxUsedCountPerDomain = -1;
         private readonly ConcurrentDictionary<string, int> _usageCounter = new();
         /// <summary>
         /// 记录使用信息
         /// </summary>
-        /// <param name="key"></param>
-        protected virtual void RecordUsage(string key)
+        /// <param name="email"></param>
+        protected virtual void RecordUsage(string email)
         {
-            if (_usageCounter.TryGetValue(key, out var count))
+            var domain = email.Split('@').Last();
+
+            if (_usageCounter.TryGetValue(domain, out var count))
             {
-                _usageCounter[key] = count + 1;
+                _usageCounter[domain] = count + 1;
             }
             else
             {
-                _usageCounter.TryAdd(key, 1);
+                _usageCounter.TryAdd(domain, 1);
             }
         }
         #endregion
+
+        #region 用户信息
+        public long UserId { get; private set; } = 0;
+        #endregion
+
         /// <summary>
         /// 与字符串的转换
         /// </summary>
@@ -195,20 +205,25 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// <summary>
         /// 是否匹配
         /// </summary>
-        /// <param name="matchStr"></param>
+        /// <param name="email"></param>
         /// <returns></returns>
-        public virtual bool IsMatch(string matchStr, int limitCount)
+        public virtual bool IsMatch(string email)
         {
             // 为空时，默认全部匹配
             if (string.IsNullOrEmpty(ProxyInfo.MatchRegex)) return true;
 
             // 规则不匹配时，返回 false
-            if (!Regex.IsMatch(matchStr, ProxyInfo.MatchRegex)) return false;
+            if (!Regex.IsMatch(email, ProxyInfo.MatchRegex)) return false;
 
-            // 次数超限判断
-            if (_usageCounter.TryGetValue(matchStr, out var count))
+            // 未设置限制时，默认全部匹配
+            if (_maxUsedCountPerDomain < 0) return true;
+
+            // 判断使用次数是否超限
+            var domain = email.Split('@').Last();
+            if (_usageCounter.TryGetValue(domain, out var usedCount))
             {
-                return count < limitCount;
+                if (usedCount >= _maxUsedCountPerDomain)
+                    return false;
             }
 
             return true;
@@ -221,10 +236,10 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public virtual async Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider serviceProvider, string matchStr)
+        public virtual async Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider serviceProvider, string email)
         {
             // 登记使用
-            RecordUsage(matchStr);
+            RecordUsage(email);
 
             if (_proxyClientAdapter != null) return _proxyClientAdapter;
 
@@ -260,12 +275,14 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
         /// </summary>
         /// <param name="proxy"></param>
         /// <param name="expireSeconds">单位秒</param>
-        public virtual void Update(Proxy proxy, ProxyTesterType testerType = ProxyTesterType.All, int expireSeconds = int.MaxValue)
+        public virtual void Update(Proxy proxy, ProxyZoneType proxyZoneType = ProxyZoneType.Default, int expireSeconds = int.MaxValue, int maxUsedCountPerDomain = -1, long userId = 0)
         {
             // 更新代理数据
             ProxyInfo = proxy;
-            SetProxyTesterType(testerType);
+            SetProxyTesterType(proxyZoneType);
             _expireDate = DateTime.UtcNow.AddSeconds(expireSeconds);
+            _maxUsedCountPerDomain = maxUsedCountPerDomain;
+            if (userId > 0) UserId = userId;
 
             // 将字符串转换为代理
             Uri uri = new(proxy.Url);

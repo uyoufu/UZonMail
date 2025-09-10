@@ -1,5 +1,4 @@
 ﻿using log4net;
-using System.Collections.Concurrent;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.Core.Services.SendCore.Outboxes;
@@ -11,11 +10,10 @@ namespace UZonMail.Core.Services.SendCore
     /// <summary>
     /// 发件箱任务管理器
     /// </summary>
-    public class OutboxTasksManager(IServiceProvider provider, OutboxesManager outboxesManager) : ISendingThreadsManager, ISingletonService<ISendingThreadsManager>
+    public class OutboxTasksManager(IServiceProvider provider, OutboxesManager outboxesManager) : ISendingTasksManager, ISingletonService<ISendingTasksManager>
     {
         private readonly ILog _logger = LogManager.GetLogger(typeof(OutboxTasksManager));
         private readonly object _lockObj = new();
-        private static ConcurrentDictionary<string, Task> _outboxTasksDic = new();
 
         /// <summary>
         /// 发件任务数量
@@ -26,7 +24,7 @@ namespace UZonMail.Core.Services.SendCore
         /// <summary>
         /// 启动发件任务
         /// </summary>
-        public void StartSending(int activeCount)
+        public void StartSending()
         {
             lock (_lockObj)
             {
@@ -73,15 +71,14 @@ namespace UZonMail.Core.Services.SendCore
                 // 创建职责链
                 // 每条职责链必定会被执行，内部需要根据状态判断是否调用核心逻辑
                 var chainHandlers = new List<Type>()
-                {                   
+                {
                     typeof(EmailItemGetter), // 获取邮件
                     typeof(LocalEmailSendingHandler), // 开始发件
                     typeof(EmailItemPostHandler), // 发件回调
                     typeof(GroupTaskPostHandler), // 发件任务回调
-                    typeof(OutboxesPostHandler), // 发件箱回调
-                    typeof(OutboxCooler), // 发件箱冷却重置
-                    typeof(OutboxUnlocker), // 发件箱解锁
-                    typeof(SmtpClientDisposer) // 释放 smtp 连接
+                    typeof(OutboxesPostHandler), // 发件箱回调                    
+                    typeof(SmtpClientDisposer), // 释放 smtp 连接
+                    typeof(OutboxSendingSpeedController) // 发件箱发送速度控制
                 }
                 .Select(provider.GetRequiredService)
                 .Where(x => x != null)
@@ -101,7 +98,7 @@ namespace UZonMail.Core.Services.SendCore
                 // 若发件箱被标记为释放，则结束任务
                 if (outbox.ShouldDispose)
                 {
-                    _logger.Info($"发件箱不可用，线程 {Environment.CurrentManagedThreadId} 结束 {outbox.Email} 发件任务");
+                    _logger.Info($"发件箱已标记为释放，线程 {Environment.CurrentManagedThreadId} 结束 {outbox.Email} 发件任务");
                     break;
                 }
             }

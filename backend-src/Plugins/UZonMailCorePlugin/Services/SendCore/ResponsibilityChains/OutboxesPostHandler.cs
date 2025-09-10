@@ -8,13 +8,12 @@ using UZonMail.Core.Services.Settings.Model;
 using UZonMail.Core.SignalRHubs.Extensions;
 using UZonMail.Core.SignalRHubs.SendEmail;
 using UZonMail.DB.Extensions;
-using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 
 namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 {
-    public class OutboxesPostHandler(GroupTasksList groupTasksList, OutboxesPoolList outboxesPoolList, AppSettingsManager settingsService) : AbstractSendingHandler
+    public class OutboxesPostHandler(GroupTasksList groupTasksList, OutboxesManager outboxManager, AppSettingsManager settingsService) : AbstractSendingHandler
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(OutboxesPostHandler));
 
@@ -38,7 +37,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 if (!MatchEmailItem(outbox))
                 {
                     // 移除
-                    outboxesPoolList.RemoveOutbox(outbox);
+                    outboxManager.RemoveOutbox(outbox);
                 }
                 return;
             }
@@ -61,7 +60,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             if (outbox.ShouldDispose)
             {
                 // 说明要释放发件箱
-                outboxesPoolList.RemoveOutbox(outbox);
+                outboxManager.RemoveOutbox(outbox);
 
                 // 移除对应的发件组中的数据
                 // 1. 特定发件箱，移除特定邮件
@@ -135,7 +134,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 if (!groupTasks.TryGetValue(sendingGroupId, out var groupTask)) continue;
 
                 // 判断当前发件组是否还有发件箱
-                var existOutboxes = outboxesPoolList.ExistOutboxes(outbox.UserId, sendingGroupId);
+                var existOutboxes = outboxManager.ExistOutboxes(sendingGroupId);
                 if (existOutboxes)
                 {
                     var sendingItemIds = outbox.GetSpecificSendingItemIds();

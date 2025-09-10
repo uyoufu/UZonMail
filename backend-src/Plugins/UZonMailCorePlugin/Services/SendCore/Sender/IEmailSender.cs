@@ -26,7 +26,7 @@ namespace UZonMail.Core.Services.SendCore.Sender
         bool IsMatch(string email, string smtpHost);
 
         /// <summary>
-        /// 开发发送邮件
+        /// 发送邮件
         /// </summary>
         /// <param name="sendingContext"></param>
         /// <param name="mimeMessage"></param>
