@@ -109,7 +109,8 @@ export interface ISendingSetting {
   maxSendingBatchSize: number,
   minInboxCooldownHours: number,
   replyToEmails?: string,
-  changeIpAfterEmailCount: number
+  changeIpAfterEmailCount: number,
+  maxCountPerIPDomainHour: number,
 }
 
 /**
