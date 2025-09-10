@@ -1,30 +1,30 @@
 ﻿using log4net;
 using System.Collections.Concurrent;
 using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
+using UZonMail.Core.Services.SendCore.Proxies.Clients;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy
+namespace UZonMail.Core.Services.SendCore.Proxies
 {
     /// <summary>
     /// 代理管理器
     /// </summary>
-    public class ProxyManager : ISingletonService
+    public class ProxiesManager : ISingletonService
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyManager));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxiesManager));
         private readonly AppSettingsManager _settingsService;
 
-        public ProxyManager(AppSettingsManager settingsService)
+        public ProxiesManager(AppSettingsManager settingsService)
         {
             _settingsService = settingsService;
 
             DisposeHandlerAuto();
         }
 
-        private readonly ConcurrentDictionary<long, UserProxyManager> _userProxyManagers = new();
+        private readonly ConcurrentDictionary<long, UserProxiesManager> _userProxyManagers = new();
 
         /// <summary>
         /// 重新加载用户的代理
@@ -68,7 +68,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             if (!_userProxyManagers.TryGetValue(userId, out var manager))
             {
                 // 新增并添加
-                manager = new UserProxyManager(userId);
+                manager = new UserProxiesManager(userId);
                 await manager.UpdateProxies(serviceProvider);
                 _userProxyManagers.TryAdd(userId, manager);
             }
@@ -83,11 +83,8 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
                 return null;
             }
 
-            var sqlContext = serviceProvider.GetRequiredService<SqlContext>();
-            var orgSetting = await _settingsService.GetSetting<SendingSetting>(sqlContext, userId);
-
             // 随机匹配代理
-            return manager.RandomProxyHandler(outboxEmail, orgSetting.ChangeIpAfterEmailCount, availableProxyIds);
+            return manager.RandomProxyHandler(outboxEmail, availableProxyIds);
         }
 
         /// <summary>
@@ -102,16 +99,13 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
             if (!_userProxyManagers.TryGetValue(userId, out var manager))
             {
                 // 新增并添加
-                manager = new UserProxyManager(userId);
+                manager = new UserProxiesManager(userId);
                 await manager.UpdateProxies(serviceProvider);
                 _userProxyManagers.TryAdd(userId, manager);
             }
 
-            var sqlContext = serviceProvider.GetRequiredService<SqlContext>();
-            var orgSetting = await _settingsService.GetSetting<SendingSetting>(sqlContext, userId);
-
             // 随机匹配代理
-            return manager.RandomProxyHandler(matchStr, orgSetting.ChangeIpAfterEmailCount);
+            return manager.RandomProxyHandler(matchStr);
         }
 
 

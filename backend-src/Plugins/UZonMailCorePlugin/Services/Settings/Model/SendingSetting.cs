@@ -53,6 +53,11 @@ namespace UZonMail.Core.Services.Settings.Model
         public int ChangeIpAfterEmailCount { get; set; }
 
         /// <summary>
+        /// 每小时每个 IP 最大发送次数
+        /// </summary>
+        public int MaxCountPerIPDomainHour { get; set; } = 0;
+
+        /// <summary>
         /// 回复邮件地址列表
         /// </summary>
         [NotMapped]
@@ -89,8 +94,9 @@ namespace UZonMail.Core.Services.Settings.Model
             MaxSendingBatchSize = GetIntValue(nameof(MaxSendingBatchSize), 20);
             MinInboxCooldownHours = GetIntValue(nameof(MinInboxCooldownHours), 0);
             ReplyToEmails = GetStringValue(nameof(ReplyToEmails), string.Empty);
-            MaxRetryCount = GetIntValue(nameof(MaxRetryCount), 3);           
+            MaxRetryCount = GetIntValue(nameof(MaxRetryCount), 3); 
             ChangeIpAfterEmailCount = GetIntValue(nameof(ChangeIpAfterEmailCount), 0);
+            MaxCountPerIPDomainHour = GetIntValue(nameof(MaxCountPerIPDomainHour), 1200);
         }
     }
 }

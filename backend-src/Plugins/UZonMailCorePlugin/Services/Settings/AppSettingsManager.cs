@@ -1,13 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 using System.Collections.Concurrent;
 using System.Reflection;
-using UZonMail.Core.Services.Settings.Model;
 using UZonMail.Core.Services.Settings.Core;
+using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
-using System.Threading.Tasks;
 
 namespace UZonMail.Core.Services.Settings
 {

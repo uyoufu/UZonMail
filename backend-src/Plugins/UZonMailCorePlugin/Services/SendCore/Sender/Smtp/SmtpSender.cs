@@ -3,13 +3,11 @@ using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.Encrypt;
 using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.DynamicProxy;
-using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
+using UZonMail.Core.Services.SendCore.Proxies;
+using UZonMail.Core.Services.SendCore.Proxies.Clients;
 using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
 
@@ -18,13 +16,13 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
     /// <summary>
     /// 本机邮件发送器
     /// </summary>
-    public class SmtpSender(IServiceProvider provider, EncryptService encryptService, ProxyManager proxyManager) : IEmailSender
+    public class SmtpSender(IServiceProvider provider, EncryptService encryptService, ProxiesManager proxyManager, IPRateLimiter iPRateLimiter) : IEmailSender
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpSender));
 
         public int Order => int.MaxValue;
 
-        public bool IsMatch(string email,string smtpHost)
+        public bool IsMatch(string email, string smtpHost)
         {
             return true;
         }
@@ -47,11 +45,13 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// <param name="message"></param>
         /// <param name="tryCount"></param>
         /// <returns></returns>
-        private static async Task SendAsync(SendingContext context, MimeMessage message, int tryCount)
+        private async Task SendAsync(SendingContext context, MimeMessage message, int tryCount)
         {
             SendItemMeta sendItem = context.EmailItem!;
-            var smtpClientFactory = context.Provider.GetRequiredService<SmtpClientFactory>();
-            var clientResult = await smtpClientFactory.GetSmtpClientAsync(context);
+
+            // 获取 smtp 客户端
+            var smtpClientManager = context.Provider.GetRequiredService<SmtpClientsManager>();
+            var clientResult = await smtpClientManager.GetSmtpClientAsync(context);
             // 若返回 null,说明这个发件箱不能建立 smtp 连接，对它进行取消
             if (!clientResult)
             {
@@ -60,12 +60,21 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 context.OutboxAddress?.MarkShouldDispose(clientResult.Message);
                 return;
             }
-
             // throw new NullReferenceException("测试报错");
-            var client = clientResult.Data;
+            var smtpClient = clientResult.Data;
+            // 等待发送间隔
+            // 等待之后，可能出现代理过期的问题
+            await iPRateLimiter.WaitForReleaseAsync(context, sendItem.Outbox.Email, smtpClient.ProxyClient?.ProxyHost);
+            // 如果是动态代理，则需要检测动态代理是否过期
+            if(smtpClient.ProxyClient is ProxyClientAdapter proxyAdapter && !proxyAdapter.IsEnable)
+            {
+                // 动态代理不可用，重新执行发送逻辑
+                await SendAsync(context, message, tryCount - 1);
+                return;
+            }
             try
             {
-                var sendResult = await client.SendAsync(message);
+                var sendResult = await smtpClient.SendAsync(message);
                 _logger.Info($"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}");
 
                 // 标记邮件状态
@@ -104,7 +113,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 // 代理无法连接到服务器
                 // 在发件前已经验证过邮件可用，此处应当作是代理出了问题
                 // 将当前代理标记为不可用
-                if (client.ProxyClient is ProxyClientAdapter clientAdapter)
+                if (smtpClient.ProxyClient is ProxyClientAdapter clientAdapter)
                 {
                     clientAdapter.MarkHealthless();
                 }

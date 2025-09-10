@@ -35,7 +35,7 @@ namespace UZonMail.Core.Services.SendCore.Contexts
         /// <summary>
         /// 发件箱地址
         /// </summary>
-        public OutboxEmailAddress? OutboxAddress { get; set; }
+        public OutboxEmailAddress? OutboxAddress { get; private set; }
 
         #region 发件列表相关临时参数
         /// <summary>
@@ -44,6 +44,14 @@ namespace UZonMail.Core.Services.SendCore.Contexts
         public SendItemMeta? EmailItem { get; set; }
         #endregion
 
+        #endregion
+
+        #region 外部调用的方法
+        public SendingContext SetOutbox(OutboxEmailAddress outbox)
+        {
+            this.OutboxAddress = outbox;
+            return this;
+        }
         #endregion
     }
 }

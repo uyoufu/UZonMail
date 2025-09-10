@@ -4,7 +4,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using UZonMail.Core.Services.Config;
-using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
+using UZonMail.Core.Services.SendCore.Proxies.Clients;
 
 namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 {

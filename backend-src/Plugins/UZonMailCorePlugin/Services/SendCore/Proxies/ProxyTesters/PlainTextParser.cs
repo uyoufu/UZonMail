@@ -2,13 +2,13 @@
 using System.Text.RegularExpressions;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
+namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 纯文本解析器
     /// </summary>
     /// <param name="httpClient"></param>
-    public abstract class PlainTextParser(HttpClient httpClient, ProxyTesterType testerType) : BaseProxyTester(httpClient, testerType)
+    public abstract class PlainTextParser(HttpClient httpClient, ProxyZoneType testerType) : BaseProxyTester(httpClient, testerType)
     {
         protected override string? RetrieveIP(string content)
         {

@@ -1,15 +1,14 @@
 ﻿using log4net;
 using MailKit.Net.Proxy;
-using MailKit.Net.Smtp;
 using MailKit.Security;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Timers;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.DynamicProxy;
-using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
+using UZonMail.Core.Services.SendCore.Proxies;
 using UZonMail.Core.Services.SendCore.Outboxes;
+using UZonMail.Core.Services.SendCore.Proxies.Clients;
 using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
@@ -22,9 +21,9 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
     /// <summary>
     /// 按发件任务缓存 SmtpClient, 因此发件完成后，要手动进行释放
     /// </summary>
-    public class SmtpClientFactory : ISingletonService
+    public class SmtpClientsManager : ISingletonService
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpClientFactory));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpClientsManager));
 
         /// <summary>
         /// 发件客户端缓存
@@ -32,13 +31,13 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// </summary>
         private readonly ConcurrentDictionary<SmtpClientKey, ThrottlingSmtpClient> _smptClients = new();
 
-        private readonly ProxyManager _proxyManager;
+        private readonly ProxiesManager _proxyManager;
         private readonly GroupTasksList _groupTaskList;
         private readonly AppSettingsManager _settingsService;
 
         private readonly Timer _timer;
 
-        public SmtpClientFactory(ProxyManager proxyManager, GroupTasksList groupTaskList, AppSettingsManager settingsService)
+        public SmtpClientsManager(ProxiesManager proxyManager, GroupTasksList groupTaskList, AppSettingsManager settingsService)
         {
             _proxyManager = proxyManager;
             _groupTaskList = groupTaskList;
@@ -49,6 +48,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             _timer.Elapsed += Timer_Elapsed;
         }
 
+        #region 连接保活
         private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
             // 保活
@@ -64,17 +64,20 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 foreach (var key in keys)
                 {
                     if (!_smptClients.TryGetValue(key, out var client)) continue;
-                    if (!client.IsConnected)
+                    try
                     {
-                        _smptClients.TryRemove(key, out _);
-                        continue;
+                        await client.NoOpAsync();
                     }
-
-                    // 用 if 判断是为了防止并发被释放掉
-                    if (client.IsConnected) await client.NoOpAsync();
+                    catch(Exception ex)
+                    {
+                        _logger.Warn($"保活 SMTP 连接 {key.Email} 失败，断开连接并移除缓存");
+                        await client.DisconnectAsync(true);
+                        _smptClients.TryRemove(key, out _);
+                    }
                 }
             });
         }
+        #endregion
 
         /// <summary>
         /// 获取 smtp 客户端
@@ -102,7 +105,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 // 说明客户端不可用了，需要移除
                 _smptClients.TryRemove(existClient.GetClientKey(), out _);
                 // 不等待，后台断开
-                existClient.DisconnectAsync(true);
+                await existClient.DisconnectAsync(true);
             }
 
             _logger.Debug($"初始化 SmtpClient: {outbox.SmtpAuthUserName}");
@@ -146,7 +149,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                 return true;
             }
 
-            // 未设置代理更换时，不更换代理
+            // 未设置代理更换时，不更换代理，直到代理失效为止
             var orgSetting = await _settingsService.GetSetting<SendingSetting>(sendingContext.SqlContext, sendingContext.EmailItem.UserId);
             if (orgSetting.ChangeIpAfterEmailCount <= 0)
             {
@@ -164,6 +167,9 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// <returns></returns>
         private ThrottlingSmtpClient? GetSmtpClientFromCache(string email, bool useProxy)
         {
+            // 筛选条件
+            // 1. 邮箱相同
+            // 2. 代理状态相同
             var key = _smptClients.Keys.Where(x => x.Email == email && !(x.HasProxy ^ useProxy)).FirstOrDefault();
             if (key == null) return null;
 
@@ -181,6 +187,18 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// <returns></returns>
         private async Task<bool> CheckSmtpClientAvailable(ThrottlingSmtpClient client, SendingContext sendingContext)
         {
+            // 判断是否真实存活
+            try
+            {
+                await client.NoOpAsync();
+            }
+            catch(Exception ex)
+            {
+                _logger.Debug($"SmtpClient: {sendingContext.EmailItem!.Outbox.Email} 连接不可用，断开连接并移除缓存");
+                _logger.Debug(ex);
+                return false;
+            }
+
             if (!client.IsConnected)
             {
                 _logger.Warn($"SmtpClient: {sendingContext.EmailItem!.Outbox.Email} 已经断开连接");
@@ -203,10 +221,8 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             if (!proxyClientAdapter.IsEnable)
                 return false;
 
-
             // 指定了代理，但是没有设置更换 IP 的次数，返回正常
-            // 这种情况，代理可能会失败，要同时考虑
-            // 未设置代理更换时，不更换代理
+            // 未设置代理更换频率时，不更换代理
             var orgSetting = await _settingsService.GetSetting<SendingSetting>(sendingContext.SqlContext, sendingContext.EmailItem.UserId);
             if (orgSetting.ChangeIpAfterEmailCount <= 0)
             {
@@ -279,7 +295,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         }
 
         /// <summary>
-        /// 连接 smtp client
+        /// 设置代理并连接 SmtpClient
         /// </summary>
         /// <param name="client"></param>
         /// <param name="outbox"></param>
