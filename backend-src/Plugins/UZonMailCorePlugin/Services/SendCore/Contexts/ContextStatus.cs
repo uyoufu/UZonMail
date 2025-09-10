@@ -21,7 +21,7 @@
         /// <summary>
         /// 是否应该退出线程
         /// </summary>
-        ShouldExitThread = 1 << 3,
+        ShouldExitTask = 1 << 3,
 
         /// <summary>
         /// 退出责任链

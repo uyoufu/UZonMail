@@ -1,12 +1,9 @@
-﻿using UZonMail.Utils.Extensions;
-using UZonMail.Core.Utils.Database;
-using log4net;
-using UZonMail.Core.Services.SendCore.Utils;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.Core.Services.SendCore.Contexts;
+﻿using log4net;
 using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Core.Services.SendCore.Utils;
 using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Extensions;
 
 namespace UZonMail.Core.Services.SendCore.Outboxes
 {
@@ -20,8 +17,6 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxEmailAddress));
 
         #region 私有变量
-        private readonly object _lock = new();
-
         // 发件箱数据
         private Outbox _outbox;
 
@@ -144,6 +139,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
 
         /// <summary>
         /// 是否应释放
+        /// 只有发件箱无法再次被使用时，才会被标记为应释放
         /// </summary>
         public bool ShouldDispose { get; private set; } = false;
 
@@ -151,14 +147,14 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// 工作中
         /// 当没有发送目标后，working 为 false
         /// </summary>
-        public bool Working => _sendingTargetIds.Count > 0;
+        public bool IsWorking => _sendingTargetIds.Count > 0;
 
         /// <summary>
         /// 是否可用
         /// </summary>
         public bool Enable
         {
-            get => !ShouldDispose && !_isCooling && !_usingLock.IsLocked && Working;
+            get => !ShouldDispose && !_isCooling && !_usingLock.IsLocked && IsWorking;
         }
         #endregion
 
@@ -345,6 +341,17 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             ErroredMessage = erroredMessage;
             ShouldDispose = true;
         }
+
+
+        private int _taskId = 0;
+        public void SetTaskId(int taskId)
+        {
+            _taskId = taskId;
+        }
+        /// <summary>
+        /// 是否正在任务中运行
+        /// </summary>
+        public bool IsRunningInTask => _taskId > 0;
         #endregion
     }
 }
