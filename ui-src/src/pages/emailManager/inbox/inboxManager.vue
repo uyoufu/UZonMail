@@ -1,52 +1,20 @@
 <template>
   <div class="full-height full-width row items-start">
-    <EmailGroupList
-      v-show="!isCollapseGroupList"
-      v-model="emailGroupRef"
-      :groupType="2"
-      class="q-card q-mr-sm full-height"
-      style="min-width: 160px"
-      :contextMenuItems="groupCtxMenuItems"
-    />
+    <EmailGroupList v-show="!isCollapseGroupList" v-model="emailGroupRef" :groupType="2"
+      class="q-card q-mr-sm full-height" style="min-width: 160px" :contextMenuItems="groupCtxMenuItems" />
 
-    <q-table
-      ref="inboxTableRef"
-      class="col full-height"
-      :rows="rows"
-      :columns="columns"
-      row-key="id"
-      virtual-scroll
-      v-model:pagination="pagination"
-      dense
-      :loading="loading"
-      :filter="filter"
-      binary-state-sort
-      @request="onTableRequest"
-    >
+    <q-table ref="inboxTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
+      v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
+      @request="onTableRequest">
       <template v-slot:top-left>
         <div class="row justify-start q-gutter-sm">
-          <CreateBtn
-            tooltip="新增收件箱"
-            @click="onNewInboxClick"
-            :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组"
-          />
+          <CreateBtn tooltip="新增收件箱" @click="onNewInboxClick" :disable="!isValidEmailGroup"
+            tooltip-when-disabled="请先添加组" />
           <ExportBtn label="" tooltip="导出收件箱模板" @click="onExportInboxTemplateClick" />
-          <ImportBtn
-            label=""
-            tooltip="导入收件箱"
-            @click="onImportInboxClick()"
-            :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组"
-          />
-          <ImportBtn
-            label=""
-            icon="description"
-            :tooltip="importFromTxtTooltip"
-            @click="onImportInboxFromTxt()"
-            :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组"
-          />
+          <ImportBtn label="" tooltip="导入收件箱" @click="onImportInboxClick()" :disable="!isValidEmailGroup"
+            tooltip-when-disabled="请先添加组" />
+          <ImportBtn label="" icon="description" :tooltip="importFromTxtTooltip" @click="onImportInboxFromTxt()"
+            :disable="!isValidEmailGroup" tooltip-when-disabled="请先添加组" />
         </div>
       </template>
 
@@ -91,8 +59,7 @@ import type { IEmailGroupListItem } from '../components/types'
 // 左侧分组开关
 import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
 const inboxTableRef = ref<InstanceType<typeof QTable> | undefined>()
-const isCollapseGroupList = ref(false)
-const { CollapseLeft, collapseStyleRef } = useTableCollapseLeft(inboxTableRef, isCollapseGroupList)
+const { CollapseLeft, collapseStyleRef, isCollapseGroupList } = useTableCollapseLeft(inboxTableRef)
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 // 菜单项
@@ -143,11 +110,11 @@ const columns: QTableColumn[] = [
     sortable: true
   }
 ]
-async function getRowsNumberCount(filterObj: TTableFilterObject) {
+async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getInboxesCount(emailGroupRef.value.id, filterObj.filter)
   return data
 }
-async function onRequest(filterObj: TTableFilterObject, pagination: IRequestPagination) {
+async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getInboxesData(emailGroupRef.value.id, filterObj.filter, pagination)
   return data
 }
@@ -192,7 +159,7 @@ const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
 // 导出当前组中的所有的收件箱
 import { writeExcel } from 'src/utils/file'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function exportAllInboxesInThisGroup(group: Record<string, any>) {
+async function exportAllInboxesInThisGroup (group: Record<string, any>) {
   // 获取所有的收件箱
   const { data: count } = await getInboxesCount(group.id, '')
   if (!count) {

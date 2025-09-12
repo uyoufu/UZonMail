@@ -1,14 +1,19 @@
 <template>
   <q-dialog ref='dialogRef' @hide="onDialogHide" :persistent='true'>
     <q-card class='send-schedule-container column items-center q-pa-md no-wrap'>
-      <div class="text-subtitle1 q-mb-sm">
-        <span>指定发送时间: </span>
-        <span class="text-primary">{{ modelValue }}</span>
+      <div class="text-subtitle q-mb-sm row items-center no-wrap">
+        <span>定时发送: </span>
+        <span v-if="isDesktop" class="text-primary">{{ modelValue }}</span>
+        <div v-else>
+          <q-btn flat dense color="primary" :label="dateStr" @click="onShowDateSelector" />
+          <q-btn flat dense color="primary" :label="timeStr" @click="onShowTimeSelector" />
+          <span class="text-caption">单击切换</span>
+        </div>
       </div>
 
       <div class="q-gutter-md row items-start justify-center">
-        <q-date v-model="modelValue" mask="YYYY-MM-DD HH:mm" color="primary" />
-        <q-time v-model="modelValue" mask="YYYY-MM-DD HH:mm" color="secondary" format24h />
+        <q-date v-show="isShowDateSelector" v-model="modelValue" mask="YYYY-MM-DD HH:mm" color="primary" />
+        <q-time v-show="isShowTimeSelector" v-model="modelValue" mask="YYYY-MM-DD HH:mm" color="secondary" format24h />
       </div>
 
       <div class="row justify-end items-center q-mt-md full-width">
@@ -48,6 +53,27 @@ function onOkClick () {
 
   onDialogOK(modelValue.value)
 }
+
+// #region 移动端优化
+import { Platform } from 'quasar'
+const isDesktop = Platform.is.desktop
+const dateStr = computed(() => {
+  return dayjs(modelValue.value).format('YYYY-MM-DD')
+})
+const timeStr = computed(() => {
+  return dayjs(modelValue.value).format('HH:mm')
+})
+const isShowDateSelector = ref(true)
+const isShowTimeSelector = ref(isDesktop)
+function onShowDateSelector () {
+  isShowDateSelector.value = true
+  isShowTimeSelector.value = false
+}
+function onShowTimeSelector () {
+  isShowDateSelector.value = false
+  isShowTimeSelector.value = true
+}
+// #endregion
 </script>
 
 <style lang='scss' scoped>

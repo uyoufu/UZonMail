@@ -155,7 +155,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
   // 定时发送
   async function onScheduleSendClick () {
     if (!validateParams()) return
-    console.log('email info:', emailInfo.value)
+    logger.debug('email info:', emailInfo.value)
 
     // 选择日期
     const { ok, data: scheduleDate } = await showComponentDialog<string>(SelectScheduleDate)

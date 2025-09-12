@@ -2,8 +2,8 @@
   <q-dialog ref='dialogRef' @hide="onDialogHide" :persistent='true'>
     <q-card class='column no-wrap q-pa-sm height-0 select-email-box-dialog'>
       <div class="col row items-start">
-        <EmailGroupList v-model="emailGroupRef" :extra-items="categoryTopItems" readonly :groupType="groupType"
-          selectable class="q-mr-sm card-like full-height" v-model:selected="selectedGroups" />
+        <EmailGroupList v-show="!isCollapseGroupList" v-model="emailGroupRef" :extra-items="categoryTopItems" readonly
+          :groupType="groupType" selectable class="q-mr-sm card-like full-height" v-model:selected="selectedGroups" />
 
         <q-table class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
           v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
@@ -22,6 +22,8 @@
             <QTableIndex :props="props" />
           </template>
         </q-table>
+
+        <CollapseLeft v-model="isCollapseGroupList" :style="collapseStyleRef" />
       </div>
 
       <div class="row justify-end items-center q-mt-md">
@@ -61,7 +63,7 @@ const groupType = computed(() => {
  * 参考：http://www.quasarchs.com/quasar-plugins/dialog#composition-api-variant
  */
 
-import { QTableColumn, useDialogPluginComponent } from 'quasar'
+import { QTable, QTableColumn, useDialogPluginComponent } from 'quasar'
 defineEmits([
   // 必需；需要指定一些事件
   // （组件将通过useDialogPluginComponent()发出）
@@ -201,6 +203,14 @@ function onOKClick () {
   // console.log('dialog closed:', result)
   onDialogOK(result)
 }
+
+// #region 左侧分组开关
+import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
+const outboxTableRef = ref<InstanceType<typeof QTable> | undefined>()
+const { CollapseLeft, collapseStyleRef, isCollapseGroupList } = useTableCollapseLeft(outboxTableRef, 14)
+// 默认展示
+isCollapseGroupList.value = false
+// #endregion
 </script>
 
 <style lang='scss' scoped>

@@ -78,8 +78,7 @@ import type { IEmailGroupListItem } from '../components/types'
 // #region 左侧分组开关
 import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
 const outboxTableRef = ref<InstanceType<typeof QTable> | undefined>()
-const isCollapseGroupList = ref(false)
-const { CollapseLeft, collapseStyleRef } = useTableCollapseLeft(outboxTableRef, isCollapseGroupList)
+const { CollapseLeft, collapseStyleRef, isCollapseGroupList } = useTableCollapseLeft(outboxTableRef)
 // #endregion
 
 // 菜单项
@@ -298,7 +297,7 @@ useSignalR(updateExistOne)
 // #region 邮箱导入功能
 import { useOutboxImporter } from './useOutboxImporter'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { onImportOutboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useOutboxImporter(emailGroupRef,addNewRow)
+const { onImportOutboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useOutboxImporter(emailGroupRef, addNewRow)
 // #endregion
 </script>
 

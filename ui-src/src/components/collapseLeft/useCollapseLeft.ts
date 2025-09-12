@@ -10,7 +10,7 @@ import { Platform } from 'quasar'
  * @param offsetLeft
  * @returns
  */
-export function useTableCollapseLeft (containerRef: Ref<InstanceType<typeof QTable> | undefined>, updateSignal: Ref<boolean>, offsetLeft: number = 10) {
+export function useTableCollapseLeft (containerRef: Ref<InstanceType<typeof QTable> | undefined>, offsetLeft: number = 10) {
   const collapseStyleRef = ref({
     position: 'absolute',
     top: '40%',
@@ -18,7 +18,7 @@ export function useTableCollapseLeft (containerRef: Ref<InstanceType<typeof QTab
   })
 
   // 初始化折叠状态
-  updateSignal.value = !Platform.is.desktop
+  const isCollapseGroupList = ref(!Platform.is.desktop)
 
   function updateCollapseLocation () {
     if (!containerRef.value) return
@@ -28,7 +28,7 @@ export function useTableCollapseLeft (containerRef: Ref<InstanceType<typeof QTab
     collapseStyleRef.value.left = `${containerElement.offsetLeft + offsetLeft}px`
   }
 
-  watch(updateSignal, async () => {
+  watch(isCollapseGroupList, async () => {
     await nextTick()
     updateCollapseLocation()
   })
@@ -40,6 +40,7 @@ export function useTableCollapseLeft (containerRef: Ref<InstanceType<typeof QTab
   })
 
   return {
+    isCollapseGroupList,
     collapseStyleRef,
     CollapseLeft
   }
