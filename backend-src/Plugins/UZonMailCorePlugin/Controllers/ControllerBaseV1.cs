@@ -49,7 +49,7 @@ namespace UZonMail.Core.Controllers
             var token = Request.Headers[HeaderNames.Authorization].ToString();
             if(string.IsNullOrEmpty(token))return 0;
 
-            var tokenPayloads = tokenParams.GetTokenPayloads(token);
+            var tokenPayloads = JWTToken.GetTokenPayloads(token);
             string userId = tokenPayloads.SelectTokenOrDefault("userId", string.Empty);
             if (int.TryParse(userId, out int intUserId)) return intUserId;
             return 0;
