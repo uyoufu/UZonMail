@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using Quartz;
+using System.Reflection;
 using System.Security.Claims;
 using Uamazing.Utils.Plugin;
 using UZonMail.DB.MySql;
@@ -107,8 +108,10 @@ services.AddSwaggerGen(new OpenApiInfo()
         Name = "galens",
         Url = new Uri("https://galens.uamazing.cn"),
         Email = "260827400@qq.com"
-    }
-}, "UZonMailService.xml");
+    },    
+});
+
+
 
 // 验证在 jwt 中实现
 // 添加 signalR，还需要在 app 中使用 MapHub

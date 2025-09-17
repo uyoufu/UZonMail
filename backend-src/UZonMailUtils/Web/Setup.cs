@@ -1,21 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc.ApplicationModels;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
-using UZonMail.Utils.Web.Service;
-using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
-using UZonMail.Utils.Web.Convention;
-using System.Linq;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System;
 using System.Threading.Tasks;
-using Microsoft.OpenApi.Models;
-using System.IO;
-using System.Collections.Generic;
-using Microsoft.Extensions.Hosting;
-using System.IdentityModel.Tokens.Jwt;
 using UZonMail.Utils.Database.Redis;
+using UZonMail.Utils.Web.Convention;
+using UZonMail.Utils.Web.Service;
+using UZonMail.Utils.Web.Swagger;
 
 namespace UZonMail.Utils.Web
 {
@@ -152,15 +154,18 @@ namespace UZonMail.Utils.Web
         /// <param name="services"></param>
         /// <param name="apiInfo"></param>
         /// <returns></returns>
-        public static IServiceCollection AddSwaggerGen(this IServiceCollection services, OpenApiInfo apiInfo, string xmlCommentsPath)
+        public static IServiceCollection AddSwaggerGen(this IServiceCollection services, OpenApiInfo apiInfo)
         {
             services.AddSwaggerGen(swaggerOptions =>
             {
                 swaggerOptions.SwaggerDoc("v1", apiInfo);
 
-                // Set the comments path for the Swagger JSON and UI.    
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlCommentsPath);
-                swaggerOptions.IncludeXmlComments(xmlPath);
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetEntryAssembly()?.GetName().Name}.xml";
+                if (File.Exists(xmlFile))
+                {
+                    swaggerOptions.IncludeXmlComments(xmlFile);
+                }
 
                 // Bearer 的scheme定义
                 var securityScheme = new OpenApiSecurityScheme()
@@ -175,6 +180,9 @@ namespace UZonMail.Utils.Web
                     Scheme = "bearer",
                     BearerFormat = "JWT"
                 };
+
+                // 添加过滤器，输出更多信息
+                swaggerOptions.OperationFilter<DotNETSwaggerFilter>();
 
                 //把所有方法配置为增加bearer头部信息
                 var securityRequirement = new OpenApiSecurityRequirement
