@@ -16,7 +16,7 @@ export default {
     logger: {
       level: 'info'
     },
-    version: '0.17.0.1'
+    version: '0.17.1.0'
   },
 
   // 生产配置
