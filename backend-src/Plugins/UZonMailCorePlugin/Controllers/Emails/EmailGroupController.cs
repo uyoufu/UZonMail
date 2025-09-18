@@ -121,7 +121,9 @@ namespace UZonMail.Core.Controllers.Emails
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
-            var outboxes = db.Outboxes.AsNoTracking().Where(x => !x.IsValid && x.EmailGroupId == groupId && x.UserId == userId);
+            var outboxes = await db.Outboxes.AsNoTracking()
+                .Where(x => !x.IsValid && x.EmailGroupId == groupId && x.UserId == userId)
+                .ToListAsync();
 
             var client = hub.GetUserClient(userId);
 

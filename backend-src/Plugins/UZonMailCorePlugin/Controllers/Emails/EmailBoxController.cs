@@ -21,7 +21,7 @@ namespace UZonMail.Core.Controllers.Emails
     /// 邮箱
     /// </summary>
     public class EmailBoxController(SqlContext db, TokenService tokenService, UserService userService,
-        EmailGroupService emailGroupService, OutboxValidateService emailUtils,EncryptService encryptService) : ControllerBaseV1
+        EmailGroupService emailGroupService, OutboxValidateService emailUtils, EncryptService encryptService) : ControllerBaseV1
     {
         /// <summary>
         /// 创建发件箱
@@ -446,6 +446,42 @@ namespace UZonMail.Core.Controllers.Emails
         }
 
         /// <summary>
+        /// 通过组获取收件箱
+        /// </summary>
+        /// <param name="groupIds"></param>
+        /// <returns></returns>
+        [HttpGet("inbox/groups-data")]
+        public async Task<ResponseResult<List<Inbox>>> GetGroupsInboxes(string groupIds)
+        {
+            var longGroupIds = groupIds.Split(",")
+                .Select(x =>
+                    {
+                        if (long.TryParse(x, out var value)) return value;
+                        return 0;
+                    })
+                .Where(x => x > 0)
+                .ToList();
+            if (longGroupIds.Count == 0)
+            {
+                return ResponseResult<List<Inbox>>.Success([]);
+            }
+
+            var userId = tokenService.GetUserSqlId();
+            var inboxes = await db.Inboxes.AsNoTracking()
+                .Where(x => longGroupIds.Contains(x.EmailGroupId))
+                .Where(x => x.UserId == userId)
+                .Select(x => new Inbox()
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Email = x.Email
+                })
+                .ToListAsync();
+
+            return inboxes.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 通过 id 删除邮箱
         /// 若邮箱在使用，则仅标记一个删除状态
         /// </summary>
@@ -489,7 +525,7 @@ namespace UZonMail.Core.Controllers.Emails
             var userId = tokenService.GetUserSqlId();
             if (string.IsNullOrEmpty(password)) throw new KnownException("密码不能为空");
 
-            var encryptedResult = encryptService.EncryptOutboxSecret(userId,password);
+            var encryptedResult = encryptService.EncryptOutboxSecret(userId, password);
             return encryptedResult.ToSuccessResponse();
         }
     }
