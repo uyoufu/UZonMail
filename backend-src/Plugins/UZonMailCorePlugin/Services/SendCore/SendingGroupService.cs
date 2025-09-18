@@ -9,6 +9,7 @@ using UZonMail.Core.Jobs;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.Emails;
 using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.Sender.Smtp;
 using UZonMail.Core.Services.SendCore.WaitList;
@@ -31,10 +32,10 @@ namespace UZonMail.Core.Services.SendCore
     public class SendingGroupService(SqlContext db
         , DebugConfig debugConfig
         , TokenService tokenService
-        , SendingThreadsManager tasksService
+        , ISendingTasksManager tasksService
         , GroupTasksList waitList
-        , OutboxesPoolList outboxesPoolList
-        , SmtpClientFactory clientFactory
+        , OutboxesManager outboxesManager
+        , SmtpClientsManager clientFactory
         , AppSettingsManager settingsService
         , ISchedulerFactory schedulerFactory
         , IServiceProvider serviceProvider
@@ -399,7 +400,7 @@ namespace UZonMail.Core.Services.SendCore
         public Task RemoveSendingGroupTask(SendingGroup sendingGroup)
         {
             // 找到关联的发件箱移除
-            var removedOutboxes = outboxesPoolList.RemoveOutbox(sendingGroup.UserId, sendingGroup.Id);
+            var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id);
 
             // 移除关联的客户端
             foreach (var outbox in removedOutboxes)

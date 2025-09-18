@@ -12,6 +12,7 @@ using UZonMail.Core.Services.Settings.Model;
 using UZonMail.Core.Utils.Extensions;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.ResponseModel;
 
@@ -46,7 +47,11 @@ namespace UZonMail.Core.Controllers.Emails
 
             var sendItemMeta = new SendItemMeta(0);
             sendItemMeta.SetSendingItem(sendingItem);
-            var decoratorParams = new EmailDecoratorParams(new SendingSetting(), sendItemMeta, "out@test.com");
+            var decoratorParams = new EmailDecoratorParams(new SendingSetting(), sendItemMeta, new Outbox()
+            {
+                Email = "out@test.com",
+                Name = "outbox"
+            });
             data.Subject = await decorateService.ResolveVariables(decoratorParams, data.Subject);
             data.Body = await decorateService.ResolveVariables(decoratorParams, data.Body);
             return data.ToSuccessResponse();

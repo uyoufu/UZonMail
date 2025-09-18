@@ -8,8 +8,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>Resource\uzon-mail.ico</ApplicationIcon>
-		<FileVersion>0.16.4.0</FileVersion>
-		<AssemblyVersion>0.16.4.0</AssemblyVersion>
+		<FileVersion>0.17.0.0</FileVersion>
+		<AssemblyVersion>0.17.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

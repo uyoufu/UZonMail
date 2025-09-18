@@ -1,8 +1,13 @@
 ﻿using MailKit.Net.Proxy;
 using System.Net;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy.Clients
+namespace UZonMail.Core.Services.SendCore.Proxies.Clients
 {
+    /// <summary>
+    /// IProxyClient 适配器
+    /// </summary>
+    /// <param name="proxyHandler"></param>
+    /// <param name="proxyClient"></param>
     public class ProxyClientAdapter(IProxyHandler proxyHandler, IProxyClient proxyClient) : IProxyClient
     {
         #region 接口实现

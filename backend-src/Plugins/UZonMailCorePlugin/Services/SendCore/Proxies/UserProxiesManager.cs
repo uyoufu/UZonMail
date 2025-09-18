@@ -1,21 +1,20 @@
 ﻿using log4net;
-using Microsoft.Extensions.FileSystemGlobbing;
 using System.Collections.Concurrent;
-using System.Linq;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.DynamicProxy.Clients;
+using UZonMail.Core.Services.SendCore.Proxies.Clients;
+using UZonMail.Core.Services.Settings;
+using UZonMail.Core.Services.Settings.Model;
 using UZonMail.DB.Getters;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy
+namespace UZonMail.Core.Services.SendCore.Proxies
 {
     /// <summary>
     /// 用户代理管理器
     /// </summary>
-    public class UserProxyManager(long userId) : IProxyHandlerDisposer
+    public class UserProxiesManager(long userId) : IProxyHandlerDisposer
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(UserProxyManager));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(UserProxiesManager));
         private readonly ConcurrentDictionary<string, IProxyHandler> _proxyHandlers = [];
 
         public async Task UpdateProxies(IServiceProvider serviceProvider)
@@ -37,20 +36,23 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
                .OrderBy(x => x.Order)
                .ToList();
 
+            var settingManager = serviceProvider.GetRequiredService<AppSettingsManager>();
+            var sendingSetting = await settingManager.GetSetting<SendingSetting>(sqlContext, userId);
+
             foreach (var proxy in proxies)
             {
-                // 若转换器已经存在，则更新
-                if (_proxyHandlers.TryGetValue(proxy.ObjectId, out var existOne))
+                // 不存在，添加新的转换器
+                // key 为 ObjectId
+                if (!_proxyHandlers.TryGetValue(proxy.ObjectId, out var existOne))
                 {
-                    existOne.Update(proxy);
-                    continue;
+                    var newHandler = await CreateProxyHandler(serviceProvider, proxyFactories, proxy);
+                    if (newHandler == null) continue;
+
+                    _proxyHandlers.TryAdd(newHandler.Id, newHandler);
+                    existOne = newHandler;
                 }
-
-                // 若不存在，则新增                
-                var newHandler = await CreateProxyHandler(serviceProvider, proxyFactories, proxy);
-                if (newHandler == null) continue;
-
-                _proxyHandlers.TryAdd(newHandler.Id, newHandler);
+                // 若转换器已经存在，则更新
+                existOne.Update(proxy, maxUsedCountPerDomain: sendingSetting.ChangeIpAfterEmailCount, userId: userId);
             }
         }
 
@@ -78,25 +80,21 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy
         /// 随机一个可用代理
         /// </summary>
         /// <param name="matchStr"></param>
-        /// <param name="limitCount">限制每个matchStr对应的使用次数</param>
         /// <param name="ranges">指定代理的范围, 为空时，默认所有</param>
         /// <returns></returns>
-        public IProxyHandler? RandomProxyHandler(string matchStr, int limitCount, List<long>? ranges = null)
+        public IProxyHandler? RandomProxyHandler(string matchStr, List<long>? ranges = null)
         {
             if (_proxyHandlers.IsEmpty) return null;
-
-            // 若 limitCount 小于等于 0，则不限制
-            if (limitCount <= 0) limitCount = int.MaxValue;
 
             var enabledProxies = _proxyHandlers.Values.AsEnumerable();
             if (ranges != null)
             {
-                var strRanges = ranges.Select(x => x.ToString()).ToList();
+                var strRanges = ranges.Select(x => x.ToString()).ToArray();
                 enabledProxies = enabledProxies.Where(x => strRanges.Contains(x.Id));
             }
             var rangedProxies = enabledProxies
             .Where(x => x.IsEnable())
-            .Where(x => x.IsMatch(matchStr, limitCount))
+            .Where(x => x.IsMatch(matchStr))
             .ToList();
 
             // 随机一个代理

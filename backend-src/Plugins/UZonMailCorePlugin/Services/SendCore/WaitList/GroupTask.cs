@@ -13,7 +13,7 @@ using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Core.Services.SendCore.Interfaces;
 using UZonMail.DB.Extensions;
-using UZonMail.Core.Services.SendCore.DynamicProxy;
+using UZonMail.Core.Services.SendCore.Proxies;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
 
@@ -154,7 +154,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             ProxyIds = sendingGroup.ProxyIds ?? [];
 
             // 更新代理缓存
-            var proxyManager = sendingContext.Provider.GetRequiredService<ProxyManager>();
+            var proxyManager = sendingContext.Provider.GetRequiredService<ProxiesManager>();
             await proxyManager.UpdateUserProxies(sendingContext.Provider, UserId);
 
             // 获取所有的模板，模板是用户级别的
@@ -176,7 +176,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         private async Task AddSharedOutboxToPool(SendingContext sendingContext, List<Outbox> outboxes, List<IdAndName>? outboxGroup)
         {
             if (outboxes.Count == 0 && (outboxGroup == null || outboxGroup.Count == 0)) return;
-            var container = sendingContext.Provider.GetRequiredService<OutboxesPoolList>();
+            var container = sendingContext.Provider.GetRequiredService<OutboxesManager>();
 
             var outboxAddresses = outboxes.ConvertAll(x => new OutboxEmailAddress(x, SendingGroupId, SmtpPasswordSecretKeys, OutboxEmailAddressType.Shared));
             foreach (var outbox in outboxAddresses)
@@ -291,7 +291,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             await UpdateSendingGroupInfo(sqlContext, SendingGroupId);
 
             // 新增特定发件箱
-            var outboxesPoolList = sendingContext.Provider.GetRequiredService<OutboxesPoolList>();
+            var outboxesPoolList = sendingContext.Provider.GetRequiredService<OutboxesManager>();
             foreach (var outbox in outboxes)
             {
                 // 获取收件项 Id

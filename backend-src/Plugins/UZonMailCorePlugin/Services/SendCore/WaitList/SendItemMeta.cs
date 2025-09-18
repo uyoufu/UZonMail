@@ -221,7 +221,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             var orgSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()
                 .GetSetting<SendingSetting>(sendingContext.SqlContext, outbox.UserId);
 
-            return new EmailDecoratorParams(orgSetting, this, outbox.Email);
+            return new EmailDecoratorParams(orgSetting, this, outbox.Outbox);
         }
         #endregion
 

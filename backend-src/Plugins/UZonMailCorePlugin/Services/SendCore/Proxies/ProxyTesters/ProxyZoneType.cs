@@ -1,12 +1,12 @@
-﻿namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
+﻿namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
 {
     [Flags]
-    public enum ProxyTesterType
+    public enum ProxyZoneType
     {
         /// <summary>
-        /// 所有类型的代理查询都可以使用
+        /// 默认值，没有任何效果
         /// </summary>
-        All = 1,
+        Default = 1,
 
         /// <summary>
         /// 表示能访问谷歌时调用
@@ -16,7 +16,7 @@
         /// <summary>
         /// 表示能访问 Baidu 时调用
         /// </summary>
-        Baidu = 3,
+        Baidu = 4,
 
         // 其它情况保留
     }

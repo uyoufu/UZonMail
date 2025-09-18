@@ -5,25 +5,25 @@ using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
 using UZonMail.Utils.Results;
 
-namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
+namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 代理查询基类
     /// 来源：https://github.com/ihmily/ip-info-api?tab=readme-ov-file
     /// </summary>
     /// <param name="httpClient"></param>
-    public abstract class BaseProxyTester : IProxyTester
+    public abstract class BaseProxyTester : IProxyHealthChecker
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(BaseProxyTester));
 
         private readonly HttpClient _httpClient;
         private readonly long _timeout = 5000;
 
-        public BaseProxyTester(HttpClient httpClient,ProxyTesterType testerType)
+        public BaseProxyTester(HttpClient httpClient,ProxyZoneType testerType)
         {
             _httpClient = httpClient;
             _httpClient.Timeout = TimeSpan.FromMilliseconds(_timeout);
-            TesterType = testerType;
+            ProxyZoneType = testerType;
         }
 
         public bool Enable { get; set; } = true;
@@ -36,7 +36,7 @@ namespace UZonMail.Core.Services.SendCore.DynamicProxy.ProxyTesters
         /// <summary>
         /// 代理查询类型
         /// </summary>
-        public ProxyTesterType TesterType { get; private set; }
+        public ProxyZoneType ProxyZoneType { get; private set; }
 
         /// <summary>
         /// 获取当前 IP
