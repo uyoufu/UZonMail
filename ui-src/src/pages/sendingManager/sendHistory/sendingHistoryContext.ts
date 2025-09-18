@@ -41,8 +41,8 @@ export function useContextMenu () {
     },
     {
       name: 'cancelSchedule',
-      label: '取消计划',
-      tooltip: '取消计划发件',
+      label: '取消发件',
+      tooltip: '取消当前发件任务',
       color: 'negative',
       vif: canCancel as any,
       onClick: onCancelSending as any

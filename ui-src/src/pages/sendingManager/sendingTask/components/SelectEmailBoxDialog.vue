@@ -158,7 +158,6 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 }
 const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow } = useQTable({
   getRowsNumberCount,
-
   onRequest
 })
 watch(emailGroupRef, () => {
