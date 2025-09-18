@@ -75,6 +75,7 @@ export function selectFile (multiple: boolean = false, accept: string = ''): Pro
     }
 
     const onFocus = () => {
+      logger.debug('[file] selectFile onFocus')
       // 等短时间，允许 change 先执行；若没有文件则视为取消
       setTimeout(() => {
         // 如果已被 resolve/reject 则不处理
@@ -84,8 +85,8 @@ export function selectFile (multiple: boolean = false, accept: string = ''): Pro
           // 有文件，等待 change 事件处理（或直接读取）
           return
         }
-        finishReject({ ok: false, data: null } as any)
-      }, 500)
+        finishReject({ ok: false, data: null, message: '未检测到文件,可能是用户已取消' } as any)
+      }, 5000)
     }
 
     inputElement.addEventListener('change', onChange)
