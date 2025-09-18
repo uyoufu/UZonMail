@@ -36,13 +36,16 @@ namespace UZonMail.Core.Controllers.Emails
             // 对数据进行替换
             var userId = tokenService.GetUserSqlId();
 
+            var inbox = await db.Inboxes.Where(x => x.UserId == userId && x.Email == data.Inbox)
+                .FirstOrDefaultAsync();
+
             var sendingItem = new SendingItem()
             {
                 UserId = userId,
                 Subject = data.Subject,
                 Content = data.Body,
                 Data = data.Data,
-                Inboxes = [new EmailAddress() { Email = data.Inbox }]
+                Inboxes = [new EmailAddress() { Email = data.Inbox, Name = inbox == null ? string.Empty : inbox.Name }]
             };
 
             var sendItemMeta = new SendItemMeta(0);

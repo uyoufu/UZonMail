@@ -39,7 +39,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// 移除发件箱
         /// </summary>
         /// <param name="outbox"></param>
-        public bool RemoveOutbox(OutboxEmailAddress outbox)
+        public bool RemoveOutbox(OutboxEmailAddress outbox, string message = "系统检测到发件箱不可用或取消，主动释放")
         {
             if (!this.TryRemove(outbox.Email, out var existValue))
             {
@@ -47,7 +47,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             }
 
             // 更新状态
-            outbox.MarkShouldDispose("发件箱被手动移除");
+            outbox.MarkShouldDispose(message);
             return true;
         }
 

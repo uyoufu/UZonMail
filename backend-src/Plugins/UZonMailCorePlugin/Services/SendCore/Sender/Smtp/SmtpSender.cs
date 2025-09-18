@@ -94,7 +94,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                     sendItem.SetStatus(SendItemMetaStatus.Error, smtpCommandException.Message);
                     return;
                 }
-
+                
                 // 发件箱有问题
                 sendItem.Outbox?.MarkShouldDispose(smtpCommandException.Message);
                 return;

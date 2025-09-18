@@ -17,6 +17,7 @@ namespace UZonMail.Core.Services.Settings
     public class TokenService(IHttpContextAccessor httpContextAccessor, IOptions<AppConfig> appConfig) : IScopedService
     {
         private HttpRequest Request => httpContextAccessor.HttpContext.Request;
+
         /// <summary>
         /// 获取 token 值
         /// </summary>

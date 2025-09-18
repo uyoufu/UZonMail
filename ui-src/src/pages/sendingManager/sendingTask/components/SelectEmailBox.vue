@@ -85,6 +85,7 @@ async function onSelectOutboxes () {
   })
   if (!ok) return
 
+  logger.debug('[SelectEmailBox] selectedEmails:', data.selectedEmails)
   // 更新选择的数据
   const selectedEmailsResults = data.selectedEmails.map(x => {
     return {

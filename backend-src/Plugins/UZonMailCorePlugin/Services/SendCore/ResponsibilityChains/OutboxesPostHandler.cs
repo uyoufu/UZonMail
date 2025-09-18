@@ -36,8 +36,10 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 // 没有发件项时，可会存在所有发件正在发送中的情况，因此 outbox 不能立马释放, 需要进行判断
                 if (!MatchEmailItem(outbox))
                 {
+                    var message = "未匹配到可发邮件,主动释放";
+                    _logger.Info(message);
                     // 移除
-                    outboxManager.RemoveOutbox(outbox);
+                    outboxManager.RemoveOutbox(outbox, message);
                 }
                 return;
             }
@@ -59,9 +61,6 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             // 发件箱被标记为需要释放
             if (outbox.ShouldDispose)
             {
-                // 说明要释放发件箱
-                outboxManager.RemoveOutbox(outbox);
-
                 // 移除对应的发件组中的数据
                 // 1. 特定发件箱，移除特定邮件
                 // 2. 共享发件箱，判断是否还有多余的发件箱，若没有，则整体移除

@@ -27,6 +27,7 @@
  * warning: 该组件一个弹窗的示例，不可直接使用
  * 参考：http://www.quasarchs.com/quasar-plugins/dialog#composition-api-variant
  */
+import logger from 'loglevel'
 
 import { useDialogPluginComponent } from 'quasar'
 defineEmits([
@@ -51,15 +52,34 @@ const currentPage = ref(1)
 // #region 预览邮件发件正文逻辑
 // 若用户数据中有收件箱，则要与收件箱中的数据进行合并
 let inboxes = [...props.emailCreateInfo.inboxes]
-console.log('emailCreateInfo.data', props.emailCreateInfo.data)
-const userDataInboxes = props.emailCreateInfo.data.map((item) => item.inbox)
+// 将数据转换成 IInbox 类型
+logger.debug('[preview] emailCreateInfo.data', props.emailCreateInfo.data)
+const userDataInboxes = props.emailCreateInfo.data.map((x) => ({
+  email: x.inbox,
+  name: x.inboxName
+} as IInbox))
   .filter(x => x)
 if (userDataInboxes.length > 0) {
-  inboxes.push(...userDataInboxes.map(x => ({ email: x } as IInbox)))
+  inboxes.push(...userDataInboxes)
 }
-// 去重
-inboxes = Array.from(new Set(inboxes))
-pagesCount.value = inboxes.length
+import { getGroupsInboxes } from 'src/api/emailBox'
+onMounted(async () => {
+  // 获取发件组中的邮箱
+  if (props.emailCreateInfo.inboxGroups.length > 0) {
+    const { data } = await getGroupsInboxes(props.emailCreateInfo.inboxGroups.map(x => x.id as number))
+    inboxes.push(...data)
+  }
+
+  // 对邮箱去重
+  const inboxMap = new Map<string, IInbox>()
+  inboxes.forEach(x => {
+    inboxMap.set(x.email, x)
+  })
+
+  inboxes = Array.from(inboxMap.values())
+  pagesCount.value = inboxes.length
+})
+
 
 import { useInstanceRequestCache } from 'src/api/base/httpCache'
 import { getEmailTemplateById, getEmailTemplateByIdOrName } from 'src/api/emailTemplate'
