@@ -51,7 +51,7 @@
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { getSendingSetting, updateSendingSetting } from 'src/api/appSetting'
 import { useUserInfoStore } from 'src/stores/user'
-import { notifySuccess } from 'src/utils/dialog'
+import { notifyError, notifySuccess } from 'src/utils/dialog'
 
 import type { ISendingSetting } from 'src/api/appSetting';
 import { AppSettingType } from 'src/api/appSetting'
@@ -119,12 +119,34 @@ watch(
       return
     }
 
+    // 对参数进行验证
+    if (!validateOutboxSetting()) return
+
     await updateSendingSetting(outboxSettingRef.value, props.settingType)
 
     notifySuccess('设置更改已生效')
   },
   { deep: true }
 )
+
+import { isEmail } from 'src/utils/validator';
+function validateOutboxSetting () {
+  if (outboxSettingRef.value.minOutboxCooldownSecond > 0
+    && outboxSettingRef.value.maxOutboxCooldownSecond < outboxSettingRef.value.minOutboxCooldownSecond) {
+    notifyError('单个发件箱最大发件间隔必须大于最小发件间隔')
+    return false
+  }
+
+  if (outboxSettingRef.value.replyToEmails) {
+    const emails = outboxSettingRef.value.replyToEmails.split(',')
+    if (emails.some(email => !isEmail(email.trim()))) {
+      notifyError('回信收件人格式不正确, 多个邮箱请使用英文逗号分隔')
+      return false
+    }
+  }
+
+  return true
+}
 </script>
 
 <style lang="scss" scoped></style>

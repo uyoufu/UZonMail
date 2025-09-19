@@ -96,7 +96,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'minInboxCooldownHours',
-    label: '最小发件间隔(h)',
+    label: '最小收件间隔(h)',
     align: 'left',
     field: 'minInboxCooldownHours',
     sortable: true
