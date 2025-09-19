@@ -43,25 +43,13 @@ namespace UZonMail.Utils.Web.Token
         /// <param name="tokenParam"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static JObject GetTokenPayloads(this TokenParams tokenParam, string token)
+        public static JObject GetTokenPayloads(string token)
         {
-            //校验token
-            var validateParameter = new TokenValidationParameters()
-            {
-                ValidateLifetime = true,
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = tokenParam.Issuer,
-                ValidAudience = tokenParam.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenParam.UniqueSecret))
-            };
-
             // 校验并解析token
-            new JwtSecurityTokenHandler().ValidateToken(token, validateParameter, out SecurityToken validatedToken);//validatedToken:解密后的对象
-            var jwtPayload = ((JwtSecurityToken)validatedToken).Payload.SerializeToJson(); //获取payload中的数据
+            var securityToken = new JwtSecurityTokenHandler().ReadJwtToken(token); //validatedToken:解密后的对象
+            var jwtPayload = securityToken.Payload.SerializeToJson(); //获取payload中的数据
             var jobj = JObject.Parse(jwtPayload);
-
+            if (jobj == null) return new JObject();
             return jobj;
         }
     }

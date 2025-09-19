@@ -4,6 +4,47 @@ editLink: false
 description: 本页收录了宇正群邮所有历史发布版本。宇正群邮是一款开源免费的邮件群发软件，支持邮件群发、邮件营销、邮箱爬取、变量替换等功能，兼容所有邮箱账号（含Outlook OAuth2），支持Windows、Linux、MacOS及服务器部署。多线程并发，支持多账号，性能强劲，持续迭代优化，被外贸、教育、财务等行业广泛认可。宇正群邮致力于成为最好用的邮件群发软件，是企业和个人邮件营销的首选开源邮件群发解决方案。
 ---
 
+## 0.17.1
+
+> 更新时期：2025-09-18
+
+### Bug 修复
+
+1. 修复部分机型无法选择文件的bug
+2. 修复批量验证时，数据库并发占用错误
+3. 修复收件人变量名获取不正确
+4. 修复仅选择收件组时，无法预览的bug
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.17.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.17.1.0.zip)
+
+[uzonmail-service-win-x64-0.17.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.17.1.0.zip)
+
+[uzonmail-service-linux-x64-0.17.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.17.1.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
+## 0.17.0
+
+> 更新时期：2025-09-10
+
+### 功能优化
+
+1. 优化发件核心, 提升发件速率
+2. 增加每个IP每个域名每小时最大发送数量设置, 防止大并发下被封 IP
+3. 动态变量增加 Outbox、Inbox、Inboxes 等过程数据
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.17.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.17.0.0.zip)
+
+[uzonmail-service-win-x64-0.17.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.17.0.0.zip)
+
+[uzonmail-service-linux-x64-0.17.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.17.0.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.16.4
 
 > 更新时期：2025-09-04

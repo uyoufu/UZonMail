@@ -200,6 +200,19 @@ export function getInboxesData (groupId: number | undefined, filter: string | un
 }
 
 /**
+ * 获取组内的收件箱
+ * @param groupIds
+ * @returns
+ */
+export function getGroupsInboxes (groupIds: number[]) {
+  return httpClient.get<IInbox[]>('/email-box/inbox/groups-data', {
+    params: {
+      groupIds: groupIds.join(',') // ?groupIds=1,2,3
+    }
+  })
+}
+
+/**
  * 通过 id 删除邮箱
  * @param emailBoxId
  * @returns

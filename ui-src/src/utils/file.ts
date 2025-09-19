@@ -26,58 +26,72 @@ export function selectFile (multiple: boolean = false, accept: string = ''): Pro
     inputElement.type = 'file'
     inputElement.accept = accept
     inputElement.multiple = multiple
-    let fileCancel = true
 
-    const callback = (data: Event) => {
-      fileCancel = false
+    let settled = false
+    let isChanged = false
 
-      // 获取file文件
-      const files = (data.target as HTMLInputElement).files
+    const cleanup = () => {
+      inputElement.removeEventListener('change', onChange)
+      window.removeEventListener('focus', onFocus)
+      inputElement.remove()
+    }
+
+    const finishResolve = (result: ISelectFileResult) => {
+      if (settled) return
+      settled = true
+      cleanup()
+      resolve(result)
+    }
+
+    const finishReject = (result: ISelectFileResult) => {
+      if (settled) return
+      settled = true
+      cleanup()
+      reject(result)
+    }
+
+    const onChange = (ev: Event) => {
+      logger.debug('[file] selectFile onChange:', ev)
+      isChanged = true
+
+      // change 触发，说明用户选择了文件（或清除了选择）
+      const files = (ev.target as HTMLInputElement).files
       if (!files || files.length < 1) {
         notifyError('未找到文件')
-        // 删除 input
-        // inputElement.remove()
-        return reject({
-          ok: false,
-          message: '未找到文件'
-        })
+        return finishReject({ ok: false, data: null } as any)
       }
 
       const file = files[0] as File
-      // 读取数据
       const reader = new FileReader()
       reader.onload = e => {
-        // 读取workbook
         const buffer = e.target?.result
-        // 删除 input
-        // inputElement.remove()
-        resolve({
-          ok: true,
-          data: buffer,
-          files
-        })
+        finishResolve({ ok: true, data: buffer, files })
+      }
+      reader.onerror = err => {
+        logger.error('selectFile read error:', err)
+        finishReject({ ok: false, data: null } as any)
       }
       reader.readAsArrayBuffer(file)
     }
-    inputElement.addEventListener('change', callback)
-    inputElement.dispatchEvent(new MouseEvent('click'))
-    // 模拟取消事件
-    window.addEventListener(
-      'focus',
-      () => {
-        setTimeout(() => {
-          if (fileCancel) {
-            reject({
-              ok: false,
-              message: '取消选择文件'
-            })
-          }
-        }, 500)
-      },
-      { once: true }
-    )
-    // 移除 input
-    inputElement.remove()
+
+    const onFocus = () => {
+      logger.debug('[file] selectFile onFocus')
+      // 等短时间，允许 change 先执行；若没有文件则视为取消
+      setTimeout(() => {
+        // 如果已被 resolve/reject 则不处理
+        if (settled || isChanged) return
+        const files = inputElement.files
+        if (files && files.length > 0) {
+          // 有文件，等待 change 事件处理（或直接读取）
+          return
+        }
+        finishReject({ ok: false, data: null, message: '未检测到文件,可能是用户已取消' } as any)
+      }, 5000)
+    }
+
+    inputElement.addEventListener('change', onChange)
+    window.addEventListener('focus', onFocus, { once: true })
+    inputElement.click()
   })
 
   return promise

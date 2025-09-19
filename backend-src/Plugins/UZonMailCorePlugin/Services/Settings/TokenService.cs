@@ -17,6 +17,7 @@ namespace UZonMail.Core.Services.Settings
     public class TokenService(IHttpContextAccessor httpContextAccessor, IOptions<AppConfig> appConfig) : IScopedService
     {
         private HttpRequest Request => httpContextAccessor.HttpContext.Request;
+
         /// <summary>
         /// 获取 token 值
         /// </summary>
@@ -43,7 +44,7 @@ namespace UZonMail.Core.Services.Settings
         public JObject GetTokenPayload()
         {
             var token = GetToken();
-            return appConfig.Value.TokenParams.GetTokenPayloads(token);
+            return JWTToken.GetTokenPayloads(token);
         }
 
         public long GetLongId(string fieldName)
@@ -88,7 +89,7 @@ namespace UZonMail.Core.Services.Settings
         public TokenPayloads GetTokenPayloads()
         {
             var token = GetToken();
-            var paylods = appConfig.Value.TokenParams.GetTokenPayloads(token);
+            var paylods = JWTToken.GetTokenPayloads(token);
             return new TokenPayloads(paylods);
         }
     }
