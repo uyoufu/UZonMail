@@ -150,6 +150,16 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         component: () => import('pages/sendingManager/sendingTask/sendingTask.vue')
       },
       {
+        name: 'IpWarmUpManager',
+        path: 'ip-warm-up-manager',
+        meta: {
+          icon: 'autorenew',
+          label: 'IP 预热',
+          access: ['professional']
+        },
+        component: () => import('pages/sendingManager/ipWarmUp/IpWarmUpManager.vue')
+      },
+      {
         name: 'SendHistory',
         path: 'history',
         meta: {
@@ -176,16 +186,6 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           label: '附件管理'
         },
         component: () => import('pages/sendingManager/fileManager/AttachmentManager.vue')
-      },
-      {
-        name: 'IpWarmUpManager',
-        path: 'ip-warm-up-manager',
-        meta: {
-          icon: 'autorenew',
-          label: 'IP 预热',
-          access: ['professional']
-        },
-        component: () => import('pages/sendingManager/ipWarmUp/IpWarmUpManager.vue')
       },
     ]
   },

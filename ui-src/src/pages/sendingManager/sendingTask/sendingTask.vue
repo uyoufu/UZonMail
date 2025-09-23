@@ -38,9 +38,11 @@
         :cache-tip="false" />
 
       <div class="row justify-end items-center">
-        <CommonBtn label="预览" color="accent" icon="view_carousel" tooltip="预览发件正文" @click="onPreviewClick" />
-        <CommonBtn label="定时发送" class="q-ml-sm" color="primary" icon="schedule" tooltip="定时发件"
+        <CommonBtn label="预览" color="primary" icon="view_carousel" tooltip="预览发件正文" @click="onPreviewClick" />
+        <CommonBtn label="定时" class="q-ml-sm" color="secondary" icon="schedule" tooltip="定时发件"
           @click="onScheduleSendClick" />
+        <CommonBtn v-if="enableIpWarmUpBtn" label="预热" class="q-ml-sm" color="secondary" icon="autorenew"
+          tooltip="IP 预热发件" @click="onIpWarmUpClick" />
         <OkBtn label="发送" class="q-ml-sm" icon="alternate_email" tooltip="立即发件" @click="onSendNowClick" />
       </div>
     </div>
@@ -116,6 +118,11 @@ const { proxyBtnTooltip, proxyBtnColor, onProxyBtnClick } = useProxyAdder(emailI
 // #region 使用模板
 import { useSendingGroupTemplate } from './compositions/useSendingGroupTemplate'
 useSendingGroupTemplate(emailInfo)
+// #endregion
+
+// #region IP预热
+import { useIpWarmUp } from './compositions/useIpWarmUp'
+const { onIpWarmUpClick, enableIpWarmUpBtn } = useIpWarmUp()
 // #endregion
 </script>
 
