@@ -27,7 +27,7 @@ namespace UZonMail.Core.Services.HostedServices
 
             var trigger = TriggerBuilder.Create()
                 .ForJob(jobKey)
-                .StartAt(new DateTimeOffset(DateTime.UtcNow.AddDays(1).Date)) // 明天凌晨开始
+                .StartAt(new DateTimeOffset(DateTime.UtcNow.AddDays(1))) // 明天凌晨开始
                 .WithDailyTimeIntervalSchedule(x => x.WithIntervalInHours(24).OnEveryDay())
                 .Build();
             await scheduler.ScheduleJob(job, trigger, stoppingToken);
