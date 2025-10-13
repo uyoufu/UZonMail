@@ -13,6 +13,6 @@
         /// <summary>
         /// 计划发送
         /// </summary>
-        Scheduled,
+        Scheduled
     }
 }

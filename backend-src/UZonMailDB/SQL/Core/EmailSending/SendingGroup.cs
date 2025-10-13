@@ -82,6 +82,7 @@ namespace UZonMail.DB.SQL.Core.EmailSending
         /// </summary>
         [JsonField]
         public List<EmailAddress>? CcBoxes { get; set; } = [];
+
         /// <summary>
         /// 密送
         /// </summary>

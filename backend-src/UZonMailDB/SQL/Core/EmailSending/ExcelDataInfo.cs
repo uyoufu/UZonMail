@@ -18,8 +18,6 @@ namespace UZonMail.DB.SQL.Core.EmailSending
             TotalCount = excelData.Count;
 
             // 计算 inboxes , outboxes, body 的数量
-            InboxSet = [];
-
             foreach (var item in excelData)
             {
                 if (item is not JObject row) continue;
@@ -29,12 +27,11 @@ namespace UZonMail.DB.SQL.Core.EmailSending
 
                 if (!string.IsNullOrEmpty(inbox))
                 {
-                    InboxesCount++;
                     InboxSet.Add(inbox);
                 }
-                if(!string.IsNullOrEmpty(outbox))
+                if (!string.IsNullOrEmpty(outbox))
                 {
-                    OutboxesCount++;
+                    OutboxSet.Add(outbox);
                 }
                 if (!string.IsNullOrEmpty(body))
                 {
@@ -61,13 +58,15 @@ namespace UZonMail.DB.SQL.Core.EmailSending
             return ExcelDataStatus.Some;
         }
 
-        public int InboxesCount { get;  }
+        public int InboxesCount => InboxSet.Count;
 
-        public int OutboxesCount { get;  }
+        public int OutboxesCount => OutboxSet.Count;
 
         public int BodyCount { get; }
 
-        public HashSet<string> InboxSet { get; }
+        public HashSet<string> InboxSet { get; } = [];
+
+        public HashSet<string> OutboxSet { get; } = [];
 
         public ExcelDataStatus InboxStatus { get; }
         public ExcelDataStatus OutboxStatus { get; }
