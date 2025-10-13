@@ -1,4 +1,5 @@
 import { useUserInfoStore } from 'src/stores/user'
+import { computed } from 'vue'
 
 /**
  * 权限控制
@@ -28,6 +29,10 @@ export function usePermission () {
     return hasPermissionOr(['professional'])
   }
 
+  const isProfession = computed(() => {
+    return hasProfessionAccess()
+  })
+
   /**
    * 是否有企业版权限
    * @returns
@@ -36,12 +41,18 @@ export function usePermission () {
     return hasPermission('enterprise')
   }
 
+  const isEnterprise = computed(() => {
+    return hasEnterpriseAccess()
+  })
+
   return {
     hasPermission,
     hasPermissionOr,
     isSuperAdmin,
     isOrganizationAdmin,
     hasProfessionAccess,
-    hasEnterpriseAccess
+    hasEnterpriseAccess,
+    isProfession,
+    isEnterprise
   }
 }

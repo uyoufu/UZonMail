@@ -89,23 +89,34 @@ async function onSaveTemplate () {
   await notifyUntil(
     async () => {
       const config = useConfig()
-      const blob = await toBlob(node, {
-        backgroundColor: 'white',
-        filter: (node) => {
-          logger.debug("[templateEditor] node: %O", node)
 
-          if (node.nodeName !== 'IMG') return true
+      let blob: Blob | null = null
+      try {
+        blob = await toBlob(node, {
+          backgroundColor: 'white',
+          skipFonts: true,
+          width: 600,
+          height: 600,
+          filter: (node) => {
+            logger.debug("[templateEditor] node: %O", node)
 
-          const imgNode = node as HTMLImageElement
-          if (!imgNode.src.startsWith('http') || imgNode.src.startsWith(config.baseUrl)) {
+            if (node.nodeName !== 'IMG') return true
+
+            const imgNode = node as HTMLImageElement
+            if (!imgNode.src.startsWith('http') || imgNode.src.startsWith(config.baseUrl)) {
+              return true
+            }
+
+            // 修改图片地址为本机代理
+            imgNode.src = `${config.baseUrl}${config.api}/resource-proxy/stream?uri=${encodeURIComponent(imgNode.src)}&access_token=${userInfoStore.token}`
             return true
           }
-
-          // 修改图片地址为本机代理
-          imgNode.src = `${config.baseUrl}${config.api}/resource-proxy/stream?uri=${encodeURIComponent(imgNode.src)}&access_token=${userInfoStore.token}`
-          return true
-        }
-      })
+        })
+      }
+      catch (err) {
+        logger.error('[templateEditor] 生成缩略图失败: %O', err)
+        notifyError('当前正文结构异常，无法生成缩略图')
+      }
 
       // 保存模板
       const templateData = {
@@ -116,7 +127,9 @@ async function onSaveTemplate () {
       const {
         data: { id }
       } = await upsertEmailTemplate(templateData)
-      await uploadToStaticFile('template-thumbnails', `${id}.png`, blob as Blob)
+      if (blob) {
+        await uploadToStaticFile('template-thumbnails', `${id}.png`, blob)
+      }
 
       templateId.value = id as number
     },
