@@ -1,7 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Quartz;
+﻿using Quartz;
 using UZonMail.Core.Jobs;
-using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.HostedServices
 {
@@ -18,7 +16,7 @@ namespace UZonMail.Core.Services.HostedServices
 
             #region 重置每日发件限制
             var jobKey = new JobKey($"schduleTask-resetSentCountToday");
-            bool exist = await scheduler.CheckExists(jobKey);
+            bool exist = await scheduler.CheckExists(jobKey, stoppingToken);
             if (exist) return;
 
             var job = JobBuilder.Create<SentCountReseter>()
