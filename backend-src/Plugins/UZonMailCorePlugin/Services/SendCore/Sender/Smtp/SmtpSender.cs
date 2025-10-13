@@ -66,7 +66,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             // 等待之后，可能出现代理过期的问题
             await iPRateLimiter.WaitForReleaseAsync(context, sendItem.Outbox.Email, smtpClient.ProxyClient?.ProxyHost);
             // 如果是动态代理，则需要检测动态代理是否过期
-            if(smtpClient.ProxyClient is ProxyClientAdapter proxyAdapter && !proxyAdapter.IsEnable)
+            if (smtpClient.ProxyClient is ProxyClientAdapter proxyAdapter && !proxyAdapter.IsEnable)
             {
                 // 动态代理不可用，重新执行发送逻辑
                 await SendAsync(context, message, tryCount - 1);
@@ -94,7 +94,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
                     sendItem.SetStatus(SendItemMetaStatus.Error, smtpCommandException.Message);
                     return;
                 }
-                
+
                 // 发件箱有问题
                 sendItem.Outbox?.MarkShouldDispose(smtpCommandException.Message);
                 return;
