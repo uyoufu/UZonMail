@@ -38,6 +38,7 @@
 
 <script lang="ts" setup>
 import { notifyError, notifySuccess } from 'src/utils/dialog'
+import logger from 'loglevel'
 
 // 模板数据
 const modelValue = defineModel({
@@ -62,12 +63,13 @@ async function onSelectExcel () {
     return
   }
 
+  logger.debug('[SelectEmailData] selected data:', data)
   // 检查数据中每条数据是否都有收件箱
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hasInbox = data.every((item: Record<string, any>) => item.inbox && item.inbox.indexOf('@') > 0)
-  if (!hasInbox) {
-    console.log('exce data:', data)
-    notifyError('请确保每条数据都有 inbox')
+  const emptyInboxRowIndex = data.findIndex((item: Record<string, any>) => !item.inbox || item.inbox.indexOf('@') <= 0)
+  if (emptyInboxRowIndex > 0) {
+    logger.warn('[SelectEmailData] selected data has empty inbox:', emptyInboxRowIndex + 2, data[emptyInboxRowIndex])
+    notifyError(`第 ${emptyInboxRowIndex + 2} 行数据的收件箱为空或格式不正确，请检查后重新选择`)
     return
   }
 
