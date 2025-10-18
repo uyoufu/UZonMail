@@ -178,7 +178,7 @@ namespace UZonMail.DB.SQL.Core.EmailSending
         #region 外部工具方法       
         private List<string>? _subjects;
         private static readonly string[] separators = ["\r\n", "\n", ";", "；"];
-        private List<string> SplitSubjects()
+        public List<string> SplitSubjects()
         {
             if (_subjects == null)
             {
@@ -193,6 +193,7 @@ namespace UZonMail.DB.SQL.Core.EmailSending
             }
             return _subjects;
         }
+
         /// <summary>
         /// 若有多个主题，则获取随机主题
         /// </summary>
