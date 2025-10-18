@@ -3,7 +3,7 @@
     v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
     @request="onTableRequest">
     <template v-slot:top-left>
-      <div class="text-primary">IP 预热计划</div>
+      <CommonBtn label="预热" icon="autorenew" tooltip="新增 IP 预热计划" @click="onIpWarmUpClick" />
     </template>
 
     <template v-slot:top-right>
@@ -14,9 +14,10 @@
       <QTableIndex :props="props" />
     </template>
 
-    <template v-slot:body-cell-userId="props">
+    <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        {{ props.value }}
+        <StatusChip :status="props.value">
+        </StatusChip>
       </q-td>
     </template>
   </q-table>
@@ -27,7 +28,10 @@ import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
+import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
+import StatusChip from 'src/components/statusChip/StatusChip.vue'
 import { formatDate } from 'src/utils/format'
+import { IpWarmUpUpStatus } from 'src/api/pro/ipWarmUp'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [
@@ -41,35 +45,39 @@ const columns: QTableColumn[] = [
     sortable: true
   },
   {
-    name: 'subjectsCount',
+    name: 'subjects',
     required: true,
     label: '主题数',
     align: 'left',
-    field: 'subjectsCount',
+    field: 'subjects',
+    format: (val: string[]) => String(val.length),
     sortable: true
   },
   {
-    name: 'templatesCount',
+    name: 'templateIds',
     required: true,
     label: '模板数',
     align: 'left',
-    field: 'templatesCount',
+    field: 'templateIds',
+    format: (val: number[]) => String(val.length),
     sortable: true
   },
   {
-    name: 'outboxesCount',
+    name: 'outboxIds',
     required: true,
     label: '发件箱数',
     align: 'left',
-    field: 'outboxesCount',
+    field: 'outboxIds',
+    format: (val: number[]) => String(val.length),
     sortable: true
   },
   {
-    name: 'inboxesCount',
+    name: 'inboxIds',
     required: true,
     label: '收件箱数',
     align: 'left',
-    field: 'inboxesCount',
+    field: 'inboxIds',
+    format: (val: number[]) => String(val.length),
     sortable: true
   },
   {
@@ -91,12 +99,11 @@ const columns: QTableColumn[] = [
     sortable: true
   },
   {
-    name: 'repeatRounds',
+    name: 'tasksCount',
     required: false,
     label: '发件总轮数',
     align: 'left',
-    field: 'repeatRounds',
-    format: formatDate, // format 需要的 value 是 string
+    field: 'tasksCount',
     sortable: true
   },
   {
@@ -105,7 +112,7 @@ const columns: QTableColumn[] = [
     label: '状态',
     align: 'left',
     field: 'status',
-    format: formatDate, // format 需要的 value 是 string
+    format: v => IpWarmUpUpStatus[v] as string,
     sortable: true
   },
   {
@@ -118,20 +125,34 @@ const columns: QTableColumn[] = [
     sortable: true
   }
 ]
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getIpWarmUpPlanCount, getIpWarmUpPlanData } from 'src/api/pro/ipWarmUp'
+
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
-  return 0
+  const { data } = await getIpWarmUpPlanCount(filterObj.filter)
+  return data || 0
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
-  return []
+  const { data } = await getIpWarmUpPlanData(filterObj.filter, pagination)
+  return data || []
 }
 
 const { pagination, rows, filter, onTableRequest, loading } = useQTable({
   getRowsNumberCount,
-
   onRequest
 })
+
+// #region 新增
+import { useRouter } from 'vue-router'
+const router = useRouter()
+async function onIpWarmUpClick () {
+  await router.push({
+    name: 'SendingTask', query: {
+      type: 'ipWarmUp'
+    }
+  })
+}
+// #endregion
 </script>
 
 <style lang="scss" scoped></style>

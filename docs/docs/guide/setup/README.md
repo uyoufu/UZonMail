@@ -67,6 +67,10 @@ dir:
     "Path": "resource"
   },
 
+  // 后端 api 的基础 URL
+  // 若是部署到公网服务器上或者需要局域网内访问，必须修改为对应的域名或者IP地址
+  "BaseUrl": "http://localhost:22345",
+
   // http 设置
   // 目前未启用
   "Http": {
@@ -224,15 +228,26 @@ dir:
 }
 ```
 
-## 前端配置
+### 配置 BaseUrl
 
 本软件采用前后端分离框架，前端的 baseUrl 默认为 `http://localhost:22345`, 若是进行反向代理或者共享给局域网内其他用户使用，则需要将其配置为服务器对应的域名或者IP。
 
-前端的配置为 `wwwwroot/app.config.json`，所有配置如下：
+在 `appsettings.Production.json` 中添加 `BaseUrl` 对管理员配置进行修改
+
+``` json
+{
+  "BaseUrl": "http:/localhost:22345"
+}
+```
+
+## 前端配置
+
+若要修改前端的配置, 可以查看 `wwwwroot/app.config.json` 文件，所有配置如下：
 
 ``` json
 {
   // baseUrl 要修改成自己的域名或者 IP
+  // 当后端配置了 BaseUrl 时，该字段无效
   "baseUrl": "http:/localhost:22345",
   "api": "/api/v1",
   "signalRHub": "/hubs/uzonMailHub",
