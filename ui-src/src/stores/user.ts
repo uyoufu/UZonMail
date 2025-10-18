@@ -47,11 +47,11 @@ export const useUserInfoStore = defineStore('userInfo', {
     /**
      * smtp 加密解密密钥
      * @param state
-     * @deprecated 已弃用，请使用 userEncryptKeys
+     * @deprecated 已弃用，请尽量使用 userEncryptKeys
      * @returns
      */
     smtpPasswordSecretKeys: (state) => {
-      // 直接复用 userEncryptKeys 的实现逻辑
+      // TODO: 直接复用 userEncryptKeys 的实现逻辑
       const key = state.secretKey
       const keys = [key, key]
       if (key && key.length >= 16) {

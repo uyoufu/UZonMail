@@ -98,7 +98,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     redirect: '/template-manage/index',
     children: [
       {
-        name: 'emailTemplates',
+        name: 'EmailTemplates',
         path: 'index',
         meta: {
           icon: 'chrome_reader_mode',
@@ -108,7 +108,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         component: () => import('pages/sourceManager/templateManager/emailTemplates.vue')
       },
       {
-        name: 'variableManager',
+        name: 'VariableManager',
         path: 'variable',
         meta: {
           icon: 'data_object',
@@ -119,7 +119,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         component: () => import('pages/sourceManager/variableManager/variableManagerIndex.vue')
       },
       {
-        name: 'templateEditor',
+        name: 'TemplateEditor',
         path: 'editor',
         meta: {
           icon: 'article',
@@ -131,7 +131,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     ]
   },
   {
-    name: 'SendManage',
+    name: 'SendManager',
     path: '/send-management',
     component: NormalLayout,
     meta: {
@@ -141,7 +141,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     redirect: '/send-management/new-task',
     children: [
       {
-        name: 'sendingTask',
+        name: 'SendingTask',
         path: 'new-task',
         meta: {
           icon: 'add_box',

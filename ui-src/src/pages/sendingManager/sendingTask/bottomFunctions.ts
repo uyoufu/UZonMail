@@ -84,8 +84,8 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
     return true
   }
   // 数据验证
-  function validateParams () {
-    console.log('email info:', emailInfo.value)
+  function validateSendingTaskParams () {
+    logger.debug('[sendingTask] validateSendingTaskParams email info:', emailInfo.value)
     if (!emailInfo.value.subjects) {
       notifyError('请填写邮件主题')
       return false
@@ -139,7 +139,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
 
   // 立即发送
   async function onSendNowClick () {
-    if (!validateParams()) return
+    if (!validateSendingTaskParams()) return
     // console.log('email info:', emailInfo.value)
     // 将数据传到后台发送
     notifySuccess('开始发送...')
@@ -154,7 +154,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
 
   // 定时发送
   async function onScheduleSendClick () {
-    if (!validateParams()) return
+    if (!validateSendingTaskParams()) return
     logger.debug('email info:', emailInfo.value)
 
     // 选择日期
@@ -171,7 +171,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
 
   // 预览
   async function onPreviewClick () {
-    if (!validateParams()) return
+    if (!validateSendingTaskParams()) return
 
     // 预览功能在本机实现
     // 1. 正文优先级：用户数据/正文 > 用户数据/模板 > 界面/正文 > 界面/模板
@@ -188,6 +188,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
     needUpload,
     onSendNowClick,
     onScheduleSendClick,
-    onPreviewClick
+    onPreviewClick,
+    validateSendingTaskParams
   }
 }

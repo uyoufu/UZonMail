@@ -19,6 +19,10 @@ export interface IEmailCreateInfo {
   smtpPasswordSecretKeys?: string[], // 发件人邮箱密码密钥, 发件时，需要由用户上传到服务器
   sendBatch: boolean, // 多个收件箱时，是否批量发送
   proxyIds: number[], // 代理人id
+
+  // ip 预热作为参数传递给后端
+  sendStartDate?: string, // 计划发送时间，UTC时间字符串
+  sendEndDate?: string, // 计划发送结束时间，UTC时间字符串
 }
 
 export interface ISendingItemPreview {

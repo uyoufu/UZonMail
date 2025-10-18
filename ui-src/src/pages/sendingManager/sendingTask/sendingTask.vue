@@ -41,9 +41,9 @@
         <CommonBtn label="预览" color="primary" icon="view_carousel" tooltip="预览发件正文" @click="onPreviewClick" />
         <CommonBtn label="定时" class="q-ml-sm" color="secondary" icon="schedule" tooltip="定时发件"
           @click="onScheduleSendClick" />
-        <CommonBtn v-if="enableIpWarmUpBtn" label="预热" class="q-ml-sm" color="secondary" icon="autorenew"
-          tooltip="IP 预热发件" @click="onIpWarmUpClick" />
         <OkBtn label="发送" class="q-ml-sm" icon="alternate_email" tooltip="立即发件" @click="onSendNowClick" />
+        <OkBtn v-if="enableIpWarmUpBtn" label="预热" class="q-ml-sm" icon="autorenew" tooltip="IP 预热发件"
+          @click="onIpWarmUpClick" />
       </div>
     </div>
   </div>
@@ -79,7 +79,10 @@ const emailInfo: Ref<IEmailCreateInfo> = ref({
 })
 
 // 底部功能按钮
-const { needUpload, OkBtn, CommonBtn, onPreviewClick, onScheduleSendClick, onSendNowClick } = useBottomFunctions(emailInfo)
+const {
+  needUpload, OkBtn, CommonBtn,
+  onPreviewClick, onScheduleSendClick, onSendNowClick, validateSendingTaskParams
+} = useBottomFunctions(emailInfo)
 
 // 合并发送
 const sendBatchTooltips = ['若有多个发件人,将其合并到一封邮件中发送', '启用后无法对单个发件箱进行重发', '一般不建议启用']
@@ -122,7 +125,7 @@ useSendingGroupTemplate(emailInfo)
 
 // #region IP预热
 import { useIpWarmUp } from './compositions/useIpWarmUp'
-const { onIpWarmUpClick, enableIpWarmUpBtn } = useIpWarmUp()
+const { onIpWarmUpClick, enableIpWarmUpBtn } = useIpWarmUp(validateSendingTaskParams, emailInfo)
 // #endregion
 </script>
 
