@@ -20,11 +20,7 @@ namespace UZonMail.Core.Services.HostedServices
             if(string.IsNullOrEmpty(baseUrl)) return Task.CompletedTask;
 
             // 读取为 json
-            var jobject = JObject.Parse(File.ReadAllText(frontConfigPath));
-            var oldBaseUrl = jobject["baseUrl"]?.ToString();
-            // 说明已经被用户修改过了
-            if (oldBaseUrl == null || !oldBaseUrl.Contains("localhost")) return Task.CompletedTask;
-
+            var jobject = JObject.Parse(File.ReadAllText(frontConfigPath));            
             jobject["baseUrl"] = baseUrl;
             // 保存文件
             File.WriteAllText(frontConfigPath, jobject.ToString());

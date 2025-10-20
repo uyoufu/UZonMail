@@ -50,7 +50,7 @@ services:
     volumes:
       - ./data/appsettings.Production.json:/app/appsettings.Production.json # 生产环境配置
       - ./data/data:/app/data # 数据存储
-      - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
+      # - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
     networks:
       - uzonmail_network
       - uzon_mysql_network
