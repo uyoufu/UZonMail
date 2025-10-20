@@ -61,6 +61,11 @@ import { useBottomFunctions } from './bottomFunctions'
 
 import type { IEmailCreateInfo } from 'src/api/emailSending'
 
+// 设置名称
+defineOptions({
+  name: 'SendingTask'
+})
+
 const emailInfo: Ref<IEmailCreateInfo> = ref({
   subjects: '', // 主题
   templates: [], // 模板 id

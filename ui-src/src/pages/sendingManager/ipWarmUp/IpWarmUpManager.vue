@@ -33,6 +33,10 @@ import StatusChip from 'src/components/statusChip/StatusChip.vue'
 import { formatDate } from 'src/utils/format'
 import { IpWarmUpUpStatus } from 'src/api/pro/ipWarmUp'
 
+defineOptions({
+  name: 'IpWarmUpManager'
+})
+
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [
   indexColumn,
@@ -148,7 +152,8 @@ const router = useRouter()
 async function onIpWarmUpClick () {
   await router.push({
     name: 'SendingTask', query: {
-      type: 'ipWarmUp'
+      type: 'ipWarmUp',
+      tagName: 'IP预热'
     }
   })
 }
