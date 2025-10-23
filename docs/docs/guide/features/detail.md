@@ -7,13 +7,13 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 ## 登陆界面
 
-![uzon-mail-login-2](https://obs.uamazing.cn:52443/public/files/images/uzon-mail-login-2.png)
+![uzon-mail-login-2](https://oss.uzoncloud.com:2234/public/files/images/uzon-mail-login-2.png)
 
 默认用户名和密码为：admin/admin1234
 
 ## 首页
 
-![image-20240614231957130](https://obs.uamazing.cn:52443/public/files/images/image-20240614231957130.png)
+![image-20240614231957130](https://oss.uzoncloud.com:2234/public/files/images/image-20240614231957130.png)
 
 首页主要展示的内容有：
 
@@ -25,7 +25,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 ### 用户管理
 
-![image-20240612122713293](https://obs.uamazing.cn:52443/public/files/images/image-20240612122713293.png)
+![image-20240612122713293](https://oss.uzoncloud.com:2234/public/files/images/image-20240612122713293.png)
 
 系统默认的用户名为 admin，默认密码为 admin1234，这是一个管理员账号，该账号具有【管理用户】的权限。
 
@@ -35,7 +35,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 **新增用户：**
 
-![image-20240612123329057](https://obs.uamazing.cn:52443/public/files/images/image-20240612123329057.png)
+![image-20240612123329057](https://oss.uzoncloud.com:2234/public/files/images/image-20240612123329057.png)
 
 单击左上角的新增，即可新增用户。
 
@@ -43,19 +43,19 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 重置后的密码为：`uzonmail123`，在重置时会有提示。
 
-![image-20240612123429178](https://obs.uamazing.cn:52443/public/files/images/image-20240612123429178.png)
+![image-20240612123429178](https://oss.uzoncloud.com:2234/public/files/images/image-20240612123429178.png)
 
 **修改密码和头像：**
 
 可以通过右上角的个人信息界面对头像和密码进行修改。
 
-![image-20240612125131168](https://obs.uamazing.cn:52443/public/files/images/image-20240612125131168.png)
+![image-20240612125131168](https://oss.uzoncloud.com:2234/public/files/images/image-20240612125131168.png)
 
 ### 基础设置
 
 基础设置中，主要设置全局的发件间隔，最大发件量等。
 
-![image-20240612125859579](https://obs.uamazing.cn:52443/public/files/images/image-20240612125859579.png)
+![image-20240612125859579](https://oss.uzoncloud.com:2234/public/files/images/image-20240612125859579.png)
 
 - 单个邮箱每日最大发件量
 
@@ -83,7 +83,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 ### 代理管理
 
-![image-20240612131312091](https://obs.uamazing.cn:52443/public/files/images/image-20240612131312091.png)
+![image-20240612131312091](https://oss.uzoncloud.com:2234/public/files/images/image-20240612131312091.png)
 
 代理管理模块主要针对使用国外邮箱的情况，允许针对某一类或者某个发件箱指定代理。
 
@@ -91,7 +91,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 **新增代理**：
 
-![image-20240612130111084](https://obs.uamazing.cn:52443/public/files/images/image-20240612130111084.png)
+![image-20240612130111084](https://oss.uzoncloud.com:2234/public/files/images/image-20240612130111084.png)
 
 新增代理参数说明：
 
@@ -139,21 +139,21 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 增加发件箱时，必须先建立发件组。
 
-![image-20240612131552355](https://obs.uamazing.cn:52443/public/files/images/image-20240612131552355.png)
+![image-20240612131552355](https://oss.uzoncloud.com:2234/public/files/images/image-20240612131552355.png)
 
 在 "发件箱" 上右键，可新增发件组。
 
-![image-20240612131711338](https://obs.uamazing.cn:52443/public/files/images/image-20240612131711338.png)
+![image-20240612131711338](https://oss.uzoncloud.com:2234/public/files/images/image-20240612131711338.png)
 
 新增时，"序号" 表示发件组的排序号，仅用于排序。
 
 当新建组完成后，可以在组名上右键，对组进行管理
 
-![image-20240612131916319](https://obs.uamazing.cn:52443/public/files/images/image-20240612131916319.png)
+![image-20240612131916319](https://oss.uzoncloud.com:2234/public/files/images/image-20240612131916319.png)
 
 **新增发件箱**：
 
-![image-20240612132056895](https://obs.uamazing.cn:52443/public/files/images/image-20240612132056895.png)
+![image-20240612132056895](https://oss.uzoncloud.com:2234/public/files/images/image-20240612132056895.png)
 
 本软件采用的是 SMTP 协议发件，因此发件时，需要将自己的邮箱开通 SMTP 服务，可自行查阅资料。以下对一些重要参数说明：
 
@@ -197,11 +197,11 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 在使用批量添加发件人功能时，Excel 表中第一行为表头，必须包含 `smtp邮箱`、`smtp密码`、`smtp地址`、`smtp端口`  列。
 
-![image-20240614123302248](https://obs.uamazing.cn:52443/public/files/images/image-20240614123302248.png)
+![image-20240614123302248](https://oss.uzoncloud.com:2234/public/files/images/image-20240614123302248.png)
 
 ### 收件箱
 
-![image-20240614124814856](https://obs.uamazing.cn:52443/public/files/images/image-20240614124814856.png)
+![image-20240614124814856](https://oss.uzoncloud.com:2234/public/files/images/image-20240614124814856.png)
 
 该模块主要用于对收件箱的分组和管理，使用方式、注意要点与发件人一致。
 
@@ -209,7 +209,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 ## 模板管理
 
-![image-20240614125056768](https://obs.uamazing.cn:52443/public/files/images/image-20240614125056768.png)
+![image-20240614125056768](https://oss.uzoncloud.com:2234/public/files/images/image-20240614125056768.png)
 
 在【正文模板】用于管理用户下的所有模板，它是 html 格式。
 
@@ -225,13 +225,13 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
   
   通过单击【新增】按钮新增模板。
   
-  ![image-20240614125417120](https://obs.uamazing.cn:52443/public/files/images/image-20240614125417120.png)
+  ![image-20240614125417120](https://oss.uzoncloud.com:2234/public/files/images/image-20240614125417120.png)
 
 ### 模板编辑
 
 通过单击模板名称或者在模板上右键，然后选择【编译】跳转到模板修改界面。
 
-![image-20240614125609679](https://obs.uamazing.cn:52443/public/files/images/image-20240614125609679.png)
+![image-20240614125609679](https://oss.uzoncloud.com:2234/public/files/images/image-20240614125609679.png)
 
 ### 模板变量
 
@@ -245,7 +245,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 ### 新建发件
 
-![image-20240614125845479](https://obs.uamazing.cn:52443/public/files/images/image-20240614125845479.png)
+![image-20240614125845479](https://oss.uzoncloud.com:2234/public/files/images/image-20240614125845479.png)
 
 新建发件用于添加发件任务，通过不同的参数组合，它可以实现以下功能：
 
@@ -271,7 +271,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 多个主题使用英文分号（`;`）或者换行进行分隔。
 
-![image-20240614130827129](https://obs.uamazing.cn:52443/public/files/images/image-20240614130827129.png)
+![image-20240614130827129](https://oss.uzoncloud.com:2234/public/files/images/image-20240614130827129.png)
 
 若有多个主题，系统在发件时，会随机使用一个主题（若在数据中指定了主题，则会固定使用数据的主题）。
 
@@ -281,15 +281,15 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 模板相当于是正文的一个草稿，它可以让你快速发送正文，而不需要每次都在正文处输入。
 
-![image-20240614131034812](https://obs.uamazing.cn:52443/public/files/images/image-20240614131034812.png)
+![image-20240614131034812](https://oss.uzoncloud.com:2234/public/files/images/image-20240614131034812.png)
 
 可以选择多个模板。若有多个模板时，系统将随机选择一个模板来发件（若在数据中指定了模板，则会固定使用数据中的模板）
 
 #### 正文
 
-![image-20240614131326894](https://obs.uamazing.cn:52443/public/files/images/image-20240614131326894.png)
+![image-20240614131326894](https://oss.uzoncloud.com:2234/public/files/images/image-20240614131326894.png)
 
-![image-20240614225842011](https://obs.uamazing.cn:52443/public/files/images/image-20240614225842011.png)
+![image-20240614225842011](https://oss.uzoncloud.com:2234/public/files/images/image-20240614225842011.png)
 
 软件支持用户手动输入正文。
 
@@ -299,7 +299,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 #### 发件人
 
-![image-20240614131606189](https://obs.uamazing.cn:52443/public/files/images/image-20240614131606189.png)
+![image-20240614131606189](https://oss.uzoncloud.com:2234/public/files/images/image-20240614131606189.png)
 
 单击发件人右侧的 + 号，选择发件人。
 
@@ -309,7 +309,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 #### 收件人
 
-![image-20240614131851665](https://obs.uamazing.cn:52443/public/files/images/image-20240614131851665.png)
+![image-20240614131851665](https://oss.uzoncloud.com:2234/public/files/images/image-20240614131851665.png)
 
 单击收件人右侧的 + 号，选择收件人。
 
@@ -321,7 +321,7 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 #### 附件
 
-![image-20240614214517919](https://obs.uamazing.cn:52443/public/files/images/image-20240614214517919.png)
+![image-20240614214517919](https://oss.uzoncloud.com:2234/public/files/images/image-20240614214517919.png)
 
 若邮件中需要添加附件，可以在此添加附件。
 
@@ -333,21 +333,21 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 当将鼠标聚焦在数据栏，右侧会出现下载模板的图标，单击该图标即可下载模板。
 
-![image-20240614215520531](https://obs.uamazing.cn:52443/public/files/images/image-20240614215520531.png)
+![image-20240614215520531](https://oss.uzoncloud.com:2234/public/files/images/image-20240614215520531.png)
 
 数据格式大致如下：
 
-![image-20240614220243117](https://obs.uamazing.cn:52443/public/files/images/image-20240614220243117.png)
+![image-20240614220243117](https://oss.uzoncloud.com:2234/public/files/images/image-20240614220243117.png)
 
 **数据的效果**：
 
 模板内容:
 
-![image-20240614222544153](https://obs.uamazing.cn:52443/public/files/images/image-20240614222544153.png)
+![image-20240614222544153](https://oss.uzoncloud.com:2234/public/files/images/image-20240614222544153.png)
 
 模板赋予数据后的正文预览：
 
-![image-20240614222617857](https://obs.uamazing.cn:52443/public/files/images/image-20240614222617857.png)
+![image-20240614222617857](https://oss.uzoncloud.com:2234/public/files/images/image-20240614222617857.png)
 
 **数据的作用**：
 
@@ -400,8 +400,8 @@ description: 宇正群邮邮件群发软件功能列表，全面介绍邮件群�
 
 单击 ID 或者右键【详细】可查看具体发件项。
 
-![image-20240614225346191](https://obs.uamazing.cn:52443/public/files/images/image-20240614225346191.png)
+![image-20240614225346191](https://oss.uzoncloud.com:2234/public/files/images/image-20240614225346191.png)
 
 发件明细：
 
-![image-20240614231145776](https://obs.uamazing.cn:52443/public/files/images/image-20240614231145776.png)
+![image-20240614231145776](https://oss.uzoncloud.com:2234/public/files/images/image-20240614231145776.png)

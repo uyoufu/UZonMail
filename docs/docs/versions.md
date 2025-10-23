@@ -17,11 +17,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.17.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.17.1.0.zip)
+[uzonmail-desktop-win-x64-0.17.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.17.1.0.zip)
 
-[uzonmail-service-win-x64-0.17.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.17.1.0.zip)
+[uzonmail-service-win-x64-0.17.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.17.1.0.zip)
 
-[uzonmail-service-linux-x64-0.17.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.17.1.0.zip)
+[uzonmail-service-linux-x64-0.17.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.17.1.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -37,11 +37,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.17.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.17.0.0.zip)
+[uzonmail-desktop-win-x64-0.17.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.17.0.0.zip)
 
-[uzonmail-service-win-x64-0.17.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.17.0.0.zip)
+[uzonmail-service-win-x64-0.17.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.17.0.0.zip)
 
-[uzonmail-service-linux-x64-0.17.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.17.0.0.zip)
+[uzonmail-service-linux-x64-0.17.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.17.0.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -56,11 +56,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.16.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.4.0.zip)
+[uzonmail-desktop-win-x64-0.16.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.4.0.zip)
 
-[uzonmail-service-win-x64-0.16.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.16.4.0.zip)
+[uzonmail-service-win-x64-0.16.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.16.4.0.zip)
 
-[uzonmail-service-linux-x64-0.16.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.16.4.0.zip)
+[uzonmail-service-linux-x64-0.16.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.16.4.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -79,11 +79,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.16.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.3.0.zip)
+[uzonmail-desktop-win-x64-0.16.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.3.0.zip)
 
-[uzonmail-service-win-x64-0.16.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.16.3.0.zip)
+[uzonmail-service-win-x64-0.16.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.16.3.0.zip)
 
-[uzonmail-service-linux-x64-0.16.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.16.3.0.zip)
+[uzonmail-service-linux-x64-0.16.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.16.3.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -98,11 +98,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.16.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.2.0.zip)
+[uzonmail-desktop-win-x64-0.16.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.2.0.zip)
 
-[uzonmail-service-win-x64-0.16.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.16.2.0.zip)
+[uzonmail-service-win-x64-0.16.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.16.2.0.zip)
 
-[uzonmail-service-linux-x64-0.16.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.16.2.0.zip)
+[uzonmail-service-linux-x64-0.16.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.16.2.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -121,11 +121,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.16.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.1.0.zip)
+[uzonmail-desktop-win-x64-0.16.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.1.0.zip)
 
-[uzonmail-service-win-x64-0.16.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.16.1.0.zip)
+[uzonmail-service-win-x64-0.16.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.16.1.0.zip)
 
-[uzonmail-service-linux-x64-0.16.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.16.1.0.zip)
+[uzonmail-service-linux-x64-0.16.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.16.1.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -145,11 +145,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.16.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.0.0.zip)
+[uzonmail-desktop-win-x64-0.16.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.16.0.0.zip)
 
-[uzonmail-service-win-x64-0.16.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.16.0.0.zip)
+[uzonmail-service-win-x64-0.16.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.16.0.0.zip)
 
-[uzonmail-service-linux-x64-0.16.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.16.0.0.zip)
+[uzonmail-service-linux-x64-0.16.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.16.0.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -170,11 +170,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.15.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.3.0.zip)
+[uzonmail-desktop-win-x64-0.15.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.3.0.zip)
 
-[uzonmail-service-win-x64-0.15.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.15.3.0.zip)
+[uzonmail-service-win-x64-0.15.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.15.3.0.zip)
 
-[uzonmail-service-linux-x64-0.15.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.15.3.0.zip)
+[uzonmail-service-linux-x64-0.15.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.15.3.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -189,11 +189,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.15.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.2.0.zip)
+[uzonmail-desktop-win-x64-0.15.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.2.0.zip)
 
-[uzonmail-service-win-x64-0.15.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.15.2.0.zip)
+[uzonmail-service-win-x64-0.15.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.15.2.0.zip)
 
-[uzonmail-service-linux-x64-0.15.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.15.2.0.zip)
+[uzonmail-service-linux-x64-0.15.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.15.2.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -223,11 +223,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.15.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.1.0.zip)
+[uzonmail-desktop-win-x64-0.15.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.1.0.zip)
 
-[uzonmail-service-win-x64-0.15.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.15.1.0.zip)
+[uzonmail-service-win-x64-0.15.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.15.1.0.zip)
 
-[uzonmail-service-linux-x64-0.15.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.15.1.0.zip)
+[uzonmail-service-linux-x64-0.15.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.15.1.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -247,11 +247,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.15.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.0.0.zip)
+[uzonmail-desktop-win-x64-0.15.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.15.0.0.zip)
 
-[uzonmail-service-win-x64-0.15.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.15.0.0.zip)
+[uzonmail-service-win-x64-0.15.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.15.0.0.zip)
 
-[uzonmail-service-linux-x64-0.15.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.15.0.0.zip)
+[uzonmail-service-linux-x64-0.15.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.15.0.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -270,11 +270,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.2.2.zip)
+[uzonmail-desktop-win-x64-0.14.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.2.2.zip)
 
-[uzonmail-service-win-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.14.2.2.zip)
+[uzonmail-service-win-x64-0.14.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.14.2.2.zip)
 
-[uzonmail-service-linux-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.14.2.2.zip)
+[uzonmail-service-linux-x64-0.14.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.14.2.2.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -296,11 +296,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.2.0.zip)
+[uzonmail-desktop-win-x64-0.14.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.2.0.zip)
 
-[uzonmail-service-win-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.14.2.0.zip)
+[uzonmail-service-win-x64-0.14.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.14.2.0.zip)
 
-[uzonmail-service-linux-x64-0.14.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.14.2.0.zip)
+[uzonmail-service-linux-x64-0.14.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.14.2.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -319,11 +319,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.14.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.1.0.zip)
+[uzonmail-desktop-win-x64-0.14.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.1.0.zip)
 
-[uzonmail-service-win-x64-0.14.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.14.1.0.zip)
+[uzonmail-service-win-x64-0.14.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.14.1.0.zip)
 
-[uzonmail-service-linux-x64-0.14.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.14.1.0.zip)
+[uzonmail-service-linux-x64-0.14.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.14.1.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -349,11 +349,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.14.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.0.0.zip)
+[uzonmail-desktop-win-x64-0.14.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.14.0.0.zip)
 
-[uzonmail-service-win-x64-0.14.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.14.0.0.zip)
+[uzonmail-service-win-x64-0.14.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.14.0.0.zip)
 
-[uzonmail-service-linux-x64-0.14.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.14.0.0.zip)
+[uzonmail-service-linux-x64-0.14.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.14.0.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -372,11 +372,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.13.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.13.0.0.zip)
+[uzonmail-desktop-win-x64-0.13.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.13.0.0.zip)
 
-[uzonmail-service-win-x64-0.13.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.13.0.0.zip)
+[uzonmail-service-win-x64-0.13.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.13.0.0.zip)
 
-[uzonmail-service-linux-x64-0.13.0.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.13.0.0.zip)
+[uzonmail-service-linux-x64-0.13.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.13.0.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -398,11 +398,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.12.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.4.0.zip)
+[uzonmail-desktop-win-x64-0.12.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.4.0.zip)
 
-[uzonmail-service-win-x64-0.12.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.12.4.0.zip)
+[uzonmail-service-win-x64-0.12.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.12.4.0.zip)
 
-[uzonmail-service-linux-x64-0.12.4.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.12.4.0.zip)
+[uzonmail-service-linux-x64-0.12.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.12.4.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -418,11 +418,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.12.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.3.0.zip)
+[uzonmail-desktop-win-x64-0.12.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.3.0.zip)
 
-[uzonmail-service-win-x64-0.12.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.12.3.0.zip)
+[uzonmail-service-win-x64-0.12.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.12.3.0.zip)
 
-[uzonmail-service-linux-x64-0.12.3.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.12.3.0.zip)
+[uzonmail-service-linux-x64-0.12.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.12.3.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -440,11 +440,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.12.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.2.0.zip)
+[uzonmail-desktop-win-x64-0.12.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.2.0.zip)
 
-[uzonmail-service-win-x64-0.12.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.12.2.0.zip)
+[uzonmail-service-win-x64-0.12.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.12.2.0.zip)
 
-[uzonmail-service-linux-x64-0.12.2.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.12.2.0.zip)
+[uzonmail-service-linux-x64-0.12.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.12.2.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -468,11 +468,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.12.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.1.0.zip)
+[uzonmail-desktop-win-x64-0.12.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.12.1.0.zip)
 
-[uzonmail-service-win-x64-0.12.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-win-x64-0.12.1.0.zip)
+[uzonmail-service-win-x64-0.12.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.12.1.0.zip)
 
-[uzonmail-service-linux-x64-0.12.1.0.zip](https://obs.uamazing.cn:2234/public/files/soft/uzonmail-service-linux-x64-0.12.1.0.zip)
+[uzonmail-service-linux-x64-0.12.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.12.1.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -484,11 +484,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.11.3.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-desktop-win-x64-0.11.3.0.zip)
+[uzonmail-desktop-win-x64-0.11.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.11.3.0.zip)
 
-[uzonmail-service-win-x64-0.11.3.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-win-x64-0.11.3.0.zip)
+[uzonmail-service-win-x64-0.11.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.11.3.0.zip)
 
-[uzonmail-service-linux-x64-0.11.3.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-linux-x64-0.11.3.0.zip)
+[uzonmail-service-linux-x64-0.11.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.11.3.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -501,11 +501,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.11.2.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-desktop-win-x64-0.11.2.0.zip)
+[uzonmail-desktop-win-x64-0.11.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.11.2.0.zip)
 
-[uzonmail-service-win-x64-0.11.2.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-win-x64-0.11.2.0.zip)
+[uzonmail-service-win-x64-0.11.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.11.2.0.zip)
 
-[uzonmail-service-linux-x64-0.11.2.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-linux-x64-0.11.2.0.zip)
+[uzonmail-service-linux-x64-0.11.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.11.2.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -525,11 +525,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.11.1.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-desktop-win-x64-0.11.1.0.zip)
+[uzonmail-desktop-win-x64-0.11.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.11.1.0.zip)
 
-[uzonmail-service-win-x64-0.11.1.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-win-x64-0.11.1.0.zip)
+[uzonmail-service-win-x64-0.11.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.11.1.0.zip)
 
-[uzonmail-service-linux-x64-0.11.1.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-linux-x64-0.11.1.0.zip)
+[uzonmail-service-linux-x64-0.11.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.11.1.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -564,11 +564,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.11.0.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-desktop-win-x64-0.11.0.0.zip)
+[uzonmail-desktop-win-x64-0.11.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.11.0.0.zip)
 
-[uzonmail-service-win-x64-0.11.0.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-win-x64-0.11.0.0.zip)
+[uzonmail-service-win-x64-0.11.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.11.0.0.zip)
 
-[uzonmail-service-linux-x64-0.11.0.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-linux-x64-0.11.0.0.zip)
+[uzonmail-service-linux-x64-0.11.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.11.0.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 
@@ -584,11 +584,11 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 
 ### 下载地址
 
-[uzonmail-desktop-win-x64-0.10.0.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-desktop-win-x64-0.10.0.0.zip)
+[uzonmail-desktop-win-x64-0.10.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.10.0.0.zip)
 
-[uzonmail-service-win-x64-0.10.0.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-win-x64-0.10.0.0.zip)
+[uzonmail-service-win-x64-0.10.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.10.0.0.zip)
 
-[uzonmail-service-linux-x64-0.10.0.0.zip](https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-linux-x64-0.10.0.0.zip)
+[uzonmail-service-linux-x64-0.10.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.10.0.0.zip)
 
 [docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
 

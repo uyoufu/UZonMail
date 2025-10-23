@@ -1,6 +1,6 @@
 import { usePermission } from 'src/compositions/permission'
 import IpWarmUpSettingDialog from '../components/IpWarmUpSettingDialog.vue'
-import { showComponentDialog } from 'src/utils/dialog'
+import { notifySuccess, showComponentDialog } from 'src/utils/dialog'
 import { useRoute } from 'vue-router'
 import { useUserInfoStore } from 'src/stores/user'
 import { formatDateToUTC } from 'src/utils/format'
@@ -23,9 +23,9 @@ export function useIpWarmUp (validateSendingTaskParams: () => boolean, emailInfo
 
   async function onIpWarmUpClick () {
     // 先要进行数据验证
-    if (!validateSendingTaskParams()) {
-      return
-    }
+    // if (!validateSendingTaskParams()) {
+    //   return
+    // }
 
     // TODO 打开预热弹窗
     const warmUpSettingResult = await showComponentDialog(IpWarmUpSettingDialog)
@@ -41,6 +41,8 @@ export function useIpWarmUp (validateSendingTaskParams: () => boolean, emailInfo
     })
 
     await createIpWarmUpPlan(warmUpData)
+
+    notifySuccess('IP预热计划创建成功！')
   }
 
   return { onIpWarmUpClick, enableIpWarmUpBtn }
