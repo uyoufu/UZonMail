@@ -26,6 +26,8 @@ export enum IpWarmUpUpStatus {
 }
 
 export interface IIpWarmUpUpPlan {
+  id: number,
+  objectId: string,
   userId: number
   name: string
   subjects: string[]
@@ -40,7 +42,8 @@ export interface IIpWarmUpUpPlan {
   startDate: Date
   endDate: Date
   tasksCount: number
-  status: IpWarmUpUpStatus
+  status: IpWarmUpUpStatus,
+  sendCountChartPoints: [number, number][]
 }
 
 /**
@@ -82,4 +85,24 @@ export function getIpWarmUpPlanData (filter: string | undefined, pagination: IRe
     },
     data: pagination
   })
+}
+
+/**
+ * 删除预热计划
+ * @param planIds
+ * @returns
+ */
+export function deleteIpWarmUpPlanByIds (planIds: number[]) {
+  return httpClientPro.delete<IIpWarmUpUpPlan[]>('/ip-warm-up-plan/ids', {
+    data: planIds
+  })
+}
+
+/**
+ * 通过 planObjectId 获取该计划最新的发送组 id
+ * @param planObjectId
+ * @returns
+ */
+export function getLatestSendingGroupOfSchedulePlan (planObjectId: string) {
+  return httpClientPro.get<number>(`/ip-warm-up-plan/sendingGroupIds/latest?planObjectId=${planObjectId}`)
 }

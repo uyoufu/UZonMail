@@ -7,6 +7,7 @@ import { formatDateToUTC } from 'src/utils/format'
 import logger from 'loglevel'
 import dayjs from 'dayjs'
 import { createIpWarmUpPlan } from 'src/api/pro/ipWarmUp'
+import { getInboxesCountInGroups } from 'src/api/emailBox'
 
 import type { IEmailCreateInfo } from 'src/api/emailSending'
 
@@ -23,21 +24,35 @@ export function useIpWarmUp (validateSendingTaskParams: () => boolean, emailInfo
 
   async function onIpWarmUpClick () {
     // 先要进行数据验证
-    // if (!validateSendingTaskParams()) {
-    //   return
-    // }
+    if (!validateSendingTaskParams()) {
+      return
+    }
+
+    logger.debug('[IpWarmUp] 点击 IP 预热按钮', emailInfo.value)
+
+    // 获取收件箱中的邮箱数量
+    let totalInboxesCount = emailInfo.value.inboxes.length
+    if (emailInfo.value.inboxGroups.length > 0) {
+      const { data: inboxesCount } = await getInboxesCountInGroups(emailInfo.value.inboxGroups.map(x => x.id!))
+      totalInboxesCount += inboxesCount
+    }
+
 
     // TODO 打开预热弹窗
-    const warmUpSettingResult = await showComponentDialog(IpWarmUpSettingDialog)
-    if (!warmUpSettingResult.ok)
+    const { ok, data } = await showComponentDialog(IpWarmUpSettingDialog, {
+      totalCount: totalInboxesCount || 10
+    })
+    if (!ok)
       return
 
-    logger.debug('[IpWarmUp] 预热设置结果: ', warmUpSettingResult.data)
+    logger.debug('[IpWarmUp] 预热设置结果: ', data)
     // 添加时间范围和 smtps key
     const timePart = dayjs().format('HH:mm:ss')
     const warmUpData = Object.assign({ smtpPasswordSecretKeys: userInfoStore.smtpPasswordSecretKeys }, emailInfo.value, {
-      sendStartDate: formatDateToUTC(`${warmUpSettingResult.data.from} ${timePart}`),
-      sendEndDate: formatDateToUTC(`${warmUpSettingResult.data.to} ${timePart}`)
+      sendStartDate: formatDateToUTC(`${data.from} ${timePart}`),
+      sendEndDate: formatDateToUTC(`${data.to} ${timePart}`),
+      sendCountChartPoints: data.countChartPoints,
+      name: data.name
     })
 
     await createIpWarmUpPlan(warmUpData)

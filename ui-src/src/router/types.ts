@@ -8,6 +8,7 @@ export type ExtendedRouteRecordRaw = RouteRecordRaw & {
     access?: string[], // 访问权限，当有该权限时，才显示，权限是且的关系，即同时具有多个权限才显示
     denies?: string[], // 当有该权限时，拒绝显示，权限是或的关系，即只要有一个权限就不显示, 该值优先于 access
     noTag?: boolean, // 是否不显示标签
+    noCache?: boolean, // 不缓存页面，默认为 false
     noMenu?: boolean // 是否不显示菜单
   }
 }

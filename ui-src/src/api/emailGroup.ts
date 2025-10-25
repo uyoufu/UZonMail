@@ -2,6 +2,7 @@ import { httpClient } from 'src/api//base/httpClient'
 
 export interface IEmailGroup {
   id?: number,
+  objectId?: string,
   name: string,
   icon?: string,
   description?: string,

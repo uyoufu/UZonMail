@@ -3,7 +3,10 @@
     <q-card class='column items-center items-start q-pa-sm warm-up-settings'>
       <div class='full-width text-primary text-h6'>预热设置</div>
 
-      <q-field v-model="dateRangeContent" label="日期范围" dense class="full-width">
+      <q-input outlined standout dense v-model="planName" label="计划名称" placeholder="输入计划名称" class="full-width q-mt-sm">
+      </q-input>
+
+      <q-field outlined v-model="dateRangeContent" label="日期范围" dense class="full-width q-mt-sm">
         <template v-slot:control>
           <div>{{ dateRangeContent }}</div>
         </template>
@@ -17,11 +20,17 @@
         </template>
       </q-field>
 
+      <q-field outlined v-model="dateRangeContent" label="最大发件量" dense class="full-width q-mt-sm">
+        <template v-slot:control>
+          <div>{{ totalCount }}</div>
+        </template>
+      </q-field>
+
       <div ref="countChartElementRef" class="full-width" style="height: 250px;"></div>
 
       <div class="row justify-end items-center q-mb-sm full-width">
         <CancelBtn @click="onDialogCancel" />
-        <OkBtn class="q-ml-sm" @click="onDialogOK(dateRangeModelValue)" />
+        <OkBtn class="q-ml-sm" @click="onOkClicked" />
       </div>
     </q-card>
   </q-dialog>
@@ -56,7 +65,8 @@ const dateRangeModelValue = ref<{ from: string, to: string }>({
   to: dayjs().add(1, 'month').format(dateMask)
 })
 function formatDateRange () {
-  return `${dateRangeModelValue.value.from} ~ ${dateRangeModelValue.value.to}`
+  const totalDays = dayjs(dateRangeModelValue.value.to).diff(dayjs(dateRangeModelValue.value.from), 'day') + 1
+  return `${dateRangeModelValue.value.from} ~ ${dateRangeModelValue.value.to}, 共 ${totalDays} 天`
 }
 const dateRangeContent = ref(formatDateRange())
 watch(dateRangeModelValue, () => {
@@ -64,9 +74,29 @@ watch(dateRangeModelValue, () => {
 })
 
 // #endregion
+
+// #region 图表
 const countChartElementRef = ref<HTMLElement | null>(null)
 import { useWarmUpCountChart } from './compositions/useWarmUpCountChart'
-useWarmUpCountChart(countChartElementRef, dateRangeModelValue, props.totalCount)
+const { chartData } = useWarmUpCountChart(countChartElementRef, dateRangeModelValue, props.totalCount)
+
+// #endregion
+
+const planName = ref('')
+
+// #region 按钮
+function onOkClicked () {
+  const payloads = {
+    dateRange: dateRangeModelValue.value,
+    from: dateRangeModelValue.value.from,
+    to: dateRangeModelValue.value.to,
+    countChartPoints: chartData.value,
+    name: planName.value
+  }
+
+  onDialogOK(payloads)
+}
+// #endregion
 </script>
 
 <style lang='scss' scoped>

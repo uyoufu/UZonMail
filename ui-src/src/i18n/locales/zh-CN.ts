@@ -94,6 +94,7 @@ export default {
     unverified: '未验证',
     valid: '有效',
     invalid: '无效',
+    inProgress: '进行中',
   },
   sendingProgress: {
     title: '发送进度',
