@@ -18,7 +18,7 @@ description: 宇正群邮 Windows Server 安装教程，详细介绍如何在 Wi
 
 若截图如下所示，则说明安装成功：
 
-![image-20241017221814354](https://obs.uamazing.cn:52443/public/files/images/image-20241017221814354.png)
+![image-20241017221814354](https://oss.uzoncloud.com:2234/public/files/images/image-20241017221814354.png)
 
 此时，可以在浏览器中输入[http://localhost:22345/](http://localhost:22345/) 进行测试
 

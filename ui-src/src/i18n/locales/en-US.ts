@@ -21,6 +21,7 @@ export default {
   },
   statusChip: {
     false: 'No',
-    true: 'Yes'
+    true: 'Yes',
+    inProgress: 'In Progress',
   }
 }

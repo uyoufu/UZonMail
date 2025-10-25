@@ -19,7 +19,7 @@ Web 方式按如下步骤进行安装：
 
 3. 打开 `service/UZonMailService.exe` 程序
 
-  打开后界面如下图所示，其中黄颜色的 WARN 不用理会。	![image-20241017221814354](https://obs.uamazing.cn:52443/public/files/images/image-20241017221814354.png)
+  打开后界面如下图所示，其中黄颜色的 WARN 不用理会。	![image-20241017221814354](https://oss.uzoncloud.com:2234/public/files/images/image-20241017221814354.png)
 
 4. 打开浏览器，输入 [http://localhost:22345/](http://localhost:22345/) 进行使用
 

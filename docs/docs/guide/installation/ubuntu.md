@@ -34,7 +34,7 @@ sudo apt install unzip
 
 # 进入到 home 目录，然后下载并解压安装包
 cd ~ && \
-  wget --no-check-certificate https://obs.uamazing.cn:52443/public/files/soft/uzonmail-service-linux-x64-0.10.0.0.zip -O uzonmail.zip && \
+  wget --no-check-certificate https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.10.0.0.zip -O uzonmail.zip && \
   unzip uzonmail.zip -d ./uzonmail && \
   cd ./uzonmail
   

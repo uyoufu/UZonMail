@@ -155,7 +155,8 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         meta: {
           icon: 'autorenew',
           label: 'IP 预热',
-          access: ['professional']
+          noCache: true,
+          access: ['professional'],
         },
         component: () => import('pages/sendingManager/ipWarmUp/IpWarmUpManager.vue')
       },

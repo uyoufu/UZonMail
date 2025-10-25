@@ -11,6 +11,9 @@
 </template>
 
 <script lang="ts" setup>
+import logger from 'loglevel'
+
+// #region echarts
 // 参考：https://echarts.apache.org/handbook/zh/basics/import/
 // 引入 echarts 核心模块，核心模块提供了 echarts 使用必须要的接口。
 import type { EChartsOption, EChartsType } from 'echarts/types/dist/shared'
@@ -30,7 +33,6 @@ import {
 import { LabelLayout, UniversalTransition } from 'echarts/features'
 // 引入 Canvas 渲染器，注意引入 CanvasRenderer 或者 SVGRenderer 是必须的一步
 import { CanvasRenderer } from 'echarts/renderers'
-import logger from 'loglevel'
 
 // 注册必须的组件
 echarts.use([
@@ -46,6 +48,8 @@ echarts.use([
   UniversalTransition,
   CanvasRenderer
 ])
+// #endregion
+
 
 const initCharts: {
   name: string,
@@ -57,7 +61,7 @@ onUnmounted(() => {
   })
 })
 
-import type { IEmailCount, IMonthlySendingInfo } from 'src/api/statistics';
+import type { IEmailCount, IMonthlySendingInfo } from 'src/api/statistics'
 import { getInboxEmailCountStatistics, getOutboxEmailCountStatistics, getMonthlySendingCountInfo } from 'src/api/statistics'
 const outboxesCount: Ref<IEmailCount[]> = ref([])
 // 渲染 outbox 数量柱状图

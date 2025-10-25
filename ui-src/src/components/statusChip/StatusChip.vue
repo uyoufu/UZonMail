@@ -41,7 +41,8 @@ const defaultStatusStyles = [
   { status: 'verified', label: '已验证', color: 'positive', textColor: 'white', icon: '' },
   { status: 'unsubscribed', label: '取消订阅', color: 'negative', textColor: 'white', icon: '' },
   { status: 'running', label: '运行中', color: 'secondary', textColor: 'white', icon: '' },
-  { status: 'unknown', label: '未知', color: 'negative', textColor: 'white', icon: '' }
+  { status: 'unknown', label: '未知', color: 'negative', textColor: 'white', icon: '' },
+  { status: 'inProgress', label: '进行中', color: 'info', textColor: 'white', icon: '' }
 ]
 const props = defineProps({
   status: {
@@ -56,7 +57,7 @@ const props = defineProps({
 })
 
 // 将 props.statusStyles 进行格式化
-const colors = ['primary', 'secondary', 'accent', 'negative', 'info', 'orange', 'positive', 'white', 'grey-3']
+const colors = ['primary', 'secondary', 'negative', 'info', 'orange', 'positive', 'white', 'grey-3']
 const statusStylesMap = computed(() => {
   const result: Record<string, IStatusChipItem> = {}
 
@@ -86,18 +87,35 @@ const statusStyle = computed(() => {
 
   const statusMap = statusStylesMap.value[statusStr]
   if (!statusMap) {
+    // 获取随机颜色
+    const labelHash = hashStringToNumber(statusStr)
+    const randomColor = getColorFromHash(labelHash, colors)
+
     return {
       status: 'unknown',
-      color: 'negative',
-      label: statusStr.toUpperCase(),
+      color: randomColor,
+      label: statusLabel || statusStr.toUpperCase(),
       textColor: 'white'
     }
   }
 
   // 克隆一个新对象，避免修改原对象
   const result = Object.assign({}, statusMap, { label: statusLabel || statusMap.label })
+  logger.debug('[statusChip] result:', result)
   return result
 })
+
+function hashStringToNumber (str: string) {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return hash
+}
+function getColorFromHash (hash: number, colors: string[]) {
+  const index = Math.abs(hash) % colors.length
+  return colors[index]
+}
 </script>
 
 <style lang="scss" scoped></style>

@@ -183,6 +183,14 @@ export function getInboxesCount (groupId: number | undefined, filter?: string) {
 }
 
 /**
+ * 获取当前用户组内的收件箱数量
+ * @param groupIds
+ */
+export function getInboxesCountInGroups (groupIds: number[]) {
+  return httpClient.get<number>(`/email-box/inboxes/count?groupIds=${groupIds.join(',')}`)
+}
+
+/**
  * 获取收件邮箱数据
  * @param groupId
  * @param filter

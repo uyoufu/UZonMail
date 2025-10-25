@@ -12,6 +12,7 @@
 
     <template v-slot:body-cell-index="props">
       <QTableIndex :props="props" />
+      <ContextMenu :items="ipWarmUpContextMenuItems" :value="props.row"></ContextMenu>
     </template>
 
     <template v-slot:body-cell-status="props">
@@ -32,6 +33,11 @@ import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
 import { formatDate } from 'src/utils/format'
 import { IpWarmUpUpStatus } from 'src/api/pro/ipWarmUp'
+
+// 不进行缓存
+defineOptions({
+  name: 'IpWarmUpManager'
+})
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 const columns: QTableColumn[] = [
@@ -137,7 +143,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
   return data || []
 }
 
-const { pagination, rows, filter, onTableRequest, loading } = useQTable({
+const { pagination, rows, filter, onTableRequest, loading, deleteRowById } = useQTable({
   getRowsNumberCount,
   onRequest
 })
@@ -148,10 +154,16 @@ const router = useRouter()
 async function onIpWarmUpClick () {
   await router.push({
     name: 'SendingTask', query: {
-      type: 'ipWarmUp'
+      type: 'ipWarmUp',
+      tagName: 'IP预热'
     }
   })
 }
+// #endregion
+
+// #region 右键菜单
+import { useIpWarmIpContext } from './compositions/useIpWarmIpContext'
+const { ipWarmUpContextMenuItems } = useIpWarmIpContext(deleteRowById)
 // #endregion
 </script>
 

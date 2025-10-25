@@ -29,6 +29,10 @@
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import logger from 'loglevel'
 
+defineOptions({
+  name: 'TemplateEditor'
+})
+
 const editorValue = defineModel<string>({
   default: ''
 })

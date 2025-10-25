@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
-import type { ISendingGroupHistory } from 'src/api/sendingGroup';
+import type { ISendingGroupHistory } from 'src/api/sendingGroup'
 import { SendingGroupStatus } from 'src/api/sendingGroup'
 import { pauseSending, restartSending, cancelSending, resendSendingGroup } from 'src/api/emailSending'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { useUserInfoStore } from 'src/stores/user'
+import { useSendDetailVisitor } from './useSendDetailVisitor'
 
 /**
  * 添加右键菜单
@@ -57,15 +58,10 @@ export function useContextMenu () {
 
 
   // 打开发件明细
+  const { visitSendDetailTable } = useSendDetailVisitor()
   async function openSendDetailDialog (data: ISendingGroupHistory) {
     // 跳转到发件明细页面
-    await router.push({
-      name: 'SendDetailTable',
-      query: {
-        sendingGroupId: data.id,
-        tagName: data.id
-      }
-    })
+    await visitSendDetailTable(data.id, String(data.id))
   }
 
   // 暂停发件
