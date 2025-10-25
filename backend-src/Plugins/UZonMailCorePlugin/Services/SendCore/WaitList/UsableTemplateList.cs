@@ -43,6 +43,10 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         /// <returns></returns>
         public async Task<EmailTemplate?> GetTemplate(SqlContext sqlContext, long sendingItemId)
         {
+            // 为空时直接返回空
+            if (_sendingItemTemplateIds.IsEmpty)
+                return null;
+
             // 获取所有的模板
             var allTemplates = await _cacheManager.GetCache<UserTemplatesCache>(sqlContext, userId);
 

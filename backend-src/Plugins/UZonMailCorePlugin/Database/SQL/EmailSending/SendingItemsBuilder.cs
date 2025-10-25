@@ -14,7 +14,7 @@ namespace UZonMail.Core.Database.SQL.EmailSending
     /// </summary>
     /// <param name="group"></param>
     /// <param name="userSetting"></param>
-    public class SendingItemsBuilder(SqlContext db, SendingGroup group, int maxSendingBatchSize, TokenService tokenService)
+    public class SendingItemsBuilder(SqlContext db, SendingGroup group, int maxSendingBatchSize)
     {
         /// <summary>
         /// 批量发件时的大小
@@ -35,9 +35,8 @@ namespace UZonMail.Core.Database.SQL.EmailSending
             // allInboxes 有的是从数据中解析得到的，需要获取其 id
             var inboxesWithoutId = allInboxes.Where(x => x.Id == 0).ToList();
             // 获取当前用户下的发件箱
-            var currentUserId = tokenService.GetUserSqlId();
             var inboxesEmails = inboxesWithoutId.Select(x => x.Email).ToList();
-            var inboxes = await db.Inboxes.AsNoTracking().Where(x => x.UserId== currentUserId && inboxesEmails.Contains(x.Email)).ToListAsync();
+            var inboxes = await db.Inboxes.AsNoTracking().Where(x => x.UserId == group.UserId && inboxesEmails.Contains(x.Email)).ToListAsync();
             inboxesWithoutId.ForEach(x =>
             {
                 var existInbox = inboxes.FirstOrDefault(i => i.Email == x.Email);
@@ -56,13 +55,16 @@ namespace UZonMail.Core.Database.SQL.EmailSending
             db.SendingItems.AddRange(sendingIitemes);
             await db.SaveChangesAsync();
 
-            var tokenPayloads = tokenService.GetTokenPayloads();
+            var userInfo = await db.Users.AsNoTracking()
+                .Where(x => x.Id == group.UserId)
+                .FirstAsync();
+
             // 保存关系
             var sendingItemInboxRelations = new List<SendingItemInbox>();
             foreach (var sendingItem in sendingIitemes)
             {
                 // 添加组织 id
-                sendingItem.OrganizationId = tokenPayloads.OrganizationId;
+                sendingItem.OrganizationId = userInfo.OrganizationId;
 
                 var temps = new List<SendingItemInbox>();
                 sendingItem.Inboxes?.ForEach(inbox =>

@@ -11,6 +11,12 @@ description: 宇正群邮 Docker 安装教程，详细讲解如何在 Ubuntu 等
 
 ## 视频教程
 
+::: info
+
+部署文档配置有精简，视频与当前文档不一致时，以当前文档为准
+
+:::
+
 <BiliBili bvid="BV1JLJqziEd5" />
 
 ## 连接到 Ubuntu
@@ -133,20 +139,14 @@ wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts
 为了方便对服务器进行配置，需要在外部创建相应的挂载文件。为了使用安全，有一些参数必须在配置进行修改。
 
 ``` bash
-# 生成前端配置文件, baseUrl 见配置章节
-echo '{
-  "baseUrl": "http://localhost:22345",
-  "api": "/api/v1",
-  "signalRHub": "/hubs/uzonMailHub",
-  "logger": {
-    "level": "info"
-  }
-}' > data/app.config.json
+# 此处不再需要前端配置
 
 # 生成后端配置文件
 # 该文件中有一些初始化配置项，建议跳转到 [后端配置] 章节阅读，添加必要项配置，然后继续
 # 当然也可以继续配置，后续再修改
 echo '{
+  // 改为实际的
+  "BaseUrl": "http://localhost:22345",
   // Secret 必须修改，防止被其它人伪装登陆
   "TokenParams": {
     "Secret": "640807f8983090349cca90b9640807f8983090349cca90b9",
@@ -210,7 +210,37 @@ docker compose pull
 
 # 创建容器并启动
 docker compose up -d
+
+# 检查是否启动成功：出现 html 内容时，表示成功
+# 否则按下一节进行问题排查
+curl http://localhost:22345
 ```
+
+### 问题排查
+
+**Couldn't connect to server**
+
+当使用 `curl http://localhost:22345` 报如下错误时：
+
+``` text
+[root@VM-16-3-opencloudos uzon-mail]# curl http://localhost:22345
+curl: (7) Failed to connect to localhost port 22345 after 0 ms: Couldn't connect to server
+```
+
+表示 uzon-mail 服务启动失败了，可以通过 `docker logs uzon-mail` 查看失败日志。
+
+当日志中包含类似日志时：
+
+``` tex
+Unhandled exception. System.InvalidOperationException: An exception has been raised that is likely due to a transient failure. Consider enabling transient error resiliency by adding 'EnableRetryOnFailure()' to the 'UseMySql' call.
+ ---> MySqlConnector.MySqlException (0x80004005): Unable to connect to any of the specified MySQL hosts.
+```
+
+表示无法连接 mysql，可能是 mysql 还未完全启动成功，可以使用 `docker restart uzon-mail` 重新启动一下主服务。
+
+当日志中显示如下内容时，表示启动成功了
+
+![image-20251018103117215](https://oss.uzoncloud.com:2234/public/files/images/image-20251018103117215.png)
 
 ## 防火墙放行
 

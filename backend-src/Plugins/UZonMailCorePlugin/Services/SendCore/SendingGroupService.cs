@@ -16,6 +16,7 @@ using UZonMail.Core.Services.SendCore.WaitList;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
 using UZonMail.Core.Utils.Extensions;
+using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
@@ -52,7 +53,12 @@ namespace UZonMail.Core.Services.SendCore
         {
             _logger.Info("开始创建发送任务");
 
-            var userId = tokenService.GetUserSqlId();
+            var userId = sendingGroupData.UserId;
+            if (sendingGroupData.UserId <= 0 && tokenService != null)
+            {
+                userId = tokenService.GetUserSqlId();
+            }
+
             // 格式化 Excel 数据
             sendingGroupData.Data = await FormatExcelData(sendingGroupData.Data, userId);
 
@@ -102,7 +108,7 @@ namespace UZonMail.Core.Services.SendCore
 
                 // 将数据组装成 SendingItem 保存
                 // 要确保数据已经通过验证
-                var builder = new SendingItemsBuilder(ctx, sendingGroupData, orgSetting.MaxSendingBatchSize, tokenService);
+                var builder = new SendingItemsBuilder(ctx, sendingGroupData, orgSetting.MaxSendingBatchSize);
                 List<SendingItem> items = await builder.GenerateAndSave();
 
                 // 更新发件总数量
@@ -341,18 +347,6 @@ namespace UZonMail.Core.Services.SendCore
         }
 
         /// <summary>
-        /// 移除发件计划
-        /// </summary>
-        /// <param name="sendingGroupId"></param>
-        /// <returns></returns>
-        public async Task RemoveSendSchedule(long sendingGroupId)
-        {
-            var scheduler = await schedulerFactory.GetScheduler();
-            var jobKey = new JobKey($"emailSending-{sendingGroupId}", "sendingGroup");
-            await scheduler.DeleteJob(jobKey);
-        }
-
-        /// <summary>
         /// 立即发件或者计划发件
         /// 根据 scheduleDate 进行判断
         /// </summary>
@@ -396,23 +390,51 @@ namespace UZonMail.Core.Services.SendCore
         /// 里面不会修改发件组和发件项的状态
         /// 因为移除可能是暂停、停止等不同的状态
         /// </summary>
+        /// <param name="sendingGroup"></param>
+        /// <param name="cancelMessage"></param>
         /// <returns></returns>
-        public Task RemoveSendingGroupTask(SendingGroup sendingGroup)
+        public async Task RemoveSendingGroupTask(SendingGroup sendingGroup, string cancelMessage = "")
         {
-            // 找到关联的发件箱移除
-            var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id);
-
-            // 移除关联的客户端
-            foreach (var outbox in removedOutboxes)
+            // 若处于发送中，则取消
+            if (sendingGroup.Status == SendingGroupStatus.Sending)
             {
-                // 释放发件箱
-                clientFactory.DisposeSmtpClients(outbox.Email);
+                // 找到关联的发件箱移除
+                var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id);
+
+                // 移除关联的客户端
+                foreach (var outbox in removedOutboxes)
+                {
+                    // 释放发件箱
+                    clientFactory.DisposeSmtpClients(outbox.Email);
+                }
+
+                // 移除任务
+                waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);
             }
 
-            // 移除任务
-            waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);
+            // 若是计划发件，则取消计划
+            if (sendingGroup.SendingType == SendingGroupType.Scheduled)
+            {
+                await RemoveSendSchedule(sendingGroup.Id);
+            }
 
-            return Task.CompletedTask;
+            // 更新状态
+            await db.SendingGroups.UpdateAsync(x => x.Id == sendingGroup.Id,
+                x => x.SetProperty(y => y.Status, SendingGroupStatus.Cancel));
+            await db.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroup.Id && x.Status == SendingItemStatus.Pending,
+                x => x.SetProperty(y => y.Status, SendingItemStatus.Cancel));
+        }
+
+        /// <summary>
+        /// 移除发件计划
+        /// </summary>
+        /// <param name="sendingGroupId"></param>
+        /// <returns></returns>
+        public async Task RemoveSendSchedule(long sendingGroupId)
+        {
+            var scheduler = await schedulerFactory.GetScheduler();
+            var jobKey = new JobKey($"emailSending-{sendingGroupId}", "sendingGroup");
+            await scheduler.DeleteJob(jobKey);
         }
     }
 }

@@ -11,27 +11,56 @@ namespace UZonMail.Core.Services.EmailDecorator
         // 更早执行
         public int Order { get; } = -1;
 
-        public Task<string> StartDecorating(IContentDecoratorParams decoratorParams, string originContent)
+        public Task<string> StartDecorating(
+            IContentDecoratorParams decoratorParams,
+            string originContent
+        )
         {
             // 将基本变量进行替换
-            if (string.IsNullOrEmpty(originContent)) return Task.FromResult(originContent);
+            if (string.IsNullOrEmpty(originContent))
+                return Task.FromResult(originContent);
 
             var bodyData = decoratorParams.SendItemMeta.BodyData;
             // 替换正文变量
-            if (bodyData == null) return Task.FromResult(originContent);
+            if (bodyData == null)
+                return Task.FromResult(originContent);
 
             // 获取内容中的变量
             var variables = EmailVariableHelper.GetAllVariableContents(originContent);
-            if (variables.Count == 0) return Task.FromResult(originContent);
+            if (variables.Count == 0)
+                return Task.FromResult(originContent);
+
+            Dictionary<string, string> emailItemVariables =
+                new()
+                {
+                    { "inbox", decoratorParams.SendItemMeta.Inboxes.First().Email },
+                    { "inboxName", decoratorParams.SendItemMeta.Inboxes.First().Name ?? "" },
+                    { "outbox", decoratorParams.Outbox.Email },
+                    { "outboxName", decoratorParams.Outbox.Name ?? "" }
+                };
 
             foreach (var variable in variables)
             {
+                string? value = null;
+                if (bodyData.ContainsKey(variable))
+                {
+                    value = bodyData[variable]!.ToString();
+                }
+
+                if (!emailItemVariables.TryGetValue(variable, out value))
+                {
+                    continue;
+                }
+
                 // 判断是否存在值
-                var value = bodyData.ContainsKey(variable) ? bodyData[variable] : null;
-                if (value == null) continue;
+                if (value == null)
+                    continue;
 
                 // 使用正则进行替换
-                var regex = new Regex(@"\{\{\s*" + variable + @"\s*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                var regex = new Regex(
+                    @"\{\{\s*" + variable + @"\s*\}\}",
+                    RegexOptions.IgnoreCase | RegexOptions.Multiline
+                );
                 originContent = regex.Replace(originContent, value.ToString());
             }
 
