@@ -24,7 +24,7 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<int>> GetSendingGroupsCount(string filter)
         {
             var userId = tokenService.GetUserSqlId();
-            var dbSet = db.SendingGroups.AsNoTracking().Where(x => x.UserId == userId);
+            var dbSet = db.SendingGroups.AsNoTracking().Where(x => x.UserId == userId && !x.IsDeleted);
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Subjects.Contains(filter));
@@ -43,7 +43,7 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<List<SendingHistoryResult>>> GetSendingGroupsData(string filter, Pagination pagination)
         {
             var userId = tokenService.GetUserSqlId();
-            var dbSet = db.SendingGroups.AsNoTracking().Where(x => x.UserId == userId);
+            var dbSet = db.SendingGroups.AsNoTracking().Where(x => x.UserId == userId && !x.IsDeleted);
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Subjects.Contains(filter));
@@ -123,17 +123,17 @@ namespace UZonMail.Core.Controllers.Emails
             var sendingGroup = await db.SendingGroups.Where(x => x.UserId == userId && x.ObjectId == sendingGroupObjId)
                 .Include(x => x.Outboxes)
                 .Include(x => x.Templates)
-                .Include(x => x.Attachments)                
+                .Include(x => x.Attachments)
                 .FirstOrDefaultAsync();
             if (sendingGroup == null)
                 return ResponseResult<SendingGroup>.Fail("未找到发件组模板");
 
             // 获取文件
-            if (sendingGroup.Attachments!=null && sendingGroup.Attachments.Count>0)
+            if (sendingGroup.Attachments != null && sendingGroup.Attachments.Count > 0)
             {
                 var fileObjectIds = sendingGroup.Attachments.Select(x => x.Id);
                 var fileObjects = db.FileObjects.Where(x => fileObjectIds.Contains(x.Id));
-                foreach(var attachment in sendingGroup.Attachments)
+                foreach (var attachment in sendingGroup.Attachments)
                 {
                     var fileObject = fileObjects.FirstOrDefault(x => x.Id == attachment.Id);
                     attachment.FileObject = fileObject;
@@ -141,6 +141,21 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             return sendingGroup.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 批量删除发件组
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete("ids/many")]
+        public async Task<ResponseResult<bool>> DeleteSendingGroups([FromBody] List<long> sendingGroupIds)
+        {
+            var userId = tokenService.GetUserSqlId();
+            await db.SendingGroups.Where(x => x.UserId == userId)
+                .Where(x => sendingGroupIds.Contains(x.Id))
+                .ExecuteUpdateAsync(x => x.SetProperty(p => p.IsDeleted, true));
+
+            return true.ToSuccessResponse();
         }
     }
 }
