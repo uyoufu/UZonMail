@@ -2,9 +2,16 @@
 # 本脚本用于从网络下载 Linux 包并编译 Docker 镜像
 # 设置参数
 param(
-  [string]$downloadUrl = "https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.18.0.0.zip",
+  # 示例 "https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.18.0.0.zip"
+  [string]$downloadUrl,
   [bool]$upload = $true
 )
+
+# 如果没有提供下载 URL，直接退出
+if ([string]::IsNullOrWhiteSpace($downloadUrl)) {
+  Write-Host "请提供有效的下载 URL！" -ForegroundColor Red
+  exit 1
+}
 
 # 遇到错误即退出
 $ErrorActionPreference = "Stop"
@@ -21,14 +28,11 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 }
 Write-Host "docker 环境检测通过！" -ForegroundColor Green
 
-# 检查平台
-if ($env:OS -notlike "*Linux*") {
-  Write-Host "请在 Linux 平台下运行此脚本！" -ForegroundColor Red
-  exit 1
-}
-
 # 创建临时目录
-$tempDir = Join-Path -Path $env:TEMP -ChildPath "uzonmail-build-$(Get-Random)"
+$temp = [System.IO.Path]::GetTempPath()
+$tempDir = Join-Path -Path $temp -ChildPath "uzonmail-build-$(Get-Random)"
+write-Host "创建临时目录..." -ForegroundColor Yellow
+
 New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
 Write-Host "临时目录: $tempDir" -ForegroundColor Green
 
@@ -58,7 +62,8 @@ catch {
 }
 
 # 检查解压目录
-$dockerfilePath = Join-Path -Path $extractDir -ChildPath "service-linux-x64/Dockerfile"
+$contextDir = Join-Path -Path $extractDir -ChildPath "service-linux-x64"
+$dockerfilePath = Join-Path -Path $contextDir -ChildPath "Dockerfile"
 if (-not (Test-Path -Path $dockerfilePath -PathType Leaf)) {
   Write-Host "解压目录中未找到 Dockerfile！" -ForegroundColor Red
   exit 1
@@ -72,9 +77,10 @@ $dockerImage = "$($dockerImageName):$imageVersion"
 
 # 编译 Docker 镜像
 Write-Host "开始编译 Docker 镜像: $dockerImage" -ForegroundColor Yellow
+
 try {
-  docker build -t $dockerImage -f $dockerfilePath $extractDir
-  docker build -t "$dockerImageName:latest" -f $dockerfilePath $extractDir
+  docker build -t $dockerImage -f $dockerfilePath $contextDir
+  docker build -t "$($dockerImageName):latest" -f $dockerfilePath $contextDir
   Write-Host "Docker 镜像编译完成！" -ForegroundColor Green
 }
 catch {
@@ -103,4 +109,4 @@ if ($upload) {
 # 清理临时目录
 Write-Host "清理临时文件..." -ForegroundColor Yellow
 Remove-Item -Path $tempDir -Recurse -Force
-Write-Host "脚本执行完成！" -ForegroundColor Green
+Write-Host "Docker 镜像编译完成！" -ForegroundColor Green
