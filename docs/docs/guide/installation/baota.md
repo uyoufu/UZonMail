@@ -23,4 +23,4 @@ description: 宇正群邮宝塔安装教程，详细讲解如何在宝塔界面�
 
 完成之后，点击右侧的【设置】打开网站的设置界面
 
-![image-20251018104946594](C:\Users\galens\AppData\Roaming\Typora\typora-user-images\image-20251018104946594.png)
+![image-20251018104946594](https://oss.uzoncloud.com:2234/public/files/images/image-20251018104946594.png)
