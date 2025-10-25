@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
 using UZonMail.Core.Services.Settings.Core;
 using UZonMail.Utils.Extensions;
 
@@ -82,9 +83,9 @@ namespace UZonMail.Core.Services.Settings.Model
             {
                 return min * 1000;
             }
-
             // 随机从 min 到 max 取值
-            return new Random().Next(min, max) * 1000;
+            int seconds = RandomNumberGenerator.GetInt32(min, max);
+            return seconds * 1000;
         }
 
         protected override void InitValue()
