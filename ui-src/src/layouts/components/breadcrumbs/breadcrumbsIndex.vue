@@ -1,7 +1,8 @@
 <template>
   <q-breadcrumbs style="font-size: 15px">
     <q-breadcrumbs-el v-for="item in matchedRoutes" :key="item.path" class="animated fadeInRight"
-      exact-active-class="text-secondary" :to="item.path" :icon="item.meta.icon" :label="item.meta.label">
+      exact-active-class="text-secondary" :to="item.path" :icon="item.meta.icon"
+      :label="translateRoutes(item.meta.label)">
     </q-breadcrumbs-el>
   </q-breadcrumbs>
 </template>
@@ -19,6 +20,8 @@ const matchedRoutes = computed(() => {
   // console.log('results', results)
   return results as unknown as ExtendedRouteRecordRaw[]
 })
+
+import { translateRoutes } from 'src/i18n/helpers'
 </script>
 
 <style lang="scss" scoped>

@@ -48,6 +48,8 @@
 </template>
 
 <script lang="ts" setup>
+import { translateEmailGroup } from 'src/i18n/helpers'
+
 import type { PropType } from 'vue'
 import type { IEmailGroupListItem, IFlatHeader } from './types'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
@@ -105,12 +107,12 @@ const props = defineProps({
 const header: ComputedRef<IFlatHeader> = computed(() => {
   if (props.groupType === 1) {
     return {
-      label: '发件箱组',
+      label: translateEmailGroup('outboxGroup'),
       icon: 'group'
     }
   }
   return {
-    label: '收件箱组',
+    label: translateEmailGroup('inboxGroup'),
     icon: 'group'
   }
 })
@@ -131,9 +133,9 @@ const filteredItems = computed(() => {
 })
 
 // 初始化获取组
-import type { IEmailGroup } from 'src/api/emailGroup';
+import type { IEmailGroup } from 'src/api/emailGroup'
 import { getEmailGroups, createEmailCroup, updateEmailCroup, deleteEmailGroupById } from 'src/api/emailGroup'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types';
+import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
@@ -168,24 +170,24 @@ function onItemClick (item: IEmailGroupListItem) {
 // 新增邮箱组
 async function onCreateEmailGroup () {
   const popupParams: IPopupDialogParams = {
-    title: '新增邮箱组',
+    title: translateEmailGroup('newGroup'),
     fields: [
       {
         name: 'name',
-        label: '组名',
+        label: translateEmailGroup('field_name'),
         value: '',
         type: PopupDialogFieldType.text,
         required: true
       },
       {
         name: 'description',
-        label: '描述',
+        label: translateEmailGroup('field_description'),
         value: '',
         type: PopupDialogFieldType.textarea
       },
       {
         name: 'order',
-        label: '序号',
+        label: translateEmailGroup('field_order'),
         value: groupItems.value.length + 1,
         type: PopupDialogFieldType.text
       }

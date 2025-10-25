@@ -9,7 +9,7 @@ export type Translation = {
 export interface ITranslation {
   locale: string
   label: string
-  translation: Translation
+  translation: Translation,
 }
 
 const translations: ITranslation[] = [
