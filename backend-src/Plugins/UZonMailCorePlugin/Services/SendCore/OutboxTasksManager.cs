@@ -38,16 +38,25 @@ namespace UZonMail.Core.Services.SendCore
                     // 启动任务
                     var task = Task.Run(async () =>
                     {
-                        await StartSendingWorkTask(outbox);
-
-                        // 结束后，清理数据残留
-                        outbox.SetTaskId(0);
+                        try
+                        {
+                            await StartSendingWorkTask(outbox);                            
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error($"发件箱 {outbox.Email} 发件任务异常终止: {ex.Message}", ex);
+                        }
+                        finally
+                        {
+                            // 结束后，清理数据残留
+                            outbox.SetTaskId(0);
+                        }
                     });
                     outbox.SetTaskId(task.Id);
                 }
             }
         }
-        
+
         /// <summary>
         /// 开始任务
         /// 以发件箱的数据为索引进行发件，提高发件箱利用率

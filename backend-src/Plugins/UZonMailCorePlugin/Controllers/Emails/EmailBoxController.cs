@@ -421,6 +421,27 @@ namespace UZonMail.Core.Controllers.Emails
         }
 
         /// <summary>
+        /// 获取组中邮箱的数量
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        [HttpGet("inboxes/count")]
+        public async Task<ResponseResult<int>> GetInboxesCountInGroups(string groupIds)
+        {
+            if (string.IsNullOrEmpty(groupIds)) return 0.ToSuccessResponse();
+
+            var groupIdsList = groupIds.Split(',')
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Select(x => long.Parse(x))
+                .ToList();
+
+            var userId = tokenService.GetUserSqlId();
+            var count = await db.Inboxes.Where(x => x.UserId == userId && groupIdsList.Contains(x.EmailGroupId))
+                .CountAsync();
+            return count.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 获取邮箱数据
         /// </summary>
         /// <param name="groupId"></param>
