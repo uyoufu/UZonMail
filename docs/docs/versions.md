@@ -4,6 +4,39 @@ editLink: false
 description: 本页收录了宇正群邮所有历史发布版本。宇正群邮是一款开源免费的邮件群发软件，支持邮件群发、邮件营销、邮箱爬取、变量替换等功能，兼容所有邮箱账号（含Outlook OAuth2），支持Windows、Linux、MacOS及服务器部署。多线程并发，支持多账号，性能强劲，持续迭代优化，被外贸、教育、财务等行业广泛认可。宇正群邮致力于成为最好用的邮件群发软件，是企业和个人邮件营销的首选开源邮件群发解决方案。
 ---
 
+## 0.18.0
+
+> 更新时期：2025-10-25
+
+### 功能优化
+
+1. 专业版本新增 IP 预热功能
+
+   ![image-20251025143555005](https://oss.uzoncloud.com:2234/public/files/images/image-20251025143555005.png)
+
+2. 社区版本新增以下默认变量
+
+   | 变量名     | 值         |
+   | ---------- | ---------- |
+   | inbox      | 收件人     |
+   | inboxName  | 收件人姓名 |
+   | outbox     | 发件人     |
+   | outboxName | 收件人姓名 |
+
+3. 增强发件间隔随机值的均匀性
+4. 增加批量删除发件历史功能
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.18.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.18.0.0.zip)
+
+[uzonmail-service-win-x64-0.18.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.18.0.0.zip)
+
+[uzonmail-service-linux-x64-0.18.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.18.0.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
+
 ## 0.17.1
 
 > 更新时期：2025-09-18

@@ -367,6 +367,13 @@ if ($platform -eq "linux") {
 function Add-Docker {
     # $desktop 为 false，直接返回
     if ($platform -ne "linux") {
+        write-Host "仅 linux 平台支持 Docker 镜像编译！" -ForegroundColor Yellow
+        return
+    }
+
+    # 检测是否存在 docker 命令
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        Write-Host "未安装 docker, 取消 docker 编译" -ForegroundColor Yellow
         return
     }
 

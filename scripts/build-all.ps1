@@ -43,6 +43,7 @@ function New-Oss {
   $results
 }
 
+# 使用 od 上传文件到对象存储
 if (Get-Command od -ErrorAction SilentlyContinue) {
   New-Oss
 }
