@@ -1,18 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import type { ISendingGroupHistory } from 'src/api/sendingGroup'
-import { SendingGroupStatus } from 'src/api/sendingGroup'
+import { SendingGroupStatus, deleteSendingGroups } from 'src/api/sendingGroup'
 import { pauseSending, restartSending, cancelSending, resendSendingGroup } from 'src/api/emailSending'
-import { confirmOperation, notifySuccess } from 'src/utils/dialog'
+import { confirmOperation, notifyError, notifySuccess } from 'src/utils/dialog'
 import { useUserInfoStore } from 'src/stores/user'
 import { useSendDetailVisitor } from './useSendDetailVisitor'
+
+import { useI18n } from 'vue-i18n'
+
+import type { deleteRowByIdType, getSelectedRowsType } from 'src/compositions/qTableUtils'
+import type { ISendingGroupInfo } from 'src/api/sendingGroup'
 
 /**
  * 添加右键菜单
  */
-export function useContextMenu () {
+export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowById: deleteRowByIdType) {
   const router = useRouter()
-  const sendingHistoryContextItems: IContextMenuItem[] = [
+  const { t } = useI18n()
+
+  const sendingHistoryContextItems: IContextMenuItem<ISendingGroupInfo>[] = [
     {
       name: 'detail',
       label: '发件明细',
@@ -53,6 +60,13 @@ export function useContextMenu () {
       label: '复制发件',
       tooltip: '复制该数据作为模板并新建发件',
       onClick: onNewSendingTaskWithTemplate as any
+    },
+    {
+      name: 'delete',
+      label: t('sendDetail.delete'),
+      color: 'negative',
+      tooltip: '删除当前或者选中的发件历史',
+      onClick: onDeleteSendingGroups
     }
   ]
 
@@ -137,6 +151,29 @@ export function useContextMenu () {
         sendingGroupTemplateId: data.objectId
       }
     })
+  }
+
+  async function onDeleteSendingGroups (cursorData: ISendingGroupInfo) {
+    const { rows, selectedRows } = getSelectedRows(cursorData)
+    // 如果在进行中，则不允许删除
+    const inProgressGroups = rows.filter(x => x.status === SendingGroupStatus.Sending
+      || x.status === SendingGroupStatus.Scheduled)
+    if (inProgressGroups.length > 0) {
+      notifyError(`选中项共有 ${inProgressGroups.length} 项正在运行，请取消后再删除`)
+      return
+    }
+
+    const confirm = await confirmOperation(t('deleteConfirm'), `即将删除 ${rows.length} 项发件历史，是否继续？`)
+    if (!confirm) return
+
+    // 开始删除
+    await deleteSendingGroups(rows.map(x => x.id))
+    for (const row of rows) {
+      deleteRowById(row.id)
+    }
+    selectedRows.value = []
+
+    notifySuccess(t('deleteSuccess'))
   }
 
   return {

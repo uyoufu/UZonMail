@@ -98,5 +98,9 @@ export default {
   },
   sendingProgress: {
     title: '发送进度',
+  },
+  sendDetail: {
+    resend: '重新发送',
+    delete: '删除'
   }
 }

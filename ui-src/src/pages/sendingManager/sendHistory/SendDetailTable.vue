@@ -140,7 +140,6 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 
 const { pagination, rows, filter, onTableRequest, loading, refreshTable } = useQTable({
   getRowsNumberCount,
-
   onRequest
 })
 
@@ -163,7 +162,7 @@ onMounted(() => {
 // #region 发件进度相关
 import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 import { subscribeOne } from 'src/signalR/signalR'
-import type { ISendingGroupProgressArg, ISendingItemStatusChangedArg } from 'src/signalR/types';
+import type { ISendingGroupProgressArg, ISendingItemStatusChangedArg } from 'src/signalR/types'
 import { UzonMailClientMethods, SendingGroupProgressType } from 'src/signalR/types'
 import { getSendingGroupRunningInfo, SendingGroupStatus } from 'src/api/sendingGroup'
 const sendingGroupProgressValue = ref(-1)
@@ -210,7 +209,7 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
  */
 import { useContextMenu } from './sendDetailContext'
 import { notifyError } from 'src/utils/dialog'
-import type { IExcelColumnMapper, IExcelWriterParams } from 'src/utils/file';
+import type { IExcelColumnMapper, IExcelWriterParams } from 'src/utils/file'
 import { writeExcel } from 'src/utils/file'
 const { sendDetailContextItems, ContextMenu } = useContextMenu()
 
