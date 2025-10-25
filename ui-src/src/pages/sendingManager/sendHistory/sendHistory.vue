@@ -1,7 +1,7 @@
 <template>
   <q-table class="full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
-    v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
-    @request="onTableRequest">
+    v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort selection="multiple"
+    v-model:selected="selectedRows" @request="onTableRequest">
     <template v-slot:top-left>
       <div class="text-subtile1 text-primary">历史发件</div>
     </template>
@@ -48,7 +48,7 @@ import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
-import type { ISendingGroupInfo } from 'src/api/sendingGroup';
+import type { ISendingGroupInfo } from 'src/api/sendingGroup'
 import { getSendingGroupsCount, getEmailTemplatesData, SendingGroupStatus, SendingGroupType } from 'src/api/sendingGroup'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
@@ -164,18 +164,19 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
   return data || []
 }
 
-const { pagination, rows, filter, onTableRequest, loading } = useQTable({
+const { pagination, rows, filter, onTableRequest, loading,
+  selectedRows, getSelectedRows, deleteRowById
+} = useQTable({
   sortBy: 'id',
   descending: true,
   getRowsNumberCount,
-
   onRequest
 })
 
 // 右键菜单
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import { useContextMenu } from './sendingHistoryContext'
-const { openSendDetailDialog, sendingHistoryContextItems } = useContextMenu()
+const { openSendDetailDialog, sendingHistoryContextItems } = useContextMenu(getSelectedRows, deleteRowById)
 
 /**
  * 进度与状态显示
@@ -183,7 +184,7 @@ const { openSendDetailDialog, sendingHistoryContextItems } = useContextMenu()
 
 // 注册进度获取回调
 import { subscribeOne } from 'src/signalR/signalR'
-import type { ISendingGroupProgressArg } from 'src/signalR/types';
+import type { ISendingGroupProgressArg } from 'src/signalR/types'
 import { SendingGroupProgressType, UzonMailClientMethods } from 'src/signalR/types'
 
 // 进度变化

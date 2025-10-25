@@ -9,7 +9,10 @@ export type updateExistOneType<T = Record<string, any>> = (newData: T, idField?:
 
 export type deleteRowByIdType = (id?: number, idField?: string) => void
 
-export type getSelectedRowsType = (cursorData: Record<string, any>) => { rows: Record<string, any>[]; selectedRows: Ref<Record<string, any>[]> }
+export type getSelectedRowsType = (cursorData: Record<string, any>) => {
+  rows: Record<string, any>[]
+  selectedRows: Ref<Record<string, any>[]>
+}
 
 export interface ITableRequestProp {
   /**
@@ -19,23 +22,23 @@ export interface ITableRequestProp {
     /**
      * Column name (from column definition)
      */
-    sortBy: string;
+    sortBy: string
     /**
      * Is sorting in descending order?
      */
-    descending: boolean;
+    descending: boolean
     /**
      * Page number (1-based)
      */
-    page: number;
+    page: number
     /**
      * How many rows per page? 0 means Infinite
      */
-    rowsPerPage: number;
+    rowsPerPage: number
     /**
      * For server-side fetching only. How many total database rows are there to be added to the table.
      */
-    rowsNumber?: number;
+    rowsNumber?: number
   }
 
   /**
@@ -210,6 +213,7 @@ export function useQTable (initParams: IQTableInitParams) {
   }
 
   const selectedRows = ref<Record<string, any>[]>([])
+
   /**
    * 获取选中的行
    * @param cursorData
@@ -223,6 +227,8 @@ export function useQTable (initParams: IQTableInitParams) {
 
     return { rows, selectedRows }
   }
+
+
 
   return {
     rows,

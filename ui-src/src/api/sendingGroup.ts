@@ -166,3 +166,14 @@ export interface ISendingGroupFull extends ISendingGroupInfo {
 export function getSendingGroup (sendingGroupObjId: string) {
   return httpClient.get<ISendingGroupFull>(`/sending-group/${sendingGroupObjId}`)
 }
+
+/**
+ * 通过 id 批量删除发件组
+ * @param sendingGroupIds
+ * @returns
+ */
+export function deleteSendingGroups (sendingGroupIds: number[]) {
+  return httpClient.delete('/sending-group/ids/many', {
+    data: sendingGroupIds
+  })
+}
