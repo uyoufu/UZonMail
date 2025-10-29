@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Security.Cryptography;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Templates;
@@ -44,7 +45,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         public async Task<EmailTemplate?> GetTemplate(SqlContext sqlContext, long sendingItemId)
         {
             // 为空时直接返回空
-            if (_sendingItemTemplateIds.IsEmpty)
+            if (_sendingItemTemplateIds.IsEmpty && _sendingGroupTemplateIds.Count == 0)
                 return null;
 
             // 获取所有的模板
@@ -57,7 +58,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
 
             // 随机获取一个模板
             var random = new Random();
-            var index = random.Next(0, _sendingGroupTemplateIds.Count);
+            var index = RandomNumberGenerator.GetInt32(0,_sendingGroupTemplateIds.Count);
             var template = allTemplates.Where(x => x.Id == _sendingGroupTemplateIds[index]).FirstOrDefault();
             return template;
         }
