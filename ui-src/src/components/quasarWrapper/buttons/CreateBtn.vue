@@ -1,5 +1,5 @@
 <template>
-  <q-btn class="q-pr-sm q-py-none" :dense="dense" :color="color" :size="size" :icon="icon" :label="label"
+  <q-btn class="q-pr-sm q-py-none" :dense="dense" :color="color" :size="size" :icon="icon" :label="labelValue"
     :disable="disable" v-bind="$attrs">
     <template v-for="(slot, slotName) in $slots">
       <slot :name="slotName"></slot>
@@ -10,6 +10,7 @@
 
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
+import { translateButton } from 'src/i18n/helpers'
 
 const props = defineProps({
   color: {
@@ -22,11 +23,10 @@ const props = defineProps({
   },
   label: {
     type: String,
-    default: '新增'
   },
   tooltip: {
     type: [String, Array] as PropType<string | string[]>,
-    default: '新增项'
+    default: translateButton('newItem')
   },
   size: {
     type: String,
@@ -50,6 +50,11 @@ const props = defineProps({
 const tooltipValue = computed(() => {
   if (props.disable) return props.tooltipWhenDisabled || props.tooltip
   return props.tooltip
+})
+
+const labelValue = computed(() => {
+  if (!props.label) return translateButton('new')
+  return props.label
 })
 </script>
 

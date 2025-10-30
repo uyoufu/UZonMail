@@ -10,13 +10,13 @@
         <div class="self-center q-mb-lg text-h5 text-secondary welcome-to-uzon-mail">{{ systemConfig.loginWelcome }}
         </div>
 
-        <q-input outlined class="full-width q-mb-md" standout v-model="userId" label="用户名">
+        <q-input outlined class="full-width q-mb-md" standout v-model="userId" :label="translateLoginPage('userName')">
           <template v-slot:prepend>
             <q-icon name="person" />
           </template>
         </q-input>
 
-        <q-input outlined class="full-width q-mb-md" standout v-model="password" label="密码"
+        <q-input outlined class="full-width q-mb-md" standout v-model="password" :label="translateLoginPage('password')"
           :type="isPwd ? 'password' : 'text'">
           <template v-slot:prepend>
             <q-icon name="lock" />
@@ -26,14 +26,15 @@
           </template>
         </q-input>
 
-        <q-btn class="full-width border-radius-8" color="primary" label="登 录" @click="onUserLogin" />
+        <q-btn class="full-width border-radius-8" color="primary" :label="translateLoginPage('signIn')"
+          @click="onUserLogin" />
       </div>
     </div>
 
     <div class="row justify-center items-center q-mb-lg text-secondary">
-      <div class="text-primary">版本:&nbsp;&nbsp;</div>
-      <div>client - {{ clientVersion }},&nbsp;&nbsp;</div>
-      <div :class="serverVersionClass">server - {{ serverVersion }}</div>
+      <div class="text-primary">{{ translateLoginPage('version') }}:&nbsp;&nbsp;</div>
+      <div>{{ translateLoginPage('client') }} - {{ clientVersion }},&nbsp;&nbsp;</div>
+      <div :class="serverVersionClass">{{ translateLoginPage('server') }} - {{ serverVersion }}</div>
     </div>
   </div>
 </template>
@@ -41,6 +42,7 @@
 <script lang="ts" setup>
 import { userLogin, updateUserEncryptKeys } from 'src/api/user'
 
+import { translateLoginPage } from 'src/i18n/helpers'
 import { useUserInfoStore } from 'src/stores/user'
 import { useRoutesStore } from 'src/stores/routes'
 import { notifyError } from 'src/utils/dialog'
@@ -62,12 +64,12 @@ const routeStore = useRoutesStore()
 async function onUserLogin () {
   // 验证数据
   if (!userId.value) {
-    notifyError('请输入用户名')
+    notifyError(translateLoginPage('pleaseInputUserName'))
     return
   }
 
   if (!password.value) {
-    notifyError('请输入密码')
+    notifyError(translateLoginPage('pleaseInputPassword'))
     return
   }
 

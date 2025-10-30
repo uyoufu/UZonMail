@@ -1,6 +1,6 @@
 <template>
   <q-expansion-item :header-inset-level="insetLevel" v-if="!noMenu && existChildren" v-model="openExpansionItem"
-    class="rounded-borders" :class="{ 'text-orange': isActive }" :icon="icon" :label="label">
+    class="rounded-borders" :class="{ 'text-orange': isActive }" :icon="icon" :label="labelValue">
     <MenuItem v-for="child in childrenRoutes" :key="child.path" :routeRaw="child" :depth="depth + 1">
     </MenuItem>
   </q-expansion-item>
@@ -10,11 +10,15 @@
     <q-item-section avatar>
       <q-icon :name="icon" />
     </q-item-section>
-    <q-item-section :class="{ 'slash-right': isActive }">{{ label }}</q-item-section>
+    <q-item-section :class="{ 'slash-right': isActive }">{{ labelValue }}</q-item-section>
   </q-item>
 </template>
 
 <script lang="ts" setup>
+defineOptions({
+  name: 'MenuItem'
+})
+
 /**
  * 显示逻辑
  * 1- 若只有一个子菜单，则只展示子菜单
@@ -49,7 +53,11 @@ const insetLevel = computed(() => {
   return props.depth * props.unitInsetLevel
 })
 
-const { name, children, meta: { label, icon, noMenu } } = props.routeRaw
+const { name, children, meta: { icon, noMenu } } = props.routeRaw
+import { translateRoutes } from 'src/i18n/helpers'
+const labelValue = computed(() => {
+  return translateRoutes(props.routeRaw.meta.label)
+})
 const existChildren = computed(() => children && children.length > 0)
 const childrenRoutes = children?.map(x => getMenuRoute(x)) as ExtendedRouteRecordRaw[]
 
@@ -85,12 +93,6 @@ async function goToRoute () {
   await router.push({
     name
   })
-}
-</script>
-
-<script lang="ts">
-export default {
-  name: 'MenuItem'
 }
 </script>
 

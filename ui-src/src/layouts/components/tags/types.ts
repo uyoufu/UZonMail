@@ -1,4 +1,5 @@
 import type { LocationQuery } from 'vue-router'
+import type { RoutesLangKey } from 'src/i18n/types'
 
 /**
  * 路由历史
@@ -8,7 +9,7 @@ export interface IRouteHistory {
   fullPath: string,
   query: LocationQuery,
   name: string,
-  label: string,
+  label: RoutesLangKey,
   isActive: boolean,
   icon: string,
   noCache: boolean,
