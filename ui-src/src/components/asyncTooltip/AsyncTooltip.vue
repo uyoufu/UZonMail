@@ -65,6 +65,11 @@ const props = defineProps({
   },
 
   // 可以是字符串，字符串数组，或者是一个返回字符串数组的函数
+  // examples:
+  // tooltip: 'this is 1st line\n this is 2nd line'
+  // tooltip: ['this is 1st line', 'this is 2nd line']
+  // tooltip: [(params) => { return ['this is 1st line', 'this is 2nd line'] },'this is 3rd line']
+  // tooltip: async (params) => { return ['this is 1st line', 'this is 2nd line'] }
   tooltip: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type: [Array, Function, String] as PropType<Array<any> | ((params?: object) => Promise<string[]>) | string>,
@@ -121,7 +126,7 @@ async function generateTooltips (tooltip: Array<any> | ((params?: object) => Pro
   const tooltipResults: string[] = []
   // 字符串
   if (typeof tooltip === 'string') {
-    tooltipResults.push(tooltip)
+    tooltipResults.push(...tooltip.split('\n'))
   }
   // 数组
   else if (Array.isArray(tooltip)) {
@@ -142,7 +147,14 @@ async function generateTooltips (tooltip: Array<any> | ((params?: object) => Pro
   return tooltipResults
 }
 
-
+// #region  多语言变化
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
+watch(locale, () => {
+  // 清除缓存
+  cached = false
+})
+// #endregion
 </script>
 <style lang="scss" scoped>
 .break-word {

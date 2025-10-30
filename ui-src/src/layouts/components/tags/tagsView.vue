@@ -36,9 +36,12 @@ function getTagClass (item: IRouteHistory) {
     'text-white': true
   }
 }
+
+import { translateRoutes } from 'src/i18n/helpers'
 function getTagLabel (tagItem: IRouteHistory) {
-  if (tagItem.query.tagName) return `${tagItem.label} - ${String(tagItem.query.tagName)}`
-  return tagItem.label
+  const labelValue = translateRoutes(tagItem.label)
+  if (tagItem.query.tagName) return `${labelValue} - ${String(tagItem.query.tagName)}`
+  return labelValue
 }
 const router = useRouter()
 async function goToRoute (item: IRouteHistory) {

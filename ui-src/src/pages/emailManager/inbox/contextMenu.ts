@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IInbox } from 'src/api/emailBox';
+import type { IInbox } from 'src/api/emailBox'
 import { deleteInboxById, updateInbox } from 'src/api/emailBox'
 import { validateAllInvalidInboxes } from 'src/api/pro/emailVerify'
 
@@ -8,6 +8,8 @@ import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { getInboxFields } from './headerFunctions'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
+
+import { translateInboxManager, translateGlobal } from 'src/i18n/helpers'
 
 export function useContextMenu (deleteRowById: (id?: number) => void) {
   // 更新发件箱
@@ -37,7 +39,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
 
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
-      title: `修改收件箱 / ${inbox.email}`,
+      title: `${translateInboxManager('modifyInbox')} / ${inbox.email}`,
       fields
     }
 
@@ -52,41 +54,41 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     // 将参数更新到 inbox 中
     Object.assign(inbox, data, { decryptedPassword: false })
 
-    notifySuccess('更新成功')
+    notifySuccess(translateInboxManager('updateInboxSuccess'))
   }
 
   const inboxContextMenuItems: IContextMenuItem[] = [
     {
       name: 'edit',
-      label: '编辑',
-      tooltip: '编辑当前发件箱',
+      label: translateGlobal('modify'),
+      tooltip: translateInboxManager('modifyCurrentInbox'),
       onClick: onUpdateInbox
     },
     {
       name: 'validateSelected',
-      label: '验证',
-      tooltip: '验证当前或选中的发件箱',
+      label: translateGlobal('validate'),
+      tooltip: translateInboxManager('validateCurrentOrSelectedInboxes'),
       onClick: deleteInbox,
       vif: () => false
     },
     {
       name: 'validateAll',
-      label: '批量验证',
-      tooltip: '批量验证当前组中的所有未验证过的发件箱',
+      label: translateGlobal('validateMultiple'),
+      tooltip: translateInboxManager('validateAllInvalidInboxesInCurrentGroup'),
       onClick: onValidateAllInvalidInboxes,
       vif: () => false
     },
     {
       name: 'delete',
-      label: '删除',
-      tooltip: '删除当前发件箱',
+      label: translateGlobal('delete'),
+      tooltip: translateInboxManager('deleteCurrentInbox'),
       color: 'negative',
       onClick: deleteInbox
     },
     {
       name: 'deleteInvalid',
-      label: '删除无效',
-      tooltip: '删除所有验证无效项',
+      label: translateInboxManager('ctx_deleteInvalid'),
+      tooltip: translateInboxManager('deleteAllInvalidInboxesInCurrentGroup'),
       color: 'negative',
       onClick: deleteInbox,
       vif: () => false
@@ -106,7 +108,10 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
   async function deleteInbox (row: Record<string, any>) {
     const inbox = row as IInbox
     // 提示是否删除
-    const confirm = await confirmOperation('删除收件箱', `是否删除收件箱: ${inbox.email}？`)
+    const confirm = await confirmOperation(
+      translateGlobal('deleteConfirmation'),
+      translateInboxManager('isDeleteEmailOf', { email: inbox.email })
+    )
     if (!confirm) return
 
     await deleteInboxById(inbox.id as number)
@@ -114,7 +119,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     // 开始删除
     deleteRowById(inbox.id)
 
-    notifySuccess('删除成功')
+    notifySuccess(translateGlobal('deleteSuccess'))
   }
   // #endregion
 

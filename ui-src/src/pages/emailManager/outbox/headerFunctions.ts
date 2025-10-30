@@ -21,6 +21,7 @@ import { debounce } from 'lodash'
 import type { IUserEncryptKeys } from 'src/stores/types'
 
 import logger from 'loglevel'
+import { translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
 
 function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
   return aes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, password)
@@ -67,7 +68,7 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
   const { data: proxyOptions } = await getUsableProxies()
   proxyOptions.unshift({
     id: 0,
-    name: '无',
+    name: translateGlobal('empty'),
     isActive: true,
     url: ''
   } as IProxy)
@@ -75,26 +76,26 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
     {
       name: 'email',
       type: PopupDialogFieldType.email,
-      label: 'smtp发件邮箱',
+      label: translateOutboxManager('col_email'),
       value: '',
       required: true
     },
     {
       name: 'name',
       type: PopupDialogFieldType.text,
-      label: '发件人名称',
+      label: translateOutboxManager('col_outboxUserName'),
       value: ''
     },
     {
       name: 'smtpHost',
-      label: 'smtp地址',
+      label: translateOutboxManager('col_smtpHost'),
       type: PopupDialogFieldType.text,
       value: '',
       required: true
     },
     {
       name: 'smtpPort',
-      label: 'smtp端口',
+      label: translateOutboxManager('col_smtpPort'),
       type: PopupDialogFieldType.number,
       value: 465,
       required: true
@@ -102,13 +103,13 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
     {
       name: 'userName',
       type: PopupDialogFieldType.text,
-      label: 'smtp用户名',
-      placeholder: '可为空，若为空，则使用发件邮箱作用用户名',
+      label: translateOutboxManager('col_smtpUserName'),
+      placeholder: translateOutboxManager('ifSameAsEmailUseEmpty'),
       value: ''
     },
     {
       name: 'password',
-      label: 'smtp密码',
+      label: translateOutboxManager('col_smtpPassword'),
       type: PopupDialogFieldType.password,
       parser: (value: any) => {
         const pwd = String(value)
@@ -124,21 +125,21 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
         }
         return {
           ok: value && value.length > 0,
-          message: 'smtp密码不能为空'
+          message: translateOutboxManager('smtpPasswordIsRequired')
         }
       },
       value: ''
     },
     {
       name: 'description',
-      label: '描述'
+      label: translateOutboxManager('col_description'),
     },
     {
       name: 'proxyId',
-      label: '代理',
+      label: translateOutboxManager('col_proxy'),
       type: PopupDialogFieldType.selectOne,
       value: 0,
-      placeholder: '为空时使用系统设置',
+      placeholder: translateOutboxManager('ifEmptyProxyUseSystemSettings'),
       options: proxyOptions,
       optionLabel: 'name',
       optionValue: 'id',
@@ -148,11 +149,11 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
     },
     {
       name: 'replyToEmails',
-      label: '回信收件人'
+      label: translateOutboxManager('col_replyToEmails'),
     },
     {
       name: 'enableSSL',
-      label: '启用 SSL',
+      label: translateOutboxManager('col_enableSSL'),
       type: PopupDialogFieldType.boolean,
       value: true,
       required: true
@@ -163,55 +164,55 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
 export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
   return [
     {
-      headerName: 'smtp邮箱',
+      headerName: translateOutboxManager('col_email'),
       fieldName: 'email',
       required: true
     },
     {
-      headerName: '发件人名称',
+      headerName: translateOutboxManager('col_outboxUserName'),
       fieldName: 'name'
     },
     {
-      headerName: 'smtp用户名',
+      headerName: translateOutboxManager('col_smtpUserName'),
       fieldName: 'userName'
     },
     {
-      headerName: 'smtp密码',
+      headerName: translateOutboxManager('col_smtpPassword'),
       fieldName: 'password',
       required: true
     },
     {
-      headerName: 'smtp地址',
+      headerName: translateOutboxManager('col_smtpHost'),
       fieldName: 'smtpHost',
       required: true
     },
     {
-      headerName: 'smtp端口',
+      headerName: translateOutboxManager('col_smtpPort'),
       fieldName: 'smtpPort',
       required: true
     },
     {
-      headerName: '描述',
+      headerName: translateOutboxManager('col_description'),
       fieldName: 'description'
     },
     {
-      headerName: '代理',
+      headerName: translateOutboxManager('col_proxy'),
       fieldName: 'proxy'
     },
     {
-      headerName: '回信收件人',
+      headerName: translateOutboxManager('col_replyToEmails'),
       fieldName: 'replyToEmails'
     },
     {
-      headerName: '启用SSL',
+      headerName: translateOutboxManager('col_enableSSL'),
       fieldName: 'enableSSL',
       format: (value: boolean) => {
         if (typeof value === 'boolean') {
-          return value ? '是' : '否'
+          return value ? translateGlobal('yes') : translateGlobal('no')
         }
 
         if (typeof value === 'string') {
-          return value === '是'
+          return value === translateGlobal('yes')
         }
         return !!value
       }
@@ -230,7 +231,7 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptK
   if (!isExchangeEmail(outbox.email)) return
   // 存在但非 Exchange 地址
   if (outbox.smtpHost && !isExchangeDomain(outbox.smtpHost)) {
-    notifyWarning('检测到 Outlook 邮箱，但 SMTP 地址不是 Exchange 地址，跳过委托授权')
+    notifyWarning(translateOutboxManager('outlookDelegateAuthorizationSkippedNonExchangeSmtp'))
     return
   }
 
@@ -241,16 +242,16 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptK
   // 否则可能是 refreshToken
   const plainPassword = deAes(encryptKeys.key, encryptKeys.iv, outbox.password)
   if (plainPassword.length > 80) {
-    notifySuccess('该邮箱已换取 refreshToken, 无需进行委托授权')
+    notifySuccess(translateOutboxManager('existingRefreshTokenNoNeedDelegateAuthorization'))
     return
   }
 
 
-  notifyWarning("检测到个人 Outlook 邮箱，需要进行委托授权，请批准")
+  notifyWarning(translateOutboxManager('detectedExchangeEmailStartingOutlookDelegateAuthorization'))
 
   const { data: authorizationUrl } = await startOutlookDelegateAuthorization(outbox.id as number)
   if (!authorizationUrl) {
-    notifyError("获取委托授权地址失败，请稍后重试")
+    notifyError(translateOutboxManager('failedToGetAuthorizationUrl'))
     return
   }
 
@@ -261,7 +262,7 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptK
   )
 
   if (!win) {
-    notifyError('请允许浏览器弹出窗口')
+    notifyError(translateOutboxManager('allowPopupWindowsForAuthorization'))
     return
   }
 
@@ -280,7 +281,7 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptK
   const { data: newOutbox } = await getOutboxInfo(outbox.id as number)
   outbox.password = newOutbox.password
 
-  notifySuccess('委托授权结束')
+  notifySuccess(translateOutboxManager('delegateCopleted'))
 }
 
 /**
@@ -308,7 +309,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
 
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
-      title: `新增发件箱 / ${emailGroup.value.label}`,
+      title: translateOutboxManager('newOutboxTitle', { groupName: emailGroup.value.label }),
       fields: await getOutboxFields(userInfoStore.smtpPasswordSecretKeys),
       onSetup: (params) => {
         watch(() => params.fieldsModel.value.email, async newValue => {
@@ -332,7 +333,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     // 保存到 rows 中
     addNewRow(outbox)
 
-    notifySuccess('新增发件箱成功')
+    notifySuccess(translateOutboxManager('newOutboxSuccess'))
 
     // 进行 outlook 委托授权
     await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
@@ -342,15 +343,15 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
   async function onExportOutboxTemplateClick () {
     const data: any[] = [
       {
-        email: '填写发件邮箱(导入时，请删除该行数据)',
-        name: '填写发件人名称(可选)',
-        userName: '填写 smtp 用户名，若与邮箱一致，则设置不填写',
-        password: '填写 smtp 密码',
-        smtpHost: '填写 smtp 地址',
+        email: translateOutboxManager('exportColumn_email'),
+        name: translateOutboxManager('exportColumn_name'),
+        userName: translateOutboxManager('exportColumn_userName'),
+        password: translateOutboxManager('exportColumn_password'),
+        smtpHost: translateOutboxManager('exportColumn_smtpHost'),
         smtpPort: 25,
-        description: '描述(可选)',
-        proxy: '格式为：http://username:password@domain:port(可选)',
-        replyToEmails: '回信收件人(多个使用逗号分隔)',
+        description: translateOutboxManager('exportColumn_description'),
+        proxy: translateOutboxManager('exportColumn_proxy'),
+        replyToEmails: translateOutboxManager('exportColumn_replyToEmails'),
         enableSSL: true
       }, {
         email: 'test@163.com',
@@ -366,12 +367,12 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
       }
     ]
     await writeExcel(data, {
-      fileName: '发件箱模板.xlsx',
-      sheetName: '发件箱',
+      fileName: translateOutboxManager('outboxTemplateFileName'),
+      sheetName: translateOutboxManager('col_email'),
       mappers: getOutboxExcelDataMapper()
     })
 
-    notifySuccess('模板下载成功')
+    notifySuccess(translateOutboxManager('outboxTemplateDownloadSuccess'))
   }
 
   // 从 excel 导入
@@ -385,7 +386,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     })
 
     if (data.length === 0) {
-      notifyError('未找到可导入的数据')
+      notifyError(translateOutboxManager('noItemsToImport'))
       return
     }
 
@@ -394,15 +395,16 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     // 对密码进行加密
     for (const [index, row] of data.entries()) {
       if (!row.email) {
-        logger.info(`第 ${index + 1} 行数据邮箱为空`)
+        logger.info(translateOutboxManager('emaiEmptyAtRow', { row: index + 1 }))
         continue
       }
 
       // 验证邮箱是否正确
       // 验证 email 格式
       if (!isEmail(row.email)) {
-        logger.info(`邮箱格式错误:`, row)
-        notifyError(`邮箱格式错误: ${row.email}`)
+        const message = translateOutboxManager('emailFormatInvalid', { email: row.email })
+        logger.info(message, row)
+        notifyError(message)
         continue
       }
 
@@ -412,15 +414,17 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     }
 
     if (validRows.length === 0) {
-      notifyError('没有有效的发件箱数据,请核查表头是否正确')
+      notifyError(translateOutboxManager('noValidImportData'))
       return
     }
 
     // 判断是否数据相等
     if (validRows.length < data.length) {
-      const continueImport = await confirmOperation('数据异常确认', '部分数据格式错误，是否继续导入？')
+      const continueImport = await confirmOperation(
+        translateGlobal('confirmOperation'),
+        translateOutboxManager('confirmImportWithErrors'))
       if (!continueImport) {
-        notifyError('导入已取消')
+        notifyError(translateOutboxManager('importCancelled'))
         return
       }
     }
@@ -434,7 +438,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
       })
     }
 
-    notifySuccess(`导入成功，共导入 ${outboxes.length} 项`)
+    notifySuccess(translateOutboxManager('importOutboxSuccess', { count: outboxes.length }))
   }
 
   return {

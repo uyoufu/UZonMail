@@ -12,6 +12,7 @@
 
 <script lang="ts" setup>
 import logger from 'loglevel'
+import { translateDashboardPage } from 'src/i18n/helpers'
 
 // #region echarts
 // 参考：https://echarts.apache.org/handbook/zh/basics/import/
@@ -73,7 +74,7 @@ function renderOutboxCountBar () {
   // 绘制图表
   const options: EChartsOption = {
     title: {
-      text: '发件箱统计',
+      text: translateDashboardPage('inboxStatsTitle'),
       left: 'center',
       textStyle: {
         fontSize: 14
@@ -95,7 +96,7 @@ function renderOutboxCountBar () {
     color: '#7367f0',
     series: [
       {
-        name: '邮箱数量',
+        name: translateDashboardPage('emailCount'),
         type: 'bar',
         barWidth: '75%',
         data: outboxesCount.value.map(item => item.count),
@@ -120,7 +121,7 @@ function renderInboxCountBar () {
   // 绘制图表
   const options: EChartsOption = {
     title: {
-      text: '收件箱统计',
+      text: translateDashboardPage('inboxStatsTitle'),
       left: 'center',
       textStyle: {
         fontSize: 14
@@ -142,7 +143,7 @@ function renderInboxCountBar () {
     color: '#7367f0',
     series: [
       {
-        name: '邮箱数量',
+        name: translateDashboardPage('emailCount'),
         type: 'bar',
         barWidth: '75%',
         data: inboxesCount.value.map(item => item.count),
@@ -167,7 +168,7 @@ function renderMonthlySendingInfoBar () {
   // 绘制图表
   const options: EChartsOption = {
     title: {
-      text: '每月发件统计',
+      text: translateDashboardPage('monthlySendingStatsTitle'),
       left: 'center',
       textStyle: {
         fontSize: 14
@@ -189,7 +190,7 @@ function renderMonthlySendingInfoBar () {
     color: '#7367f0',
     series: [
       {
-        name: '数量',
+        name: translateDashboardPage('count'),
         type: 'line',
         data: monthlySendingInfo.value.map(x => x.count),
         label: {
@@ -244,6 +245,16 @@ useResizeObserver(containerElementRef, () => {
   initCharts.forEach(x => {
     x.chart?.resize()
   })
+})
+
+// 监听语言变化，重新渲染图表
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
+watch(locale, () => {
+  // 重新渲染图表
+  renderOutboxCountBar()
+  renderInboxCountBar()
+  renderMonthlySendingInfoBar()
 })
 
 // #region 版本检查

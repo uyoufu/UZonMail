@@ -8,13 +8,15 @@
       v-model:selected="selectedRows" @request="onTableRequest">
       <template v-slot:top-left>
         <div class="row justify-start q-gutter-sm">
-          <CreateBtn tooltip="新增发件箱" @click="onNewOutboxClick" :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组" />
-          <ExportBtn label="" tooltip="下载发件箱模板" @click="onExportOutboxTemplateClick" />
-          <ImportBtn label="" tooltip="导入发件箱" @click="onImportOutboxFromExcelClicked()" :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组" />
+          <CreateBtn :tooltip="translateOutboxManager('newOutbox')" @click="onNewOutboxClick"
+            :disable="!isValidEmailGroup" :tooltip-when-disabled="translateOutboxManager('pleaseAddGroupFirst')" />
+          <ExportBtn label="" :tooltip="translateOutboxManager('downloadOutboxTemplate')"
+            @click="onExportOutboxTemplateClick" />
+          <ImportBtn label="" :tooltip="translateOutboxManager('importOutbox')"
+            @click="onImportOutboxFromExcelClicked()" :disable="!isValidEmailGroup"
+            :tooltip-when-disabled="translateOutboxManager('pleaseAddGroupFirst')" />
           <ImportBtn label="" icon="description" :tooltip="importFromTxtTooltip" @click="onImportOutboxFromTxt()"
-            :disable="!isValidEmailGroup" tooltip-when-disabled="请先添加组" />
+            :disable="!isValidEmailGroup" :tooltip-when-disabled="translateOutboxManager('pleaseAddGroupFirst')" />
         </div>
       </template>
 
@@ -55,8 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
+import { translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
 
 import type { QTable, QTableColumn } from 'quasar'
 
@@ -89,7 +90,7 @@ const emailGroupRef: Ref<IEmailGroupListItem> = ref({
   order: 0
 })
 const isValidEmailGroup = computed(() => emailGroupRef.value.id)
-import type { IProxy } from 'src/api/proxy';
+import type { IProxy } from 'src/api/proxy'
 import { getUsableProxies } from 'src/api/proxy'
 const usableProxies: Ref<IProxy[]> = ref([])
 onMounted(async () => {
@@ -100,21 +101,21 @@ const columns: QTableColumn[] = [
   {
     name: 'id',
     required: true,
-    label: '序号',
+    label: translateOutboxManager('col_order'),
     align: 'left',
     field: 'id'
   },
   {
     name: 'email',
     required: true,
-    label: '发件箱',
+    label: translateOutboxManager('col_email'),
     align: 'left',
     field: 'email',
     sortable: true
   },
   {
     name: 'name',
-    label: '名称(发件人姓名)',
+    label: translateOutboxManager('col_outboxUserName'),
     align: 'left',
     field: 'name',
     sortable: true
@@ -122,7 +123,7 @@ const columns: QTableColumn[] = [
   {
     name: 'smtpHost',
     required: true,
-    label: 'smtp地址',
+    label: translateOutboxManager('col_smtpHost'),
     align: 'left',
     field: 'smtpHost',
     sortable: true
@@ -130,7 +131,7 @@ const columns: QTableColumn[] = [
   {
     name: 'smtpPort',
     required: true,
-    label: 'smtp端口',
+    label: translateOutboxManager('col_smtpPort'),
     align: 'left',
     field: 'smtpPort',
     sortable: true
@@ -138,7 +139,7 @@ const columns: QTableColumn[] = [
   {
     name: 'userName',
     required: true,
-    label: 'smtp用户名',
+    label: translateOutboxManager('col_smtpUserName'),
     align: 'left',
     field: 'userName',
     sortable: true
@@ -146,7 +147,7 @@ const columns: QTableColumn[] = [
   {
     name: 'password',
     required: true,
-    label: 'smtp密码',
+    label: translateOutboxManager('col_smtpPassword'),
     align: 'left',
     field: 'password',
     sortable: true
@@ -154,16 +155,16 @@ const columns: QTableColumn[] = [
   {
     name: 'enableSSL',
     required: true,
-    label: 'SSL',
+    label: translateOutboxManager('col_enableSSL'),
     align: 'left',
     field: 'enableSSL',
-    format: v => v ? '是' : '否',
+    format: v => v ? translateGlobal('yes') : translateGlobal('no'),
     sortable: true
   },
   {
     name: 'description',
     required: true,
-    label: '描述',
+    label: translateOutboxManager('col_description'),
     align: 'left',
     field: 'description',
     sortable: true
@@ -171,19 +172,19 @@ const columns: QTableColumn[] = [
   {
     name: 'proxyId',
     required: true,
-    label: '代理',
+    label: translateOutboxManager('col_proxy'),
     align: 'left',
     field: 'proxyId',
     sortable: true,
     format: (val: number) => {
       const proxy = usableProxies.value.find(p => p.id === val)
-      return proxy?.name ?? '无'
+      return proxy?.name ?? translateGlobal('empty')
     }
   },
   {
     name: 'status',
     required: true,
-    label: t('outboxManager.col_status'),
+    label: translateOutboxManager('col_status'),
     align: 'left',
     field: 'status',
     format: v => OutboxStatus[v] as string,
@@ -212,7 +213,7 @@ watch(emailGroupRef, () => {
 
 function getPasswordValue (data: IOutbox) {
   if (data.showPassword) return data.password
-  return '******'
+  return '*'.repeat(6)
 }
 import { deAes } from 'src/utils/encrypt'
 import { useUserInfoStore } from 'src/stores/user'
@@ -223,7 +224,7 @@ function togglePasswordViewMode (data: IOutbox) {
   if (!data.decryptedPassword) {
     // 进行解密
     const plainPwd = deAes(userInfoStore.smtpPasswordSecretKeys[0] || '', userInfoStore.smtpPasswordSecretKeys[1] || '', data.password)
-    data.password = plainPwd || '密钥变动,解密失败。请重新输入 smtp 密码'
+    data.password = plainPwd || translateOutboxManager('decryptionFailedDueToKeyChange')
     data.decryptedPassword = true
   }
 
@@ -246,20 +247,20 @@ import { notifyError } from 'src/utils/dialog'
 const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
   {
     name: 'importExcel',
-    label: '导入EXCEL',
-    tooltip: '向当前组中导入收件箱',
+    label: translateOutboxManager('importFromExcel'),
+    tooltip: translateOutboxManager('importOutboxForCurrentGroupFromExcel'),
     onClick: value => onImportOutboxFromExcelClicked(value.id)
   } as IContextMenuItem,
   {
     name: 'importTxt',
-    label: '导入TXT',
-    tooltip: '向当前组中导入收件箱',
+    label: translateOutboxManager('importFromTxt'),
+    tooltip: translateOutboxManager('importOutboxForCurrentGroupFromTxt'),
     onClick: value => onImportOutboxFromTxt(value.id)
   },
   {
     name: 'export',
-    label: '导出',
-    tooltip: '导出当前组中的收件箱',
+    label: translateGlobal('export'),
+    tooltip: translateOutboxManager('exportOutboxesInThisGroup'),
     onClick: exportAllInboxesInThisGroup
   }
 ])
@@ -270,18 +271,18 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
   // 获取所有的收件箱
   const { data: count } = await getOutboxesCount(group.id, '')
   if (!count) {
-    notifyError('没有可导出项')
+    notifyError(translateOutboxManager('noItemsToExport'))
     return
   }
   const { data: dataRows } = await getOutboxesData(group.id, '', { sortBy: 'id', descending: false, skip: 0, limit: count })
   // 对密码进行解密
   dataRows.forEach(row => {
     const plainPwd = deAes(userInfoStore.smtpPasswordSecretKeys[0] || '', userInfoStore.smtpPasswordSecretKeys[1] || '', row.password)
-    row.password = plainPwd || '密钥变动,解密失败'
+    row.password = plainPwd || translateOutboxManager('decryptionFailedDueToKeyChange')
   })
 
   await writeExcel(dataRows, {
-    fileName: `${group.name}-发件箱.xlsx`,
+    fileName: translateOutboxManager('exportFileName', { groupName: group.name }),
     sheetName: group.name,
     mappers: getOutboxExcelDataMapper(),
     strict: true
@@ -296,8 +297,8 @@ useSignalR(updateExistOne)
 
 // #region 邮箱导入功能
 import { useOutboxImporter } from './useOutboxImporter'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { onImportOutboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useOutboxImporter(emailGroupRef, addNewRow)
+
+const { onImportOutboxFromTxt, importFromTxtTooltip } = useOutboxImporter(emailGroupRef, addNewRow)
 // #endregion
 </script>
 

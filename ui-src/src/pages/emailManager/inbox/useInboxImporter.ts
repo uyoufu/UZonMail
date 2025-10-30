@@ -1,13 +1,14 @@
 import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
-import { useI18n } from 'vue-i18n'
 import type { IEmailGroupListItem } from '../components/types'
 
 import logger from 'loglevel'
 import { splitString } from 'src/utils/stringHelper'
-import type { IInbox } from 'src/api/emailBox';
+import type { IInbox } from 'src/api/emailBox'
 import { createInboxes } from 'src/api/emailBox'
+
+import { translateInboxManager } from 'src/i18n/helpers'
 
 /**
  * 从 txt 文件导入邮件
@@ -15,22 +16,20 @@ import { createInboxes } from 'src/api/emailBox'
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRow: (newRow: Record<string, any>) => void) {
-  const { t } = useI18n()
-
   // #region 从文本导入
   async function onImportInboxFromTxt (emailGroupId: number | null = null) {
     if (typeof emailGroupId !== 'number') emailGroupId = emailGroup.value.id as number
 
     // 新建弹窗
     const popupParams: IPopupDialogParams = {
-      title: `从文本导入收件箱 / ${emailGroupId}`,
+      title: `${translateInboxManager('importFromTxt')} / ${emailGroupId}`,
       oneColumn: true,
       fields: [
         {
           name: 'text',
-          label: '收件箱文本',
+          label: translateInboxManager('inboxText'),
           type: PopupDialogFieldType.textarea,
-          placeholder: '每行一个收件箱',
+          placeholder: translateInboxManager('importFromTxtPlaceholder'),
           value: '',
           required: true,
           disableAutogrow: true
@@ -51,7 +50,7 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
       .filter((x: string[]) => x.length > 0)
 
     if (inboxTexts.length === 0) {
-      notifyError('未找到可导入的数据')
+      notifyError(translateInboxManager('availableImportDataNotFound'))
       return
     }
 
@@ -73,7 +72,7 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
       })
     }
 
-    notifySuccess('导入成功')
+    notifySuccess(translateInboxManager('importInboxSuccess'))
   }
 
   function __getNewInboxData (emailGroupId: number, outboxTexts: string[]): IInbox | null {
@@ -100,8 +99,8 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
     return inbox
   }
 
-  const importFromTxtLable = t('inboxManager.importFromTxt')
-  const importFromTxtTooltip = t('inboxManager.importFromTxtTooltip').split('\n')
+  const importFromTxtLable = translateInboxManager('importFromTxt')
+  const importFromTxtTooltip = translateInboxManager('importFromTxtTooltip').split('\n')
   // #endregion
 
   return {

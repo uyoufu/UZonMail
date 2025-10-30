@@ -6,12 +6,12 @@
       </q-item-section>
       <q-item-section class="q-px-lg q-py-sm text-bold">
         {{ header.label }}
-        <AsyncTooltip v-if="!readonly" tooltip="右键可添加分组" />
+        <AsyncTooltip v-if="!readonly" :tooltip="translateEmailGroup('youCanRightClickToAddNewGroup')" />
       </q-item-section>
       <ContextMenu v-if="!readonly" :items="headerContextMenuItems"></ContextMenu>
       <q-item-section v-if="!readonly" side>
         <q-btn icon="add" dense flat size="md" @click.stop="onCreateEmailGroup">
-          <AsyncTooltip tooltip="添加分组" />
+          <AsyncTooltip :tooltip="translateEmailGroup('newGroup')" />
         </q-btn>
       </q-item-section>
     </q-item>
@@ -48,6 +48,8 @@
 </template>
 
 <script lang="ts" setup>
+import { translateEmailGroup, translateGlobal } from 'src/i18n/helpers'
+
 import type { PropType } from 'vue'
 import type { IEmailGroupListItem, IFlatHeader } from './types'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
@@ -105,12 +107,12 @@ const props = defineProps({
 const header: ComputedRef<IFlatHeader> = computed(() => {
   if (props.groupType === 1) {
     return {
-      label: '发件箱组',
+      label: translateEmailGroup('outboxGroup'),
       icon: 'group'
     }
   }
   return {
-    label: '收件箱组',
+    label: translateEmailGroup('inboxGroup'),
     icon: 'group'
   }
 })
@@ -131,9 +133,9 @@ const filteredItems = computed(() => {
 })
 
 // 初始化获取组
-import type { IEmailGroup } from 'src/api/emailGroup';
+import type { IEmailGroup } from 'src/api/emailGroup'
 import { getEmailGroups, createEmailCroup, updateEmailCroup, deleteEmailGroupById } from 'src/api/emailGroup'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types';
+import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
@@ -168,24 +170,24 @@ function onItemClick (item: IEmailGroupListItem) {
 // 新增邮箱组
 async function onCreateEmailGroup () {
   const popupParams: IPopupDialogParams = {
-    title: '新增邮箱组',
+    title: translateEmailGroup('newGroup'),
     fields: [
       {
         name: 'name',
-        label: '组名',
+        label: translateEmailGroup('field_name'),
         value: '',
         type: PopupDialogFieldType.text,
         required: true
       },
       {
         name: 'description',
-        label: '描述',
+        label: translateEmailGroup('field_description'),
         value: '',
         type: PopupDialogFieldType.textarea
       },
       {
         name: 'order',
-        label: '序号',
+        label: translateEmailGroup('field_order'),
         value: groupItems.value.length + 1,
         type: PopupDialogFieldType.text
       }
@@ -215,14 +217,14 @@ async function onCreateEmailGroup () {
   activeGroup(groupItems.value[groupItems.value.length - 1] as IEmailGroupListItem)
 
   // 新增组
-  notifySuccess('新增成功')
+  notifySuccess(translateEmailGroup('newGroupSuccess'))
 }
 // 分类 header 右键
 const headerContextMenuItems: IContextMenuItem[] = [
   {
     name: 'add',
-    label: '新增',
-    tooltip: '新增邮箱组',
+    label: translateGlobal('new'),
+    tooltip: translateEmailGroup('newEmailGroup'),
     onClick: onCreateEmailGroup
   }
 ]
@@ -236,24 +238,24 @@ const headerContextMenuItems: IContextMenuItem[] = [
 async function modifyGroup (emailGroup: Record<string, any>) {
   const typedEmailGroup = emailGroup as IEmailGroupListItem
   const popupParams: IPopupDialogParams = {
-    title: '修改邮箱组',
+    title: translateEmailGroup('modifyEmailGroup'),
     fields: [
       {
         name: 'name',
-        label: '组名',
+        label: translateEmailGroup('field_name'),
         value: typedEmailGroup.label,
         type: PopupDialogFieldType.text,
         required: true
       },
       {
         name: 'description',
-        label: '描述',
+        label: translateEmailGroup('field_description'),
         value: typedEmailGroup.description,
         type: PopupDialogFieldType.textarea
       },
       {
         name: 'order',
-        label: '序号',
+        label: translateEmailGroup('field_order'),
         value: typedEmailGroup.order || typedEmailGroup.side,
         // eslint-disable-next-line @typescript-eslint/require-await
         validate: async (value: number) => {
@@ -261,7 +263,7 @@ async function modifyGroup (emailGroup: Record<string, any>) {
           if (isNaN(numValue)) {
             return {
               ok: false,
-              message: '请输入数字'
+              message: translateGlobal('pleaseInputNumber')
             }
           }
           return { ok: true }
@@ -286,12 +288,15 @@ async function modifyGroup (emailGroup: Record<string, any>) {
   typedEmailGroup.side = String(result.data.order)
 
   // 新增组
-  notifySuccess('新增成功')
+  notifySuccess(translateEmailGroup('newGroupSuccess'))
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function deleteGroup (emailGroup: Record<string, any>) {
   // 进行确认
-  const confirm = await confirmOperation('确认删除', `即将删除组【${emailGroup.label}】和其中所有的邮箱，是否继续？`)
+  const confirm = await confirmOperation(
+    translateGlobal('deleteConfirmation'),
+    translateEmailGroup('deleteGroupAndInboxesConfirm', { groupName: emailGroup.label })
+  )
   if (!confirm) return
 
   // 向服务器请求删除
@@ -314,22 +319,22 @@ async function deleteGroup (emailGroup: Record<string, any>) {
     }
   }
 
-  notifySuccess(`删除组【${emailGroup.label}】成功`)
+  notifySuccess(translateEmailGroup('deleteGroupSuccess', { groupName: emailGroup.label }))
 }
 const itemContextMenuItems: IContextMenuItem[] = [
   ...props.contextMenuItems,
   ...headerContextMenuItems,
   {
     name: 'modify',
-    label: '修改',
-    tooltip: '修改当前分组',
+    label: translateGlobal('modify'),
+    tooltip: translateEmailGroup('modifyCurrentGroup'),
     onClick: modifyGroup
   },
   {
     name: 'delete',
-    label: '删除',
+    label: translateGlobal('delete'),
     color: 'negative',
-    tooltip: '删除当前分组',
+    tooltip: translateEmailGroup('deleteCurrentGroup'),
     onClick: deleteGroup
   }
 ]

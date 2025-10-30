@@ -8425,6 +8425,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ts-toolbelt@npm:^9.6.0":
+  version: 9.6.0
+  resolution: "ts-toolbelt@npm:9.6.0"
+  checksum: 10c0/838f9a2f0fe881d5065257a23b402c41315b33ff987b73db3e2b39fcb70640c4c7220e1ef118ed5676763543724fdbf4eda7b0e2c17acb667ed1401336af9f8c
+  languageName: node
+  linkType: hard
+
 "tsconfck@npm:^3.0.3":
   version: 3.1.5
   resolution: "tsconfck@npm:3.1.5"
@@ -8908,6 +8915,7 @@ __metadata:
     primevue: "npm:^4.3.1"
     quasar: "npm:^2.18.2"
     status-code-enum: "npm:^1.0.0"
+    ts-toolbelt: "npm:^9.6.0"
     typescript: "npm:^5.8.2"
     unplugin-auto-import: "npm:^19.1.1"
     unplugin-vue-components: "npm:^28.4.1"

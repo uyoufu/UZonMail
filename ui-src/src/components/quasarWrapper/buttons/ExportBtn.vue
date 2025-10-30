@@ -10,6 +10,7 @@
 
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
+import { translateButton } from 'src/i18n/helpers'
 
 defineProps({
   color: {
@@ -22,11 +23,11 @@ defineProps({
   },
   label: {
     type: String,
-    default: '导出'
+    default: translateButton('export')
   },
   tooltip: {
     type: String,
-    default: '导出数据'
+    default: translateButton('exportData')
   },
   size: {
     type: String,

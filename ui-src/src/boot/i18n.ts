@@ -1,4 +1,4 @@
-import { defineBoot } from '#q-app/wrappers';
+import { defineBoot } from '#q-app/wrappers'
 import { createI18n } from 'vue-i18n'
 import { useSessionStorage } from '@vueuse/core'
 
@@ -8,9 +8,9 @@ import { useSessionStorage } from '@vueuse/core'
  */
 import { messages } from 'src/i18n'
 
-export type MessageLanguages = keyof typeof messages;
+export type MessageLanguages = keyof typeof messages
 // Type-define 'en-US' as the master schema for the resource
-export type MessageSchema = typeof messages['en-US'];
+export type MessageSchema = typeof messages['en-US']
 
 // See https://vue-i18n.intlify.dev/guide/advanced/typescript.html#global-resource-schema-type-definition
 /* eslint-disable @typescript-eslint/no-empty-object-type */
@@ -38,12 +38,14 @@ function getDefaultLocale (): string {
 
 export const i18n = createI18n({
   locale: getDefaultLocale(),
+  // 回退语言
   fallbackLocale: 'zh-CN',
   silentFallbackWarn: true, // 控制台上不打印警告
-  legacy: false, // 如果要支持compositionAPI，此项必须设置为false
+  legacy: false, // 如果要支持 compositionAPI，此项必须设置为false
   messages,
-  globalInjection: true // 注册全局 $t
+  globalInjection: true, // 注册全局 $t
 })
+
 
 export default defineBoot(({ app }) => {
   // Set i18n instance on app

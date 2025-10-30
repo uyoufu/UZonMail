@@ -7,11 +7,12 @@ import type { IEmailGroupListItem } from '../components/types'
 
 import logger from 'loglevel'
 import { splitString } from 'src/utils/stringHelper'
-import type { ISmtpInfo } from 'src/api/smtpInfo';
+import type { ISmtpInfo } from 'src/api/smtpInfo'
 import { GuessSmtpInfoPost } from 'src/api/smtpInfo'
-import type { IOutbox } from 'src/api/emailBox';
+import type { IOutbox } from 'src/api/emailBox'
 import { createOutboxes } from 'src/api/emailBox'
 import { aes } from 'src/utils/encrypt'
+import { translateOutboxManager } from 'src/i18n/helpers'
 
 /**
  * 从 txt 文件导入邮件
@@ -146,7 +147,7 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
   }
 
   const importFromTxtLable = t('outboxManager.importFromTxt')
-  const importFromTxtTooltip = t('outboxManager.importFromTxtTooltip').split('\n')
+  const importFromTxtTooltip = computed(() => translateOutboxManager('importFromTxtTooltip').split('\n'))
   // #endregion
 
   return {

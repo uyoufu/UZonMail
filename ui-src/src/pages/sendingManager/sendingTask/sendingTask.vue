@@ -1,7 +1,7 @@
 <template>
   <div class="card-like column q-pa-md hover-scroll no-wrap">
     <q-input v-model="emailInfo.subjects" autogrow label="主题" dense
-      placeholder="请输入邮件主题(若需要随机主题，多个主题之间请使用分号 ; 进行分隔或者单独一行)" class="email-subject q-mb-sm" style="max-height:200px">
+      :placeholder="translateSendingTask('subjectPlaceholder')" class="email-subject q-mb-sm" style="max-height:200px">
       <template v-slot:before>
         <q-icon name="subject" color="primary" />
       </template>
@@ -12,38 +12,43 @@
     <SelectEmailData v-model="emailInfo.data" class="q-mb-sm" />
 
     <SelectEmailBox v-model="emailInfo.outboxes" v-model:selectedGroups="emailInfo.outboxGroups" :emailBoxType="0"
-      icon="directions_run" label="发件人" class="q-mb-sm" icon-color="secondary" placeholder="请选择发件箱 (必须)" />
+      icon="directions_run" :label="translateSendingTask('sender')" class="q-mb-sm" icon-color="secondary"
+      :placeholder="translateSendingTask('senderPlaceholder')" />
 
     <div class="q-mb-sm row justify-start items-center">
       <SelectEmailBox class="col" v-model="emailInfo.inboxes" v-model:selectedGroups="emailInfo.inboxGroups"
-        :emailBoxType="1" icon="hail" label="收件人" placeholder="请选择收件箱 (必须)" />
+        :emailBoxType="1" icon="hail" :label="translateSendingTask('recipients')"
+        :placeholder="translateSendingTask('recipientsPlaceholder')" />
 
-      <q-checkbox dense keep-color v-model="emailInfo.sendBatch" label="合并" color="secondary"
-        :disable="disableSendBatchCheckbox">
+      <q-checkbox dense keep-color v-model="emailInfo.sendBatch" :label="translateSendingTask('mergeToSend')"
+        color="secondary" :disable="disableSendBatchCheckbox">
         <AsyncTooltip anchor="bottom left" self="top start" :tooltip="sendBatchTooltips" />
       </q-checkbox>
     </div>
 
-    <SelectEmailBox v-model="emailInfo.ccBoxes" :emailBoxType="1" icon="settings_accessibility" label="抄送人"
-      placeholder="请选择抄送人 (可选)" class="q-mb-sm" icon-color="secondary" />
+    <SelectEmailBox v-model="emailInfo.ccBoxes" :emailBoxType="1" icon="settings_accessibility"
+      :label="translateSendingTask('ccRecipients')" :placeholder="translateSendingTask('ccRecipientsPlaceholder')"
+      class="q-mb-sm" icon-color="secondary" />
 
     <TemplateEditor class="q-pa-xs q-ma-sm" v-model="emailInfo.body" :show-title-bar="false" :height="300">
     </TemplateEditor>
 
-    <ObjectUploader v-model="emailInfo.attachments" v-model:need-upload="needUpload" label="附件" class="q-mx-sm q-mt-sm"
-      style="width:auto" multiple />
+    <ObjectUploader v-model="emailInfo.attachments" v-model:need-upload="needUpload"
+      :label="translateSendingTask('attachments')" class="q-mx-sm q-mt-sm" style="width:auto" multiple />
 
     <div class="row justify-between items-center q-ma-sm q-mt-lg">
       <CommonBtn label="" :color="proxyBtnColor" icon="public" :tooltip="proxyBtnTooltip" @click="onProxyBtnClick"
         :cache-tip="false" />
 
       <div class="row justify-end items-center">
-        <CommonBtn label="预览" color="primary" icon="view_carousel" tooltip="预览发件正文" @click="onPreviewClick" />
-        <CommonBtn label="定时" class="q-ml-sm" color="secondary" icon="schedule" tooltip="定时发件"
-          @click="onScheduleSendClick" />
-        <OkBtn label="发送" class="q-ml-sm" icon="alternate_email" tooltip="立即发件" @click="onSendNowClick" />
-        <OkBtn v-if="enableIpWarmUpBtn" label="预热" class="q-ml-sm" icon="autorenew" tooltip="IP 预热发件"
-          @click="onIpWarmUpClick" />
+        <CommonBtn :label="translateSendingTask('btn_preview')" color="primary" icon="view_carousel"
+          :tooltip="translateSendingTask('btn_previewTooltip')" @click="onPreviewClick" />
+        <CommonBtn :label="translateSendingTask('btn_schedule')" class="q-ml-sm" color="secondary" icon="schedule"
+          :tooltip="translateSendingTask('btn_scheduleTooltip')" @click="onScheduleSendClick" />
+        <OkBtn :label="translateSendingTask('btn_send')" class="q-ml-sm" icon="alternate_email"
+          :tooltip="translateSendingTask('btn_sendTooltip')" @click="onSendNowClick" />
+        <OkBtn v-if="enableIpWarmUpBtn" :label="translateSendingTask('btn_warmup')" class="q-ml-sm" icon="autorenew"
+          :tooltip="translateSendingTask('btn_warmupTooltip')" @click="onIpWarmUpClick" />
       </div>
     </div>
   </div>
@@ -58,6 +63,7 @@ import AsyncTooltip from 'components/asyncTooltip/AsyncTooltip.vue'
 import TemplateEditor from 'src/pages/sourceManager/templateManager/templateEditor.vue'
 
 import { useBottomFunctions } from './bottomFunctions'
+import { translateSendingTask } from 'src/i18n/helpers'
 
 import type { IEmailCreateInfo } from 'src/api/emailSending'
 
@@ -90,7 +96,7 @@ const {
 } = useBottomFunctions(emailInfo)
 
 // 合并发送
-const sendBatchTooltips = ['若有多个发件人,将其合并到一封邮件中发送', '启用后无法对单个发件箱进行重发', '一般不建议启用']
+const sendBatchTooltips = translateSendingTask('sendBatchTooltips')
 // 进行重置
 // inboxes 数量太少时不批量
 watch(() => emailInfo.value.inboxes, (newValue) => {

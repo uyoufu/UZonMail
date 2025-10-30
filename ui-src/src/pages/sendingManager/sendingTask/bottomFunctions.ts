@@ -4,7 +4,7 @@ import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { formatDateToUTC } from 'src/utils/format'
-import type { IEmailCreateInfo } from 'src/api/emailSending';
+import type { IEmailCreateInfo } from 'src/api/emailSending'
 import { sendEmailNow, sendSchedule } from 'src/api/emailSending'
 import { useUserInfoStore } from 'src/stores/user'
 
@@ -14,6 +14,7 @@ import SendingProgress from '../sendingProgress/SendingProgress.vue'
 import SelectScheduleDate from './components/SelectScheduleDate.vue'
 
 import logger from 'loglevel'
+import { translateSendingTask } from 'src/i18n/helpers'
 
 /**
  * 使用底部功能定义
@@ -67,17 +68,17 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
   }
   function validateParamsWhenNoExcelData () {
     if (!existGlobalBody.value) {
-      notifyError('邮件模板和正文必须有一个不为空')
+      notifyError(translateSendingTask('emailTemplateAndBodyRequired'))
       return false
     }
 
     if (!emailInfo.value.outboxes.length && !emailInfo.value.outboxGroups.length) {
-      notifyError('请选择发件人')
+      notifyError(translateSendingTask('pleaseSelectSender'))
       return false
     }
 
     if (!emailInfo.value.inboxes.length && !emailInfo.value.inboxGroups.length) {
-      notifyError('请选择收件人')
+      notifyError(translateSendingTask('pleaseSelectRecipients'))
       return false
     }
 
@@ -87,7 +88,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
   function validateSendingTaskParams () {
     logger.debug('[sendingTask] validateSendingTaskParams email info:', emailInfo.value)
     if (!emailInfo.value.subjects) {
-      notifyError('请填写邮件主题')
+      notifyError(translateSendingTask('pleaseInputEmailSubject'))
       return false
     }
 
@@ -104,7 +105,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
         emailInfo.value.inboxes.forEach(x => inboxSet.add(x.email))
         const inboxesNowCount = inboxSet.size
         if (inboxesNowCount > inboxesCount) {
-          notifySuccess('除了数据外，您选择了额外的收件箱')
+          notifySuccess(translateSendingTask('notifyExtraInboxSelected'))
           // 说明选择了额外的收件箱，还要验证非数据的情况
           if (!validateParamsWhenNoExcelData()) return false
         }
@@ -113,25 +114,25 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
       // 验证其它情况
       const { inboxStatus, outboxStatus, bodyStatus } = vdDataResult
       if (inboxStatus !== 2) {
-        notifyError('请保证每条数据都有 inbox (收件人邮箱)')
+        notifyError(translateSendingTask('pleaseEnsureEachDataHasInbox'))
         return false
       }
 
       if (emailInfo.value.outboxes.length === 0 && emailInfo.value.outboxGroups.length == 0 && outboxStatus < 2) {
         // 没有发件
-        notifyError('数据中发件箱缺失，请在数据中指定发件箱或选择发件箱')
+        notifyError(translateSendingTask('outboxMissingInData'))
         return false
       }
 
       if (!existGlobalBody.value && bodyStatus < 2) {
         // 没有发件
-        notifyError('数据中正文缺失，请在数据中指定邮件正文 或 选择模板 或 填写正文')
+        notifyError(translateSendingTask('bodyMissingInData'))
         return false
       }
     }
 
     if (needUpload.value) {
-      notifyError('请单击附件上传按钮上传附件')
+      notifyError(translateSendingTask('pleaseUploadAttachments'))
       return false
     }
     return true
@@ -142,10 +143,10 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
     if (!validateSendingTaskParams()) return
     // console.log('email info:', emailInfo.value)
     // 将数据传到后台发送
-    notifySuccess('开始发送...')
+    notifySuccess(translateSendingTask('sendingStarted'))
 
     await showComponentDialog(SendingProgress, {
-      title: '发送进度',
+      title: translateSendingTask('sendingProgress'),
       sendingApi: async () => {
         return await sendEmailNow(Object.assign({ smtpPasswordSecretKeys: userInfoStore.smtpPasswordSecretKeys }, emailInfo.value))
       }
@@ -166,7 +167,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
       scheduleDate: formatDateToUTC(scheduleDate) // 转换成带时区的字符串
     }))
 
-    notifySuccess('定时发送已预约')
+    notifySuccess(translateSendingTask('scheduledSendingBooked'))
   }
 
   // 预览

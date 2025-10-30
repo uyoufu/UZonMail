@@ -10,6 +10,7 @@
 
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
+import { translateButton } from 'src/i18n/helpers'
 
 defineProps({
   color: {
@@ -22,11 +23,11 @@ defineProps({
   },
   label: {
     type: String,
-    default: '确认'
+    default: translateButton('confirm')
   },
   tooltip: {
     type: String,
-    default: '确认操作'
+    default: translateButton('confirmCurrentOperation')
   },
   size: {
     type: String,

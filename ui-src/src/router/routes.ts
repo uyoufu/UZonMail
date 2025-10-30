@@ -1,4 +1,5 @@
 import type { ExtendedRouteRecordRaw } from './types'
+
 const NormalLayout = () => import('../layouts/normalLayout/normalLayout.vue')
 const SinglePageLayout = () => import('../layouts/singlePageLayout/singlePageLayout.vue')
 
@@ -15,7 +16,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/',
     component: NormalLayout,
     meta: {
-      label: '首页',
+      label: 'dashboard', // '首页',
       icon: 'home',
       // 不缓存
       noCache: false
@@ -27,7 +28,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         name: 'IndexPage',
         path: 'index',
         meta: {
-          label: '首页',
+          label: 'dashboard',
           icon: 'home'
         },
         component: () => import('pages/dashboard/DashboardIndex.vue')
@@ -39,7 +40,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/user',
     component: NormalLayout,
     meta: {
-      label: '用户信息',
+      label: 'userInfo',
       icon: 'person',
       noTag: true,
       noMenu: true
@@ -51,7 +52,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'profile',
         meta: {
           icon: 'menu',
-          label: '个人资料'
+          label: 'profile'
         },
         component: () => import('pages/user/profileIndex.vue')
       }
@@ -62,7 +63,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/email-management',
     component: NormalLayout,
     meta: {
-      label: '邮箱管理',
+      label: 'emailManagement',
       icon: 'alternate_email'
     },
     redirect: '/email-manager/out-box',
@@ -72,7 +73,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'out-box',
         meta: {
           icon: 'forward_to_inbox',
-          label: '发件箱'
+          label: 'outbox'
         },
         component: () => import('pages/emailManager/outbox/outboxManager.vue')
       },
@@ -81,7 +82,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'in-box',
         meta: {
           icon: 'mark_email_unread',
-          label: '收件箱'
+          label: 'inbox'
         },
         component: () => import('pages/emailManager/inbox/inboxManager.vue')
       }
@@ -92,7 +93,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/template',
     component: NormalLayout,
     meta: {
-      label: '模板数据',
+      label: 'templateData',
       icon: 'article'
     },
     redirect: '/template-manage/index',
@@ -102,7 +103,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'index',
         meta: {
           icon: 'chrome_reader_mode',
-          label: '模板管理',
+          label: 'templateManagement',
           noCache: true
         },
         component: () => import('pages/sourceManager/templateManager/emailTemplates.vue')
@@ -112,7 +113,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'variable',
         meta: {
           icon: 'data_object',
-          label: '变量管理',
+          label: 'variableManagement',
           noCache: true,
           access: ['professional']
         },
@@ -123,7 +124,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'editor',
         meta: {
           icon: 'article',
-          label: '模板编辑',
+          label: 'templateEditor',
           noMenu: true
         },
         component: () => import('pages/sourceManager/templateManager/templateEditor.vue')
@@ -135,7 +136,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/send-management',
     component: NormalLayout,
     meta: {
-      label: '发件管理',
+      label: 'sendingManagement',
       icon: 'send'
     },
     redirect: '/send-management/new-task',
@@ -145,7 +146,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'new-task',
         meta: {
           icon: 'add_box',
-          label: '新建发件'
+          label: 'newSending'
         },
         component: () => import('pages/sendingManager/sendingTask/sendingTask.vue')
       },
@@ -154,7 +155,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'ip-warm-up-manager',
         meta: {
           icon: 'autorenew',
-          label: 'IP 预热',
+          label: 'ipWarmUp',
           noCache: true,
           access: ['professional'],
         },
@@ -165,7 +166,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'history',
         meta: {
           icon: 'schedule_send',
-          label: '历史发件'
+          label: 'sendHistory'
         },
         component: () => import('pages/sendingManager/sendHistory/sendHistory.vue')
       },
@@ -175,7 +176,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         meta: {
           noMenu: true,
           icon: 'schedule_send',
-          label: '发件明细'
+          label: 'sendDetail'
         },
         component: () => import('pages/sendingManager/sendHistory/SendDetailTable.vue')
       },
@@ -184,7 +185,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'attachment-manager',
         meta: {
           icon: 'cloud_upload',
-          label: '附件管理'
+          label: 'attachmentManagement',
         },
         component: () => import('pages/sendingManager/fileManager/AttachmentManager.vue')
       },
@@ -195,7 +196,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/sending-statistics',
     component: NormalLayout,
     meta: {
-      label: '统计报表',
+      label: 'statisticsReport',
       icon: 'analytics',
       access: ['enterprise']
     },
@@ -206,7 +207,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'anchor-report',
         meta: {
           icon: 'mark_email_read',
-          label: '阅读统计'
+          label: 'readStatistics'
         },
         component: () => import('pages/statisticsReport/EmailAnchor.vue')
       },
@@ -215,7 +216,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'unsubscribe-report',
         meta: {
           icon: 'unsubscribe',
-          label: '退订统计'
+          label: 'unsubscribeStatistics'
         },
         component: () => import('pages/statisticsReport/UnsubscribeReport.vue')
       }
@@ -226,7 +227,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/email-crawler',
     component: NormalLayout,
     meta: {
-      label: '邮件爬虫',
+      label: 'emailCrawler',
       icon: 'bug_report',
       access: ['enterprise']
     },
@@ -237,7 +238,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'tiktok-device',
         meta: {
           icon: 'devices',
-          label: 'TikTok设备'
+          label: 'tiktokDevice'
         },
         component: () => import('pages/emailCrawler/tikTokDevice/TikTokDeviceManager.vue')
       },
@@ -246,7 +247,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'task',
         meta: {
           icon: 'flag',
-          label: '爬虫任务'
+          label: 'crawlerTask'
         },
         component: () => import('pages/emailCrawler/crawlerTask/CrawlerTask.vue')
       },
@@ -255,7 +256,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'tasks/:id',
         meta: {
           icon: 'contact_mail',
-          label: '爬取结果',
+          label: 'crawlerResult',
           noMenu: true
         },
         component: () => import('pages/emailCrawler/crawlerResult/CrawlerResult.vue')
@@ -267,7 +268,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/system',
     component: NormalLayout,
     meta: {
-      label: '系统设置',
+      label: 'systemSettings',
       icon: 'settings_suggest'
     },
     redirect: '/system/user-manager',
@@ -277,7 +278,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'basic-setting',
         meta: {
           icon: 'tune',
-          label: '基础设置',
+          label: 'basicSettings',
           access: ['organizationAdmin']
         },
         component: () => import('pages/systemSetting/basicSetting/BasicSettings.vue')
@@ -287,7 +288,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'proxy',
         meta: {
           icon: 'public',
-          label: '代理管理'
+          label: 'proxyManagement',
         },
         component: () => import('pages/systemSetting/proxyManager/ProxyManager.vue')
       },
@@ -296,7 +297,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'user-manager',
         meta: {
           icon: 'manage_accounts',
-          label: '用户管理',
+          label: 'userManagement',
           access: ['admin', 'professional']
         },
         component: () => import('pages/systemSetting/userManager/UserManager.vue')
@@ -306,7 +307,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'permission',
         meta: {
           icon: 'badge',
-          label: '权限管理',
+          label: 'permissionManagement',
           access: ['admin', 'enterprise']
         },
         redirect: '/system/permission/code',
@@ -316,7 +317,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
             path: 'code',
             meta: {
               icon: 'fingerprint',
-              label: '功能管理'
+              label: 'functionManagement'
             },
             component: () => import('pages/systemSetting/permission/functionManager/PermissionCode.vue')
           },
@@ -325,7 +326,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
             path: 'role',
             meta: {
               icon: 'emoji_people',
-              label: '角色管理'
+              label: 'roleManagement'
             },
             component: () => import('pages/systemSetting/permission/roleManager/RoleManager.vue')
           },
@@ -334,7 +335,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
             path: 'user-role',
             meta: {
               icon: 'supervised_user_circle',
-              label: '用户角色'
+              label: 'userRole'
             },
             component: () => import('pages/systemSetting/permission/userRoleManager/UserRole.vue')
           }
@@ -345,7 +346,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'api-access',
         meta: {
           icon: 'key',
-          label: 'API 授权',
+          label: 'apiAccess',
           access: ['admin', 'enterprise']
         },
         component: () => import('pages/systemSetting/apiAccess/ApiAccess.vue')
@@ -355,7 +356,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'license',
         meta: {
           icon: 'emoji_events',
-          label: '软件许可',
+          label: 'softwareLicense',
           access: ['admin'],
           denies: ['noProPlugin'],
           noTag: true
@@ -369,7 +370,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/sponsor',
     component: NormalLayout,
     meta: {
-      label: '支持作者',
+      label: 'sponsorAuthor',
       icon: 'thumb_up',
       denies: ['professional', 'enterprise']
     },
@@ -380,7 +381,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'author',
         meta: {
           icon: 'thumb_up',
-          label: '支持作者',
+          label: 'sponsorAuthor',
           noTag: true
         },
         component: () => import('pages/sponsor/sponsorAuthor.vue')
@@ -392,7 +393,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     path: '/help',
     component: NormalLayout,
     meta: {
-      label: '帮助文档',
+      label: 'helpDoc',
       icon: 'settings_suggest'
     },
     redirect: '/help/start-guide',
@@ -403,7 +404,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         component: () => import('pages/help/StartGuide.vue'),
         meta: {
           icon: 'tips_and_updates',
-          label: '使用说明',
+          label: 'startGuide',
           noTag: true
         }
       }
@@ -418,7 +419,7 @@ export const constantRoutes: ExtendedRouteRecordRaw[] = [
     path: '/login',
     component: () => import('src/pages/login/loginIndex.vue'),
     meta: {
-      label: '用户登录',
+      label: 'login',
       icon: 'login',
       noMenu: true, // 在菜单中隐藏
       noTag: true // 在标签中隐藏
@@ -429,7 +430,7 @@ export const constantRoutes: ExtendedRouteRecordRaw[] = [
     path: '/pages',
     component: SinglePageLayout,
     meta: {
-      label: '单页面',
+      label: 'singlePages',
       icon: 'view_carousel',
       noMenu: true,
       noTag: true
@@ -440,7 +441,7 @@ export const constantRoutes: ExtendedRouteRecordRaw[] = [
         path: 'unsubscribe/pls-give-me-a-shot',
         component: () => import('src/pages/unsubscribe/UnsubscribePage.vue'),
         meta: {
-          label: 'Unsubscribe',
+          label: 'unsubscribe',
           icon: 'unsubscribe',
           noMenu: true,
           noTag: true,
@@ -461,7 +462,7 @@ export const exceptionRoutes: ExtendedRouteRecordRaw[] = [
     name: 'exception',
     path: '/:catchAll(.*)*',
     meta: {
-      label: '异常',
+      label: 'exception',
       icon: 'error',
       noMenu: true, // 在菜单中隐藏
       noTag: true // 在标签中隐藏

@@ -8,13 +8,14 @@
       @request="onTableRequest">
       <template v-slot:top-left>
         <div class="row justify-start q-gutter-sm">
-          <CreateBtn tooltip="新增收件箱" @click="onNewInboxClick" :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组" />
-          <ExportBtn label="" tooltip="导出收件箱模板" @click="onExportInboxTemplateClick" />
-          <ImportBtn label="" tooltip="导入收件箱" @click="onImportInboxClick()" :disable="!isValidEmailGroup"
-            tooltip-when-disabled="请先添加组" />
+          <CreateBtn :tooltip="translateInboxManager('newInbox')" @click="onNewInboxClick" :disable="!isValidEmailGroup"
+            :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
+          <ExportBtn label="" :tooltip="translateInboxManager('exportInboxTemplate')"
+            @click="onExportInboxTemplateClick" />
+          <ImportBtn label="" :tooltip="translateInboxManager('importInbox')" @click="onImportInboxClick()"
+            :disable="!isValidEmailGroup" :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
           <ImportBtn label="" icon="description" :tooltip="importFromTxtTooltip" @click="onImportInboxFromTxt()"
-            :disable="!isValidEmailGroup" tooltip-when-disabled="请先添加组" />
+            :disable="!isValidEmailGroup" :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
         </div>
       </template>
 
@@ -39,6 +40,8 @@
 </template>
 
 <script lang="ts" setup>
+import { translateInboxManager } from 'src/i18n/helpers'
+
 import type { QTableColumn } from 'quasar'
 import { QTable } from 'quasar'
 import { formatDate } from 'src/utils/format'
@@ -56,7 +59,6 @@ import { getInboxesCount, getInboxesData } from 'src/api/emailBox'
 import type { IEmailGroupListItem } from '../components/types'
 
 // 左侧分组开关
-// 左侧分组开关
 import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
 const inboxTableRef = ref<InstanceType<typeof QTable> | undefined>()
 const { CollapseLeft, collapseStyleRef, isCollapseGroupList } = useTableCollapseLeft(inboxTableRef)
@@ -71,45 +73,45 @@ const emailGroupRef: Ref<IEmailGroupListItem> = ref({
 })
 const isValidEmailGroup = computed(() => emailGroupRef.value.id)
 
-const columns: QTableColumn[] = [
+const columns: ComputedRef<QTableColumn[]> = computed(() => [
   indexColumn,
   {
     name: 'email',
-    label: '邮箱',
+    label: translateInboxManager('col_email'),
     align: 'left',
     field: 'email',
     sortable: true
   },
   {
     name: 'name',
-    label: '名称(收件人姓名)',
+    label: translateInboxManager('col_name'),
     align: 'left',
     field: 'name',
     sortable: true
   },
   {
     name: 'description',
-    label: '描述',
+    label: translateInboxManager('col_description'),
     align: 'left',
     field: 'description',
     sortable: true
   },
   {
     name: 'minInboxCooldownHours',
-    label: '最小收件间隔(h)',
+    label: translateInboxManager('col_minInboxCooldownHours'),
     align: 'left',
     field: 'minInboxCooldownHours',
     sortable: true
   },
   {
     name: 'lastSuccessDeliveryDate',
-    label: '最近发件日期',
+    label: translateInboxManager('col_lastSuccessDeliveryDate'),
     align: 'left',
     field: 'lastSuccessDeliveryDate',
     format: (v) => formatDate(v),
     sortable: true
   }
-]
+])
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getInboxesCount(emailGroupRef.value.id, filterObj.filter)
   return data
@@ -120,7 +122,6 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 }
 const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById } = useQTable({
   getRowsNumberCount,
-
   onRequest
 })
 watch(emailGroupRef, () => {
@@ -144,14 +145,14 @@ import { notifyError } from 'src/utils/dialog'
 const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
   {
     name: 'import',
-    label: '导入',
-    tooltip: '向当前组中导入收件箱',
+    label: translateInboxManager('ctx_import'),
+    tooltip: translateInboxManager('ctx_importInboxToCurrentGroup'),
     onClick: (value) => onImportInboxClick(value.id)
   },
   {
     name: 'export',
-    label: '导出',
-    tooltip: '导出当前组中的收件箱',
+    label: translateInboxManager('ctx_export'),
+    tooltip: translateInboxManager('ctx_exportInboxToCurrentGroup'),
     onClick: exportAllInboxesInThisGroup
   }
 ])
@@ -163,7 +164,7 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
   // 获取所有的收件箱
   const { data: count } = await getInboxesCount(group.id, '')
   if (!count) {
-    notifyError('没有可导出项')
+    notifyError(translateInboxManager('noInboxesInThisGroupForExporting'))
     return
   }
   const { data: dataRows } = await getInboxesData(group.id, '', {
@@ -173,7 +174,7 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
     limit: count
   })
   await writeExcel(dataRows, {
-    fileName: `${group.name}-收件箱.xlsx`,
+    fileName: `${group.name}-${translateInboxManager('inbox')}.xlsx`,
     sheetName: group.name,
     mappers: getInboxExcelDataMapper(),
     strict: true

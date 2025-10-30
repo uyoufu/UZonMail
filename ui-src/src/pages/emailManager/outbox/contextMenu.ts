@@ -8,12 +8,14 @@ import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getOutboxFields } from './headerFunctions'
 import { useUserInfoStore } from 'src/stores/user'
+
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 import { deAes } from 'src/utils/encrypt'
 
 import type { getSelectedRowsType } from 'src/compositions/qTableUtils'
 
-import { useI18n } from 'vue-i18n'
+import { translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
+
 import logger from 'loglevel'
 
 import { tryOutlookDelegateAuthorization, isExchangeOutbox } from './headerFunctions'
@@ -29,49 +31,48 @@ function getSmtpPassword (outbox: IOutbox, smtpPasswordSecretKeys: string[]) {
 }
 
 export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType, refreshTable: () => void) {
-  const { t } = useI18n()
-
-  const outboxContextMenuItems: IContextMenuItem<IOutbox>[] = [
-    {
-      name: 'edit',
-      label: t('edit'),
-      tooltip: t('outboxManager.editCurrentOutbox'),
-      onClick: onUpdateOutbox
-    },
-    {
-      name: 'delete',
-      label: t('delete'),
-      tooltip: t('outboxManager.deleteCurrentOrSelection'),
-      color: 'negative',
-      onClick: onDeleteOutbox
-    },
-    {
-      name: 'validate',
-      label: t('outboxManager.validate'),
-      tooltip: t('outboxManager.sendTestToMe'),
-      onClick: onValidateOutbox
-    },
-    {
-      name: 'validateBatch',
-      label: t('outboxManager.validateBatch'),
-      tooltip: t('outboxManager.validateAllUnverifiedInGroup'),
-      onClick: onValidateOutboxBatch
-    },
-    {
-      name: 'deleteInvalid',
-      label: t('outboxManager.deleteInvalid'),
-      tooltip: t('outboxManager.deleteCurrentGroupInvalidOutboxes'),
-      color: 'negative',
-      onClick: onDeleteInvalidOutboxes
-    },
-    {
-      name: 'outlookDelegateAuthorization',
-      label: t('outboxManager.outlookDelegateAuthorization'),
-      tooltip: t('outboxManager.outlookDelegateAuthorization'),
-      onClick: onRequestOutlookDelegateAuthorization,
-      vif: row => isExchangeOutbox(row.smtpHost, row.email)
-    },
-  ]
+  const outboxContextMenuItems: Ref<IContextMenuItem<IOutbox>[]> = computed(() =>
+    [
+      {
+        name: 'edit',
+        label: translateGlobal('edit'),
+        tooltip: translateOutboxManager('editCurrentOutbox'),
+        onClick: onUpdateOutbox
+      },
+      {
+        name: 'delete',
+        label: translateGlobal('delete'),
+        tooltip: translateOutboxManager('deleteCurrentOrSelection'),
+        color: 'negative',
+        onClick: onDeleteOutbox
+      },
+      {
+        name: 'validate',
+        label: translateGlobal('validate'),
+        tooltip: translateOutboxManager('sendTestToMe'),
+        onClick: onValidateOutbox
+      },
+      {
+        name: 'validateBatch',
+        label: translateOutboxManager('validateBatch'),
+        tooltip: translateOutboxManager('validateAllUnverifiedInGroup'),
+        onClick: onValidateOutboxBatch
+      },
+      {
+        name: 'deleteInvalid',
+        label: translateOutboxManager('deleteInvalid'),
+        tooltip: translateOutboxManager('deleteCurrentGroupInvalidOutboxes'),
+        color: 'negative',
+        onClick: onDeleteInvalidOutboxes
+      },
+      {
+        name: 'outlookDelegateAuthorization',
+        label: translateOutboxManager('outlookDelegateAuthorization'),
+        tooltip: translateOutboxManager('outlookDelegateAuthorization'),
+        onClick: onRequestOutlookDelegateAuthorization,
+        vif: row => isExchangeOutbox(row.smtpHost, row.email)
+      },
+    ])
 
   const userInfoStore = useUserInfoStore()
 
@@ -81,10 +82,16 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
     // 提示是否删除
     if (rows.length === 1) {
-      const confirm = await confirmOperation(t('outboxManager.deleteOutbox'), t('outboxManager.isDeleteCurrentOutbox', { message: rows[0]!.email }))
+      const confirm = await confirmOperation(
+        translateOutboxManager('deleteOutbox'),
+        translateOutboxManager('isDeleteCurrentOutbox',
+          { message: rows[0]!.email }))
       if (!confirm) return
     } else {
-      const confirm = await confirmOperation(t('outboxManager.deleteOutbox'), t('outboxManager.isDeleteSelectedOutboxes', { count: rows.length }))
+      const confirm = await confirmOperation(
+        translateOutboxManager('deleteOutbox'),
+        translateOutboxManager('isDeleteSelectedOutboxes',
+          { count: rows.length }))
       if (!confirm) return
     }
 
@@ -96,7 +103,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       deleteRowById(row.id)
     })
     selectedRows.value = []
-    notifySuccess(t('outboxManager.deleteSuccess', { count: rows.length }))
+    notifySuccess(translateOutboxManager('deleteSuccess', { count: rows.length }))
   }
 
   /**
@@ -156,7 +163,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
-      title: `修改发件箱 / ${outbox.email}`,
+      title: translateOutboxManager('modifyOutboxTitle', { email: outbox.email }),
       fields
     }
 
@@ -171,7 +178,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     // 将参数更新到 outbox 中
     Object.assign(outbox, data, { decryptedPassword: false, showPassword: false })
 
-    notifySuccess('更新成功')
+    notifySuccess(translateGlobal('updateSuccess'))
 
     // 尝试进行 outlook 委托授权
     await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
@@ -181,13 +188,13 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     const outbox = row as IOutbox
     const result = await notifyUntil(async () => {
       return await validateOutbox(outbox.id as number, userInfoStore.smtpPasswordSecretKeys)
-    }, `验证 ${row.email}`, '正在验证中...')
+    }, translateOutboxManager('validatingEmail', { email: row.email }), translateOutboxManager('validating'))
     if (!result) return
     const { data, message } = result
 
     if (data) {
       // 验证成功
-      notifySuccess('验证成功')
+      notifySuccess(translateOutboxManager('validationSuccessful'))
       // 更新状态
       row.isValid = true
       row.status = OutboxStatus.Valid
@@ -195,7 +202,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       return
     }
 
-    const fullMessage = `验证失败: ${message}`
+    const fullMessage = translateOutboxManager('validateFailed', { email: outbox.email, reason: message })
     logger.error(fullMessage)
 
     // 验证失败
@@ -207,15 +214,15 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
   }
 
   async function onValidateOutboxBatch (row: Record<string, any>) {
-    const confirm = await confirmOperation(t('confirmOperation'), t('outboxManager.isConfirmValidateBatch'))
+    const confirm = await confirmOperation(translateGlobal('confirmOperation'), translateOutboxManager('isConfirmValidateBatch'))
     if (!confirm) return
 
     await notifyUntil(async () => {
       // 向后端进行批量验证，通过 websocket 更新进度信息
       return await validateAllInvalidOutboxes(row.emailGroupId as number, userInfoStore.smtpPasswordSecretKeys)
-    }, t('outboxManager.validateBatch'), t('outboxManager.validating'))
+    }, translateOutboxManager('validateBatch'), translateOutboxManager('validating'))
 
-    notifySuccess(t('outboxManager.validateBatchSuccess'))
+    notifySuccess(translateOutboxManager('validateBatchSuccess'))
 
     // 重新刷新
     refreshTable()
@@ -223,14 +230,14 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
 
   async function onDeleteInvalidOutboxes (row: Record<string, any>) {
-    const confirm = await confirmOperation(t('deleteConfirm'), t('outboxManager.doDeleteAllInvalidOutboxes'))
+    const confirm = await confirmOperation(translateGlobal('deleteConfirmation'), translateOutboxManager('doDeleteAllInvalidOutboxes'))
     if (!confirm) return
 
     // 请求删除
     const outbox = row as IOutbox
     await deleteAllInvalidoutboxesInGroup(outbox.emailGroupId as number)
     // 删除成功
-    notifySuccess(t('deleteSuccess'))
+    notifySuccess(translateGlobal('deleteSuccess'))
 
     // 重新刷新
     refreshTable()

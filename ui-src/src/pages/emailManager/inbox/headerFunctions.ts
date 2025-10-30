@@ -1,42 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types';
+import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { addNewRowType } from 'src/compositions/qTableUtils'
 
-import type { IInbox } from 'src/api/emailBox';
+import type { IInbox } from 'src/api/emailBox'
 import { createInbox, createInboxes } from 'src/api/emailBox'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
-import type { IExcelColumnMapper } from 'src/utils/file';
+import type { IExcelColumnMapper } from 'src/utils/file'
 import { readExcel, writeExcel } from 'src/utils/file'
 import { isEmail } from 'src/utils/validator'
 import logger from 'loglevel'
+
+import { translateInboxManager, translateGlobal } from 'src/i18n/helpers'
 
 export function getInboxFields () {
   return [
     {
       name: 'email',
       type: PopupDialogFieldType.email,
-      label: '邮箱',
+      label: translateInboxManager('col_email'),
       value: '',
       required: true
     },
     {
       name: 'name',
       type: PopupDialogFieldType.text,
-      label: '收件人名称'
+      label: translateInboxManager('col_name'),
     },
     {
       name: 'minInboxCooldownHours',
       type: PopupDialogFieldType.number,
-      label: '最小收件间隔(小时)',
+      label: translateInboxManager('col_minInboxCooldownHours'),
       value: 0
     },
     {
       name: 'description',
-      label: '描述'
+      label: translateInboxManager('col_description'),
     }
   ]
 }
@@ -44,20 +46,20 @@ export function getInboxFields () {
 export function getInboxExcelDataMapper (): IExcelColumnMapper[] {
   return [
     {
-      headerName: '邮箱',
+      headerName: translateInboxManager('col_email'),
       fieldName: 'email',
       required: true
     },
     {
-      headerName: '收件人名称',
+      headerName: translateInboxManager('col_name'),
       fieldName: 'name'
     },
     {
-      headerName: '最小收件间隔(小时)',
+      headerName: translateInboxManager('col_minInboxCooldownHours'),
       fieldName: 'minInboxCooldownHours'
     },
     {
-      headerName: '描述',
+      headerName: translateInboxManager('col_description'),
       fieldName: 'description'
     }
   ]
@@ -71,7 +73,7 @@ export function getInboxExcelDataMapper (): IExcelColumnMapper[] {
 export async function showNewInboxDialog (emailGroupLabel: string) {
   // 新增发件箱
   const popupParams: IPopupDialogParams = {
-    title: `新增收件箱 / ${emailGroupLabel}`,
+    title: `${translateInboxManager('newInbox')} / ${emailGroupLabel}`,
     fields: getInboxFields()
   }
 
@@ -94,26 +96,26 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
     // 保存到 rows 中
     addNewRow(inbox)
 
-    notifySuccess('新增收件箱成功')
+    notifySuccess(translateInboxManager('newInboxSuccess'))
   }
 
   // 导出模板
   async function onExportInboxTemplateClick () {
     const data: any[] = [
       {
-        name: '收件人名称',
-        email: '邮箱(导入时，请删除该行数据)',
-        minInboxCooldownHours: '最小收件间隔(小时)',
-        description: ''
+        name: translateInboxManager('col_name'),
+        email: translateInboxManager('export_EmailColumnTooltip'),
+        minInboxCooldownHours: translateInboxManager('col_minInboxCooldownHours'),
+        description: translateInboxManager('col_description')
       }
     ]
     await writeExcel(data, {
-      fileName: '收件箱模板.xlsx',
-      sheetName: '收件箱',
+      fileName: `${translateInboxManager('inboxTemplate')}.xlsx`,
+      sheetName: translateInboxManager('inbox'),
       mappers: getInboxExcelDataMapper()
     })
 
-    notifySuccess('模板下载成功')
+    notifySuccess(translateInboxManager('templateDonwloadSuccess'))
   }
 
   // 导入收件箱
@@ -128,7 +130,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
     })
 
     if (data.length === 0) {
-      notifyError('未找到可导入的数据')
+      notifyError(translateInboxManager('availableImportDataNotFound'))
       return
     }
 
@@ -136,13 +138,15 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
     // 添加组id
     for (const [index, row] of data.entries()) {
       if (!row.email) {
-        logger.info(`第 ${index + 1} 行数据邮箱为空`)
+        logger.info(translateInboxManager('emptyDataAtRow', {
+          row: index + 1
+        }))
         continue
       }
 
       // 验证 email 格式
       if (!isEmail(row.email)) {
-        notifyError(`邮箱格式错误: ${row.email}`)
+        notifyError(translateInboxManager('emailFormatInvalid', { email: row.email }))
         continue
       }
 
@@ -152,15 +156,17 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
     }
 
     if (validRows.length === 0) {
-      notifyError('没有有效的收件箱数据,请核查表头是否正确')
+      notifyError(translateInboxManager('noValidImportData'))
       return
     }
 
     // 判断是否数据相等
     if (validRows.length < data.length) {
-      const continueImport = await confirmOperation('数据异常确认', '部分数据格式错误，是否继续导入？')
+      const continueImport = await confirmOperation(
+        translateGlobal('warning'),
+        translateInboxManager('confirmImportWithErrors'))
       if (!continueImport) {
-        notifyError('导入已取消')
+        notifyError(translateInboxManager('importCancelled'))
         return
       }
     }
@@ -169,7 +175,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
     await notifyUntil(async (update) => {
       // 对数据分批处理
       for (let i = 0; i < validRows.length; i += 100) {
-        update(`导入中... [${i}/${validRows.length}]`)
+        update(`${translateGlobal('importing')}... [${i}/${validRows.length}]`)
         const partData = validRows.slice(i, i + 100)
         const { data: inboxes } = await createInboxes(partData)
 
@@ -179,9 +185,9 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
           })
         }
       }
-    }, '导入收件箱', '正在导入中...')
+    }, translateInboxManager('importInbox'), translateGlobal('importing'))
 
-    notifySuccess('导入成功')
+    notifySuccess(translateInboxManager('importInboxSuccess'))
   }
 
   return {
