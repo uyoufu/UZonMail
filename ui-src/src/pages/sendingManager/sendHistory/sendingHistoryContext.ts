@@ -146,7 +146,7 @@ export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowB
 
   async function onNewSendingTaskWithTemplate (data: ISendingGroupHistory) {
     await router.push({
-      name: 'sendingTask',
+      name: 'SendingTask',
       query: {
         sendingGroupTemplateId: data.objectId
       }
