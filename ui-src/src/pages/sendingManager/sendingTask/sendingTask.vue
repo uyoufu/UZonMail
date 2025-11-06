@@ -1,6 +1,6 @@
 <template>
   <div class="card-like column q-pa-md hover-scroll no-wrap">
-    <q-input v-model="emailInfo.subjects" autogrow label="主题" dense
+    <q-input v-model="emailInfo.subjects" autogrow :label="translateSendingTask('subject')" dense
       :placeholder="translateSendingTask('subjectPlaceholder')" class="email-subject q-mb-sm" style="max-height:200px">
       <template v-slot:before>
         <q-icon name="subject" color="primary" />

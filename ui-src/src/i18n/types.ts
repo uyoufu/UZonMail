@@ -24,3 +24,5 @@ export type EmailGroupLangKey = keyof typeof LocaleLang.emailGroup
 export type GlobalLangKey = keyof typeof LocaleLang.global
 
 export type SendingTaskLangKey = keyof typeof LocaleLang.sendingTask
+
+export type UtilsLangKey = keyof typeof LocaleLang.utils

@@ -52,6 +52,14 @@ export default {
 
   // #endregion
 
+  // #region utils
+  utils: {
+    // `... 等共 ${labels.length} ${unit}`
+    totalItems: '... 等共 {count} {unit}',
+    item: '项',
+  },
+  // #endregion
+
   // #region 路由
   routes: {
     dashboard: '首页',
@@ -306,6 +314,12 @@ export default {
 
   // #region 发件任务
   sendingTask: {
+    subject: '主题',
+    template: '模板',
+    // 选择模板
+    selectTemplateTooltip: '请选择模板 (模板与正文需至少有一个不为空)',
+    templateUnit: '个模板',
+
     subjectPlaceholder: '请输入邮件主题(若需要随机主题，多个主题之间请使用分号 ; 进行分隔或者单独一行)',
     sender: '发件人',
     senderPlaceholder: '请选择发件箱或者发件组 (必须)',

@@ -1,6 +1,6 @@
 <template>
-  <q-field v-model="fieldModelValue" tag="div" label="模板" dense @focus="isActive = true" @blur="isActive = false"
-    @dbclick="onSelectEmailTemplates">
+  <q-field v-model="fieldModelValue" tag="div" :label="translateSendingTask('template')" dense @focus="isActive = true"
+    @blur="isActive = false" @dbclick="onSelectEmailTemplates">
     <template v-slot:before>
       <q-icon name="article" color="secondary" />
     </template>
@@ -15,7 +15,7 @@
       <div class="row justify-end">
         <q-btn round dense flat icon="add" class="q-ml-sm" @click.stop="onSelectEmailTemplates" color="grey-7">
           <q-tooltip>
-            选择模板
+            {{ translateSendingTask('selectTemplateTooltip') }}
           </q-tooltip>
         </q-btn>
       </div>
@@ -35,10 +35,11 @@ import { createAbstractLabel } from 'src/utils/labelHelper'
 // placeholder 显示
 import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
 import { useCustomQField } from '../helper'
-const { isActive, fieldModelValue, fieldText } = useCustomQField('请选择模板 (模板与正文需至少有一个不为空)')
+const { isActive, fieldModelValue, fieldText } = useCustomQField(translateSendingTask('selectTemplateTooltip'))
 
 // 选择模板
 import SelectEmailTemplateDialog from './SelectEmailTemplateDialog.vue'
+import { translateSendingTask } from 'src/i18n/helpers'
 
 async function onSelectEmailTemplates () {
   const { ok, data: templates } = await showComponentDialog<IEmailTemplate[]>(SelectEmailTemplateDialog, {
@@ -48,7 +49,7 @@ async function onSelectEmailTemplates () {
 
   // 更新选择的数据
   modelValue.value = templates
-  const label = createAbstractLabel(templates.map(item => item.name), 5, '个模板')
+  const label = createAbstractLabel(templates.map(item => item.name), 5, translateSendingTask('templateUnit'))
   fieldModelValue.value = label
 }
 </script>

@@ -9,7 +9,8 @@ import type {
   EmailGroupLangKey,
   GlobalLangKey,
   outboxManagerLangKey,
-  SendingTaskLangKey
+  SendingTaskLangKey,
+  UtilsLangKey
 } from './types'
 
 import { i18n } from 'src/boot/i18n'
@@ -77,5 +78,9 @@ export function translateGlobal (key: GlobalLangKey, named?: NamedValue): string
 
 export function translateSendingTask (key: SendingTaskLangKey, named?: NamedValue): string {
   return translateSub<SendingTaskLangKey>(key, 'sendingTask', named)
+}
+
+export function translateUtils (key: UtilsLangKey, named?: NamedValue): string {
+  return translateSub<UtilsLangKey>(key, 'utils', named)
 }
 

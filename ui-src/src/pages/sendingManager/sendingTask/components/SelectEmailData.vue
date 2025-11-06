@@ -47,7 +47,7 @@ const modelValue = defineModel({
 })
 
 // 选择模板数据
-import type { IExcelColumnMapper } from 'src/utils/file';
+import type { IExcelColumnMapper } from 'src/utils/file'
 import { readExcelCore, writeExcel } from 'src/utils/file'
 async function onSelectExcel () {
   const { files, sheetName, data } = await readExcelCore({
