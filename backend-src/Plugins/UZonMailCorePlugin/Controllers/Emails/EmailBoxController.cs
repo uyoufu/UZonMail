@@ -20,8 +20,14 @@ namespace UZonMail.Core.Controllers.Emails
     /// <summary>
     /// 邮箱
     /// </summary>
-    public class EmailBoxController(SqlContext db, TokenService tokenService, UserService userService,
-        EmailGroupService emailGroupService, OutboxValidateService emailUtils, EncryptService encryptService) : ControllerBaseV1
+    public class EmailBoxController(
+        SqlContext db,
+        TokenService tokenService,
+        UserService userService,
+        EmailGroupService emailGroupService,
+        OutboxValidateService emailUtils,
+        EncryptService encryptService
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 创建发件箱
@@ -39,11 +45,14 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             // 设置默认端口
-            if (entity.SmtpPort == 0) entity.SmtpPort = 25; // 默认端口
+            if (entity.SmtpPort == 0)
+                entity.SmtpPort = 25; // 默认端口
 
             var userId = tokenService.GetUserSqlId();
             // 验证发件箱是否存在，若存在，则复用原来的发件箱
-            Outbox? existOne = db.Outboxes.SingleOrDefault(x => x.UserId == userId && x.Email == entity.Email);
+            Outbox? existOne = db.Outboxes.SingleOrDefault(x =>
+                x.UserId == userId && x.Email == entity.Email
+            );
             if (existOne != null)
             {
                 existOne.EmailGroupId = entity.EmailGroupId;
@@ -73,7 +82,9 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="entity"></param>
         /// <returns></returns>
         [HttpPost("outboxes")]
-        public async Task<ResponseResult<List<Outbox>>> CreateOutboxes([FromBody] List<Outbox> entities)
+        public async Task<ResponseResult<List<Outbox>>> CreateOutboxes(
+            [FromBody] List<Outbox> entities
+        )
         {
             if (entities == null)
             {
@@ -83,7 +94,8 @@ namespace UZonMail.Core.Controllers.Emails
             foreach (var entity in entities)
             {
                 // 设置默认端口
-                if (entity.SmtpPort == 0) entity.SmtpPort = 25;
+                if (entity.SmtpPort == 0)
+                    entity.SmtpPort = 25;
                 // 设置用户
                 entity.UserId = userId;
 
@@ -97,8 +109,11 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             List<string> emails = entities.Select(x => x.Email).ToList();
-            List<Outbox> existEmails = await db.Outboxes.Where(x => x.UserId == userId && emails.Contains(x.Email)).ToListAsync();
-            List<Outbox?> newEntities = emails.Except(existEmails.Select(x => x.Email))
+            List<Outbox> existEmails = await db
+                .Outboxes.Where(x => x.UserId == userId && emails.Contains(x.Email))
+                .ToListAsync();
+            List<Outbox?> newEntities = emails
+                .Except(existEmails.Select(x => x.Email))
                 .Select(x => entities.Find(e => e.Email == x))
                 .ToList();
 
@@ -140,7 +155,8 @@ namespace UZonMail.Core.Controllers.Emails
         {
             var inboxValidator = new InboxValidator();
             var vdResult = inboxValidator.Validate(entity);
-            if (!vdResult.IsValid) return vdResult.ToErrorResponse<Inbox>();
+            if (!vdResult.IsValid)
+                return vdResult.ToErrorResponse<Inbox>();
 
             var tokenPayloads = tokenService.GetTokenPayloads();
             var userId = tokenPayloads.UserId;
@@ -148,7 +164,9 @@ namespace UZonMail.Core.Controllers.Emails
             entity.OrganizationId = tokenPayloads.OrganizationId;
 
             // 验证发件箱是否存在，若存在，则复用原来的发件箱
-            Inbox? existOne = db.Inboxes.IgnoreQueryFilters().SingleOrDefault(x => x.UserId == userId && x.Email == entity.Email);
+            Inbox? existOne = db
+                .Inboxes.IgnoreQueryFilters()
+                .SingleOrDefault(x => x.UserId == userId && x.Email == entity.Email);
             if (existOne != null)
             {
                 existOne.EmailGroupId = entity.EmailGroupId;
@@ -158,7 +176,7 @@ namespace UZonMail.Core.Controllers.Emails
             }
             else
             {
-                // 新建一个发件箱               
+                // 新建一个发件箱
                 db.Inboxes.Add(entity);
                 existOne = entity;
             }
@@ -189,7 +207,9 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="entity"></param>
         /// <returns></returns>
         [HttpPost("inboxes")]
-        public async Task<ResponseResult<List<Inbox>>> CreateInboxes([FromBody] List<Inbox> entities)
+        public async Task<ResponseResult<List<Inbox>>> CreateInboxes(
+            [FromBody] List<Inbox> entities
+        )
         {
             if (entities == null)
             {
@@ -203,12 +223,17 @@ namespace UZonMail.Core.Controllers.Emails
                 entity.UserId = userId;
                 var inboxValidator = new InboxValidator();
                 var vdResult = inboxValidator.Validate(entity);
-                if (!vdResult.IsValid) return vdResult.ToErrorResponse<List<Inbox>>();
+                if (!vdResult.IsValid)
+                    return vdResult.ToErrorResponse<List<Inbox>>();
             }
 
             List<string> emails = entities.Select(x => x.Email).ToList();
-            List<Inbox> existEmails = await db.Inboxes.IgnoreQueryFilters().Where(x => x.UserId == userId && emails.Contains(x.Email)).ToListAsync();
-            List<Inbox?> newEntities = emails.Except(existEmails.Select(x => x.Email))
+            List<Inbox> existEmails = await db
+                .Inboxes.IgnoreQueryFilters()
+                .Where(x => x.UserId == userId && emails.Contains(x.Email))
+                .ToListAsync();
+            List<Inbox?> newEntities = emails
+                .Except(existEmails.Select(x => x.Email))
                 .Select(x => entities.Find(e => e.Email == x))
                 .ToList();
 
@@ -245,20 +270,25 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="entity"></param>
         /// <returns></returns>
         [HttpPut("outbox/{outboxId:long}")]
-        public async Task<ResponseResult<bool>> UpdateOutbox(long outboxId, [FromBody] Outbox entity)
+        public async Task<ResponseResult<bool>> UpdateOutbox(
+            long outboxId,
+            [FromBody] Outbox entity
+        )
         {
-            await db.Outboxes.UpdateAsync(x => x.Id == outboxId,
-                 x => x.SetProperty(y => y.Email, entity.Email)
-                 .SetProperty(y => y.Name, entity.Name)
-                 .SetProperty(y => y.SmtpHost, entity.SmtpHost)
-                 .SetProperty(y => y.SmtpPort, entity.SmtpPort)
-                 .SetProperty(y => y.UserName, entity.UserName)
-                 .SetProperty(y => y.Password, entity.Password)
-                 .SetProperty(y => y.EnableSSL, entity.EnableSSL)
-                 .SetProperty(y => y.Description, entity.Description)
-                 .SetProperty(y => y.ProxyId, entity.ProxyId)
-                 .SetProperty(y => y.ReplyToEmails, entity.ReplyToEmails)
-                 );
+            await db.Outboxes.UpdateAsync(
+                x => x.Id == outboxId,
+                x =>
+                    x.SetProperty(y => y.Email, entity.Email)
+                        .SetProperty(y => y.Name, entity.Name)
+                        .SetProperty(y => y.SmtpHost, entity.SmtpHost)
+                        .SetProperty(y => y.SmtpPort, entity.SmtpPort)
+                        .SetProperty(y => y.UserName, entity.UserName)
+                        .SetProperty(y => y.Password, entity.Password)
+                        .SetProperty(y => y.EnableSSL, entity.EnableSSL)
+                        .SetProperty(y => y.Description, entity.Description)
+                        .SetProperty(y => y.ProxyId, entity.ProxyId)
+                        .SetProperty(y => y.ReplyToEmails, entity.ReplyToEmails)
+            );
             return true.ToSuccessResponse();
         }
 
@@ -286,12 +316,14 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpPut("inbox/{inboxId:long}")]
         public async Task<ResponseResult<bool>> UpdateInbox(long inboxId, [FromBody] Inbox entity)
         {
-            await db.Inboxes.UpdateAsync(x => x.Id == inboxId,
-                 x => x.SetProperty(y => y.Email, entity.Email)
-                    .SetProperty(y => y.Name, entity.Name)
-                    .SetProperty(y => y.MinInboxCooldownHours, entity.MinInboxCooldownHours)
-                    .SetProperty(y => y.Description, entity.Description)
-                 );
+            await db.Inboxes.UpdateAsync(
+                x => x.Id == inboxId,
+                x =>
+                    x.SetProperty(y => y.Email, entity.Email)
+                        .SetProperty(y => y.Name, entity.Name)
+                        .SetProperty(y => y.MinInboxCooldownHours, entity.MinInboxCooldownHours)
+                        .SetProperty(y => y.Description, entity.Description)
+            );
             return true.ToSuccessResponse();
         }
 
@@ -308,14 +340,18 @@ namespace UZonMail.Core.Controllers.Emails
             var userId = tokenService.GetUserSqlId();
 
             // 收件箱
-            var dbSet = db.Outboxes.AsNoTracking().Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
+            var dbSet = db
+                .Outboxes.AsNoTracking()
+                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
             if (groupId > 0)
             {
                 dbSet = dbSet.Where(x => x.EmailGroupId == groupId);
             }
             if (!string.IsNullOrEmpty(filter))
             {
-                dbSet = dbSet.Where(x => x.Email.Contains(filter) || x.Description.Contains(filter));
+                dbSet = dbSet.Where(x =>
+                    x.Email.Contains(filter) || x.Description.Contains(filter)
+                );
             }
             int count = await dbSet.CountAsync();
             return count.ToSuccessResponse();
@@ -330,17 +366,25 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("outbox/filtered-data")]
-        public async Task<ResponseResult<List<Outbox>>> GetOutboxesData(long groupId, string filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<Outbox>>> GetOutboxesData(
+            long groupId,
+            string filter,
+            [FromBody] Pagination pagination
+        )
         {
             var userId = tokenService.GetUserSqlId();
-            var dbSet = db.Outboxes.AsNoTracking().Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
+            var dbSet = db
+                .Outboxes.AsNoTracking()
+                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
             if (groupId > 0)
             {
                 dbSet = dbSet.Where(x => x.EmailGroupId == groupId);
             }
             if (!string.IsNullOrEmpty(filter))
             {
-                dbSet = dbSet.Where(x => x.Email.Contains(filter) || x.Description.Contains(filter));
+                dbSet = dbSet.Where(x =>
+                    x.Email.Contains(filter) || x.Description.Contains(filter)
+                );
             }
             var results = await dbSet.Page(pagination).ToListAsync();
             return results.ToSuccessResponse();
@@ -355,7 +399,9 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<Outbox>> GetOutboxInfo(long outboxId)
         {
             var userId = tokenService.GetUserSqlId();
-            var outbox = await db.Outboxes.Where(x => x.Id == outboxId && x.UserId == userId).FirstOrDefaultAsync();
+            var outbox = await db
+                .Outboxes.Where(x => x.Id == outboxId && x.UserId == userId)
+                .FirstOrDefaultAsync();
             return outbox.ToSuccessResponse();
         }
 
@@ -369,7 +415,8 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<bool>> DeleteOutboxById(long emailBoxId)
         {
             var emailBox = await db.Outboxes.FirstOrDefaultAsync(x => x.Id == emailBoxId);
-            if (emailBox == null) throw new KnownException("邮箱不存在");
+            if (emailBox == null)
+                throw new KnownException("邮箱不存在");
             db.Outboxes.Remove(emailBox);
             await db.SaveChangesAsync();
 
@@ -387,7 +434,9 @@ namespace UZonMail.Core.Controllers.Emails
         {
             var userId = tokenService.GetUserSqlId();
 
-            var emailBox = db.Outboxes.Where(x => x.UserId == userId && outboxIds.Contains(x.ObjectId));
+            var emailBox = db.Outboxes.Where(x =>
+                x.UserId == userId && outboxIds.Contains(x.ObjectId)
+            );
             db.Outboxes.RemoveRange(emailBox);
             await db.SaveChangesAsync();
 
@@ -407,14 +456,18 @@ namespace UZonMail.Core.Controllers.Emails
             var userId = tokenService.GetUserSqlId();
 
             // 收件箱
-            var dbSet = db.Inboxes.AsNoTracking().Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
+            var dbSet = db
+                .Inboxes.AsNoTracking()
+                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
             if (groupId > 0)
             {
                 dbSet = dbSet.Where(x => x.EmailGroupId == groupId);
             }
             if (!string.IsNullOrEmpty(filter))
             {
-                dbSet = dbSet.Where(x => x.Email.Contains(filter) || x.Description.Contains(filter));
+                dbSet = dbSet.Where(x =>
+                    x.Email.Contains(filter) || x.Description.Contains(filter)
+                );
             }
             int count = await dbSet.CountAsync();
             return count.ToSuccessResponse();
@@ -428,15 +481,18 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("inboxes/count")]
         public async Task<ResponseResult<int>> GetInboxesCountInGroups(string groupIds)
         {
-            if (string.IsNullOrEmpty(groupIds)) return 0.ToSuccessResponse();
+            if (string.IsNullOrEmpty(groupIds))
+                return 0.ToSuccessResponse();
 
-            var groupIdsList = groupIds.Split(',')
+            var groupIdsList = groupIds
+                .Split(',')
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Select(x => long.Parse(x))
                 .ToList();
 
             var userId = tokenService.GetUserSqlId();
-            var count = await db.Inboxes.Where(x => x.UserId == userId && groupIdsList.Contains(x.EmailGroupId))
+            var count = await db
+                .Inboxes.Where(x => x.UserId == userId && groupIdsList.Contains(x.EmailGroupId))
                 .CountAsync();
             return count.ToSuccessResponse();
         }
@@ -450,17 +506,25 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("inbox/filtered-data")]
-        public async Task<ResponseResult<List<Inbox>>> GetInboxesData(long groupId, string filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<Inbox>>> GetInboxesData(
+            long groupId,
+            string filter,
+            [FromBody] Pagination pagination
+        )
         {
             var userId = tokenService.GetUserSqlId();
-            var dbSet = db.Inboxes.AsNoTracking().Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
+            var dbSet = db
+                .Inboxes.AsNoTracking()
+                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
             if (groupId > 0)
             {
                 dbSet = dbSet.Where(x => x.EmailGroupId == groupId);
             }
             if (!string.IsNullOrEmpty(filter))
             {
-                dbSet = dbSet.Where(x => x.Email.Contains(filter) || x.Description.Contains(filter));
+                dbSet = dbSet.Where(x =>
+                    x.Email.Contains(filter) || x.Description.Contains(filter)
+                );
             }
             var results = await dbSet.Page(pagination).ToListAsync();
             return results.ToSuccessResponse();
@@ -474,12 +538,14 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("inbox/groups-data")]
         public async Task<ResponseResult<List<Inbox>>> GetGroupsInboxes(string groupIds)
         {
-            var longGroupIds = groupIds.Split(",")
+            var longGroupIds = groupIds
+                .Split(",")
                 .Select(x =>
-                    {
-                        if (long.TryParse(x, out var value)) return value;
-                        return 0;
-                    })
+                {
+                    if (long.TryParse(x, out var value))
+                        return value;
+                    return 0;
+                })
                 .Where(x => x > 0)
                 .ToList();
             if (longGroupIds.Count == 0)
@@ -488,7 +554,8 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             var userId = tokenService.GetUserSqlId();
-            var inboxes = await db.Inboxes.AsNoTracking()
+            var inboxes = await db
+                .Inboxes.AsNoTracking()
                 .Where(x => longGroupIds.Contains(x.EmailGroupId))
                 .Where(x => x.UserId == userId)
                 .Select(x => new Inbox()
@@ -511,10 +578,28 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpDelete("inboxes/{emailBoxId:long}")]
         public async Task<ResponseResult<bool>> DeleteInboxById(long emailBoxId)
         {
-            var emailBox = await db.Inboxes.FirstOrDefaultAsync(x => x.Id == emailBoxId) ?? throw new KnownException("邮箱不存在");
+            var emailBox =
+                await db.Inboxes.FirstOrDefaultAsync(x => x.Id == emailBoxId)
+                ?? throw new KnownException("邮箱不存在");
             emailBox.IsDeleted = true;
             await db.SaveChangesAsync();
 
+            return true.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// Delete all delivered inboxes in group of self
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete("inboxes/groups/{groupId:long}/delivered")]
+        public async Task<ResponseResult<bool>> DeleteAllDeliveredInboxesInGroup(long groupId)
+        {
+            var userId = tokenService.GetUserSqlId();
+            await db
+                .Inboxes.Where(x => x.UserId == userId)
+                .Where(x => x.EmailGroupId == groupId)
+                .Where(x => x.LastSuccessDeliveryDate > DateTime.MinValue)
+                .ExecuteUpdateAsync(x => x.SetProperty(p => p.IsDeleted, true));
             return true.ToSuccessResponse();
         }
 
@@ -528,7 +613,9 @@ namespace UZonMail.Core.Controllers.Emails
         {
             var userId = tokenService.GetUserSqlId();
 
-            var emailBox = db.Inboxes.Where(x => x.UserId == userId && inboxIds.Contains(x.ObjectId));
+            var emailBox = db.Inboxes.Where(x =>
+                x.UserId == userId && inboxIds.Contains(x.ObjectId)
+            );
             db.Inboxes.RemoveRange(emailBox);
             await db.SaveChangesAsync();
 
@@ -544,7 +631,8 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<string>> EncryptOutboxPassword(string password)
         {
             var userId = tokenService.GetUserSqlId();
-            if (string.IsNullOrEmpty(password)) throw new KnownException("密码不能为空");
+            if (string.IsNullOrEmpty(password))
+                throw new KnownException("密码不能为空");
 
             var encryptedResult = encryptService.EncryptOutboxSecret(userId, password);
             return encryptedResult.ToSuccessResponse();
