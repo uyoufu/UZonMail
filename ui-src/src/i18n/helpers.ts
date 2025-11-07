@@ -17,6 +17,14 @@ import { i18n } from 'src/boot/i18n'
 const i18nTranslate = i18n.global.t
 
 /**
+ * get current locale from i18n
+ * @returns
+ */
+export function getCurrentLocale (): WritableComputedRef<string, string> {
+  return i18n.global.locale
+}
+
+/**
  * 翻译为对应语言
  * @param key
  * @returns
