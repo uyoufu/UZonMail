@@ -52,6 +52,29 @@ export default {
 
   // #endregion
 
+  // #region components
+  components: {
+    // 清空
+    clear: '清空',
+    // 移除已上传文件
+    removeUploadedFile: '移除已上传文件',
+    // 选择文件
+    selectFile: '选择文件',
+    // 上传
+    upload: '上传',
+    // 中止上传
+    abortUpload: '中止上传',
+    // 等待上传中...
+    waitingForUpload: '等待上传中...',
+    // 剩余
+    remain: '剩余',
+    // 正在计算 ${callbackData.file.name} 哈希值
+    calculatingFileHash: '正在计算 {fileName} 哈希值',
+    // 正在上传 ${file.name}
+    uploadingFile: '正在上传 {fileName}',
+  },
+  // #endregion
+
   // #region utils
   utils: {
     // `... 等共 ${labels.length} ${unit}`
@@ -147,6 +170,29 @@ export default {
   },
   // #endregion
 
+  // 模板相关
+  template: {
+    templateName: '模板名称',
+    templateId: '模板ID',
+    // 返回模板管理
+    backToTemplateManager: '返回模板管理',
+    // 输入模板名称
+    pleaseInputTemplateName: '请输入模板名称',
+    saveTemplate: '保存模板',
+    savingTemplate: '正在保存模板...',
+    saveTemplateSuccess: '模板保存成功',
+    // 保存失败: 无法生成缩略图
+    saveFailedCannotGenerateThumbnail: '保存失败: 无法生成缩略图',
+    // 当前正文结构异常，无法生成缩略图
+    saveFailedCurrentContentStructureInvalid: '当前正文结构异常，无法生成缩略图',
+    templateEditorPlaceholder: "在此处输入模板内容, 变量使用 {'{{  }}'} 号包裹, 例如 {'{{ variableName }}'}"
+  },
+
+  // 代理
+  proxy: {
+    proxyId: '代理ID',
+  },
+
   // #region 邮箱管理
   // 邮箱组
   emailGroup: {
@@ -182,8 +228,8 @@ export default {
     newInbox: '新建收件箱',
     newInboxSuccess: '新建收件箱成功',
     addGroupFirst: '请先添加分组',
-    modifyInbox: '修改收件箱',
-    modifyCurrentInbox: '修改当前收件箱',
+    editInbox: '修改收件箱',
+    editCurrentInbox: '修改当前收件箱',
     updateInboxSuccess: '更新收件箱成功',
     validateCurrentOrSelectedInboxes: '验证当前或选中的收件箱',
 
@@ -199,6 +245,9 @@ export default {
     ctx_importInboxToCurrentGroup: '向当前组中导入收件箱',
     ctx_export: '导出',
     ctx_exportInboxToCurrentGroup: '导出当前组中的收件箱',
+    ctx_deleteDelivered: '删除投递',
+    ctx_deleteDeliveredInboxesInCurrentGroup: '删除当前组中所有已成功投递的收件箱',
+
     availableImportDataNotFound: '未找到可导入的数据',
     emptyDataAtRow: '第 {row} 行数据为空',
     emailFormatInvalid: '邮箱格式错误: {email}',
@@ -212,8 +261,11 @@ export default {
     ctx_deleteInvalid: '删除无效',
     deleteAllInvalidInboxesInCurrentGroup: '删除当前组中所有验证无效的收件箱',
     isDeleteEmailOf: '是否删除收件箱: {email} ?',
+    isDeleteAllDeliveredInboxesInCurrentGroup: '是否删除当前组中所有已成功投递的收件箱？',
 
-    col_email: '邮箱',
+    col_email: '收件箱',
+    col_inbox: '收件箱',
+    col_inboxName: '收件箱姓名',
     col_name: '收件人姓名',
     col_description: '描述',
     col_minInboxCooldownHours: '最小收件间隔(小时)',
@@ -224,7 +276,8 @@ export default {
   outboxManager: {
     col_order: '@:global.order',
     col_email: '发件箱',
-    col_outboxUserName: '名称(发件人姓名)',
+    col_outbox: '发件箱',
+    col_outboxName: '名称(发件人姓名)',
     col_smtpHost: 'SMTP地址',
     col_smtpPort: 'SMTP端口',
     col_smtpUserName: 'SMTP用户名',
@@ -326,10 +379,40 @@ export default {
     recipients: '收件人',
     recipientsPlaceholder: '请选择收件箱或者收件箱组 (必须)',
     mergeToSend: '合并',
+
+    body: '正文',
+    // 自定义变量
+    customVariables: '自定义变量',
+
+    // 模板中的默认值
+    example_inbox: '收件箱(导入时，请删除该行数据)',
+    example_inboxName: '收件人姓名(可选)',
+    example_outbox: '发件箱(可选)',
+    example_outboxName: '发件人姓名(可选)',
+    example_subject: '主题(可选)',
+    example_body: '内容(可选)',
+    example_cc: '抄送(多个逗号分隔,可选)',
+    example_bcc: '密送(多个逗号分隔,可选)',
+    example_templateName: '模板名称(可选)',
+    example_templateId: '模板id(可选)',
+    example_proxy: '代理Id(可选)',
+    example_other: '可以继续增加列，作为自定义字段(可选)',
+    example_attachmentNames: '附件名称(多个逗号分隔,可选)',
+
+    // 发件数据模板.xlsx
+    sendingDataTemplateFileName: '发件数据模板.xlsx',
+    // 发件数据
+    sendingDataTemplateSheetName: '发件数据',
+    // 下载模板
+    templateDownloadSuccess: '模板下载成功',
+
     // 抄送人
     ccRecipients: '抄送人',
     // 请选择抄送人 (可选)
     ccRecipientsPlaceholder: '请选择抄送人 (可选)',
+    bccRecipients: '密送人',
+    // 请选择密送人 (可选)
+    bccRecipientsPlaceholder: '请选择密送人 (可选)',
     // 附件
     attachments: '附件',
     // 预览
@@ -368,6 +451,18 @@ export default {
     sendingProgress: '发送进度',
     // 定时发送已预约
     scheduledSendingBooked: '定时发送已预约',
+    // 数据
+    emailData: '数据',
+    // 删除当前数据
+    deleteCurrentData: '删除当前数据',
+    // 下载模板
+    downloadTemplate: '下载模板',
+    // 选择数据
+    selectData: '选择数据',
+    // 数据为空，请重新选择
+    dataIsEmpty: '数据为空，请重新选择',
+    // 第 ${emptyInboxRowIndex + 2} 行数据的收件箱为空或格式不正确，请检查后重新选择
+    inboxEmptyOrInvalidAtRow: '第 {row} 行数据的收件箱为空或格式不正确，请检查后重新选择',
   },
   // #endregion
 

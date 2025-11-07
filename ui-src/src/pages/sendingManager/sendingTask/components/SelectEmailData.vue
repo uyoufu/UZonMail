@@ -1,5 +1,6 @@
 <template>
-  <q-field v-model="fieldModelValue" tag="div" label="数据" dense @focus="isActive = true" @blur="isActive = false">
+  <q-field v-model="fieldModelValue" tag="div" :label="translateSendingTask('emailData')" dense @focus="isActive = true"
+    @blur="isActive = false">
     <template v-slot:before>
       <q-icon name="analytics" color="primary" />
     </template>
@@ -15,20 +16,20 @@
         <q-btn v-if="fieldModelValue" round dense flat icon="close" color="negative"
           @click.prevent="onRemoveSelectedFile">
           <q-tooltip>
-            删除当前数据
+            {{ translateSendingTask('deleteCurrentData') }}
           </q-tooltip>
         </q-btn>
 
         <q-btn v-if="isActive" round dense flat icon="article" color="secondary" class="q-ml-sm"
           @click.prevent="onDownloadEmailDataTemplate">
           <q-tooltip>
-            下载模板
+            {{ translateSendingTask('downloadTemplate') }}
           </q-tooltip>
         </q-btn>
 
         <q-btn round dense flat icon="add" class="q-ml-sm" @click.stop="onSelectExcel" color="grey-7">
           <q-tooltip>
-            选择数据
+            {{ translateSendingTask('selectData') }}
           </q-tooltip>
         </q-btn>
       </div>
@@ -59,7 +60,7 @@ async function onSelectExcel () {
 
   // 检查数据的有效性
   if (data.length === 0) {
-    notifyError('数据为空，请重新选择')
+    notifyError(translateSendingTask('dataIsEmpty'))
     return
   }
 
@@ -69,7 +70,7 @@ async function onSelectExcel () {
   const emptyInboxRowIndex = data.findIndex((item: Record<string, any>) => !item.inbox || item.inbox.indexOf('@') <= 0)
   if (emptyInboxRowIndex > 0) {
     logger.warn('[SelectEmailData] selected data has empty inbox:', emptyInboxRowIndex + 2, data[emptyInboxRowIndex])
-    notifyError(`第 ${emptyInboxRowIndex + 2} 行数据的收件箱为空或格式不正确，请检查后重新选择`)
+    notifyError(translateSendingTask('inboxEmptyOrInvalidAtRow', { row: emptyInboxRowIndex + 2 }))
     return
   }
 
@@ -80,6 +81,7 @@ async function onSelectExcel () {
 
 // placeholder 显示
 import { useCustomQField } from '../helper'
+import { translateInboxManager, translateOutboxManager, translateProxy, translateSendingTask, translateTemplate } from 'src/i18n/helpers'
 const { isActive, fieldModelValue, fieldText } = useCustomQField('请选择数据 (该项可为空)')
 
 // 删除选择的数据
@@ -92,56 +94,56 @@ function onRemoveSelectedFile () {
 function getEmailSendingExcelDataMapper (): IExcelColumnMapper[] {
   return [
     {
-      headerName: 'inbox',
+      headerName: translateInboxManager('col_inbox'),
       fieldName: 'inbox',
       required: true
     },
     {
-      headerName: 'inboxName',
+      headerName: translateInboxManager('col_inboxName'),
       fieldName: 'inboxName'
     },
     {
-      headerName: 'outbox',
+      headerName: translateOutboxManager('col_outbox'),
       fieldName: 'outbox'
     },
     {
-      headerName: 'outboxName',
+      headerName: translateOutboxManager('col_outboxName'),
       fieldName: 'outboxName'
     },
     {
-      headerName: 'subject',
+      headerName: translateSendingTask('subject'),
       fieldName: 'subject'
     },
     {
-      headerName: 'body',
+      headerName: translateSendingTask('body'),
       fieldName: 'body'
     },
     {
-      headerName: 'cc',
+      headerName: translateSendingTask('ccRecipients'),
       fieldName: 'cc'
     },
     {
-      headerName: 'bcc',
+      headerName: translateSendingTask('bccRecipients'),
       fieldName: 'bcc'
     },
     {
-      headerName: 'templateName',
+      headerName: translateTemplate('templateName'),
       fieldName: 'templateName'
     },
     {
-      headerName: 'templateId',
+      headerName: translateTemplate('templateId'),
       fieldName: 'templateId'
     },
     {
-      headerName: 'proxyId',
+      headerName: translateProxy('proxyId'),
       fieldName: 'proxyId'
     },
     {
-      headerName: 'attachmentNames',
+      headerName: translateSendingTask('attachments'),
       fieldName: 'attachmentNames'
     },
     {
-      headerName: '自定义变量',
+      headerName: translateSendingTask('customVariables'),
       fieldName: 'other'
     }
   ]
@@ -150,28 +152,28 @@ async function onDownloadEmailDataTemplate () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any[] = [
     {
-      inbox: '收件箱(导入时，请删除该行数据)',
-      inboxName: '收件人姓名(可选)',
-      outbox: '发件箱(可选)',
-      outboxName: '发件人姓名(可选)',
-      subject: '主题(可选)',
-      body: '内容(可选)',
-      cc: '抄送(多个逗号分隔,可选)',
-      bcc: '密送(多个逗号分隔,可选)',
-      templateName: '模板名称(可选)',
-      templateId: '模板id(可选)',
-      proxy: '代理Id(可选)',
-      other: '可以继续增加列，作为自定义字段(可选)',
-      attachmentNames: '附件名称(多个逗号分隔,可选)'
+      inbox: translateSendingTask('example_inbox'),
+      inboxName: translateSendingTask('example_inboxName'),
+      outbox: translateSendingTask('example_outbox'),
+      outboxName: translateSendingTask('example_outboxName'),
+      subject: translateSendingTask('example_subject'),
+      body: translateSendingTask('example_body'),
+      cc: translateSendingTask('example_cc'),
+      bcc: translateSendingTask('example_bcc'),
+      templateName: translateSendingTask('example_templateName'),
+      templateId: translateSendingTask('example_templateId'),
+      proxy: translateSendingTask('example_proxy'),
+      other: translateSendingTask('example_other'),
+      attachmentNames: translateSendingTask('example_attachmentNames')
     }
   ]
   await writeExcel(data, {
-    fileName: '发件数据模板.xlsx',
-    sheetName: '发件数据',
+    fileName: translateSendingTask('sendingDataTemplateFileName'),
+    sheetName: translateSendingTask('sendingDataTemplateSheetName'),
     mappers: getEmailSendingExcelDataMapper()
   })
 
-  notifySuccess('模板下载成功')
+  notifySuccess(translateSendingTask('templateDownloadSuccess'))
 }
 </script>
 

@@ -10,7 +10,10 @@ import type {
   GlobalLangKey,
   outboxManagerLangKey,
   SendingTaskLangKey,
-  UtilsLangKey
+  UtilsLangKey,
+  TemplateLangKey,
+  ProxyLangKey,
+  ComponentsLangKey
 } from './types'
 
 import { i18n } from 'src/boot/i18n'
@@ -88,7 +91,19 @@ export function translateSendingTask (key: SendingTaskLangKey, named?: NamedValu
   return translateSub<SendingTaskLangKey>(key, 'sendingTask', named)
 }
 
+export function translateComponents (key: ComponentsLangKey, named?: NamedValue): string {
+  return translateSub<ComponentsLangKey>(key, 'components', named)
+}
+
 export function translateUtils (key: UtilsLangKey, named?: NamedValue): string {
   return translateSub<UtilsLangKey>(key, 'utils', named)
+}
+
+export function translateTemplate (key: TemplateLangKey, named?: NamedValue): string {
+  return translateSub<TemplateLangKey>(key, 'template', named)
+}
+
+export function translateProxy (key: ProxyLangKey, named?: NamedValue): string {
+  return translateSub<ProxyLangKey>(key, 'proxy', named)
 }
 

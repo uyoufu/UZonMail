@@ -115,7 +115,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'name',
-    label: translateOutboxManager('col_outboxUserName'),
+    label: translateOutboxManager('col_outboxName'),
     align: 'left',
     field: 'name',
     sortable: true

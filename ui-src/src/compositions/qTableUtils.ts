@@ -14,6 +14,8 @@ export type getSelectedRowsType = (cursorData: Record<string, any>) => {
   selectedRows: Ref<Record<string, any>[]>
 }
 
+export type refreshTableType = () => void
+
 export interface ITableRequestProp {
   /**
    * Pagination object

@@ -2,32 +2,34 @@
   <div class="full-height column no-wrap">
     <div v-if="showTitleBar" class="row items-center justify-between bg-white editor-title">
       <q-btn flat icon="west" class="q-px-xs q-ml-md" size="sm" @click="onBackToTemplateManager">
-        <AsyncTooltip tooltip="返回" />
+        <AsyncTooltip :tooltip="translateTemplate('backToTemplateManager')" />
       </q-btn>
 
-      <q-input borderless dense v-model="templateName" placeholder="输入模板名称">
+      <q-input borderless dense v-model="templateName" :placeholder="translateTemplate('pleaseInputTemplateName')">
         <template v-slot:prepend>
           <q-icon color="primary" name="article" size="xs">
-            <AsyncTooltip tooltip="模板名称" />
+            <AsyncTooltip :tooltip="translateTemplate('templateName')" />
           </q-icon>
         </template>
 
         <template v-slot:append>
           <q-btn flat icon="save" color="secondary" class="q-px-xs q-ml-md" size="sm" @click="onSaveTemplate">
-            <AsyncTooltip tooltip="保存" />
+            <AsyncTooltip :tooltip="translateTemplate('saveTemplate')" />
           </q-btn>
         </template>
       </q-input>
       <div></div>
     </div>
 
-    <TinymceEditor class="col" v-model="editorValue" tinymce-script-src="/tinymce/tinymce.min.js" :init="tinymceInit" />
+    <TinymceEditor ref="editorRef" class="col" v-model="editorValue" tinymce-script-src="/tinymce/tinymce.min.js"
+      :init="tinymceInit" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import logger from 'loglevel'
+import { translateTemplate } from 'src/i18n/helpers'
 
 defineOptions({
   name: 'TemplateEditor'
@@ -79,14 +81,14 @@ import { useUserInfoStore } from 'src/stores/user'
 const userInfoStore = useUserInfoStore()
 async function onSaveTemplate () {
   if (!templateName.value) {
-    notifyError('请输入模板名称')
+    notifyError(translateTemplate('pleaseInputTemplateName'))
     return
   }
 
   // 生成缩略图并上传到服务器
   const node = tinymceEditor.value?.getBody()
   if (!node) {
-    notifyError('保存失败: 无法生成缩略图')
+    notifyError(translateTemplate('saveFailedCannotGenerateThumbnail'))
     return
   }
 
@@ -119,7 +121,7 @@ async function onSaveTemplate () {
       }
       catch (err) {
         logger.error('[templateEditor] 生成缩略图失败: %O', err)
-        notifyError('当前正文结构异常，无法生成缩略图')
+        notifyError(translateTemplate('saveFailedCurrentContentStructureInvalid'))
       }
 
       // 保存模板
@@ -137,10 +139,10 @@ async function onSaveTemplate () {
 
       templateId.value = id as number
     },
-    '保存模板',
-    '保存中...'
+    translateTemplate('saveTemplate'),
+    translateTemplate('savingTemplate')
   )
-  notifySuccess('保存成功')
+  notifySuccess(translateTemplate('saveTemplateSuccess'))
 }
 
 async function onBackToTemplateManager () {
@@ -154,14 +156,18 @@ async function onBackToTemplateManager () {
 import TinymceEditor from '@tinymce/tinymce-vue'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tinymceEditor = ref<any>(null)
+
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
+
 const tinymceInit = {
   plugins: 'advlist anchor autolink charmap code fullscreen help image insertdatetime link lists media preview searchreplace table visualblocks wordcount',
   toolbar: 'undo redo | styles | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | code',
   height: props.height,
   promotion: false,
   branding: false,
-  language: navigator.language.replace('-', '_'),
-  placeholder: '在此处输入模板内容, 变量使用 {{  }} 号包裹, 例如 {{ variableName }}',
+  language: locale.value.replace('-', '_'),
+  placeholder: translateTemplate('templateEditorPlaceholder'),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setup: (editor: any) => {
     tinymceEditor.value = editor
@@ -184,6 +190,16 @@ const tinymceInit = {
   //   return ''
   // }
 }
+
+const editorRef: Ref<{
+  rerender: (options: { language: string }) => void
+} | null> = ref(null)
+watch(locale, (newValue) => {
+  logger.debug('[TemplateEditor] 语言切换，更新编辑器语言为: ', newValue, editorRef.value)
+  if (editorRef.value) {
+    editorRef.value.rerender({ language: newValue.replace('-', '_') })
+  }
+})
 
 // 上传图片到服务器
 

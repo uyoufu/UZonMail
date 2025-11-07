@@ -5,7 +5,7 @@ import { notifyError } from 'src/utils/dialog'
 import * as XLSX from 'xlsx'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import CryptoJS from 'crypto-js'
-import type { IProgressOptions } from 'src/compositions/useProgress';
+import type { IProgressOptions } from 'src/compositions/useProgress'
 import { useNotifyProgress } from 'src/compositions/useProgress'
 import logger from 'loglevel'
 
@@ -552,7 +552,7 @@ declare global {
         description: string,
         accept: Record<string, string[]>
       }[]
-    }) => Promise<any>;
+    }) => Promise<any>
   }
 }
 

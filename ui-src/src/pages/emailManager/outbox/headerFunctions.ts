@@ -83,7 +83,7 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
     {
       name: 'name',
       type: PopupDialogFieldType.text,
-      label: translateOutboxManager('col_outboxUserName'),
+      label: translateOutboxManager('col_outboxName'),
       value: ''
     },
     {
@@ -169,7 +169,7 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
       required: true
     },
     {
-      headerName: translateOutboxManager('col_outboxUserName'),
+      headerName: translateOutboxManager('col_outboxName'),
       fieldName: 'name'
     },
     {
