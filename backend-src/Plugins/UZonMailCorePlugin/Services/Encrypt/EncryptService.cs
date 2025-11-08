@@ -11,7 +11,11 @@ namespace UZonMail.Core.Services.Encrypt
     /// </summary>
     public class EncryptService : ISingletonService
     {
-        private static readonly ConcurrentDictionary<long, SmtpPasswordSecretKeys> _userOutboxSecretKeys = new();
+        private static readonly ConcurrentDictionary<
+            long,
+            SmtpPasswordSecretKeys
+        > _userOutboxSecretKeys = new();
+
         /// <summary>
         /// 更新用户的发件箱密码密钥
         /// </summary>
@@ -23,7 +27,8 @@ namespace UZonMail.Core.Services.Encrypt
             {
                 _userOutboxSecretKeys[userId] = secretKeys;
             }
-            else _userOutboxSecretKeys.TryAdd(userId, secretKeys);
+            else
+                _userOutboxSecretKeys.TryAdd(userId, secretKeys);
         }
 
         /// <summary>
@@ -44,7 +49,7 @@ namespace UZonMail.Core.Services.Encrypt
         /// <returns></returns>
         public string EncryptOutboxSecret(long userId, string secret)
         {
-            if(!_userOutboxSecretKeys.TryGetValue(userId,out var keys))
+            if (!_userOutboxSecretKeys.TryGetValue(userId, out var keys))
                 throw new KnownException("用户的 SMTP 密码密钥未设置, 请重新登录");
 
             return secret.AES(keys.Key, keys.Iv);
@@ -59,7 +64,7 @@ namespace UZonMail.Core.Services.Encrypt
         {
             if (!_userOutboxSecretKeys.TryGetValue(userId, out var keys))
                 throw new KnownException("用户的 SMTP 密码密钥未设置, 请重新登录");
-           
+
             return secret.DeAES(keys.Key, keys.Iv);
         }
     }
