@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IInbox } from 'src/api/emailBox'
-import { deleteInboxById, updateInbox } from 'src/api/emailBox'
+import { deleteInboxById, updateInbox, deleteAllDeliveredInboxesInGroup } from 'src/api/emailBox'
 import { validateAllInvalidInboxes } from 'src/api/pro/emailVerify'
 
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
@@ -10,8 +10,9 @@ import { getInboxFields } from './headerFunctions'
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
 
 import { translateInboxManager, translateGlobal } from 'src/i18n/helpers'
+import type { deleteRowByIdType, refreshTableType } from 'src/compositions/qTableUtils'
 
-export function useContextMenu (deleteRowById: (id?: number) => void) {
+export function useContextMenu (deleteRowById: deleteRowByIdType, refreshTable: refreshTableType) {
   // 更新发件箱
   async function onUpdateInbox (row: Record<string, any>) {
     const inbox = row as IInbox
@@ -39,7 +40,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
 
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
-      title: `${translateInboxManager('modifyInbox')} / ${inbox.email}`,
+      title: `${translateInboxManager('editInbox')} / ${inbox.email}`,
       fields
     }
 
@@ -57,13 +58,14 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     notifySuccess(translateInboxManager('updateInboxSuccess'))
   }
 
-  const inboxContextMenuItems: IContextMenuItem[] = [
+  const inboxContextMenuItems: ComputedRef<IContextMenuItem<IInbox>[]> = computed(() => [
     {
       name: 'edit',
-      label: translateGlobal('modify'),
-      tooltip: translateInboxManager('modifyCurrentInbox'),
+      label: translateGlobal('edit'),
+      tooltip: translateInboxManager('editCurrentInbox'),
       onClick: onUpdateInbox
     },
+    // TODO: Not fully implemented, will enable in the future
     {
       name: 'validateSelected',
       label: translateGlobal('validate'),
@@ -71,6 +73,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
       onClick: deleteInbox,
       vif: () => false
     },
+    // TODO: Not fully implemented, will enable in the future
     {
       name: 'validateAll',
       label: translateGlobal('validateMultiple'),
@@ -86,6 +89,14 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
       onClick: deleteInbox
     },
     {
+      name: 'deleteAllDelivered',
+      label: translateInboxManager('ctx_deleteDelivered'),
+      tooltip: translateInboxManager('ctx_deleteDeliveredInboxesInCurrentGroup'),
+      color: 'negative',
+      onClick: onDeleteAllDeliveredInboxes
+    },
+    // TODO: Not fully implemented, will enable in the future
+    {
       name: 'deleteInvalid',
       label: translateInboxManager('ctx_deleteInvalid'),
       tooltip: translateInboxManager('deleteAllInvalidInboxesInCurrentGroup'),
@@ -93,7 +104,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
       onClick: deleteInbox,
       vif: () => false
     },
-  ]
+  ])
 
   // #region 验证
   async function onValidateAllInvalidInboxes (row: Record<string, any>) {
@@ -118,6 +129,23 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
 
     // 开始删除
     deleteRowById(inbox.id)
+
+    notifySuccess(translateGlobal('deleteSuccess'))
+  }
+
+  // delete all delivered inboxes in current group
+  async function onDeleteAllDeliveredInboxes (row: IInbox) {
+    const confirm = await confirmOperation(
+      translateGlobal('deleteConfirmation'),
+      translateInboxManager('isDeleteAllDeliveredInboxesInCurrentGroup')
+    )
+    if (!confirm) return
+
+    // start deleting
+    await deleteAllDeliveredInboxesInGroup(row.emailGroupId as number)
+
+    // 刷新当前显示
+    refreshTable()
 
     notifySuccess(translateGlobal('deleteSuccess'))
   }

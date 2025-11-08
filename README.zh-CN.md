@@ -1,0 +1,113 @@
+# 宇正群邮邮件群发软件介绍
+
+[![Github release](https://img.shields.io/github/v/tag/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/releases)
+[![GitHub](https://img.shields.io/github/license/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/blob/main/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/commits/main)
+[![GitHub issues](https://img.shields.io/github/issues/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/issues)
+
+[简体中文](/README.zh-CN.md) | [English](/README.md) 
+
+## 🥝简介
+
+[![uzon-mail-login-3](https://github.com/uyoufu/UZonMail/raw/master/resource/images/uzon-mail-login-3.png)](https://github.com/user-attachments/assets/8cc1332e-aa63-4a84-bb99-2dc467874a7b)
+
+本软件名为 "宇正群邮 (UZonMail)"，是一款开源免费的邮件群发软件，提供邮件群发、邮件营销、邮箱爬取、任意变量等诸多功能。支持所有类型邮箱账号，包括Outlook的OAuth2。原生企业级品质，支持多端用户，支持Windows、Linux、MacOS等操作系统, 支持服务器部署。原生多线程并发，支持多账号同时使用，性能强劲。多年持续迭代更新优化，已被外贸营销、教育培训、财务会计等多个行业广泛使用。
+
+常见的应用场景有：
+
+1. 营销邮件群发
+2. 工资条邮件群发
+3. 发票邮件群发
+4. 接入系统作为通知中心进行邮件群发
+
+[在线Demo](https://maildemo.uzoncloud.com:2234)，账号/密码: admin/admin1234
+
+> 为了防止滥用，demo 版本部分功能已禁用。每个邮件任务最多只能发 5 封邮件
+
+<!--more-->
+
+## ⭐ 特色功能
+
+![image-20240614121857801](https://github.com/uyoufu/UZonMail/raw/master/resource/images/uzon-mail-send.png)
+
+1. **支持多个发件人同时发件**
+
+   可以添加任意个不同的发件人同时发件，不仅提高发件效率，而且突破了单个发件箱每日发件数量的限制，理论上，若有足够多的发件箱，可以不受约束地发送海量的邮件。
+
+2. **支持邮件内容模板自定义**
+
+   发件内容可以直接输入，也可以采用预定义模块。
+
+   模板可根据需要进行自定义，定义完成后保存到模板库，可以轻易实现模板的复用。
+
+   模板板采用 HTML 格式定义，程序同时提供可视化界面进行编辑，对于新手和大神都很友好，模板让内容充满无限可能。
+
+3. **支持无限变量，邮件封封不同**
+
+   支持数据变量、随机变量。可以在模板中引入这些变量，在发送的过程中，程序会自动将变量替换成真实的值进行发送，可以实现同一套模板，不同的收件人，接收的具体内容不同。
+
+4. **多线程并发发送，日发可达 10 万+**
+
+   每个发件人采用单独的线程进行发送，发件人越多，发件速度越快，若有足够多的发件箱，日发 10 万不是问题。   
+
+5. **失败重发**
+
+   当有多个发件箱时，若 A 发件箱发件失败后，会转由 B 发件箱继续进行发送。
+
+   如果仅有一个发件箱，当发件失败后，可以在发件历史中重新对失败项进行重发。
+
+6. **自研随机算法，可实现发件人，发件模板智能随机**
+
+   当有多个发件人、发件模板时，程序会智能随机选择，提升邮件的到达率。
+
+7. **支持发件箱每日发件总量限制**
+
+8. **支持抄送、密送**
+
+   支持多封邮件抄送到特定邮箱或者不同邮件抄送到不同的邮箱。
+
+9. **支持邮件阅读跟踪**
+
+   支持跟踪邮件的打开情况，更精准地助力营销实施。
+
+10. **支持取消订阅功能**
+
+    对于营销邮件，邮件包含取消订阅功能，可以更加符合相关地区的法律法规，提升用户体验，保护发件人声誉，降低投诉率，提升营销效果。
+
+11. **支持权限管理**
+
+    企业组织管理员可以管理查看所有子用户的数据、设置。方便集中管理
+
+12. **原生爬虫支持，助力外贸市场开拓**
+
+13. **支持 Outlook OAuth2 发件**
+
+    Outlook 支持通过 RefreshToken 或者账号密码发件
+
+14. **原生企业级品质**
+
+    开发之初便立足于企业级定位，采用 mysql、redis 数据库，支持多用户，大并发。支持Windows、Linux、MacOS等操作系统, 支持服务器部署。
+
+## 👍 主要优势
+
+相较于市面上其它邮件群发软件，宇正群邮的优势主要有以下几点：
+
+1. 企业级品质：多用户、大并发，硬件要求低，性能强大
+2. Web 架构，可私有化部署，适配多平台
+3. 真正支持所有邮箱，包括 Outlook OAuth2 发件
+4. 现代化 UI，UI 设计位居同类软件第一名
+5. 邮件支持取消订阅，保护您的声誉
+6. 无限变量，无限可能，可用性超出想象
+
+## 💻 支持平台
+
+1. Windows
+2. Windows Server
+3. Linux
+4. Docker
+5. MacOS
+
+## 📖 更多文档
+
+更多详细内容：[https://mail.uzoncloud.com/](https://mail.uzoncloud.com/)
+

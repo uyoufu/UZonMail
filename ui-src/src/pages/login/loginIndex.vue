@@ -42,7 +42,7 @@
 <script lang="ts" setup>
 import { userLogin, updateUserEncryptKeys } from 'src/api/user'
 
-import { translateLoginPage } from 'src/i18n/helpers'
+import { getCurrentLocale, translateLoginPage } from 'src/i18n/helpers'
 import { useUserInfoStore } from 'src/stores/user'
 import { useRoutesStore } from 'src/stores/routes'
 import { notifyError } from 'src/utils/dialog'
@@ -73,11 +73,14 @@ async function onUserLogin () {
     return
   }
 
+  const currentLocale = getCurrentLocale()
+  logger.log(`[Login] 用户 ${userId.value} 使用语言 ${currentLocale.value} 登录`)
+
   // 登录逻辑
   // 1- 请求登录信息，返回用户信息、token、权限信息
   // 2- 保存信息、密码加密后保存，用于解析服务器的密码
   // 3- 跳转到主页或重定向的页面
-  const { data: { userInfo, token, access, installedPlugins } } = await userLogin(userId.value, password.value)
+  const { data: { userInfo, token, access, installedPlugins } } = await userLogin(userId.value, password.value, currentLocale.value)
   logger.debug('[Login] 用户登录信息:', userInfo, token, access)
 
   const userInfoStore = useUserInfoStore()

@@ -9,11 +9,23 @@ import type {
   EmailGroupLangKey,
   GlobalLangKey,
   outboxManagerLangKey,
-  SendingTaskLangKey
+  SendingTaskLangKey,
+  UtilsLangKey,
+  TemplateLangKey,
+  ProxyLangKey,
+  ComponentsLangKey
 } from './types'
 
 import { i18n } from 'src/boot/i18n'
 const i18nTranslate = i18n.global.t
+
+/**
+ * get current locale from i18n
+ * @returns
+ */
+export function getCurrentLocale (): WritableComputedRef<string, string> {
+  return i18n.global.locale
+}
 
 /**
  * 翻译为对应语言
@@ -77,5 +89,21 @@ export function translateGlobal (key: GlobalLangKey, named?: NamedValue): string
 
 export function translateSendingTask (key: SendingTaskLangKey, named?: NamedValue): string {
   return translateSub<SendingTaskLangKey>(key, 'sendingTask', named)
+}
+
+export function translateComponents (key: ComponentsLangKey, named?: NamedValue): string {
+  return translateSub<ComponentsLangKey>(key, 'components', named)
+}
+
+export function translateUtils (key: UtilsLangKey, named?: NamedValue): string {
+  return translateSub<UtilsLangKey>(key, 'utils', named)
+}
+
+export function translateTemplate (key: TemplateLangKey, named?: NamedValue): string {
+  return translateSub<TemplateLangKey>(key, 'template', named)
+}
+
+export function translateProxy (key: ProxyLangKey, named?: NamedValue): string {
+  return translateSub<ProxyLangKey>(key, 'proxy', named)
 }
 

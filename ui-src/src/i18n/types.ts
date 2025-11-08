@@ -24,3 +24,11 @@ export type EmailGroupLangKey = keyof typeof LocaleLang.emailGroup
 export type GlobalLangKey = keyof typeof LocaleLang.global
 
 export type SendingTaskLangKey = keyof typeof LocaleLang.sendingTask
+
+export type ComponentsLangKey = keyof typeof LocaleLang.components
+
+export type UtilsLangKey = keyof typeof LocaleLang.utils
+
+export type TemplateLangKey = keyof typeof LocaleLang.template
+
+export type ProxyLangKey = keyof typeof LocaleLang.proxy

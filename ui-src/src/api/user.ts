@@ -15,13 +15,14 @@ export interface IUserLoginInfo {
  * 用户登录
  * @returns
  */
-export function userLogin (userId: string, password: string) {
+export function userLogin (userId: string, password: string, lang: string) {
   // 对密码加密
   password = sha256(password)
   return httpClient.post<IUserLoginInfo>('/user/sign-in', {
     data: {
       userId,
-      password
+      password,
+      lang
     }
   })
 }

@@ -36,6 +36,7 @@ import { uploadFileObject } from 'src/api/file'
 import dayjs from 'dayjs'
 import { fileSha256, IFileSha256Callback } from 'src/utils/file'
 import { AxiosProgressEvent } from 'axios'
+import { translateComponents } from 'src/i18n/helpers'
 
 interface IProgressInfo {
   virtualFile: boolean
@@ -58,7 +59,7 @@ const allTransferredBytes = computed(() => progressInfos.value.reduce((sum, info
 const allBytes = computed(() => progressInfos.value.reduce((sum, info) => sum + info.totalBytes, 0))
 const progress = computed(() => allBytes.value === 0 ? 0 : allTransferredBytes.value / allBytes.value)
 const labels = computed(() => {
-  if (progressInfos.value.length === 0) return '等待上传中...'
+  if (progressInfos.value.length === 0) return translateComponents('waitingForUpload')
 
   let transferredBytes = 0, totalBytes = 0
   for (const info of progressInfos.value) {
@@ -79,7 +80,7 @@ const labels = computed(() => {
     `[${progressInfos.value.length}/${totalCount}]`,
     `${humanStorageSize(speedPerSecond)}/s`,
     `[${totalSpeed}]`,
-    `剩余 ${dayjs(remainingTime).format('mm:ss')}`
+    `${translateComponents('remain')} ${dayjs(remainingTime).format('mm:ss')}`
   ]
   return results
 })
@@ -111,12 +112,16 @@ const updateProgressInfo = throttle((index: number, message: string, transferred
 onMounted(async () => {
   let index = 0
   function sha256Callback (callbackData: IFileSha256Callback) {
-    updateProgressInfo(index, `正在计算 ${callbackData.file.name} 哈希值`, callbackData.computed, callbackData.file.size, true)
+    updateProgressInfo(index,
+      translateComponents('calculatingFileHash', { fileName: callbackData.file.name }),
+      callbackData.computed, callbackData.file.size, true)
   }
 
   function onUploadProgress (progressEvent: AxiosProgressEvent) {
     const file = props.files[index] as File
-    updateProgressInfo(index, `正在上传 ${file.name}`, progressEvent.loaded, progressEvent.total || 1)
+    updateProgressInfo(index,
+      translateComponents('uploadingFile', { fileName: file.name }),
+      progressEvent.loaded, progressEvent.total || 1)
   }
 
   const fileIds: number[] = []

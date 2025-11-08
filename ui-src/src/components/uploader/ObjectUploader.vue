@@ -4,11 +4,11 @@
     <template v-slot:header="scope">
       <div class="row no-wrap items-center q-pa-sm q-gutter-xs">
         <q-btn v-if="scope.queuedFiles.length > 0" icon="clear_all" @click="scope.removeQueuedFiles" round dense flat>
-          <q-tooltip>清空</q-tooltip>
+          <q-tooltip>{{ translateComponents('clear') }}</q-tooltip>
         </q-btn>
         <q-btn v-if="scope.uploadedFiles.length > 0" icon="done_all" @click="scope.removeUploadedFiles" round dense
           flat>
-          <q-tooltip>移除已上传文件</q-tooltip>
+          <q-tooltip>{{ translateComponents('removeUploadedFile') }}</q-tooltip>
         </q-btn>
         <q-spinner v-if="scope.isUploading" class="q-uploader__spinner" />
         <div class="col">
@@ -17,16 +17,16 @@
         </div>
         <q-btn v-if="scope.canAddFiles" type="a" icon="add_box" @click="scope.pickFiles" round dense flat>
           <q-uploader-add-trigger />
-          <q-tooltip>选择文件</q-tooltip>
+          <q-tooltip>{{ translateComponents('selectFile') }}</q-tooltip>
         </q-btn>
         <!-- <q-btn v-if="scope.canUpload" icon="cloud_upload" @click="scope.upload" round dense flat>
           <q-tooltip>上传</q-tooltip>
         </q-btn> -->
         <q-btn v-if="canUpload" icon="cloud_upload" @click="scope.upload" round dense flat>
-          <q-tooltip>上传</q-tooltip>
+          <q-tooltip>{{ translateComponents('upload') }}</q-tooltip>
         </q-btn>
         <q-btn v-if="scope.isUploading" icon="clear" @click="scope.abort" round dense flat>
-          <q-tooltip>中止上传</q-tooltip>
+          <q-tooltip>{{ translateComponents('abortUpload') }}</q-tooltip>
         </q-btn>
       </div>
     </template>
@@ -99,7 +99,7 @@ function addObsFile (files: IObsUploadedResult[]) {
 }
 
 
-import type { QUploaderFactoryObject } from 'quasar';
+import type { QUploaderFactoryObject } from 'quasar'
 import { QUploader } from 'quasar'
 const uploaderRef: Ref<QUploader> = ref(null as unknown as QUploader)
 onMounted(() => {
@@ -186,6 +186,7 @@ const canUpload = computed(() => {
 
 // 文件上传后的操作
 import { notifyError } from 'src/utils/dialog'
+import { translateComponents } from 'src/i18n/helpers'
 function onFileUploaded ({ files, xhr }: { files: readonly IObsUploadedFile[], xhr: XMLHttpRequest }) {
   const file = files[0] as IObsUploadedFile
   const response = JSON.parse(xhr.responseText)
