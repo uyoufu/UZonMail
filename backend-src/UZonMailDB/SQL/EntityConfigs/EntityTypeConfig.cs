@@ -44,20 +44,19 @@ namespace UZonMail.DB.SQL.EntityConfigs
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 // Console.WriteLine($"检查实体类型: {entityType.ClrType.FullName}");
-                // 添加全局删除过滤
-                // 20251028 禁用软删除过滤器，违反查询直觉
-                //if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
-                //{
-                //    var parameter = Expression.Parameter(entityType.ClrType, "e");
-                //    var filter = Expression.Lambda(
-                //        Expression.Equal(
-                //            Expression.Property(parameter, nameof(ISoftDelete.IsDeleted)),
-                //            Expression.Constant(false)
-                //        ),
-                //        parameter
-                //    );
-                //    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
-                //}
+                // 添加全局删除过滤，一般不会影响索引，复杂情况需要使用 .ToQueryString() 查看语句
+                if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+                {
+                    var parameter = Expression.Parameter(entityType.ClrType, "e");
+                    var filter = Expression.Lambda(
+                        Expression.Equal(
+                            Expression.Property(parameter, nameof(ISoftDelete.IsDeleted)),
+                            Expression.Constant(false)
+                        ),
+                        parameter
+                    );
+                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
+                }
             }
         }
     }
