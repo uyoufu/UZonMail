@@ -2,7 +2,7 @@
 import { httpClient } from 'src/api//base/httpClient'
 import type { IUserInfo, UserStatus, UserType } from 'src/stores/types'
 import type { IRequestPagination } from 'src/compositions/types'
-import { sha256, getSmtpPasswordSecretKeys } from 'src/utils/encrypt'
+import { sha256 } from 'src/utils/encrypt'
 
 export interface IUserLoginInfo {
   token: string,
@@ -36,21 +36,6 @@ export function userRelogin () {
   return httpClient.put<IUserLoginInfo>('/user/sign-in')
 }
 
-/**
- * 更新用户的 AES 密钥
- * 用于加密发件箱的密码
- * @param key
- * @param iv
- * @returns
- */
-export function updateUserEncryptKeys (key: string, iv: string) {
-  return httpClient.put<boolean>('/user/encrypt-keys', {
-    data: {
-      key,
-      iv
-    }
-  })
-}
 
 // 检查用户ID是否存在
 export function checkUserId (userId: string) {
@@ -156,15 +141,10 @@ export function getUserInfo (userId: string) {
  * @returns
  */
 export function changeUserPassword (oldPassword: string, newPassword: string) {
-  const oldSmtpPasswordSecretKeys = getSmtpPasswordSecretKeys(oldPassword)
-  const newSmtpPasswordSecretKeys = getSmtpPasswordSecretKeys(newPassword)
-
   return httpClient.put<boolean>('/user/password', {
     data: {
       oldPassword: sha256(oldPassword),
-      newPassword: sha256(newPassword),
-      oldSmtpPasswordSecretKeys,
-      newSmtpPasswordSecretKeys
+      newPassword: sha256(newPassword)
     }
   })
 }

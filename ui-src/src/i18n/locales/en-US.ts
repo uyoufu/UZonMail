@@ -341,6 +341,7 @@ export default {
     ifEmptyProxyUseSystemSettings: 'Use system settings if empty',
     outlookDelegateAuthorizationSkippedNonExchangeSmtp: 'Detected Outlook email, but SMTP address is not Exchange address, skipping delegate authorization',
     existingRefreshTokenNoNeedDelegateAuthorization: 'This email has already obtained refreshToken, no need for delegate authorization',
+    outlookDelegateAuthorizationSkippedEncryptedPassword: 'Detected that the outbox password is encrypted, skipping delegate authorization',
     detectedExchangeEmailStartingOutlookDelegateAuthorization: 'Detected personal Outlook email, delegate authorization required, please approve the authorization window',
     allowPopupWindowsForAuthorization: 'Please allow popup windows for authorization',
     delegateCopleted: 'Delegate authorization completed',

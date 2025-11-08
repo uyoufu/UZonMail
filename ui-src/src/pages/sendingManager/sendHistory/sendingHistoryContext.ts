@@ -4,7 +4,6 @@ import type { ISendingGroupHistory } from 'src/api/sendingGroup'
 import { SendingGroupStatus, deleteSendingGroups } from 'src/api/sendingGroup'
 import { pauseSending, restartSending, cancelSending, resendSendingGroup } from 'src/api/emailSending'
 import { confirmOperation, notifyError, notifySuccess } from 'src/utils/dialog'
-import { useUserInfoStore } from 'src/stores/user'
 import { useSendDetailVisitor } from './useSendDetailVisitor'
 
 import { useI18n } from 'vue-i18n'
@@ -103,7 +102,7 @@ export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowB
     const confirm = await confirmOperation('发送确认', '确认重新开始发件吗？')
     if (!confirm) return
 
-    await restartSending(data.id, userInfoStore.smtpPasswordSecretKeys)
+    await restartSending(data.id)
     data.status = SendingGroupStatus.Sending
 
     notifySuccess('已重新发送')
@@ -129,13 +128,13 @@ export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowB
     return data.status === SendingGroupStatus.Finish && data.successCount < data.totalCount
   }
 
-  const userInfoStore = useUserInfoStore()
+
   async function onResendSendingGroup (data: ISendingGroupHistory) {
     const confirm = await confirmOperation('重发确认', `即将重新发送【${data.totalCount - data.successCount}】封邮件，是否继续？`)
     if (!confirm) return
 
     // 开始重发
-    await resendSendingGroup(data.id, userInfoStore.smtpPasswordSecretKeys)
+    await resendSendingGroup(data.id)
 
     notifySuccess('正在重新发送...')
 

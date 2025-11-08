@@ -2,7 +2,6 @@ import { usePermission } from 'src/compositions/permission'
 import IpWarmUpSettingDialog from '../components/IpWarmUpSettingDialog.vue'
 import { notifySuccess, showComponentDialog } from 'src/utils/dialog'
 import { useRoute } from 'vue-router'
-import { useUserInfoStore } from 'src/stores/user'
 import { formatDateToUTC } from 'src/utils/format'
 import logger from 'loglevel'
 import dayjs from 'dayjs'
@@ -12,8 +11,6 @@ import { getInboxesCountInGroups } from 'src/api/emailBox'
 import type { IEmailCreateInfo } from 'src/api/emailSending'
 
 export function useIpWarmUp (validateSendingTaskParams: () => boolean, emailInfo: Ref<IEmailCreateInfo>) {
-  const userInfoStore = useUserInfoStore()
-
   // #region 权限
   const route = useRoute()
   const { isProfession } = usePermission()
@@ -48,7 +45,7 @@ export function useIpWarmUp (validateSendingTaskParams: () => boolean, emailInfo
     logger.debug('[IpWarmUp] 预热设置结果: ', data)
     // 添加时间范围和 smtps key
     const timePart = dayjs().format('HH:mm:ss')
-    const warmUpData = Object.assign({ smtpPasswordSecretKeys: userInfoStore.smtpPasswordSecretKeys }, emailInfo.value, {
+    const warmUpData = Object.assign({}, emailInfo.value, {
       sendStartDate: formatDateToUTC(`${data.from} ${timePart}`),
       sendEndDate: formatDateToUTC(`${data.to} ${timePart}`),
       sendCountChartPoints: data.countChartPoints,

@@ -215,19 +215,8 @@ function getPasswordValue (data: IOutbox) {
   if (data.showPassword) return data.password
   return '*'.repeat(6)
 }
-import { deAes } from 'src/utils/encrypt'
-import { useUserInfoStore } from 'src/stores/user'
-const userInfoStore = useUserInfoStore()
-function togglePasswordViewMode (data: IOutbox) {
-  // console.log('togglePasswordViewMode', data)
-  // 若是显示密码，但没有解密，则先解密
-  if (!data.decryptedPassword) {
-    // 进行解密
-    const plainPwd = deAes(userInfoStore.smtpPasswordSecretKeys[0] || '', userInfoStore.smtpPasswordSecretKeys[1] || '', data.password)
-    data.password = plainPwd || translateOutboxManager('decryptionFailedDueToKeyChange')
-    data.decryptedPassword = true
-  }
 
+function togglePasswordViewMode (data: IOutbox) {
   data.showPassword = !data.showPassword
 }
 
@@ -275,11 +264,6 @@ async function exportAllInboxesInThisGroup (group: Record<string, any>) {
     return
   }
   const { data: dataRows } = await getOutboxesData(group.id, '', { sortBy: 'id', descending: false, skip: 0, limit: count })
-  // 对密码进行解密
-  dataRows.forEach(row => {
-    const plainPwd = deAes(userInfoStore.smtpPasswordSecretKeys[0] || '', userInfoStore.smtpPasswordSecretKeys[1] || '', row.password)
-    row.password = plainPwd || translateOutboxManager('decryptionFailedDueToKeyChange')
-  })
 
   await writeExcel(dataRows, {
     fileName: translateOutboxManager('exportFileName', { groupName: group.name }),

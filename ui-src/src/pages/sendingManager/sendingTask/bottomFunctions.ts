@@ -6,7 +6,6 @@ import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { formatDateToUTC } from 'src/utils/format'
 import type { IEmailCreateInfo } from 'src/api/emailSending'
 import { sendEmailNow, sendSchedule } from 'src/api/emailSending'
-import { useUserInfoStore } from 'src/stores/user'
 
 import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
 import PreviewSendingDialog from './components/PreviewSendingDialog.vue'
@@ -24,8 +23,6 @@ import { translateSendingTask } from 'src/i18n/helpers'
 export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
   // 数据验证
   const needUpload = ref(false)
-  const userInfoStore = useUserInfoStore()
-
   // 存在全局的 body
   const existGlobalBody = computed(() => {
     return emailInfo.value.templates.length || emailInfo.value.body
@@ -148,7 +145,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
     await showComponentDialog(SendingProgress, {
       title: translateSendingTask('sendingProgress'),
       sendingApi: async () => {
-        return await sendEmailNow(Object.assign({ smtpPasswordSecretKeys: userInfoStore.smtpPasswordSecretKeys }, emailInfo.value))
+        return await sendEmailNow(emailInfo.value)
       }
     })
   }
@@ -163,7 +160,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
     if (!ok) return
 
     // 将数据传到后台发送
-    await sendSchedule(Object.assign({ smtpPasswordSecretKeys: userInfoStore.smtpPasswordSecretKeys }, emailInfo.value, {
+    await sendSchedule(Object.assign(emailInfo.value, {
       scheduleDate: formatDateToUTC(scheduleDate) // 转换成带时区的字符串
     }))
 
