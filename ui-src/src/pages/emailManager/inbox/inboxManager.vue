@@ -84,7 +84,7 @@ const columns: ComputedRef<QTableColumn[]> = computed(() => [
   },
   {
     name: 'name',
-    label: translateInboxManager('col_name'),
+    label: translateInboxManager('col_inboxName'),
     align: 'left',
     field: 'name',
     sortable: true
@@ -136,7 +136,7 @@ const { onNewInboxClick, onExportInboxTemplateClick, onImportInboxClick } = useH
 
 // #region 数据右键菜单
 import { useContextMenu } from './contextMenu'
-const { inboxContextMenuItems } = useContextMenu(deleteRowById)
+const { inboxContextMenuItems } = useContextMenu(deleteRowById, refreshTable)
 // #endregion
 
 // #region 分组的右键菜单

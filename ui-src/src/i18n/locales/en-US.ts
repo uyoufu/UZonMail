@@ -54,6 +54,38 @@ export default {
   },
   // #endregion
 
+  // #region components
+  components: {
+    // Clear
+    clear: 'Clear',
+    // Remove uploaded file
+    removeUploadedFile: 'Remove uploaded file',
+    // Select file
+    selectFile: 'Select file',
+    // Upload
+    upload: 'Upload',
+    // Abort upload
+    abortUpload: 'Abort upload',
+    // Waiting for upload...
+    waitingForUpload: 'Waiting for upload...',
+    // Remaining
+    remain: 'Remain',
+    // Calculating hash for ${fileName}
+    calculatingFileHash: 'Calculating hash for {fileName}',
+    // Uploading ${fileName}
+    uploadingFile: 'Uploading {fileName}',
+  },
+  // #endregion
+
+  // #region utils
+  utils: {
+    // `... 等共 ${labels.length} ${unit}`
+    totalItems: '... and a total of {count} {unit}',
+    item: 'item',
+  },
+  // #endregion
+  // #endregion
+
   // #region Routes
   routes: {
     dashboard: 'Dashboard',
@@ -148,6 +180,23 @@ export default {
   },
   // #endregion
 
+  template: {
+    templateName: 'Template Name',
+    templateId: 'Template ID',
+    backToTemplateManager: 'Back to Template Manager',
+    pleaseInputTemplateName: 'Please input template name',
+    saveTemplate: 'Save Template',
+    savingTemplate: 'Saving template...',
+    saveTemplateSuccess: 'Template saved successfully',
+    saveFailedCannotGenerateThumbnail: 'Save failed: Cannot generate thumbnail',
+    saveFailedCurrentContentStructureInvalid: 'Current content structure is invalid, cannot generate thumbnail',
+    templateEditorPlaceholder: "Enter template content here, variables are wrapped in {'{{ }}'}, for example {'{{ variableName }}'}",
+  },
+
+  proxy: {
+    proxyId: 'Proxy ID',
+  },
+
   // #region 邮箱管理
   emailGroup: {
     inboxGroup: 'Inbox Group',
@@ -187,8 +236,12 @@ export default {
     ctx_importInboxToCurrentGroup: 'Import inboxes to current group',
     ctx_export: 'Export',
     ctx_exportInboxToCurrentGroup: 'Export inboxes from current group',
+    ctx_deleteDelivered: 'Delete Delivered',
+    ctx_deleteDeliveredInboxesInCurrentGroup: 'Delete all delivered inboxes in the current group',
 
     col_email: 'Email',
+    col_inbox: 'Inbox',
+    col_inboxName: 'Inbox Name',
     col_name: 'Recipient Name',
     col_description: 'Description',
     col_minInboxCooldownHours: 'Minimum Inbox Cooldown (Hours)',
@@ -198,8 +251,8 @@ export default {
     inboxText: 'Inbox Text',
     importFromTxtPlaceholder: 'One inbox per line',
     newInboxSuccess: 'New inbox created successfully',
-    modifyInbox: 'Modify Inbox',
-    modifyCurrentInbox: 'Modify Current Inbox',
+    editInbox: 'Edit Inbox',
+    editCurrentInbox: 'Edit Current Inbox',
     updateInboxSuccess: 'Inbox updated successfully',
     validateCurrentOrSelectedInboxes: 'Validate current or selected inboxes',
     inboxTemplate: 'Inbox Template',
@@ -217,6 +270,7 @@ export default {
     ctx_deleteInvalid: 'Delete Invalid',
     deleteAllInvalidInboxesInCurrentGroup: 'Delete all invalid inboxes in the current group',
     isDeleteEmailOf: 'Delete inbox: {email} ?',
+    isDeleteAllDeliveredInboxesInCurrentGroup: 'Delete all delivered inboxes in the current group?',
   },
   // #endregion
 
@@ -266,8 +320,9 @@ export default {
     refreshTokenAlreadyObtained: 'This email has already obtained refreshToken, no need for delegate authorization',
     failedToGetAuthorizationUrl: 'Failed to get delegate authorization URL, please try again later',
 
+    col_order: '@:global.order',
     col_outbox: 'Outbox',
-    col_outboxUserName: 'Name (Sender Name)',
+    col_outboxName: 'Name (Sender Name)',
     col_smtpHost: 'SMTP Address',
     col_smtpPort: 'SMTP Port',
     col_smtpUserName: 'SMTP Username',
@@ -276,7 +331,6 @@ export default {
     col_proxy: 'Proxy',
     col_description: 'Description',
     col_status: 'Validation',
-    col_order: '@:global.order',
     col_email: 'Outbox',
     col_replyToEmails: 'Reply To Emails',
 
@@ -293,6 +347,10 @@ export default {
     importOutboxForCurrentGroupFromExcel: 'Import outboxes to current group from Excel',
     importOutboxForCurrentGroupFromTxt: 'Import outboxes to current group from TXT',
     noItemsToImport: 'No items to import',
+    emailFormatInvalid: 'Invalid email format: {email}',
+    noValidImportData: 'No valid import data found, please check the header',
+    confirmImportWithErrors: 'Some data has format errors, continue importing?',
+    importCancelled: 'Import cancelled',
     emaiEmptyAtRow: 'Email empty at row {row}',
     importOutboxSuccess: 'Import outbox success, imported {count} items',
     exportOutboxesInThisGroup: 'Export outboxes in this group',
@@ -317,6 +375,11 @@ export default {
   // #region Sending Task
   sendingTask: {
     subjectPlaceholder: 'Please input email subject (if you need random subjects, separate multiple subjects with a semicolon ; or place each on its own line)',
+    subject: 'Subject',
+    template: 'Template',
+    // select template
+    selectTemplateTooltip: 'Please select a template (template and body must have at least one non-empty)',
+    templateUnit: 'templates',
     sender: 'Sender',
     senderPlaceholder: 'Please select an outbox or outbox group (required)',
     recipients: 'Recipients',
@@ -342,10 +405,45 @@ export default {
     pleaseEnsureEachDataHasInbox: 'Please ensure each data row has an inbox (recipient email)',
     outboxMissingInData: 'Outbox missing in data, please specify outbox in data or select an outbox',
     bodyMissingInData: 'Body missing in data, please specify email body in data or select a template or enter the body',
+    body: 'Body',
+    // custom variables
+    customVariables: 'Custom Variables',
     pleaseUploadAttachments: 'Please click the attachments upload button to upload attachments',
     sendingStarted: 'Sending started...',
     sendingProgress: 'Sending progress',
     scheduledSendingBooked: 'Scheduled sending booked',
+    // examples for template columns
+    example_inbox: 'Inbox (please delete this row when importing)',
+    example_inboxName: 'Recipient Name (optional)',
+    example_outbox: 'Outbox (optional)',
+    example_outboxName: 'Sender Name (optional)',
+    example_subject: 'Subject (optional)',
+    example_body: 'Content (optional)',
+    example_cc: 'CC (comma separated, optional)',
+    example_bcc: 'BCC (comma separated, optional)',
+    example_templateName: 'Template Name (optional)',
+    example_templateId: 'Template ID (optional)',
+    example_proxy: 'Proxy ID (optional)',
+    example_other: 'You can add more columns as custom fields (optional)',
+    example_attachmentNames: 'Attachment names (comma separated, optional)',
+    // sending data template
+    sendingDataTemplateFileName: 'Sending Data Template.xlsx',
+    sendingDataTemplateSheetName: 'Sending Data',
+    templateDownloadSuccess: 'Template download successful',
+    // data
+    emailData: 'Data',
+    // delete current data
+    deleteCurrentData: 'Delete current data',
+    // download template
+    downloadTemplate: 'Download Template',
+    // select data
+    selectData: 'Select Data',
+    // data empty
+    dataIsEmpty: 'Data is empty, please reselect',
+    // inbox empty or invalid at row
+    inboxEmptyOrInvalidAtRow: 'Inbox at row {row} is empty or invalid, please check and reselect',
+    bccRecipients: 'BCC',
+    bccRecipientsPlaceholder: 'Please select BCC recipients (optional)',
   },
   // #endregion
 
@@ -395,6 +493,12 @@ export default {
   },
 
   unsubscribePage: {
+    unsubscribe: 'Unsubscribe',
+    unsubscribed: 'Unsubscribed'
+  }
+  ,
+  // keep old spelling from zh file
+  unsuscribePage: {
     unsubscribe: 'Unsubscribe',
     unsubscribed: 'Unsubscribed'
   }

@@ -230,6 +230,15 @@ export function deleteInboxById (emailBoxId: number) {
 }
 
 /**
+ * delete all delivered inboxes in specific group
+ * @param emailGroupId
+ * @returns
+ */
+export function deleteAllDeliveredInboxesInGroup (emailGroupId: number) {
+  return httpClient.delete<boolean>(`/email-box/inboxes/groups/${emailGroupId}/delivered`)
+}
+
+/**
  * 批量创建收件箱
  * @param outbox
  * @returns

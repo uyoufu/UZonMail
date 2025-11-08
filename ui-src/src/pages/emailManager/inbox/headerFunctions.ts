@@ -28,7 +28,7 @@ export function getInboxFields () {
     {
       name: 'name',
       type: PopupDialogFieldType.text,
-      label: translateInboxManager('col_name'),
+      label: translateInboxManager('col_inboxName'),
     },
     {
       name: 'minInboxCooldownHours',
@@ -51,7 +51,7 @@ export function getInboxExcelDataMapper (): IExcelColumnMapper[] {
       required: true
     },
     {
-      headerName: translateInboxManager('col_name'),
+      headerName: translateInboxManager('col_inboxName'),
       fieldName: 'name'
     },
     {
@@ -103,7 +103,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewR
   async function onExportInboxTemplateClick () {
     const data: any[] = [
       {
-        name: translateInboxManager('col_name'),
+        name: translateInboxManager('col_inboxName'),
         email: translateInboxManager('export_EmailColumnTooltip'),
         minInboxCooldownHours: translateInboxManager('col_minInboxCooldownHours'),
         description: translateInboxManager('col_description')
