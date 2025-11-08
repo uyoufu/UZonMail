@@ -18,6 +18,8 @@ export default {
 
   // #region 全局通用
   global: {
+    appName: '宇正群邮',
+
     order: '序号',
     failed: '失败',
     success: '操作成功',

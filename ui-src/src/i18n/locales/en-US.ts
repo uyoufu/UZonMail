@@ -21,6 +21,8 @@ export default {
 
   // #region Global
   global: {
+    appName: 'UZonMail',
+
     order: 'Order',
     failed: 'Action failed',
     success: 'Action was successful',
