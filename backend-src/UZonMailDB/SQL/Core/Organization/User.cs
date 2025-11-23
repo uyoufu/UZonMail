@@ -1,4 +1,4 @@
-﻿using UZonMail.DB.SQL.Base;
+using UZonMail.DB.SQL.Base;
 using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.Utils.Web.Token;
 
@@ -38,6 +38,12 @@ namespace UZonMail.DB.SQL.Core.Organization
         /// 用户姓名
         /// </summary>
         public string? UserName { get; set; }
+
+        /// <summary>
+        /// 密码盐值
+        /// 使用一个新的 GUID 作为盐值
+        /// </summary>
+        public string Salt { get; set; } = NewSalt();
 
         /// <summary>
         /// 密码
@@ -82,8 +88,13 @@ namespace UZonMail.DB.SQL.Core.Organization
         /// </summary>
         public long CreateBy { get; set; }
 
-        #region 静态变量
+        #region 静态方法
         public static string SystemUserId => "system_uzon";
+
+        public static string NewSalt()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
         #endregion
     }
 }

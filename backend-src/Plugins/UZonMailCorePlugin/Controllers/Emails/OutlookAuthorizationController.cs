@@ -1,9 +1,9 @@
-﻿using log4net;
+using System.Reflection;
+using log4net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using System.Reflection;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Emails.Requests;
 using UZonMail.Core.Services.Encrypt;
@@ -21,9 +21,16 @@ namespace UZonMail.Core.Controllers.Emails
     /// 参考：https://github.com/jstedfast/MailKit/blob/master/ExchangeOAuth2.md
     /// TODO: 目前该方法存在验证问题
     /// </summary>
-    public class OutlookAuthorizationController(IServiceProvider serviceProvider, SqlContext db, TokenService tokenService, EncryptService encryptService) : ControllerBaseV1
+    public class OutlookAuthorizationController(
+        IServiceProvider serviceProvider,
+        SqlContext db,
+        TokenService tokenService,
+        EncryptService encryptService
+    ) : ControllerBaseV1
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(OutlookAuthorizationController));
+        private static readonly ILog _logger = LogManager.GetLogger(
+            typeof(OutlookAuthorizationController)
+        );
 
         /// <summary>
         /// 获取微软授权请求
@@ -35,7 +42,9 @@ namespace UZonMail.Core.Controllers.Emails
             var userId = tokenService.GetUserSqlId();
 
             // 查找 outbox
-            var outbox = await db.Outboxes.Where(x => x.Id == outboxId && x.UserId == userId).FirstOrDefaultAsync();
+            var outbox = await db
+                .Outboxes.Where(x => x.Id == outboxId && x.UserId == userId)
+                .FirstOrDefaultAsync();
             if (outbox == null)
             {
                 return string.Empty.ToFailResponse("未找到该发件箱");
@@ -44,7 +53,8 @@ namespace UZonMail.Core.Controllers.Emails
             var graphParams = serviceProvider.GetRequiredService<MsGraphParamsResolver>();
             graphParams.SetGraphInfo(outbox.UserName);
 
-            var uri = serviceProvider.GetRequiredService<OutlookAuthorizationRequest>()
+            var uri = serviceProvider
+                .GetRequiredService<OutlookAuthorizationRequest>()
                 .WithClientId(graphParams.ClientId)
                 .WithState(outbox.ObjectId)
                 .WithEmail(outbox.Email)
@@ -54,6 +64,7 @@ namespace UZonMail.Core.Controllers.Emails
         }
 
         private static string _outlookAuthorizeCallbackPage = string.Empty;
+
         /// <summary>
         /// 微软授权回调
         /// </summary>
@@ -61,7 +72,10 @@ namespace UZonMail.Core.Controllers.Emails
         /// <returns></returns>
         [AllowAnonymous]
         [HttpGet("code")]
-        public async Task<IActionResult> OnAuthorizationCallback([FromQuery] string code, [FromQuery] string state)
+        public async Task<IActionResult> OnAuthorizationCallback(
+            [FromQuery] string code,
+            [FromQuery] string state
+        )
         {
             var outbox = await db.Outboxes.FirstOrDefaultAsync(x => x.ObjectId == state);
             if (outbox == null)
@@ -74,25 +88,32 @@ namespace UZonMail.Core.Controllers.Emails
                 // 从文件中读取
                 var assemblyLocation = Assembly.GetExecutingAssembly().Location;
                 var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
-                var smtpInfoPath = Path.Combine(assemblyDirectory, "data/init/outlookAuthorizeCallback.html");
+                var smtpInfoPath = Path.Combine(
+                    assemblyDirectory,
+                    "data/init/outlookAuthorizeCallback.html"
+                );
                 _outlookAuthorizeCallbackPage = await System.IO.File.ReadAllTextAsync(smtpInfoPath);
             }
 
             // 解析用户名和密码
-            var plainPassword = encryptService.DecryptOutboxSecret(outbox.UserId, outbox.Password);
+            var plainPassword = encryptService.DecryptPassword(outbox.Password);
             var graphParams = serviceProvider.GetRequiredService<MsGraphParamsResolver>();
             graphParams.SetGraphInfo(outbox.UserName, plainPassword);
 
-            var request = serviceProvider.GetRequiredService<OutlookRefreshokenRequest>()
-               .WithFormData(graphParams.ClientId, graphParams.ClientSecret, code);
+            var request = serviceProvider
+                .GetRequiredService<OutlookRefreshokenRequest>()
+                .WithFormData(graphParams.ClientId, graphParams.ClientSecret, code);
 
             var response = await request.SendAsync();
             var result = new JObject()
             {
-                { "ok",response.IsSuccessStatusCode},
-                { "message",response.ReasonPhrase}
+                { "ok", response.IsSuccessStatusCode },
+                { "message", response.ReasonPhrase }
             };
-            var content = _outlookAuthorizeCallbackPage.Replace("{{ authorizeResult }}", $"JSON.parse('{result.ToJson()}')");
+            var content = _outlookAuthorizeCallbackPage.Replace(
+                "{{ authorizeResult }}",
+                $"JSON.parse('{result.ToJson()}')"
+            );
 
             if (response.IsSuccessStatusCode)
             {
@@ -101,8 +122,10 @@ namespace UZonMail.Core.Controllers.Emails
                 var authResult = responseContent.JsonTo<AuthenticationResult2>();
 
                 graphParams.SetRefreshToken(authResult?.RefreshToken);
-                
-                var encryptedPassword = encryptService.EncryptOutboxSecret(outbox.UserId, graphParams.GetPasswordForDB());
+
+                var encryptedPassword = encryptService.EncrytPassword(
+                    graphParams.GetPasswordForDB()
+                );
                 outbox.Password = encryptedPassword;
                 outbox.Status = OutboxStatus.Valid;
                 await db.SaveChangesAsync();

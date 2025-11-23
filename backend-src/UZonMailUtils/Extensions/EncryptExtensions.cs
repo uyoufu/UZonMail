@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,10 +23,15 @@ namespace UZonMail.Utils.Extensions
         /// <param name="format"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static string Hash(this string plainText, HashAlgorithm hashAlgorithm, string format = "x2")
+        public static string Hash(
+            this string plainText,
+            HashAlgorithm hashAlgorithm,
+            string format = "x2"
+        )
         {
             // 参考：https://www.cnblogs.com/qiufengke/p/5292621.html
-            if (string.IsNullOrEmpty(plainText)) throw new ArgumentNullException($"{nameof(plainText)}为空");
+            if (string.IsNullOrEmpty(plainText))
+                throw new ArgumentNullException($"{nameof(plainText)}为空");
             var bytHash = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(plainText));
             var sb = new StringBuilder();
             foreach (var b in bytHash)
@@ -73,7 +78,6 @@ namespace UZonMail.Utils.Extensions
 
             if (md5Result != encryptText)
             {
-
                 // 明文与密文不匹配
                 return false;
             }
@@ -85,26 +89,30 @@ namespace UZonMail.Utils.Extensions
         /// 计算字符串的 SHA256 值
         /// </summary>
         /// <param name="plainText"></param>
-        /// <param name="cycle">额外的循环的次数</param>
+        /// <param name="extra">额外的循环的次数</param>
         /// <returns></returns>
-        public static string Sha256(this string plainText, int cycle = 0)
+        public static string Sha256(this string plainText, int extra = 0)
         {
             var hashAlgorithm = SHA256.Create();
             var hash = plainText.Hash(hashAlgorithm);
 
-            if (cycle > 0)
+            if (extra > 0)
             {
-                return hash.Sha256(cycle - 1);
+                return hash.Sha256(extra - 1);
             }
             return hash;
         }
         #endregion
 
         #region 对称加密
-        public static byte[] CryptoTransform(this string plainText, ICryptoTransform cryptoTransform)
+        public static byte[] CryptoTransform(
+            this string plainText,
+            ICryptoTransform cryptoTransform
+        )
         {
             // 参考：https://www.cnblogs.com/qiufengke/p/5292621.html
-            if (string.IsNullOrEmpty(plainText)) throw new ArgumentNullException($"{nameof(plainText)}为空");
+            if (string.IsNullOrEmpty(plainText))
+                throw new ArgumentNullException($"{nameof(plainText)}为空");
             var textBytes = Encoding.UTF8.GetBytes(plainText);
             return textBytes.CryptoTransform(cryptoTransform);
         }
@@ -121,10 +129,17 @@ namespace UZonMail.Utils.Extensions
         /// <param name="textBytes"></param>
         /// <param name="cryptoTransform"></param>
         /// <returns></returns>
-        public static byte[] CryptoTransform(this byte[] textBytes, ICryptoTransform cryptoTransform)
+        public static byte[] CryptoTransform(
+            this byte[] textBytes,
+            ICryptoTransform cryptoTransform
+        )
         {
             using MemoryStream msDecrypt = new MemoryStream(textBytes);
-            using CryptoStream csDecrypt = new CryptoStream(msDecrypt, cryptoTransform, CryptoStreamMode.Read);
+            using CryptoStream csDecrypt = new CryptoStream(
+                msDecrypt,
+                cryptoTransform,
+                CryptoStreamMode.Read
+            );
             // 读取所有 bytes
             List<byte> bytes = new List<byte>();
             while (true)
@@ -148,10 +163,13 @@ namespace UZonMail.Utils.Extensions
         /// <returns></returns>
         public static byte[] HexToByteArray(this string hex)
         {
-            return Enumerable.Range(0, hex.Length)
-                             .Where(x => x % 2 == 0)
-                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-                             .ToArray();
+            return
+            [
+                .. Enumerable
+                    .Range(0, hex.Length)
+                    .Where(x => x % 2 == 0)
+                    .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+            ];
         }
 
         /// <summary>
@@ -163,10 +181,16 @@ namespace UZonMail.Utils.Extensions
         /// <returns></returns>
         public static string AES(this string plainText, string key, string iv)
         {
+            // 将 key 取 hash 值, 避免长度不够
+            var sha256Key = key.Sha256();
+            var sha256Iv = iv.Sha256();
+            var rgbKeyBytes = Encoding.UTF8.GetBytes(sha256Key)[..32];
+            var rgbIvBytes = Encoding.UTF8.GetBytes(sha256Iv)[..16];
+
             var aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
-            var encryptor = aes.CreateEncryptor(key.ToUtf8Bytes(), iv.ToUtf8Bytes());
+            var encryptor = aes.CreateEncryptor(rgbKeyBytes, rgbIvBytes);
             var bytes = plainText.CryptoTransform(encryptor);
             // 转换为 16 进制字符串
             return BitConverter.ToString(bytes).Replace("-", "").ToLower();
@@ -184,9 +208,15 @@ namespace UZonMail.Utils.Extensions
             var aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
-            var decryptor = aes.CreateDecryptor(key.ToUtf8Bytes(), iv.ToUtf8Bytes());
+
+            var sha256Key = key.Sha256();
+            var sha256Iv = iv.Sha256();
+            var rgbKeyBytes = Encoding.UTF8.GetBytes(sha256Key)[..32];
+            var rgbIvBytes = Encoding.UTF8.GetBytes(sha256Iv)[..16];
+
+            var decryptor = aes.CreateDecryptor(rgbKeyBytes, rgbIvBytes);
             var encryptArray = encryptText.HexToByteArray();
-            var bytes =  decryptor.TransformFinalBlock(encryptArray, 0, encryptArray.Length);            
+            var bytes = decryptor.TransformFinalBlock(encryptArray, 0, encryptArray.Length);
             // 转为 utf 字符串
             return Encoding.UTF8.GetString(bytes);
         }

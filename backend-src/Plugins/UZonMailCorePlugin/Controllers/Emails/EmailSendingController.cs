@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Controllers.Emails.Models;
@@ -21,22 +21,27 @@ namespace UZonMail.Core.Controllers.Emails
     /// <summary>
     /// 发件相关接口
     /// </summary>
-    public class EmailSendingController(SqlContext db,
-        SendingGroupService sendingService, TokenService tokenService,
+    public class EmailSendingController(
+        SqlContext db,
+        SendingGroupService sendingService,
+        TokenService tokenService,
         EmailContentDecorateService decorateService
-        ) : ControllerBaseV1
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 预览发件项
         /// </summary>
         /// <returns></returns>
         [HttpPost("preview")]
-        public async Task<ResponseResult<SendingItemPreview>> PreviewSendingItem([FromBody] SendingItemPreview data)
+        public async Task<ResponseResult<SendingItemPreview>> PreviewSendingItem(
+            [FromBody] SendingItemPreview data
+        )
         {
             // 对数据进行替换
             var userId = tokenService.GetUserSqlId();
 
-            var inbox = await db.Inboxes.Where(x => x.UserId == userId && x.Email == data.Inbox)
+            var inbox = await db
+                .Inboxes.Where(x => x.UserId == userId && x.Email == data.Inbox)
                 .FirstOrDefaultAsync();
 
             var sendingItem = new SendingItem()
@@ -45,23 +50,30 @@ namespace UZonMail.Core.Controllers.Emails
                 Subject = data.Subject,
                 Content = data.Body,
                 Data = data.Data,
-                Inboxes = [new EmailAddress() { Email = data.Inbox, Name = inbox == null ? string.Empty : inbox.Name }]
+                Inboxes =
+                [
+                    new EmailAddress()
+                    {
+                        Email = data.Inbox,
+                        Name = inbox == null ? string.Empty : inbox.Name
+                    }
+                ]
             };
 
             var sendItemMeta = new SendItemMeta(0);
             sendItemMeta.SetSendingItem(sendingItem);
-            var decoratorParams = new EmailDecoratorParams(new SendingSetting(), sendItemMeta, new Outbox()
-            {
-                Email = "out@test.com",
-                Name = "outbox"
-            });
+            var decoratorParams = new EmailDecoratorParams(
+                new SendingSetting(),
+                sendItemMeta,
+                new Outbox() { Email = "out@test.com", Name = "outbox" }
+            );
             data.Subject = await decorateService.ResolveVariables(decoratorParams, data.Subject);
             data.Body = await decorateService.ResolveVariables(decoratorParams, data.Body);
             return data.ToSuccessResponse();
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         [HttpPost("now")]
@@ -77,7 +89,9 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="sendingData"></param>
         /// <returns></returns>
         [HttpPost("schedule")]
-        public async Task<ResponseResult<SendingGroup>> SendSchedule([FromBody] SendingGroup sendingData)
+        public async Task<ResponseResult<SendingGroup>> SendSchedule(
+            [FromBody] SendingGroup sendingData
+        )
         {
             // 校验数据
             return await sendingService.StartSending(sendingData);
@@ -92,7 +106,9 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<bool>> PauseSending(long sendingGroupId)
         {
             // 查找发件组
-            var sendingGroup = await db.SendingGroups.AsNoTracking().FirstOrDefaultAsync(x => x.Id == sendingGroupId);
+            var sendingGroup = await db
+                .SendingGroups.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == sendingGroupId);
             if (sendingGroup == null)
             {
                 return false.ToFailResponse("发件组不存在");
@@ -102,9 +118,14 @@ namespace UZonMail.Core.Controllers.Emails
             await sendingService.RemoveSendingGroupTask(sendingGroup);
 
             // 更新状态
-            await db.SendingGroups.UpdateAsync(x => x.Id == sendingGroupId, x => x.SetProperty(y => y.Status, SendingGroupStatus.Pause));
-            await db.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending,
-                x => x.SetProperty(y => y.Status, SendingItemStatus.Created));
+            await db.SendingGroups.UpdateAsync(
+                x => x.Id == sendingGroupId,
+                x => x.SetProperty(y => y.Status, SendingGroupStatus.Pause)
+            );
+            await db.SendingItems.UpdateAsync(
+                x => x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending,
+                x => x.SetProperty(y => y.Status, SendingItemStatus.Created)
+            );
 
             return true.ToSuccessResponse();
         }
@@ -116,16 +137,17 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="sendingGroupId"></param>
         /// <returns></returns>
         [HttpPost("sending-groups/{sendingGroupId:long}/restart")]
-        public async Task<ResponseResult<bool>> RestartSending(long sendingGroupId, [FromBody] SmtpSecretKeysModel smtpSecretKeys)
+        public async Task<ResponseResult<bool>> RestartSending(long sendingGroupId)
         {
             // 查找发件组
-            var sendingGroup = await db.SendingGroups.AsNoTracking().Where(x => x.Id == sendingGroupId).FirstOrDefaultAsync();
+            var sendingGroup = await db
+                .SendingGroups.AsNoTracking()
+                .Where(x => x.Id == sendingGroupId)
+                .FirstOrDefaultAsync();
             if (sendingGroup == null)
             {
                 return false.ToFailResponse("发件组不存在");
             }
-
-            sendingGroup.SmtpPasswordSecretKeys = smtpSecretKeys.SmtpPasswordSecretKeys;
 
             // 重新开始发件
             await sendingService.SendNow(sendingGroup);
@@ -142,7 +164,9 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<bool>> CancelSending(long sendingGroupId)
         {
             // 查找发件组
-            var sendingGroup = await db.SendingGroups.FirstOrDefaultAsync(x => x.Id == sendingGroupId);
+            var sendingGroup = await db.SendingGroups.FirstOrDefaultAsync(x =>
+                x.Id == sendingGroupId
+            );
             if (sendingGroup == null)
             {
                 return false.ToFailResponse("发件组不存在");
@@ -159,9 +183,10 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="sendingItemId"></param>
         /// <returns></returns>
         [HttpPost("sending-items/{sendingItemId:long}/resend")]
-        public async Task<ResponseResult<bool>> ResendSendingItem(long sendingItemId, [FromBody] SmtpSecretKeysModel smtpSecretKeys)
+        public async Task<ResponseResult<bool>> ResendSendingItem(long sendingItemId)
         {
-            var sendingItem = await db.SendingItems.Where(x => x.Id == sendingItemId)
+            var sendingItem = await db
+                .SendingItems.Where(x => x.Id == sendingItemId)
                 .Include(x => x.SendingGroup)
                 .FirstOrDefaultAsync();
             if (sendingItem == null)
@@ -180,8 +205,6 @@ namespace UZonMail.Core.Controllers.Emails
                 return false.ToFailResponse("发件组已全部成功，不支持重发");
             }
 
-            // 开始发件
-            sendingGroup.SmtpPasswordSecretKeys = smtpSecretKeys.SmtpPasswordSecretKeys;
             await sendingService.SendNow(sendingGroup, [sendingItem.Id]);
 
             return true.ToSuccessResponse();
@@ -193,10 +216,12 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="sendingGroupId"></param>
         /// <returns></returns>
         [HttpPost("sending-groups/{sendingGroupId:long}/resend")]
-        public async Task<ResponseResult<bool>> ResendSendingGroup(long sendingGroupId, [FromBody] SmtpSecretKeysModel smtpSecretKeys)
+        public async Task<ResponseResult<bool>> ResendSendingGroup(long sendingGroupId)
         {
             // 查找发件项
-            var sendingGroup = await db.SendingGroups.FirstOrDefaultAsync(x => x.Id == sendingGroupId);
+            var sendingGroup = await db.SendingGroups.FirstOrDefaultAsync(x =>
+                x.Id == sendingGroupId
+            );
             if (sendingGroup == null)
             {
                 return false.ToFailResponse("发件组不存在");
@@ -211,7 +236,6 @@ namespace UZonMail.Core.Controllers.Emails
             }
 
             // 重新发送
-            sendingGroup.SmtpPasswordSecretKeys = smtpSecretKeys.SmtpPasswordSecretKeys;
             await sendingService.SendNow(sendingGroup);
             return true.ToSuccessResponse();
         }

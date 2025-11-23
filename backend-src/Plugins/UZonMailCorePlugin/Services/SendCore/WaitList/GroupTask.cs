@@ -1,58 +1,53 @@
-﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.SignalRHubs.SendEmail;
-using UZonMail.Core.SignalRHubs.Extensions;
 using log4net;
+using Microsoft.EntityFrameworkCore;
 using UZonMail.Core.Database.SQL.EmailSending;
-using UZonMail.DB.SQL;
-using UZonMail.Core.Services.SendCore.Outboxes;
+using UZonMail.Core.Services.Encrypt;
+using UZonMail.Core.Services.Encrypt.Models;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.EmailWaitList;
-using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.DB.Extensions;
+using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.SendCore.Proxies;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
+using UZonMail.Core.SignalRHubs.Extensions;
+using UZonMail.Core.SignalRHubs.SendEmail;
+using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Base;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.EmailSending.WaitList
+namespace UZonMail.Core.Services.SendCore.WaitList
 {
     /// <summary>
     /// 一次发件任务
     /// 不同的发件任务包含不同的数据库上下文，保证上下文不重复使用
     /// 包含发件组和收件内容
+    /// 请调用 <seealso cref="Create(SendingContext, long)"/> 方法创建实例
     /// </summary>
     /// <remarks>
-    /// 构造
     /// </remarks>
-    public class GroupTask
+    public class GroupTask(EncryptService encryptService) : ITransientService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTask));
         private readonly object _lockObject = new();
 
-        private GroupTask(long sendingGroupId, List<string> smtpPasswordSecretKeys)
-        {
-            SendingGroupId = sendingGroupId;
-            SmtpPasswordSecretKeys = smtpPasswordSecretKeys;
-        }
-
         /// <summary>
         /// 创建一个发件任务
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="ctx"></param>
         /// <param name="sendingGroupId"></param>
-        /// <param name="smtpPasswordSecretKeys"></param>
         /// <returns></returns>
-        public static async Task<GroupTask?> Create(SendingContext context
-        , long sendingGroupId
-        , List<string> smtpPasswordSecretKeys
-        )
+        public static async Task<GroupTask?> Create(SendingContext ctx, long sendingGroupId)
         {
-            GroupTask groupTask = new(sendingGroupId, smtpPasswordSecretKeys);
+            var groupTask = ctx.Provider.GetRequiredService<GroupTask>();
+            // 初始化基本参数
+            groupTask.SetSendingGroupId(sendingGroupId);
             // 初始化组
-            if (!await groupTask.InitSendingGroup(context)) return null;
+            if (!await groupTask.InitSendingGroup(ctx))
+                return null;
             return groupTask;
         }
 
@@ -70,7 +65,7 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <summary>
         /// 密钥
         /// </summary>
-        public List<string> SmtpPasswordSecretKeys { get; private set; }
+        public EncryptParams SmtpPasswordSecretKeys => encryptService.GetEncrypParams();
 
         /// <summary>
         /// 所属用户
@@ -89,7 +84,6 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// </summary>
         private List<long> ProxyIds { get; set; } = [];
 
-
         /// <summary>
         /// 可用的模板
         /// </summary>
@@ -106,6 +100,12 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         private readonly DateTime _startDate = DateTime.UtcNow;
         #endregion
 
+        #region 初始化
+        public void SetSendingGroupId(long sendingGroupId)
+        {
+            SendingGroupId = sendingGroupId;
+        }
+        #endregion
 
         /// <summary>
         /// 初始化发件组信息
@@ -118,8 +118,8 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             var sqlContext = sendingContext.Provider.GetRequiredService<SqlContext>();
 
             // 获取完整的邮件组
-            var sendingGroup = await sqlContext.SendingGroups
-                .AsNoTracking()
+            var sendingGroup = await sqlContext
+                .SendingGroups.AsNoTracking()
                 .Where(x => x.Id == SendingGroupId)
                 .Include(x => x.Outboxes)
                 .Include(x => x.Templates)
@@ -148,7 +148,11 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
 
             // 将公共的发件箱添加到发件池中
             // 邮件级别的发件箱在初始化发送项时，再添加
-            await AddSharedOutboxToPool(sendingContext, sendingGroup.Outboxes, sendingGroup.OutboxGroups);
+            await AddSharedOutboxToPool(
+                sendingContext,
+                sendingGroup.Outboxes,
+                sendingGroup.OutboxGroups
+            );
 
             // 保存所使用的代理
             ProxyIds = sendingGroup.ProxyIds ?? [];
@@ -160,7 +164,9 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             // 获取所有的模板，模板是用户级别的
             _usableTemplates = new UsableTemplateList(UserId);
             // 添加组的通用模板
-            _usableTemplates.AddSendingGroupTemplates(_sendingGroup.Templates!.ConvertAll(x => x.Id));
+            _usableTemplates.AddSendingGroupTemplates(
+                _sendingGroup.Templates!.ConvertAll(x => x.Id)
+            );
 
             return true;
         }
@@ -173,27 +179,39 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <param name="outboxes"></param>
         /// <param name="outboxGroup"></param>
         /// <returns></returns>
-        private async Task AddSharedOutboxToPool(SendingContext sendingContext, List<Outbox> outboxes, List<IdAndName>? outboxGroup)
+        private async Task AddSharedOutboxToPool(
+            SendingContext sendingContext,
+            List<Outbox> outboxes,
+            List<IdAndName>? outboxGroup
+        )
         {
-            if (outboxes.Count == 0 && (outboxGroup == null || outboxGroup.Count == 0)) return;
+            if (outboxes.Count == 0 && (outboxGroup == null || outboxGroup.Count == 0))
+                return;
             var container = sendingContext.Provider.GetRequiredService<OutboxesManager>();
 
-            var outboxAddresses = outboxes.ConvertAll(x => new OutboxEmailAddress(x, SendingGroupId, SmtpPasswordSecretKeys, OutboxEmailAddressType.Shared));
+            var outboxAddresses = outboxes.ConvertAll(x => new OutboxEmailAddress(
+                x,
+                SendingGroupId,
+                SmtpPasswordSecretKeys,
+                OutboxEmailAddressType.Shared
+            ));
             foreach (var outbox in outboxAddresses)
             {
                 container.AddOutbox(outbox);
             }
 
             // 解析发件箱组
-            if (outboxGroup == null || outboxGroup.Count == 0) return;
+            if (outboxGroup == null || outboxGroup.Count == 0)
+                return;
             var outboxGroupIds = outboxGroup.Select(x => x.Id).ToList();
             // 添加发件组的发件箱
             var sqlContext = sendingContext.Provider.GetRequiredService<SqlContext>();
-            var groupBoxes = await sqlContext.Outboxes.AsNoTracking()
-                .Where(x => outboxGroupIds.Contains(x.EmailGroupId)).ToListAsync();
+            var groupBoxes = await sqlContext
+                .Outboxes.AsNoTracking()
+                .Where(x => outboxGroupIds.Contains(x.EmailGroupId))
+                .ToListAsync();
             await AddSharedOutboxToPool(sendingContext, groupBoxes, null);
         }
-
 
         /// <summary>
         /// 初始化发件组的发件项
@@ -203,14 +221,18 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <param name="sendingContext"></param>
         /// <param name="sendingItemIds">只发送特定的发件项</param>
         /// <returns></returns>
-        public async Task<bool> InitSendingItems(SendingContext sendingContext, List<long>? sendingItemIds)
+        public async Task<bool> InitSendingItems(
+            SendingContext sendingContext,
+            List<long>? sendingItemIds
+        )
         {
             var sqlContext = sendingContext.Provider.GetRequiredService<SqlContext>();
             // 获取待发件
-            var dbSet = sqlContext.SendingItems.AsNoTracking()
+            var dbSet = sqlContext
+                .SendingItems.AsNoTracking()
                 .Where(x => x.SendingGroupId == SendingGroupId)
-                .Where(x => x.Status == SendingItemStatus.Created ||
-                    x.Status == SendingItemStatus.Failed
+                .Where(x =>
+                    x.Status == SendingItemStatus.Created || x.Status == SendingItemStatus.Failed
                 ); // 获取可发送项
 
             if (sendingItemIds != null && sendingItemIds.Count > 0)
@@ -218,15 +240,16 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
                 dbSet = dbSet.Where(x => sendingItemIds.Contains(x.Id));
             }
             // 只获取需要的数据，完整数据在执行过程中获取
-            List<SendingItem> toSendingItems = await dbSet.Select(x => new SendingItem()
-            {
-                EmailTemplateId = x.EmailTemplateId,
-                Id = x.Id,
-                OutBoxId = x.OutBoxId,
-                Inboxes = x.Inboxes,
-                ProxyId = x.ProxyId
-            })
-              .ToListAsync();
+            List<SendingItem> toSendingItems = await dbSet
+                .Select(x => new SendingItem()
+                {
+                    EmailTemplateId = x.EmailTemplateId,
+                    Id = x.Id,
+                    OutBoxId = x.OutBoxId,
+                    Inboxes = x.Inboxes,
+                    ProxyId = x.ProxyId
+                })
+                .ToListAsync();
 
             // 去掉当前组中已经包含的项
             var existIds = _sendingItemMetas.SendingItemIds.ToList();
@@ -234,10 +257,13 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
 
             // 获取发件箱
             HashSet<long> outboxIds = [.. toSendingItems.Select(x => x.OutBoxId).Where(x => x > 0)];
-            var outboxes = await sqlContext.Outboxes.Where(x => outboxIds.Contains(x.Id)).ToListAsync();
+            var outboxes = await sqlContext
+                .Outboxes.Where(x => outboxIds.Contains(x.Id))
+                .ToListAsync();
 
             // 对于找不到发件项的邮件，给予标记非法
-            var invalidSendingItemIds = toSendingItems.Where(x => x.OutBoxId > 0)
+            var invalidSendingItemIds = toSendingItems
+                .Where(x => x.OutBoxId > 0)
                 .Where(x =>
                 {
                     var outbox = outboxes.FirstOrDefault(o => o.Id == x.OutBoxId);
@@ -248,13 +274,19 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             if (invalidSendingItemIds.Count > 0)
             {
                 // 更新邮件状态
-                await sqlContext.SendingItems.UpdateAsync(x => invalidSendingItemIds.Contains(x.Id),
-                    x => x.SetProperty(y => y.Status, SendingItemStatus.Invalid)
-                        .SetProperty(y => y.SendDate, DateTime.UtcNow)
-                        .SetProperty(y => y.SendResult, "指定的发件箱已被删除"));
+                await sqlContext.SendingItems.UpdateAsync(
+                    x => invalidSendingItemIds.Contains(x.Id),
+                    x =>
+                        x.SetProperty(y => y.Status, SendingItemStatus.Invalid)
+                            .SetProperty(y => y.SendDate, DateTime.UtcNow)
+                            .SetProperty(y => y.SendResult, "指定的发件箱已被删除")
+                );
 
                 // 过滤掉无效的发件箱项
-                toSendingItems = [.. toSendingItems.FindAll(x => !invalidSendingItemIds.Contains(x.Id))];
+                toSendingItems =
+                [
+                    .. toSendingItems.FindAll(x => !invalidSendingItemIds.Contains(x.Id))
+                ];
             }
 
             // 按注册的发件项过滤无效项
@@ -271,23 +303,27 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
                 toSendingItems = toSendingItems.FindAll(x => !filteredInvalidIdsSet.Contains(x.Id));
             }
 
-
             // 更新待发件列表
             // 由于初始化时，不是并发的，不需要加锁
-            var toSendingItemMetas = toSendingItems.Select(x => new SendItemMeta(x.Id, x.OutBoxId)).ToList();
+            var toSendingItemMetas = toSendingItems
+                .Select(x => new SendItemMeta(x.Id, x.OutBoxId))
+                .ToList();
             _sendingItemMetas.AddRange(toSendingItemMetas);
 
             // 添加代理和模板
             foreach (var toSendingItem in toSendingItems)
             {
                 // 添加特定模板
-                _usableTemplates.AddSendingItemTemplate(toSendingItem.Id, toSendingItem.EmailTemplateId);
+                _usableTemplates.AddSendingItemTemplate(
+                    toSendingItem.Id,
+                    toSendingItem.EmailTemplateId
+                );
 
                 // 添加特定代理
                 //_usableProxies.AddSendingItemProxy(toSendingItem.Id, toSendingItem.ProxyId);
             }
 
-            // 更新当前发件组的数据 
+            // 更新当前发件组的数据
             await UpdateSendingGroupInfo(sqlContext, SendingGroupId);
 
             // 新增特定发件箱
@@ -295,24 +331,37 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             foreach (var outbox in outboxes)
             {
                 // 获取收件项 Id
-                var sendingItemIdsTemp = toSendingItems.Where(x => x.OutBoxId == outbox.Id).Select(x => x.Id).ToList();
-                var outboxAddress = new OutboxEmailAddress(outbox, SendingGroupId, SmtpPasswordSecretKeys, OutboxEmailAddressType.Specific, sendingItemIdsTemp);
+                var sendingItemIdsTemp = toSendingItems
+                    .Where(x => x.OutBoxId == outbox.Id)
+                    .Select(x => x.Id)
+                    .ToList();
+                var outboxAddress = new OutboxEmailAddress(
+                    outbox,
+                    SendingGroupId,
+                    SmtpPasswordSecretKeys,
+                    OutboxEmailAddressType.Specific,
+                    sendingItemIdsTemp
+                );
                 outboxesPoolList.AddOutbox(outboxAddress);
             }
 
             // 将发件项修改为发送中
             if (toSendingItems.Count > 0)
             {
-                await sqlContext.SendingItems.UpdateAsync(x => toSendingItems.Select(x => x.Id).Contains(x.Id),
-                    x => x.SetProperty(y => y.Status, SendingItemStatus.Pending));
+                await sqlContext.SendingItems.UpdateAsync(
+                    x => toSendingItems.Select(x => x.Id).Contains(x.Id),
+                    x => x.SetProperty(y => y.Status, SendingItemStatus.Pending)
+                );
             }
 
             // 通知用户，任务已开始
             var client = sendingContext.HubClient.GetUserClient(UserId);
-            await client.SendingGroupProgressChanged(new SendingGroupProgressArg(_sendingGroup, _startDate)
-            {
-                ProgressType = ProgressType.Start
-            });
+            await client.SendingGroupProgressChanged(
+                new SendingGroupProgressArg(_sendingGroup, _startDate)
+                {
+                    ProgressType = ProgressType.Start
+                }
+            );
 
             return true;
         }
@@ -326,24 +375,28 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         private async Task UpdateSendingGroupInfo(SqlContext sqlContext, long sendingGroupId)
         {
             // 获取成功数、失败数、总数
-            var sendingGroup = await sqlContext.SendingGroups.Where(x => x.Id == sendingGroupId).FirstOrDefaultAsync();
-            if (sendingGroup == null) return;
+            var sendingGroup = await sqlContext
+                .SendingGroups.Where(x => x.Id == sendingGroupId)
+                .FirstOrDefaultAsync();
+            if (sendingGroup == null)
+                return;
 
-            var allSendingItems = await sqlContext.SendingItems.AsNoTracking()
+            var allSendingItems = await sqlContext
+                .SendingItems.AsNoTracking()
                 .Where(x => x.SendingGroupId == sendingGroup.Id)
-                .Select(x => new
-                {
-                    x.Status,
-                    x.SendDate,
-                })
+                .Select(x => new { x.Status, x.SendDate, })
                 .ToListAsync();
 
             // 更新发件组的信息
             sendingGroup.Status = SendingGroupStatus.Sending;
             sendingGroup.TotalCount = allSendingItems.Count;
-            sendingGroup.SuccessCount = allSendingItems.Count(x => x.Status >= SendingItemStatus.Success);
+            sendingGroup.SuccessCount = allSendingItems.Count(x =>
+                x.Status >= SendingItemStatus.Success
+            );
             // 有发送日期的项，表示已经发送过了
-            sendingGroup.SentCount = allSendingItems.Count(x => x.Status <= SendingItemStatus.Cancel) + sendingGroup.SuccessCount;
+            sendingGroup.SentCount =
+                allSendingItems.Count(x => x.Status <= SendingItemStatus.Cancel)
+                + sendingGroup.SuccessCount;
             // 开始发送日期
             if (sendingGroup.SendStartDate == DateTime.MinValue)
                 sendingGroup.SendStartDate = DateTime.UtcNow;
@@ -368,29 +421,41 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             sendingContext.GroupTaskStartDate = _startDate;
 
             var outboxEmailAddress = sendingContext.OutboxAddress;
-            if (outboxEmailAddress == null) return null;
+            if (outboxEmailAddress == null)
+                return null;
 
             // 判断是否为当前组对应的发件箱
-            if (!outboxEmailAddress.ContainsSendingGroup(SendingGroupId)) return null;
+            if (!outboxEmailAddress.ContainsSendingGroup(SendingGroupId))
+                return null;
 
             // 从列表中移除发件项并转换成 sendItem
             var sendItemMeta = await GetEmailItemFromDb(sendingContext);
-            if (sendItemMeta == null) return null;
+            if (sendItemMeta == null)
+                return null;
 
             // 为 sendItem 动态赋值
             // 赋予发件箱
             sendItemMeta.SetOutbox(outboxEmailAddress);
 
-            var sendingSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()
-                .GetSetting<SendingSetting>(sendingContext.SqlContext, sendItemMeta.SendingItem.UserId);
-            sendItemMeta.SetReplyToEmails(outboxEmailAddress.ReplyToEmails, sendingSetting.ReplyToEmailsList);
+            var sendingSetting = await sendingContext
+                .Provider.GetRequiredService<AppSettingsManager>()
+                .GetSetting<SendingSetting>(
+                    sendingContext.SqlContext,
+                    sendItemMeta.SendingItem.UserId
+                );
+            sendItemMeta.SetReplyToEmails(
+                outboxEmailAddress.ReplyToEmails,
+                sendingSetting.ReplyToEmailsList
+            );
 
             // 推送开始发件
             var client = sendingContext.HubClient.GetUserClient(UserId);
-            client?.SendingItemStatusChanged(new SendingItemStatusChangedArg(sendItemMeta.SendingItem)
-            {
-                Status = SendingItemStatus.Sending
-            });
+            client?.SendingItemStatusChanged(
+                new SendingItemStatusChangedArg(sendItemMeta.SendingItem)
+                {
+                    Status = SendingItemStatus.Sending
+                }
+            );
 
             return sendItemMeta;
         }
@@ -402,7 +467,8 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <returns></returns>
         private async Task<SendItemMeta?> GetEmailItemFromDb(SendingContext sendingContext)
         {
-            var outbox = sendingContext.OutboxAddress ?? throw new Exception("GetSendItem 调用失败, 请先获取发件箱");
+            var outbox =
+                sendingContext.OutboxAddress ?? throw new Exception("GetSendItem 调用失败, 请先获取发件箱");
 
             // 先发指定项
             SendItemMeta? sendItemMeta = null;
@@ -417,7 +483,8 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             {
                 sendItemMeta = _sendingItemMetas.GetSendingMeta();
             }
-            if (sendItemMeta == null) return null;
+            if (sendItemMeta == null)
+                return null;
 
             // 如果已经包含 SendingItem, 说明初始化过了，直接返回
             if (sendItemMeta.Initialized)
@@ -430,14 +497,18 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             var sqlContext = sendingContext.SqlContext;
             sendItemMeta.AvailableProxyIds = ProxyIds;
 
-            // 拉取发件项           
+            // 拉取发件项
             sendItemMeta = await _sendingItemMetas.FillSendingItem(sqlContext, sendItemMeta);
 
             // 获取附件
             await sendItemMeta.ResolveAttachments(sendingContext);
 
             // 生成正文原始内容
-            var originBody = await GetSendingItemOriginBody(sqlContext, sendItemMeta.SendingItem, sendItemMeta.BodyData);
+            var originBody = await GetSendingItemOriginBody(
+                sqlContext,
+                sendItemMeta.SendingItem,
+                sendItemMeta.BodyData
+            );
             await sendItemMeta.SetHtmlBody(sendingContext, originBody);
 
             // 设置主题
@@ -445,13 +516,13 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             await sendItemMeta.SetSubject(sendingContext, subject);
 
             // 添加最大重试次数
-            var sendingSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()
+            var sendingSetting = await sendingContext
+                .Provider.GetRequiredService<AppSettingsManager>()
                 .GetSetting<SendingSetting>(sqlContext, sendItemMeta.SendingItem.UserId);
             await sendItemMeta.SetMaxRetryCount(sendingSetting.MaxRetryCount);
 
             return sendItemMeta;
         }
-
 
         /// <summary>
         /// 获取原始发件内容
@@ -460,12 +531,17 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
         /// <param name="sendItemMeta"></param>
         /// <param name="templates"></param>
         /// <returns></returns>
-        private async Task<string> GetSendingItemOriginBody(SqlContext sqlContext, SendingItem sendingItem, SendingItemExcelData? bodyData)
+        private async Task<string> GetSendingItemOriginBody(
+            SqlContext sqlContext,
+            SendingItem sendingItem,
+            SendingItemExcelData? bodyData
+        )
         {
             // 批量发送的情况
             if (sendingItem.IsSendingBatch)
             {
-                if (!string.IsNullOrEmpty(_sendingGroup.Body)) return _sendingGroup.Body;
+                if (!string.IsNullOrEmpty(_sendingGroup.Body))
+                    return _sendingGroup.Body;
 
                 var template = await _usableTemplates.GetTemplate(sqlContext, sendingItem.Id);
                 return template?.Content ?? string.Empty;
@@ -476,25 +552,35 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             if (bodyData != null)
             {
                 // 判断是否有 body
-                if (!string.IsNullOrEmpty(bodyData.Body)) return bodyData.Body;
+                if (!string.IsNullOrEmpty(bodyData.Body))
+                    return bodyData.Body;
 
                 // 判断是否有模板 id 或者模板名称
                 if (bodyData.TemplateId > 0)
                 {
-                    var template = await _usableTemplates.GetTemplateById(sqlContext, bodyData.TemplateId);
-                    if (template != null) return template.Content;
+                    var template = await _usableTemplates.GetTemplateById(
+                        sqlContext,
+                        bodyData.TemplateId
+                    );
+                    if (template != null)
+                        return template.Content;
                 }
 
                 // 判断是否有模板名称
                 if (!string.IsNullOrEmpty(bodyData.TemplateName))
                 {
-                    var template = await _usableTemplates.GetTemplateByName(sqlContext, bodyData.TemplateName);
-                    if (template != null) return template.Content;
+                    var template = await _usableTemplates.GetTemplateByName(
+                        sqlContext,
+                        bodyData.TemplateName
+                    );
+                    if (template != null)
+                        return template.Content;
                 }
             }
 
             // 没有数据时，优先使用组中的 body
-            if (!string.IsNullOrEmpty(_sendingGroup.Body)) return _sendingGroup.Body;
+            if (!string.IsNullOrEmpty(_sendingGroup.Body))
+                return _sendingGroup.Body;
 
             // 返回随机模板
             var randTemplate = await _usableTemplates.GetTemplate(sqlContext, sendingItem.Id);
@@ -516,7 +602,6 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             return _sendingGroup.GetRandSubject();
         }
 
-
         /// <summary>
         /// 判断 outbox 能否匹配到发件项
         /// </summary>
@@ -528,14 +613,16 @@ namespace UZonMail.Core.Services.EmailSending.WaitList
             if (outbox.Type.HasFlag(OutboxEmailAddressType.Specific))
             {
                 var matchSpecific = _sendingItemMetas.MatchSendingMeta(outbox.Id, true);
-                if (matchSpecific) return true;
+                if (matchSpecific)
+                    return true;
             }
 
             // 从当前组中获取
             if (outbox.Type.HasFlag(OutboxEmailAddressType.Shared))
             {
                 var matchShared = _sendingItemMetas.MatchSendingMeta(outbox.Id, false);
-                if (matchShared) return true;
+                if (matchShared)
+                    return true;
             }
 
             return false;

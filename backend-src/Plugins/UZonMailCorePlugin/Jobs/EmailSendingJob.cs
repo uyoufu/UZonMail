@@ -1,17 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Quartz;
-using UZonMail.Utils.Web.Service;
-using UZonMail.DB.SQL;
 using log4net;
-using UZonMail.DB.SQL.Core.EmailSending;
+using Microsoft.EntityFrameworkCore;
+using Quartz;
 using UZonMail.Core.Services.SendCore;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Jobs
 {
     /// <summary>
     /// 邮件发送定时任务
     /// </summary>
-    public class EmailSendingJob(SqlContext db, SendingGroupService sendingService) : IJob, IScopedService
+    public class EmailSendingJob(SqlContext db, SendingGroupService sendingService)
+        : IJob,
+            IScopedService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(EmailSendingJob));
 
@@ -27,8 +29,10 @@ namespace UZonMail.Core.Jobs
                 return;
             }
 
-            var sendingGroup = await db.SendingGroups.Where(x => x.Id == sendingGroupId
-                    && x.SendingType == SendingGroupType.Scheduled)
+            var sendingGroup = await db
+                .SendingGroups.Where(x =>
+                    x.Id == sendingGroupId && x.SendingType == SendingGroupType.Scheduled
+                )
                 .Include(x => x.Outboxes)
                 .Include(x => x.Templates)
                 .FirstOrDefaultAsync();
@@ -41,8 +45,6 @@ namespace UZonMail.Core.Jobs
             }
 
             // 获取密钥
-            string[] smtpPasswordSecretKeys = context.JobDetail.JobDataMap.GetString("smtpPasswordSecretKeys").Split(',');
-            sendingGroup.SmtpPasswordSecretKeys = smtpPasswordSecretKeys.ToList();
             await sendingService.SendNow(sendingGroup);
         }
     }

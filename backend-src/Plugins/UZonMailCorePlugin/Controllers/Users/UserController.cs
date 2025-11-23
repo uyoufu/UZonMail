@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
@@ -26,8 +26,13 @@ namespace UZonMail.Core.Controllers.Users
     /// <param name="userService"></param>
     /// <param name="tokenService"></param>
     /// <param name="fileStoreService"></param>
-    public class UserController(SqlContext db, UserService userService, TokenService tokenService,
-        FileStoreService fileStoreService, EncryptService encryptService) : ControllerBaseV1
+    public class UserController(
+        SqlContext db,
+        UserService userService,
+        TokenService tokenService,
+        FileStoreService fileStoreService,
+        EncryptService encryptService
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// UserId 是否已经被使用
@@ -36,9 +41,11 @@ namespace UZonMail.Core.Controllers.Users
         [HttpGet("check-user-id")]
         public async Task<ResponseResult<bool>> IsUserIdInUse([FromQuery] string userId)
         {
-            if (string.IsNullOrEmpty(userId)) throw new KnownException("用户 ID 不能为空");
+            if (string.IsNullOrEmpty(userId))
+                throw new KnownException("用户 ID 不能为空");
             var existUser = await userService.ExistUser(userId);
-            if (existUser) throw new KnownException($"用户 ID: {userId} 已经存在");
+            if (existUser)
+                throw new KnownException($"用户 ID: {userId} 已经存在");
             return true.ToSuccessResponse();
         }
 
@@ -46,17 +53,19 @@ namespace UZonMail.Core.Controllers.Users
         /// 新建用户
         /// </summary>
         /// <returns></returns>
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("sign-up")]
         public async Task<ResponseResult<User>> SignUp([FromBody] User user)
         {
             // 验证用户名和密码
             var userVdResult = new UserIdAndPasswordValidator().Validate(user);
-            if (!userVdResult.IsValid) return userVdResult.ToErrorResponse<User>();
+            if (!userVdResult.IsValid)
+                return userVdResult.ToErrorResponse<User>();
 
             // 用户名重复检查
             var existUser = await userService.ExistUser(user.UserId);
-            if (existUser) throw new KnownException($"用户 {user.UserId} 已经存在");
+            if (existUser)
+                throw new KnownException($"用户 {user.UserId} 已经存在");
 
             // 返回新建用户
             var newUser = await userService.CreateUser(user.UserId, user.Password);
@@ -75,7 +84,8 @@ namespace UZonMail.Core.Controllers.Users
             // 验证用户
             // 验证用户名和密码
             var userVdResult = new UserIdAndPasswordValidator().Validate(user);
-            if (!userVdResult.IsValid) return userVdResult.ToErrorResponse<UserSignInResult>();
+            if (!userVdResult.IsValid)
+                return userVdResult.ToErrorResponse<UserSignInResult>();
 
             var loginResult = await userService.UserSignIn(user.UserId, user.Password);
 
@@ -92,24 +102,11 @@ namespace UZonMail.Core.Controllers.Users
         public async Task<ResponseResult<UserSignInResult>> UpdateSignIn()
         {
             var userId = tokenService.GetUserSqlId();
-            var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId) ?? throw new KnownException("用户不存在");
-            var loginResult = await userService.UserSignIn(user);
+            var user =
+                await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId)
+                ?? throw new KnownException("用户不存在");
+            var loginResult = await userService.CreateSignSuccessResult(user);
             return loginResult.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 更新用户的 SMTP 密码密钥
-        /// 服务器只保存在内存中，不进行持久化保存
-        /// 在用户登录后应调用该接口来更新密钥，以便加密和解密 SMTP 密码
-        /// </summary>
-        /// <param name="secretKeys"></param>
-        /// <returns></returns>
-        [HttpPut("encrypt-keys")]
-        public async Task<ResponseResult<bool>> UpdateUserEncryptKeys([FromBody] SmtpPasswordSecretKeys secretKeys)
-        {
-            var userId = tokenService.GetUserSqlId();
-            encryptService.UpdateUserEncryptKeys(userId, secretKeys);
-            return true.ToSuccessResponse();
         }
 
         /// <summary>
@@ -157,7 +154,10 @@ namespace UZonMail.Core.Controllers.Users
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<User>>> GetUsersData([FromQuery] string filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<User>>> GetUsersData(
+            [FromQuery] string filter,
+            [FromBody] Pagination pagination
+        )
         {
             var users = await userService.GetFilteredUsersData(filter, pagination);
             return users.ToSuccessResponse();
@@ -207,7 +207,9 @@ namespace UZonMail.Core.Controllers.Users
         /// </summary>
         /// <returns></returns>
         [HttpPut("password")]
-        public async Task<ResponseResult<bool>> ChangeUserPassword([FromBody] ChangePasswordModel passwordModel)
+        public async Task<ResponseResult<bool>> ChangeUserPassword(
+            [FromBody] ChangePasswordModel passwordModel
+        )
         {
             // 获取当前用户
             var userId = tokenService.GetUserSqlId();
@@ -224,10 +226,15 @@ namespace UZonMail.Core.Controllers.Users
         [HttpPut("avatar")]
         public async Task<ResponseResult<string>> UpdateUserAvatar(IFormFile file)
         {
-            if (file == null) throw new KnownException("文件不能为空");
+            if (file == null)
+                throw new KnownException("文件不能为空");
 
             var userId = tokenService.GetUserSqlId();
-            var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(userId.ToString(), "avatar", DateTime.UtcNow.ToTimestamp() + "_" + file.FileName);
+            var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(
+                userId.ToString(),
+                "avatar",
+                DateTime.UtcNow.ToTimestamp() + "_" + file.FileName
+            );
 
             // 清除原来的头像文件
             string baseDir = Path.GetDirectoryName(fullPath) ?? throw new KnownException("文件路径错误");
@@ -242,7 +249,11 @@ namespace UZonMail.Core.Controllers.Users
             file.CopyTo(saveFile);
 
             // 将头像更新到用户信息中
-            await db.Users.UpdateAsync(x => x.Id == userId, x => x.SetProperty(y => y.Avatar, relativePath));
+            await db.Users.UpdateAsync(
+                x => x.Id == userId,
+                x => x.SetProperty(y => y.Avatar, relativePath)
+            );
+
             await db.SaveChangesAsync();
 
             return relativePath.ToSuccessResponse();
@@ -271,7 +282,10 @@ namespace UZonMail.Core.Controllers.Users
         [HttpPut("{userId:long}/status")]
         public async Task<ResponseResult<bool>> ChangeUserStatus(long userId, UserStatus status)
         {
-            await db.Users.UpdateAsync(x => x.Id == userId, x => x.SetProperty(p => p.Status, status));
+            await db.Users.UpdateAsync(
+                x => x.Id == userId,
+                x => x.SetProperty(p => p.Status, status)
+            );
             return true.ToSuccessResponse();
         }
     }

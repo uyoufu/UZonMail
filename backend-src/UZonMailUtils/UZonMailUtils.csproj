@@ -9,11 +9,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="Config\**" />
 		<Compile Remove="Utils\**" />
 		<Compile Remove="Web\Extensions\**" />
+		<Content Remove="Config\**" />
 		<Content Remove="Web\Extensions\**" />
+		<EmbeddedResource Remove="Config\**" />
 		<EmbeddedResource Remove="Utils\**" />
 		<EmbeddedResource Remove="Web\Extensions\**" />
+		<None Remove="Config\**" />
 		<None Remove="Utils\**" />
 		<None Remove="Web\Extensions\**" />
 	</ItemGroup>

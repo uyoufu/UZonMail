@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
@@ -57,7 +57,7 @@ namespace UZonMail.Core.Controllers.Emails
             {
                 existOne.EmailGroupId = entity.EmailGroupId;
                 existOne.SmtpPort = entity.SmtpPort;
-                existOne.Password = entity.Password;
+                existOne.Password = encryptService.EncrytPassword(entity.Password);
                 existOne.UserName = entity.UserName;
                 existOne.Description = entity.Description;
                 existOne.ProxyId = entity.ProxyId;
@@ -129,7 +129,7 @@ namespace UZonMail.Core.Controllers.Emails
                     entity.EmailGroupId = newEntity.EmailGroupId;
                     entity.SmtpPort = newEntity.SmtpPort;
                     entity.UserName = newEntity.UserName;
-                    entity.Password = newEntity.Password;
+                    entity.Password = encryptService.EncrytPassword(newEntity.Password);
                     entity.EnableSSL = newEntity.EnableSSL;
                     entity.Description = newEntity.Description;
                     entity.ProxyId = newEntity.ProxyId;
@@ -283,12 +283,24 @@ namespace UZonMail.Core.Controllers.Emails
                         .SetProperty(y => y.SmtpHost, entity.SmtpHost)
                         .SetProperty(y => y.SmtpPort, entity.SmtpPort)
                         .SetProperty(y => y.UserName, entity.UserName)
-                        .SetProperty(y => y.Password, entity.Password)
                         .SetProperty(y => y.EnableSSL, entity.EnableSSL)
                         .SetProperty(y => y.Description, entity.Description)
                         .SetProperty(y => y.ProxyId, entity.ProxyId)
                         .SetProperty(y => y.ReplyToEmails, entity.ReplyToEmails)
             );
+
+            // 如果密码为以 * 开头，则不更新密码
+            if (!string.IsNullOrEmpty(entity.Password) && !entity.Password.StartsWith("***"))
+            {
+                await db.Outboxes.UpdateAsync(
+                    x => x.Id == outboxId,
+                    x =>
+                        x.SetProperty(
+                            y => y.Password,
+                            encryptService.EncrytPassword(entity.Password)
+                        )
+                );
+            }
             return true.ToSuccessResponse();
         }
 
@@ -387,6 +399,10 @@ namespace UZonMail.Core.Controllers.Emails
                 );
             }
             var results = await dbSet.Page(pagination).ToListAsync();
+
+            // 将密码转为 6 个 * 号返回
+            results.ForEach(x => x.Password = "******");
+
             return results.ToSuccessResponse();
         }
 
@@ -630,11 +646,10 @@ namespace UZonMail.Core.Controllers.Emails
         [HttpGet("encrypt-password")]
         public async Task<ResponseResult<string>> EncryptOutboxPassword(string password)
         {
-            var userId = tokenService.GetUserSqlId();
             if (string.IsNullOrEmpty(password))
                 throw new KnownException("密码不能为空");
 
-            var encryptedResult = encryptService.EncryptOutboxSecret(userId, password);
+            var encryptedResult = encryptService.EncrytPassword(password);
             return encryptedResult.ToSuccessResponse();
         }
     }

@@ -1010,6 +1010,10 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 

@@ -1010,6 +1010,10 @@ namespace UZonMail.DB.Migrations.Mysql
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
