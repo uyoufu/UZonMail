@@ -11,21 +11,15 @@ import { GuessSmtpInfoGet } from 'src/api/smtpInfo'
 import { confirmOperation, notifyError, notifySuccess, notifyWarning } from 'src/utils/dialog'
 import { isEmail } from 'src/utils/validator'
 
-import { useUserInfoStore } from 'src/stores/user'
-import { aes, deAes } from 'src/utils/encrypt'
 import type { IExcelColumnMapper } from 'src/utils/file'
 import { readExcel, writeExcel } from 'src/utils/file'
 import type { IProxy } from 'src/api/proxy'
 import { getUsableProxies } from 'src/api/proxy'
 import { debounce } from 'lodash'
-import type { IUserEncryptKeys } from 'src/stores/types'
 
 import logger from 'loglevel'
 import { translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
 
-function encryptPassword (smtpPasswordSecretKeys: string[], password: string) {
-  return aes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, password)
-}
 
 // 判断是否是 Exchange 邮箱
 export function isExchangeEmail (email: string): boolean {
@@ -60,10 +54,9 @@ export function isExchangeOutbox (smtpHost: string, email: string): boolean {
 
 /**
  * 获取发件箱字段
- * @param smtpPasswordSecretKeys
  * @returns
  */
-export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promise<IPopupDialogField[]> {
+export async function getOutboxFields (): Promise<IPopupDialogField[]> {
   // 获取所有的代理
   const { data: proxyOptions } = await getUsableProxies()
   proxyOptions.unshift({
@@ -111,11 +104,6 @@ export async function getOutboxFields (smtpPasswordSecretKeys: string[]): Promis
       name: 'password',
       label: translateOutboxManager('col_smtpPassword'),
       type: PopupDialogFieldType.password,
-      parser: (value: any) => {
-        const pwd = String(value)
-        // 对密码进行加密
-        return encryptPassword(smtpPasswordSecretKeys, pwd)
-      },
       validate: (value: any, parsedValue: any, allValues: Record<string, any>) => {
         if (isExchangeEmail(allValues.email)) {
           // 如果是 Outlook 邮箱，则允许为空
@@ -227,11 +215,17 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
  * @param encryptKeys
  * @returns
  */
-export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptKeys: IUserEncryptKeys) {
+export async function tryOutlookDelegateAuthorization (outbox: IOutbox) {
   if (!isExchangeEmail(outbox.email)) return
   // 存在但非 Exchange 地址
   if (outbox.smtpHost && !isExchangeDomain(outbox.smtpHost)) {
     notifyWarning(translateOutboxManager('outlookDelegateAuthorizationSkippedNonExchangeSmtp'))
+    return
+  }
+
+  // 若密码是加密后的状态，则进行提示
+  if (outbox.password && outbox.password.startsWith('*')) {
+    notifyError(translateOutboxManager('outlookDelegateAuthorizationSkippedEncryptedPassword'))
     return
   }
 
@@ -240,12 +234,11 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptK
 
   // 密钥必须小于 80 位
   // 否则可能是 refreshToken
-  const plainPassword = deAes(encryptKeys.key, encryptKeys.iv, outbox.password)
+  const plainPassword = outbox.password
   if (plainPassword.length > 80) {
     notifySuccess(translateOutboxManager('existingRefreshTokenNoNeedDelegateAuthorization'))
     return
   }
-
 
   notifyWarning(translateOutboxManager('detectedExchangeEmailStartingOutlookDelegateAuthorization'))
 
@@ -292,8 +285,6 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox, encryptK
  */
 export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
   addNewRow: (newRow: Record<string, any>) => void) {
-  const userInfoStore = useUserInfoStore()
-
   // 新建发件箱
   async function onNewOutboxClick () {
     const GuessSmtpInfoGetDebounce = debounce(async (email: string, params: IOnSetupParams) => {
@@ -310,7 +301,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
       title: translateOutboxManager('newOutboxTitle', { groupName: emailGroup.value.label }),
-      fields: await getOutboxFields(userInfoStore.smtpPasswordSecretKeys),
+      fields: await getOutboxFields(),
       onSetup: (params) => {
         watch(() => params.fieldsModel.value.email, async newValue => {
           if (!newValue) return
@@ -336,7 +327,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     notifySuccess(translateOutboxManager('newOutboxSuccess'))
 
     // 进行 outlook 委托授权
-    await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
+    await tryOutlookDelegateAuthorization(outbox)
   }
 
   // 导出模板
@@ -408,7 +399,6 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
         continue
       }
 
-      row.password = encryptPassword(userInfoStore.smtpPasswordSecretKeys, row.password)
       row.emailGroupId = emailGroupId || emailGroup.value.id
       validRows.push(row as IOutbox)
     }

@@ -1,7 +1,7 @@
 import { getEmailTemplatesCount, getEmailTemplatesData } from 'src/api/emailTemplate'
 import { useQTable } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
-import type { QBtnDropdown, QEditor } from 'quasar';
+import type { QBtnDropdown, QEditor } from 'quasar'
 import { useQuasar } from 'quasar'
 
 // 查看缩略图
@@ -94,7 +94,7 @@ export function useWysiwygEditor () {
         'size-7'
       ]
     },
-    'textColor'
+      'textColor'
     ],
     // ['left', 'center', 'right', 'justify'],
     ['bold', 'italic', 'strike', 'underline', 'link'],
@@ -161,3 +161,4 @@ export function useWysiwygEditor () {
     highlightColorPalette
   }
 }
+

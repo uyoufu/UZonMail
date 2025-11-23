@@ -47,26 +47,13 @@ export function useSendEmailHub () {
   })
 
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  signal.start().then(async () => {
+  signal.start().then(() => {
     logger.info('[signalR] 连接成功')
-
-    // 推送用户加密密钥到服务器
-    await resendUserEncryptKeys()
   })
 
-  signal.onreconnected(async (msg) => {
+  signal.onreconnected((msg) => {
     logger.info('[signalR] 重新连接成功', msg)
-
-    // 重新推送
-    await resendUserEncryptKeys()
   })
-
-  async function resendUserEncryptKeys () {
-    if (userInfoStore.userInfo && userInfoStore.secretKey) {
-      const userEncryptKeys = userInfoStore.userEncryptKeys
-      await signal.invoke('SetUserEncryptKeys', userInfoStore.userInfo.id, userEncryptKeys.key, userEncryptKeys.iv)
-    }
-  }
 
   signalRs.sendingProgressHub = signal
 

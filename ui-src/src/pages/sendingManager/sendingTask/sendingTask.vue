@@ -5,6 +5,17 @@
       <template v-slot:before>
         <q-icon name="subject" color="primary" />
       </template>
+
+      <template v-slot:append>
+        <div class="row justify-end">
+          <q-btn round dense flat icon="motion_photos_auto" class="q-ml-sm" color="grey-7"
+            @click.stop="onGenerateSubjectsByAI">
+            <q-tooltip>
+              {{ translateAI('summaryEmailSubjects') }}
+            </q-tooltip>
+          </q-btn>
+        </div>
+      </template>
     </q-input>
 
     <SelectEmailTemplate v-model="emailInfo.templates" class="q-mb-sm" />
@@ -63,7 +74,7 @@ import AsyncTooltip from 'components/asyncTooltip/AsyncTooltip.vue'
 import TemplateEditor from 'src/pages/sourceManager/templateManager/templateEditor.vue'
 
 import { useBottomFunctions } from './bottomFunctions'
-import { translateSendingTask } from 'src/i18n/helpers'
+import { translateAI, translateSendingTask } from 'src/i18n/helpers'
 
 import type { IEmailCreateInfo } from 'src/api/emailSending'
 
@@ -137,6 +148,12 @@ useSendingGroupTemplate(emailInfo)
 // #region IP预热
 import { useIpWarmUp } from './compositions/useIpWarmUp'
 const { onIpWarmUpClick, enableIpWarmUpBtn } = useIpWarmUp(validateSendingTaskParams, emailInfo)
+// #endregion
+
+
+// #region AI 生成邮件主题
+import { useAISubjects } from './compositions/useAISubjects'
+const { onGenerateSubjectsByAI } = useAISubjects(emailInfo)
 // #endregion
 </script>
 

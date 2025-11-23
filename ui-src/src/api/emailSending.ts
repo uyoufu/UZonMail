@@ -16,7 +16,6 @@ export interface IEmailCreateInfo {
   body: string, // 邮件正文
   // 附件必须先上传，此处保存的是附件的Id
   attachments: Record<string, any>[], // 附件
-  smtpPasswordSecretKeys?: string[], // 发件人邮箱密码密钥, 发件时，需要由用户上传到服务器
   sendBatch: boolean, // 多个收件箱时，是否批量发送
   proxyIds: number[], // 代理人id
 
@@ -73,12 +72,8 @@ export function sendSchedule (sendingGroup: IEmailCreateInfo) {
  * @param sendingItemId
  * @returns
  */
-export function resendSendingItem (sendingItemId: number, smtpPasswordSecretKeys: string[]) {
-  return httpClient.post<boolean>(`/email-sending/sending-items/${sendingItemId}/resend`, {
-    data: {
-      smtpPasswordSecretKeys
-    }
-  })
+export function resendSendingItem (sendingItemId: number) {
+  return httpClient.post<boolean>(`/email-sending/sending-items/${sendingItemId}/resend`)
 }
 
 /**
@@ -86,12 +81,8 @@ export function resendSendingItem (sendingItemId: number, smtpPasswordSecretKeys
  * @param sendingItemId
  * @returns
  */
-export function resendSendingGroup (sendingGroupId: number, smtpPasswordSecretKeys: string[]) {
-  return httpClient.post<boolean>(`/email-sending/sending-groups/${sendingGroupId}/resend`, {
-    data: {
-      smtpPasswordSecretKeys
-    }
-  })
+export function resendSendingGroup (sendingGroupId: number) {
+  return httpClient.post<boolean>(`/email-sending/sending-groups/${sendingGroupId}/resend`)
 }
 
 /**
@@ -108,12 +99,8 @@ export function pauseSending (sendingGroupId: number) {
  * @param sendingGroupId
  * @returns
  */
-export function restartSending (sendingGroupId: number, smtpPasswordSecretKeys: string[]) {
-  return httpClient.post<boolean>(`/email-sending/sending-groups/${sendingGroupId}/restart`, {
-    data: {
-      smtpPasswordSecretKeys
-    }
-  })
+export function restartSending (sendingGroupId: number) {
+  return httpClient.post<boolean>(`/email-sending/sending-groups/${sendingGroupId}/restart`)
 }
 
 /**

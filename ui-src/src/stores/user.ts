@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSessionStorage } from '@vueuse/core'
-import type { IUserEncryptKeys, IUserInfo } from './types'
+import type { IUserInfo } from './types'
 import { useRouter } from 'src/router/index'
 import logger from 'loglevel'
 
@@ -43,38 +43,6 @@ export const useUserInfoStore = defineStore('userInfo', {
     isAdmin: (state) => {
       // 目前使用 * 或者 admin 来表示超管权限
       return state.access.includes('*') || state.userInfo.userId === 'admin'
-    },
-    /**
-     * smtp 加密解密密钥
-     * @param state
-     * @deprecated 已弃用，请尽量使用 userEncryptKeys
-     * @returns
-     */
-    smtpPasswordSecretKeys: (state) => {
-      // TODO: 直接复用 userEncryptKeys 的实现逻辑
-      const key = state.secretKey
-      const keys = [key, key]
-      if (key && key.length >= 16) {
-        keys[1] = key.substring(0, 16)
-      }
-      return [keys[0] as string, keys[1] as string]
-    },
-
-    /**
-     * 用户的 smtp 密码加密解密密钥
-     * @param state
-     */
-    userEncryptKeys: (state) => {
-      const key = state.secretKey
-      const keys = [key, key]
-      if (key && key.length >= 16) {
-        keys[1] = key.substring(0, 16)
-      }
-
-      return {
-        key: keys[0] as string,
-        iv: keys[1] as string
-      } as IUserEncryptKeys
     },
 
     /**

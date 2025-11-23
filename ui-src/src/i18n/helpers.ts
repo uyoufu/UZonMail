@@ -13,7 +13,9 @@ import type {
   UtilsLangKey,
   TemplateLangKey,
   ProxyLangKey,
-  ComponentsLangKey
+  ComponentsLangKey,
+  BasicSettingsLangKey,
+  AiLangKey
 } from './types'
 
 import { i18n } from 'src/boot/i18n'
@@ -105,5 +107,13 @@ export function translateTemplate (key: TemplateLangKey, named?: NamedValue): st
 
 export function translateProxy (key: ProxyLangKey, named?: NamedValue): string {
   return translateSub<ProxyLangKey>(key, 'proxy', named)
+}
+
+export function translateBasicSettings (key: BasicSettingsLangKey, named?: NamedValue): string {
+  return translateSub<BasicSettingsLangKey>(key, 'basicSettings', named)
+}
+
+export function translateAI (key: AiLangKey, named?: NamedValue): string {
+  return translateSub<AiLangKey>(key, 'ai', named)
 }
 
