@@ -1,8 +1,7 @@
-﻿using log4net;
 using System.Collections.Concurrent;
+using log4net;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.EmailSending.WaitList;
 
 namespace UZonMail.Core.Services.SendCore.WaitList
 {
@@ -33,18 +32,24 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <param name="smtpPasswordSecretKeys">smtp密码密钥</param>
         /// <param name="sendingItemIds">待发送的 Id</param>
         /// <returns></returns>
-        public async Task<bool> AddSendingGroup(SendingContext scopeServices, long sendingGroupId, List<string> smtpPasswordSecretKeys, List<long>? sendingItemIds = null)
+        public async Task<bool> AddSendingGroup(
+            SendingContext scopeServices,
+            long sendingGroupId,
+            List<long>? sendingItemIds = null
+        )
         {
             // 有可能发件组已经存在
             if (!TryGetValue(sendingGroupId, out var existTask))
             {
                 // 重新初始化
                 // 添加到列表
-                var newTask = await GroupTask.Create(scopeServices, sendingGroupId, smtpPasswordSecretKeys);
-                if (newTask == null) return false;
+                var newTask = await GroupTask.Create(scopeServices, sendingGroupId);
+                if (newTask == null)
+                    return false;
 
                 var success = await newTask.InitSendingItems(scopeServices, sendingItemIds);
-                if (!success) return false;
+                if (!success)
+                    return false;
                 return TryAdd(sendingGroupId, newTask);
             }
             else
@@ -65,7 +70,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             {
                 var groupTask = kv.Value;
                 var result = await groupTask.GetEmailItem(context);
-                if (result != null) return result;
+                if (result != null)
+                    return result;
             }
 
             return null;
@@ -73,14 +79,16 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
         public bool MatchEmailItem(OutboxEmailAddress outbox)
         {
-            if (outbox.UserId != UserId) return false;
+            if (outbox.UserId != UserId)
+                return false;
 
             // 依次获取发件项
             foreach (var kv in _tasks)
             {
                 var groupTask = kv.Value;
                 var match = groupTask.MatchEmailItem(outbox);
-                if (match) return true;
+                if (match)
+                    return true;
             }
 
             return false;
@@ -103,7 +111,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
         public bool TryRemove(long key, out GroupTask value)
         {
-            if (!_tasks.TryRemove(key, out value)) return false;
+            if (!_tasks.TryRemove(key, out value))
+                return false;
 
             // 添加到消息队列，对消息进行处理
 

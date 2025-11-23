@@ -1,7 +1,6 @@
-﻿using System.Collections.Concurrent;
-using UZonMail.Core.Controllers.Users.Model;
+using UZonMail.Core.Services.Encrypt.Models;
 using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.Exceptions;
+using UZonMail.Utils.Web.Configs;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.Encrypt
@@ -9,63 +8,50 @@ namespace UZonMail.Core.Services.Encrypt
     /// <summary>
     /// 加密相关的服务
     /// </summary>
-    public class EncryptService : ISingletonService
+    public class EncryptService(IConfiguration config) : ISingletonService
     {
-        private static readonly ConcurrentDictionary<
-            long,
-            SmtpPasswordSecretKeys
-        > _userOutboxSecretKeys = new();
+        private EncryptParams? _encrypParams;
 
-        /// <summary>
-        /// 更新用户的发件箱密码密钥
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="secretKeys"></param>
-        public void UpdateUserEncryptKeys(long userId, SmtpPasswordSecretKeys secretKeys)
+        public EncryptParams GetEncrypParams()
         {
-            if (_userOutboxSecretKeys.ContainsKey(userId))
-            {
-                _userOutboxSecretKeys[userId] = secretKeys;
-            }
-            else
-                _userOutboxSecretKeys.TryAdd(userId, secretKeys);
+            if (_encrypParams != null)
+                return _encrypParams;
+
+            _encrypParams = config.GetConfig<EncryptParams>();
+            return _encrypParams;
         }
 
         /// <summary>
-        /// 加密用户密码
-        /// 进行二次 hash 计算
+        /// 使用盐加密密码
         /// </summary>
-        /// <param name="password">非加密过的密码</param>
+        /// <param name="hashedPwd">前端加密后的密码，由于密码传入后端时，已经是二次加密过的</param>
+        /// <param name="salt">盐值，增加密码的破解验证</param>
         /// <returns></returns>
-        public string EncryptUserPassword(string password)
+        public string HashPassword(string hashedPwd, string salt)
         {
-            return password.Sha256(1);
+            return (hashedPwd + salt).Sha256();
         }
 
         /// <summary>
-        /// 加密发件箱的密码
+        /// 使用对称加密方式加密密码
         /// </summary>
-        /// <param name="secret"></param>
+        /// <param name="password"></param>
         /// <returns></returns>
-        public string EncryptOutboxSecret(long userId, string secret)
+        public string EncrytPassword(string password)
         {
-            if (!_userOutboxSecretKeys.TryGetValue(userId, out var keys))
-                throw new KnownException("用户的 SMTP 密码密钥未设置, 请重新登录");
-
-            return secret.AES(keys.Key, keys.Iv);
+            var encryptParams = GetEncrypParams();
+            return password.AES(encryptParams.Key, encryptParams.Iv);
         }
 
         /// <summary>
         /// 解密发件箱的密码
         /// </summary>
-        /// <param name="secret"></param>
+        /// <param name="password"></param>
         /// <returns></returns>
-        public string DecryptOutboxSecret(long userId, string secret)
+        public string DecryptPassword(string password)
         {
-            if (!_userOutboxSecretKeys.TryGetValue(userId, out var keys))
-                throw new KnownException("用户的 SMTP 密码密钥未设置, 请重新登录");
-
-            return secret.DeAES(keys.Key, keys.Iv);
+            var encryptParams = GetEncrypParams();
+            return password.DeAES(encryptParams.Key, encryptParams.Iv);
         }
     }
 }

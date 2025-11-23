@@ -1,8 +1,8 @@
-﻿using Innofactor.EfCoreJsonValueConverter;
+using System.ComponentModel.DataAnnotations.Schema;
+using Innofactor.EfCoreJsonValueConverter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations.Schema;
 using UZonMail.DB.SQL.Base;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.Files;
@@ -14,7 +14,7 @@ namespace UZonMail.DB.SQL.Core.EmailSending
     /// 发件组
     /// 此处只记录统计数据
     /// 具体的数据由 EmailItem 记录
-    /// </summary>    
+    /// </summary>
     public class SendingGroup : SqlId, IEntityTypeConfiguration<SendingGroup>
     {
         #region EF 定义
@@ -163,21 +163,16 @@ namespace UZonMail.DB.SQL.Core.EmailSending
 
         #region 临时数据，不保存到数据库
         /// <summary>
-        /// smtp 密码解密 key
-        /// </summary>
-        [NotMapped]
-        public List<string> SmtpPasswordSecretKeys { get; set; }
-
-        /// <summary>
         /// 批量改善
         /// </summary>
         [NotMapped]
         public bool SendBatch { get; set; }
         #endregion
 
-        #region 外部工具方法       
+        #region 外部工具方法
         private List<string>? _subjects;
         private static readonly string[] separators = ["\r\n", "\n", ";", "；"];
+
         public List<string> SplitSubjects()
         {
             if (_subjects == null)

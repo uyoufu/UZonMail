@@ -1,15 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using UZonMail.Core.Config.SubConfigs;
 using UZonMail.Core.Database.Updater;
+using UZonMail.Core.Services.Encrypt;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Files;
 using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.Utils.Extensions;
+using UZonMail.Utils.Web.Configs;
 
 namespace UZonMail.Core.Database.Update.Updaters
 {
-    public class InitSql(SqlContext db, IConfiguration config) : IDatabaseUpdater
+    public class InitSql(SqlContext db, IConfiguration config, EncryptService encryptService)
+        : IDatabaseUpdater
     {
         public Version Version => new("0.1.0.0");
 
@@ -53,7 +56,9 @@ namespace UZonMail.Core.Database.Update.Updaters
             }
             // 判断是否有系统级部门
             string systemDpName = Department.SystemDepartmentName;
-            var systemDepartment = systemDepartments.FirstOrDefault(x => x.Name == systemDpName && x.ParentId == systemOrganization.Id);
+            var systemDepartment = systemDepartments.FirstOrDefault(x =>
+                x.Name == systemDpName && x.ParentId == systemOrganization.Id
+            );
             if (systemDepartment == null)
             {
                 systemDepartment = new Department
@@ -92,7 +97,10 @@ namespace UZonMail.Core.Database.Update.Updaters
             await db.SaveChangesAsync();
 
             // 添加默认组织
-            var defaultOrganization = await db.Departments.FirstOrDefaultAsync(x => x.Type == DepartmentType.Organization && x.Name == Department.DefaultOrganizationName);
+            var defaultOrganization = await db.Departments.FirstOrDefaultAsync(x =>
+                x.Type == DepartmentType.Organization
+                && x.Name == Department.DefaultOrganizationName
+            );
             // 添加默认组织
             if (defaultOrganization == null)
             {
@@ -109,7 +117,9 @@ namespace UZonMail.Core.Database.Update.Updaters
             }
 
             // 添加默认部门
-            var defaultDepartment = await db.Departments.FirstOrDefaultAsync(x => x.Type == DepartmentType.Department && x.Name == Department.DefaultDepartmentName);
+            var defaultDepartment = await db.Departments.FirstOrDefaultAsync(x =>
+                x.Type == DepartmentType.Department && x.Name == Department.DefaultDepartmentName
+            );
             if (defaultDepartment == null)
             {
                 defaultDepartment = new Department
@@ -117,7 +127,8 @@ namespace UZonMail.Core.Database.Update.Updaters
                     Id = 4,
                     Name = Department.DefaultDepartmentName,
                     Description = "默认部门",
-                    FullPath = $"{Department.DefaultOrganizationName}/{Department.DefaultDepartmentName}",
+                    FullPath =
+                        $"{Department.DefaultOrganizationName}/{Department.DefaultDepartmentName}",
                     ParentId = defaultOrganization.Id,
                     IsHidden = false,
                     Type = DepartmentType.Department
@@ -136,32 +147,44 @@ namespace UZonMail.Core.Database.Update.Updaters
                     DepartmentId = defaultDepartment.Id,
                     UserId = "admin",
                     UserName = "admin",
-                    // 密码是进行了 Sha256 二次加密
-                    Password = "admin1234".Sha256(1),
+                    // 默认密码是 admin1234
+                    Password = "admin1234",
                     IsSuperAdmin = true,
                     IsHidden = true,
                 };
 
-                var userConfig = new UserConfig();
-                config.GetSection("User")?.Bind(userConfig);
+                var userConfig = config.GetConfig<UserConfig>();
                 // 从配置中读取超管的信息
                 if (userConfig.AdminUser != null)
                 {
                     var adminUserConfig = userConfig.AdminUser;
-                    if (!string.IsNullOrEmpty(adminUserConfig.UserId)) adminUser.UserId = adminUserConfig.UserId;
-                    if (!string.IsNullOrEmpty(adminUserConfig.Password)) adminUser.Password = adminUserConfig.Password.Sha256(1);
-                    if (!string.IsNullOrEmpty(adminUserConfig.Avatar)) adminUser.Avatar = adminUserConfig.Avatar;
+                    if (!string.IsNullOrEmpty(adminUserConfig.UserId))
+                        adminUser.UserId = adminUserConfig.UserId;
+                    if (!string.IsNullOrEmpty(adminUserConfig.Password))
+                        adminUser.Password = adminUserConfig.Password;
+                    if (!string.IsNullOrEmpty(adminUserConfig.Avatar))
+                        adminUser.Avatar = adminUserConfig.Avatar;
                 }
+
+                // 对密码加密
+                adminUser.Password = encryptService.HashPassword(
+                    adminUser.Password.Sha256(),
+                    adminUser.Salt
+                );
 
                 db.Users.Add(adminUser);
             }
             await db.SaveChangesAsync();
 
             // 添加组织管理员角色
-            var orgAdminRole = await db.Roles.FirstOrDefaultAsync(x => x.Name == Role.OrganizationAdminRoleName);
+            var orgAdminRole = await db.Roles.FirstOrDefaultAsync(x =>
+                x.Name == Role.OrganizationAdminRoleName
+            );
             if (orgAdminRole == null)
             {
-                var permissionCode = await db.PermissionCodes.FirstOrDefaultAsync(x => x.Code == PermissionCode.OrganizationPermissionCode);
+                var permissionCode = await db.PermissionCodes.FirstOrDefaultAsync(x =>
+                    x.Code == PermissionCode.OrganizationPermissionCode
+                );
                 orgAdminRole = new Role
                 {
                     Name = Role.OrganizationAdminRoleName,
@@ -174,11 +197,7 @@ namespace UZonMail.Core.Database.Update.Updaters
             await db.SaveChangesAsync();
 
             // 为超管添加组织管理员角色
-            var userRole = new UserRoles
-            {
-                UserId = adminUser.Id,
-                Roles = [orgAdminRole]
-            };
+            var userRole = new UserRoles { UserId = adminUser.Id, Roles = [orgAdminRole] };
             db.UserRole.Add(userRole);
             await db.SaveChangesAsync();
         }
@@ -194,10 +213,14 @@ namespace UZonMail.Core.Database.Update.Updaters
             // 检查是否已经有数据
             if (db.Users.Any())
             {
-                return;   // 如果已经有数据，直接返回
+                return; // 如果已经有数据，直接返回
             }
 
-            var permissionCode = new PermissionCode() { Code = PermissionCode.OrganizationPermissionCode, Description = "拥有管理所在组织所有功能的权限" };
+            var permissionCode = new PermissionCode()
+            {
+                Code = PermissionCode.OrganizationPermissionCode,
+                Description = "拥有管理所在组织所有功能的权限"
+            };
             db.PermissionCodes.Add(permissionCode);
             await db.SaveChangesAsync();
         }
@@ -208,10 +231,10 @@ namespace UZonMail.Core.Database.Update.Updaters
         private async Task InitFileStorage()
         {
             bool existDefaultFileBucket = await db.FileBuckets.AnyAsync(x => x.IsDefault);
-            if (existDefaultFileBucket) return;
+            if (existDefaultFileBucket)
+                return;
 
-            var fileStorage = new FileStorageConfig();
-            config.GetSection("FileStorage")?.Bind(fileStorage);
+            var fileStorage = config.GetConfig<FileStorageConfig>();
 
             // 新建
             var defaultBucket = new FileBucket

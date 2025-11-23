@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Services.Encrypt;
 using UZonMail.Core.Services.SendCore.Sender;
@@ -15,16 +15,24 @@ namespace UZonMail.Core.Controllers.Settings
     /// 通知设置
     /// </summary>
     /// <param name="db"></param>
-    public class NotificationSettingController(IServiceProvider serviceProvider,
-        SqlContext db, AppSettingService settingService, TokenService tokenService,
-        AppSettingsManager settingsManager, EmailSendersManager sendersManager, EncryptService encryptService) : ControllerBaseV1
+    public class NotificationSettingController(
+        IServiceProvider serviceProvider,
+        SqlContext db,
+        AppSettingService settingService,
+        TokenService tokenService,
+        AppSettingsManager settingsManager,
+        EmailSendersManager sendersManager,
+        EncryptService encryptService
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 获取发件通知设置
         /// </summary>
         /// <returns></returns>
         [HttpGet()]
-        public async Task<ResponseResult<SmtpNotificationSetting>> GetSmtpNotificationSetting(AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<SmtpNotificationSetting>> GetSmtpNotificationSetting(
+            AppSettingType type = AppSettingType.System
+        )
         {
             // 获取发送设置
             var key = nameof(SmtpNotificationSetting);
@@ -42,9 +50,15 @@ namespace UZonMail.Core.Controllers.Settings
         /// </summary>
         /// <returns></returns>
         [HttpPut()]
-        public async Task<ResponseResult<bool>> UpdateSmtpNotificationSetting([FromBody] SmtpNotificationSetting smtpSettings, AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<bool>> UpdateSmtpNotificationSetting(
+            [FromBody] SmtpNotificationSetting smtpSettings,
+            AppSettingType type = AppSettingType.System
+        )
         {
-            var emailSender = sendersManager.GetEmailSender(smtpSettings.Email, smtpSettings.SmtpHost);
+            var emailSender = sendersManager.GetEmailSender(
+                smtpSettings.Email,
+                smtpSettings.SmtpHost
+            );
 
             var userId = tokenService.GetUserSqlId();
 
@@ -53,7 +67,7 @@ namespace UZonMail.Core.Controllers.Settings
                 UserId = userId,
                 Email = smtpSettings.Email,
                 UserName = string.Empty,
-                Password = encryptService.EncryptOutboxSecret(userId, smtpSettings.Password),
+                Password = encryptService.EncrytPassword(smtpSettings.Password),
                 SmtpHost = smtpSettings.SmtpHost,
                 SmtpPort = smtpSettings.SmtpPort,
                 EnableSSL = true
@@ -70,8 +84,10 @@ namespace UZonMail.Core.Controllers.Settings
             // 更新缓存
             await settingsManager.ResetSetting<SmtpNotificationSetting>(newSetting.Id);
 
-            if (!result.Ok) return false.ToFailResponse(result.Message);
-            else return true.ToSuccessResponse();
+            if (!result.Ok)
+                return false.ToFailResponse(result.Message);
+            else
+                return true.ToSuccessResponse();
         }
     }
 }

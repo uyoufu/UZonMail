@@ -1,4 +1,4 @@
-﻿using log4net;
+using log4net;
 using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -16,7 +16,12 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
     /// <summary>
     /// 本机邮件发送器
     /// </summary>
-    public class SmtpSender(IServiceProvider provider, EncryptService encryptService, ProxiesManager proxyManager, IPRateLimiter iPRateLimiter) : IEmailSender
+    public class SmtpSender(
+        IServiceProvider provider,
+        EncryptService encryptService,
+        ProxiesManager proxyManager,
+        IPRateLimiter iPRateLimiter
+    ) : IEmailSender
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpSender));
 
@@ -64,7 +69,11 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             var smtpClient = clientResult.Data;
             // 等待发送间隔
             // 等待之后，可能出现代理过期的问题
-            await iPRateLimiter.WaitForReleaseAsync(context, sendItem.Outbox.Email, smtpClient.ProxyClient?.ProxyHost);
+            await iPRateLimiter.WaitForReleaseAsync(
+                context,
+                sendItem.Outbox.Email,
+                smtpClient.ProxyClient?.ProxyHost
+            );
             // 如果是动态代理，则需要检测动态代理是否过期
             if (smtpClient.ProxyClient is ProxyClientAdapter proxyAdapter && !proxyAdapter.IsEnable)
             {
@@ -75,7 +84,9 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             try
             {
                 var sendResult = await smtpClient.SendAsync(message);
-                _logger.Info($"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}");
+                _logger.Info(
+                    $"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}"
+                );
 
                 // 标记邮件状态
                 sendItem.SetStatus(SendItemMetaStatus.Success, sendResult);
@@ -135,7 +146,10 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// <param name="db"></param>
         /// <param name="outbox">密码应是加密后的字符串</param>
         /// <returns></returns>
-        public async Task<Result<string>> TestOutbox(IServiceProvider scopeServiceProvider, Outbox outbox)
+        public async Task<Result<string>> TestOutbox(
+            IServiceProvider scopeServiceProvider,
+            Outbox outbox
+        )
         {
             var client = provider.GetRequiredService<ThrottlingSmtpClient>();
             client.SetParams(string.Empty, 0);
@@ -143,8 +157,10 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             var email = outbox.Email;
             var smtpHost = outbox.SmtpHost;
             var smtpPort = outbox.SmtpPort;
-            var smtpUserName = string.IsNullOrEmpty(outbox.UserName) ? outbox.Email : outbox.UserName;
-            var smtpPassword = encryptService.DecryptOutboxSecret(outbox.UserId, outbox.Password);
+            var smtpUserName = string.IsNullOrEmpty(outbox.UserName)
+                ? outbox.Email
+                : outbox.UserName;
+            var smtpPassword = encryptService.DecryptPassword(outbox.Password);
             var enableSSL = outbox.EnableSSL;
 
             // 判断参数是否正确
@@ -169,9 +185,17 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             // 参考：https://github.com/jstedfast/MailKit/tree/master/Documentation/Examples
             if (outbox.ProxyId > 0)
             {
-                var proxyHandler = await proxyManager.GetProxyHandler(scopeServiceProvider, outbox.UserId, email, outbox.ProxyId);
+                var proxyHandler = await proxyManager.GetProxyHandler(
+                    scopeServiceProvider,
+                    outbox.UserId,
+                    email,
+                    outbox.ProxyId
+                );
                 if (proxyHandler != null)
-                    client.ProxyClient = await proxyHandler.GetProxyClientAsync(scopeServiceProvider, email);
+                    client.ProxyClient = await proxyHandler.GetProxyClientAsync(
+                        scopeServiceProvider,
+                        email
+                    );
             }
 
             string sendResult = $"{smtpUserName} test success";

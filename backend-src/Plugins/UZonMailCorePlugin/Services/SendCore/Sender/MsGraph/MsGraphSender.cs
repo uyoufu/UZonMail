@@ -1,4 +1,4 @@
-﻿using log4net;
+using log4net;
 using MimeKit;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.Encrypt;
@@ -11,7 +11,8 @@ using UZonMail.Utils.Results;
 
 namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
 {
-    public class MsGraphSender(IServiceProvider provider, EncryptService encryptService) : IEmailSender
+    public class MsGraphSender(IServiceProvider provider, EncryptService encryptService)
+        : IEmailSender
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(MsGraphSender));
 
@@ -47,9 +48,17 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             try
             {
                 // 验证授权并保存 refreshToken
-                await client.AuthenticateAsync(outbox.Email, outbox.OutlookClientId, outbox.AuthPassword, outbox.UserId, context.SqlContext);
+                await client.AuthenticateAsync(
+                    outbox.Email,
+                    outbox.OutlookClientId,
+                    outbox.AuthPassword,
+                    outbox.UserId,
+                    context.SqlContext
+                );
                 var sendResult = await client.SendAsync(message);
-                _logger.Info($"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}");
+                _logger.Info(
+                    $"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}"
+                );
 
                 // 标记邮件状态
                 sendItem.SetStatus(SendItemMetaStatus.Success, sendResult);
@@ -71,7 +80,10 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// <param name="db"></param>
         /// <param name="outbox">发件箱中的密码是加密后的密码</param>
         /// <returns></returns>
-        public async Task<Result<string>> TestOutbox(IServiceProvider scopeServiceProvider, Outbox outbox)
+        public async Task<Result<string>> TestOutbox(
+            IServiceProvider scopeServiceProvider,
+            Outbox outbox
+        )
         {
             var client = provider.GetRequiredService<MsGraphClient>();
             client.SetParams(string.Empty, 0);
@@ -82,8 +94,14 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             // 若需要，后期增加
             try
             {
-                var decryptedPassword = encryptService.DecryptOutboxSecret(outbox.UserId, outbox.Password);
-                await client.AuthenticateAsync(outbox.Email, outbox.UserName, decryptedPassword, outbox.UserId, db);
+                var decryptedPassword = encryptService.DecryptPassword(outbox.Password);
+                await client.AuthenticateAsync(
+                    outbox.Email,
+                    outbox.UserName,
+                    decryptedPassword,
+                    outbox.UserId,
+                    db
+                );
                 return Result<string>.Success("success");
             }
             catch (Exception e)

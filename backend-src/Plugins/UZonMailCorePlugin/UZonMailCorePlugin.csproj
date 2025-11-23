@@ -20,15 +20,19 @@
 	<ItemGroup>
 	  <Compile Remove="bin\**" />
 	  <Compile Remove="Controllers\Organization\**" />
+	  <Compile Remove="Services\LLM\**" />
 	  <Compile Remove="Services\UzonMailCore\**" />
 	  <Content Remove="bin\**" />
 	  <Content Remove="Controllers\Organization\**" />
+	  <Content Remove="Services\LLM\**" />
 	  <Content Remove="Services\UzonMailCore\**" />
 	  <EmbeddedResource Remove="bin\**" />
 	  <EmbeddedResource Remove="Controllers\Organization\**" />
+	  <EmbeddedResource Remove="Services\LLM\**" />
 	  <EmbeddedResource Remove="Services\UzonMailCore\**" />
 	  <None Remove="bin\**" />
 	  <None Remove="Controllers\Organization\**" />
+	  <None Remove="Services\LLM\**" />
 	  <None Remove="Services\UzonMailCore\**" />
 	</ItemGroup>
 
@@ -37,7 +41,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Services\LLM\" />
+		<Folder Include="Services\Encrypt\Base\" />
+		<Folder Include="SignalRHubs\SeverFuncHub\" />
 		<Folder Include="Utils\Attributes\" />
 		<Folder Include="Utils\Helpers\" />
 	</ItemGroup>

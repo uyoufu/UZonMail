@@ -1,10 +1,10 @@
-﻿using log4net;
+using System.Net;
+using log4net;
 using MailKit.Net.Proxy;
 using MailKit.Security;
 using Microsoft.Identity.Client;
 using MimeKit;
 using Newtonsoft.Json.Linq;
-using System.Net;
 using UZonMail.Core.Services.Config;
 using UZonMail.Core.Services.Encrypt;
 using UZonMail.DB.Extensions;
@@ -20,7 +20,11 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
     /// </summary>
     /// <param name="email"></param>
     /// <param name="cooldownMilliseconds"></param>
-    public class MsGraphClient(EncryptService encryptService, IConfiguration configuration, DebugConfig debugConfig) : IEmailSendingClient
+    public class MsGraphClient(
+        EncryptService encryptService,
+        IConfiguration configuration,
+        DebugConfig debugConfig
+    ) : IEmailSendingClient
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(MsGraphClient));
         private static HttpClient _httpClient = new();
@@ -34,7 +38,8 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             {
                 var newRefreshToken = value?.RefreshToken ?? string.Empty;
                 var oldRefreshToken = _authenticationResult?.RefreshToken ?? string.Empty;
-                _isRefreshTokenChanged = !string.IsNullOrEmpty(newRefreshToken) && newRefreshToken != oldRefreshToken;
+                _isRefreshTokenChanged =
+                    !string.IsNullOrEmpty(newRefreshToken) && newRefreshToken != oldRefreshToken;
 
                 _authenticationResult = value;
             }
@@ -45,6 +50,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
 
         private string _email;
         private int _cooldownMilliseconds;
+
         public void SetParams(string email, int cooldownMilliseconds)
         {
             _email = email;
@@ -67,11 +73,13 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         {
             // tempKey 保证数据修改后，会继续验证
             var inputMd5 = $"{email}-{username}-{password}".MD5();
-            if (AuthenticationResult != null
+            if (
+                AuthenticationResult != null
                 && AuthenticationResult.ExpireAt > DateTime.UtcNow
-                && _authenticateInputMd5 == inputMd5) return;
+                && _authenticateInputMd5 == inputMd5
+            )
+                return;
             _authenticateInputMd5 = inputMd5;
-
 
             // 解析用户名和密码
             _msGraphParams = new MsGraphParamsResolver(configuration);
@@ -88,7 +96,12 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             if (msGraphParams.HasRefreshToken)
             {
                 // 说明是 clientId, refreshToken 的形式
-                AuthenticationResult = await GetAccessByRefreshToken(msGraphParams.ClientId, msGraphParams.ClientSecret, msGraphParams.RefreshToken!)
+                AuthenticationResult =
+                    await GetAccessByRefreshToken(
+                        msGraphParams.ClientId,
+                        msGraphParams.ClientSecret,
+                        msGraphParams.RefreshToken!
+                    )
                     ?? throw new AuthenticationException("Outlook 邮箱的 refreshToken 无效或已过期，请检查配置。");
                 return;
             }
@@ -103,8 +116,14 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
                 throw new AuthenticationException("Outlook 邮箱的用户名格式不正确，应为 tenantId/clientId 的形式。");
             }
 
-            var authenticateResult = await GetConfidentialClientOAuth2CredentialsAsync(tenantId, clientId, msGraphParams.ClientSecret);
-            AuthenticationResult = AuthenticationResult2.FromAuthenticationResult(authenticateResult);
+            var authenticateResult = await GetConfidentialClientOAuth2CredentialsAsync(
+                tenantId,
+                clientId,
+                msGraphParams.ClientSecret
+            );
+            AuthenticationResult = AuthenticationResult2.FromAuthenticationResult(
+                authenticateResult
+            );
             return;
         }
 
@@ -117,21 +136,35 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// <param name="password">解密后的密码</param>
         /// <param name="db"></param>
         /// <returns></returns>
-        public async Task AuthenticateAsync(string email, string username, string password, long userId, SqlContext db)
+        public async Task AuthenticateAsync(
+            string email,
+            string username,
+            string password,
+            long userId,
+            SqlContext db
+        )
         {
             // 直接调用 AuthenticateAsync
             await AuthenticateAsync(email, username, password);
 
             // 判断是否采用 refreshToken 的方式发件，若是，则保存 refreshToken 到数据库中
-            if (username.Contains('/')) return;
+            if (username.Contains('/'))
+                return;
 
             // 加密 refreshToken
-            if (string.IsNullOrEmpty(AuthenticationResult!.RefreshToken)) return;
-            if (!_isRefreshTokenChanged) return;
+            if (string.IsNullOrEmpty(AuthenticationResult!.RefreshToken))
+                return;
+            if (!_isRefreshTokenChanged)
+                return;
 
             // 保存新的 refreshToken 到数据库中
-            var encryptedPassword = encryptService.EncryptOutboxSecret(userId, AuthenticationResult.RefreshToken);
-            await db.Outboxes.UpdateAsync(x => x.UserId == userId && x.Email == email, x => x.SetProperty(y => y.Password, encryptedPassword));
+            var encryptedPassword = encryptService.EncrytPassword(
+                AuthenticationResult.RefreshToken
+            );
+            await db.Outboxes.UpdateAsync(
+                x => x.UserId == userId && x.Email == email,
+                x => x.SetProperty(y => y.Password, encryptedPassword)
+            );
         }
 
         /// <summary>
@@ -143,14 +176,18 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// <param name="clientSecret"></param>
         /// <returns></returns>
         [Obsolete("暂未完全测试")]
-        private static async Task<AuthenticationResult> GetConfidentialClientOAuth2CredentialsAsync(string tenantId, string clientId, string clientSecret)
+        private static async Task<AuthenticationResult> GetConfidentialClientOAuth2CredentialsAsync(
+            string tenantId,
+            string clientId,
+            string clientSecret
+        )
         {
             var loginUrl = "https://login.microsoftonline.com/";
-            var confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(clientId)
+            var confidentialClientApplication = ConfidentialClientApplicationBuilder
+                .Create(clientId)
                 .WithAuthority($"{loginUrl}{tenantId}/v2.0")
                 .WithClientSecret(clientSecret) // or .WithClientSecret (clientSecret)
                 .Build();
-
 
             //var scopes = [
             //      // For IMAP and POP3, use the following scope
@@ -167,14 +204,18 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// <param name="clientId"></param>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        private static async Task<AuthenticationResult2?> GetAccessByRefreshToken(string clientId, string? clienSecret, string refreshToken)
+        private static async Task<AuthenticationResult2?> GetAccessByRefreshToken(
+            string clientId,
+            string? clienSecret,
+            string refreshToken
+        )
         {
             var formContent = new Dictionary<string, string>()
             {
                 { "client_id", clientId },
-                { "refresh_token", refreshToken},
-                { "grant_type", "refresh_token"},
-                { "scope", "https://graph.microsoft.com/.default"}
+                { "refresh_token", refreshToken },
+                { "grant_type", "refresh_token" },
+                { "scope", "https://graph.microsoft.com/.default" }
             };
             if (!string.IsNullOrEmpty(clienSecret))
             {
@@ -195,7 +236,9 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
                 // 表示没有成功请求到授权
                 _logger.Error($"{clientId} 请求授权失败: {responseContent}");
                 // 获取错误信息
-                var errorMessage = JObject.Parse(responseContent).SelectTokenOrDefault("error_description", "未知错误");
+                var errorMessage = JObject
+                    .Parse(responseContent)
+                    .SelectTokenOrDefault("error_description", "未知错误");
                 throw new AuthenticationException(errorMessage);
             }
             var jsonResult = responseContent.JsonTo<AuthenticationResult2>();
@@ -229,10 +272,10 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
 
             var apiPath = _authenticationResult!.IsPersonalAccount ? "me" : $"users{encodedEmail}";
             var request = new MsGraphSendMailRequest()
-                 .WithAccessToken(AuthenticationResult!.AccessToken)
-                 .WithMimeMessage(mimeMessage)
-                 .WithUrl($"https://graph.microsoft.com/v1.0/{apiPath}/sendMail")
-                 .WithHttpClient(_httpClient);
+                .WithAccessToken(AuthenticationResult!.AccessToken)
+                .WithMimeMessage(mimeMessage)
+                .WithUrl($"https://graph.microsoft.com/v1.0/{apiPath}/sendMail")
+                .WithHttpClient(_httpClient);
 
             var response = await request.SendAsync();
             // 根据状态返回发送结果

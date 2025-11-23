@@ -1,10 +1,6 @@
-﻿using log4net;
 using System.Collections.Concurrent;
-using UZonMail.Core.Services.EmailSending.WaitList;
+using log4net;
 using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Utils.Database;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
@@ -27,15 +23,14 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <param name="group"></param>
         /// <param name="sendingItemIds"></param>
         /// <returns></returns>
-        public async Task<bool> AddSendingGroup(SendingContext sendingContext, SendingGroup group, List<long>? sendingItemIds = null)
+        public async Task<bool> AddSendingGroup(
+            SendingContext sendingContext,
+            SendingGroup group,
+            List<long>? sendingItemIds = null
+        )
         {
             if (group == null)
                 return false;
-            if (group.SmtpPasswordSecretKeys == null || group.SmtpPasswordSecretKeys.Count != 2)
-            {
-                _logger.Warn($"发送 {group.Id} 时, 没有提供 smtp 解密密钥，取消发送");
-                return false;
-            }
 
             // 判断是否有用户发件管理器
             if (!this.TryGetValue(group.UserId, out var groupTasks))
@@ -46,11 +41,17 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             }
 
             // 向发件管理器添加发件组
-            bool result = await groupTasks.AddSendingGroup(sendingContext, group.Id, group.SmtpPasswordSecretKeys, sendingItemIds);
+            bool result = await groupTasks.AddSendingGroup(
+                sendingContext,
+                group.Id,
+                sendingItemIds
+            );
 
             // 更新发件组状态为发送中
-            await sendingContext.SqlContext.SendingGroups
-                .UpdateAsync(x => x.Id == group.Id, x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending));
+            await sendingContext.SqlContext.SendingGroups.UpdateAsync(
+                x => x.Id == group.Id,
+                x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending)
+            );
 
             return result;
         }
@@ -122,7 +123,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public void RemoveSendingGroupTask(long userId, long sendingGroupId)
         {
-            if (!this.TryGetValue(userId, out var userSendingGroupsPool)) return;
+            if (!this.TryGetValue(userId, out var userSendingGroupsPool))
+                return;
             userSendingGroupsPool.TryRemove(sendingGroupId, out _);
         }
     }

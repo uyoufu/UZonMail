@@ -1,4 +1,4 @@
-﻿using log4net;
+using log4net;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Quartz;
@@ -30,17 +30,18 @@ namespace UZonMail.Core.Services.SendCore
     /// <summary>
     /// 发送组服务
     /// </summary>
-    public class SendingGroupService(SqlContext db
-        , DebugConfig debugConfig
-        , TokenService tokenService
-        , ISendingTasksManager tasksService
-        , GroupTasksList waitList
-        , OutboxesManager outboxesManager
-        , SmtpClientsManager clientFactory
-        , AppSettingsManager settingsService
-        , ISchedulerFactory schedulerFactory
-        , IServiceProvider serviceProvider
-        ) : IScopedService
+    public class SendingGroupService(
+        SqlContext db,
+        DebugConfig debugConfig,
+        TokenService tokenService,
+        ISendingTasksManager tasksService,
+        GroupTasksList waitList,
+        OutboxesManager outboxesManager,
+        SmtpClientsManager clientFactory,
+        AppSettingsManager settingsService,
+        ISchedulerFactory schedulerFactory,
+        IServiceProvider serviceProvider
+    ) : IScopedService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(SendingGroupService));
 
@@ -72,24 +73,38 @@ namespace UZonMail.Core.Services.SendCore
                 // 跟踪数据，将数据转换成 EF 对象
                 if (sendingGroupData.Templates != null)
                 {
-                    var templates = ctx.EmailTemplates.Where(x => sendingGroupData.Templates.Select(t => t.Id).Contains(x.Id)).ToList();
+                    var templates = ctx
+                        .EmailTemplates.Where(x =>
+                            sendingGroupData.Templates.Select(t => t.Id).Contains(x.Id)
+                        )
+                        .ToList();
                     sendingGroupData.Templates = templates;
                 }
                 if (sendingGroupData.Outboxes != null)
                 {
-                    var outboxes = ctx.Outboxes.Where(x => sendingGroupData.Outboxes.Select(t => t.Id).Contains(x.Id)).ToList();
+                    var outboxes = ctx
+                        .Outboxes.Where(x =>
+                            sendingGroupData.Outboxes.Select(t => t.Id).Contains(x.Id)
+                        )
+                        .ToList();
                     sendingGroupData.Outboxes = outboxes;
                     sendingGroupData.OutboxesCount = outboxes.Count;
                 }
                 if (sendingGroupData.Attachments != null)
                 {
-                    var fileUsageIds = sendingGroupData.Attachments.Select(x => x.__fileUsageId).Where(x => x > 0).ToList();
+                    var fileUsageIds = sendingGroupData
+                        .Attachments.Select(x => x.__fileUsageId)
+                        .Where(x => x > 0)
+                        .ToList();
                     if (fileUsageIds.Count > 0)
                     {
-                        var attachmenets = await ctx.FileUsages.Where(x => fileUsageIds.Contains(x.Id)).ToListAsync();
+                        var attachmenets = await ctx
+                            .FileUsages.Where(x => fileUsageIds.Contains(x.Id))
+                            .ToListAsync();
                         sendingGroupData.Attachments = attachmenets;
                     }
-                    else sendingGroupData.Attachments = [];
+                    else
+                        sendingGroupData.Attachments = [];
                 }
                 // 增加数据
                 sendingGroupData.Status = SendingGroupStatus.Created;
@@ -101,23 +116,36 @@ namespace UZonMail.Core.Services.SendCore
                 await ctx.SaveChangesAsync();
 
                 // 获取用户设置
-                var orgSetting = await settingsService.GetSetting<SendingSetting>(ctx, sendingGroupData.UserId);
+                var orgSetting = await settingsService.GetSetting<SendingSetting>(
+                    ctx,
+                    sendingGroupData.UserId
+                );
 
                 // 保存发件箱
                 await SaveInboxes(sendingGroupData.Data, sendingGroupData.UserId);
 
                 // 将数据组装成 SendingItem 保存
                 // 要确保数据已经通过验证
-                var builder = new SendingItemsBuilder(ctx, sendingGroupData, orgSetting.MaxSendingBatchSize);
+                var builder = new SendingItemsBuilder(
+                    ctx,
+                    sendingGroupData,
+                    orgSetting.MaxSendingBatchSize
+                );
                 List<SendingItem> items = await builder.GenerateAndSave();
 
                 // 更新发件总数量
                 sendingGroupData.TotalCount = items.Count;
                 // 更新发件箱的数量
-                if (sendingGroupData.OutboxGroups != null && sendingGroupData.OutboxGroups.Count > 0)
+                if (
+                    sendingGroupData.OutboxGroups != null
+                    && sendingGroupData.OutboxGroups.Count > 0
+                )
                 {
                     var outboxGroupIds = sendingGroupData.OutboxGroups.Select(x => x.Id).ToList();
-                    var outboxCount = await db.Outboxes.AsNoTracking().Where(x => outboxGroupIds.Contains(x.EmailGroupId)).CountAsync();
+                    var outboxCount = await db
+                        .Outboxes.AsNoTracking()
+                        .Where(x => outboxGroupIds.Contains(x.EmailGroupId))
+                        .CountAsync();
                     sendingGroupData.OutboxesCount += outboxCount;
                 }
 
@@ -128,15 +156,15 @@ namespace UZonMail.Core.Services.SendCore
                     .SelectMany(x => x)
                     .Select(x => x.FileObjectId)
                     .GroupBy(x => x)
-                    .Select(x => new
-                    {
-                        count = x.Count(),
-                        fileObjectId = x.Key
-                    })
+                    .Select(x => new { count = x.Count(), fileObjectId = x.Key })
                     .ToList();
                 foreach (var info in incInfos)
                 {
-                    await ctx.FileObjects.Where(x => x.Id == info.fileObjectId).ExecuteUpdateAsync(x => x.SetProperty(e => e.LinkCount, e => e.LinkCount + 1));
+                    await ctx
+                        .FileObjects.Where(x => x.Id == info.fileObjectId)
+                        .ExecuteUpdateAsync(x =>
+                            x.SetProperty(e => e.LinkCount, e => e.LinkCount + 1)
+                        );
                 }
 
                 return await ctx.SaveChangesAsync();
@@ -161,12 +189,25 @@ namespace UZonMail.Core.Services.SendCore
             }
 
             // 获取发件箱,只能使用自己名下的发件箱
-            var outboxEmails = data.Select(x => x.SelectTokenOrDefault("outbox", "")).Where(x => !string.IsNullOrEmpty(x)).ToList();
-            var outboxes = await db.Outboxes.Where(x => x.UserId == userId && outboxEmails.Contains(x.Email)).ToListAsync();
+            var outboxEmails = data.Select(x => x.SelectTokenOrDefault("outbox", ""))
+                .Where(x => !string.IsNullOrEmpty(x))
+                .ToList();
+            var outboxes = await db
+                .Outboxes.Where(x => x.UserId == userId && outboxEmails.Contains(x.Email))
+                .ToListAsync();
 
-            var templateIds = data.Select(x => x.SelectTokenOrDefault("templateId", 0L)).Where(x => x > 0).ToList();
-            var templateNames = data.Select(x => x.SelectTokenOrDefault("templateName", "")).Where(x => !string.IsNullOrEmpty(x)).ToList();
-            var templates = await db.EmailTemplates.Where(x => x.UserId == userId && (templateIds.Contains(x.Id) || templateNames.Contains(x.Name))).ToListAsync();
+            var templateIds = data.Select(x => x.SelectTokenOrDefault("templateId", 0L))
+                .Where(x => x > 0)
+                .ToList();
+            var templateNames = data.Select(x => x.SelectTokenOrDefault("templateName", ""))
+                .Where(x => !string.IsNullOrEmpty(x))
+                .ToList();
+            var templates = await db
+                .EmailTemplates.Where(x =>
+                    x.UserId == userId
+                    && (templateIds.Contains(x.Id) || templateNames.Contains(x.Name))
+                )
+                .ToListAsync();
 
             // 重新更新数据
             JArray results = [];
@@ -190,7 +231,9 @@ namespace UZonMail.Core.Services.SendCore
 
                 var templateId = token.SelectTokenOrDefault("templateId", 0);
                 var templateName = token.SelectTokenOrDefault("templateName", "");
-                var templateEntity = templates.FirstOrDefault(x => x.Id == templateId || x.Name == templateName);
+                var templateEntity = templates.FirstOrDefault(x =>
+                    x.Id == templateId || x.Name == templateName
+                );
 
                 if (templateEntity == null)
                 {
@@ -217,16 +260,25 @@ namespace UZonMail.Core.Services.SendCore
             _logger.Debug("开始验证发件箱");
             var outboxIds = sendingGroupData.Outboxes.Select(x => x.Id).ToList();
             var groupOutboxIds = sendingGroupData.OutboxGroups?.Select(x => x.Id).ToList() ?? [];
-            var dataOutboxIds = sendingGroupData.Data?.Select(x => x.SelectTokenOrDefault("outboxId", ""))
-                .Where(x => !string.IsNullOrEmpty(x))
-                .Select(x => long.Parse(x)) ?? [];
-            var dataOutboxEmails = sendingGroupData.Data?.Select(x => x.SelectTokenOrDefault("outbox", ""))
-                .Where(x => !string.IsNullOrEmpty(x)) ?? [];
+            var dataOutboxIds =
+                sendingGroupData
+                    .Data?.Select(x => x.SelectTokenOrDefault("outboxId", ""))
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Select(x => long.Parse(x)) ?? [];
+            var dataOutboxEmails =
+                sendingGroupData
+                    .Data?.Select(x => x.SelectTokenOrDefault("outbox", ""))
+                    .Where(x => !string.IsNullOrEmpty(x)) ?? [];
 
             var allOutboxIds = outboxIds.Concat(dataOutboxIds).ToList();
-            var outboxes = await db.Outboxes.AsNoTracking()
+            var outboxes = await db
+                .Outboxes.AsNoTracking()
                 .Where(x => x.Status != OutboxStatus.Valid)
-                .Where(x => allOutboxIds.Contains(x.Id) || dataOutboxEmails.Contains(x.Email) || groupOutboxIds.Contains(x.EmailGroupId))
+                .Where(x =>
+                    allOutboxIds.Contains(x.Id)
+                    || dataOutboxEmails.Contains(x.Email)
+                    || groupOutboxIds.Contains(x.EmailGroupId)
+                )
                 .ToListAsync();
 
             // 重新验证发件箱
@@ -250,11 +302,17 @@ namespace UZonMail.Core.Services.SendCore
         /// <returns></returns>
         private async Task SaveInboxes(JArray? data, long userId)
         {
-            if (data == null) return;
-            var emails = data.Select(x => x["inbox"]).Where(x => x != null).Select(x => x.ToString()).ToList();
-            if (emails.Count == 0) return;
+            if (data == null)
+                return;
+            var emails = data.Select(x => x["inbox"])
+                .Where(x => x != null)
+                .Select(x => x.ToString())
+                .ToList();
+            if (emails.Count == 0)
+                return;
 
-            var existsEmails = await db.Inboxes.AsNoTracking()
+            var existsEmails = await db
+                .Inboxes.AsNoTracking()
                 .IgnoreQueryFilters()
                 .Where(x => x.UserId == userId && emails.Contains(x.Email))
                 .Select(x => x.Email)
@@ -263,7 +321,9 @@ namespace UZonMail.Core.Services.SendCore
             var newEmails = emails.Except(existsEmails);
             // 新建 email
             // 查找默认的收件组
-            var defaultInboxGroup = await db.EmailGroups.Where(x => x.Type == EmailGroupType.InBox && x.IsDefault).FirstOrDefaultAsync();
+            var defaultInboxGroup = await db
+                .EmailGroups.Where(x => x.Type == EmailGroupType.InBox && x.IsDefault)
+                .FirstOrDefaultAsync();
             if (defaultInboxGroup == null)
             {
                 defaultInboxGroup = EmailGroup.GetDefaultEmailGroup(userId, EmailGroupType.InBox);
@@ -272,7 +332,9 @@ namespace UZonMail.Core.Services.SendCore
             }
 
             // 某些发件箱可能被删除，恢复数据
-            await db.Inboxes.IgnoreQueryFilters().Where(x => x.UserId == userId && x.IsDeleted && emails.Contains(x.Email))
+            await db
+                .Inboxes.IgnoreQueryFilters()
+                .Where(x => x.UserId == userId && x.IsDeleted && emails.Contains(x.Email))
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, false));
 
             // 新建发件箱
@@ -303,7 +365,9 @@ namespace UZonMail.Core.Services.SendCore
             if (debugConfig.IsDemo)
             {
                 // 限制最多只能发 10 条
-                var sendingImtesCount = await db.SendingItems.CountAsync(x => x.SendingGroupId == sendingGroup.Id);
+                var sendingImtesCount = await db.SendingItems.CountAsync(x =>
+                    x.SendingGroupId == sendingGroup.Id
+                );
                 if (sendingImtesCount > 5)
                 {
                     throw new KnownException("示例环境最多群发 5 条");
@@ -328,17 +392,15 @@ namespace UZonMail.Core.Services.SendCore
             var scheduler = await schedulerFactory.GetScheduler();
             var jobKey = new JobKey($"emailSending-{sendingGroup.Id}", "sendingGroup");
 
-            var job = JobBuilder.Create<EmailSendingJob>()
-                        .WithIdentity(jobKey)
-                        .SetJobData(new JobDataMap
-                        {
-                            { "sendingGroupId", sendingGroup.Id },
-                            { "smtpPasswordSecretKeys", string.Join(',',sendingGroup.SmtpPasswordSecretKeys) }
-                        })
-                        .Build();
+            var job = JobBuilder
+                .Create<EmailSendingJob>()
+                .WithIdentity(jobKey)
+                .SetJobData(new JobDataMap { { "sendingGroupId", sendingGroup.Id } })
+                .Build();
 
             // 先指定为 Unspecified，再转为本地时间
-            var trigger = TriggerBuilder.Create()
+            var trigger = TriggerBuilder
+                .Create()
                 .ForJob(jobKey)
                 .StartAt(new DateTimeOffset(sendingGroup.ScheduleDate))
                 .Build();
@@ -364,7 +426,9 @@ namespace UZonMail.Core.Services.SendCore
             var isSchedule = sendingData.ScheduleDate > DateTime.UtcNow.AddMinutes(1);
 
             // 创建发件组
-            sendingData.SendingType = isSchedule ? SendingGroupType.Scheduled : SendingGroupType.Instant;
+            sendingData.SendingType = isSchedule
+                ? SendingGroupType.Scheduled
+                : SendingGroupType.Instant;
             var sendingGroup = await CreateSendingGroup(sendingData);
 
             // 判断是立即发件还是计划发件
@@ -393,7 +457,10 @@ namespace UZonMail.Core.Services.SendCore
         /// <param name="sendingGroup"></param>
         /// <param name="cancelMessage"></param>
         /// <returns></returns>
-        public async Task RemoveSendingGroupTask(SendingGroup sendingGroup, string cancelMessage = "")
+        public async Task RemoveSendingGroupTask(
+            SendingGroup sendingGroup,
+            string cancelMessage = ""
+        )
         {
             // 若处于发送中，则取消
             if (sendingGroup.Status == SendingGroupStatus.Sending)
@@ -419,10 +486,14 @@ namespace UZonMail.Core.Services.SendCore
             }
 
             // 更新状态
-            await db.SendingGroups.UpdateAsync(x => x.Id == sendingGroup.Id,
-                x => x.SetProperty(y => y.Status, SendingGroupStatus.Cancel));
-            await db.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroup.Id && x.Status == SendingItemStatus.Pending,
-                x => x.SetProperty(y => y.Status, SendingItemStatus.Cancel));
+            await db.SendingGroups.UpdateAsync(
+                x => x.Id == sendingGroup.Id,
+                x => x.SetProperty(y => y.Status, SendingGroupStatus.Cancel)
+            );
+            await db.SendingItems.UpdateAsync(
+                x => x.SendingGroupId == sendingGroup.Id && x.Status == SendingItemStatus.Pending,
+                x => x.SetProperty(y => y.Status, SendingItemStatus.Cancel)
+            );
         }
 
         /// <summary>

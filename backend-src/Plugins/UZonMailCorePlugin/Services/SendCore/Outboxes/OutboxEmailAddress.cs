@@ -1,6 +1,5 @@
-﻿using log4net;
-using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.Core.Services.SendCore.Utils;
+using log4net;
+using UZonMail.Core.Services.Encrypt.Models;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Extensions;
@@ -14,7 +13,7 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
     /// </summary>
     public class OutboxEmailAddress : EmailAddress
     {
-        private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxEmailAddress));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(OutboxEmailAddress));
 
         #region 私有变量
         // 发件箱数据
@@ -164,13 +163,18 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// </summary>
         /// <param name="outbox"></param>
         /// <param name="sendingGroupId"></param>
-        /// <param name="smtpPasswordSecretKeys"></param>
         /// <param name="type"></param>
         /// <param name="sendingItemIds"></param>
-        public OutboxEmailAddress(Outbox outbox, long sendingGroupId, List<string> smtpPasswordSecretKeys, OutboxEmailAddressType type, List<long> sendingItemIds = null)
+        public OutboxEmailAddress(
+            Outbox outbox,
+            long sendingGroupId,
+            EncryptParams encrypParams,
+            OutboxEmailAddressType type,
+            List<long> sendingItemIds = null
+        )
         {
             Outbox = outbox;
-            AuthPassword = outbox.Password.DeAES(smtpPasswordSecretKeys.First(), smtpPasswordSecretKeys.Last());
+            AuthPassword = outbox.Password.DeAES(encrypParams.Key, encrypParams.Iv);
             Type = type;
 
             // 共享发件箱
@@ -185,9 +189,10 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
                     throw new Exception("特定发件箱的 Type 必须包含 Specific");
 
                 // 开始添加
-                sendingItemIds?.ForEach(x => _sendingTargetIds.Add(new SendingTargetId(sendingGroupId, x)));
+                sendingItemIds?.ForEach(x =>
+                    _sendingTargetIds.Add(new SendingTargetId(sendingGroupId, x))
+                );
             }
-
 
             CreateDate = DateTime.UtcNow;
             Email = outbox.Email;
@@ -257,7 +262,10 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <returns></returns>
         public List<long> GetSpecificSendingItemIds()
         {
-            return _sendingTargetIds.Where(x => x.SendingGroupId > 0).Select(x => x.SendingItemId).ToList();
+            return _sendingTargetIds
+                .Where(x => x.SendingGroupId > 0)
+                .Select(x => x.SendingItemId)
+                .ToList();
         }
 
         /// <summary>
@@ -276,7 +284,9 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
         /// <param name="sendingGroupId"></param>
         public void RemoveSendingGroup(long sendingGroupId)
         {
-            _sendingTargetIds = _sendingTargetIds.Where(x => x.SendingGroupId != sendingGroupId).ToHashSet();
+            _sendingTargetIds = _sendingTargetIds
+                .Where(x => x.SendingGroupId != sendingGroupId)
+                .ToHashSet();
         }
 
         /// <summary>
@@ -289,12 +299,13 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             ShouldDispose = true;
         }
 
-
         private int _taskId = 0;
+
         public void SetTaskId(int taskId)
         {
             _taskId = taskId;
         }
+
         /// <summary>
         /// 是否正在任务中运行
         /// </summary>
