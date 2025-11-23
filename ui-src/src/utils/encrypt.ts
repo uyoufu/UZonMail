@@ -76,23 +76,3 @@ export function sha256 (data: string) {
 export function md5 (data: string) {
   return CryptoJS.MD5(data).toString()
 }
-
-/**
- * 使用明文的 password 生成 SmtpPasswordSecretKeys
- * @param password
- * @returns
- */
-export function getSmtpPasswordSecretKeys (password: string) {
-  const md5Password = md5(password)
-  const key = md5Password
-  if (!key || key.length < 16) {
-    return {
-      key,
-      iv: key
-    }
-  }
-
-  return {
-    key, iv: key.substring(0, 16)
-  }
-}

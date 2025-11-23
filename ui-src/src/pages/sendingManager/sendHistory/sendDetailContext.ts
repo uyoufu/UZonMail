@@ -6,14 +6,11 @@ import { resendSendingItem } from 'src/api/emailSending'
 import type { ISendingItem } from 'src/api/sendingItem'
 import { SendingItemStatus, getSendingItemBody } from 'src/api/sendingItem'
 import { confirmOperation, notifySuccess, showHtmlDialog2 } from 'src/utils/dialog'
-import { useUserInfoStore } from 'src/stores/user'
 import { useI18n } from 'vue-i18n'
 
 
 export function useContextMenu () {
   const { t } = useI18n()
-
-  const userInfoStore = useUserInfoStore()
 
   const sendDetailContextItems: IContextMenuItem<ISendingItem>[] = [
     {
@@ -42,7 +39,7 @@ export function useContextMenu () {
 
     // 重新发送
     // 向服务器请求重新发送
-    await resendSendingItem(email.id, userInfoStore.smtpPasswordSecretKeys)
+    await resendSendingItem(email.id)
 
     // 更改本机状态为正在发送
     email.status = SendingItemStatus.Sending

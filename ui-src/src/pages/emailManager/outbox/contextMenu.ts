@@ -1,16 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IOutbox } from 'src/api/emailBox'
 import { deleteOutboxByIds, OutboxStatus, updateOutbox, validateOutbox } from 'src/api/emailBox'
-import { deleteAllInvalidoutboxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
+import { deleteAllInvalidOutboxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
 
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getOutboxFields } from './headerFunctions'
-import { useUserInfoStore } from 'src/stores/user'
 
 import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import { deAes } from 'src/utils/encrypt'
 
 import type { getSelectedRowsType } from 'src/compositions/qTableUtils'
 
@@ -20,15 +18,6 @@ import logger from 'loglevel'
 
 import { tryOutlookDelegateAuthorization, isExchangeOutbox } from './headerFunctions'
 
-/**
- * 获取smtp密码
- * @param IOutbox
- * @returns
- */
-function getSmtpPassword (outbox: IOutbox, smtpPasswordSecretKeys: string[]) {
-  if (outbox.decryptedPassword) return outbox.password
-  return deAes(smtpPasswordSecretKeys[0] as string, smtpPasswordSecretKeys[1] as string, outbox.password)
-}
 
 export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType, refreshTable: () => void) {
   const outboxContextMenuItems: Ref<IContextMenuItem<IOutbox>[]> = computed(() =>
@@ -74,8 +63,6 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
       },
     ])
 
-  const userInfoStore = useUserInfoStore()
-
   // 删除发件箱
   async function onDeleteOutbox (row: Record<string, any>) {
     const { rows, selectedRows } = getSelectedRows(row)
@@ -115,14 +102,14 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     if (!outbox.userName)
       outbox.password = ""
 
-    await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
+    await tryOutlookDelegateAuthorization(outbox)
   }
 
   // 更新发件箱
   async function onUpdateOutbox (row: Record<string, any>) {
     const outbox = row as IOutbox
 
-    const fields = await getOutboxFields(userInfoStore.smtpPasswordSecretKeys)
+    const fields = await getOutboxFields()
     // 修改默认值
     fields.forEach(field => {
       switch (field.name) {
@@ -136,7 +123,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
           field.value = outbox.userName
           break
         case 'password':
-          field.value = getSmtpPassword(outbox, userInfoStore.smtpPasswordSecretKeys)
+          field.value = outbox.password
           break
         case 'smtpHost':
           field.value = outbox.smtpHost
@@ -181,13 +168,13 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     notifySuccess(translateGlobal('updateSuccess'))
 
     // 尝试进行 outlook 委托授权
-    await tryOutlookDelegateAuthorization(outbox, userInfoStore.userEncryptKeys)
+    await tryOutlookDelegateAuthorization(outbox)
   }
 
   async function onValidateOutbox (row: Record<string, any>) {
     const outbox = row as IOutbox
     const result = await notifyUntil(async () => {
-      return await validateOutbox(outbox.id as number, userInfoStore.smtpPasswordSecretKeys)
+      return await validateOutbox(outbox.id as number)
     }, translateOutboxManager('validatingEmail', { email: row.email }), translateOutboxManager('validating'))
     if (!result) return
     const { data, message } = result
@@ -219,7 +206,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
     await notifyUntil(async () => {
       // 向后端进行批量验证，通过 websocket 更新进度信息
-      return await validateAllInvalidOutboxes(row.emailGroupId as number, userInfoStore.smtpPasswordSecretKeys)
+      return await validateAllInvalidOutboxes(row.emailGroupId as number)
     }, translateOutboxManager('validateBatch'), translateOutboxManager('validating'))
 
     notifySuccess(translateOutboxManager('validateBatchSuccess'))
@@ -235,7 +222,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
 
     // 请求删除
     const outbox = row as IOutbox
-    await deleteAllInvalidoutboxesInGroup(outbox.emailGroupId as number)
+    await deleteAllInvalidOutboxesInGroup(outbox.emailGroupId as number)
     // 删除成功
     notifySuccess(translateGlobal('deleteSuccess'))
 

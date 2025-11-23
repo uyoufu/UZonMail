@@ -98,13 +98,8 @@ export function startOutlookDelegateAuthorization (outboxId: number) {
  * @param outbox
  * @returns
  */
-export function validateOutbox (outboxId: number, smtpPasswordSecretKeys: string[]) {
-  return httpClient.put<boolean>(`/email-box/outbox/${outboxId}/validation`, {
-    data: {
-      key: smtpPasswordSecretKeys[0],
-      iv: smtpPasswordSecretKeys[1]
-    }
-  })
+export function validateOutbox (outboxId: number) {
+  return httpClient.put<boolean>(`/email-box/outbox/${outboxId}/validation`)
 }
 
 

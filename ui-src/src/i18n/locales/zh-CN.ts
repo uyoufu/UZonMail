@@ -18,6 +18,8 @@ export default {
 
   // #region 全局通用
   global: {
+    appName: '宇正群邮',
+
     order: '序号',
     failed: '失败',
     success: '操作成功',
@@ -293,6 +295,7 @@ export default {
     ifEmptyProxyUseSystemSettings: '为空时使用系统设置',
     outlookDelegateAuthorizationSkippedNonExchangeSmtp: ' 检测到 Outlook 邮箱，但 SMTP 地址不是 Exchange 地址，跳过委托授权',
     existingRefreshTokenNoNeedDelegateAuthorization: '该邮箱已换取 refreshToken, 无需进行委托授权',
+    outlookDelegateAuthorizationSkippedEncryptedPassword: '检测到该发件箱的密码为加密状态，跳过委托授权',
     detectedExchangeEmailStartingOutlookDelegateAuthorization: '检测到个人 Outlook 邮箱，需要进行委托授权，请批准弹出的授权窗口',
     failedToGetAuthorizationUrl: '获取委托授权地址失败，请稍后重试',
     allowPopupWindowsForAuthorization: '请允许弹出窗口以进行授权',

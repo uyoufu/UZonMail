@@ -2,7 +2,6 @@ import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import { useI18n } from 'vue-i18n'
-import { useUserInfoStore } from 'src/stores/user'
 import type { IEmailGroupListItem } from '../components/types'
 
 import logger from 'loglevel'
@@ -11,7 +10,6 @@ import type { ISmtpInfo } from 'src/api/smtpInfo'
 import { GuessSmtpInfoPost } from 'src/api/smtpInfo'
 import type { IOutbox } from 'src/api/emailBox'
 import { createOutboxes } from 'src/api/emailBox'
-import { aes } from 'src/utils/encrypt'
 import { translateOutboxManager } from 'src/i18n/helpers'
 
 /**
@@ -21,8 +19,6 @@ import { translateOutboxManager } from 'src/i18n/helpers'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRow: (newRow: Record<string, any>) => void) {
   const { t } = useI18n()
-  const userInfoStore = useUserInfoStore()
-
   // #region 从文本导入
   async function onImportOutboxFromTxt (emailGroupId: number | null = null) {
     if (typeof emailGroupId !== 'number') emailGroupId = emailGroup.value.id as number
@@ -130,9 +126,6 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
     const smtpPassword = outboxTexts.find(x => !x.includes('@') && !x.includes("smtp.") && isNaN(Number(x)))
     if (!smtpPassword) return null
     outbox.password = smtpPassword
-
-    // 对明文密码加密
-    outbox.password = aes(userInfoStore.smtpPasswordSecretKeys[0] as string, userInfoStore.smtpPasswordSecretKeys[1] as string, outbox.password)
 
     // 添加其它项
     const smtpInfo = smtpInfos.find(x => x.domain === outbox.email.split('@')[1])

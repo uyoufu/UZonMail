@@ -62,7 +62,7 @@ export function deleteEmailGroupById (groupId: number) {
  * 删除所有无效的发件箱
  * @returns
  */
-export function deleteAllInvalidoutboxesInGroup (groupId: number) {
+export function deleteAllInvalidOutboxesInGroup (groupId: number) {
   return httpClient.delete<boolean>(`/email-group/${groupId}/invalid-outboxes`)
 }
 
@@ -70,14 +70,8 @@ export function deleteAllInvalidoutboxesInGroup (groupId: number) {
  * 验证组中未验证通过的邮箱
  * 发件验证结果 websocket 进行回调
  * @param groupId
- * @param smtpPasswordSecretKeys
  * @returns
  */
-export function validateAllInvalidOutboxes (groupId: number, smtpPasswordSecretKeys: string[]) {
-  return httpClient.put<boolean>(`/email-group/${groupId}/invalid-outbox/validate`, {
-    data: {
-      key: smtpPasswordSecretKeys[0],
-      iv: smtpPasswordSecretKeys[1]
-    }
-  })
+export function validateAllInvalidOutboxes (groupId: number) {
+  return httpClient.put<boolean>(`/email-group/${groupId}/invalid-outbox/validate`)
 }
