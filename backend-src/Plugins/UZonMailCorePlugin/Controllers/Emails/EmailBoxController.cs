@@ -53,11 +53,16 @@ namespace UZonMail.Core.Controllers.Emails
             Outbox? existOne = db.Outboxes.SingleOrDefault(x =>
                 x.UserId == userId && x.Email == entity.Email
             );
+
+            // 添加用户和加密密码
+            entity.UserId = userId;
+            entity.Password = encryptService.EncrytPassword(entity.Password);
+
             if (existOne != null)
             {
                 existOne.EmailGroupId = entity.EmailGroupId;
                 existOne.SmtpPort = entity.SmtpPort;
-                existOne.Password = encryptService.EncrytPassword(entity.Password);
+                existOne.Password = entity.Password;
                 existOne.UserName = entity.UserName;
                 existOne.Description = entity.Description;
                 existOne.ProxyId = entity.ProxyId;
@@ -67,7 +72,6 @@ namespace UZonMail.Core.Controllers.Emails
             else
             {
                 // 新建一个发件箱
-                entity.UserId = userId;
                 db.Outboxes.Add(entity);
                 existOne = entity;
             }
@@ -98,6 +102,8 @@ namespace UZonMail.Core.Controllers.Emails
                     entity.SmtpPort = 25;
                 // 设置用户
                 entity.UserId = userId;
+                // 加密密码
+                entity.Password = encryptService.EncrytPassword(entity.Password);
 
                 // 验证数据
                 var outboxValidator = new OutboxValidator();
@@ -112,10 +118,12 @@ namespace UZonMail.Core.Controllers.Emails
             List<Outbox> existEmails = await db
                 .Outboxes.Where(x => x.UserId == userId && emails.Contains(x.Email))
                 .ToListAsync();
-            List<Outbox?> newEntities = emails
-                .Except(existEmails.Select(x => x.Email))
-                .Select(x => entities.Find(e => e.Email == x))
-                .ToList();
+            List<Outbox?> newEntities =
+            [
+                .. emails
+                    .Except(existEmails.Select(x => x.Email))
+                    .Select(x => entities.Find(e => e.Email == x))
+            ];
 
             // 新建发件箱
             await db.Outboxes.AddRangeAsync(newEntities.Where(x => x != null));
@@ -129,7 +137,7 @@ namespace UZonMail.Core.Controllers.Emails
                     entity.EmailGroupId = newEntity.EmailGroupId;
                     entity.SmtpPort = newEntity.SmtpPort;
                     entity.UserName = newEntity.UserName;
-                    entity.Password = encryptService.EncrytPassword(newEntity.Password);
+                    entity.Password = newEntity.Password; // 密码已经加密处理
                     entity.EnableSSL = newEntity.EnableSSL;
                     entity.Description = newEntity.Description;
                     entity.ProxyId = newEntity.ProxyId;

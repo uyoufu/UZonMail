@@ -1,5 +1,4 @@
-﻿using UZonMail.Core.Config.SubConfigs;
-using UZonMail.Utils.Web.Service;
+using UZonMail.Core.Config.SubConfigs;
 using UZonMail.Utils.Web.Token;
 
 namespace UZonMail.Core.Config

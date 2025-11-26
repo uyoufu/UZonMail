@@ -1,17 +1,18 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace UZonMail.Utils.Json
 {
     public static class JsonExtension
     {
-        public readonly static JsonSerializerSettings CameCaseJsonSettings = new JsonSetting().WithCameCase();
+        public static readonly JsonSerializerSettings CameCaseJsonSettings =
+            new JsonSetting().WithCameCase();
 
         /// <summary>
         /// object 对象转换成 json
@@ -54,10 +55,12 @@ namespace UZonMail.Utils.Json
         /// <returns></returns>
         public static T ToObjectOrDefault<T>(this JToken jt, T default_)
         {
-            if (jt == null) return default_;
+            if (jt == null)
+                return default_;
 
             T? value = jt.ToObject<T>();
-            if (value == null) return default_;
+            if (value == null)
+                return default_;
 
             return value;
         }
@@ -70,13 +73,16 @@ namespace UZonMail.Utils.Json
         /// <param name="path"></param>
         /// <param name="default_"></param>
         /// <returns></returns>
-        public static T? SelectTokenOrDefault<T>(this JToken jt, string path, T? default_=default)
+        public static T? SelectTokenOrDefault<T>(this JToken jt, string path, T? default_ = default)
         {
-            if (string.IsNullOrEmpty(path)) return default_;
-            if (jt == null) return default_;
+            if (string.IsNullOrEmpty(path))
+                return default_;
+            if (jt == null)
+                return default_;
 
             var value = jt.SelectToken(path);
-            if (value == null) return default_;
+            if (value == null)
+                return default_;
             return value.ToObjectOrDefault(default_);
         }
 
@@ -92,7 +98,8 @@ namespace UZonMail.Utils.Json
             {
                 var value = item.Value?.ToString();
                 value ??= string.Empty;
-                if (value == "True" || value == "False") value = value.ToLower();
+                if (value == "True" || value == "False")
+                    value = value.ToLower();
 
                 stringBuilder.Append($"{item.Key}={value}&");
             }

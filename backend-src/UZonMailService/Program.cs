@@ -1,11 +1,11 @@
+using System.Reflection;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using Quartz;
-using System.Reflection;
-using System.Security.Claims;
 using Uamazing.Utils.Plugin;
 using UZonMail.DB.MySql;
 using UZonMail.DB.PostgreSql;
@@ -18,17 +18,17 @@ using UZonMail.Utils.Web.Filters;
 using UZonMail.Utils.Web.Token;
 using UZonMailService.Middlewares;
 
-// ĞŞ¸Äµ±Ç°Ä¿Â¼
+// ä¿®æ”¹å½“å‰ç›®å½•
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
-// Éú³ÉÄ¬ÈÏµÄÅäÖÃÎÄ¼ş
+// ç”Ÿæˆé»˜è®¤çš„é…ç½®æ–‡ä»¶
 var productConfig = "appsettings.Production.json";
 if (!File.Exists(productConfig))
 {
     File.WriteAllText(productConfig, "{\n}");
 }
 
-// ¸´ÖÆ quartz Êı¾İ¿â
+// å¤åˆ¶ quartz æ•°æ®åº“
 var quartzDb = "data/db/quartz-sqlite.sqlite3";
 if (!File.Exists(quartzDb))
 {
@@ -46,151 +46,155 @@ var appOptions = new WebApplicationOptions
 var builder = WebApplication.CreateBuilder(appOptions);
 var services = builder.Services;
 
+// æŸ¥çœ‹å½“å‰ç¯å¢ƒ
+Console.WriteLine($"Current Environmentï¼š{builder.Environment.EnvironmentName}");
 
-// ²é¿´µ±Ç°»·¾³
-Console.WriteLine($"Current Environment£º{builder.Environment.EnvironmentName}");
-
-
-// ±£Ö¤Ö»ÓĞÒ»¸öÊµÀı
+// ä¿è¯åªæœ‰ä¸€ä¸ªå®ä¾‹
 // services.UseSingleApp();
 
-// ÈÕÖ¾
+// æ—¥å¿—
 services.AddLogging(loggingBuilder =>
 {
     loggingBuilder.ClearProviders();
     loggingBuilder.AddLog4Net();
 });
-// Ìí¼Ó http ÈÕÖ¾
+
+// æ·»åŠ  http æ—¥å¿—
 services.AddHttpLogging(logging =>
 {
-    logging.LoggingFields = HttpLoggingFields.RequestProperties
+    logging.LoggingFields =
+        HttpLoggingFields.RequestProperties
         | HttpLoggingFields.RequestHeaders
         | HttpLoggingFields.ResponseHeaders;
     logging.RequestBodyLogLimit = 4096;
     logging.ResponseBodyLogLimit = 4096;
 });
+
 //// log4net: https://github.com/huorswords/Microsoft.Extensions.Logging.Log4Net.AspNetCore/blob/develop/samples/Net8.0/WebApi/log4net.config
-//// ²Î¿¼£ºhttps://github.com/huorswords/Microsoft.Extensions.Logging.Log4Net.AspNetCore/blob/develop/samples/Net8.0/WebApi/Program.cs
+//// å‚è€ƒï¼šhttps://github.com/huorswords/Microsoft.Extensions.Logging.Log4Net.AspNetCore/blob/develop/samples/Net8.0/WebApi/Program.cs
 //builder.Logging.ClearProviders();
 //builder.Logging.AddLog4Net();
-// ½« logging µÄÈÕÖ¾¼¶±ğÓ³Éäµ½ log4net
+// å°† logging çš„æ—¥å¿—çº§åˆ«æ˜ å°„åˆ° log4net
 builder.AttachLevelToLog4Net();
 
-
-// Ìí¼Ó httpClient
+// æ·»åŠ  httpClient
 services.AddHttpClient();
 
 // Add services to the container.
-var mvcBuilder = services.AddControllers(option =>
-{
-    // Ìí¼ÓÈ«¾ÖÒì³£´¦Àí
-    option.Filters.Add(new KnownExceptionFilter());
-    option.Filters.Add(new TokenExpiredFilter());
-})
-.AddNewtonsoftJson(x =>
-{
-    x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-});
+var mvcBuilder = services
+    .AddControllers(option =>
+    {
+        // æ·»åŠ å…¨å±€å¼‚å¸¸å¤„ç†
+        option.Filters.Add(new KnownExceptionFilter());
+        option.Filters.Add(new TokenExpiredFilter());
+    })
+    .AddNewtonsoftJson(x =>
+    {
+        x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
 
-// ¼ÓÔØ²å¼ş
+// åŠ è½½æ’ä»¶
 var pluginLoader = new PluginLoader("Plugins");
 pluginLoader.AddApplicationPart(mvcBuilder);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
 
-// ÅäÖÃ swagger
-services.AddSwaggerGen(new OpenApiInfo()
-{
-    Title = "UZonMail API",
-    Contact = new OpenApiContact()
+// é…ç½® swagger
+services.AddSwaggerGen(
+    new OpenApiInfo()
     {
-        Name = "galens",
-        Url = new Uri("https://galens.uamazing.cn"),
-        Email = "260827400@qq.com"
-    },    
-});
+        Title = "UZonMail API",
+        Contact = new OpenApiContact()
+        {
+            Name = "galens",
+            Url = new Uri("https://galens.uamazing.cn"),
+            Email = "260827400@qq.com"
+        },
+    }
+);
 
-
-
-// ÑéÖ¤ÔÚ jwt ÖĞÊµÏÖ
-// Ìí¼Ó signalR£¬»¹ĞèÒªÔÚ app ÖĞÊ¹ÓÃ MapHub
-// ²Î¿¼: https://learn.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-8.0&tabs=visual-studio
+// éªŒè¯åœ¨ jwt ä¸­å®ç°
+// æ·»åŠ  signalRï¼Œè¿˜éœ€è¦åœ¨ app ä¸­ä½¿ç”¨ MapHub
+// å‚è€ƒ: https://learn.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-8.0&tabs=visual-studio
 services.AddSignalR();
+
 // Change to use Name as the user identifier for SignalR
-// WARNING: This requires that the source of your JWT token 
+// WARNING: This requires that the source of your JWT token
 // ensures that the Name claim is unique!
-// If the Name claim isn't unique, users could receive messages 
+// If the Name claim isn't unique, users could receive messages
 // intended for a different user!
-// ²»Ê¹ÓÃ×Ô¶¨ÒåµÄ IUserIdProvider£¬Ê¹ÓÃÄ¬ÈÏµÄ£¬±£Ö¤ token µÄ claim ÖĞ°üº¬ ClaimTypes.Name,
+// ä¸ä½¿ç”¨è‡ªå®šä¹‰çš„ IUserIdProviderï¼Œä½¿ç”¨é»˜è®¤çš„ï¼Œä¿è¯ token çš„ claim ä¸­åŒ…å« ClaimTypes.Name,
 //builder.Services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
 
-// ÉèÖÃ hyphen-case Â·ÓÉ
+// è®¾ç½® hyphen-case è·¯ç”±
 services.SetupSlugifyCaseRoute();
 
-// ×¢ÈëÊı¾İ¿â
-services.AddSqlContext<SqlContext, PostgreSqlContext, MySqlContext, SqLiteContext>(builder.Configuration);
+// æ³¨å…¥æ•°æ®åº“
+services.AddSqlContext<SqlContext, PostgreSqlContext, MySqlContext, SqLiteContext>(
+    builder.Configuration
+);
 
-// Ìí¼Ó HttpContextAccessor£¬ÒÔ¹© service »ñÈ¡µ±Ç°ÇëÇóµÄÓÃ»§ĞÅÏ¢
+// æ·»åŠ  HttpContextAccessorï¼Œä»¥ä¾› service è·å–å½“å‰è¯·æ±‚çš„ç”¨æˆ·ä¿¡æ¯
 services.AddHttpContextAccessor();
 
-// ¶¨Ê±ÈÎÎñ
+// å®šæ—¶ä»»åŠ¡
 services.Configure<QuartzOptions>(builder.Configuration.GetSection("Quartz"));
+
 // if you are using persistent job store, you might want to alter some options
 services.Configure<QuartzOptions>(options =>
 {
     options.Scheduling.IgnoreDuplicates = true; // default: false
     options.Scheduling.OverWriteExistingData = true; // default: true
 });
-// ×¢Èëµ½ ioc ÖĞ
-services.AddQuartz();
-// Æô¶¯·şÎñ
-services.AddQuartzHostedService(
-    q => q.WaitForJobsToComplete = false);
 
-// ÅäÖÃ jwt ÑéÖ¤
+// æ³¨å…¥åˆ° ioc ä¸­
+services.AddQuartz();
+
+// å¯åŠ¨æœåŠ¡
+services.AddQuartzHostedService(q => q.WaitForJobsToComplete = false);
+
+// é…ç½® jwt éªŒè¯
 var tokenParams = new TokenParams();
 builder.Configuration.GetSection("TokenParams").Bind(tokenParams);
 var redisConfig = new RedisConnectionConfig();
 builder.Configuration.GetSection("Database:Redis").Bind(redisConfig);
 services.AddJWTAuthentication(tokenParams.UniqueSecret, redisConfig);
 
-// ÅäÖÃ½Ó¿Ú¼øÈ¨²ßÂÔ
-services.AddAuthorizationBuilder()
-    // ³¬¹Ü
+// é…ç½®æ¥å£é‰´æƒç­–ç•¥
+services
+    .AddAuthorizationBuilder()
+    // è¶…ç®¡
     .AddPolicy("RequireAdmin", policy => policy.RequireClaim(ClaimTypes.Role, "admin"));
 
-// ¹Ø±Õ²ÎÊı×Ô¶¯¼ìÑé
+// å…³é—­å‚æ•°è‡ªåŠ¨æ£€éªŒ
 services.Configure<ApiBehaviorOptions>(o =>
 {
     o.SuppressModelStateInvalidFilter = true;
 });
 
-// ¿çÓò
+// è·¨åŸŸ
 services.AddCors(options =>
 {
     var configuration = builder.Configuration;
-    // »ñÈ¡¿çÓòÅäÖÃ
+    // è·å–è·¨åŸŸé…ç½®
     string[]? corsConfig = configuration.GetSection("Cors").Get<string[]>();
 
-    options.AddDefaultPolicy(
-        policy =>
-        {
-            policy.WithOrigins([.. corsConfig])
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-        });
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins([.. corsConfig]).AllowAnyMethod().AllowAnyHeader();
+    });
 });
 
-// ĞŞ¸ÄÎÄ¼şÉÏ´«´óĞ¡ÏŞÖÆ
+// ä¿®æ”¹æ–‡ä»¶ä¸Šä¼ å¤§å°é™åˆ¶
 services.Configure<FormOptions>(options =>
 {
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartBodyLengthLimit = int.MaxValue;
 });
 
-// ÅäÖÃ Kestrel ·şÎñÆ÷
-// Ä¬ÈÏ¼àÌıµØÖ·Í¨¹ı Urls ÅäÖÃ 
+// é…ç½® Kestrel æœåŠ¡å™¨
+// é»˜è®¤ç›‘å¬åœ°å€é€šè¿‡ Urls é…ç½®
 builder.WebHost.ConfigureKestrel(options =>
 {
     bool listenAnyIP = builder.Configuration.GetSection("Http:ListenAnyIP").Get<bool>();
@@ -203,39 +207,47 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = int.MaxValue;
 });
 
-// ¼ÓÔØ±¾»ú·şÎñ
+// æ·»åŠ å·¥å…·ä¸­çš„æœåŠ¡
+services.AddUtilsServices();
+
+// åŠ è½½æœ¬æœºæœåŠ¡
 services.AddServices();
 
-// ¼ÓÔØ²å¼ş·şÎñ
+// åŠ è½½æ’ä»¶æœåŠ¡
 pluginLoader.UseServices(builder);
 
 var app = builder.Build();
 
 app.UseDefaultFiles();
-// ÉèÖÃÍøÕ¾µÄ¸ùÄ¿Â¼
-app.UseStaticFiles(new StaticFileOptions()
-{
-    ServeUnknownFileTypes = true,
-    OnPrepareResponse = (ctx) =>
+
+// è®¾ç½®ç½‘ç«™çš„æ ¹ç›®å½•
+app.UseStaticFiles(
+    new StaticFileOptions()
     {
-        // ÌØ±ğ¼æÈİ .well-known µÄÇé¿ö
-        if (ctx.Context.Request.Path.StartsWithSegments("/.well-known"))
+        ServeUnknownFileTypes = true,
+        OnPrepareResponse = (ctx) =>
         {
-            ctx.Context.Response.ContentType = "text/plain";
+            // ç‰¹åˆ«å…¼å®¹ .well-known çš„æƒ…å†µ
+            if (ctx.Context.Request.Path.StartsWithSegments("/.well-known"))
+            {
+                ctx.Context.Response.ContentType = "text/plain";
+            }
         }
     }
-});
+);
 
-// ÉèÖÃ public Ä¿Â¼Îª¾²Ì¬ÎÄ¼şÄ¿Â¼
+// è®¾ç½® public ç›®å½•ä¸ºé™æ€æ–‡ä»¶ç›®å½•
 var publicPath = Path.Combine(builder.Environment.ContentRootPath, "data/public");
 Directory.CreateDirectory(publicPath);
-app.UseStaticFiles(new StaticFileOptions()
-{
-    FileProvider = new PhysicalFileProvider(publicPath),
-    RequestPath = "/public"
-});
+app.UseStaticFiles(
+    new StaticFileOptions()
+    {
+        FileProvider = new PhysicalFileProvider(publicPath),
+        RequestPath = "/public"
+    }
+);
 
-// ¿çÓò
+// è·¨åŸŸ
 app.UseCors();
 
 // Configure the HTTP request pipeline.
@@ -249,13 +261,12 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-// vue µ¥Ò³ÃæÓ¦ÓÃÖĞ¼ä¼ş
+// vue å•é¡µé¢åº”ç”¨ä¸­é—´ä»¶
 app.UseVueASP();
 
-// http Â·ÓÉ
+// http è·¯ç”±
 app.MapControllers();
 
 pluginLoader.UseApp(app);
 
 app.Run();
-

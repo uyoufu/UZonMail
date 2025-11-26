@@ -1,4 +1,4 @@
-﻿using Innofactor.EfCoreJsonValueConverter;
+using Innofactor.EfCoreJsonValueConverter;
 using Newtonsoft.Json.Linq;
 using UZonMail.DB.SQL.Base;
 
@@ -31,7 +31,7 @@ namespace UZonMail.DB.SQL.Core.Settings
         /// 系统设置类型
         /// 为空是为了兼容旧数据
         /// </summary>
-        public AppSettingType? Type { get; set; } = AppSettingType.System;
+        public AppSettingType Type { get; set; } = AppSettingType.System;
 
         /// <summary>
         /// 名称

@@ -1,10 +1,3 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +7,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using UZonMail.Utils.Database.Redis;
 using UZonMail.Utils.Web.Convention;
 using UZonMail.Utils.Web.Service;
@@ -34,8 +33,9 @@ namespace UZonMail.Utils.Web
         {
             services.AddControllersWithViews(options =>
             {
-                options.Conventions.Add(new RouteTokenTransformerConvention(
-                                             new SlugifyParameterTransformer()));
+                options.Conventions.Add(
+                    new RouteTokenTransformerConvention(new SlugifyParameterTransformer())
+                );
             });
             return services;
         }
@@ -55,96 +55,25 @@ namespace UZonMail.Utils.Web
         /// <returns></returns>
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            // 批量注入 Services 单例            
-            var assembleyTypes = Assembly.GetCallingAssembly()
-                .GetTypes();
-            var transientType = typeof(ITransientService);
-            // 分多种情况，注册不同的生命周期
-
-            // 瞬时类型
-            var transientTypes = assembleyTypes.Where(x => !x.IsInterface && !x.IsAbstract && transientType.IsAssignableFrom(x))
-                .ToList();
-            transientTypes.ForEach(type =>
-            {
-                // 获取注册类型和实现类型
-                var serviceTypes = GetServiceTypes(type);
-                serviceTypes.ForEach(serviceType =>
-                {
-                    services.AddTransient(serviceType, type);
-                });
-            });
-
-            // 请求周期
-            var scopedServiceType = typeof(IScopedService);
-            // 分多种情况，注册不同的生命周期
-            var scopedServiceTypes = assembleyTypes.Where(x => !x.IsInterface && !x.IsAbstract && scopedServiceType.IsAssignableFrom(x))
-                .ToList();
-            scopedServiceTypes.ForEach(type =>
-            {
-                var serviceTypes = GetServiceTypes(type);
-                serviceTypes.ForEach(serviceType =>
-                {
-                    services.AddScoped(serviceType, type);
-                });
-            });
-
-            // 单例
-            var singletonServiceType = typeof(ISingletonService);
-            // 分多种情况，注册不同的生命周期
-            var singletonServiceTypes = assembleyTypes.Where(x => !x.IsInterface && !x.IsAbstract && singletonServiceType.IsAssignableFrom(x))
-               .ToList();
-            singletonServiceTypes.ForEach(type =>
-            {
-                var serviceTypes = GetServiceTypes(type);
-                serviceTypes.ForEach(serviceType =>
-                {
-                    services.AddSingleton(serviceType, type);
-                });
-            });
-
-            // 后台服务,在启动时，就会运行
-            var hostedServiceType = typeof(IHostedService);
-            var hostedServiceTypes = assembleyTypes.Where(x => !x.IsInterface && !x.IsAbstract && hostedServiceType.IsAssignableFrom(x))
-                .ToList();
-            hostedServiceTypes.ForEach(type =>
-            {
-                services.AddSingleton(hostedServiceType, type);
-                services.AddSingleton(type);
-            });
-
-            return services;
+            // 批量注入 Services 单例
+            var callingAssembly = Assembly.GetCallingAssembly();
+            return ServiceUtils.AddServices(services, callingAssembly);
         }
 
         /// <summary>
-        /// 通过实现类型获取服务类型
+        /// 添加 Utils 服务
         /// </summary>
-        /// <param name="implementationType">实现类型，必须继承 ITransientService 或 IScopedService 或 ISingletonService</param>
+        /// <param name="services"></param>
         /// <returns></returns>
-        private static List<Type> GetServiceTypes(Type implementationType)
+        public static IServiceCollection AddUtilsServices(this IServiceCollection services)
         {
-            var interfaceNames = new List<Type>() {
-                typeof(ITransientService<>), typeof(IScopedService<>), typeof(ISingletonService<>),
-                typeof(ITransientService), typeof(IScopedService), typeof(ISingletonService)
-            }.ConvertAll(x => x.Name);
-
-            // 不断向上查找，直到找到 IService 为止
-            var interfaces = implementationType.GetInterfaces()
-                .Where(x => x.IsInterface)
-                .Where(x => interfaceNames.Contains(x.Name))
-                .ToList();
-
-            List<Type> serviceTypes = [implementationType];
-            foreach (var item in interfaces)
+            // 批量注入 Services 单例
+            var utilsAssembly = Assembly.GetExecutingAssembly();
+            if (utilsAssembly != null)
             {
-                if (item.IsGenericType)
-                {
-                    // 获取泛型参数
-                    Type genericArgument = item.GetGenericArguments().First();
-                    serviceTypes.Add(genericArgument);
-                }
+                return ServiceUtils.AddServices(services, utilsAssembly);
             }
-
-            return serviceTypes;
+            return services;
         }
 
         /// <summary>
@@ -154,7 +83,10 @@ namespace UZonMail.Utils.Web
         /// <param name="services"></param>
         /// <param name="apiInfo"></param>
         /// <returns></returns>
-        public static IServiceCollection AddSwaggerGen(this IServiceCollection services, OpenApiInfo apiInfo)
+        public static IServiceCollection AddSwaggerGen(
+            this IServiceCollection services,
+            OpenApiInfo apiInfo
+        )
         {
             services.AddSwaggerGen(swaggerOptions =>
             {
@@ -170,7 +102,8 @@ namespace UZonMail.Utils.Web
                 // Bearer 的scheme定义
                 var securityScheme = new OpenApiSecurityScheme()
                 {
-                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Description =
+                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
                     Name = "Authorization",
                     //参数添加在头部
                     In = ParameterLocation.Header,
@@ -190,11 +123,11 @@ namespace UZonMail.Utils.Web
                     {
                         new OpenApiSecurityScheme
                         {
-                           Reference = new OpenApiReference
-                           {
-                               Type = ReferenceType.SecurityScheme,
-                               Id = "bearerAuth"
-                           }
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "bearerAuth"
+                            }
                         },
                         Array.Empty<string>()
                     }
@@ -216,7 +149,11 @@ namespace UZonMail.Utils.Web
         /// <param name="secretKey"></param>
         /// <param name="redisConnection">若传递该参数，会进行 token 黑名单验证</param>
         /// <returns></returns>
-        public static IServiceCollection AddJWTAuthentication(this IServiceCollection services, string secretKey, RedisConnectionConfig? redisConnection = null)
+        public static IServiceCollection AddJWTAuthentication(
+            this IServiceCollection services,
+            string secretKey,
+            RedisConnectionConfig? redisConnection = null
+        )
         {
             // reids 缓存
             RedisCacheAdapter? redisCache = null;
@@ -226,64 +163,73 @@ namespace UZonMail.Utils.Web
                 redisCache = new RedisCacheAdapter(redisConnection);
             }
 
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters
+            services
+                .AddAuthentication(x =>
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    // 是否验证令牌有效期
-                    ValidateLifetime = true,
-                    // 每次颁发令牌，令牌有效时间
-                    ClockSkew = TimeSpan.FromMinutes(1440)
-                };
-
-                // We have to hook the OnMessageReceived event in order to
-                // allow the JWT authentication handler to read the access
-                // token from the query string when a WebSocket or 
-                // Server-Sent Events request comes in.
-
-                // Sending the access token in the query string is required when using WebSockets or ServerSentEvents
-                // due to a limitation in Browser APIs. We restrict it to only calls to the
-                // SignalR hub in this code.
-                // See https://docs.microsoft.com/aspnet/core/signalr/security#access-token-logging
-                // for more information about security considerations when using
-                // the query string to transmit the access token.
-                options.Events = new JwtBearerEvents
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
                 {
-                    OnMessageReceived = context =>
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        if (context.Token == null)
-                        {
-                            var accessToken = context.Request.Query["access_token"];
-                            context.Token = accessToken;
-                        }
-                        return Task.CompletedTask;
-                    },
-                    OnTokenValidated = async context =>
-                    {
-                        if (redisCache == null || !redisCache.Enable) return;
-                        var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
-                        if (string.IsNullOrEmpty(jti)) return;
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(secretKey)
+                        ),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        // 是否验证令牌有效期
+                        ValidateLifetime = true,
+                        // 每次颁发令牌，令牌有效时间
+                        ClockSkew = TimeSpan.FromMinutes(1440)
+                    };
 
-                        // 查询黑名单
-                        var isBlacklisted = await redisCache.KeyExistsAsync($"jwt:blacklist:{jti}");
-                        if (isBlacklisted)
+                    // We have to hook the OnMessageReceived event in order to
+                    // allow the JWT authentication handler to read the access
+                    // token from the query string when a WebSocket or
+                    // Server-Sent Events request comes in.
+
+                    // Sending the access token in the query string is required when using WebSockets or ServerSentEvents
+                    // due to a limitation in Browser APIs. We restrict it to only calls to the
+                    // SignalR hub in this code.
+                    // See https://docs.microsoft.com/aspnet/core/signalr/security#access-token-logging
+                    // for more information about security considerations when using
+                    // the query string to transmit the access token.
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
                         {
-                            context.Fail("Token has been deprecated!");
+                            if (context.Token == null)
+                            {
+                                var accessToken = context.Request.Query["access_token"];
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = async context =>
+                        {
+                            if (redisCache == null || !redisCache.Enable)
+                                return;
+                            var jti = context
+                                .Principal?.FindFirst(JwtRegisteredClaimNames.Jti)
+                                ?.Value;
+                            if (string.IsNullOrEmpty(jti))
+                                return;
+
+                            // 查询黑名单
+                            var isBlacklisted = await redisCache.KeyExistsAsync(
+                                $"jwt:blacklist:{jti}"
+                            );
+                            if (isBlacklisted)
+                            {
+                                context.Fail("Token has been deprecated!");
+                            }
                         }
-                    }
-                };
-            });
+                    };
+                });
             return services;
         }
 

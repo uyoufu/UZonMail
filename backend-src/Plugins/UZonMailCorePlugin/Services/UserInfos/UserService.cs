@@ -268,7 +268,7 @@ namespace UZonMail.Core.Services.UserInfos
             await db.SaveChangesAsync();
 
             // 更新用户的组织设置和和退订设置
-            CacheManager.Global.SetCacheDirty<UserInfoCache>(user.Id.ToString());
+            DBCacheManager.Global.SetCacheDirty<UserInfoCache>(user.Id);
 
             return true;
         }

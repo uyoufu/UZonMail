@@ -8,7 +8,9 @@ namespace UZonMail.Core.Services.Encrypt
     /// <summary>
     /// 加密相关的服务
     /// </summary>
-    public class EncryptService(IConfiguration config) : ISingletonService
+    public class EncryptService(IConfiguration config)
+        : ISingletonService<IEncryptService>,
+            IEncryptService
     {
         private EncryptParams? _encrypParams;
 
@@ -39,6 +41,9 @@ namespace UZonMail.Core.Services.Encrypt
         /// <returns></returns>
         public string EncrytPassword(string password)
         {
+            if (string.IsNullOrEmpty(password))
+                return password;
+
             var encryptParams = GetEncrypParams();
             return password.AES(encryptParams.Key, encryptParams.Iv);
         }
@@ -50,6 +55,9 @@ namespace UZonMail.Core.Services.Encrypt
         /// <returns></returns>
         public string DecryptPassword(string password)
         {
+            if (string.IsNullOrEmpty(password))
+                return password;
+
             var encryptParams = GetEncrypParams();
             return password.DeAES(encryptParams.Key, encryptParams.Iv);
         }

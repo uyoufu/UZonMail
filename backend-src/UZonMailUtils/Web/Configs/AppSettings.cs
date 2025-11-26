@@ -9,9 +9,12 @@ namespace UZonMail.Utils.Web.Configs
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="configuration"></param>
-    public class AppSettings<T>(IConfiguration configuration) : ITransientService
+    public class AppSettings<T>(IConfiguration configuration)
+        : ISingletonService<IAppSettings<T>>,
+            IAppSettings<T>
         where T : class, new()
     {
-        public T Value { get; set; } = configuration.GetConfig<T>();
+        private readonly T _value = configuration.GetConfig<T>();
+        public T Value => _value;
     }
 }

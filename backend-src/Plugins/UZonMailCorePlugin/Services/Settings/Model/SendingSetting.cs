@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
-using UZonMail.Core.Services.Settings.Core;
+using UZonMail.Core.Utils.Cache;
 using UZonMail.Utils.Extensions;
 
 namespace UZonMail.Core.Services.Settings.Model
@@ -64,10 +64,7 @@ namespace UZonMail.Core.Services.Settings.Model
         [NotMapped]
         public List<string> ReplyToEmailsList
         {
-            get
-            {
-                return ReplyToEmails.SplitBySeparators().Distinct().ToList();
-            }
+            get { return ReplyToEmails.SplitBySeparators().Distinct().ToList(); }
         }
 
         /// <summary>
@@ -88,14 +85,14 @@ namespace UZonMail.Core.Services.Settings.Model
             return seconds * 1000;
         }
 
-        protected override void InitValue()
+        protected override void ReadValuesFromJsons()
         {
             MaxSendCountPerEmailDay = GetIntValue(nameof(MaxSendCountPerEmailDay), 0);
             MinOutboxCooldownSecond = GetIntValue(nameof(MinOutboxCooldownSecond), 5);
             MaxSendingBatchSize = GetIntValue(nameof(MaxSendingBatchSize), 20);
             MinInboxCooldownHours = GetIntValue(nameof(MinInboxCooldownHours), 0);
             ReplyToEmails = GetStringValue(nameof(ReplyToEmails), string.Empty);
-            MaxRetryCount = GetIntValue(nameof(MaxRetryCount), 3); 
+            MaxRetryCount = GetIntValue(nameof(MaxRetryCount), 3);
             ChangeIpAfterEmailCount = GetIntValue(nameof(ChangeIpAfterEmailCount), 0);
             MaxCountPerIPDomainHour = GetIntValue(nameof(MaxCountPerIPDomainHour), 1200);
         }
