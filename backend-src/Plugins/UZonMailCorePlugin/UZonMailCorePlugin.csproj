@@ -21,18 +21,22 @@
 	  <Compile Remove="bin\**" />
 	  <Compile Remove="Controllers\Organization\**" />
 	  <Compile Remove="Services\LLM\**" />
+	  <Compile Remove="Services\Settings\Core\**" />
 	  <Compile Remove="Services\UzonMailCore\**" />
 	  <Content Remove="bin\**" />
 	  <Content Remove="Controllers\Organization\**" />
 	  <Content Remove="Services\LLM\**" />
+	  <Content Remove="Services\Settings\Core\**" />
 	  <Content Remove="Services\UzonMailCore\**" />
 	  <EmbeddedResource Remove="bin\**" />
 	  <EmbeddedResource Remove="Controllers\Organization\**" />
 	  <EmbeddedResource Remove="Services\LLM\**" />
+	  <EmbeddedResource Remove="Services\Settings\Core\**" />
 	  <EmbeddedResource Remove="Services\UzonMailCore\**" />
 	  <None Remove="bin\**" />
 	  <None Remove="Controllers\Organization\**" />
 	  <None Remove="Services\LLM\**" />
+	  <None Remove="Services\Settings\Core\**" />
 	  <None Remove="Services\UzonMailCore\**" />
 	</ItemGroup>
 
@@ -56,9 +60,10 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.0" />
+		<PackageReference Include="Microsoft.Extensions.AI" Version="9.10.2" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.2" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.72.0" />
-		<PackageReference Include="OpenAI" Version="2.5.0" />
+		<PackageReference Include="OpenAI" Version="2.6.0" />
 		<PackageReference Include="Quartz" Version="3.14.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.3.1" />

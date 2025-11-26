@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore;
+using UZonMail.Core.Utils.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 
@@ -11,14 +11,14 @@ namespace UZonMail.Core.Services.Settings.Core
     /// <param name="type"></param>
     /// <param name="userId"></param>
     /// <param name="data"></param>
-    public class UserSetting(string key, long userId) : HierarchicalSetting(AppSettingType.User, key, userId)
+    public class UserSetting(CacheKey cacheKey) : JsonSettings
     {
         protected override async Task<AppSetting?> FetchAppSetting(SqlContext sqlContext)
         {
-            return await sqlContext.AppSettings
-                  .Where(x => x.Key == Key)
-                  .Where(x => x.Type == AppSettingType.User && x.UserId == OwnerId)
-                  .FirstOrDefaultAsync();
+            return await sqlContext
+                .AppSettings.Where(x => x.Key == cacheKey.Key)
+                .Where(x => x.Type == AppSettingType.User && x.UserId == cacheKey.OwnerId)
+                .FirstOrDefaultAsync();
         }
     }
 }

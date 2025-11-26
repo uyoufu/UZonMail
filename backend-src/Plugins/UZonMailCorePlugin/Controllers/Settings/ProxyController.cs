@@ -1,22 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Utils.Web.PagingQuery;
-using UZonMail.DB.SQL;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Utils.Database;
+using UZonMail.Core.Services.Settings;
+using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.DB.Extensions;
+using UZonMail.Utils.Web.PagingQuery;
+using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Settings
 {
     /// <summary>
     /// 代理控制器
     /// </summary>
-    public class ProxyController(SqlContext db, ProxyService proxyService, TokenService tokenService) : ControllerBaseV1
+    public class ProxyController(
+        SqlContext db,
+        ProxyService proxyService,
+        TokenService tokenService
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 验证代理名称是否存在
@@ -83,10 +85,12 @@ namespace UZonMail.Core.Controllers.Settings
             var tokenPayloads = tokenService.GetTokenPayloads();
             var organizationId = isShared ? tokenPayloads.OrganizationId : 0;
 
-            await db.Proxies.UpdateAsync(x => x.Id == id && x.UserId == tokenPayloads.UserId,
-                x => x.SetProperty(y => y.OrganizationId, organizationId)
-                    .SetProperty(y => y.IsShared, isShared)
-                );
+            await db.Proxies.UpdateAsync(
+                x => x.Id == id && x.UserId == tokenPayloads.UserId,
+                x =>
+                    x.SetProperty(y => y.OrganizationId, organizationId)
+                        .SetProperty(y => y.IsShared, isShared)
+            );
             return true.ToSuccessResponse();
         }
 
@@ -113,7 +117,10 @@ namespace UZonMail.Core.Controllers.Settings
         public async Task<ResponseResult<int>> GetFilteredCount(string filter)
         {
             var tokenPayloads = tokenService.GetTokenPayloads();
-            var dbSet = db.Proxies.Where(x => (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared) || x.UserId == tokenPayloads.UserId);
+            var dbSet = db.Proxies.Where(x =>
+                (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared)
+                || x.UserId == tokenPayloads.UserId
+            );
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Url.Contains(filter));
@@ -130,10 +137,18 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<Proxy>>> GetFilteredData(string filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<Proxy>>> GetFilteredData(
+            string filter,
+            [FromBody] Pagination pagination
+        )
         {
             var tokenPayloads = tokenService.GetTokenPayloads();
-            var dbSet = db.Proxies.Where(x => x.IsActive).Where(x => (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared) || x.UserId == tokenPayloads.UserId);
+            var dbSet = db
+                .Proxies.Where(x => x.IsActive)
+                .Where(x =>
+                    (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared)
+                    || x.UserId == tokenPayloads.UserId
+                );
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Name.Contains(filter) || x.Url.Contains(filter));
@@ -150,7 +165,11 @@ namespace UZonMail.Core.Controllers.Settings
         public async Task<ResponseResult<int>> GetEnabledFilteredCount(string filter)
         {
             var tokenPayloads = tokenService.GetTokenPayloads();
-            var dbSet = db.Proxies.Where(x => (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared) || x.UserId == tokenPayloads.UserId)
+            var dbSet = db
+                .Proxies.Where(x =>
+                    (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared)
+                    || x.UserId == tokenPayloads.UserId
+                )
                 .Where(x => x.IsActive);
             if (!string.IsNullOrEmpty(filter))
             {
@@ -168,10 +187,18 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("enabled/filtered-data")]
-        public async Task<ResponseResult<List<Proxy>>> GetEnabledFilteredData(string filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<Proxy>>> GetEnabledFilteredData(
+            string filter,
+            [FromBody] Pagination pagination
+        )
         {
             var tokenPayloads = tokenService.GetTokenPayloads();
-            var dbSet = db.Proxies.Where(x => x.IsActive).Where(x => (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared) || x.UserId == tokenPayloads.UserId)
+            var dbSet = db
+                .Proxies.Where(x => x.IsActive)
+                .Where(x =>
+                    (x.OrganizationId == tokenPayloads.OrganizationId && x.IsShared)
+                    || x.UserId == tokenPayloads.UserId
+                )
                 .Where(x => x.IsActive);
             if (!string.IsNullOrEmpty(filter))
             {
@@ -190,8 +217,12 @@ namespace UZonMail.Core.Controllers.Settings
         {
             var organizationId = tokenService.GetOrganizationId();
             var tokenPayloads = tokenService.GetTokenPayloads();
-            var dbSet = db.Proxies.Where(x => x.IsActive)
-                .Where(x => x.OrganizationId == tokenPayloads.OrganizationId || x.UserId == tokenPayloads.UserId);
+            var dbSet = db
+                .Proxies.Where(x => x.IsActive)
+                .Where(x =>
+                    x.OrganizationId == tokenPayloads.OrganizationId
+                    || x.UserId == tokenPayloads.UserId
+                );
 
             var results = await dbSet.ToListAsync();
             return results.ToSuccessResponse();

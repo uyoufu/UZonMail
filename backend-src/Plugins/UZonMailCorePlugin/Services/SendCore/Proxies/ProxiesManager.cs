@@ -1,10 +1,8 @@
-﻿using log4net;
 using System.Collections.Concurrent;
+using log4net;
 using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Proxies.Clients;
 using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
-using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.SendCore.Proxies
@@ -38,7 +36,6 @@ namespace UZonMail.Core.Services.SendCore.Proxies
             }
         }
 
-
         /// <summary>
         /// 获取代理处理器
         /// </summary>
@@ -47,12 +44,19 @@ namespace UZonMail.Core.Services.SendCore.Proxies
         /// <returns></returns>
         public async Task<IProxyHandler?> GetProxyHandler(SendingContext sendingContext)
         {
-            if (sendingContext.EmailItem == null) return null;
+            if (sendingContext.EmailItem == null)
+                return null;
 
             var userId = sendingContext.EmailItem.UserId;
             var outboxEmail = sendingContext.EmailItem.Outbox.Email;
 
-            return await GetProxyHandler(sendingContext.Provider, userId, outboxEmail, sendingContext.EmailItem.ProxyId, sendingContext.EmailItem.AvailableProxyIds);
+            return await GetProxyHandler(
+                sendingContext.Provider,
+                userId,
+                outboxEmail,
+                sendingContext.EmailItem.ProxyId,
+                sendingContext.EmailItem.AvailableProxyIds
+            );
         }
 
         /// <summary>
@@ -63,7 +67,13 @@ namespace UZonMail.Core.Services.SendCore.Proxies
         /// <param name="outboxEmail"></param>
         /// <param name="proxyId"></param>
         /// <returns></returns>
-        public async Task<IProxyHandler?> GetProxyHandler(IServiceProvider serviceProvider, long userId, string outboxEmail, long proxyId, List<long> availableProxyIds = null)
+        public async Task<IProxyHandler?> GetProxyHandler(
+            IServiceProvider serviceProvider,
+            long userId,
+            string outboxEmail,
+            long proxyId,
+            List<long> availableProxyIds = null
+        )
         {
             if (!_userProxyManagers.TryGetValue(userId, out var manager))
             {
@@ -94,7 +104,11 @@ namespace UZonMail.Core.Services.SendCore.Proxies
         /// <param name="userId"></param>
         /// <param name="matchStr"></param>
         /// <returns></returns>
-        public async Task<IProxyHandler?> GetProxyHander(IServiceProvider serviceProvider, long userId, string matchStr)
+        public async Task<IProxyHandler?> GetProxyHander(
+            IServiceProvider serviceProvider,
+            long userId,
+            string matchStr
+        )
         {
             if (!_userProxyManagers.TryGetValue(userId, out var manager))
             {
@@ -108,23 +122,29 @@ namespace UZonMail.Core.Services.SendCore.Proxies
             return manager.RandomProxyHandler(matchStr);
         }
 
-
         private Timer? _timer;
+
         /// <summary>
         /// 释放资源
         /// </summary>
         private void DisposeHandlerAuto()
         {
-            if (_timer != null) return;
+            if (_timer != null)
+                return;
 
-            _timer = new Timer(_ =>
-            {
-                _logger.Info("开始自动释放代理处理器");
-                foreach (var manager in _userProxyManagers.Values)
+            _timer = new Timer(
+                _ =>
                 {
-                    manager.DisposeHandler();
-                }
-            }, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+                    _logger.Info("开始自动释放代理处理器");
+                    foreach (var manager in _userProxyManagers.Values)
+                    {
+                        manager.DisposeHandler();
+                    }
+                },
+                null,
+                TimeSpan.FromMinutes(5),
+                TimeSpan.FromMinutes(5)
+            );
         }
     }
 }
