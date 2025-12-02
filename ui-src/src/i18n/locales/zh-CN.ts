@@ -82,6 +82,39 @@ export default {
     // `... 等共 ${labels.length} ${unit}`
     totalItems: '... 等共 {count} {unit}',
     item: '项',
+
+    // 未找到文件
+    file_fileNotFound: '未找到文件',
+    // 未检测到文件,可能是用户已取消
+    file_noFileDetected: '未检测到文件,可能是用户已取消',
+    // 指定 Worksheet
+    file_specifyWorksheet: '指定 WorkSheet',
+    // 请选择 Worksheet
+    file_pleaseSelectWorksheet: '请选择 WorkSheet',
+    // 字段 ${field} 不能为空
+    file_fieldCannotBeEmpty: '字段 {field} 不能为空',
+    // 严格模式下, mappers 不能为空
+    file_mappersCannotBeEmptyInStrictMode: '严格模式下, mappers 不能为空',
+    // 第 ${rowIndex} 行数据中，${map.headerName} 列不能为空
+    file_fieldCannotBeEmptyAtRow: '第 {rowIndex} 行数据中，{field} 列不能为空',
+    // 正在计算 hash 值...
+    file_calculatingHash: '正在计算 hash 值...',
+    // 文件 ${file.name} sha256 值为：
+    file_fileHashCalculated: '文件 {fileName} sha256 值为：',
+    // hash 已校验, 等待上传
+    file_hashVerifiedWaitingUpload: 'hash 已校验, 等待上传',
+    // 下载地址不合法,应以 http 开头
+    file_invalidDownloadUrl: '下载地址不合法,应以 http 开头',
+    // 正在解析文件...
+    file_parsingFile: '正在解析文件...',
+    // 下载完成
+    file_downloadCompleted: '下载完成',
+    // 下载失败
+    file_downloadFailed: '下载失败',
+    // ${fileHandle.name} 下载中...
+    file_downloadingFile: '{fileName} 下载中...',
+    // ${ext} 文件
+    file_fileExtension: '{ext} 文件',
   },
   // #endregion
 
@@ -135,7 +168,7 @@ export default {
     new: '新增',
     newItem: '新增项',
     delete: '删除',
-    deletetItem: '删除项',
+    deleteItem: '删除项',
     save: '保存',
     cancel: '取消',
     cancelCurrentOperation: '取消当前操作',
@@ -188,6 +221,20 @@ export default {
     // 当前正文结构异常，无法生成缩略图
     saveFailedCurrentContentStructureInvalid: '当前正文结构异常，无法生成缩略图',
     templateEditorPlaceholder: "在此处输入模板内容, 变量使用 {'{{  }}'} 号包裹, 例如 {'{{ variableName }}'}"
+  },
+
+  // AI 相关
+  ai: {
+    generateBodyWithCopilot: '使用 Copilot 生成正文',
+    contentGeneration: '正文生成',
+    contentEnhancement: '内容优化',
+    prompt: '提示词',
+    pleaseInputPrompt: '请输入提示词',
+    generatingEmailContent: 'Copilot 正在生成邮件内容, 请稍候... 可能需要几分钟时间',
+    contentEnhancementSuccess: '内容优化成功',
+    summaryEmailSubjects: '使用 AI 根据邮件内容生成主题',
+    bodyOrTemplateRequired: '正文或模板不能为空',
+    generatingSubjects: 'AI 正在生成主题, 请稍候... 可能需要几分钟时间',
   },
 
   // 代理
@@ -279,7 +326,7 @@ export default {
     col_order: '@:global.order',
     col_email: '发件箱',
     col_outbox: '发件箱',
-    col_outboxName: '名称(发件人姓名)',
+    col_outboxName: '发件人姓名',
     col_smtpHost: 'SMTP地址',
     col_smtpPort: 'SMTP端口',
     col_smtpUserName: 'SMTP用户名',
@@ -506,8 +553,40 @@ export default {
     delete: '删除'
   },
 
-  unsuscribePage: {
+  unsubscribePage: {
     unsubscribe: '取消订阅',
     unsubscribed: '已取消订阅'
   },
+
+  basicSettings: {
+    tabUser: '用户',
+    tabUserTooltip: '用户设置，该设置会覆盖组织设置',
+    tabOrganization: '组织',
+    tabOrganizationTooltip: '组织设置，该设置会覆盖系统设置',
+    tabSystem: '系统',
+    tabSystemTooltip: '系统设置，所有用户和组织默认应用该设置',
+
+    // #region AI 设置
+    aiSettings: 'AI 设置',
+    addAiKeyToEnableAiFeatures: '添加 AI 密钥以启用 AI 功能',
+    enableAIFeatures: '启用 AI 功能',
+    enableAIFeaturesTooltip: '启用后，可使用 AI 功能来优化邮件内容和发送效果',
+
+    aiProviderType: 'AI 提供商类型',
+    aiProviderTooltip: '选择 AI 提供商类型，例如 OpenAI, 目前仅支持 OpenAI 或者兼容 API 的提供商',
+    endPoint: 'AI 端点',
+    aiKey: 'AI 密钥',
+    enterYourAiKey: '输入您的 AI 密钥',
+    aiKeyTooltip: '支持 OpenAI 兼容的 API Key，例如 OpenAI, Azure OpenAI 等等',
+    aiModel: 'AI 模型',
+    aiModelTooltip: '选择使用的 AI 模型，例如 gpt-3.5-turbo, gpt-4 等等',
+    maxTokens: '最大令牌数',
+
+    btn_saveSetting: '保存设置',
+    btn_saveSettingTooltip: '保存 AI 设置',
+    notify_updateAISettingsTitle: '更新 AI 设置',
+    notify_updateAISettingsUSuccess: '更新 AI 设置成功',
+    // #endregion
+
+  }
 }

@@ -32,3 +32,7 @@ export type UtilsLangKey = keyof typeof LocaleLang.utils
 export type TemplateLangKey = keyof typeof LocaleLang.template
 
 export type ProxyLangKey = keyof typeof LocaleLang.proxy
+
+export type BasicSettingsLangKey = keyof typeof LocaleLang.basicSettings
+
+export type AiLangKey = keyof typeof LocaleLang.ai

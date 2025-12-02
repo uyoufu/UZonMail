@@ -28,6 +28,7 @@ export interface ISendingItemPreview {
   subject: string, // 主题
   body: string, // 邮件正文
   data: Record<string, any>, // 用户发件数据
+  outbox: string, // 发件人邮箱
   inbox: string, // 收件人邮箱
   ccBoxes: string[], // 抄送人邮箱
   bccBoxes: string[], // 密送人邮箱

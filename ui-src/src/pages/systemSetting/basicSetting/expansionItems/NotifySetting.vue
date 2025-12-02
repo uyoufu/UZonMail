@@ -67,7 +67,7 @@ const props = defineProps({
   }
 })
 
-import { useSettingsAutoSaver } from '../compisitions/useSettingsAutoSaver'
+import { useSettingsAutoSaver } from '../compositions/useSettingsAutoSaver'
 import type { INotificationSettings } from 'src/api/notificationSetting'
 import { getSmtpNotificationSetting, updateSmtpNotificationSetting } from 'src/api/notificationSetting'
 

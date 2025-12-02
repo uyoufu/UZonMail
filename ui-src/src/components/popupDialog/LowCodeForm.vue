@@ -21,7 +21,7 @@
           <q-input v-if="isMatchedType(field, ['textarea'])" outlined class="q-mb-sm low-code__field q-px-sm"
             :class="field.classes" standout dense v-model="fieldsModel[field.name]" type="textarea"
             :autogrow="!field.disableAutogrow" :label="field.label" :disable="field.disable"
-            :placeholder="field.placeholder || '可 Enter 换行'">
+            :placeholder="field.placeholder || '按 Enter 可换行'">
             <template v-if="field.icon" v-slot:prepend>
               <q-icon :name="field.icon" />
             </template>
@@ -87,7 +87,7 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import PasswordInput from '../passwordInput/PasswordInput.vue'
 
 import type { PropType } from 'vue'
-import type { ICustomPopupButton, IPopupDialogField, IOnSetupParams } from './types';
+import type { ICustomPopupButton, IPopupDialogField, IOnSetupParams } from './types'
 import { PopupDialogFieldType } from './types'
 import { notifyError } from 'src/utils/dialog'
 import type { IFunctionResult } from 'src/types'

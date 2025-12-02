@@ -47,16 +47,16 @@ onMounted(async () => {
     const { data: isUnsubscribedResult } = await isUnsubscribed(token.value)
     if (isUnsubscribedResult) {
       diableUnsubscribeBtn.value = true
-      btnLabel.value = t('unsuscribePage.unsubscribed')
+      btnLabel.value = t('unsubscribePage.unsubscribed')
     }
   }
 })
 
 const unsubscribeHtml = ref('<div>empty</div>')
-const btnLabel = ref(t('unsuscribePage.unsubscribe'))
+const btnLabel = ref(t('unsubscribePage.unsubscribe'))
 const diableUnsubscribeBtn = ref(false)
 async function onUnsubscribeClicked () {
-  btnLabel.value = t('unsuscribePage.unsubscribed')
+  btnLabel.value = t('unsubscribePage.unsubscribed')
   diableUnsubscribeBtn.value = true
   if (!token.value) {
     return

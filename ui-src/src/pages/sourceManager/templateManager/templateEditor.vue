@@ -23,13 +23,20 @@
 
     <TinymceEditor ref="editorRef" class="col" v-model="editorValue" tinymce-script-src="/tinymce/tinymce.min.js"
       :init="tinymceInit" />
+
+    <div v-if="copilotRunningTip" class="q-mt-xs">
+      <q-circular-progress class="q-mr-sm" rounded indeterminate size="xs" :thickness="0.3" color="primary"
+        track-color="secondary" center-color="white">
+      </q-circular-progress>
+      <span>{{ copilotRunningTip }}</span>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import logger from 'loglevel'
-import { translateTemplate } from 'src/i18n/helpers'
+import { translateAI, translateTemplate } from 'src/i18n/helpers'
 
 defineOptions({
   name: 'TemplateEditor'
@@ -158,38 +165,79 @@ import TinymceEditor from '@tinymce/tinymce-vue'
 const tinymceEditor = ref<any>(null)
 
 import { useI18n } from 'vue-i18n'
+import { useTinyMceAICopilot } from './useTinyMceAICopilot'
+const { copilotRunningTip, onGenerateContentByCopilot, onEnhanceContentByCopilot } = useTinyMceAICopilot(editorValue)
+
 const { locale } = useI18n()
 
-const tinymceInit = {
-  plugins: 'advlist anchor autolink charmap code fullscreen help image insertdatetime link lists media preview searchreplace table visualblocks wordcount',
-  toolbar: 'undo redo | styles | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | code',
-  height: props.height,
-  promotion: false,
-  branding: false,
-  language: locale.value.replace('-', '_'),
-  placeholder: translateTemplate('templateEditorPlaceholder'),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setup: (editor: any) => {
-    tinymceEditor.value = editor
+const tinymceInit = computed(() => {
+  return {
+    menubar: 'file edit view insert format tools table aiCopilot help',
+    menu: {
+      aiCopilot: { title: 'AI', items: 'aiBodyGeneration aiBodyEnhancement' },
+    },
+    plugins: 'advlist anchor autolink charmap code fullscreen help image insertdatetime link lists media preview searchreplace table visualblocks wordcount',
+    toolbar: 'aiGenerate | undo redo | styles | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | code',
+    height: props.height,
+    promotion: false,
+    branding: false,
+    language: locale.value.replace('-', '_'),
+    placeholder: translateTemplate('templateEditorPlaceholder'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setup: (editor: any) => {
+      // 保存 editor 实例
+      tinymceEditor.value = editor
+
+      // 注册 ai 按钮
+      // icons from: https://www.tiny.cloud/docs/tinymce/latest/editor-icon-identifiers/
+      editor.ui.registry.addButton('aiGenerate', {
+        icon: 'ai',
+        tooltip: translateAI('generateBodyWithCopilot'),
+        onAction: async () => {
+          logger.debug('[TemplateEditor] AI button clicked')
+          await onGenerateContentByCopilot()
+        }
+      })
+
+
+      // #region AI 相关菜单
+      // 参考 https://www.tiny.cloud/docs/tinymce/6/creating-custom-menu-items/
+      editor.ui.registry.addMenuItem('aiBodyGeneration', {
+        text: translateAI('contentGeneration'),
+        onAction: async () => {
+          logger.debug('[TemplateEditor] aiBodyGeneration menu item clicked')
+          await onGenerateContentByCopilot()
+        }
+      })
+
+      editor.ui.registry.addMenuItem('aiBodyEnhancement', {
+        text: translateAI('contentEnhancement'),
+        onAction: async () => {
+          logger.debug('[TemplateEditor] aiBodyEnhancement menu item clicked')
+          await onEnhanceContentByCopilot()
+        }
+      })
+      // #endregion
+    }
+
+    // TODO: 此实现有 Bug, 后期再实现
+    // images_upload_handler: (blobInfo: any, progress: (value: number) => void) => {
+    //   logger.debug('[tinymce] 上传图片:', blobInfo, blobInfo.blobUri(), progress)
+
+    //   // 判断是否是域名部署
+    //   const config = useConfig()
+    //   if (!config.baseUrl.startsWith('https') || config.baseUrl.indexOf(":") > -1) {
+    //     logger.info('[tinymce] 当前配置不支持图片上传, 仅支持域名部署')
+    //     return new Promise((resolve) => {
+    //       resolve(blobInfo.blobUri())
+    //     })
+    //   }
+
+    //   logger.debug('[tinymce] 开始上传图片到服务器')
+    //   return ''
+    // }
   }
-  // TODO: 此实现有 Bug, 后期再实现
-
-  // images_upload_handler: (blobInfo: any, progress: (value: number) => void) => {
-  //   logger.debug('[tinymce] 上传图片:', blobInfo, blobInfo.blobUri(), progress)
-
-  //   // 判断是否是域名部署
-  //   const config = useConfig()
-  //   if (!config.baseUrl.startsWith('https') || config.baseUrl.indexOf(":") > -1) {
-  //     logger.info('[tinymce] 当前配置不支持图片上传, 仅支持域名部署')
-  //     return new Promise((resolve) => {
-  //       resolve(blobInfo.blobUri())
-  //     })
-  //   }
-
-  //   logger.debug('[tinymce] 开始上传图片到服务器')
-  //   return ''
-  // }
-}
+})
 
 const editorRef: Ref<{
   rerender: (options: { language: string }) => void

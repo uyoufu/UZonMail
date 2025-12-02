@@ -99,7 +99,6 @@ export default class HttpClient {
           // 当不阻止错误通知时，进行提示
           if (!error.config.stopNotifyError)
             notifyError(error.code)
-
           return Promise.reject(error as Error)
         }
 
