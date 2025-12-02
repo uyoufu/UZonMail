@@ -1,5 +1,5 @@
 
-import type { QNotifyCreateOptions } from 'quasar';
+import type { QNotifyCreateOptions } from 'quasar'
 import { Notify, Dialog } from 'quasar'
 import { i18n } from 'src/boot/i18n'
 const { t } = i18n.global
@@ -158,6 +158,7 @@ export function useIndeterminateProgressNotify (message: string, caption: string
     timeout: 0, // we want to be in control when it gets dismissed
     spinner: true,
     spinnerColor: 'negative',
+    spinnerSize: 'sm',
     message,
     caption,
     color: 'primary'

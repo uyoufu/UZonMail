@@ -195,6 +195,19 @@ export default {
     templateEditorPlaceholder: "Enter template content here, variables are wrapped in {'{{ }}'}, for example {'{{ variableName }}'}",
   },
 
+  ai: {
+    generateBodyWithCopilot: 'Generate Body with Copilot',
+    contentGeneration: 'Content Generation',
+    contentEnhancement: 'Content Enhancement',
+    prompt: 'Prompt',
+    pleaseInputPrompt: 'Please input prompt',
+    generatingEmailContent: 'Copilot is generating email content, please wait... It may take a few minutes',
+    contentEnhancementSuccess: 'Content enhancement successful',
+    summaryEmailSubjects: 'Use AI to generate subjects based on email content',
+    bodyOrTemplateRequired: 'Body or template cannot be empty',
+    generatingSubjects: 'AI is generating subjects, please wait... It may take a few minutes',
+  },
+
   proxy: {
     proxyId: 'Proxy ID',
   },
@@ -504,5 +517,31 @@ export default {
   unsuscribePage: {
     unsubscribe: 'Unsubscribe',
     unsubscribed: 'Unsubscribed'
+  },
+
+  basicSettings: {
+    tabUser: 'User',
+    tabUserTooltip: 'User settings, these settings will override organization settings',
+    tabOrganization: 'Organization',
+    tabOrganizationTooltip: 'Organization settings, these settings will override system settings',
+    tabSystem: 'System',
+    tabSystemTooltip: 'System settings, applied by default to all users and organizations',
+    aiSettings: 'AI Settings',
+    addAiKeyToEnableAiFeatures: 'Add AI key to enable AI features',
+    enableAIFeatures: 'Enable AI Features',
+    enableAIFeaturesTooltip: 'When enabled, AI features can be used to optimize email content and sending effects',
+    aiProviderType: 'AI Provider Type',
+    aiProviderTooltip: 'Select AI provider type, such as OpenAI, currently only supports OpenAI or compatible APIs',
+    endPoint: 'AI Endpoint',
+    aiKey: 'AI Key',
+    enterYourAiKey: 'Enter your AI key',
+    aiKeyTooltip: 'Supports OpenAI compatible API Keys, such as OpenAI, Azure OpenAI, etc.',
+    aiModel: 'AI Model',
+    aiModelTooltip: 'Select the AI model to use, such as gpt-3.5-turbo, gpt-4, etc.',
+    maxTokens: 'Maximum Tokens',
+    btn_saveSetting: 'Save Settings',
+    btn_saveSettingTooltip: 'Save AI settings',
+    notify_updateAISettingsTitle: 'Update AI Settings',
+    notify_updateAISettingsUSuccess: 'Update AI settings successful',
   }
 }

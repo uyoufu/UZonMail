@@ -190,6 +190,20 @@ export default {
     templateEditorPlaceholder: "在此处输入模板内容, 变量使用 {'{{  }}'} 号包裹, 例如 {'{{ variableName }}'}"
   },
 
+  // AI 相关
+  ai: {
+    generateBodyWithCopilot: '使用 Copilot 生成正文',
+    contentGeneration: '正文生成',
+    contentEnhancement: '内容优化',
+    prompt: '提示词',
+    pleaseInputPrompt: '请输入提示词',
+    generatingEmailContent: 'Copilot 正在生成邮件内容, 请稍候... 可能需要几分钟时间',
+    contentEnhancementSuccess: '内容优化成功',
+    summaryEmailSubjects: '使用 AI 根据邮件内容生成主题',
+    bodyOrTemplateRequired: '正文或模板不能为空',
+    generatingSubjects: 'AI 正在生成主题, 请稍候... 可能需要几分钟时间',
+  },
+
   // 代理
   proxy: {
     proxyId: '代理ID',
@@ -510,4 +524,36 @@ export default {
     unsubscribe: '取消订阅',
     unsubscribed: '已取消订阅'
   },
+
+  basicSettings: {
+    tabUser: '用户',
+    tabUserTooltip: '用户设置，该设置会覆盖组织设置',
+    tabOrganization: '组织',
+    tabOrganizationTooltip: '组织设置，该设置会覆盖系统设置',
+    tabSystem: '系统',
+    tabSystemTooltip: '系统设置，所有用户和组织默认应用该设置',
+
+    // #region AI 设置
+    aiSettings: 'AI 设置',
+    addAiKeyToEnableAiFeatures: '添加 AI 密钥以启用 AI 功能',
+    enableAIFeatures: '启用 AI 功能',
+    enableAIFeaturesTooltip: '启用后，可使用 AI 功能来优化邮件内容和发送效果',
+
+    aiProviderType: 'AI 提供商类型',
+    aiProviderTooltip: '选择 AI 提供商类型，例如 OpenAI, 目前仅支持 OpenAI 或者兼容 API 的提供商',
+    endPoint: 'AI 端点',
+    aiKey: 'AI 密钥',
+    enterYourAiKey: '输入您的 AI 密钥',
+    aiKeyTooltip: '支持 OpenAI 兼容的 API Key，例如 OpenAI, Azure OpenAI 等等',
+    aiModel: 'AI 模型',
+    aiModelTooltip: '选择使用的 AI 模型，例如 gpt-3.5-turbo, gpt-4 等等',
+    maxTokens: '最大令牌数',
+
+    btn_saveSetting: '保存设置',
+    btn_saveSettingTooltip: '保存 AI 设置',
+    notify_updateAISettingsTitle: '更新 AI 设置',
+    notify_updateAISettingsUSuccess: '更新 AI 设置成功',
+    // #endregion
+
+  }
 }

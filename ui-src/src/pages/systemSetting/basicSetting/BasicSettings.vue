@@ -7,18 +7,21 @@
       <SendSetting :setting-type="currentSettingType?.type" />
       <EmailTrackingSetting v-if="isEnterpriseUser" :setting-type="currentSettingType?.type" />
       <UnsubscribeSetting v-if="isEnterpriseUser" :setting-type="currentSettingType?.type" />
+      <AISetting :setting-type="currentSettingType?.type" />
     </q-list>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { AppSettingType } from 'src/api/appSetting'
+import UTabs from 'src/components/quasarWrapper/UTabs.vue'
+import { translateBasicSettings } from 'src/i18n/helpers'
+
 import NotifySetting from './expansionItems/NotifySetting.vue'
 import SendSetting from './expansionItems/SendSetting.vue'
-import UTabs from 'src/components/quasarWrapper/UTabs.vue'
-
 import EmailTrackingSetting from './expansionItems/EmailTrackingSetting.vue'
 import UnsubscribeSetting from './expansionItems/UnsubscribeSetting.vue'
+import AISetting from './expansionItems/AISetting.vue'
 
 import { usePermission } from 'src/compositions/permission'
 const { hasEnterpriseAccess, isSuperAdmin, isOrganizationAdmin } = usePermission()
@@ -27,23 +30,23 @@ const isEnterpriseUser = hasEnterpriseAccess()
 const allSettingTypes = ref([
   {
     name: 'system',
-    label: '系统',
+    label: translateBasicSettings('tabSystem'),
     vif: isSuperAdmin.value,
     type: AppSettingType.System,
-    tooltip: '系统设置'
+    tooltip: translateBasicSettings('tabSystemTooltip')
   },
   {
     name: 'organization',
-    label: '组织',
+    label: translateBasicSettings('tabOrganization'),
     vif: isOrganizationAdmin.value,
     type: AppSettingType.Organization,
-    tooltip: '组织设置，该设置会覆盖系统设置'
+    tooltip: translateBasicSettings('tabOrganizationTooltip')
   },
   {
     name: 'user',
-    label: '用户',
+    label: translateBasicSettings('tabUser'),
     type: AppSettingType.User,
-    tooltip: '用户设置，该设置会覆盖组织设置',
+    tooltip: translateBasicSettings('tabUserTooltip'),
   }
 ])
 // 不同的用户具有不同的权限
