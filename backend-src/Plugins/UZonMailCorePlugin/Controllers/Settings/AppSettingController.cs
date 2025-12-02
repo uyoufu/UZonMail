@@ -1,20 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Settings.Request;
 using UZonMail.Core.Controllers.Settings.Validators;
 using UZonMail.Core.Services.Permission;
 using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Core;
 using UZonMail.Core.Services.Settings.Model;
 using UZonMail.Core.Utils.Extensions;
-using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Settings
@@ -27,10 +20,13 @@ namespace UZonMail.Core.Controllers.Settings
     /// <param name="tokenService"></param>
     /// <param name="permissionService"></param>
     /// <param name="settingsManager"></param>
-    public class AppSettingController(SqlContext db, AppSettingService settingService,
-        TokenService tokenService, PermissionService permissionService,
+    public class AppSettingController(
+        SqlContext db,
+        AppSettingService settingService,
+        TokenService tokenService,
+        PermissionService permissionService,
         AppSettingsManager settingsManager
-        ) : ControllerBaseV1
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 更新系统设置
@@ -39,7 +35,11 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("string")]
-        public async Task<ResponseResult<bool>> UpdateAppSetting(string key, string value, AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<bool>> UpdateAppSetting(
+            string key,
+            string value,
+            AppSettingType type = AppSettingType.System
+        )
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -58,7 +58,11 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("json")]
-        public async Task<ResponseResult<bool>> UpdateAppSettingJson(string key, [FromBody] JToken value, AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<bool>> UpdateAppSettingJson(
+            string key,
+            [FromBody] JToken value,
+            AppSettingType type = AppSettingType.System
+        )
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -78,7 +82,11 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="type"></param>
         /// <returns></returns>
         [HttpPut("boolean")]
-        public async Task<ResponseResult<bool>> UpdateAppSetting(string key, bool value, AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<bool>> UpdateAppSetting(
+            string key,
+            bool value,
+            AppSettingType type = AppSettingType.System
+        )
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -97,7 +105,11 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("long")]
-        public async Task<ResponseResult<bool>> UpdateAppSetting(string key, long value, AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<bool>> UpdateAppSetting(
+            string key,
+            long value,
+            AppSettingType type = AppSettingType.System
+        )
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -109,14 +121,16 @@ namespace UZonMail.Core.Controllers.Settings
             return true.ToSuccessResponse();
         }
 
-
         /// <summary>
         /// 获取系统设置
         /// </summary>
         /// <param name="keys"></param>
         /// <returns>设置的对象</returns>
         [HttpGet("kv")]
-        public async Task<ResponseResult<AppSetting?>> GetAppSetting(string key, AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<AppSetting?>> GetAppSetting(
+            string key,
+            AppSettingType type = AppSettingType.System
+        )
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -133,7 +147,9 @@ namespace UZonMail.Core.Controllers.Settings
         /// </summary>
         /// <returns></returns>
         [HttpGet("sending-setting")]
-        public async Task<ResponseResult<SendingSetting>> GetSendingSetting(AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<SendingSetting>> GetSendingSetting(
+            AppSettingType type = AppSettingType.System
+        )
         {
             // 获取发送设置
             var key = nameof(SendingSetting);
@@ -152,7 +168,10 @@ namespace UZonMail.Core.Controllers.Settings
         /// </summary>
         /// <returns></returns>
         [HttpPut("sending-setting")]
-        public async Task<ResponseResult<bool>> UpserSendingSetting([FromBody] SendingSetting sendingSetting, AppSettingType type = AppSettingType.System)
+        public async Task<ResponseResult<bool>> UpserSendingSetting(
+            [FromBody] SendingSetting sendingSetting,
+            AppSettingType type = AppSettingType.System
+        )
         {
             // 进行数据验证
             var validator = new SendingSettingValidator();
@@ -170,7 +189,7 @@ namespace UZonMail.Core.Controllers.Settings
             var appSetting = await settingService.UpdateAppSetting(sendingSetting, key, type);
 
             // 更新缓存
-            settingsManager.ResetSetting<SendingSetting>(appSetting.Id);
+            settingsManager.ResetSetting<SendingSetting>(appSetting);
 
             return true.ToSuccessResponse();
         }

@@ -1,5 +1,9 @@
-﻿namespace UZonMail.Core.Services.Settings.Model
+namespace UZonMail.Core.Services.Settings.Model
 {
+    /// <summary>
+    /// smtp 通知设置
+    /// 若 isValid 为 false，则表示未设置该项, 需要忽略当前设置
+    /// </summary>
     public class SmtpNotificationSetting : BaseSettingModel
     {
         public string Email { get; set; }
@@ -13,18 +17,13 @@
 
         public bool IsValid { get; set; } = false;
 
-        protected override void InitValue()
+        protected override void ReadValuesFromJsons()
         {
-            var setting = HierarchicalSetting.ToObjects<SmtpNotificationSetting>()
-                .Where(x => x.IsValid)
-                .FirstOrDefault();
-            if (setting == null) return;
-
-            Email = setting.Email;
-            SmtpHost = setting.SmtpHost;
-            SmtpPort = setting.SmtpPort;
-            Password = setting.Password;
-            IsValid = setting.IsValid;
+            Email = GetStringValue(nameof(Email));
+            SmtpHost = GetStringValue(nameof(SmtpHost));
+            SmtpPort = GetIntValue(nameof(SmtpPort));
+            Password = GetStringValue(nameof(Password));
+            IsValid = GetBoolValue(nameof(IsValid));
         }
     }
 }

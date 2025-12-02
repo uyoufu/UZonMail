@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.DB.SQL;
 using Microsoft.EntityFrameworkCore;
+using UZonMail.Core.Utils.Cache;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Settings;
 
 namespace UZonMail.Core.Services.Settings.Core
 {
@@ -10,7 +10,7 @@ namespace UZonMail.Core.Services.Settings.Core
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="data"></param>
-    public class OrganizationSetting(string key, long organizationId) : HierarchicalSetting(AppSettingType.Organization, key, organizationId)
+    public class OrganizationSetting(CacheKey key) : JsonSettings(key)
     {
         /// <summary>
         /// 拉取设置
@@ -19,10 +19,12 @@ namespace UZonMail.Core.Services.Settings.Core
         /// <returns></returns>
         protected override async Task<AppSetting?> FetchAppSetting(SqlContext sqlContext)
         {
-            return await sqlContext.AppSettings
-                  .Where(x => x.Key == Key)
-                  .Where(x => x.Type == AppSettingType.Organization && x.OrganizationId == OwnerId)
-                  .FirstOrDefaultAsync();
+            return await sqlContext
+                .AppSettings.Where(x => x.Key == key.Key)
+                .Where(x =>
+                    x.Type == AppSettingType.Organization && x.OrganizationId == key.OwnerId
+                )
+                .FirstOrDefaultAsync();
         }
     }
 }

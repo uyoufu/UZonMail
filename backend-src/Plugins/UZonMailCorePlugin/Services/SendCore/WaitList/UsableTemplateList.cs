@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
@@ -13,7 +13,7 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
     {
         private ConcurrentDictionary<long, long> _sendingItemTemplateIds = [];
         private readonly List<long> _sendingGroupTemplateIds = [];
-        private readonly CacheManager _cacheManager = new();
+        private readonly DBCacheManager _cacheManager = new();
 
         /// <summary>
         /// 为 SendingItem 添加指定模板
@@ -22,7 +22,8 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
         /// <param name="templateId"></param>
         public void AddSendingItemTemplate(long sendingItemId, long templateId)
         {
-            if (templateId <= 0) return;
+            if (templateId <= 0)
+                return;
             _sendingItemTemplateIds.TryAdd(sendingItemId, templateId);
         }
 
@@ -58,8 +59,10 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
 
             // 随机获取一个模板
             var random = new Random();
-            var index = RandomNumberGenerator.GetInt32(0,_sendingGroupTemplateIds.Count);
-            var template = allTemplates.Where(x => x.Id == _sendingGroupTemplateIds[index]).FirstOrDefault();
+            var index = RandomNumberGenerator.GetInt32(0, _sendingGroupTemplateIds.Count);
+            var template = allTemplates
+                .Where(x => x.Id == _sendingGroupTemplateIds[index])
+                .FirstOrDefault();
             return template;
         }
 
@@ -70,7 +73,10 @@ namespace UZonMail.Core.Services.SendCore.EmailWaitList
             return allTemplates.Where(x => x.Id == templateId).FirstOrDefault();
         }
 
-        public async Task<EmailTemplate?> GetTemplateByName(SqlContext sqlContext, string templateName)
+        public async Task<EmailTemplate?> GetTemplateByName(
+            SqlContext sqlContext,
+            string templateName
+        )
         {
             // 从自己可使用的所有模板中获取
             var allTemplates = await _cacheManager.GetCache<UserTemplatesCache>(sqlContext, userId);

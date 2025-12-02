@@ -1,17 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Core.Services.Permission;
-using UZonMail.Core.Services.Settings.Model;
+using UZonMail.Core.Utils.Cache;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Json;
 using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.Core.Services.Settings
@@ -19,7 +14,11 @@ namespace UZonMail.Core.Services.Settings
     /// <summary>
     /// 系统通知设置
     /// </summary>
-    public class AppSettingService(SqlContext db, TokenService tokenService, PermissionService permissionService) : IScopedService
+    public class AppSettingService(
+        SqlContext db,
+        TokenService tokenService,
+        PermissionService permissionService
+    ) : IScopedService
     {
         private static readonly string _systemSmtpNotificationSettingKey = "systemSmtpNotification";
 
@@ -44,7 +43,8 @@ namespace UZonMail.Core.Services.Settings
             if (type == AppSettingType.Organization)
             {
                 var isOrgAdmin = await permissionService.HasOrganizationPermission(userId);
-                if (!isOrgAdmin) throw new KnownException("You are not organization admin");
+                if (!isOrgAdmin)
+                    throw new KnownException("You are not organization admin");
             }
         }
 
@@ -54,7 +54,9 @@ namespace UZonMail.Core.Services.Settings
             var queryResult = db.AppSettings.Where(x => x.Type == type && x.Key == key);
             if (type == AppSettingType.Organization)
             {
-                queryResult = queryResult.Where(x => x.OrganizationId == tokenPayloads.OrganizationId);
+                queryResult = queryResult.Where(x =>
+                    x.OrganizationId == tokenPayloads.OrganizationId
+                );
             }
 
             if (type == AppSettingType.User)
@@ -71,7 +73,11 @@ namespace UZonMail.Core.Services.Settings
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public async Task<AppSetting> UpdateAppSetting(string key, string value, AppSettingType type = AppSettingType.System)
+        public async Task<AppSetting> UpdateAppSetting(
+            string key,
+            string value,
+            AppSettingType type = AppSettingType.System
+        )
         {
             // 开始更新
             var setting = await GetQueryableSetting(key, type).FirstOrDefaultAsync();
@@ -96,7 +102,11 @@ namespace UZonMail.Core.Services.Settings
             return setting;
         }
 
-        public async Task<AppSetting> UpdateAppSetting(string key, JToken value, AppSettingType type = AppSettingType.System)
+        public async Task<AppSetting> UpdateAppSetting(
+            string key,
+            JToken value,
+            AppSettingType type = AppSettingType.System
+        )
         {
             // 开始更新
             var setting = await GetQueryableSetting(key, type).FirstOrDefaultAsync();
@@ -121,16 +131,25 @@ namespace UZonMail.Core.Services.Settings
             return setting;
         }
 
-        public async Task<AppSetting> UpdateAppSetting<T>(T settingModel, string key = "", AppSettingType type = AppSettingType.System)
+        public async Task<AppSetting> UpdateAppSetting<T>(
+            T settingModel,
+            string key = "",
+            AppSettingType type = AppSettingType.System
+        )
         {
-            if (string.IsNullOrEmpty(key)) key = AppSettingsManager.GetSettingEntityKey<T>();
+            if (string.IsNullOrEmpty(key))
+                key = CacheKey.GetEntityKey<T>();
 
             // 更新
             var value = settingModel.ToJToken();
             return await UpdateAppSetting(key, value, type);
         }
 
-        public async Task<AppSetting> UpdateAppSetting(string key, bool value, AppSettingType type = AppSettingType.System)
+        public async Task<AppSetting> UpdateAppSetting(
+            string key,
+            bool value,
+            AppSettingType type = AppSettingType.System
+        )
         {
             // 开始更新
             var setting = await GetQueryableSetting(key, type).FirstOrDefaultAsync();
@@ -162,7 +181,11 @@ namespace UZonMail.Core.Services.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("long")]
-        public async Task<AppSetting> UpdateAppSetting(string key, long value, AppSettingType type = AppSettingType.System)
+        public async Task<AppSetting> UpdateAppSetting(
+            string key,
+            long value,
+            AppSettingType type = AppSettingType.System
+        )
         {
             // 开始更新
             var setting = await GetQueryableSetting(key, type).FirstOrDefaultAsync();
@@ -187,13 +210,15 @@ namespace UZonMail.Core.Services.Settings
             return setting;
         }
 
-
         /// <summary>
         /// 获取系统设置
         /// </summary>
         /// <param name="keys"></param>
         /// <returns>设置的对象</returns>
-        public async Task<AppSetting?> GetAppSetting(string key, AppSettingType type = AppSettingType.User)
+        public async Task<AppSetting?> GetAppSetting(
+            string key,
+            AppSettingType type = AppSettingType.User
+        )
         {
             return await GetQueryableSetting(key, type).FirstOrDefaultAsync();
         }
