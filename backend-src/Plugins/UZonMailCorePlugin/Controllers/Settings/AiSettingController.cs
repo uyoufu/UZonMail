@@ -33,7 +33,12 @@ namespace UZonMail.Core.Controllers.Settings
                 return new AICopilotSetting().ToSuccessResponse();
             }
 
-            return settings.Json!.ToObject<AICopilotSetting>()!.ToSuccessResponse();
+            // 若存在，则将其转换成设置对象，并将密码修改为 6 个 *
+            var settingModel = settings.Json!.ToObject<AICopilotSetting>()!;
+            if (!string.IsNullOrEmpty(settingModel.ApiKey))
+                settingModel.ApiKey = encryptService.GetPasswordMask();
+
+            return settingModel.ToSuccessResponse();
         }
 
         /// <summary>
@@ -42,15 +47,32 @@ namespace UZonMail.Core.Controllers.Settings
         /// <returns></returns>
         [HttpPut()]
         public async Task<ResponseResult<bool>> UpdateAICopilotSetting(
-            [FromBody] AICopilotSetting smtpSettings,
+            [FromBody] AICopilotSetting copilotSetting,
             AppSettingType type = AppSettingType.System
         )
         {
             // 对 ApiKey 进行加密
-            smtpSettings.ApiKey = encryptService.EncrytPassword(smtpSettings.ApiKey);
+            if (!encryptService.IsPasswordMask(copilotSetting.ApiKey))
+                copilotSetting.ApiKey = encryptService.EncrytPassword(copilotSetting.ApiKey);
+            else if (string.IsNullOrWhiteSpace(copilotSetting.ApiKey))
+            {
+                // 从数据库中找到已经存在的密码并赋予
+                var key = nameof(AICopilotSetting);
+                var settings = await settingService.GetAppSetting(key, type);
+                if (settings != null)
+                {
+                    var existingSettingModel = settings.Json!.ToObject<AICopilotSetting>()!;
+                    copilotSetting.ApiKey = existingSettingModel.ApiKey;
+                }
+            }
+            else
+            {
+                // 对原有密码加密
+                copilotSetting.ApiKey = encryptService.EncrytPassword(copilotSetting.ApiKey);
+            }
 
             // 保存到数据库
-            var newSetting = await settingService.UpdateAppSetting(smtpSettings, type: type);
+            var newSetting = await settingService.UpdateAppSetting(copilotSetting, type: type);
 
             // 更新缓存
             settingsManager.ResetSetting<AICopilotSetting>(newSetting);

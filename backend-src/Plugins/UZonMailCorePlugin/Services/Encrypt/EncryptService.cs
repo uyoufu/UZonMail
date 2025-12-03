@@ -1,4 +1,4 @@
-﻿using UZonMail.Core.Services.Encrypt.Models;
+using UZonMail.Core.Services.Encrypt.Models;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Configs;
 using UZonMail.Utils.Web.Service;
@@ -21,6 +21,22 @@ namespace UZonMail.Core.Services.Encrypt
 
             _encrypParams = config.GetConfig<EncryptParams>();
             return _encrypParams;
+        }
+
+        /// <summary>
+        /// check whether the password is masked
+        /// if the password is "******", it means it is masked
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public bool IsPasswordMask(string password)
+        {
+            return password == GetPasswordMask();
+        }
+
+        public string GetPasswordMask()
+        {
+            return "******";
         }
 
         /// <summary>
