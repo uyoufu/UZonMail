@@ -1,5 +1,5 @@
 ---
-title: AI 应用
+title: AI 助手
 icon: fab fa-openai
 order: 6
 description: 宇正群邮邮件群发软件 AI 助手介绍，支持邮件内容个性化和批量邮件定制，助力邮件群发、邮件营销，开源邮件群发软件让企业和个人高效实现最好用的邮件群发解决方案。
