@@ -77,6 +77,7 @@ namespace UZonMail.Core.Controllers.Settings
 
             // 验证通过后，更新数据库
             smtpSettings.IsValid = result.Ok;
+            smtpSettings.Status = result.Ok ? AppSettingStatus.Enabled : AppSettingStatus.Ignored;
 
             // 保存到数据库
             var newSetting = await settingService.UpdateAppSetting(smtpSettings, type: type);

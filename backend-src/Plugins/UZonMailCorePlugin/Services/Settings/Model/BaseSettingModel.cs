@@ -21,6 +21,12 @@ namespace UZonMail.Core.Services.Settings.Model
         private List<AppSettingCache> _appSettings = [];
 
         /// <summary>
+        /// 系统设置状态
+        /// 默认为启用
+        /// </summary>
+        public AppSettingStatus Status { get; set; } = AppSettingStatus.Enabled;
+
+        /// <summary>
         /// 获取 json 设置
         /// 若设置有变动，则会重新获取
         /// </summary>
@@ -123,7 +129,7 @@ namespace UZonMail.Core.Services.Settings.Model
             {
                 var jsonSetting = _appSettings[index];
                 var status = jsonSetting.JsonData.SelectTokenOrDefault(
-                    "status",
+                    nameof(Status).ToCamelCase(),
                     // 默认启用，兼容旧版本
                     AppSettingStatus.Enabled
                 );

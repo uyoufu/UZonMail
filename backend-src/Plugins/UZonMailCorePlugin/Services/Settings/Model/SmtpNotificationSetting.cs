@@ -15,7 +15,10 @@ namespace UZonMail.Core.Services.Settings.Model
         // 该密码是明文存储的
         public string Password { get; set; }
 
-        public bool IsValid { get; set; } = false;
+        /// <summary>
+        /// 是否验证有效
+        /// </summary>
+        public bool IsValid { get; set; }
 
         protected override void ReadValuesFromJsons()
         {
@@ -23,7 +26,7 @@ namespace UZonMail.Core.Services.Settings.Model
             SmtpHost = GetStringValue(nameof(SmtpHost));
             SmtpPort = GetIntValue(nameof(SmtpPort));
             Password = GetStringValue(nameof(Password));
-            IsValid = GetBoolValue(nameof(IsValid));
+            IsValid = GetBoolValue(nameof(IsValid), false);
         }
     }
 }

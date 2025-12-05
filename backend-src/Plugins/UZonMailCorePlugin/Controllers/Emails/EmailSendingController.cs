@@ -12,6 +12,7 @@ using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Json;
 using UZonMail.Utils.Web.ResponseModel;
 
 namespace UZonMail.Core.Controllers.Emails
@@ -38,9 +39,28 @@ namespace UZonMail.Core.Controllers.Emails
             // 对数据进行替换
             var userId = tokenService.GetUserSqlId();
 
-            var inbox = await db
-                .Inboxes.Where(x => x.UserId == userId && x.Email == data.Inbox)
-                .FirstOrDefaultAsync();
+            var inbox =
+                await db
+                    .Inboxes.Where(x => x.UserId == userId && x.Email == data.Inbox)
+                    .Select(x => new EmailAddress() { Email = x.Email, Name = x.Name })
+                    .FirstOrDefaultAsync()
+                ?? new EmailAddress() { Email = data.Inbox, Name = "inbox-name-preview" };
+
+            // 获取指定的 outbox
+            var outboxEmail = data.Data.SelectTokenOrDefault("outbox", data.Outbox);
+            var outbox =
+                await db
+                    .Outboxes.Where(x => x.UserId == userId && x.Email == data.Outbox)
+                    .FirstOrDefaultAsync()
+                ?? new Outbox() { Email = "outbox-preview@test.com", Name = "outbox-name" };
+
+            // 允许通过 data 参数覆盖 outbox name
+            var outboxNameFromData = data.Data.SelectTokenOrDefault("outboxName", string.Empty);
+            if (!string.IsNullOrEmpty(outboxNameFromData))
+                outbox.Name = outboxNameFromData;
+            var inboxNameFromData = data.Data.SelectTokenOrDefault("inboxName", string.Empty);
+            if (!string.IsNullOrEmpty(inboxNameFromData))
+                inbox.Name = inboxNameFromData;
 
             var sendingItem = new SendingItem()
             {
@@ -48,14 +68,7 @@ namespace UZonMail.Core.Controllers.Emails
                 Subject = data.Subject,
                 Content = data.Body,
                 Data = data.Data,
-                Inboxes =
-                [
-                    new EmailAddress()
-                    {
-                        Email = data.Inbox,
-                        Name = inbox == null ? string.Empty : inbox.Name
-                    }
-                ]
+                Inboxes = [inbox]
             };
 
             var sendItemMeta = new SendItemMeta(0);
@@ -63,7 +76,7 @@ namespace UZonMail.Core.Controllers.Emails
             var decoratorParams = new EmailDecoratorParams(
                 new SendingSetting(),
                 sendItemMeta,
-                new Outbox() { Email = "out@test.com", Name = "outbox" }
+                outbox
             );
             data.Subject = await decorateService.ResolveVariables(decoratorParams, data.Subject);
             data.Body = await decorateService.ResolveVariables(decoratorParams, data.Body);

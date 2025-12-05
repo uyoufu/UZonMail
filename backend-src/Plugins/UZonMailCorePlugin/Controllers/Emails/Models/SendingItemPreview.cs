@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace UZonMail.Core.Controllers.Emails.Models
 {
@@ -26,5 +26,10 @@ namespace UZonMail.Core.Controllers.Emails.Models
         /// 收件箱
         /// </summary>
         public string Inbox { get; set; }
+
+        /// <summary>
+        /// 发件箱
+        /// </summary>
+        public string Outbox { get; set; }
     }
 }

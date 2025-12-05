@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using UZonMail.Core.Services.EmailDecorator.Interfaces;
 
 namespace UZonMail.Core.Services.EmailDecorator
@@ -42,12 +42,13 @@ namespace UZonMail.Core.Services.EmailDecorator
             foreach (var variable in variables)
             {
                 string? value = null;
+                // 先从数据中获取值
+                // 再从邮件变量中获取值
                 if (bodyData.ContainsKey(variable))
                 {
                     value = bodyData[variable]!.ToString();
                 }
-
-                if (!emailItemVariables.TryGetValue(variable, out value))
+                else if (!emailItemVariables.TryGetValue(variable, out value))
                 {
                     continue;
                 }

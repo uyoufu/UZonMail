@@ -415,6 +415,46 @@ namespace UZonMail.Core.Controllers.Emails
         }
 
         /// <summary>
+        /// 获取组中发件邮箱的数据
+        /// 仅返回 Id, Name, Email 三个字段
+        /// </summary>
+        /// <param name="groupIds"></param>
+        /// <returns></returns>
+        [HttpGet("outbox/groups-data")]
+        public async Task<ResponseResult<List<Outbox>>> GetGroupsOutboxes(string groupIds)
+        {
+            var longGroupIds = groupIds
+                .Split(",")
+                .Select(x =>
+                {
+                    if (long.TryParse(x, out var value))
+                        return value;
+                    return 0;
+                })
+                .Where(x => x > 0)
+                .ToList();
+            if (longGroupIds.Count == 0)
+            {
+                return ResponseResult<List<Outbox>>.Success([]);
+            }
+
+            var userId = tokenService.GetUserSqlId();
+            var outboxes = await db
+                .Outboxes.AsNoTracking()
+                .Where(x => longGroupIds.Contains(x.EmailGroupId))
+                .Where(x => x.UserId == userId)
+                .Select(x => new Outbox()
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Email = x.Email
+                })
+                .ToListAsync();
+
+            return outboxes.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 获取发件箱信息
         /// </summary>
         /// <param name="outboxId"></param>

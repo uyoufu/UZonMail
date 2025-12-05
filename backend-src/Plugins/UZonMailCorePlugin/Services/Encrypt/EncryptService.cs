@@ -24,6 +24,22 @@ namespace UZonMail.Core.Services.Encrypt
         }
 
         /// <summary>
+        /// check whether the password is masked
+        /// if the password is "******", it means it is masked
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public bool IsPasswordMask(string password)
+        {
+            return password == GetPasswordMask();
+        }
+
+        public string GetPasswordMask()
+        {
+            return "******";
+        }
+
+        /// <summary>
         /// 使用盐加密密码
         /// </summary>
         /// <param name="hashedPwd">前端加密后的密码，由于密码传入后端时，已经是二次加密过的</param>
