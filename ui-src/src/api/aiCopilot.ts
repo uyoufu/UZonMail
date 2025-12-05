@@ -19,7 +19,7 @@ export enum AppSettingStatus {
 export interface AIProviderSetting {
   status: AppSettingStatus,
   providerType: AIProviderType,
-  endPoint: string,
+  endpoint: string,
   apiKey: string,
   model: string,
   maxTokens: number,

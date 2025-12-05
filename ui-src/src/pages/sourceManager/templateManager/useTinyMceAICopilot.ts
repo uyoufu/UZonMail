@@ -2,7 +2,7 @@
 import type { IPopupDialogParams } from 'src/components/popupDialog/types'
 import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import { translateAI } from 'src/i18n/helpers'
-import { notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
+import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import { generateEmailBody, enhanceEmailBody } from 'src/api/aiCopilot'
 
 
@@ -35,18 +35,16 @@ export function useTinyMceAICopilot (tinymceEditorValueRef: Ref<string>) {
 
     copilotRunningTip.value = translateAI('generatingEmailContent')
 
-    const result = await notifyUntil(async () => {
-      // 根据提示词生成内容
-      const { data: emailBody } = await generateEmailBody(userInput.data.prompt as string)
-      return emailBody
-    }, translateAI('generatingEmailContent'))
+    // 根据提示词生成内容
+    const { data: emailBody, ok } = await generateEmailBody(userInput.data.prompt as string)
+
     // 重置提示
     copilotRunningTip.value = ''
     // 判断结果
-    if (!result) return
+    if (!ok) return
 
     // 将生成的内容覆盖到编辑器中
-    tinymceEditorValueRef.value = result
+    tinymceEditorValueRef.value = emailBody
   }
 
   // 优化邮件正文

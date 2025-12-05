@@ -54,7 +54,8 @@ async function onSelectExcel () {
   const { files, sheetName, data } = await readExcelCore({
     sheetIndex: 0,
     selectSheet: true,
-    numberDecimalCount: 5
+    numberDecimalCount: 5,
+    mappers: getEmailSendingExcelDataMapper()
   })
   if (!files || !data) return
 

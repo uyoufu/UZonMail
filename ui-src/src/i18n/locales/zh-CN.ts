@@ -82,6 +82,39 @@ export default {
     // `... 等共 ${labels.length} ${unit}`
     totalItems: '... 等共 {count} {unit}',
     item: '项',
+
+    // 未找到文件
+    file_fileNotFound: '未找到文件',
+    // 未检测到文件,可能是用户已取消
+    file_noFileDetected: '未检测到文件,可能是用户已取消',
+    // 指定 Worksheet
+    file_specifyWorksheet: '指定 WorkSheet',
+    // 请选择 Worksheet
+    file_pleaseSelectWorksheet: '请选择 WorkSheet',
+    // 字段 ${field} 不能为空
+    file_fieldCannotBeEmpty: '字段 {field} 不能为空',
+    // 严格模式下, mappers 不能为空
+    file_mappersCannotBeEmptyInStrictMode: '严格模式下, mappers 不能为空',
+    // 第 ${rowIndex} 行数据中，${map.headerName} 列不能为空
+    file_fieldCannotBeEmptyAtRow: '第 {rowIndex} 行数据中，{field} 列不能为空',
+    // 正在计算 hash 值...
+    file_calculatingHash: '正在计算 hash 值...',
+    // 文件 ${file.name} sha256 值为：
+    file_fileHashCalculated: '文件 {fileName} sha256 值为：',
+    // hash 已校验, 等待上传
+    file_hashVerifiedWaitingUpload: 'hash 已校验, 等待上传',
+    // 下载地址不合法,应以 http 开头
+    file_invalidDownloadUrl: '下载地址不合法,应以 http 开头',
+    // 正在解析文件...
+    file_parsingFile: '正在解析文件...',
+    // 下载完成
+    file_downloadCompleted: '下载完成',
+    // 下载失败
+    file_downloadFailed: '下载失败',
+    // ${fileHandle.name} 下载中...
+    file_downloadingFile: '{fileName} 下载中...',
+    // ${ext} 文件
+    file_fileExtension: '{ext} 文件',
   },
   // #endregion
 
@@ -135,7 +168,7 @@ export default {
     new: '新增',
     newItem: '新增项',
     delete: '删除',
-    deletetItem: '删除项',
+    deleteItem: '删除项',
     save: '保存',
     cancel: '取消',
     cancelCurrentOperation: '取消当前操作',
@@ -293,7 +326,7 @@ export default {
     col_order: '@:global.order',
     col_email: '发件箱',
     col_outbox: '发件箱',
-    col_outboxName: '名称(发件人姓名)',
+    col_outboxName: '发件人姓名',
     col_smtpHost: 'SMTP地址',
     col_smtpPort: 'SMTP端口',
     col_smtpUserName: 'SMTP用户名',
@@ -520,7 +553,7 @@ export default {
     delete: '删除'
   },
 
-  unsuscribePage: {
+  unsubscribePage: {
     unsubscribe: '取消订阅',
     unsubscribed: '已取消订阅'
   },

@@ -220,14 +220,14 @@ async function onCreateEmailGroup () {
   notifySuccess(translateEmailGroup('newGroupSuccess'))
 }
 // 分类 header 右键
-const headerContextMenuItems: IContextMenuItem[] = [
+const headerContextMenuItems: ComputedRef<IContextMenuItem[]> = computed(() => [
   {
     name: 'add',
     label: translateGlobal('new'),
     tooltip: translateEmailGroup('newEmailGroup'),
     onClick: onCreateEmailGroup
   }
-]
+])
 
 /**
  * 具体分类上的右键菜单
@@ -321,9 +321,9 @@ async function deleteGroup (emailGroup: Record<string, any>) {
 
   notifySuccess(translateEmailGroup('deleteGroupSuccess', { groupName: emailGroup.label }))
 }
-const itemContextMenuItems: IContextMenuItem[] = [
+const itemContextMenuItems: ComputedRef<IContextMenuItem[]> = computed(() => [
   ...props.contextMenuItems,
-  ...headerContextMenuItems,
+  ...headerContextMenuItems.value,
   {
     name: 'modify',
     label: translateGlobal('modify'),
@@ -337,7 +337,7 @@ const itemContextMenuItems: IContextMenuItem[] = [
     tooltip: translateEmailGroup('deleteCurrentGroup'),
     onClick: deleteGroup
   }
-]
+])
 // #endregion
 </script>
 

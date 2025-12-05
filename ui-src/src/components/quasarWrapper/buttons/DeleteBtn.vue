@@ -27,7 +27,7 @@ defineProps({
   },
   tooltip: {
     type: String,
-    default: translateButton('deletetItem')
+    default: translateButton('deleteItem')
   },
   size: {
     type: String,

@@ -8,6 +8,7 @@ import CryptoJS from 'crypto-js'
 import type { IProgressOptions } from 'src/compositions/useProgress'
 import { useNotifyProgress } from 'src/compositions/useProgress'
 import logger from 'loglevel'
+import { translateGlobal, translateUtils } from 'src/i18n/helpers'
 
 export interface ISelectFileResult {
   ok: boolean,
@@ -57,7 +58,7 @@ export function selectFile (multiple: boolean = false, accept: string = ''): Pro
       // change 触发，说明用户选择了文件（或清除了选择）
       const files = (ev.target as HTMLInputElement).files
       if (!files || files.length < 1) {
-        notifyError('未找到文件')
+        notifyError(translateUtils('file_fileNotFound'))
         return finishReject({ ok: false, data: null } as any)
       }
 
@@ -85,7 +86,7 @@ export function selectFile (multiple: boolean = false, accept: string = ''): Pro
           // 有文件，等待 change 事件处理（或直接读取）
           return
         }
-        finishReject({ ok: false, data: null, message: '未检测到文件,可能是用户已取消' } as any)
+        finishReject({ ok: false, data: null, message: translateUtils('file_noFileDetected') } as any)
       }, 5000)
     }
 
@@ -187,12 +188,12 @@ export async function readExcelCore (params: IExcelReaderParams): Promise<{ data
   // 打开选择框
   if (params.selectSheet && workbook.SheetNames.length > 1) {
     const { ok, data } = await showDialog<Record<string, any>>({
-      title: '指定 Sheet',
+      title: translateUtils('file_specifyWorksheet'),
       fields: [
         {
           name: 'sheetName',
           type: PopupDialogFieldType.selectOne,
-          label: '请选择 Sheet',
+          label: translateUtils('file_pleaseSelectWorksheet'),
           value: workbook.SheetNames[0],
           options: workbook.SheetNames
         }
@@ -250,8 +251,9 @@ export async function readExcelCore (params: IExcelReaderParams): Promise<{ data
         // 判断是否存在
         if (map.required) {
           if (formattedValue === null || formattedValue === undefined || formattedValue === '') {
-            notifyError(`字段 ${map.headerName} 不能为空`)
-            throw new Error(`字段 ${map.fieldName} 不能为空`)
+            const errorMsg = translateUtils('file_fieldCannotBeEmpty', { field: map.headerName })
+            notifyError(errorMsg)
+            throw new Error(errorMsg)
           }
         }
         formattedRow[map.fieldName] = formattedValue
@@ -298,7 +300,7 @@ export async function readExcel (params: IExcelReaderParams) {
  */
 export async function writeExcel (rows: any[], params: IExcelWriterParams) {
   if (params.strict && !params.mappers?.length) {
-    logger.error('[file] 严格模式下, mappers 不能为空')
+    logger.error(`[file] ${translateUtils('file_mappersCannotBeEmptyInStrictMode')}`)
     return
   }
 
@@ -339,8 +341,12 @@ export async function writeExcel (rows: any[], params: IExcelWriterParams) {
         // 判断是否存在
         if (map.required) {
           if (formattedValue === null || formattedValue === undefined || formattedValue === '') {
-            notifyError(`第 ${rowIndex} 行数据中，${map.headerName} 列不能为空`)
-            throw new Error(`列 ${map.headerName} 不能为空`)
+            const errorMsg = translateUtils('file_fieldCannotBeEmptyAtRow', {
+              rowIndex,
+              field: map.headerName
+            })
+            notifyError(errorMsg)
+            throw new Error(errorMsg)
           }
         }
 
@@ -453,7 +459,7 @@ export function fileSha256 (file: File, callback?: (params: IFileSha256Callback)
     function asyncUpdate () {
       if (start < total) {
         const process = start / total
-        const progressLabel = '正在计算 hash 值...' + (process * 100).toFixed(2) + '%'
+        const progressLabel = translateUtils('file_calculatingHash') + (process * 100).toFixed(2) + '%'
         const end = Math.min(start + batch, total)
         reader.readAsArrayBuffer(file.slice(start, end))
         start = end
@@ -474,11 +480,13 @@ export function fileSha256 (file: File, callback?: (params: IFileSha256Callback)
         }
       } else {
         const sha256 = hashObject.finalize()
-        console.log(`文件 ${file.name} sha256 值为：`, sha256.toString())
+        console.log(translateUtils('file_fileHashCalculated', {
+          fileName: file.name,
+        }), sha256.toString())
 
         if (typeof callback === 'function') {
           const callbackResult = {
-            progressLabel: 'hash 已校验, 等待上传', // 重置为未上传的显示状态
+            progressLabel: translateUtils('file_hashVerifiedWaitingUpload'), // 重置为未上传的显示状态
             process: total,
             computed: total,
             total,
@@ -565,13 +573,13 @@ declare global {
  */
 export async function saveByFileSystemAccess (fileName: string, downloadUrl: string, options: IProgressOptions = {}) {
   if (!validUrl(downloadUrl)) {
-    throw new Error('下载地址不合法,应以 http 开头')
+    throw new Error(translateUtils('file_invalidDownloadUrl'))
   }
 
   const _options = Object.assign({
     token: '',
-    initMessage: '正在解析文件...',
-    doneMessage: '下载完成',
+    initMessage: translateUtils('file_parsingFile'),
+    doneMessage: translateUtils('file_downloadCompleted'),
     cancellable: false
   }, options)
   if (!window.showSaveFilePicker) return false
@@ -585,7 +593,9 @@ export async function saveByFileSystemAccess (fileName: string, downloadUrl: str
       suggestedName: fileName,
       types: [
         {
-          description: `${ext} 文件`,
+          description: translateUtils('file_fileExtension', {
+            ext: ext
+          }),
           accept: {
             '*/*': [`.${ext.toLowerCase()}`]
           }
@@ -600,7 +610,7 @@ export async function saveByFileSystemAccess (fileName: string, downloadUrl: str
     if (_options.cancellable) {
       _options.actions = [
         {
-          label: '取消',
+          label: translateGlobal('cancel'),
           dense: true,
           color: 'white',
           padding: 'none',
@@ -621,7 +631,7 @@ export async function saveByFileSystemAccess (fileName: string, downloadUrl: str
 
     const writableStream = await fileHandle.createWritable()
     const response = await fetch(downloadUrl, { signal })
-    if (!response || !response.body) { throw new Error('下载失败') }
+    if (!response || !response.body) { throw new Error(translateUtils('file_downloadFailed')) }
     const reader = response.body.getReader()
     const writer = writableStream.getWriter()
 
@@ -633,7 +643,9 @@ export async function saveByFileSystemAccess (fileName: string, downloadUrl: str
       const percent = Math.floor(receivedLength / totalLength * 100)
       if (percent > 100) return 90
 
-      update(percent, `${fileHandle.name} 下载中...`)
+      update(percent, translateUtils('file_downloadingFile', {
+        fileName: fileHandle.name
+      }))
     }
 
     while (true) {

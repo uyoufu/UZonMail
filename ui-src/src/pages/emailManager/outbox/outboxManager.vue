@@ -97,7 +97,7 @@ onMounted(async () => {
   const { data: proxies } = await getUsableProxies()
   usableProxies.value = proxies
 })
-const columns: QTableColumn[] = [
+const columns: ComputedRef<QTableColumn[]> = computed(() => [
   {
     name: 'id',
     required: true,
@@ -190,7 +190,7 @@ const columns: QTableColumn[] = [
     format: v => OutboxStatus[v] as string,
     sortable: true
   }
-]
+])
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getOutboxesCount(emailGroupRef.value.id, filterObj.filter)
   return data

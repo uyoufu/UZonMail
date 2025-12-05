@@ -16,7 +16,7 @@
             <AsyncTooltip :tooltip="translateBasicSettings('aiProviderTooltip')" />
           </q-input>
 
-          <q-input outlined class="col-auto-4" standout dense v-model="aiCopilotSettingRef.endPoint" :debounce="500"
+          <q-input outlined class="col-auto-4" standout dense v-model="aiCopilotSettingRef.endpoint" :debounce="500"
             :label="translateBasicSettings('endPoint')">
           </q-input>
 
@@ -84,7 +84,7 @@ const props = defineProps({
 const defaultAISetting: AIProviderSetting = {
   status: AppSettingStatus.Disabled,
   providerType: AIProviderType.OpenAI,
-  endPoint: '',
+  endpoint: '',
   apiKey: '',
   model: '',
   maxTokens: 8 * 1024,

@@ -215,6 +215,22 @@ export function getGroupsInboxes (groupIds: number[]) {
   })
 }
 
+
+/**
+ * 获取组内的发件箱
+ * 但是密码不会下发
+ * @param groupIds
+ * @returns
+ */
+export function getGroupsOutboxes (groupIds: number[]) {
+  return httpClient.get<IOutbox[]>('/email-box/outbox/groups-data', {
+    params: {
+      groupIds: groupIds.join(',') // ?groupIds=1,2,3
+    }
+  })
+}
+
+
 /**
  * 通过 id 删除邮箱
  * @param emailBoxId

@@ -1,4 +1,4 @@
-using UZonMail.Core.Services.Encrypt.Models;
+﻿using UZonMail.Core.Services.Encrypt.Models;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Configs;
 using UZonMail.Utils.Web.Service;

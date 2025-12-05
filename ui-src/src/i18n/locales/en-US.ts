@@ -84,6 +84,39 @@ export default {
     // `... 等共 ${labels.length} ${unit}`
     totalItems: '... and a total of {count} {unit}',
     item: 'item',
+
+    // File not found
+    file_fileNotFound: 'File not found',
+    // No file detected, possibly canceled by user
+    file_noFileDetected: 'No file detected, possibly canceled by user',
+    // Specify Worksheet
+    file_specifyWorksheet: 'Specify Worksheet',
+    // Please select Worksheet
+    file_pleaseSelectWorksheet: 'Please select Worksheet',
+    // Field {field} cannot be empty
+    file_fieldCannotBeEmpty: 'Field {field} cannot be empty',
+    // Mappers cannot be empty in strict mode
+    file_mappersCannotBeEmptyInStrictMode: 'Mappers cannot be empty in strict mode',
+    // Field {field} in row {rowIndex} cannot be empty
+    file_fieldCannotBeEmptyAtRow: 'Field {field} in row {rowIndex} cannot be empty',
+    // Calculating hash...
+    file_calculatingHash: 'Calculating hash...',
+    // File {fileName} SHA256 value:
+    file_fileHashCalculated: 'File {fileName} SHA256 value: ',
+    // Hash verified, waiting for upload
+    file_hashVerifiedWaitingUpload: 'Hash verified, waiting for upload',
+    // Invalid download URL, should start with http
+    file_invalidDownloadUrl: 'Invalid download URL, should start with http',
+    // Parsing file...
+    file_parsingFile: 'Parsing file...',
+    // Download completed
+    file_downloadCompleted: 'Download completed',
+    // Download failed
+    file_downloadFailed: 'Download failed',
+    // {fileName} downloading...
+    file_downloadingFile: '{fileName} downloading...',
+    // {ext} file
+    file_fileExtension: '{ext} file',
   },
   // #endregion
   // #endregion
@@ -139,7 +172,7 @@ export default {
     newItem: 'New Item',
 
     delete: 'Delete',
-    deletetItem: 'Delete Item',
+    deleteItem: 'Delete Item',
 
     save: 'Save',
 
@@ -337,7 +370,7 @@ export default {
 
     col_order: '@:global.order',
     col_outbox: 'Outbox',
-    col_outboxName: 'Name (Sender Name)',
+    col_outboxName: 'Sender Name',
     col_smtpHost: 'SMTP Address',
     col_smtpPort: 'SMTP Port',
     col_smtpUserName: 'SMTP Username',
@@ -509,12 +542,6 @@ export default {
   },
 
   unsubscribePage: {
-    unsubscribe: 'Unsubscribe',
-    unsubscribed: 'Unsubscribed'
-  }
-  ,
-  // keep old spelling from zh file
-  unsuscribePage: {
     unsubscribe: 'Unsubscribe',
     unsubscribed: 'Unsubscribed'
   },

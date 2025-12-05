@@ -62,7 +62,8 @@ const userDataInboxes = props.emailCreateInfo.data.map((x) => ({
 if (userDataInboxes.length > 0) {
   inboxes.push(...userDataInboxes)
 }
-import { getGroupsInboxes } from 'src/api/emailBox'
+// 获取收件箱组中的邮箱
+import { getGroupsOutboxes, IOutbox } from 'src/api/emailBox'
 onMounted(async () => {
   // 获取发件组中的邮箱
   if (props.emailCreateInfo.inboxGroups.length > 0) {
@@ -75,15 +76,31 @@ onMounted(async () => {
   inboxes.forEach(x => {
     inboxMap.set(x.email, x)
   })
-
   inboxes = Array.from(inboxMap.values())
+
   pagesCount.value = inboxes.length
 })
 
+// 获取所有的发件箱列表
+import { getGroupsInboxes } from 'src/api/emailBox'
+let outboxes = [...props.emailCreateInfo.outboxes]
+onMounted(async () => {
+  if (props.emailCreateInfo.outboxGroups.length > 0) {
+    const { data } = await getGroupsOutboxes(props.emailCreateInfo.outboxGroups.map(x => x.id as number))
+    outboxes.push(...data)
+
+    // 对邮箱去重
+    const outboxMap = new Map<string, IOutbox>()
+    outboxes.forEach(x => {
+      outboxMap.set(x.email, x)
+    })
+    outboxes = Array.from(outboxMap.values())
+  }
+})
 
 import { useInstanceRequestCache } from 'src/api/base/httpCache'
 import { getEmailTemplateById, getEmailTemplateByIdOrName } from 'src/api/emailTemplate'
-import { IInbox } from 'src/api/emailBox';
+import { IInbox } from 'src/api/emailBox'
 const cacheKey = useInstanceRequestCache()
 // 主题
 function getSubjects () {
@@ -160,6 +177,7 @@ watch(currentPage, async () => {
   // 从服务器解析变量
   const previewData: ISendingItemPreview = {
     inbox,
+    outbox: outboxes.length > 0 ? outboxes[index % outboxes.length]!.email : "",
     subject: emailSubject.value,
     body: emailBody.value,
     data: userData || {},
