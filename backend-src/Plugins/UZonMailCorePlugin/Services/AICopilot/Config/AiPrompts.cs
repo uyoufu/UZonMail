@@ -16,7 +16,7 @@ namespace UZonMail.Core.Services.AICopilot.Config
                 - Include accessible alt text for images, set dimensions on images, and provide mobile-friendly fallback (stacking/responsive).
                 - Use a clean, professional color scheme (e.g., blues, grays, whites) with ample white space, serif or sans-serif fonts for readability, and subtle borders or shadows for elegance.
                 - Ensure the design is modern yet timeless, emphasizing clarity, hierarchy, and call-to-action buttons.
-                - Support variable replacement using the format {{uzonData.FieldName}} or {{uzonData.FieldName.SubField}} (e.g., {{uzonData.Subject}}, {{uzonData.Outbox.Name}}). Available fields under uzonData include: ["Source", "Data", "Subject", "OutboxEmail", "InboxEmail", "Body", "DateNow", "Outbox", "Inbox", "Inboxes", "CC", "BCC"]. Outbox and Inbox are objects with {Name: string, Email: string} format. Use these variables dynamically in the HTML content where appropriate (e.g., in subject lines, body text, or placeholders).
+                - Support variable replacement using the format {{uzonData.FieldName}} or {{uzonData.FieldName.SubField}} or {{any javascript function body}} (e.g., {{uzonData.Subject}}, {{uzonData.Outbox.Name}}, {{const a=1;return a+1;}}). Available fields under uzonData include: ["Source", "Data", "Subject", "OutboxEmail", "InboxEmail", "Body", "DateNow", "Outbox", "Inbox", "Inboxes", "CC", "BCC"]. Outbox and Inbox are objects with {Name: string, Email: string} format. Use these variables dynamically in the HTML content where appropriate (e.g., in subject lines, body text, or placeholders).
                 - Do NOT include explanatory text, markdown, or chat commentary — output only the HTML.
                 """;
 
@@ -30,9 +30,9 @@ namespace UZonMail.Core.Services.AICopilot.Config
                 - No external resources (no external CSS, fonts, scripts, iframes) and no tracking pixels.
                 - Include accessible alt text for images, set dimensions on images, and provide mobile-friendly fallback (stacking/responsive).
                 - Use a clean, professional color scheme (e.g., blues, grays, whites) with ample white space, serif or sans-serif fonts for readability, and subtle borders or shadows for elegance.
-                - Ensure the design is modern yet timeless, emphasizing clarity, hierarchy, and call-to-action buttons.
-                - Maintain and preserve all variables in the format {{uzonData.FieldName}} or {{uzonData.FieldName.SubField}} (e.g., {{uzonData.Subject}}, {{uzonData.Outbox.Name}}). Do not delete, alter, or replace any variables; ensure they remain intact and functional in the optimized content.
-                - Improve aesthetics, business tone, and expression accuracy without changing the core message or structure.
+                - Ensure the design is highly modern and visually engaging, emphasizing clarity, hierarchy, strong contrast, and compelling call-to-action buttons with hover effects, rounded corners, gradient backgrounds, and icons for a seamless, impactful user experience.
+                - Maintain and preserve all variables in the format {{uzonData.FieldName}} or {{uzonData.FieldName.SubField}} or {{any javascript function body}} (e.g., {{uzonData.Subject}}, {{uzonData.Outbox.Name}}, {{const a=1;return a+1;}}). Do not delete, alter, or replace any variables; ensure they remain intact and functional in the optimized content.
+                - Improve aesthetics, business tone, and expression accuracy without changing the core message or structure, focusing on colorful yet professional enhancements for a polished, engaging result.
                 - Do NOT include explanatory text, markdown, or chat commentary — output only the optimized HTML.
                 """;
 

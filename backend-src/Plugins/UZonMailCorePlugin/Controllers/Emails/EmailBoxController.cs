@@ -240,10 +240,13 @@ namespace UZonMail.Core.Controllers.Emails
                 .Inboxes.IgnoreQueryFilters()
                 .Where(x => x.UserId == userId && emails.Contains(x.Email))
                 .ToListAsync();
-            List<Inbox?> newEntities = emails
-                .Except(existEmails.Select(x => x.Email))
-                .Select(x => entities.Find(e => e.Email == x))
-                .ToList();
+            List<Inbox?> newEntities =
+            [
+                .. emails
+                    .Except(existEmails.Select(x => x.Email))
+                    .Select(x => entities.Find(e => e.Email == x))
+                    .Distinct()
+            ];
 
             // 新建发件箱
             foreach (var entity in newEntities)

@@ -53,8 +53,10 @@ namespace UZonMail.Core.Controllers.Settings
         {
             // 对 ApiKey 进行加密
             if (!encryptService.IsPasswordMask(copilotSetting.ApiKey))
+            {
                 copilotSetting.ApiKey = encryptService.EncrytPassword(copilotSetting.ApiKey);
-            else if (string.IsNullOrWhiteSpace(copilotSetting.ApiKey))
+            }
+            else
             {
                 // 从数据库中找到已经存在的密码并赋予
                 var key = nameof(AICopilotSetting);
@@ -64,11 +66,6 @@ namespace UZonMail.Core.Controllers.Settings
                     var existingSettingModel = settings.Json!.ToObject<AICopilotSetting>()!;
                     copilotSetting.ApiKey = existingSettingModel.ApiKey;
                 }
-            }
-            else
-            {
-                // 对原有密码加密
-                copilotSetting.ApiKey = encryptService.EncrytPassword(copilotSetting.ApiKey);
             }
 
             // 保存到数据库

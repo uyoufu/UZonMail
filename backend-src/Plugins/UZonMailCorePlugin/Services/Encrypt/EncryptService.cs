@@ -31,6 +31,8 @@ namespace UZonMail.Core.Services.Encrypt
         /// <returns></returns>
         public bool IsPasswordMask(string password)
         {
+            if (string.IsNullOrEmpty(password))
+                return true;
             return password == GetPasswordMask();
         }
 

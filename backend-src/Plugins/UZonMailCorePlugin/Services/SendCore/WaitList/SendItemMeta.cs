@@ -1,7 +1,5 @@
-﻿using log4net;
+using log4net;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using System.Text.RegularExpressions;
 using UZonMail.Core.Database.SQL.EmailSending;
 using UZonMail.Core.Services.EmailDecorator;
 using UZonMail.Core.Services.EmailDecorator.Interfaces;
@@ -9,9 +7,6 @@ using UZonMail.Core.Services.SendCore.Contexts;
 using UZonMail.Core.Services.SendCore.Outboxes;
 using UZonMail.Core.Services.Settings;
 using UZonMail.Core.Services.Settings.Model;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
 
 namespace UZonMail.Core.Services.SendCore.WaitList
@@ -58,6 +53,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
         #region 容器
         public SendingItemMetaList Parent { get; private set; }
+
         public void SetParent(SendingItemMetaList metaList)
         {
             Parent = metaList;
@@ -72,7 +68,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <exception cref="NullReferenceException"></exception>
         public void Done()
         {
-            if (Parent == null) throw new NullReferenceException("未设置父容器");
+            if (Parent == null)
+                throw new NullReferenceException("未设置父容器");
 
             if (Status.HasFlag(SendItemMetaStatus.Success))
             {
@@ -95,7 +92,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         private void Retry()
         {
             _triedCount++;
-            if (Parent == null) throw new NullReferenceException("未设置父容器");
+            if (Parent == null)
+                throw new NullReferenceException("未设置父容器");
             Parent.MoveRecycleToWaitList(SendingItemId);
         }
         #endregion
@@ -128,7 +126,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public bool IsErrorOrSuccess()
         {
-            return Status.HasFlag(SendItemMetaStatus.Error) || Status.HasFlag(SendItemMetaStatus.Success);
+            return Status.HasFlag(SendItemMetaStatus.Error)
+                || Status.HasFlag(SendItemMetaStatus.Success);
         }
         #endregion
 
@@ -156,6 +155,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         public bool Initialized { get; set; } = false;
 
         public SendingItem SendingItem { get; private set; }
+
         public void SetSendingItem(SendingItem sendingItem)
         {
             SendingItem = sendingItem;
@@ -172,6 +172,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// 附件
         /// </summary>
         public List<FileInfo> Attachments { get; } = [];
+
         /// <summary>
         /// 解析附件数据
         /// </summary>
@@ -179,25 +180,34 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public async Task ResolveAttachments(SendingContext sendingContext)
         {
-            if (Attachments.Count > 0) return;
+            if (Attachments.Count > 0)
+                return;
 
             var fileUsageIds = SendingItem.Attachments?.Select(x => x.Id).ToList() ?? [];
-            if (fileUsageIds.Count == 0) return;
+            if (fileUsageIds.Count == 0)
+                return;
 
             // 查找文件
-            var attachments = await sendingContext.SqlContext.FileUsages.Where(f => fileUsageIds.Contains(f.Id))
-               .Include(x => x.FileObject)
-               .ThenInclude(x => x.FileBucket)
-               .Select(x => new { fullPath = $"{x.FileObject.FileBucket.RootDir}/{x.FileObject.Path}", fileName = x.DisplayName ?? x.FileName })
-               .ToListAsync();
+            var attachments = await sendingContext
+                .SqlContext.FileUsages.Where(f => fileUsageIds.Contains(f.Id))
+                .Include(x => x.FileObject)
+                .ThenInclude(x => x.FileBucket)
+                .Select(x => new
+                {
+                    fullPath = $"{x.FileObject.FileBucket.RootDir}/{x.FileObject.Path}",
+                    fileName = x.DisplayName ?? x.FileName
+                })
+                .ToListAsync();
 
-            Attachments.AddRange(attachments.Select(x => new FileInfo(x.fullPath)).Where(x => x.Exists));
+            Attachments.AddRange(
+                attachments.Select(x => new FileInfo(x.fullPath)).Where(x => x.Exists)
+            );
         }
-
 
         #region HTML 正文原始内容
         private string _originBody;
         public string HtmlBody { get; private set; } = string.Empty;
+
         public async Task SetHtmlBody(SendingContext sendingContext, string htmlBody)
         {
             _originBody = htmlBody;
@@ -205,7 +215,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
             // 调用修饰器添加额外的值
             var decoratorParams = await GetEmailDecoratorParams(sendingContext);
-            var decorateService = sendingContext.Provider.GetRequiredService<EmailContentDecorateService>();
+            var decorateService =
+                sendingContext.Provider.GetRequiredService<EmailContentDecorateService>();
             HtmlBody = await decorateService.Decorate(decoratorParams, htmlBody);
         }
 
@@ -214,11 +225,14 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// </summary>
         /// <param name="sendingContext"></param>
         /// <returns></returns>
-        public async Task<EmailDecoratorParams> GetEmailDecoratorParams(SendingContext sendingContext)
+        public async Task<EmailDecoratorParams> GetEmailDecoratorParams(
+            SendingContext sendingContext
+        )
         {
             var outbox = sendingContext.OutboxAddress;
 
-            var orgSetting = await sendingContext.Provider.GetRequiredService<AppSettingsManager>()
+            var orgSetting = await sendingContext
+                .Provider.GetRequiredService<AppSettingsManager>()
                 .GetSetting<SendingSetting>(sendingContext.SqlContext, outbox.UserId);
 
             return new EmailDecoratorParams(orgSetting, this, outbox.Outbox);
@@ -226,10 +240,12 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         #endregion
 
         private string _originSubject = string.Empty;
+
         /// <summary>
         /// 主题
         /// </summary>
         public string Subject { get; private set; }
+
         public async Task SetSubject(SendingContext sendingContext, string subject)
         {
             _originSubject = subject;
@@ -237,7 +253,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
 
             // 调用修饰器进行变量替换
             var decoratorParams = await GetEmailDecoratorParams(sendingContext);
-            var decorateService = sendingContext.Provider.GetRequiredService<EmailContentDecorateService>();
+            var decorateService =
+                sendingContext.Provider.GetRequiredService<EmailContentDecorateService>();
             Subject = await decorateService.ResolveVariables(decoratorParams, _originSubject);
         }
 
@@ -246,6 +263,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// 默认不重试，0
         /// </summary>
         public int MaxRetryCount { get; private set; }
+
         public async Task SetMaxRetryCount(int maxRetryCount)
         {
             MaxRetryCount = maxRetryCount;
@@ -263,7 +281,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         {
             get
             {
-                if (Outbox == null && SendingItem == null) return 0;
+                if (Outbox == null && SendingItem == null)
+                    return 0;
 
                 // sendingItem 中的 proxyId 优先于 outbox 中的 proxyId
                 long proxyId = 0;
@@ -285,6 +304,7 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// 这个值是动态赋予的
         /// </summary>
         public OutboxEmailAddress Outbox { get; private set; }
+
         public void SetOutbox(OutboxEmailAddress outbox)
         {
             Outbox = outbox;
@@ -294,14 +314,15 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// 回信人
         /// </summary>
         public List<string> ReplyToEmails { get; private set; } = [];
+
         public void SetReplyToEmails(List<string> replyToEmails, List<string> globalReplyToEmails)
         {
             ReplyToEmails = replyToEmails;
-            if (replyToEmails != null && replyToEmails.Count > 0) return;
+            if (replyToEmails != null && replyToEmails.Count > 0)
+                return;
 
-            // 使用全局回复               
+            // 使用全局回复
             ReplyToEmails = globalReplyToEmails;
-
         }
         #endregion
 
