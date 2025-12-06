@@ -177,6 +177,9 @@ function Copy-Assembly {
         [string]$src,
         [string]$exclude
     )
+
+    Write-Host "复制程序集从 $src 到 $mainService/Assembly" -ForegroundColor Yellow
+    Write-Host "排除程序集: $exclude" -ForegroundColor Yellow
     
     # 获取 $mainService 目录中的 dll
     $mainDlls = Get-ChildItem -Path "$mainService/*" | Where-Object { -not $_.PSIsContainer } | Where-Object { $_.Extension -eq ".dll" }
@@ -212,6 +215,8 @@ function New-UZonMailCorePlugin {
     # 编译后端 UZonMailCorePlugin
     $pluginsSrc = Join-Path -Path $backendSrc -ChildPath "Plugins"
     $uZonMailCorePlugin = 'UZonMailCorePlugin'
+    $corePluginAssembly = "UZonMail.CorePlugin"
+
     Write-Host "开始编译后端 $uZonMailCorePlugin ..." -ForegroundColor Yellow
     $serviceSrc = Join-Path -Path $pluginsSrc -ChildPath $uZonMailCorePlugin
     # 使用 dotnet 编译
@@ -221,10 +226,11 @@ function New-UZonMailCorePlugin {
     Write-Host "后端 $serviceDest 编译完成!" -ForegroundColor Green
 
     # 复制依赖到根目录，复制库 到 Plugins 目录
-    Copy-Assembly -src $serviceDest -exclude "$uZonMailCorePlugin.*"
+    Copy-Assembly -src $serviceDest -exclude "$corePluginAssembly.*"
     $uzonMailCorePluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailCorePlugin"
     New-Item -Path $uzonMailCorePluginPath -ItemType Directory -Force
-    Copy-Item -Path "$serviceDest/$uZonMailCorePlugin.*" -Destination $uzonMailCorePluginPath -Force
+    
+    Copy-Item -Path "$serviceDest/$corePluginAssembly.*" -Destination $uzonMailCorePluginPath -Force
 
     # 复制配置文件到插件目录
     $srcDirs = ("data")
@@ -241,7 +247,9 @@ New-UZonMailCorePlugin
 
 # 编译后端 UZonMailProPlugin
 function New-UZonMailProPlugin {
-    $uZonMailProPlugin = 'UZonMailProPlugin'    
+    $uZonMailProPlugin = 'UZonMailProPlugin'   
+    $proPluginAssembly = "UZonMail.ProPlugin"
+    
     # 使用 dotnet 编译
     Set-Location -Path $gitRoot
     $proPluginPath = "../UZonMailProPlugins/$uZonMailProPlugin"
@@ -257,12 +265,13 @@ function New-UZonMailProPlugin {
     $serviceDest = "$mainService/$uZonMailProPlugin"
     Set-Location $proPluginPath
     dotnet publish -c Release -o $serviceDest -r $publishPlatform --self-contained false
+
     # 复制依赖到根目录
-    Copy-Assembly -src $serviceDest -exclude "$uZonMailProPlugin.*"
+    Copy-Assembly -src $serviceDest -exclude "$proPluginAssembly.*"
     # 复制库到 Pro 插件目录  
     $uzonMailProPluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailProPlugin"
     New-Item -Path $uzonMailProPluginPath -ItemType Directory -Force
-    Copy-Item -Path "$serviceDest/$uZonMailProPlugin.*" -Destination $uzonMailProPluginPath -Force
+    Copy-Item -Path "$serviceDest/$proPluginAssembly.*" -Destination $uzonMailProPluginPath -Force    
 
     # 复制配置文件到 Pro 插件目录
     $srcDirs = ("Scripts")
