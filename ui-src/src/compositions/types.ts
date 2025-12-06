@@ -26,9 +26,9 @@ export type TTableFilterObject = {
 export interface IQTableInitParams {
   sortBy?: string,
   descending?: boolean,
-  filterFactor?: (filter: string) => Promise<TTableFilterObject>,
-  getRowsNumberCount: (filterObj: TTableFilterObject) => Promise<number>, // 请求数据总数
-
-  onRequest: (filterObj: TTableFilterObject, pagination: IRequestPagination) => Promise<Array<object>>, // 请求数据
+  filterFactor?: (filter: string) => Promise<TTableFilterObject> | TTableFilterObject, // 过滤因子
+  getRowsNumberCount?: (filterObj: TTableFilterObject) => Promise<number> | number, // 请求数据总数
+  onRequest?: (filterObj: TTableFilterObject, pagination: IRequestPagination)
+    => Promise<Array<object>> | Array<object>, // 请求数据
   preventRequestWhenMounted?: boolean // 在挂载时请求数据
 }

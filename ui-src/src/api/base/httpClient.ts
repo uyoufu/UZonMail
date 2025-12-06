@@ -26,16 +26,22 @@ export default class HttpClient {
   constructor(options: IHttpClientOptions) {
     this._options = options
     this._axios = this.createAxios()
-    this.setRequestInterceptors(this._axios)
-    this.setResponseInterceptors(this._axios)
+
+    if (!options.removeRequestInterceptors)
+      this.setRequestInterceptors(this._axios)
+    if (!options.removeResponseInterceptors)
+      this.setResponseInterceptors(this._axios)
   }
 
   // 获取基础 url
   private getBaseUrl (): string {
     const config = useConfig()
     const baseUrl = this._options.baseUrl || config.baseUrl
-    const api = this._options.api || config.api
-    return `${baseUrl}${api}`
+    const api = (this._options.api === null || this._options.api === undefined)
+      ? config.api : this._options.api
+    const finalBaseUrl = `${baseUrl}${api}`
+    logger.debug('[HttpClient] BaseUrl:', finalBaseUrl)
+    return finalBaseUrl
   }
 
   // 创建 axios 实例
@@ -70,6 +76,7 @@ export default class HttpClient {
 
 
       const data = response.data as IResponseData<any>
+      logger.debug('[HttpClient] Response data:', data)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       if (data.code === StatusCode.SuccessOK)
         return response

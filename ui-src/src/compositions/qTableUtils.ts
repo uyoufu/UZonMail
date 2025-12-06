@@ -144,6 +144,14 @@ export function useQTable (initParams: IQTableInitParams) {
     }
   }
 
+  if (!initParams.onRequest) {
+    watch(rows, () => {
+      pagination.value.rowsNumber = rows.value.length
+      // 显示全部
+      pagination.value.rowsPerPage = 0
+    })
+  }
+
   // 增减行数
   function increaseRowsNumber (count: number) {
     pagination.value.rowsNumber += count

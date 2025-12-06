@@ -50,6 +50,7 @@ export default {
     yes: '是',
     no: '否',
     empty: '无',
+    save: '保存'
   },
 
   // #endregion
@@ -140,6 +141,8 @@ export default {
     readStatistics: '阅读统计',
     unsubscribeStatistics: '退订统计',
     emailCrawler: '邮件爬虫',
+    tiktokCrawler: 'TikTok爬虫',
+    qqGroupMembersGetter: 'QQ群友获取',
     tiktokDevice: 'TikTok设备',
     crawlerTask: '爬虫任务',
     crawlerResult: '爬取结果',
@@ -556,6 +559,18 @@ export default {
   unsubscribePage: {
     unsubscribe: '取消订阅',
     unsubscribed: '已取消订阅'
+  },
+
+  // qq 获取器
+  qqGetter: {
+    qqNumber: 'QQ号码',
+    qqNickname: 'QQ昵称',
+    save: '保存',
+    saveAsInbox: '保存为收件箱',
+    selectGroup: '选择群',
+    // 是否将当前 QQ 群中的所有成员保存为收件箱？
+    confirmSaveAllMembersAsInboxes: '是否将当前 QQ 群中的 {count} 个成员保存为收件箱？',
+    saveMembersAsInboxesSuccess: '群成员保存为收件箱成功',
   },
 
   basicSettings: {

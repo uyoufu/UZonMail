@@ -11,6 +11,10 @@ export interface IHttpClientOptions {
   baseUrl?: string,
   // 重写配置中的 api
   api?: string,
+
+  // 默认不移除
+  removeRequestInterceptors?: boolean,
+  removeResponseInterceptors?: boolean
 }
 
 /**
@@ -22,6 +26,8 @@ export interface IResponseData<T> {
   code: number,
   message: string,
   ok: boolean,
+  status?: string,
+  retcode?: number
 }
 
 /**

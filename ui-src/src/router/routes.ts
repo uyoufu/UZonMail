@@ -229,38 +229,69 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     meta: {
       label: 'emailCrawler',
       icon: 'bug_report',
-      access: ['enterprise']
+      access: ['professional']
     },
-    redirect: '/email-crawler/task',
+    redirect: '/email-crawler/tiktok/task',
     children: [
       {
-        name: 'TickTokDevice',
-        path: 'tiktok-device',
+        name: 'TiktokCrawler',
+        path: 'tiktok',
         meta: {
           icon: 'devices',
-          label: 'tiktokDevice'
+          label: 'tiktokCrawler',
+          access: ['enterprise']
         },
-        component: () => import('pages/emailCrawler/tikTokDevice/TikTokDeviceManager.vue')
+        children: [
+          {
+            name: 'TickTokDevice',
+            path: 'device',
+            meta: {
+              icon: 'devices',
+              label: 'tiktokDevice'
+            },
+            component: () => import('pages/emailCrawler/tiktok/tikTokDevice/TikTokDeviceManager.vue')
+          },
+          {
+            name: 'CrawlerTask',
+            path: 'task',
+            meta: {
+              icon: 'flag',
+              label: 'crawlerTask'
+            },
+            component: () => import('pages/emailCrawler/tiktok/crawlerTask/CrawlerTask.vue')
+          },
+          {
+            name: 'CrawlerResult',
+            path: 'tasks/:id',
+            meta: {
+              icon: 'contact_mail',
+              label: 'crawlerResult',
+              noMenu: true
+            },
+            component: () => import('pages/emailCrawler/tiktok/crawlerResult/CrawlerResult.vue')
+          }
+        ]
       },
       {
-        name: 'CrawlerTask',
-        path: 'task',
+        name: 'QQCrawler',
+        path: 'qq',
         meta: {
-          icon: 'flag',
-          label: 'crawlerTask'
+          icon: 'groups',
+          label: 'qqGroupMembersGetter',
+          access: ['professional']
         },
-        component: () => import('pages/emailCrawler/crawlerTask/CrawlerTask.vue')
+        children: [
+          {
+            name: 'TickTokDevice2',
+            path: 'device',
+            meta: {
+              icon: 'groups',
+              label: 'qqGroupMembersGetter'
+            },
+            component: () => import('pages/emailCrawler/qqOnebot/qqGroupMemberGetter.vue')
+          }
+        ]
       },
-      {
-        name: 'CrawlerResult',
-        path: 'tasks/:id',
-        meta: {
-          icon: 'contact_mail',
-          label: 'crawlerResult',
-          noMenu: true
-        },
-        component: () => import('pages/emailCrawler/crawlerResult/CrawlerResult.vue')
-      }
     ]
   },
   {
