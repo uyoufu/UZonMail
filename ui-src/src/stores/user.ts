@@ -51,7 +51,7 @@ export const useUserInfoStore = defineStore('userInfo', {
      * @returns
      */
     hasProPlugin: (state) => {
-      return state.installedPlugins.includes('UZonMailProPlugin')
+      return state.installedPlugins.includes('UZonMail.ProPlugin')
     }
   },
   actions: {
