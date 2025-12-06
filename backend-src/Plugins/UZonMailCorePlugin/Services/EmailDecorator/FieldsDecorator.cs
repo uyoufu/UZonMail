@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using UZonMail.Core.Services.EmailDecorator.Interfaces;
+using UZonMail.CorePlugin.Services.EmailDecorator.Interfaces;
 
-namespace UZonMail.Core.Services.EmailDecorator
+namespace UZonMail.CorePlugin.Services.EmailDecorator
 {
     /// <summary>
     /// 通用字段替换

@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.EmailDecorator.Interfaces
+namespace UZonMail.CorePlugin.Services.EmailDecorator.Interfaces
 {
     /// <summary>
     /// 邮件正文修饰器
@@ -13,7 +13,7 @@ namespace UZonMail.Core.Services.EmailDecorator.Interfaces
         /// 执行顺序号
         /// 越小越先执行
         /// </summary>
-        int Order { get;}
+        int Order { get; }
 
         /// <summary>
         /// 开始进行装饰

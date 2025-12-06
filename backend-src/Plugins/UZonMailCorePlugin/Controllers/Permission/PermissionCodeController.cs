@@ -1,19 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Permission;
+using UZonMail.Utils.Web.PagingQuery;
+using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Permission
+namespace UZonMail.CorePlugin.Controllers.Permission
 {
     /// <summary>
     /// 权限码路由
     /// </summary>
-    public class PermissionCodeController(TokenService tokenService, SqlContext db) : PermissionControllerBase
+    public class PermissionCodeController(TokenService tokenService, SqlContext db)
+        : PermissionControllerBase
     {
         /// <summary>
         /// 获取权限码数量
@@ -38,7 +39,10 @@ namespace UZonMail.Core.Controllers.Permission
         /// <param name="filter"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<PermissionCode>>> GetPermissionCodesData(string filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<PermissionCode>>> GetPermissionCodesData(
+            string filter,
+            [FromBody] Pagination pagination
+        )
         {
             var dbSet = db.PermissionCodes.AsNoTracking();
             if (!string.IsNullOrEmpty(filter))
@@ -69,12 +73,16 @@ namespace UZonMail.Core.Controllers.Permission
         /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpPut()]
-        public async Task<ResponseResult<List<PermissionCode>>> UpdatePermissionCode([FromBody] List<PermissionCode> permissionCodes)
+        public async Task<ResponseResult<List<PermissionCode>>> UpdatePermissionCode(
+            [FromBody] List<PermissionCode> permissionCodes
+        )
         {
             permissionCodes = permissionCodes.Where(x => !string.IsNullOrEmpty(x.Code)).ToList();
             var codes = permissionCodes.Select(x => x.Code).ToList();
             // 查找存在的权限码
-            var existCodes = await db.PermissionCodes.Where(x => codes.Contains(x.Code)).ToListAsync();
+            var existCodes = await db
+                .PermissionCodes.Where(x => codes.Contains(x.Code))
+                .ToListAsync();
             // 过滤掉已经存在的权限码
             foreach (var permissionCode in permissionCodes)
             {
@@ -90,8 +98,7 @@ namespace UZonMail.Core.Controllers.Permission
 
             await db.SaveChangesAsync();
 
-            return permissionCodes.Where(x => x.Id > 0).ToList()
-                .ToSuccessResponse();
+            return permissionCodes.Where(x => x.Id > 0).ToList().ToSuccessResponse();
         }
     }
 }

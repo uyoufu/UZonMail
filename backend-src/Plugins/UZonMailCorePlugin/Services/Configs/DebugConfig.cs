@@ -1,6 +1,6 @@
-﻿using UZonMail.Utils.Web.Service;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Config
+namespace UZonMail.CorePlugin.Services.Config
 {
     /// <summary>
     /// 调试配置

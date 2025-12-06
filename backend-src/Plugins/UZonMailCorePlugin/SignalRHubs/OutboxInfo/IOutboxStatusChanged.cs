@@ -1,7 +1,7 @@
-﻿using UZonMail.Core.SignalRHubs.Notify;
+using UZonMail.CorePlugin.SignalRHubs.Notify;
 using UZonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.Core.SignalRHubs.OutboxInfo
+namespace UZonMail.CorePlugin.SignalRHubs.OutboxInfo
 {
     /// <summary>
     /// 发件箱状态变更

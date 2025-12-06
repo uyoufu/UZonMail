@@ -1,19 +1,19 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Database.Validators;
-using UZonMail.Core.Services.Permission;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Utils.Database;
-using UZonMail.Core.Utils.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.DB.SQL.Core.Permission;
+using UZonMail.CorePlugin.Database.Validators;
+using UZonMail.CorePlugin.Services.Permission;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Utils.Database;
+using UZonMail.CorePlugin.Utils.Extensions;
 using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Permission;
+using UZonMail.Utils.Web.PagingQuery;
+using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Permission
+namespace UZonMail.CorePlugin.Controllers.Permission
 {
     /// <summary>
     /// 角色控制器
@@ -21,7 +21,11 @@ namespace UZonMail.Core.Controllers.Permission
     /// <param name="tokenService"></param>
     /// <param name="db"></param>
     /// <param name="permission"></param>
-    public class RoleController(TokenService tokenService, SqlContext db, PermissionService permission) : PermissionControllerBase
+    public class RoleController(
+        TokenService tokenService,
+        SqlContext db,
+        PermissionService permission
+    ) : PermissionControllerBase
     {
         /// <summary>
         /// 获取角色数量
@@ -47,7 +51,10 @@ namespace UZonMail.Core.Controllers.Permission
         /// <param name="filter"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<Role>>> GetRolesData(string filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<Role>>> GetRolesData(
+            string filter,
+            [FromBody] Pagination pagination
+        )
         {
             var userId = tokenService.GetUserSqlId();
             var dbSet = db.Roles.AsNoTracking();
@@ -55,11 +62,14 @@ namespace UZonMail.Core.Controllers.Permission
             {
                 dbSet = dbSet.Where(x => x.Name.Contains(filter));
             }
-            var results = await dbSet.Page(pagination)
+            var results = await dbSet
+                .Page(pagination)
                 .Include(x => x.PermissionCodes)
                 .ToListAsync();
 
-            results.ForEach(x => x.PermissionCodeIds = x.PermissionCodes.Select(y => y.Id).ToList());
+            results.ForEach(x =>
+                x.PermissionCodeIds = x.PermissionCodes.Select(y => y.Id).ToList()
+            );
             return results.ToSuccessResponse();
         }
 
@@ -85,14 +95,16 @@ namespace UZonMail.Core.Controllers.Permission
         {
             var roleValidator = new RoleValidator();
             var vdResult = roleValidator.Validate(role);
-            if (!vdResult.IsValid) return vdResult.ToErrorResponse<Role>();
+            if (!vdResult.IsValid)
+                return vdResult.ToErrorResponse<Role>();
 
-            var permissionCodes = await db.PermissionCodes
-                .Where(x => role.PermissionCodeIds.Contains(x.Id))
+            var permissionCodes = await db
+                .PermissionCodes.Where(x => role.PermissionCodeIds.Contains(x.Id))
                 .ToListAsync();
 
             // 添加角色
-            var existRole = await db.Roles.Where(x => x.Id == role.Id)
+            var existRole = await db
+                .Roles.Where(x => x.Id == role.Id)
                 .Include(x => x.PermissionCodes)
                 .FirstOrDefaultAsync();
             if (existRole != null)
@@ -131,11 +143,13 @@ namespace UZonMail.Core.Controllers.Permission
         public async Task<ResponseResult<bool>> DeleteRole(long roleId)
         {
             // 删除角色
-            var role = await db.Roles.Where(x => x.Id == roleId)
+            var role = await db
+                .Roles.Where(x => x.Id == roleId)
                 .Include(x => x.UserRoles)
-                .Include(x=>x.PermissionCodes)
+                .Include(x => x.PermissionCodes)
                 .FirstOrDefaultAsync();
-            if (role == null) return true.ToSuccessResponse();
+            if (role == null)
+                return true.ToSuccessResponse();
 
             var userRoles = role.UserRoles?.ToList() ?? [];
             // 删除用户与角色关联表

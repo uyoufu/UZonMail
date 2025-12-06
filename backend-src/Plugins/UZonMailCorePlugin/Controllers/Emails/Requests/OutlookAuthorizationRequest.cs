@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Controllers.Emails.Requests
+namespace UZonMail.CorePlugin.Controllers.Emails.Requests
 {
     /// <summary>
     /// 参考: https://learn.microsoft.com/en-us/graph/sdks/choose-authentication-providers?tabs=csharp#client-credentials-provider
@@ -14,15 +14,16 @@ namespace UZonMail.Core.Controllers.Emails.Requests
     /// </summary>
     public class OutlookAuthorizationRequest : FluentHttpRequest, ITransientService
     {
-        public static readonly List<string> SendScopes = [
-                // 可以获取刷新令牌    
-                "openid",
-                "offline_access",
-                // 发送邮箱需要
-                "Mail.Send", //  替代 SMTP 发件权限
-                //"Mail.Send.Shared",
-                //"Mail.Read"  // 替代 IMAP 收件权限
-            ];
+        public static readonly List<string> SendScopes =
+        [
+            // 可以获取刷新令牌
+            "openid",
+            "offline_access",
+            // 发送邮箱需要
+            "Mail.Send", //  替代 SMTP 发件权限
+            //"Mail.Send.Shared",
+            //"Mail.Read"  // 替代 IMAP 收件权限
+        ];
 
         public OutlookAuthorizationRequest(HttpClient httpClient, IConfiguration configuration)
         {

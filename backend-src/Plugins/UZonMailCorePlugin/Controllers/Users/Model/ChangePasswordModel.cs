@@ -1,4 +1,4 @@
-namespace UZonMail.Core.Controllers.Users.Model
+namespace UZonMail.CorePlugin.Controllers.Users.Model
 {
     public class ChangePasswordModel
     {

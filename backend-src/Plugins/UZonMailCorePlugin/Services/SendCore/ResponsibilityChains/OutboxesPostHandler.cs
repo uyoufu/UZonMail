@@ -1,19 +1,23 @@
-﻿using log4net;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.Utils;
-using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
-using UZonMail.Core.SignalRHubs.Extensions;
-using UZonMail.Core.SignalRHubs.SendEmail;
+using log4net;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UZonMail.CorePlugin.Services.SendCore.Utils;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
+using UZonMail.CorePlugin.SignalRHubs.Extensions;
+using UZonMail.CorePlugin.SignalRHubs.SendEmail;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
+namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
-    public class OutboxesPostHandler(GroupTasksList groupTasksList, OutboxesManager outboxManager, AppSettingsManager settingsService) : AbstractSendingHandler
+    public class OutboxesPostHandler(
+        GroupTasksList groupTasksList,
+        OutboxesManager outboxManager,
+        AppSettingsManager settingsService
+    ) : AbstractSendingHandler
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(OutboxesPostHandler));
 
@@ -30,7 +34,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             var emailItem = context.EmailItem;
 
             // outbox 要延迟到
-            if (outbox == null) return;
+            if (outbox == null)
+                return;
             if (emailItem == null)
             {
                 // 没有发件项时，可会存在所有发件正在发送中的情况，因此 outbox 不能立马释放, 需要进行判断
@@ -51,7 +56,10 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 outbox.IncreaseSentCount();
 
                 // 从发件箱中移除发件项
-                outbox.RemoveSepecificSendingItem(emailItem.SendingItem.SendingGroupId, emailItem.SendingItemId);
+                outbox.RemoveSepecificSendingItem(
+                    emailItem.SendingItem.SendingGroupId,
+                    emailItem.SendingItemId
+                );
             }
 
             // 检查发件箱发件数量是否超限
@@ -75,16 +83,23 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
         /// <returns></returns>
         private bool MatchEmailItem(OutboxEmailAddress outbox)
         {
-            if (!groupTasksList.TryGetValue(outbox.UserId, out var groupTasks)) return false;
+            if (!groupTasksList.TryGetValue(outbox.UserId, out var groupTasks))
+                return false;
             return groupTasks.MatchEmailItem(outbox);
         }
 
         /// <summary>
         /// 检查发件箱的发件数量限制
         /// </summary>
-        private async Task CheckOutboxSentCountLimit(SqlContext sqlContext, OutboxEmailAddress outbox)
+        private async Task CheckOutboxSentCountLimit(
+            SqlContext sqlContext,
+            OutboxEmailAddress outbox
+        )
         {
-            var orgSetting = await settingsService.GetSetting<SendingSetting>(sqlContext, outbox.UserId);
+            var orgSetting = await settingsService.GetSetting<SendingSetting>(
+                sqlContext,
+                outbox.UserId
+            );
 
             // 本身有限制时，若已经达到发送上限，则不再发送
             var overflowLimit = false;
@@ -96,7 +111,10 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 }
             }
             // 本身没限制，使用系统的限制
-            else if (orgSetting.MaxSendCountPerEmailDay > 0 && outbox.SentTotalToday >= orgSetting.MaxSendCountPerEmailDay)
+            else if (
+                orgSetting.MaxSendCountPerEmailDay > 0
+                && outbox.SentTotalToday >= orgSetting.MaxSendCountPerEmailDay
+            )
             {
                 overflowLimit = true;
             }
@@ -116,10 +134,14 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
         /// <param name="sqlContext"></param>
         /// <param name="outbox"></param>
         /// <returns></returns>
-        private async Task RemoveLinkingGroups(SendingContext sendingContext, OutboxEmailAddress outbox)
+        private async Task RemoveLinkingGroups(
+            SendingContext sendingContext,
+            OutboxEmailAddress outbox
+        )
         {
-            // 受影响的发件任务           
-            if (!groupTasksList.TryGetValue(outbox.UserId, out var groupTasks)) return;
+            // 受影响的发件任务
+            if (!groupTasksList.TryGetValue(outbox.UserId, out var groupTasks))
+                return;
 
             var sqlContext = sendingContext.SqlContext;
             var hub = sendingContext.HubClient;
@@ -130,7 +152,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             foreach (var sendingGroupId in sendingGroupIds)
             {
                 // 获取发件组
-                if (!groupTasks.TryGetValue(sendingGroupId, out var groupTask)) continue;
+                if (!groupTasks.TryGetValue(sendingGroupId, out var groupTask))
+                    continue;
 
                 // 判断当前发件组是否还有发件箱
                 var existOutboxes = outboxManager.ExistOutboxes(sendingGroupId);
@@ -142,35 +165,58 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                     groupTask.RemovePendingItems(sendingItemIds);
 
                     // 标记为错误
-                    await sqlContext.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && sendingItemIds.Contains(x.Id),
-                        x => x.SetProperty(y => y.Status, SendingItemStatus.Failed)
-                            .SetProperty(y => y.SendDate, DateTime.UtcNow)
-                            .SetProperty(y => y.SendResult, outbox.ErroredMessage ?? "发件箱退出发件池，无发件箱可用")
-                        );
+                    await sqlContext.SendingItems.UpdateAsync(
+                        x => x.SendingGroupId == sendingGroupId && sendingItemIds.Contains(x.Id),
+                        x =>
+                            x.SetProperty(y => y.Status, SendingItemStatus.Failed)
+                                .SetProperty(y => y.SendDate, DateTime.UtcNow)
+                                .SetProperty(
+                                    y => y.SendResult,
+                                    outbox.ErroredMessage ?? "发件箱退出发件池，无发件箱可用"
+                                )
+                    );
 
                     // 更新发件组成功的数据
-                    var sendingGroup = await SendingGroupUpdater.UpdateSendingGroupSentInfo(sqlContext, sendingGroupId);
+                    var sendingGroup = await SendingGroupUpdater.UpdateSendingGroupSentInfo(
+                        sqlContext,
+                        sendingGroupId
+                    );
                     // 推送发送组进度
-                    await client.SendingGroupProgressChanged(new SendingGroupProgressArg(sendingGroup, sendingContext.GroupTaskStartDate));
+                    await client.SendingGroupProgressChanged(
+                        new SendingGroupProgressArg(sendingGroup, sendingContext.GroupTaskStartDate)
+                    );
                     continue;
                 }
                 ;
 
                 // 发件组不存在任何发件箱时，需要移除整个发件组
-                if (!groupTasks.TryRemove(sendingGroupId, out var removedGroupTask)) continue;
+                if (!groupTasks.TryRemove(sendingGroupId, out var removedGroupTask))
+                    continue;
                 // 修改发件项状态
-                await sendingContext.SqlContext.SendingItems.UpdateAsync(x => x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending
-                , x => x.SetProperty(y => y.Status, SendingItemStatus.Failed)
-                    .SetProperty(y => y.SendDate, DateTime.UtcNow)
-                    .SetProperty(y => y.SendResult, outbox.ErroredMessage ?? "发件箱退出发件池，无发件箱可用")
+                await sendingContext.SqlContext.SendingItems.UpdateAsync(
+                    x =>
+                        x.SendingGroupId == sendingGroupId && x.Status == SendingItemStatus.Pending,
+                    x =>
+                        x.SetProperty(y => y.Status, SendingItemStatus.Failed)
+                            .SetProperty(y => y.SendDate, DateTime.UtcNow)
+                            .SetProperty(
+                                y => y.SendResult,
+                                outbox.ErroredMessage ?? "发件箱退出发件池，无发件箱可用"
+                            )
                 );
 
                 // 更新发件组成功的数据
-                var removedSendingGroup = await SendingGroupUpdater.UpdateSendingGroupSentInfo(sqlContext, sendingGroupId);
+                var removedSendingGroup = await SendingGroupUpdater.UpdateSendingGroupSentInfo(
+                    sqlContext,
+                    sendingGroupId
+                );
 
                 // 标记结束
                 var finisher = sendingContext.Provider.GetRequiredService<SendingGroupFinisher>();
-                await finisher.MarkSendingGroupFinished(removedSendingGroup.Id, sendingContext.GroupTaskStartDate);
+                await finisher.MarkSendingGroupFinished(
+                    removedSendingGroup.Id,
+                    sendingContext.GroupTaskStartDate
+                );
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.SignalRHubs.Notify
+namespace UZonMail.CorePlugin.SignalRHubs.Notify
 {
     public interface INotifyClient
     {

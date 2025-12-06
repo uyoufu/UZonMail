@@ -1,8 +1,8 @@
-﻿using UZonMail.Core.Services.EmailDecorator.Interfaces;
-using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.EmailDecorator.Interfaces;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.EmailDecorator
+namespace UZonMail.CorePlugin.Services.EmailDecorator
 {
     /// <summary>
     /// 邮件内容装饰器
@@ -18,8 +18,7 @@ namespace UZonMail.Core.Services.EmailDecorator
         /// <returns></returns>
         public async Task<string> Decorate(IContentDecoratorParams decoratorParams, string content)
         {
-            var decorators = serviceProvider.GetServices<IContentDecroator>()
-                .OrderBy(x => x.Order);
+            var decorators = serviceProvider.GetServices<IContentDecroator>().OrderBy(x => x.Order);
             foreach (var decorator in decorators)
             {
                 content = await decorator.StartDecorating(decoratorParams, content);
@@ -33,10 +32,12 @@ namespace UZonMail.Core.Services.EmailDecorator
         /// <param name="decoratorParams"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        public async Task<string> ResolveVariables(IContentDecoratorParams decoratorParams, string content)
+        public async Task<string> ResolveVariables(
+            IContentDecoratorParams decoratorParams,
+            string content
+        )
         {
-            var decorators = serviceProvider.GetServices<IVariableResolver>()
-                .OrderBy(x => x.Order);
+            var decorators = serviceProvider.GetServices<IVariableResolver>().OrderBy(x => x.Order);
             foreach (var decorator in decorators)
             {
                 content = await decorator.StartDecorating(decoratorParams, content);

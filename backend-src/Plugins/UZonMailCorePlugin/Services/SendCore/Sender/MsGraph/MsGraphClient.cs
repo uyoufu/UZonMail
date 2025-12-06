@@ -5,15 +5,15 @@ using MailKit.Security;
 using Microsoft.Identity.Client;
 using MimeKit;
 using Newtonsoft.Json.Linq;
-using UZonMail.Core.Services.Config;
-using UZonMail.Core.Services.Encrypt;
+using UZonMail.CorePlugin.Services.Config;
+using UZonMail.CorePlugin.Services.Encrypt;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
+namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     /// <summary>
     /// 参考： https://learn.microsoft.com/en-us/graph/sdks/choose-authentication-providers?tabs=csharp#client-credentials-provider

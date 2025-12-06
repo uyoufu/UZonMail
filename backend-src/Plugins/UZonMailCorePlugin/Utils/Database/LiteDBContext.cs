@@ -1,7 +1,7 @@
-﻿using LiteDB;
-using UZonMail.Core.Config.SubConfigs;
+using LiteDB;
+using UZonMail.CorePlugin.Config.SubConfigs;
 
-namespace UZonMail.Core.Utils.Database
+namespace UZonMail.CorePlugin.Utils.Database
 {
     /// <summary>
     /// LiteDB管理器
@@ -9,12 +9,13 @@ namespace UZonMail.Core.Utils.Database
     /// <remarks>
     /// 数据库操作
     /// </remarks>
-    public class LiteDBContext(IConfiguration configuration) : LiteRepository(new ConnectionString()
-    {
-        Filename = configuration.GetValue<string>(DatabaseConfig.GetLiteDbPathConfigKey()),
-        Upgrade = true
-    }, new SMEBsonMapper())
-    {
-       
-    }
+    public class LiteDBContext(IConfiguration configuration)
+        : LiteRepository(
+            new ConnectionString()
+            {
+                Filename = configuration.GetValue<string>(DatabaseConfig.GetLiteDbPathConfigKey()),
+                Upgrade = true
+            },
+            new SMEBsonMapper()
+        ) { }
 }

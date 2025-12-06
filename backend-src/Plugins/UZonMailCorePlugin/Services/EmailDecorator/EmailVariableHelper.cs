@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
-namespace UZonMail.Core.Services.EmailDecorator
+namespace UZonMail.CorePlugin.Services.EmailDecorator
 {
     public class EmailVariableHelper
     {
@@ -13,10 +13,12 @@ namespace UZonMail.Core.Services.EmailDecorator
         public static List<string> GetAllVariableNames(string content)
         {
             // 获取内容中的变量
-            var matches = Regex.Matches(content, @"\{\{\s*([\p{L}\p{N}_\.]+)\s*\}\}", RegexOptions.None);
-            var variables = matches.Select(m => m.Groups[1].Value)
-                .Distinct()
-                .ToList();
+            var matches = Regex.Matches(
+                content,
+                @"\{\{\s*([\p{L}\p{N}_\.]+)\s*\}\}",
+                RegexOptions.None
+            );
+            var variables = matches.Select(m => m.Groups[1].Value).Distinct().ToList();
             return variables;
         }
 
@@ -29,9 +31,7 @@ namespace UZonMail.Core.Services.EmailDecorator
         public static List<string> GetAllVariableContents(string content)
         {
             var matches = Regex.Matches(content, @"\{\{\s*((.*?))\s*\}\}", RegexOptions.Multiline);
-            var contents = matches.Select(m => m.Groups[1].Value)
-                .Distinct()
-                .ToList();
+            var contents = matches.Select(m => m.Groups[1].Value).Distinct().ToList();
             return contents;
         }
     }

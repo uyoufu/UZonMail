@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.WaitList
+namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 {
     public class SendingItemsCounter
     {
@@ -27,7 +27,8 @@
         public void IncreaseSentCount(bool success)
         {
             Interlocked.Increment(ref _sentCount);
-            if (success) Interlocked.Increment(ref _successCount);
+            if (success)
+                Interlocked.Increment(ref _successCount);
         }
     }
 }

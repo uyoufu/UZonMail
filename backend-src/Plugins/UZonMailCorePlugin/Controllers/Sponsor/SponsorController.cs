@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Sponsor
+namespace UZonMail.CorePlugin.Controllers.Sponsor
 {
     /// <summary>
     /// 赞助相关接口

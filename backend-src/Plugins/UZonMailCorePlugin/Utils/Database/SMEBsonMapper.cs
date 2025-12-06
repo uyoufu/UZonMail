@@ -1,10 +1,10 @@
-﻿using LiteDB;
+using LiteDB;
 using UZonMail.Utils.Database.Attributes;
 using UZonMail.Utils.Database.LiteDB;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Helpers;
 
-namespace UZonMail.Core.Utils.Database
+namespace UZonMail.CorePlugin.Utils.Database
 {
     /// <summary>
     /// 自定义的 BsonMapper
@@ -28,8 +28,11 @@ namespace UZonMail.Core.Utils.Database
         /// <returns></returns>
         private string ResolveCollectionNameFunc(Type type)
         {
-            CollectionNameAttribute att = AttributeHelper.GetAttribute<CollectionNameAttribute>(type);
-            if (att == null) return type.Name.ToSnakeCase();
+            CollectionNameAttribute att = AttributeHelper.GetAttribute<CollectionNameAttribute>(
+                type
+            );
+            if (att == null)
+                return type.Name.ToSnakeCase();
             return att.Name.ToSnakeCase();
         }
     }

@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
 
-namespace UZonMail.Core.SignalRHubs
+namespace UZonMail.CorePlugin.SignalRHubs
 {
     /// <summary>
     /// SignalR 用户 ID 提供者
@@ -10,7 +10,8 @@ namespace UZonMail.Core.SignalRHubs
     {
         public string? GetUserId(HubConnectionContext connection)
         {
-            if (connection.User?.Identity is not ClaimsIdentity claims) return null;
+            if (connection.User?.Identity is not ClaimsIdentity claims)
+                return null;
             var name = claims.FindFirst(ClaimTypes.Name)?.Value;
             return name;
         }

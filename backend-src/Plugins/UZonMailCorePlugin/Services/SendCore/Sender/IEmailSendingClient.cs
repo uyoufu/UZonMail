@@ -1,8 +1,8 @@
-﻿using MailKit.Net.Proxy;
+using MailKit.Net.Proxy;
 using MimeKit;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.Sender
+namespace UZonMail.CorePlugin.Services.SendCore.Sender
 {
     public interface IEmailSendingClient : ITransientService<IEmailSendingClient>
     {

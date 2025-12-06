@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Config.SubConfigs;
-using UZonMail.Core.Database.Updater;
-using UZonMail.Core.Services.Encrypt;
+using UZonMail.CorePlugin.Config.SubConfigs;
+using UZonMail.CorePlugin.Database.Updater;
+using UZonMail.CorePlugin.Services.Encrypt;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Files;
 using UZonMail.DB.SQL.Core.Organization;
@@ -9,7 +9,7 @@ using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Configs;
 
-namespace UZonMail.Core.Database.Update.Updaters
+namespace UZonMail.CorePlugin.Database.Update.Updaters
 {
     public class InitSql(SqlContext db, IConfiguration config, EncryptService encryptService)
         : IDatabaseUpdater

@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.DB.SQL.Base;
-using UZonMail.Core.Services.Common;
+using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.CorePlugin.Services.Common;
+using UZonMail.DB.SQL.Base;
+using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Common
+namespace UZonMail.CorePlugin.Controllers.Common
 {
     /// <summary>
     /// 通用的增删改查控制器
     /// </summary>
-    public abstract class CurdController<T>(CurdService<T> curdService) : ControllerBaseV1 where T : SqlId
+    public abstract class CurdController<T>(CurdService<T> curdService) : ControllerBaseV1
+        where T : SqlId
     {
         /// <summary>
         /// 增加数据

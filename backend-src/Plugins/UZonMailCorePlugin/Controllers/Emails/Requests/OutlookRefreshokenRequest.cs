@@ -1,8 +1,8 @@
-﻿using UZonMail.Core.Config.SubConfigs;
+using UZonMail.CorePlugin.Config.SubConfigs;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Controllers.Emails.Requests
+namespace UZonMail.CorePlugin.Controllers.Emails.Requests
 {
     /// <summary>
     /// Outlook 刷新令牌请求
@@ -20,17 +20,21 @@ namespace UZonMail.Core.Controllers.Emails.Requests
             _baseUrl = configuration.GetValue<string>("BaseUrl")!;
         }
 
-        public OutlookRefreshokenRequest WithFormData(string clientId, string? clientSecret, string code)
+        public OutlookRefreshokenRequest WithFormData(
+            string clientId,
+            string? clientSecret,
+            string code
+        )
         {
             var formData = new Dictionary<string, string>()
             {
-                { "client_id",clientId},               
+                { "client_id", clientId },
                 { "code", code },
                 { "grant_type", "authorization_code" },
-                { "redirect_uri",$"{_baseUrl.Trim('/')}/api/v1/outlook-authorization/code"},
-                { "scope", string.Join(" ",OutlookAuthorizationRequest.SendScopes) }
+                { "redirect_uri", $"{_baseUrl.Trim('/')}/api/v1/outlook-authorization/code" },
+                { "scope", string.Join(" ", OutlookAuthorizationRequest.SendScopes) }
             };
-            if(!string.IsNullOrEmpty(clientSecret))
+            if (!string.IsNullOrEmpty(clientSecret))
             {
                 formData.Add("client_secret", clientSecret);
             }

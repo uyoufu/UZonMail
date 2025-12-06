@@ -1,4 +1,4 @@
-namespace UZonMail.Core.Config.SubConfigs
+namespace UZonMail.CorePlugin.Config.SubConfigs
 {
     /// <summary>
     /// 管理员初始配置

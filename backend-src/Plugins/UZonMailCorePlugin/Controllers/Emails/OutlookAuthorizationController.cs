@@ -5,16 +5,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Emails.Requests;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.SendCore.Sender.MsGraph;
-using UZonMail.Core.Services.Settings;
+using UZonMail.CorePlugin.Controllers.Emails.Requests;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph;
+using UZonMail.CorePlugin.Services.Settings;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Json;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Emails
+namespace UZonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// Outlook 邮箱基于用户授权控制器

@@ -1,7 +1,7 @@
-﻿using System.Data;
+using System.Data;
 using UZonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.Core.Database.Validators.Tests
+namespace UZonMail.CorePlugin.Database.Validators.Tests
 {
     [TestClass()]
     public class InboxValidatorTests
@@ -13,10 +13,7 @@ namespace UZonMail.Core.Database.Validators.Tests
         [TestMethod()]
         public void InboxValidatorTest(string email)
         {
-            var inbox = new Inbox()
-            {
-                Email = email
-            };
+            var inbox = new Inbox() { Email = email };
             var validator = new InboxValidator();
             var vdResult = validator.Validate(inbox);
             Assert.IsTrue(vdResult.IsValid);

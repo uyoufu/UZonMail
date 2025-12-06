@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.Emails;
+using UZonMail.CorePlugin.Services.Emails;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Validators;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Emails
+namespace UZonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// Smtp 信息控制器
@@ -38,13 +38,12 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="emails"></param>
         /// <returns></returns>
         [HttpPost("guess")]
-        public async Task<ResponseResult<List<SmtpInfo>>> GuessSmtpInfo([FromBody] List<string> emails)
+        public async Task<ResponseResult<List<SmtpInfo>>> GuessSmtpInfo(
+            [FromBody] List<string> emails
+        )
         {
             var results = await smtpInfo.GuessSmtpInfos(emails);
-            return results.Values
-                .DistinctBy(x => x.Host)
-                .ToList()
-                .ToSuccessResponse();
+            return results.Values.DistinctBy(x => x.Host).ToList().ToSuccessResponse();
         }
     }
 }

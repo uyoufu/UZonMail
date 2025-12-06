@@ -1,5 +1,4 @@
-﻿
-namespace UZonMail.Core.Services.SendCore.Interfaces
+namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
 {
     /// <summary>
     /// 权重接口

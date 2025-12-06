@@ -1,6 +1,6 @@
 using UZonMail.Utils.Web.Configs;
 
-namespace UZonMail.Core.Services.AICopilot.Config
+namespace UZonMail.CorePlugin.Services.AICopilot.Config
 {
     [OptionName("AiCopilot.Prompts")]
     public class AiPrompts

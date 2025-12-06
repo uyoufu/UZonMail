@@ -1,11 +1,10 @@
-﻿
 using log4net;
 using Newtonsoft.Json.Linq;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
 using UZonMail.Utils.Results;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 代理查询基类
@@ -19,7 +18,7 @@ namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
         private readonly HttpClient _httpClient;
         private readonly long _timeout = 5000;
 
-        public BaseProxyTester(HttpClient httpClient,ProxyZoneType testerType)
+        public BaseProxyTester(HttpClient httpClient, ProxyZoneType testerType)
         {
             _httpClient = httpClient;
             _httpClient.Timeout = TimeSpan.FromMilliseconds(_timeout);
@@ -61,7 +60,9 @@ namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
             // 未查找成功
             if (!response.IsSuccessStatusCode)
             {
-                _logger.Debug($"动态代理 {proxyUrl} 检测失败,{response.StatusCode}: {response.ReasonPhrase}");
+                _logger.Debug(
+                    $"动态代理 {proxyUrl} 检测失败,{response.StatusCode}: {response.ReasonPhrase}"
+                );
                 return Result<string?>.Fail(string.Empty);
             }
 
@@ -81,13 +82,15 @@ namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
 
         private DateTime _lastValidateTime = DateTime.MinValue;
         private bool _validating = false;
+
         /// <summary>
         /// 不使用代理验证可访问性
         /// </summary>
         /// <returns></returns>
         protected virtual async Task<bool> Validate()
         {
-            if (Interlocked.Exchange(ref _validating, true)) return false;
+            if (Interlocked.Exchange(ref _validating, true))
+                return false;
 
             _validating = true;
             _lastValidateTime = DateTime.UtcNow;

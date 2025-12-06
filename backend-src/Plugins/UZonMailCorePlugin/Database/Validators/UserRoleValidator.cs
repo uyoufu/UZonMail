@@ -1,14 +1,14 @@
-﻿using FluentValidation;
+using FluentValidation;
 using UZonMail.DB.SQL.Core.Permission;
 
-namespace UZonMail.Core.Database.Validators
+namespace UZonMail.CorePlugin.Database.Validators
 {
     public class UserRoleValidator : AbstractValidator<UserRoles>
     {
         public UserRoleValidator()
         {
             RuleFor(x => x.UserId).GreaterThan(0).WithMessage("请指定用户");
-            RuleFor(x=>x.Roles).NotEmpty().WithMessage("请至少选择一个角色");
+            RuleFor(x => x.Roles).NotEmpty().WithMessage("请至少选择一个角色");
         }
     }
 }

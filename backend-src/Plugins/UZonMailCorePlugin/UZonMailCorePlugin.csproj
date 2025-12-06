@@ -3,9 +3,9 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<RootNamespace>UZonMail.Core</RootNamespace>
+		<RootNamespace>UZonMail.CorePlugin</RootNamespace>	
 		<OutputType>Library</OutputType>
-		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
+		<AssemblyName>UZonMail.CorePlugin</AssemblyName>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
@@ -23,25 +23,33 @@
 	  <Compile Remove="Services\LLM\**" />
 	  <Compile Remove="Services\Settings\Core\**" />
 	  <Compile Remove="Services\UzonMailCore\**" />
+	  <Compile Remove="UZonMailCorePlugin\**" />
 	  <Content Remove="bin\**" />
 	  <Content Remove="Controllers\Organization\**" />
 	  <Content Remove="Services\LLM\**" />
 	  <Content Remove="Services\Settings\Core\**" />
 	  <Content Remove="Services\UzonMailCore\**" />
+	  <Content Remove="UZonMailCorePlugin\**" />
 	  <EmbeddedResource Remove="bin\**" />
 	  <EmbeddedResource Remove="Controllers\Organization\**" />
 	  <EmbeddedResource Remove="Services\LLM\**" />
 	  <EmbeddedResource Remove="Services\Settings\Core\**" />
 	  <EmbeddedResource Remove="Services\UzonMailCore\**" />
+	  <EmbeddedResource Remove="UZonMailCorePlugin\**" />
 	  <None Remove="bin\**" />
 	  <None Remove="Controllers\Organization\**" />
 	  <None Remove="Services\LLM\**" />
 	  <None Remove="Services\Settings\Core\**" />
 	  <None Remove="Services\UzonMailCore\**" />
+	  <None Remove="UZonMailCorePlugin\**" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Content Remove="data\init\smtpInfo.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Langs\SharedResource.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -73,6 +81,12 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\UzonMailDB\UzonMailDB.csproj" />
 	  <ProjectReference Include="..\..\UZonMailUtils\UZonMailUtils.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Langs\SharedResource.zh-CN.resx">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>

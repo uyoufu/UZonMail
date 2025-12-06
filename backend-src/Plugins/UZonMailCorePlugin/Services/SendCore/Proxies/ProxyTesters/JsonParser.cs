@@ -1,14 +1,15 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// json 解析器
     /// </summary>
     /// <param name="httpClient"></param>
-    public abstract class JsonParser(HttpClient httpClient, ProxyZoneType testerType) : BaseProxyTester(httpClient, testerType)
+    public abstract class JsonParser(HttpClient httpClient, ProxyZoneType testerType)
+        : BaseProxyTester(httpClient, testerType)
     {
         protected override string? RetrieveIP(string content)
         {

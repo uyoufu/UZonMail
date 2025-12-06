@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.SignalRHubs.SendEmail
+namespace UZonMail.CorePlugin.SignalRHubs.SendEmail
 {
     public class SendingProgressArg
     {

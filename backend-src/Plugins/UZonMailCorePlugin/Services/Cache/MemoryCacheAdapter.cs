@@ -1,13 +1,13 @@
-﻿
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using UZonMail.Utils.Database.Redis;
 
-namespace UZonMail.Core.Services.Cache
+namespace UZonMail.CorePlugin.Services.Cache
 {
     public class MemoryCacheAdapter : ICacheAdapter
     {
         private readonly MemoryCache _cache;
+
         public MemoryCacheAdapter()
         {
             _cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
@@ -33,7 +33,8 @@ namespace UZonMail.Core.Services.Cache
 
         public async Task RemoveByPrefix(string prefix)
         {
-            var keyResults = _cache.Keys.Select(x => new { keyStr = x.ToString(), key = x })
+            var keyResults = _cache
+                .Keys.Select(x => new { keyStr = x.ToString(), key = x })
                 .Where(x => x.keyStr.StartsWith(prefix))
                 .ToList();
             foreach (var keyResult in keyResults)
@@ -42,7 +43,11 @@ namespace UZonMail.Core.Services.Cache
             }
         }
 
-        public async Task<bool> SetAsync<T>(string key, T? value, TimeSpan? absoluteExpirationRelativeToNow)
+        public async Task<bool> SetAsync<T>(
+            string key,
+            T? value,
+            TimeSpan? absoluteExpirationRelativeToNow
+        )
         {
             if (absoluteExpirationRelativeToNow == null)
                 _cache.Set(key, value);

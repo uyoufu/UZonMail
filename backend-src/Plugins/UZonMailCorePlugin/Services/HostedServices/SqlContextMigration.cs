@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.HostedServices
+namespace UZonMail.CorePlugin.Services.HostedServices
 {
     public class SqlContextMigration(SqlContext db) : IHostedServiceStart
     {

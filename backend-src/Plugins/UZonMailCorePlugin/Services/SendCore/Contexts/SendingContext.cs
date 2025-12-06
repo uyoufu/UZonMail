@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.Core.SignalRHubs;
+using Microsoft.AspNetCore.SignalR;
+using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.SignalRHubs;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.Contexts
+namespace UZonMail.CorePlugin.Services.SendCore.Contexts
 {
     public class SendingContext(IServiceProvider provider) : ITransientService
     {
@@ -19,7 +19,8 @@ namespace UZonMail.Core.Services.SendCore.Contexts
         /// <summary>
         /// 获取 SignalR 客户端
         /// </summary>
-        public IHubContext<UzonMailHub, IUzonMailClient> HubClient => Provider.GetRequiredService<IHubContext<UzonMailHub, IUzonMailClient>>();
+        public IHubContext<UzonMailHub, IUzonMailClient> HubClient =>
+            Provider.GetRequiredService<IHubContext<UzonMailHub, IUzonMailClient>>();
 
         /// <summary>
         /// 数据库上下文

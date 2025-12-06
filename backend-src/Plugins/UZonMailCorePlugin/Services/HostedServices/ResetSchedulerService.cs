@@ -1,7 +1,7 @@
-﻿using Quartz;
-using UZonMail.Core.Jobs;
+using Quartz;
+using UZonMail.CorePlugin.Jobs;
 
-namespace UZonMail.Core.Services.HostedServices
+namespace UZonMail.CorePlugin.Services.HostedServices
 {
     /// <summary>
     /// 重置定时器
@@ -17,13 +17,13 @@ namespace UZonMail.Core.Services.HostedServices
             #region 重置每日发件限制
             var jobKey = new JobKey($"schduleTask-resetSentCountToday");
             bool exist = await scheduler.CheckExists(jobKey, stoppingToken);
-            if (exist) return;
+            if (exist)
+                return;
 
-            var job = JobBuilder.Create<SentCountReseter>()
-                .WithIdentity(jobKey)
-                .Build();
+            var job = JobBuilder.Create<SentCountReseter>().WithIdentity(jobKey).Build();
 
-            var trigger = TriggerBuilder.Create()
+            var trigger = TriggerBuilder
+                .Create()
                 .ForJob(jobKey)
                 .StartAt(new DateTimeOffset(DateTime.UtcNow.AddDays(1))) // 明天凌晨开始
                 .WithDailyTimeIntervalSchedule(x => x.WithIntervalInHours(24).OnEveryDay())

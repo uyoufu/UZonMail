@@ -1,10 +1,10 @@
-﻿using System.Reflection;
-using UZonMail.Core.Database.Updater;
+using System.Reflection;
+using UZonMail.CorePlugin.Database.Updater;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Database.Update.Updaters
+namespace UZonMail.CorePlugin.Database.Update.Updaters
 {
     public class InitSmtpInfo(SqlContext db) : IDatabaseUpdater
     {
@@ -16,7 +16,7 @@ namespace UZonMail.Core.Database.Update.Updaters
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
             var smtpInfoPath = Path.Combine(assemblyDirectory, "data/init/smtpInfo.json");
-            if(!File.Exists(smtpInfoPath))
+            if (!File.Exists(smtpInfoPath))
             {
                 // 如果文件不存在，直接返回
                 return;

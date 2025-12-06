@@ -1,4 +1,4 @@
-namespace UZonMail.Core.Controllers.AICopilot.DTOs
+namespace UZonMail.CorePlugin.Controllers.AICopilot.DTOs
 {
     public class UserPromptData
     {

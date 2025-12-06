@@ -1,14 +1,14 @@
-﻿using log4net;
+using log4net;
 using Timer = System.Timers.Timer;
 
-namespace UZonMail.Core.Services.SendCore.Utils
+namespace UZonMail.CorePlugin.Services.SendCore.Utils
 {
     /// <summary>
     /// 冷却器
     /// </summary>
     public class Cooler
     {
-        private readonly static ILog _logger = LogManager.GetLogger(typeof(Cooler));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(Cooler));
         private DateTime _startDate = DateTime.UtcNow;
         private Timer? _timer = null;
 
@@ -38,11 +38,7 @@ namespace UZonMail.Core.Services.SendCore.Utils
 
             IsCooling = true;
             _timer?.Dispose();
-            _timer = new Timer(cooldownMilliseconds)
-            {
-                AutoReset = false,
-                Enabled = true
-            };
+            _timer = new Timer(cooldownMilliseconds) { AutoReset = false, Enabled = true };
             _timer.Elapsed += async (sender, args) =>
             {
                 _timer.Stop();

@@ -1,22 +1,23 @@
-using System.Reflection;
+using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using Quartz;
-using Uamazing.Utils.Plugin;
 using UZonMail.DB.MySql;
 using UZonMail.DB.PostgreSql;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SqLite;
+using UZonMail.Server.Middlewares;
 using UZonMail.Utils.Database.Redis;
 using UZonMail.Utils.Log;
+using UZonMail.Utils.Plugin;
 using UZonMail.Utils.Web;
 using UZonMail.Utils.Web.Filters;
 using UZonMail.Utils.Web.Token;
-using UZonMailService.Middlewares;
 
 // 修改当前目录
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);
@@ -48,6 +49,9 @@ var services = builder.Services;
 
 // 查看当前环境
 Console.WriteLine($"Current Environment：{builder.Environment.EnvironmentName}");
+
+// 多语言
+services.AddI18N(["zh-CN", "en"]);
 
 // 保证只有一个实例
 // services.UseSingleApp();
@@ -94,8 +98,7 @@ var mvcBuilder = services
     });
 
 // 加载插件
-var pluginLoader = new PluginLoader("Plugins");
-pluginLoader.AddApplicationPart(mvcBuilder);
+builder.AddPlugins();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
@@ -213,10 +216,10 @@ services.AddUtilsServices();
 // 加载本机服务
 services.AddServices();
 
-// 加载插件服务
-pluginLoader.UseServices(builder);
-
 var app = builder.Build();
+
+// 使用多语言中间件
+app.UseRequestLocalization();
 
 app.UseDefaultFiles();
 
@@ -264,9 +267,10 @@ app.UseAuthorization();
 // vue 单页面应用中间件
 app.UseVueASP();
 
+// 使用插件
+app.UsePlugins();
+
 // http 路由
 app.MapControllers();
-
-pluginLoader.UseApp(app);
 
 app.Run();

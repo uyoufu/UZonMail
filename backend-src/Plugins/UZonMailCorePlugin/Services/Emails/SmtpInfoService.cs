@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Validators;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Emails
+namespace UZonMail.CorePlugin.Services.Emails
 {
     public class SmtpInfoService(SqlContext db) : IScopedService
     {
@@ -23,7 +23,10 @@ namespace UZonMail.Core.Services.Emails
             }
 
             var validDomains = validEmails.Select(email => email.Split('@')[1]).Distinct().ToList();
-            var smtpInfos = await db.SmtpInfos.AsNoTracking().Where(x => validDomains.Contains(x.Domain)).ToListAsync();
+            var smtpInfos = await db
+                .SmtpInfos.AsNoTracking()
+                .Where(x => validDomains.Contains(x.Domain))
+                .ToListAsync();
 
             // 返回结果，若数据库中不存在，则使用默认的 Smtp 信息
             var results = new Dictionary<string, SmtpInfo>();
@@ -32,16 +35,16 @@ namespace UZonMail.Core.Services.Emails
                 var domain = email.Split('@')[1];
                 var smtpInfo = smtpInfos.Find(x => x.Domain == domain);
                 smtpInfo ??= new SmtpInfo()
-                    {
-                        Domain = domain,
-                        Host = "smtp." + domain,
-                        Port = 465,
-                        SecurityProtocol = SecurityProtocol.SSL,
-                        EnableSSL = true
-                    };
+                {
+                    Domain = domain,
+                    Host = "smtp." + domain,
+                    Port = 465,
+                    SecurityProtocol = SecurityProtocol.SSL,
+                    EnableSSL = true
+                };
                 smtpInfos.Add(smtpInfo);
 
-                results.Add(email,smtpInfo);
+                results.Add(email, smtpInfo);
             }
 
             return results;

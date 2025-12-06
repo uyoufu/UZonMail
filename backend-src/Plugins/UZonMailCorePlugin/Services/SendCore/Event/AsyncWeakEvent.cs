@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace UZonMail.Core.Services.SendCore.Event
+namespace UZonMail.CorePlugin.Services.SendCore.Event
 {
     /// <summary>
     /// 异步弱事件
@@ -61,14 +61,18 @@ namespace UZonMail.Core.Services.SendCore.Event
             if (target is null)
             {
                 // 如果 target 仍为 null，说明进入了一个未知情况，我们需要有复现步骤来辅助编写这里的代码。
-                throw new NotSupportedException($"弱事件订阅时，事件的订阅者必须是一个对象或一个类型。此委托中的目标实例是 null：{originalHandler}");
+                throw new NotSupportedException(
+                    $"弱事件订阅时，事件的订阅者必须是一个对象或一个类型。此委托中的目标实例是 null：{originalHandler}"
+                );
             }
 
             lock (_locker)
             {
                 // 找到目前是否有已经存储过的对 target 的弱引用实例，如果有，我们将复用此实例，而不是加入到集合中。
                 // 注意，这里的判定使用的是 ReferenceEquals，因为 ConditionalWeakTable 的比较用的是此方法，这可以确保回收时机两者一致。
-                var reference = _relatedInstances.Find(x => x.TryGetTarget(out var instance) && ReferenceEquals(target, instance));
+                var reference = _relatedInstances.Find(x =>
+                    x.TryGetTarget(out var instance) && ReferenceEquals(target, instance)
+                );
                 if (reference is null)
                 {
                     // 如果没有找到已经存储过的弱引用实例，我们将创建一个新的。
@@ -115,7 +119,9 @@ namespace UZonMail.Core.Services.SendCore.Event
             {
                 // 找到目前是否有已经存储过的对 target 的弱引用实例，如果有，我们将复用此实例，而不是加入到集合中。
                 // 注意，这里的判定使用的是 ReferenceEquals，因为 ConditionalWeakTable 的比较用的是此方法，这可以确保回收时机两者一致。
-                var reference = _relatedInstances.Find(x => x.TryGetTarget(out var instance) && ReferenceEquals(target, instance));
+                var reference = _relatedInstances.Find(x =>
+                    x.TryGetTarget(out var instance) && ReferenceEquals(target, instance)
+                );
                 if (reference is null)
                 {
                     // 如果都没有找到已经存储过的弱引用实例，那我们还移除个啥，有什么好移除的？
@@ -152,17 +158,21 @@ namespace UZonMail.Core.Services.SendCore.Event
                     x.TryGetTarget(out var relatedInstance)
                     // 如果能找到目标对象，那么从 ConditionalWeakTable 中查找对应的弱事件处理器（实际上只要上面的委托存在，这里就 100% 一定存在，所以实际上我们只是为了拿 value）。
                     && _handlers.TryGetValue(relatedInstance, out var value)
-                    // 如果找到了弱事件处理器，那么返回此处理器。
-                    ? value
-                    // 如果没有找到弱事件处理器，那么返回 null，等待被过滤。
-                    : null);
+                        // 如果找到了弱事件处理器，那么返回此处理器。
+                        ? value
+                        // 如果没有找到弱事件处理器，那么返回 null，等待被过滤。
+                        : null
+                );
 
                 // 确认订阅事件的原始对象是否仍然存活。
                 var anyHandlerAlive = weakEventHandlerList.Exists(x => x != null);
                 if (anyHandlerAlive)
                 {
                     // 如果依然存活，则引发事件（无论是否还剩余订阅，这可以与一般事件行为保持一致）。
-                    invokingHandlers = weakEventHandlerList.OfType<WeakEventHandler>().SelectMany(x => x.GetInvokingHandlers()).ToList();
+                    invokingHandlers = weakEventHandlerList
+                        .OfType<WeakEventHandler>()
+                        .SelectMany(x => x.GetInvokingHandlers())
+                        .ToList();
                 }
                 else
                 {
@@ -212,10 +222,7 @@ namespace UZonMail.Core.Services.SendCore.Event
                 }
                 else
                 {
-                    handlers = new List<Func<TSender, TArgs, Task>>
-                {
-                    castedHandler,
-                };
+                    handlers = new List<Func<TSender, TArgs, Task>> { castedHandler, };
                     MethodHandlers[handler.Method] = handlers;
                 }
             }
@@ -258,7 +265,11 @@ namespace UZonMail.Core.Services.SendCore.Event
             /// 获取此弱事件处理器关联的目标方法或方法组，以及所有基于此方法组转换而得的可以直接调用的委托。
             /// 在实际上引发事件的时候，应该使用此转换后的实例，以避免使用原始事件处理函数导致的反射、IL 生成等耗性能的执行。
             /// </summary>
-            private Dictionary<MethodInfo, List<Func<TSender, TArgs, Task>>> MethodHandlers { get; } = new Dictionary<MethodInfo, List<Func<TSender, TArgs, Task>>>();
+            private Dictionary<
+                MethodInfo,
+                List<Func<TSender, TArgs, Task>>
+            > MethodHandlers { get; } =
+                new Dictionary<MethodInfo, List<Func<TSender, TArgs, Task>>>();
         }
     }
 
@@ -266,7 +277,5 @@ namespace UZonMail.Core.Services.SendCore.Event
     /// 只有一个参数的异步弱事件。
     /// </summary>
     /// <typeparam name="TArgs"></typeparam>
-    public class AsyncWeakEvent<TArgs> : AsyncWeakEvent<object?, TArgs>
-    {
-    }
+    public class AsyncWeakEvent<TArgs> : AsyncWeakEvent<object?, TArgs> { }
 }

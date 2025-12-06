@@ -1,7 +1,7 @@
-﻿using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.SignalRHubs.SendEmail
+namespace UZonMail.CorePlugin.SignalRHubs.SendEmail
 {
     /// <summary>
     /// 发送组进度参数

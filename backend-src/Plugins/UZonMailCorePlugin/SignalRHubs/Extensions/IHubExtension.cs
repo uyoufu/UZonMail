@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 
-namespace UZonMail.Core.SignalRHubs.Extensions
+namespace UZonMail.CorePlugin.SignalRHubs.Extensions
 {
     public static class IHubExtension
     {

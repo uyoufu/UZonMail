@@ -1,12 +1,12 @@
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.Settings.Model;
-using UZonMail.Core.Utils.Cache;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.Settings.Model;
+using UZonMail.CorePlugin.Utils.Cache;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Settings
+namespace UZonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// 设置管理中心

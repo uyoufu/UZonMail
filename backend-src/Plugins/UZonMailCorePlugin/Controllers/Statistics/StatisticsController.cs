@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Statistics.Model;
-using UZonMail.Core.Services.Settings;
-using UZonMail.DB.SQL;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.CorePlugin.Controllers.Statistics.Model;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Statistics
+namespace UZonMail.CorePlugin.Controllers.Statistics
 {
     public class StatisticsController(SqlContext db, TokenService tokenService) : ControllerBaseV1
     {
@@ -20,15 +20,12 @@ namespace UZonMail.Core.Controllers.Statistics
         public async Task<ResponseResult<List<EmailCount>>> GetOutboxEmailCountInfo()
         {
             var userId = tokenService.GetUserSqlId();
-            var emailCounts = await db.Outboxes.OfType<Outbox>()
+            var emailCounts = await db
+                .Outboxes.OfType<Outbox>()
                 .Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)
                 .GroupBy(x => x.Domain)
-                .Select(x => new EmailCount
-                {
-                    Domain = x.Key,
-                    Count = x.Count()
-                })
+                .Select(x => new EmailCount { Domain = x.Key, Count = x.Count() })
                 .ToListAsync();
             return emailCounts.ToSuccessResponse();
         }
@@ -42,15 +39,11 @@ namespace UZonMail.Core.Controllers.Statistics
         public async Task<ResponseResult<List<EmailCount>>> GetInboxesEmailCountInfo()
         {
             var userId = tokenService.GetUserSqlId();
-            var emailCounts = await db.Inboxes
-                .Where(x => x.UserId == userId)
+            var emailCounts = await db
+                .Inboxes.Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)
                 .GroupBy(x => x.Domain)
-                .Select(x => new EmailCount
-                {
-                    Domain = x.Key,
-                    Count = x.Count()
-                })
+                .Select(x => new EmailCount { Domain = x.Key, Count = x.Count() })
                 .ToListAsync();
             return emailCounts.ToSuccessResponse();
         }
@@ -63,7 +56,8 @@ namespace UZonMail.Core.Controllers.Statistics
         public async Task<ResponseResult<List<MonthlySendingInfo>>> GetMonthlySendingCountInfo()
         {
             var userId = tokenService.GetUserSqlId();
-            var monthlySendingInfos = await db.SendingItems.OfType<SendingItem>()
+            var monthlySendingInfos = await db
+                .SendingItems.OfType<SendingItem>()
                 .Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)
                 .GroupBy(x => new { x.CreateDate.Year, x.CreateDate.Month })

@@ -1,15 +1,15 @@
 using log4net;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Database.SQL.EmailSending;
-using UZonMail.Core.Services.EmailDecorator;
-using UZonMail.Core.Services.EmailDecorator.Interfaces;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
+using UZonMail.CorePlugin.Database.SQL.EmailSending;
+using UZonMail.CorePlugin.Services.EmailDecorator;
+using UZonMail.CorePlugin.Services.EmailDecorator.Interfaces;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.Services.SendCore.WaitList
+namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
     /// SendItem的元数据

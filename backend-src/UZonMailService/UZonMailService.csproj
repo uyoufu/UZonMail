@@ -62,6 +62,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Langs\SharedResource.zh-CN.resx">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Update="Quartz\quartz-sqlite.sqlite3">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

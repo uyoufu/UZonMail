@@ -1,11 +1,11 @@
 using System.Collections.Concurrent;
 using log4net;
-using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.WaitList
+namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
     /// 系统级的待发件调度器

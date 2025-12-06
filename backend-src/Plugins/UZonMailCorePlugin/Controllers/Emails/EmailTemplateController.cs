@@ -1,25 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Utils.Database;
+using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.CorePlugin.Database.Validators;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Utils.Database;
+using UZonMail.CorePlugin.Utils.Extensions;
+using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
-using UZonMail.Core.Utils.Extensions;
-using UZonMail.Core.Database.Validators;
+using UZonMail.DB.SQL.Core.Templates;
+using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
-using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.DB.SQL.Core.Templates;
-using UZonMail.DB.Extensions;
+using UZonMail.Utils.Web.ResponseModel;
 
-
-namespace UZonMail.Core.Controllers.Emails
+namespace UZonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// 邮箱模板
     /// </summary>
-    public class EmailTemplateController(SqlContext db, TokenService tokenService) : ControllerBaseV1
+    public class EmailTemplateController(SqlContext db, TokenService tokenService)
+        : ControllerBaseV1
     {
         /// <summary>
         /// 通过 id 或者名称获取邮件模板
@@ -30,10 +30,15 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="templateName"></param>
         /// <returns></returns>
         [HttpGet("by-id-or-name")]
-        public async Task<ResponseResult<EmailTemplate?>> GetEmailTemplateByIdOrName(long templateId, string templateName)
+        public async Task<ResponseResult<EmailTemplate?>> GetEmailTemplateByIdOrName(
+            long templateId,
+            string templateName
+        )
         {
             var userId = tokenService.GetUserSqlId();
-            var result = await db.EmailTemplates.FirstOrDefaultAsync(x => x.UserId == userId && (x.Id == templateId || x.Name == templateName));
+            var result = await db.EmailTemplates.FirstOrDefaultAsync(x =>
+                x.UserId == userId && (x.Id == templateId || x.Name == templateName)
+            );
             return result.ToSuccessResponse();
         }
 
@@ -46,7 +51,9 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<EmailTemplate?>> GetEmailTemplateById(long emailTemplateId)
         {
             var userId = tokenService.GetUserSqlId();
-            var result = await db.EmailTemplates.FirstOrDefaultAsync(x => x.Id == emailTemplateId && x.UserId == userId);
+            var result = await db.EmailTemplates.FirstOrDefaultAsync(x =>
+                x.Id == emailTemplateId && x.UserId == userId
+            );
             return result.ToSmartResponse();
         }
 
@@ -66,11 +73,13 @@ namespace UZonMail.Core.Controllers.Emails
             var vdResult = emailTemplateValidator.Validate(entity);
             if (!vdResult.IsValid)
             {
-               return vdResult.ToErrorResponse<EmailTemplate>();
+                return vdResult.ToErrorResponse<EmailTemplate>();
             }
 
             // 判断是否存在同名的模板
-            var existOne = await db.EmailTemplates.FirstOrDefaultAsync(x => x.Id == entity.Id && x.UserId == entity.UserId);
+            var existOne = await db.EmailTemplates.FirstOrDefaultAsync(x =>
+                x.Id == entity.Id && x.UserId == entity.UserId
+            );
             // 如果有 Id,则说明是修改
             if (entity.Id > 0)
             {
@@ -88,7 +97,9 @@ namespace UZonMail.Core.Controllers.Emails
                     if (existOne.Thumbnail.Contains('?'))
                     {
                         // 包含?号，将后面的值替换
-                        existOne.Thumbnail = existOne.Thumbnail.Substring(0, existOne.Thumbnail.IndexOf('?')) + $"?v={DateTime.UtcNow.ToTimestamp()}";
+                        existOne.Thumbnail =
+                            existOne.Thumbnail.Substring(0, existOne.Thumbnail.IndexOf('?'))
+                            + $"?v={DateTime.UtcNow.ToTimestamp()}";
                     }
                     else
                     {
@@ -96,7 +107,10 @@ namespace UZonMail.Core.Controllers.Emails
                     }
                 }
 
-                await db.UpdateById(entity, [nameof(EmailTemplate.Name), nameof(EmailTemplate.Content)]);
+                await db.UpdateById(
+                    entity,
+                    [nameof(EmailTemplate.Name), nameof(EmailTemplate.Content)]
+                );
             }
             else
             {
@@ -123,7 +137,9 @@ namespace UZonMail.Core.Controllers.Emails
         {
             // 通过条件删除
             var userId = tokenService.GetUserSqlId();
-            var email = await db.EmailTemplates.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId) ?? throw new KnownException("模板不存在");
+            var email =
+                await db.EmailTemplates.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId)
+                ?? throw new KnownException("模板不存在");
             db.Remove(email);
             await db.SaveChangesAsync();
             return true.ToSuccessResponse();
@@ -153,7 +169,10 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<EmailTemplate>>> GetEmailTemplatesData(string filter, Pagination pagination)
+        public async Task<ResponseResult<List<EmailTemplate>>> GetEmailTemplatesData(
+            string filter,
+            Pagination pagination
+        )
         {
             var userId = tokenService.GetUserSqlId();
             var dbSet = db.EmailTemplates.Where(x => x.UserId == userId);

@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Config.SubConfigs
+namespace UZonMail.CorePlugin.Config.SubConfigs
 {
     public class MicrosoftEntraAppConfig
     {

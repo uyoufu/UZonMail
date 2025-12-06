@@ -3,15 +3,15 @@ using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Proxies;
-using UZonMail.Core.Services.SendCore.Proxies.Clients;
-using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Proxies;
+using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
 
-namespace UZonMail.Core.Services.SendCore.Sender.Smtp
+namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// 本机邮件发送器

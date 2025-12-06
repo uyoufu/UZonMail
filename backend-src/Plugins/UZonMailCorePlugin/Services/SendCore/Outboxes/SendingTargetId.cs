@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.Outboxes
+namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
 {
     /// <summary>
     /// 用于在发件箱地址中保存发送项的 Id
@@ -8,7 +8,8 @@
         public long SendingGroupId { get; private set; } = sendingGroupId;
         public long SendingItemId { get; private set; }
 
-        public SendingTargetId(long sendingGroupId, long sendingItemId) : this(sendingGroupId)
+        public SendingTargetId(long sendingGroupId, long sendingItemId)
+            : this(sendingGroupId)
         {
             SendingItemId = sendingItemId;
         }
@@ -27,7 +28,8 @@
         {
             if (obj is SendingTargetId targetId)
             {
-                return targetId.SendingGroupId == SendingGroupId && targetId.SendingItemId == SendingItemId;
+                return targetId.SendingGroupId == SendingGroupId
+                    && targetId.SendingItemId == SendingItemId;
             }
 
             return false;

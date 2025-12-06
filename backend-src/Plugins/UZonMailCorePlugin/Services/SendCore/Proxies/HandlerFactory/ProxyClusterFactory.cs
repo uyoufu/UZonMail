@@ -1,7 +1,7 @@
-﻿using UZonMail.Core.Services.SendCore.Proxies.Clients;
+using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.HandlerFactory
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.HandlerFactory
 {
     /// <summary>
     /// 代理组
@@ -10,6 +10,9 @@ namespace UZonMail.Core.Services.SendCore.Proxies.HandlerFactory
     {
         public int Order => 0;
 
-        public abstract Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy);
+        public abstract Task<IProxyHandler?> CreateProxy(
+            IServiceProvider serviceProvider,
+            Proxy proxy
+        );
     }
 }

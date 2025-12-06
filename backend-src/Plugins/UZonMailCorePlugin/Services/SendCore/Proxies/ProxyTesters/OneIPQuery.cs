@@ -1,8 +1,9 @@
-﻿using UZonMail.Utils.Http.Request;
+using UZonMail.Utils.Http.Request;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
-    public class OneIPQuery(HttpClient httpClient) : PlainTextParser(httpClient, ProxyZoneType.Default)
+    public class OneIPQuery(HttpClient httpClient)
+        : PlainTextParser(httpClient, ProxyZoneType.Default)
     {
         private readonly string _apiUrl = "https://1.1.1.1/cdn-cgi/trace";
 

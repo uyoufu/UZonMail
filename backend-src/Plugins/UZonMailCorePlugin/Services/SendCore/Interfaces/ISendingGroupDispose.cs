@@ -1,7 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.Interfaces
+namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
 {
-    public interface ISendingGroupDispose
-    {
-
-    }
+    public interface ISendingGroupDispose { }
 }

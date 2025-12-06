@@ -1,6 +1,6 @@
-using UZonMail.Core.Utils.Cache;
+using UZonMail.CorePlugin.Utils.Cache;
 
-namespace UZonMail.Core.Services.Settings.Model
+namespace UZonMail.CorePlugin.Services.Settings.Model
 {
     public enum AIProviderType
     {

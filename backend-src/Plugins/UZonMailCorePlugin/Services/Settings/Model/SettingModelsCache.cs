@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using UZonMail.Core.Utils.Cache;
+using UZonMail.CorePlugin.Utils.Cache;
 
-namespace UZonMail.Core.Services.Settings.Model
+namespace UZonMail.CorePlugin.Services.Settings.Model
 {
     /// <summary>
     /// 设置缓存单例

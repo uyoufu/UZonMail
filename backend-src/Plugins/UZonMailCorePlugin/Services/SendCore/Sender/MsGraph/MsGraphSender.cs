@@ -1,15 +1,15 @@
 using log4net;
 using MimeKit;
-using UZonMail.Core.Services.Config;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.Config;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Results;
 
-namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
+namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     public class MsGraphSender(IServiceProvider provider, EncryptService encryptService)
         : IEmailSender

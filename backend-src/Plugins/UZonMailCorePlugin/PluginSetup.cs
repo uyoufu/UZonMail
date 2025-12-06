@@ -1,26 +1,30 @@
-﻿using Uamazing.Utils.Plugin;
-using UZonMail.Core.Config;
-using UZonMail.Utils.Web;
-using UZonMail.Core.SignalRHubs;
+using UZonMail.CorePlugin.Config;
+using UZonMail.CorePlugin.SignalRHubs;
 using UZonMail.Utils.Extensions;
+using UZonMail.Utils.Plugin;
+using UZonMail.Utils.Web;
 
-namespace UZonMail.Core
+namespace UZonMail.CorePlugin
 {
-    public class PluginSetup: IPlugin
+    public class PluginSetup : IPlugin
     {
-        public void UseServices(WebApplicationBuilder webApplicationBuilder)
+        public int Priority => 0;
+
+        public void ConfigureServices(IHostApplicationBuilder hostBuilder)
         {
-            var services = webApplicationBuilder.Services;
+            var services = hostBuilder.Services;
             // 绑定配置
-            services.Configure<AppConfig>(webApplicationBuilder.Configuration);
+            services.Configure<AppConfig>(hostBuilder.Configuration);
             // 批量注册服务
             services.AddServices();
         }
 
-        public void UseApp(WebApplication webApplication)
+        public void ConfigureApp(IApplicationBuilder app)
         {
             // SignalR 配置
-            webApplication.MapHub<UzonMailHub>($"/hubs/{nameof(UzonMailHub).ToCamelCase()}");
+            (app as WebApplication)!.MapHub<UzonMailHub>(
+                $"/hubs/{nameof(UzonMailHub).ToCamelCase()}"
+            );
         }
     }
 }

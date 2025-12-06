@@ -1,13 +1,13 @@
-﻿using log4net;
 using System.Collections.Concurrent;
-using UZonMail.Core.Services.SendCore.Proxies.Clients;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
+using log4net;
+using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.Getters;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Services.SendCore.Proxies
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies
 {
     /// <summary>
     /// 用户代理管理器
@@ -27,17 +27,22 @@ namespace UZonMail.Core.Services.SendCore.Proxies
 
             // 移除已经不存在的代理
             // 移除不可用的代理集
-            _proxyHandlers.Keys.Except(proxies.Select(x => x.ObjectId))
+            _proxyHandlers
+                .Keys.Except(proxies.Select(x => x.ObjectId))
                 .ToList()
                 .ForEach(x => _proxyHandlers.TryRemove(x, out _));
 
             // 更新或新增代理
-            var proxyFactories = serviceProvider.GetServices<IProxyFactory>()
-               .OrderBy(x => x.Order)
-               .ToList();
+            var proxyFactories = serviceProvider
+                .GetServices<IProxyFactory>()
+                .OrderBy(x => x.Order)
+                .ToList();
 
             var settingManager = serviceProvider.GetRequiredService<AppSettingsManager>();
-            var sendingSetting = await settingManager.GetSetting<SendingSetting>(sqlContext, userId);
+            var sendingSetting = await settingManager.GetSetting<SendingSetting>(
+                sqlContext,
+                userId
+            );
 
             foreach (var proxy in proxies)
             {
@@ -45,14 +50,23 @@ namespace UZonMail.Core.Services.SendCore.Proxies
                 // key 为 ObjectId
                 if (!_proxyHandlers.TryGetValue(proxy.ObjectId, out var existOne))
                 {
-                    var newHandler = await CreateProxyHandler(serviceProvider, proxyFactories, proxy);
-                    if (newHandler == null) continue;
+                    var newHandler = await CreateProxyHandler(
+                        serviceProvider,
+                        proxyFactories,
+                        proxy
+                    );
+                    if (newHandler == null)
+                        continue;
 
                     _proxyHandlers.TryAdd(newHandler.Id, newHandler);
                     existOne = newHandler;
                 }
                 // 若转换器已经存在，则更新
-                existOne.Update(proxy, maxUsedCountPerDomain: sendingSetting.ChangeIpAfterEmailCount, userId: userId);
+                existOne.Update(
+                    proxy,
+                    maxUsedCountPerDomain: sendingSetting.ChangeIpAfterEmailCount,
+                    userId: userId
+                );
             }
         }
 
@@ -62,7 +76,11 @@ namespace UZonMail.Core.Services.SendCore.Proxies
         /// <param name="proxyFactories"></param>
         /// <param name="proxy"></param>
         /// <returns></returns>
-        private static async Task<IProxyHandler?> CreateProxyHandler(IServiceProvider serviceProvider, List<IProxyFactory> proxyFactories, Proxy proxy)
+        private static async Task<IProxyHandler?> CreateProxyHandler(
+            IServiceProvider serviceProvider,
+            List<IProxyFactory> proxyFactories,
+            Proxy proxy
+        )
         {
             foreach (var factory in proxyFactories)
             {
@@ -84,7 +102,8 @@ namespace UZonMail.Core.Services.SendCore.Proxies
         /// <returns></returns>
         public IProxyHandler? RandomProxyHandler(string matchStr, List<long>? ranges = null)
         {
-            if (_proxyHandlers.IsEmpty) return null;
+            if (_proxyHandlers.IsEmpty)
+                return null;
 
             var enabledProxies = _proxyHandlers.Values.AsEnumerable();
             if (ranges != null)
@@ -93,9 +112,9 @@ namespace UZonMail.Core.Services.SendCore.Proxies
                 enabledProxies = enabledProxies.Where(x => strRanges.Contains(x.Id));
             }
             var rangedProxies = enabledProxies
-            .Where(x => x.IsEnable())
-            .Where(x => x.IsMatch(matchStr))
-            .ToList();
+                .Where(x => x.IsEnable())
+                .Where(x => x.IsMatch(matchStr))
+                .ToList();
 
             // 随机一个代理
             if (rangedProxies.Count == 0)
