@@ -267,7 +267,7 @@ function Get-ProjectFileAndAssemblyName {
             # 读取 csproj 文件，获取 AssemblyName 节点的值
             # 即 Project/PropertyGroup/AssemblyName
             [xml]$csprojXml = Get-Content $projPath
-            $assemblyName = $proj.Project.PropertyGroup | Where-Object AssemblyName | ForEach-Object { $_.AssemblyName }  | Select-Object -First 1
+            $assemblyName = $csprojXml.Project.PropertyGroup | Where-Object AssemblyName | ForEach-Object { $_.AssemblyName }  | Select-Object -First 1
             # 不存在，使用项目名
             if (-not $assemblyName) {
                 $assemblyName = $projBaseName
@@ -292,7 +292,7 @@ function Publish-PluginProject {
 
     $projectPath = $projectInfo.ProjectPath   
 
-    Write-Host "开始编译 $projectName ..." -ForegroundColor Yellow
+    Write-Host "开始编译 $projectName ... $projectPath" -ForegroundColor Yellow
     $projectRoot = Split-Path -Path $projectPath -Parent
     Set-Location $projectRoot
 
