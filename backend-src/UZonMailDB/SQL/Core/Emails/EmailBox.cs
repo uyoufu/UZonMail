@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.SQL.Base;
 
 namespace UZonMail.DB.SQL.Core.Emails
@@ -6,7 +6,8 @@ namespace UZonMail.DB.SQL.Core.Emails
     /// <summary>
     /// EmailBox 基类
     /// </summary>
-    [Index(nameof(Email), nameof(UserId), IsUnique = true)]
+    [Index(nameof(UserId))]
+    [Index(nameof(Email))]
     public class EmailBox : SqlId
     {
         /// <summary>
@@ -18,6 +19,7 @@ namespace UZonMail.DB.SQL.Core.Emails
         public long UserId { get; set; }
 
         private string _email = string.Empty;
+
         /// <summary>
         /// 收件箱
         /// </summary>

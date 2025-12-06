@@ -1,4 +1,6 @@
-﻿using UZonMail.DB.SQL.Base;
+using Innofactor.EfCoreJsonValueConverter;
+using Newtonsoft.Json.Linq;
+using UZonMail.DB.SQL.Base;
 using UZonMail.DB.SQL.Core.Organization;
 
 namespace UZonMail.DB.SQL.Core.Emails
@@ -55,6 +57,12 @@ namespace UZonMail.DB.SQL.Core.Emails
         /// 默认的分组名
         /// </summary>
         public static string DefaultGroupName => "未分组";
+
+        /// <summary>
+        /// 额外的数据
+        /// 比如关联qq组号
+        /// </summary>
+        public string Extra { get; set; }
 
         /// <summary>
         /// 获取默认的邮箱组
