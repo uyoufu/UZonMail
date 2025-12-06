@@ -1,5 +1,8 @@
 ﻿# 脚本说明
 # 本脚本为自动编译核心程序
+# 若需要增加插件的自动编译，需要在下面新增对应的编译函数来实现
+
+
 # 设置参数
 param(
     [string]$platform = "win",
@@ -59,7 +62,7 @@ if (-not (Get-Command 7z.exe -ErrorAction SilentlyContinue)) {
 }
 Write-Host "7z 环境检测通过！" -ForegroundColor Green
 
-# 找到 git 的根目录
+# 找到 git 的根目录，为项目的根目录
 $gitRoot = $null
 try {
     $gitRoot = & git rev-parse --show-toplevel    
@@ -74,8 +77,9 @@ if (-not $gitRoot) {
     exit 1
 }
 
-# 检测脚本位置是否正确：当前目录下是否有 ui-src 目录和 backend-src 目录
 $sriptRoot = $PSScriptRoot
+
+# 检测根目录位置是否正确：当前目录下是否有 ui-src 目录和 backend-src 目录
 $subDirs = $("ui-src", "backend-src")
 foreach ($subDir in $subDirs) {
     $dir = Join-Path -Path $gitRoot -ChildPath $subDir
@@ -85,6 +89,16 @@ foreach ($subDir in $subDirs) {
     }
 }
 Write-Host "脚本位置检测通过！" -ForegroundColor Green
+
+# 判断是否存在后端项目, 获取第一个 sln 文件
+$slnFiles = @(Get-ChildItem -Path $gitRoot -Filter *.sln -Recurse)
+Write-Host $slnFiles
+if (-not $slnFiles -or $slnFiles.Count -eq 0) {
+    Write-Host "未找到任何解决方案文件 (.sln)" -ForegroundColor Red
+    exit 1
+}
+$firstSln = $slnFiles[0]
+$slnRoot = $firstSln.DirectoryName
 
 Write-Host "开始拉取更新" -ForegroundColor Green
 git checkout master
@@ -171,6 +185,7 @@ function Add-WindowsService {
 }
 Add-WindowsService
 
+#region 通用方法
 # 复制程序集函数
 function Copy-Assembly {
     param(
@@ -207,83 +222,109 @@ function Copy-Assets {
     # 复制 assets 到 destRoot 子目录
     # 复制目录及其内容
     write-host "复制 $src 到 $destRoot" -ForegroundColor Yellow
+    if (-not (Test-Path -Path $src)) {
+        write-host "$src 不存在，跳过复制" -ForegroundColor Yellow
+        return
+    }
+    
     Copy-Item -Path $src -Destination $destRoot -Recurse -Force    
 }
+#endregion
 
+#region 编译核心插件
 
-function New-UZonMailCorePlugin {
-    # 编译后端 UZonMailCorePlugin
-    $pluginsSrc = Join-Path -Path $backendSrc -ChildPath "Plugins"
-    $uZonMailCorePlugin = 'UZonMailCorePlugin'
-    $corePluginAssembly = "UZonMail.CorePlugin"
+# 从 sln 文件中读取所有的项目
+Set-Location $slnRoot
 
-    Write-Host "开始编译后端 $uZonMailCorePlugin ..." -ForegroundColor Yellow
-    $serviceSrc = Join-Path -Path $pluginsSrc -ChildPath $uZonMailCorePlugin
-    # 使用 dotnet 编译
-    $serviceDest = "$mainService/$uZonMailCorePlugin"
-    Set-Location $serviceSrc
+# 所有项目的路径
+$allProjects = dotnet sln list | 
+Where-Object { $_ -and ($_ -match '\\') } | 
+ForEach-Object { 
+    $rel = $_.Trim()
+    # 将相对路径转换为绝对路径（相对于解决方案目录）
+    $abs = Join-Path $slnRoot $rel
+    # 如果文件不存在，提示缺失
+    if (Test-Path $abs) {
+        return $abs
+    }
+    else {
+        Write-Warning "项目文件不存在： $abs"
+        return $null
+    }
+} |
+Where-Object { $_ -ne $null }
+
+function Get-ProjectFileAndAssemblyName {
+    param(
+        [string] $projectName
+    )
+
+    # 在所有项目中查找指定名称的项目
+    foreach ($projPath in $allProjects) {
+        $projItem = Get-Item $projPath
+        $projBaseName = $projItem.BaseName
+        if ($projBaseName -eq $projectName) {
+            # 读取 csproj 文件，获取 AssemblyName 节点的值
+            # 即 Project/PropertyGroup/AssemblyName
+            [xml]$csprojXml = Get-Content $projPath
+            $assemblyName = $proj.Project.PropertyGroup | Where-Object AssemblyName | ForEach-Object { $_.AssemblyName }  | Select-Object -First 1
+            # 不存在，使用项目名
+            if (-not $assemblyName) {
+                $assemblyName = $projBaseName
+            }
+
+            return @{
+                ProjectPath  = $projPath
+                AssemblyName = $assemblyName
+            }
+        }
+    }
+}
+
+function Publish-PluginProject {
+    param(
+        [string] $projectName,
+        [string[]] $srcDirs = @()
+    )
+
+    $projectInfo = Get-ProjectFileAndAssemblyName $projectName
+    $assemblyName = $projectInfo.AssemblyName
+
+    $projectPath = $projectInfo.ProjectPath   
+
+    Write-Host "开始编译 $projectName ..." -ForegroundColor Yellow
+    $projectRoot = Split-Path -Path $projectPath -Parent
+    Set-Location $projectRoot
+
+    $serviceDest = "$mainService/$projectName"
     dotnet publish -c Release -o $serviceDest -r $publishPlatform --self-contained false
-    Write-Host "后端 $serviceDest 编译完成!" -ForegroundColor Green
+    Write-Host "后端 $projectName 编译完成!" -ForegroundColor Green
 
     # 复制依赖到根目录，复制库 到 Plugins 目录
-    Copy-Assembly -src $serviceDest -exclude "$corePluginAssembly.*"
-    $uzonMailCorePluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailCorePlugin"
-    New-Item -Path $uzonMailCorePluginPath -ItemType Directory -Force
-    
-    Copy-Item -Path "$serviceDest/$corePluginAssembly.*" -Destination $uzonMailCorePluginPath -Force
+    Copy-Assembly -src $serviceDest -exclude "$assemblyName.*"
+    $pluginPublishDir = Join-Path -Path $mainService -ChildPath "Plugins/$projectName"
+
+    # 复制主程序到插件目录
+    New-Item -Path $pluginPublishDir -ItemType Directory -Force    
+    Copy-Item -Path "$serviceDest/$assemblyName.*" -Destination $pluginPublishDir -Force
 
     # 复制配置文件到插件目录
-    $srcDirs = ("data")
     foreach ($srcDir in $srcDirs) {
-        Copy-Assets -src "$serviceDest/$srcDir" -destRoot $uzonMailCorePluginPath
+        Copy-Assets -src "$serviceDest/$srcDir" -destRoot $pluginPublishDir
     }
 
     # 删除临时目录
     Remove-Item -Path $serviceDest -Recurse -Force
-    Write-Host "后端 $uZonMailCorePlugin 编译完成!" -ForegroundColor Green
+    Write-Host "后端 $projectName 编译完成!" -ForegroundColor Green
 
 }
-New-UZonMailCorePlugin
+Publish-PluginProject "UZonMailCorePlugin" "data"
+#endregion
 
-# 编译后端 UZonMailProPlugin
-function New-UZonMailProPlugin {
-    $uZonMailProPlugin = 'UZonMailProPlugin'   
-    $proPluginAssembly = "UZonMail.ProPlugin"
-    
-    # 使用 dotnet 编译
-    Set-Location -Path $gitRoot
-    $proPluginPath = "../UZonMailProPlugins/$uZonMailProPlugin"
-    $serviceSrc = Resolve-Path -Path $proPluginPath -ErrorAction SilentlyContinue
-    if (-not($serviceSrc)) {
-        return
-    }
+# region 编译后端 UZonMailProPlugin
+Publish-PluginProject "UZonMailProPlugin" "Scripts"
+#endregion
 
-    if (-not(test-path -path $serviceSrc -PathType Container)) {
-        return
-    }
-    
-    $serviceDest = "$mainService/$uZonMailProPlugin"
-    Set-Location $proPluginPath
-    dotnet publish -c Release -o $serviceDest -r $publishPlatform --self-contained false
-
-    # 复制依赖到根目录
-    Copy-Assembly -src $serviceDest -exclude "$proPluginAssembly.*"
-    # 复制库到 Pro 插件目录  
-    $uzonMailProPluginPath = Join-Path -Path $mainService -ChildPath "Plugins/$uZonMailProPlugin"
-    New-Item -Path $uzonMailProPluginPath -ItemType Directory -Force
-    Copy-Item -Path "$serviceDest/$proPluginAssembly.*" -Destination $uzonMailProPluginPath -Force    
-
-    # 复制配置文件到 Pro 插件目录
-    $srcDirs = ("Scripts")
-    foreach ($srcDir in $srcDirs) {
-        Copy-Assets -src "$serviceDest/$srcDir" -destRoot $uzonMailProPluginPath
-    }
-
-    # 删除临时目录
-    Remove-Item -Path $serviceDest -Recurse -Force
-    Write-Host "后端 $uZonMailProPlugin 编译完成!" -ForegroundColor Green
-}
-New-UZonMailProPlugin
 
 # 复制前端编译结果到服务端指定位置
 $serviceWwwroot = Join-Path -Path $mainService -ChildPath "wwwroot"
