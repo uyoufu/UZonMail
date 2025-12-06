@@ -1,14 +1,15 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Threading.Tasks;
 using UZonMail.Utils.Http.Request;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 基于 http://httpbin.org/ip 实现的 IP 查询
     /// </summary>
-    public class HttpBinIPQuery(HttpClient httpClient) : JsonParser(httpClient, ProxyZoneType.Default)
+    public class HttpBinIPQuery(HttpClient httpClient)
+        : JsonParser(httpClient, ProxyZoneType.Default)
     {
         private readonly string _apiUrl = "http://httpbin.org/ip";
 

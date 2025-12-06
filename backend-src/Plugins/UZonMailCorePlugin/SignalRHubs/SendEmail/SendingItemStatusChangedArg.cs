@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.SignalRHubs.SendEmail
+namespace UZonMail.CorePlugin.SignalRHubs.SendEmail
 {
     /// <summary>
     /// 发送项进度参数

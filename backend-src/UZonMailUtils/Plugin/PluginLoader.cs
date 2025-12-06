@@ -1,16 +1,15 @@
-﻿using log4net;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static Org.BouncyCastle.Math.EC.ECCurve;
+using log4net;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-namespace Uamazing.Utils.Plugin
+namespace UZonMail.Utils.Plugin
 {
     /// <summary>
     /// 插件加载器
@@ -25,6 +24,11 @@ namespace Uamazing.Utils.Plugin
         private List<Assembly> _pluginAssemblies = [];
         private List<IPlugin> _plugins = [];
 
+        /// <summary>
+        /// 优先级
+        /// </summary>
+        public int Priority { get; }
+
         public PluginLoader(string pluginDir)
         {
             _pluginDir = pluginDir;
@@ -33,6 +37,7 @@ namespace Uamazing.Utils.Plugin
         }
 
         private List<string>? _allDllNames;
+
         private Assembly? CurrentDomain_AssemblyResolve(object? sender, ResolveEventArgs args)
         {
             // 第一次调用时，获取所有的 dll 名称
@@ -44,7 +49,7 @@ namespace Uamazing.Utils.Plugin
             // TODO: 目前由插件自己控制，需保证不引用其它插件依赖
             var dllFullName = _allDllNames.Where(x => x.EndsWith(dllName)).FirstOrDefault();
 
-            if(dllFullName == null)
+            if (dllFullName == null)
             {
                 _logger.Warn($"未找到 dll: {dllName}");
                 return null;
@@ -68,7 +73,12 @@ namespace Uamazing.Utils.Plugin
             }
 
             // 获取所有插件的 dll 名称
-            _pluginDllFullPaths = [.. Directory.GetFiles(_pluginDir, "*Plugin.dll", SearchOption.AllDirectories)];
+            _pluginDllFullPaths =
+            [
+                .. Directory
+                    .GetFiles(_pluginDir, "*Plugin.dll", SearchOption.AllDirectories)
+                    .Distinct()
+            ];
 
             if (_pluginDllFullPaths.Count == 0)
             {
@@ -77,7 +87,7 @@ namespace Uamazing.Utils.Plugin
 
             // 加载插件
             foreach (var dllFullPath in _pluginDllFullPaths)
-            {               
+            {
                 LoadAssembly(dllFullPath);
             }
         }
@@ -92,23 +102,31 @@ namespace Uamazing.Utils.Plugin
 
             // 防止重复加载
             var existPlugin = _pluginAssemblies.Find(x => Path.GetFileName(x.Location) == dllName);
-            if (existPlugin != null) return existPlugin;
+            if (existPlugin != null)
+                return existPlugin;
 
             // 判断是否存在
-            var existAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => Path.GetFileName(x.Location) == dllName);
-            if (existAssembly != null) return existAssembly;
+            var existAssembly = AppDomain
+                .CurrentDomain.GetAssemblies()
+                .FirstOrDefault(x => Path.GetFileName(x.Location) == dllName);
+            if (existAssembly != null)
+                return existAssembly;
 
             var dll = Assembly.LoadFrom(assemblyPath);
             // 判断是否是插件命名约定，若不是，直接返回
-            if (!assemblyPath.EndsWith("Plugin.dll")) return dll;
+            if (!assemblyPath.EndsWith("Plugin.dll"))
+                return dll;
 
             var thisType = typeof(PluginLoader);
-            var pluginTypes = dll.GetTypes().Where(x => !x.IsAbstract && typeof(IPlugin).IsAssignableFrom(x) && x != thisType).ToList();
-            if (pluginTypes.Count > 0) _pluginAssemblies.Add(dll);
+            var pluginTypes = dll.GetTypes()
+                .Where(x => !x.IsAbstract && typeof(IPlugin).IsAssignableFrom(x) && x != thisType)
+                .ToList();
+            if (pluginTypes.Count > 0)
+                _pluginAssemblies.Add(dll);
 
             var pluginName = Path.GetFileNameWithoutExtension(assemblyPath);
             foreach (var pluginType in pluginTypes)
-            {               
+            {
                 if (Activator.CreateInstance(pluginType) is not IPlugin plugin)
                 {
                     _logger.Warn($"插件 {pluginName} 未实现 IPlugin 接口");
@@ -116,34 +134,34 @@ namespace Uamazing.Utils.Plugin
                 }
 
                 // 开始加载
-                _plugins.Add(plugin);                
+                _plugins.Add(plugin);
             }
             _logger.Info($"已加载插件: {pluginName}");
 
             return dll;
         }
 
-        public void AddApplicationPart(IMvcBuilder mvcBuilder)
+        public void ConfigureApp(IApplicationBuilder webApplication)
         {
+            var provider = webApplication.ApplicationServices;
+            var applicationPartManager = provider.GetRequiredService<ApplicationPartManager>();
             foreach (var assembly in _pluginAssemblies)
             {
-                mvcBuilder.AddApplicationPart(assembly);
+                applicationPartManager.ApplicationParts.Add(new AssemblyPart(assembly));
+            }
+
+            // 配置插件
+            foreach (var item in _plugins)
+            {
+                item.ConfigureApp(webApplication);
             }
         }
 
-        public void UseApp(WebApplication webApplication)
+        public void ConfigureServices(IHostApplicationBuilder webApplicationBuilder)
         {
             foreach (var item in _plugins)
             {
-                item.UseApp(webApplication);
-            }
-        }
-
-        public void UseServices(WebApplicationBuilder webApplicationBuilder)
-        {
-            foreach (var item in _plugins)
-            {
-                item.UseServices(webApplicationBuilder);
+                item.ConfigureServices(webApplicationBuilder);
             }
         }
     }

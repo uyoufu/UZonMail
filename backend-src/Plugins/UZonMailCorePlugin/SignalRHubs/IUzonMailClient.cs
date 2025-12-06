@@ -1,15 +1,16 @@
-﻿using UZonMail.Core.SignalRHubs.Notify;
-using UZonMail.Core.SignalRHubs.OutboxInfo;
-using UZonMail.Core.SignalRHubs.Permission;
-using UZonMail.Core.SignalRHubs.SendEmail;
+using UZonMail.CorePlugin.SignalRHubs.Notify;
+using UZonMail.CorePlugin.SignalRHubs.OutboxInfo;
+using UZonMail.CorePlugin.SignalRHubs.Permission;
+using UZonMail.CorePlugin.SignalRHubs.SendEmail;
 
-namespace UZonMail.Core.SignalRHubs
+namespace UZonMail.CorePlugin.SignalRHubs
 {
     /// <summary>
     /// 客户端的方法
     /// </summary>
-    public interface IUzonMailClient : ISendEmailClient, INotifyClient, IPermissionClient, IOutboxStatusChanged
-    {
-
-    }
+    public interface IUzonMailClient
+        : ISendEmailClient,
+            INotifyClient,
+            IPermissionClient,
+            IOutboxStatusChanged { }
 }

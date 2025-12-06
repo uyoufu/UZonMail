@@ -1,8 +1,8 @@
-﻿using UZonMail.Core.Database.Startup;
-using UZonMail.Core.Database.Updater;
+using UZonMail.CorePlugin.Database.Startup;
+using UZonMail.CorePlugin.Database.Updater;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.HostedServices
+namespace UZonMail.CorePlugin.Services.HostedServices
 {
     /// <summary>
     /// 程序启动时，开始中断的发件任务

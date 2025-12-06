@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
-namespace UZonMail.Core.Services.SendCore.Utils
+namespace UZonMail.CorePlugin.Services.SendCore.Utils
 {
     /// <summary>
     /// 使用原子操作实现的锁

@@ -1,7 +1,7 @@
-﻿using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
+namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     public interface ISendingHandler : ITransientService
     {

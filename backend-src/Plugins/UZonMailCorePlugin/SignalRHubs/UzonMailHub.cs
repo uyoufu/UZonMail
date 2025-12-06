@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
-using UZonMail.Core.Controllers.Users.Model;
-using UZonMail.Core.Services.Encrypt;
+using Microsoft.AspNetCore.SignalR;
+using UZonMail.CorePlugin.Controllers.Users.Model;
+using UZonMail.CorePlugin.Services.Encrypt;
 
-namespace UZonMail.Core.SignalRHubs
+namespace UZonMail.CorePlugin.SignalRHubs
 {
     /// <summary>
     /// 邮件发送进度 Hub
@@ -12,7 +12,8 @@ namespace UZonMail.Core.SignalRHubs
     {
         // 使用一个字典来跟踪用户的连接
         // 有可能同一个用户同时打开多个浏览器窗口
-        public static readonly ConcurrentDictionary<string, HashSet<string>> _userConnectionIds = new();
+        public static readonly ConcurrentDictionary<string, HashSet<string>> _userConnectionIds =
+            new();
 
         /// <summary>
         /// 成功连接后
@@ -35,11 +36,13 @@ namespace UZonMail.Core.SignalRHubs
             await base.OnConnectedAsync();
 
             // 发送欢迎消息
-            await Clients.Caller.Notify(new Notify.NotifyMessage()
-            {
-                Message = "欢迎使用 UzonMail !",
-                Type = Notify.NotifyType.success.ToString()
-            });
+            await Clients.Caller.Notify(
+                new Notify.NotifyMessage()
+                {
+                    Message = "欢迎使用 UzonMail !",
+                    Type = Notify.NotifyType.success.ToString()
+                }
+            );
         }
 
         /// <summary>

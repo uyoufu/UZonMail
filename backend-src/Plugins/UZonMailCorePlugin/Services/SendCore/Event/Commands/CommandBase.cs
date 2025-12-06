@@ -1,6 +1,6 @@
-﻿using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
 
-namespace UZonMail.Core.Services.SendCore.Event.Commands
+namespace UZonMail.CorePlugin.Services.SendCore.Event.Commands
 {
     /// <summary>
     /// 事件中心参数
@@ -25,6 +25,7 @@ namespace UZonMail.Core.Services.SendCore.Event.Commands
         /// 上一级事件参数
         /// </summary>
         public CommandBase Parent { get; set; }
+
         /// <summary>
         /// 事件源
         /// A->B->C->A, A可以通过这个判断是否是自己发出的事件，防止循环调用
@@ -38,8 +39,10 @@ namespace UZonMail.Core.Services.SendCore.Event.Commands
         /// <returns></returns>
         public bool IsFromMe(object source)
         {
-            if (Source.Equals(source)) return true;
-            if (!Parent.Equals(null)) return Parent.IsFromMe(source);
+            if (Source.Equals(source))
+                return true;
+            if (!Parent.Equals(null))
+                return Parent.IsFromMe(source);
             return false;
         }
 

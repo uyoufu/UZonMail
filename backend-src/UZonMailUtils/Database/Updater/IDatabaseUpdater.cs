@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Database.Updater
+namespace UZonMail.CorePlugin.Database.Updater
 {
     /// <summary>
     /// 数据库更新器

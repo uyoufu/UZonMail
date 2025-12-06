@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.Sender.Smtp
+namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// SmtpClient 的 Key 对象
@@ -15,10 +15,10 @@
 
         public override bool Equals(object? obj)
         {
-            if (obj is not SmtpClientKey other) return false;
+            if (obj is not SmtpClientKey other)
+                return false;
 
-            return Email == other.Email &&
-                   Proxy == other.Proxy;
+            return Email == other.Email && Proxy == other.Proxy;
         }
 
         public override int GetHashCode()

@@ -1,7 +1,7 @@
-﻿using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.Sender
+namespace UZonMail.CorePlugin.Services.SendCore.Sender
 {
     /// <summary>
     /// 邮件发送管理器
@@ -17,7 +17,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
         public IEmailSender GetEmailSender(string outboxEmail, string smtpHost)
         {
             // 调用发件器进行发件
-            return emailSenders.Where(x => x.IsMatch(outboxEmail, smtpHost))
+            return emailSenders
+                .Where(x => x.IsMatch(outboxEmail, smtpHost))
                 .OrderBy(x => x.Order)
                 .First();
         }

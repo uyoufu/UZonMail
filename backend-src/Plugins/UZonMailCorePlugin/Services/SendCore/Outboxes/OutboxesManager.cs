@@ -1,12 +1,14 @@
-﻿using log4net;
 using System.Collections.Concurrent;
+using log4net;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.Outboxes
+namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
 {
-    public class OutboxesManager : ConcurrentDictionary<string, OutboxEmailAddress>, ISingletonService
+    public class OutboxesManager
+        : ConcurrentDictionary<string, OutboxEmailAddress>,
+            ISingletonService
     {
-        private readonly static ILog _logger = LogManager.GetLogger(typeof(OutboxesManager));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(OutboxesManager));
 
         /// <summary>
         /// 添加发件箱
@@ -61,11 +63,13 @@ namespace UZonMail.Core.Services.SendCore.Outboxes
             var keys = this.Keys.ToList();
             foreach (var email in keys)
             {
-                if (!this.TryGetValue(email, out var outbox)) continue;
+                if (!this.TryGetValue(email, out var outbox))
+                    continue;
 
                 outbox.RemoveSendingGroup(sendingGroupId);
                 // 说明还有其它任务在使用该发件箱，不能移除
-                if (outbox.IsWorking) continue;
+                if (outbox.IsWorking)
+                    continue;
 
                 // 移除
                 this.RemoveOutbox(outbox);

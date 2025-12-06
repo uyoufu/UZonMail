@@ -1,10 +1,10 @@
-﻿using UZonMail.Core.Utils.Database;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Service;
-using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.CorePlugin.Utils.Database;
 using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Database.Startup
+namespace UZonMail.CorePlugin.Database.Startup
 {
     /// <summary>
     /// 初始化数据库
@@ -25,18 +25,26 @@ namespace UZonMail.Core.Database.Startup
         private async Task ResetSendingGroup()
         {
             // 将所有的 Sending 或者 Created 状态的即时发件组重置为 Finish
-            await db.SendingGroups.UpdateAsync(x => x.SendingType == SendingGroupType.Instant
-                && (x.Status == SendingGroupStatus.Sending || x.Status == SendingGroupStatus.Created)
-            , obj => obj.SetProperty(x => x.Status, SendingGroupStatus.Finish)
-                .SetProperty(x => x.LastMessage, "系统被中断")
+            await db.SendingGroups.UpdateAsync(
+                x =>
+                    x.SendingType == SendingGroupType.Instant
+                    && (
+                        x.Status == SendingGroupStatus.Sending
+                        || x.Status == SendingGroupStatus.Created
+                    ),
+                obj =>
+                    obj.SetProperty(x => x.Status, SendingGroupStatus.Finish)
+                        .SetProperty(x => x.LastMessage, "系统被中断")
             );
         }
 
         private async Task ResetSendingItemsStatus()
         {
             // 对所有的 Pending 状态的发件项重置为 Created
-            await db.SendingItems.UpdateAsync(x => x.Status == SendingItemStatus.Pending || x.Status == SendingItemStatus.Sending,
-                x => x.SetProperty(y => y.Status, SendingItemStatus.Created));
+            await db.SendingItems.UpdateAsync(
+                x => x.Status == SendingItemStatus.Pending || x.Status == SendingItemStatus.Sending,
+                x => x.SetProperty(y => y.Status, SendingItemStatus.Created)
+            );
         }
     }
 }

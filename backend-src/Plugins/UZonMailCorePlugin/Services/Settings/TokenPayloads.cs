@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
 using System.Security.Claims;
+using Newtonsoft.Json.Linq;
 using UZonMail.DB.SQL.Core.Organization;
 using UZonMail.DB.SQL.Core.Permission;
 
-namespace UZonMail.Core.Services.Settings
+namespace UZonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// 生成 token 时的 payload
@@ -18,7 +18,14 @@ namespace UZonMail.Core.Services.Settings
             Add(new Claim("userId", userInfo.Id.ToString()));
             Add(new Claim("userName", userInfo.UserId));
             // 授予角色，接口权限控制
-            Add(new Claim(ClaimTypes.Role, userInfo.IsSuperAdmin ? UserRoleNames.Admin.ToString() : UserRoleNames.User.ToString()));
+            Add(
+                new Claim(
+                    ClaimTypes.Role,
+                    userInfo.IsSuperAdmin
+                        ? UserRoleNames.Admin.ToString()
+                        : UserRoleNames.User.ToString()
+                )
+            );
             // signalR 需要使用此处的 Name
             Add(new Claim(ClaimTypes.Name, userInfo.Id.ToString()));
             // 参考:https://learn.microsoft.com/zh-cn/aspnet/core/signalr/groups?view=aspnetcore-8.0

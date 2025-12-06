@@ -1,14 +1,15 @@
-﻿using MailKit.Net.Proxy;
 using System.Net;
+using MailKit.Net.Proxy;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.Clients
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// IProxyClient 适配器
     /// </summary>
     /// <param name="proxyHandler"></param>
     /// <param name="proxyClient"></param>
-    public class ProxyClientAdapter(IProxyHandler proxyHandler, IProxyClient proxyClient) : IProxyClient
+    public class ProxyClientAdapter(IProxyHandler proxyHandler, IProxyClient proxyClient)
+        : IProxyClient
     {
         #region 接口实现
         public NetworkCredential ProxyCredentials => proxyClient.ProxyCredentials;
@@ -28,17 +29,31 @@ namespace UZonMail.Core.Services.SendCore.Proxies.Clients
             return proxyClient.Connect(host, port, cancellationToken);
         }
 
-        public Stream Connect(string host, int port, int timeout, CancellationToken cancellationToken = default)
+        public Stream Connect(
+            string host,
+            int port,
+            int timeout,
+            CancellationToken cancellationToken = default
+        )
         {
             return proxyClient.Connect(host, port, timeout, cancellationToken);
         }
 
-        public Task<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
+        public Task<Stream> ConnectAsync(
+            string host,
+            int port,
+            CancellationToken cancellationToken = default
+        )
         {
             return proxyClient.ConnectAsync(host, port, cancellationToken);
         }
 
-        public Task<Stream> ConnectAsync(string host, int port, int timeout, CancellationToken cancellationToken = default)
+        public Task<Stream> ConnectAsync(
+            string host,
+            int port,
+            int timeout,
+            CancellationToken cancellationToken = default
+        )
         {
             return proxyClient.ConnectAsync(host, port, timeout, cancellationToken);
         }

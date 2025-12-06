@@ -1,11 +1,11 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Database.Updater;
-using UZonMail.Core.Services.Notification.EmailNotifier;
+using UZonMail.CorePlugin.Database.Updater;
+using UZonMail.CorePlugin.Services.Notification.EmailNotifier;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Database.Update.Updaters
+namespace UZonMail.CorePlugin.Database.Update.Updaters
 {
     public class AddSendingFinishedNotificationTemplate(SqlContext db) : IDatabaseUpdater
     {

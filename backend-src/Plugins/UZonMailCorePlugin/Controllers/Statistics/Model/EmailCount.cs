@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Controllers.Statistics.Model
+namespace UZonMail.CorePlugin.Controllers.Statistics.Model
 {
     /// <summary>
     /// 邮箱数量

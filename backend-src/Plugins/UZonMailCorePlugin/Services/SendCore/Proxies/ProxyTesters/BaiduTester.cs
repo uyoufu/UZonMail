@@ -1,12 +1,13 @@
-﻿using UZonMail.Utils.Http.Request;
+using UZonMail.Utils.Http.Request;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 百度网站连通性测试
     /// </summary>
     /// <param name="httpClient"></param>
-    public class BaiduTester(HttpClient httpClient) : BaseProxyTester(httpClient,ProxyZoneType.Baidu)
+    public class BaiduTester(HttpClient httpClient)
+        : BaseProxyTester(httpClient, ProxyZoneType.Baidu)
     {
         public override int Order { get; } = -1000;
 

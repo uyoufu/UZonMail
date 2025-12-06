@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.Controllers.Emails.Models
+namespace UZonMail.CorePlugin.Controllers.Emails.Models
 {
     public class RunningSendingGroupResult
     {
@@ -8,6 +8,7 @@ namespace UZonMail.Core.Controllers.Emails.Models
         public string Subjects { get; set; }
 
         public double Progress { get; set; }
+
         /// <summary>
         /// 总数
         /// </summary>

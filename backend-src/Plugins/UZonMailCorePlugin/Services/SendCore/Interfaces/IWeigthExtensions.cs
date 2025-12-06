@@ -1,6 +1,6 @@
-﻿using log4net;
+using log4net;
 
-namespace UZonMail.Core.Services.SendCore.Interfaces
+namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
 {
     public static class IWeigthExtensions
     {
@@ -13,7 +13,10 @@ namespace UZonMail.Core.Services.SendCore.Interfaces
         /// <typeparam name="Tkey"></typeparam>
         /// <param name="datas"></param>
         /// <returns></returns>
-        public static IWeight? GetDataByWeight<TKey, TValue>(this IDictionary<TKey, TValue> keyValuePairs) where TValue : IWeight
+        public static IWeight? GetDataByWeight<TKey, TValue>(
+            this IDictionary<TKey, TValue> keyValuePairs
+        )
+            where TValue : IWeight
         {
             // 获取可用的项
             var useableValues = keyValuePairs.Values.Where(x => x.Enable).ToList();
@@ -21,7 +24,7 @@ namespace UZonMail.Core.Services.SendCore.Interfaces
                 return null;
 
             // 计算总的权重
-            var totalWeight = useableValues.Sum(x=>x.Weight);
+            var totalWeight = useableValues.Sum(x => x.Weight);
             if (totalWeight == 0)
             {
                 _logger.Error($"所有 {typeof(TValue).Name} 权重和为 0");

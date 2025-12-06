@@ -1,19 +1,19 @@
-﻿
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
-using UZonMail.Core.Services.Common;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Utils.Database;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.CorePlugin.Services.Common;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Utils.Database;
 using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Emails;
+using UZonMail.Utils.Web.Exceptions;
 
-namespace UZonMail.Core.Services.Emails
+namespace UZonMail.CorePlugin.Services.Emails
 {
     /// <summary>
     /// 邮件组
     /// </summary>
-    public class EmailGroupService(SqlContext db, TokenService tokenService) : CurdService<EmailGroup>(db)
+    public class EmailGroupService(SqlContext db, TokenService tokenService)
+        : CurdService<EmailGroup>(db)
     {
         /// <summary>
         /// 获取用户的邮箱组
@@ -23,7 +23,9 @@ namespace UZonMail.Core.Services.Emails
         /// <returns></returns>
         public async Task<List<EmailGroup>> GetEmailGroups(long userId, EmailGroupType groupType)
         {
-            var results = await db.EmailGroups.Where(x => x.UserId == userId && x.Type == groupType).ToListAsync();
+            var results = await db
+                .EmailGroups.Where(x => x.UserId == userId && x.Type == groupType)
+                .ToListAsync();
             return results;
         }
 
@@ -32,12 +34,16 @@ namespace UZonMail.Core.Services.Emails
         /// </summary>
         /// <param name="groupType"></param>
         /// <returns></returns>
-        public async Task<EmailGroup> GetDefaultEmailGroup(EmailGroupType groupType = EmailGroupType.InBox)
+        public async Task<EmailGroup> GetDefaultEmailGroup(
+            EmailGroupType groupType = EmailGroupType.InBox
+        )
         {
             var tokenPayloads = tokenService.GetTokenPayloads();
-            if (tokenPayloads.Count == 0) throw new KnownException("无法获取用户信息");
+            if (tokenPayloads.Count == 0)
+                throw new KnownException("无法获取用户信息");
 
-            var defaultGroup = await db.EmailGroups.Where(x => x.IsDefault && x.UserId == tokenPayloads.UserId)
+            var defaultGroup = await db
+                .EmailGroups.Where(x => x.IsDefault && x.UserId == tokenPayloads.UserId)
                 .FirstOrDefaultAsync();
             if (defaultGroup == null)
             {
@@ -57,7 +63,13 @@ namespace UZonMail.Core.Services.Emails
         public override async Task<EmailGroup> Create(EmailGroup emailGroup)
         {
             // 判断组名是否重复
-            if (await db.EmailGroups.AnyAsync(x => x.UserId == emailGroup.UserId && x.Type == emailGroup.Type && x.Name == emailGroup.Name))
+            if (
+                await db.EmailGroups.AnyAsync(x =>
+                    x.UserId == emailGroup.UserId
+                    && x.Type == emailGroup.Type
+                    && x.Name == emailGroup.Name
+                )
+            )
             {
                 throw new KnownException("组名重复");
             }
@@ -73,9 +85,15 @@ namespace UZonMail.Core.Services.Emails
         /// <param name="description"></param>
         /// <param name="icon"></param>
         /// <returns></returns>
-        public async Task<EmailGroup?> UpdateBoxGroup(string name, string? description, string? icon)
+        public async Task<EmailGroup?> UpdateBoxGroup(
+            string name,
+            string? description,
+            string? icon
+        )
         {
-            ; if (string.IsNullOrEmpty(name)) throw new KnownException("组名不允许为空");
+            ;
+            if (string.IsNullOrEmpty(name))
+                throw new KnownException("组名不允许为空");
             // 获取当前用户 id
             var userId = tokenService.GetUserSqlId();
             var emailGroup = new EmailGroup()
@@ -86,8 +104,10 @@ namespace UZonMail.Core.Services.Emails
                 Icon = icon
             };
             List<string> updatedNames = [name];
-            if (!string.IsNullOrEmpty(description)) updatedNames.Add(description);
-            if (!string.IsNullOrEmpty(icon)) updatedNames.Add(icon);
+            if (!string.IsNullOrEmpty(description))
+                updatedNames.Add(description);
+            if (!string.IsNullOrEmpty(icon))
+                updatedNames.Add(icon);
 
             var result = await db.UpdateById(emailGroup, updatedNames);
             await db.SaveChangesAsync();
@@ -101,38 +121,42 @@ namespace UZonMail.Core.Services.Emails
         /// <returns></returns>
         public override Task<bool> DeleteById(long id)
         {
-            return db.RunTransaction(async (ctx) =>
-             {
-                 // 先获取组
-                 EmailGroup? group = await ctx.EmailGroups.Where(x => x.Id == id)
-                 .Include(x => x.Inboxes)
-                 .FirstOrDefaultAsync();
+            return db.RunTransaction(
+                async (ctx) =>
+                {
+                    // 先获取组
+                    EmailGroup? group = await ctx
+                        .EmailGroups.Where(x => x.Id == id)
+                        .Include(x => x.Inboxes)
+                        .FirstOrDefaultAsync();
 
-                 if (group == null) return true;
+                    if (group == null)
+                        return true;
 
-                 // 将其它邮件标记为删除
-                 List<Inbox> boxes = [];
-                 if (group.Inboxes != null)
-                 {
-                     boxes.AddRange(group.Inboxes);
-                 }
-                 bool shouldKeepGroup = boxes.Any(x => x.LinkCount > 0);
+                    // 将其它邮件标记为删除
+                    List<Inbox> boxes = [];
+                    if (group.Inboxes != null)
+                    {
+                        boxes.AddRange(group.Inboxes);
+                    }
+                    bool shouldKeepGroup = boxes.Any(x => x.LinkCount > 0);
 
-                 if (shouldKeepGroup)
-                 {
-                     // 将组标记为删除，同时将组中未使用的邮箱标记为删除
-                     group.IsDeleted = true;
-                 }
-                 else
-                 {
-                     // 先删除邮箱，再删除组
-                     boxes.ForEach(x => ctx.Remove(x));
-                     ctx.Remove(group);
-                 }
-                 await ctx.SaveChangesAsync();
+                    if (shouldKeepGroup)
+                    {
+                        // 将组标记为删除，同时将组中未使用的邮箱标记为删除
+                        group.IsDeleted = true;
+                    }
+                    else
+                    {
+                        // 先删除邮箱，再删除组
+                        boxes.ForEach(x => ctx.Remove(x));
+                        ctx.Remove(group);
+                    }
+                    await ctx.SaveChangesAsync();
 
-                 return true;
-             });
+                    return true;
+                }
+            );
         }
     }
 }

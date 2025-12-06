@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.Contexts
+namespace UZonMail.CorePlugin.Services.SendCore.Contexts
 {
     [Flags]
     public enum ContextStatus

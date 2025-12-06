@@ -1,16 +1,18 @@
-﻿using log4net;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.ResponsibilityChains;
+using log4net;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Interfaces;
+using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore
+namespace UZonMail.CorePlugin.Services.SendCore
 {
     /// <summary>
     /// 发件箱任务管理器
     /// </summary>
-    public class OutboxTasksManager(IServiceProvider provider, OutboxesManager outboxesManager) : ISendingTasksManager, ISingletonService<ISendingTasksManager>
+    public class OutboxTasksManager(IServiceProvider provider, OutboxesManager outboxesManager)
+        : ISendingTasksManager,
+            ISingletonService<ISendingTasksManager>
     {
         private readonly ILog _logger = LogManager.GetLogger(typeof(OutboxTasksManager));
         private readonly object _lockObj = new();
@@ -32,15 +34,17 @@ namespace UZonMail.Core.Services.SendCore
                 var outboxes = outboxesManager.Values.ToList();
                 foreach (var outbox in outboxes)
                 {
-                    if (outbox.IsRunningInTask) continue;
-                    if (outbox.ShouldDispose) continue;
+                    if (outbox.IsRunningInTask)
+                        continue;
+                    if (outbox.ShouldDispose)
+                        continue;
 
                     // 启动任务
                     var task = Task.Run(async () =>
                     {
                         try
                         {
-                            await StartSendingWorkTask(outbox);                            
+                            await StartSendingWorkTask(outbox);
                         }
                         catch (Exception ex)
                         {
@@ -74,7 +78,8 @@ namespace UZonMail.Core.Services.SendCore
             {
                 var provider = scope.ServiceProvider;
                 // 生成服务上下文
-                var sendingContext = provider.GetRequiredService<SendingContext>()
+                var sendingContext = provider
+                    .GetRequiredService<SendingContext>()
                     .SetOutbox(outbox);
 
                 // 创建职责链
@@ -85,14 +90,14 @@ namespace UZonMail.Core.Services.SendCore
                     typeof(LocalEmailSendingHandler), // 开始发件
                     typeof(EmailItemPostHandler), // 发件回调
                     typeof(GroupTaskPostHandler), // 发件任务回调
-                    typeof(OutboxesPostHandler), // 发件箱回调                    
+                    typeof(OutboxesPostHandler), // 发件箱回调
                     typeof(SmtpClientDisposer), // 释放 smtp 连接
                     typeof(OutboxSendingSpeedController) // 发件箱发送速度控制
                 }
-                .Select(provider.GetRequiredService)
-                .Where(x => x != null)
-                .Cast<ISendingHandler>()
-                .ToList();
+                    .Select(provider.GetRequiredService)
+                    .Where(x => x != null)
+                    .Cast<ISendingHandler>()
+                    .ToList();
                 _ = chainHandlers.Aggregate((a, b) => a.SetNext(b));
                 // 依次执行职责链
                 await chainHandlers.First().Handle(sendingContext);
@@ -100,14 +105,18 @@ namespace UZonMail.Core.Services.SendCore
                 // 根据返回值，判断线程是否需要继续
                 if (sendingContext.Status.HasFlag(ContextStatus.ShouldExitTask))
                 {
-                    _logger.Info($"发件任务执行异常，线程 {Environment.CurrentManagedThreadId} 结束 {outbox.Email} 发件任务");
+                    _logger.Info(
+                        $"发件任务执行异常，线程 {Environment.CurrentManagedThreadId} 结束 {outbox.Email} 发件任务"
+                    );
                     break;
                 }
 
                 // 若发件箱被标记为释放，则结束任务
                 if (outbox.ShouldDispose)
                 {
-                    _logger.Info($"发件箱已标记为释放，线程 {Environment.CurrentManagedThreadId} 结束 {outbox.Email} 发件任务");
+                    _logger.Info(
+                        $"发件箱已标记为释放，线程 {Environment.CurrentManagedThreadId} 结束 {outbox.Email} 发件任务"
+                    );
                     break;
                 }
             }

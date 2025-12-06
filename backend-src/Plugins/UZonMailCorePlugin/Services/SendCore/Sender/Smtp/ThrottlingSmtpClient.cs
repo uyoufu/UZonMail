@@ -1,12 +1,12 @@
-﻿using log4net;
+using log4net;
 using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using UZonMail.Core.Services.Config;
-using UZonMail.Core.Services.SendCore.Proxies.Clients;
+using UZonMail.CorePlugin.Services.Config;
+using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
 
-namespace UZonMail.Core.Services.SendCore.Sender.Smtp
+namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// 具有发件速率限制的 smtp 客户端
@@ -18,6 +18,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 
         private string _email;
         private int _cooldownMilliseconds;
+
         /// <summary>
         /// 设置参数
         /// </summary>
@@ -44,7 +45,8 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 
         private static SecureSocketOptions GuessSecureSocketOptions(int port, bool enableSSL)
         {
-            if (port == 587) return SecureSocketOptions.StartTls;
+            if (port == 587)
+                return SecureSocketOptions.StartTls;
             return enableSSL ? SecureSocketOptions.StartTlsWhenAvailable : SecureSocketOptions.Auto;
         }
 
@@ -58,7 +60,6 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
             return await SendAsync(message, default, null);
         }
 
-
         /// <summary>
         /// 发送邮件
         /// </summary>
@@ -66,7 +67,11 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
         /// <param name="cancellationToken"></param>
         /// <param name="progress"></param>
         /// <returns></returns>
-        public override async Task<string> SendAsync(MimeMessage message, CancellationToken cancellationToken, ITransferProgress progress = null)
+        public override async Task<string> SendAsync(
+            MimeMessage message,
+            CancellationToken cancellationToken,
+            ITransferProgress progress = null
+        )
         {
             var now = DateTime.UtcNow;
             var timeInverval = (int)(now - _lastDate).TotalMilliseconds;
@@ -98,7 +103,8 @@ namespace UZonMail.Core.Services.SendCore.Sender.Smtp
 
         public SmtpClientKey GetClientKey()
         {
-            if (ProxyClient == null) return new SmtpClientKey(_email, string.Empty);
+            if (ProxyClient == null)
+                return new SmtpClientKey(_email, string.Empty);
 
             // 如果存在代理，则返回包含代理的 host 的 key
             if (ProxyClient is not ProxyClientAdapter proxy)

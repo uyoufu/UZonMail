@@ -1,20 +1,25 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using UZonMail.Utils.Web.Service;
+using Microsoft.AspNetCore.SignalR;
+using UZonMail.CorePlugin.Services.Cache;
+using UZonMail.CorePlugin.SignalRHubs;
+using UZonMail.CorePlugin.SignalRHubs.Extensions;
 using UZonMail.DB.SQL;
-using UZonMail.Core.SignalRHubs;
-using UZonMail.Core.SignalRHubs.Extensions;
-using UZonMail.Core.Services.Cache;
-using UZonMail.Utils.Web.Access;
 using UZonMail.DB.SQL.Core.Permission;
+using UZonMail.Utils.Web.Access;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Permission
+namespace UZonMail.CorePlugin.Services.Permission
 {
     /// <summary>
     /// 权限服务
     /// </summary>
-    public class PermissionService(SqlContext db, CacheService cache, IHubContext<UzonMailHub, IUzonMailClient> hub, IServiceProvider serviceProvider) : IScopedService
+    public class PermissionService(
+        SqlContext db,
+        CacheService cache,
+        IHubContext<UzonMailHub, IUzonMailClient> hub,
+        IServiceProvider serviceProvider
+    ) : IScopedService
     {
-        private readonly static string _permissionPrefix = "permissions";
+        private static readonly string _permissionPrefix = "permissions";
 
         /// <summary>
         /// 生成权限缓存的 key
@@ -29,23 +34,25 @@ namespace UZonMail.Core.Services.Permission
         /// </summary>
         /// <param name="userIds"></param>
         /// <returns></returns>
-        public async Task<Dictionary<long, List<string>>> GenerateUsersPermissionCodes(List<long> userIds)
+        public async Task<Dictionary<long, List<string>>> GenerateUsersPermissionCodes(
+            List<long> userIds
+        )
         {
             // 获取所有实现了 IAccessBuilder 接口的服务
             var accessBuilders = serviceProvider.GetRequiredService<IEnumerable<IAccessBuilder>>();
-            Dictionary<long,HashSet<string>> results = [];
-            foreach(var builder in accessBuilders)
+            Dictionary<long, HashSet<string>> results = [];
+            foreach (var builder in accessBuilders)
             {
                 var codes = await builder.GenerateUserPermissionCodes(userIds);
-                foreach(var item in codes)
+                foreach (var item in codes)
                 {
-                    if(!results.TryGetValue(item.Key,out var value))
+                    if (!results.TryGetValue(item.Key, out var value))
                     {
                         value = [];
-                        results.Add(item.Key,value);
+                        results.Add(item.Key, value);
                     }
                     // 保存值
-                    foreach(var code in item.Value)
+                    foreach (var code in item.Value)
                     {
                         value.Add(code);
                     }
@@ -60,9 +67,12 @@ namespace UZonMail.Core.Services.Permission
         /// </summary>
         /// <param name="userIds"></param>
         /// <returns>返回权限码</returns>
-        public async Task<Dictionary<long, List<string>>> UpdateUserPermissionsCache(List<long> userIds)
+        public async Task<Dictionary<long, List<string>>> UpdateUserPermissionsCache(
+            List<long> userIds
+        )
         {
-            if (userIds.Count == 0) return [];
+            if (userIds.Count == 0)
+                return [];
 
             var userPermissions = await GenerateUsersPermissionCodes(userIds);
             // 更新缓存
@@ -81,7 +91,8 @@ namespace UZonMail.Core.Services.Permission
         public async Task<List<string>> UpdateUserPermissionsCache(long userId)
         {
             var results = await UpdateUserPermissionsCache([userId]);
-            if (results.TryGetValue(userId, out var value)) return value;
+            if (results.TryGetValue(userId, out var value))
+                return value;
             return [];
         }
 
@@ -94,7 +105,8 @@ namespace UZonMail.Core.Services.Permission
         public async Task<List<string>> GetUserPermissionCodes(long userId)
         {
             var cacheValues = await cache.GetAsync<List<string>>(GetPermissionCacheKey(userId));
-            if (cacheValues != null) return cacheValues;
+            if (cacheValues != null)
+                return cacheValues;
 
             // 更新缓存
             cacheValues ??= await UpdateUserPermissionsCache(userId);
@@ -111,7 +123,8 @@ namespace UZonMail.Core.Services.Permission
         {
             var permissionCodes = await GetUserPermissionCodes(userId);
             // * 代表所有权限
-            if (permissionCode.Contains(PermissionCode.SuperAdminPermissionCode)) return true;
+            if (permissionCode.Contains(PermissionCode.SuperAdminPermissionCode))
+                return true;
 
             return permissionCodes.Contains(permissionCode);
         }
@@ -133,7 +146,8 @@ namespace UZonMail.Core.Services.Permission
         /// <returns></returns>
         public async Task NotifyPermissionUpdate(Dictionary<long, List<string>> userPermissionCodes)
         {
-            if (userPermissionCodes.Count == 0) return;
+            if (userPermissionCodes.Count == 0)
+                return;
 
             foreach (var item in userPermissionCodes)
             {

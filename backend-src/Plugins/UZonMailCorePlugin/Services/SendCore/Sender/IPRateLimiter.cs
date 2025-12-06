@@ -1,13 +1,13 @@
-﻿using log4net;
 using System.Collections.Concurrent;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
+using log4net;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 using Timer = System.Timers.Timer;
 
-namespace UZonMail.Core.Services.SendCore.Sender
+namespace UZonMail.CorePlugin.Services.SendCore.Sender
 {
     /// <summary>
     /// 按邮箱域名及 IP 限制发送速率
@@ -17,7 +17,6 @@ namespace UZonMail.Core.Services.SendCore.Sender
         private static readonly ILog _logger = LogManager.GetLogger(typeof(IPRateLimiter));
         private readonly ConcurrentDictionary<string, DateTime> _lastSendedDateDic = new();
         private readonly Timer? _cleanupTimer;
-
 
         public IPRateLimiter()
         {
@@ -53,7 +52,10 @@ namespace UZonMail.Core.Services.SendCore.Sender
         public async Task WaitForReleaseAsync(SendingContext context, string outbox, string? hostIp)
         {
             var settingsManager = context.Provider.GetRequiredService<AppSettingsManager>();
-            var sendingSetting = await settingsManager.GetSetting<SendingSetting>(context.SqlContext, context.OutboxAddress.UserId);
+            var sendingSetting = await settingsManager.GetSetting<SendingSetting>(
+                context.SqlContext,
+                context.OutboxAddress.UserId
+            );
             await WaitForReleaseAsync(outbox, hostIp, sendingSetting.MaxCountPerIPDomainHour);
         }
 
@@ -63,9 +65,14 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// <param name="outbox"></param>
         /// <param name="hostIp"></param>
         /// <returns></returns>
-        public async Task WaitForReleaseAsync(string outbox, string? hostIp, int maxCountPerIPDomainHour = 0)
+        public async Task WaitForReleaseAsync(
+            string outbox,
+            string? hostIp,
+            int maxCountPerIPDomainHour = 0
+        )
         {
-            if (maxCountPerIPDomainHour <= 0) return;
+            if (maxCountPerIPDomainHour <= 0)
+                return;
 
             var cooldownMilliseconds = 60 * 60 * 1000 / maxCountPerIPDomainHour;
 
@@ -98,7 +105,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
         /// <returns></returns>
         public bool IsLimited(string outbox, string? hostIp, int maxCountPerIPDomainHour = 0)
         {
-            if (maxCountPerIPDomainHour <= 0) return false;
+            if (maxCountPerIPDomainHour <= 0)
+                return false;
 
             var cooldownMilliseconds = 60 * 60 * 1000 / maxCountPerIPDomainHour;
 
@@ -115,7 +123,8 @@ namespace UZonMail.Core.Services.SendCore.Sender
         private static string GetKey(string outbox, string? hostIp)
         {
             var domain = outbox.Split('@').Last();
-            if(string.IsNullOrEmpty(hostIp))return domain;
+            if (string.IsNullOrEmpty(hostIp))
+                return domain;
             return $"{domain}_{hostIp}";
         }
     }

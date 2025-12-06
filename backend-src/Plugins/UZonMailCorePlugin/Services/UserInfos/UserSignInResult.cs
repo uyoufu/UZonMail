@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.Core.Organization;
+using UZonMail.DB.SQL.Core.Organization;
 
-namespace UZonMail.Core.Services.UserInfos
+namespace UZonMail.CorePlugin.Services.UserInfos
 {
     /// <summary>
     /// 用户登陆结果
@@ -10,6 +10,7 @@ namespace UZonMail.Core.Services.UserInfos
         public string Token { get; set; }
         public List<string> Access { get; set; }
         public User UserInfo { get; set; }
+
         /// <summary>
         /// 已安装的插件
         /// </summary>

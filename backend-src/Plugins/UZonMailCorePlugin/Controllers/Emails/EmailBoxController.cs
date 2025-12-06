@@ -2,12 +2,12 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Database.Validators;
-using UZonMail.Core.Services.Emails;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.UserInfos;
-using UZonMail.Core.Utils.Extensions;
+using UZonMail.CorePlugin.Database.Validators;
+using UZonMail.CorePlugin.Services.Emails;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.UserInfos;
+using UZonMail.CorePlugin.Utils.Extensions;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
@@ -15,7 +15,7 @@ using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.PagingQuery;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Emails
+namespace UZonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// 邮箱
@@ -240,10 +240,13 @@ namespace UZonMail.Core.Controllers.Emails
                 .Inboxes.IgnoreQueryFilters()
                 .Where(x => x.UserId == userId && emails.Contains(x.Email))
                 .ToListAsync();
-            List<Inbox?> newEntities = emails
-                .Except(existEmails.Select(x => x.Email))
-                .Select(x => entities.Find(e => e.Email == x))
-                .ToList();
+            List<Inbox?> newEntities =
+            [
+                .. emails
+                    .Except(existEmails.Select(x => x.Email))
+                    .Select(x => entities.Find(e => e.Email == x))
+                    .Distinct()
+            ];
 
             // 新建发件箱
             foreach (var entity in newEntities)

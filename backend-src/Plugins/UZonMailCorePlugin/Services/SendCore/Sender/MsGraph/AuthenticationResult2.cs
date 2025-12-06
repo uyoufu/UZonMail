@@ -1,7 +1,7 @@
-﻿using Microsoft.Identity.Client;
+using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 
-namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
+namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     /// <summary>
     /// 当前程序专业的 OAuth2 认证结果类
@@ -28,6 +28,7 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         public string RefreshToken { get; set; } = string.Empty;
 
         private DateTime _expireAt = DateTime.MinValue;
+
         /// <summary>
         /// 在某个时间点过期
         /// </summary>
@@ -51,7 +52,9 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// 转换成 AuthenticationResult 对象
         /// </summary>
         /// <returns></returns>
-        public static AuthenticationResult2 FromAuthenticationResult(AuthenticationResult authenticationResult)
+        public static AuthenticationResult2 FromAuthenticationResult(
+            AuthenticationResult authenticationResult
+        )
         {
             return new AuthenticationResult2()
             {
@@ -59,7 +62,9 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
                 Scope = string.Join(" ", authenticationResult.Scopes),
                 TokenType = authenticationResult.TokenType,
                 ExpiresIn = (authenticationResult.ExpiresOn - DateTimeOffset.UtcNow).TotalSeconds,
-                ExtExPiresIn = (authenticationResult.ExtendedExpiresOn - DateTimeOffset.UtcNow).TotalSeconds,
+                ExtExPiresIn = (
+                    authenticationResult.ExtendedExpiresOn - DateTimeOffset.UtcNow
+                ).TotalSeconds,
                 IsPersonalAccount = false
             };
         }

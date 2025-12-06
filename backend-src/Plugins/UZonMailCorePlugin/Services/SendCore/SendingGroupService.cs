@@ -3,19 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Quartz;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Database.SQL.EmailSending;
-using UZonMail.Core.Database.Validators;
-using UZonMail.Core.Jobs;
-using UZonMail.Core.Services.Config;
-using UZonMail.Core.Services.Emails;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.Sender.Smtp;
-using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
-using UZonMail.Core.Utils.Extensions;
+using UZonMail.CorePlugin.Database.SQL.EmailSending;
+using UZonMail.CorePlugin.Database.Validators;
+using UZonMail.CorePlugin.Jobs;
+using UZonMail.CorePlugin.Services.Config;
+using UZonMail.CorePlugin.Services.Emails;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Interfaces;
+using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UZonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
+using UZonMail.CorePlugin.Utils.Extensions;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
@@ -25,7 +25,7 @@ using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.ResponseModel;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore
+namespace UZonMail.CorePlugin.Services.SendCore
 {
     /// <summary>
     /// 发送组服务

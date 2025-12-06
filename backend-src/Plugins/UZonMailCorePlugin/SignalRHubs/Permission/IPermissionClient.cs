@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.SignalRHubs.Permission
+namespace UZonMail.CorePlugin.SignalRHubs.Permission
 {
     public interface IPermissionClient
     {

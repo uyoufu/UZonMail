@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.SignalRHubs.SendEmail
+namespace UZonMail.CorePlugin.SignalRHubs.SendEmail
 {
     public class GroupEndSendingArg
     {
@@ -16,6 +16,6 @@ namespace UZonMail.Core.SignalRHubs.SendEmail
         public long SendingGroupId { get; set; }
         public int Total { get; set; }
         public int Success { get; set; }
-        public string Message { get; set;}
+        public string Message { get; set; }
     }
 }

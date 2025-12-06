@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.Outboxes
+namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
 {
     /// <summary>
     /// 发件箱地址类型

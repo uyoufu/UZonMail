@@ -1,17 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.Service;
-using UZonMail.Core.Services.UserInfos;
-using UZonMail.Utils.Extensions;
+using Microsoft.EntityFrameworkCore;
+using UZonMail.CorePlugin.Services.UserInfos;
 using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Exceptions;
 using UZonMail.DB.SQL.Core.Files;
+using UZonMail.Utils.Extensions;
+using UZonMail.Utils.Web.Exceptions;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Files
+namespace UZonMail.CorePlugin.Services.Files
 {
     /// <summary>
     /// 文件存储服务
     /// </summary>
-    public class FileStoreService(SqlContext db, UserService userService, IWebHostEnvironment env) : IScopedService
+    public class FileStoreService(SqlContext db, UserService userService, IWebHostEnvironment env)
+        : IScopedService
     {
         /// <summary>
         /// 获取存在的文件对象
@@ -26,7 +27,8 @@ namespace UZonMail.Core.Services.Files
         private async Task<FileBucket> GetDefaultBucket()
         {
             var bucket = await db.FileBuckets.FirstOrDefaultAsync(x => x.IsDefault);
-            if (bucket == null) throw new KnownException("未找到默认的存储位置");
+            if (bucket == null)
+                throw new KnownException("未找到默认的存储位置");
             return bucket;
         }
 
@@ -40,7 +42,9 @@ namespace UZonMail.Core.Services.Files
         private (string, string) GetObjectStorePath(FileBucket fileBucket, string fileName)
         {
             // 年/月/日/文件名
-            string relativePath = DateTime.UtcNow.ToString("yyyy/MM/dd") + $"/{DateTime.UtcNow.ToTimestamp()}_{fileName}";
+            string relativePath =
+                DateTime.UtcNow.ToString("yyyy/MM/dd")
+                + $"/{DateTime.UtcNow.ToTimestamp()}_{fileName}";
             string fullPath = Path.Combine(fileBucket.RootDir, relativePath);
 
             // 创建父目录
@@ -58,7 +62,10 @@ namespace UZonMail.Core.Services.Files
         /// <param name="formFile"></param>
         /// <param name="lastModifyDate"></param>
         /// <returns></returns>
-        public async Task<FileUsage> UploadFileObject(long userId, ObjectFileUploaderBody fileParams)
+        public async Task<FileUsage> UploadFileObject(
+            long userId,
+            ObjectFileUploaderBody fileParams
+        )
         {
             if (!string.IsNullOrEmpty(fileParams.UniqueName))
             {
@@ -74,7 +81,10 @@ namespace UZonMail.Core.Services.Files
                     // 获取存储位置
                     var defaultBucket = await GetDefaultBucket();
                     // 计算保存位置
-                    var (relativePath, fullPath) = GetObjectStorePath(defaultBucket, fileParams.File.FileName);
+                    var (relativePath, fullPath) = GetObjectStorePath(
+                        defaultBucket,
+                        fileParams.File.FileName
+                    );
                     // 保存文件
                     using var stream = new FileStream(fullPath, FileMode.Create);
                     fileParams.File.CopyTo(stream);
@@ -93,13 +103,14 @@ namespace UZonMail.Core.Services.Files
                 }
 
                 // 先保存使用
-                FileUsage fileUsage = new()
-                {
-                    OwnerUserId = userId,
-                    FileObjectId = fileObject.Id,
-                    IsPublic = fileParams.IsPublic,
-                    FileName = fileParams.File.FileName,
-                };
+                FileUsage fileUsage =
+                    new()
+                    {
+                        OwnerUserId = userId,
+                        FileObjectId = fileObject.Id,
+                        IsPublic = fileParams.IsPublic,
+                        FileName = fileParams.File.FileName,
+                    };
                 db.FileUsages.Add(fileUsage);
 
                 // 引用只有在用户提交时，才增加
@@ -121,10 +132,12 @@ namespace UZonMail.Core.Services.Files
         public async Task DeleteFileObject(string sha256, int maxLinkCount = 1)
         {
             // 移除文件
-            FileObject? fileObject = await db.FileObjects.Where(x => x.Sha256 == sha256 && x.LinkCount <= maxLinkCount)
+            FileObject? fileObject = await db
+                .FileObjects.Where(x => x.Sha256 == sha256 && x.LinkCount <= maxLinkCount)
                 .Include(x => x.FileBucket)
                 .FirstOrDefaultAsync();
-            if (fileObject == null) return;
+            if (fileObject == null)
+                return;
 
             // 删除文件
             string fullPath = Path.Combine(fileObject.FileBucket.RootDir, fileObject.Path);
@@ -144,14 +157,16 @@ namespace UZonMail.Core.Services.Files
         /// <exception cref="KnownException"></exception>
         public async Task<string> GetFileFullPath(long fileUsageId, bool onlyPublic = true)
         {
-            FileUsage? fileUsage = await db.FileUsages
-                .Include(x => x.FileObject)
+            FileUsage? fileUsage = await db
+                .FileUsages.Include(x => x.FileObject)
                 .ThenInclude(x => x.FileBucket)
                 .FirstOrDefaultAsync(x => x.Id == fileUsageId);
-            if (fileUsage == null) throw new KnownException("文件不存在");
+            if (fileUsage == null)
+                throw new KnownException("文件不存在");
 
             // 拼接文件路径
-            if (onlyPublic && !fileUsage.IsPublic) throw new KnownException("无权访问该文件");
+            if (onlyPublic && !fileUsage.IsPublic)
+                throw new KnownException("无权访问该文件");
 
             return GetFileFullPath(fileUsage.FileObject);
         }
@@ -164,28 +179,38 @@ namespace UZonMail.Core.Services.Files
         /// <returns></returns>
         public string GetFileFullPath(FileObject fileObject)
         {
-            if (fileObject == null) throw new KnownException("FileObject 对象为空");
-            if (fileObject.FileBucket == null) throw new KnownException("fileObject 必须要 include FileBucket");
+            if (fileObject == null)
+                throw new KnownException("FileObject 对象为空");
+            if (fileObject.FileBucket == null)
+                throw new KnownException("fileObject 必须要 include FileBucket");
 
             string fullPath = Path.Combine(fileObject.FileBucket.RootDir, fileObject.Path);
             return fullPath;
         }
 
         /// <summary>
-        /// 获取或新建一个文件使用记录 
+        /// 获取或新建一个文件使用记录
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="fileName"></param>
         /// <param name="sha256">传入时，必须要保证 sha256 是存在的</param>
         /// <returns></returns>
-        public async Task<FileUsage> GetOrCreateFileUsage(long userId, string fileName, string sha256)
+        public async Task<FileUsage> GetOrCreateFileUsage(
+            long userId,
+            string fileName,
+            string sha256
+        )
         {
             // 判断 sha256 是否存在
-            FileObject? fileObject = await GetExistFileObject(sha256) ?? throw new FileNotFoundException();
+            FileObject? fileObject =
+                await GetExistFileObject(sha256) ?? throw new FileNotFoundException();
 
             // 获取源文件
-            var fileUsage = await db.FileUsages.FirstOrDefaultAsync(x => x.OwnerUserId == userId && x.FileObjectId == fileObject.Id);
-            if (fileUsage != null) return fileUsage;
+            var fileUsage = await db.FileUsages.FirstOrDefaultAsync(x =>
+                x.OwnerUserId == userId && x.FileObjectId == fileObject.Id
+            );
+            if (fileUsage != null)
+                return fileUsage;
 
             // 若不存在，则要新建
             var result = await db.RunTransaction(async ctx =>
@@ -230,7 +255,8 @@ namespace UZonMail.Core.Services.Files
             var fullPath = Path.Combine(root.Item1, relativePath);
 
             string baseDir = Path.GetDirectoryName(fullPath);
-            if (!Directory.Exists(baseDir)) Directory.CreateDirectory(baseDir);
+            if (!Directory.Exists(baseDir))
+                Directory.CreateDirectory(baseDir);
 
             return (fullPath, $"data/public/{relativePath}".Replace('\\', '/'));
         }

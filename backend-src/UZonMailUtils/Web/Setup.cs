@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
@@ -8,9 +9,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using UZonMail.Utils.Database.Redis;
@@ -256,6 +258,34 @@ namespace UZonMail.Utils.Web
                     process.Kill();
                 }
             }
+            return services;
+        }
+
+        /// <summary>
+        /// 配置多语言支持
+        /// 添加之后，请使用 app.UseRequestLocalization(); 配置
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddI18N(
+            this IServiceCollection services,
+            string[] supportedCultures
+        )
+        {
+            // 创建资源目录
+            // 可以通过 ResourcesPath 设置根目录
+            services.AddLocalization();
+
+            var supportedCultureInfos = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+
+            // 允许应用程序根据请求的文化信息（通过查询字符串 culture、Cookie、Accept-Language 头等提供商）自动选择合适的文化
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture("zh-CN");
+                options.SupportedCultures = supportedCultureInfos;
+                options.SupportedUICultures = supportedCultureInfos;
+            });
+
             return services;
         }
     }

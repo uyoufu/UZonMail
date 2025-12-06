@@ -1,13 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Sender.Smtp;
-using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.Core.SignalRHubs.Extensions;
-using UZonMail.Core.SignalRHubs.SendEmail;
+using Microsoft.EntityFrameworkCore;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.SignalRHubs.Extensions;
+using UZonMail.CorePlugin.SignalRHubs.SendEmail;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
+namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// 发件项后处理器
@@ -20,7 +20,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
         protected override async Task HandleCore(SendingContext context)
         {
             // 发送发件进度
-            if (context.EmailItem == null) return;
+            if (context.EmailItem == null)
+                return;
 
             // 根据状态发送进度信息
             var emailItem = context.EmailItem;
@@ -30,15 +31,19 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
                 if (emailItem.TriedCount >= emailItem.MaxRetryCount)
                 {
                     // 说明已经达到了最大重试次数
-                    emailItem.SetStatus(SendItemMetaStatus.Error, $"当前邮箱重试已达最大次数 {emailItem.MaxRetryCount}");
+                    emailItem.SetStatus(
+                        SendItemMetaStatus.Error,
+                        $"当前邮箱重试已达最大次数 {emailItem.MaxRetryCount}"
+                    );
                 }
             }
 
             // 标记结束
             emailItem.Done();
 
-            if (!emailItem.IsErrorOrSuccess()) return;
-            
+            if (!emailItem.IsErrorOrSuccess())
+                return;
+
             // 保存结果到数据库
             var sendingItem = await SaveSendingItemInfos(context);
 
@@ -61,8 +66,10 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             var success = emailItem.Status.HasFlag(SendItemMetaStatus.Success);
             var message = emailItem.Message;
 
-            // 更新 sendingItems 状态            
-            var data = await db.SendingItems.FirstOrDefaultAsync(x => x.Id == emailItem.SendingItemId);
+            // 更新 sendingItems 状态
+            var data = await db.SendingItems.FirstOrDefaultAsync(x =>
+                x.Id == emailItem.SendingItemId
+            );
             // 更新数据
             data.FromEmail = outbox.Email;
             data.Subject = emailItem.Subject;
@@ -76,15 +83,20 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             data.ReceiptId = new ResultParser(message).GetReceiptId();
 
             // 更新 sendingItemInbox 状态
-            await db.SendingItemInboxes.UpdateAsync(x => x.SendingItemId == emailItem.SendingItemId,
-                x => x.SetProperty(y => y.FromEmail, outbox.Email)
-                    .SetProperty(y => y.SendDate, DateTime.UtcNow)
-                );
+            await db.SendingItemInboxes.UpdateAsync(
+                x => x.SendingItemId == emailItem.SendingItemId,
+                x =>
+                    x.SetProperty(y => y.FromEmail, outbox.Email)
+                        .SetProperty(y => y.SendDate, DateTime.UtcNow)
+            );
 
             // 更新收件箱的最近收件日期
-            await db.Inboxes.UpdateAsync(x => emailItem.Inboxes.Select(x => x.Id).Contains(x.Id),
-                               x => x.SetProperty(y => y.LastBeDeliveredDate, DateTime.UtcNow)
-                                .SetProperty(y => y.LastSuccessDeliveryDate, DateTime.UtcNow));
+            await db.Inboxes.UpdateAsync(
+                x => emailItem.Inboxes.Select(x => x.Id).Contains(x.Id),
+                x =>
+                    x.SetProperty(y => y.LastBeDeliveredDate, DateTime.UtcNow)
+                        .SetProperty(y => y.LastSuccessDeliveryDate, DateTime.UtcNow)
+            );
 
             await db.SaveChangesAsync();
 

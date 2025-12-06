@@ -1,8 +1,8 @@
-﻿using FluentValidation;
-using UZonMail.Core.Services.Settings.Model;
+using FluentValidation;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Controllers.Settings.Validators
+namespace UZonMail.CorePlugin.Controllers.Settings.Validators
 {
     /// <summary>
     /// 组织设置验证器
@@ -14,8 +14,12 @@ namespace UZonMail.Core.Controllers.Settings.Validators
         /// </summary>
         public SendingSettingValidator()
         {
-            RuleFor(x => x.MinOutboxCooldownSecond).GreaterThanOrEqualTo(0).WithMessage("最小发件时间间隔不能小于0");
-            RuleFor(x => x.MaxOutboxCooldownSecond).GreaterThanOrEqualTo(0).WithMessage("最大发件时间间隔不能小于0");
+            RuleFor(x => x.MinOutboxCooldownSecond)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("最小发件时间间隔不能小于0");
+            RuleFor(x => x.MaxOutboxCooldownSecond)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("最大发件时间间隔不能小于0");
 
             RuleFor(x => x.MaxOutboxCooldownSecond)
                 .GreaterThan(x => x.MinOutboxCooldownSecond)

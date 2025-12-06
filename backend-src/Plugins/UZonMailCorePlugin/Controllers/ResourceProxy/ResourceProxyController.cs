@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
-namespace UZonMail.Core.Controllers.ResourceProxy
+namespace UZonMail.CorePlugin.Controllers.ResourceProxy
 {
     /// <summary>
     /// 资源代理控制器
@@ -20,7 +20,8 @@ namespace UZonMail.Core.Controllers.ResourceProxy
             if (response.IsSuccessStatusCode)
             {
                 var stream = await response.Content.ReadAsStreamAsync();
-                Response.ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+                Response.ContentType =
+                    response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
                 await stream.CopyToAsync(Response.Body);
             }
             else

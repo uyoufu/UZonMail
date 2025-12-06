@@ -1,11 +1,10 @@
-﻿using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.Controllers.Emails.Models
+namespace UZonMail.CorePlugin.Controllers.Emails.Models
 {
     public class SendingGroupStatusInfo
     {
-
-        public long Id { get; set; }        
+        public long Id { get; set; }
         public double TotalCount { get; set; }
         public int SentCount { get; set; }
         public int SuccessCount { get; set; }
@@ -13,12 +12,11 @@ namespace UZonMail.Core.Controllers.Emails.Models
 
         public SendingGroupStatusInfo(SendingGroup group)
         {
-            Id = group.Id;           
+            Id = group.Id;
             TotalCount = group.TotalCount;
             SentCount = group.SentCount;
             SuccessCount = group.SuccessCount;
             Status = group.Status;
         }
-
     }
 }

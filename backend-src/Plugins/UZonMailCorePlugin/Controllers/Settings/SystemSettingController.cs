@@ -1,37 +1,39 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Settings.Request;
-using UZonMail.Core.Services.Settings;
+using UZonMail.CorePlugin.Controllers.Settings.Request;
+using UZonMail.CorePlugin.Services.Settings;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Settings
+namespace UZonMail.CorePlugin.Controllers.Settings
 {
     /// <summary>
     /// 系统级设置, 为 AppSetting 的一个子集
     /// </summary>
     /// <param name="db"></param>
     /// <param name="settingService"></param>
-    public class SystemSettingController(SqlContext db, AppSettingService settingService) : ControllerBaseV1
+    public class SystemSettingController(SqlContext db, AppSettingService settingService)
+        : ControllerBaseV1
     {
         [HttpPut("base-api-url")]
-        public async Task<ResponseResult<bool>> UpdateBaseApiUrl([FromBody] UpdateBaseApiUrlBody dataParams)
+        public async Task<ResponseResult<bool>> UpdateBaseApiUrl(
+            [FromBody] UpdateBaseApiUrlBody dataParams
+        )
         {
             var baseApiUrl = dataParams.BaseApiUrl;
-            if (string.IsNullOrEmpty(baseApiUrl)) return false.ToFailResponse("baseUrl不能为空");
+            if (string.IsNullOrEmpty(baseApiUrl))
+                return false.ToFailResponse("baseUrl不能为空");
 
             // 开始更新
-            var setting = await db.AppSettings.FirstOrDefaultAsync(x => x.Key == AppSetting.BaseApiUrl);
+            var setting = await db.AppSettings.FirstOrDefaultAsync(x =>
+                x.Key == AppSetting.BaseApiUrl
+            );
             if (setting == null)
             {
-                setting = new AppSetting
-                {
-                    Key = AppSetting.BaseApiUrl,
-                    StringValue = baseApiUrl
-                };
+                setting = new AppSetting { Key = AppSetting.BaseApiUrl, StringValue = baseApiUrl };
                 db.AppSettings.Add(setting);
             }
             else
@@ -68,7 +70,10 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("json")]
-        public async Task<ResponseResult<bool>> UpdateSystemSettingJson(string key, [FromBody] JToken value)
+        public async Task<ResponseResult<bool>> UpdateSystemSettingJson(
+            string key,
+            [FromBody] JToken value
+        )
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -112,7 +117,6 @@ namespace UZonMail.Core.Controllers.Settings
             return true.ToSuccessResponse();
         }
 
-
         /// <summary>
         /// 获取系统设置
         /// </summary>
@@ -126,7 +130,7 @@ namespace UZonMail.Core.Controllers.Settings
                 return ResponseResult<AppSetting?>.Fail("key不能为空");
             }
 
-            var settings = await settingService.GetAppSetting(key,AppSettingType.System);
+            var settings = await settingService.GetAppSetting(key, AppSettingType.System);
             return settings.ToSuccessResponse();
         }
     }

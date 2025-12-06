@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.Services.SendCore.Interfaces
+namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
 {
     /// <summary>
     /// 自定义收件箱过滤器

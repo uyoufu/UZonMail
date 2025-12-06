@@ -1,25 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Users.Model;
-using UZonMail.Core.Services.Emails;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.SignalRHubs;
-using UZonMail.Core.SignalRHubs.Extensions;
+using UZonMail.CorePlugin.Controllers.Users.Model;
+using UZonMail.CorePlugin.Services.Emails;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.SignalRHubs;
+using UZonMail.CorePlugin.SignalRHubs.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Emails
+namespace UZonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// 邮件管理
     /// </summary>
-    public class EmailGroupController(SqlContext db, EmailGroupService groupService, TokenService tokenService,
+    public class EmailGroupController(
+        SqlContext db,
+        EmailGroupService groupService,
+        TokenService tokenService,
         OutboxValidateService outboxValidator,
-        IHubContext<UzonMailHub, IUzonMailClient> hub) : ControllerBaseV1
+        IHubContext<UzonMailHub, IUzonMailClient> hub
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 获取值
@@ -54,7 +58,9 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="type"></param>
         /// <returns></returns>
         [HttpGet("all")]
-        public async Task<ResponseResult<List<EmailGroup>>> GetEmailGroups([FromQuery] EmailGroupType type)
+        public async Task<ResponseResult<List<EmailGroup>>> GetEmailGroups(
+            [FromQuery] EmailGroupType type
+        )
         {
             var userId = tokenService.GetUserSqlId();
             var groups = await groupService.GetEmailGroups(userId, type);
@@ -71,10 +77,14 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<EmailGroup>> Update(long id, [FromBody] EmailGroup entity)
         {
             // 数据验证
-            if (string.IsNullOrEmpty(entity.Name)) throw new KnownException("组名不允许为空");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new KnownException("组名不允许为空");
 
             entity.Id = id;
-            await groupService.Update(entity, [nameof(EmailGroup.Name), nameof(EmailGroup.Description), nameof(EmailGroup.Order)]);
+            await groupService.Update(
+                entity,
+                [nameof(EmailGroup.Name), nameof(EmailGroup.Description), nameof(EmailGroup.Order)]
+            );
             return entity.ToSuccessResponse();
         }
 
@@ -89,8 +99,11 @@ namespace UZonMail.Core.Controllers.Emails
         {
             var userId = tokenService.GetUserSqlId();
             // 将组重新命名
-            var emailGroup = await db.EmailGroups.Where(x => x.Id == groupId && x.UserId == userId).FirstOrDefaultAsync();
-            if (emailGroup == null) return false.ToFailResponse("未找到该邮件组");
+            var emailGroup = await db
+                .EmailGroups.Where(x => x.Id == groupId && x.UserId == userId)
+                .FirstOrDefaultAsync();
+            if (emailGroup == null)
+                return false.ToFailResponse("未找到该邮件组");
 
             // 将组进行重命名
             emailGroup.Name += "_deletedAt" + DateTime.UtcNow.ToString("D");
@@ -109,7 +122,9 @@ namespace UZonMail.Core.Controllers.Emails
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
-            var emailBoxes = db.Outboxes.Where(x => !x.IsValid && x.EmailGroupId == groupId && x.UserId == userId);
+            var emailBoxes = db.Outboxes.Where(x =>
+                !x.IsValid && x.EmailGroupId == groupId && x.UserId == userId
+            );
             db.Outboxes.RemoveRange(emailBoxes);
             await db.SaveChangesAsync();
 
@@ -121,7 +136,8 @@ namespace UZonMail.Core.Controllers.Emails
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
-            var outboxes = await db.Outboxes.AsNoTracking()
+            var outboxes = await db
+                .Outboxes.AsNoTracking()
                 .Where(x => !x.IsValid && x.EmailGroupId == groupId && x.UserId == userId)
                 .ToListAsync();
 
@@ -154,7 +170,9 @@ namespace UZonMail.Core.Controllers.Emails
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
-            var emailBoxes = db.Inboxes.Where(x => x.EmailGroupId == groupId && x.UserId == userId && x.Status != InboxStatus.Valid);
+            var emailBoxes = db.Inboxes.Where(x =>
+                x.EmailGroupId == groupId && x.UserId == userId && x.Status != InboxStatus.Valid
+            );
             db.Inboxes.RemoveRange(emailBoxes);
             await db.SaveChangesAsync();
 

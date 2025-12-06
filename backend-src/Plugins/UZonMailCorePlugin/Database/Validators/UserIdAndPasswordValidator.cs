@@ -1,12 +1,12 @@
-﻿using FluentValidation;
+using FluentValidation;
 using UZonMail.DB.SQL.Core.Organization;
 
-namespace UZonMail.Core.Database.Validators
+namespace UZonMail.CorePlugin.Database.Validators
 {
     /// <summary>
     /// 验证用户名称和密码
     /// </summary>
-    public class UserIdAndPasswordValidator:AbstractValidator<User>
+    public class UserIdAndPasswordValidator : AbstractValidator<User>
     {
         public UserIdAndPasswordValidator()
         {

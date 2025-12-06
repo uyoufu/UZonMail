@@ -1,6 +1,6 @@
-﻿using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
 
-namespace UZonMail.Core.Services.SendCore.Event.Commands
+namespace UZonMail.CorePlugin.Services.SendCore.Event.Commands
 {
     /// <summary>
     /// 泛型事件参数
@@ -8,7 +8,8 @@ namespace UZonMail.Core.Services.SendCore.Event.Commands
     /// <typeparam name="T"></typeparam>
     public class GenericCommand<T> : CommandBase
     {
-        public GenericCommand(CommandType eventType, SendingContext scopeServices, T? data) : base(eventType, scopeServices)
+        public GenericCommand(CommandType eventType, SendingContext scopeServices, T? data)
+            : base(eventType, scopeServices)
         {
             Data = data;
         }

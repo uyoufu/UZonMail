@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using UZonMail.CorePlugin.Utils.Database;
+using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
-using UZonMail.DB.SQL;
-using UZonMail.Core.Utils.Database;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.DB.Extensions;
 
-namespace UZonMail.Core.Services.Settings
+namespace UZonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// 代理服务
@@ -21,10 +21,13 @@ namespace UZonMail.Core.Services.Settings
         /// <exception cref="KnownException"></exception>
         public async Task<StringResult> ValidateProxyName(string name)
         {
-            if (string.IsNullOrEmpty(name)) return StringResult.Fail("代理名称不能为空");
+            if (string.IsNullOrEmpty(name))
+                return StringResult.Fail("代理名称不能为空");
 
             var organizationId = tokenService.GetOrganizationId();
-            bool isExist = await db.Proxies.AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
+            bool isExist = await db.Proxies.AnyAsync(x =>
+                x.OrganizationId == organizationId && x.Name == name
+            );
             return new StringResult(isExist, "代理名称已存在");
         }
 
@@ -54,14 +57,16 @@ namespace UZonMail.Core.Services.Settings
         {
             // 只能更新自己的代理
             var userId = tokenService.GetUserSqlId();
-            await db.Proxies.UpdateAsync(x => x.UserId == userId && x.Id == userProxy.Id,
-                x => x.SetProperty(y => y.Name, userProxy.Name)
-                    .SetProperty(y => y.Description, userProxy.Description)
-                    .SetProperty(y => y.Url, userProxy.Url)
-                    .SetProperty(y => y.IsActive, userProxy.IsActive)
-                    .SetProperty(y => y.MatchRegex, userProxy.MatchRegex)
-                    .SetProperty(y => y.Priority, userProxy.Priority)
-                );
+            await db.Proxies.UpdateAsync(
+                x => x.UserId == userId && x.Id == userProxy.Id,
+                x =>
+                    x.SetProperty(y => y.Name, userProxy.Name)
+                        .SetProperty(y => y.Description, userProxy.Description)
+                        .SetProperty(y => y.Url, userProxy.Url)
+                        .SetProperty(y => y.IsActive, userProxy.IsActive)
+                        .SetProperty(y => y.MatchRegex, userProxy.MatchRegex)
+                        .SetProperty(y => y.Priority, userProxy.Priority)
+            );
             return true;
         }
     }

@@ -1,12 +1,12 @@
 using log4net;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using UZonMail.Core.Services.SendCore;
+using UZonMail.CorePlugin.Services.SendCore;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Jobs
+namespace UZonMail.CorePlugin.Jobs
 {
     /// <summary>
     /// 邮件发送定时任务

@@ -1,13 +1,13 @@
-﻿using MailKit.Net.Proxy;
+using MailKit.Net.Proxy;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using UZonMail.Core.Services.Emails;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.Emails;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.Core.Utils.FluentMailkit
+namespace UZonMail.CorePlugin.Utils.FluentMailkit
 {
     /// <summary>
     /// SmtpClient 的 fluent 版本
@@ -16,7 +16,7 @@ namespace UZonMail.Core.Utils.FluentMailkit
     {
         private readonly SmtpClient _smtpClient = smtpClient ?? new SmtpClient();
         private readonly MimeMessage _mimeMessage = mime ?? new MimeMessage();
-        private readonly BodyBuilder _bodyBuilder =new();
+        private readonly BodyBuilder _bodyBuilder = new();
 
         public FluentEmail WithFrom(string email, string? userName = "")
         {
@@ -53,10 +53,10 @@ namespace UZonMail.Core.Utils.FluentMailkit
             _mimeMessage.ReplyTo.Add(new MailboxAddress(userName, email));
             return this;
         }
-        
+
         public FluentEmail WithHtmlBody(string htmlBody)
         {
-            _bodyBuilder.HtmlBody = htmlBody;           
+            _bodyBuilder.HtmlBody = htmlBody;
             return this;
         }
 
@@ -66,9 +66,9 @@ namespace UZonMail.Core.Utils.FluentMailkit
         /// <param name="filePath"></param>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public FluentEmail WithAttachment(string filePath, string fileName="")
+        public FluentEmail WithAttachment(string filePath, string fileName = "")
         {
-            if(string.IsNullOrEmpty(fileName))
+            if (string.IsNullOrEmpty(fileName))
             {
                 fileName = Path.GetFileName(filePath);
             }
@@ -80,17 +80,16 @@ namespace UZonMail.Core.Utils.FluentMailkit
             return this;
         }
 
-
         public FluentEmail WithProxy(IProxyClient? proxyClient)
         {
-            if(proxyClient == null)
+            if (proxyClient == null)
                 return this;
 
             _smtpClient.ProxyClient = proxyClient;
             return this;
         }
 
-        public FluentEmail ConnectTo(string smptHost,int smtpPort,bool useSsl)
+        public FluentEmail ConnectTo(string smptHost, int smtpPort, bool useSsl)
         {
             _smtpClient.Connect(smptHost, smtpPort, useSsl);
             return this;
@@ -111,7 +110,7 @@ namespace UZonMail.Core.Utils.FluentMailkit
             // 设置邮件内容
             _mimeMessage.Body = _bodyBuilder.ToMessageBody();
             // 发送邮件
-           return await _smtpClient.SendAsync(_mimeMessage);
+            return await _smtpClient.SendAsync(_mimeMessage);
         }
     }
 }

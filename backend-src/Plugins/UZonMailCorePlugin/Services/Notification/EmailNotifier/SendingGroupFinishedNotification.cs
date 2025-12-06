@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
-using UZonMail.Core.Utils.FluentMailkit;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
+using UZonMail.CorePlugin.Utils.FluentMailkit;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Notification.EmailNotifier
+namespace UZonMail.CorePlugin.Services.Notification.EmailNotifier
 {
     /// <summary>
     /// 发件组完成通知

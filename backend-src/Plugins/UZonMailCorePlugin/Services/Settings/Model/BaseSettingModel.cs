@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
-using UZonMail.Core.Utils.Cache;
+using UZonMail.CorePlugin.Utils.Cache;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.Settings.Model
+namespace UZonMail.CorePlugin.Services.Settings.Model
 {
     /// <summary>
     /// 所有设置的基类

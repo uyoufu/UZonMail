@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.Files;
-using UZonMail.DB.SQL;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.CorePlugin.Services.Files;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Files;
+using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Files
+namespace UZonMail.CorePlugin.Controllers.Files
 {
-    public class FileReaderController(SqlContext db, FileStoreService fileStoreService) : ControllerBaseV1
+    public class FileReaderController(SqlContext db, FileStoreService fileStoreService)
+        : ControllerBaseV1
     {
         /// <summary>
         /// 获取文件对象的下载 Id
@@ -19,10 +20,13 @@ namespace UZonMail.Core.Controllers.Files
         [HttpPost()]
         public async Task<ResponseResult<long>> GetObjectAsync(long fileUsageId)
         {
-            FileUsage? fileUsage = await db.FileUsages.FirstOrDefaultAsync(x => x.Id == fileUsageId);
+            FileUsage? fileUsage = await db.FileUsages.FirstOrDefaultAsync(x =>
+                x.Id == fileUsageId
+            );
 
             // 判断文件是否存在
-            if (fileUsage == null) return 0L.ToFailResponse("文件不存在");
+            if (fileUsage == null)
+                return 0L.ToFailResponse("文件不存在");
 
             // 生成临时读取链接
             FileReader fileReader = new(fileUsage);
@@ -43,12 +47,14 @@ namespace UZonMail.Core.Controllers.Files
         public async Task<IActionResult> GetFileStream(long fileReaderId)
         {
             // 获取文件流
-            var fileReader = await db.FileReaders.Where(x => x.Id == fileReaderId)
+            var fileReader = await db
+                .FileReaders.Where(x => x.Id == fileReaderId)
                 .Include(x => x.FileObject)
                 .ThenInclude(x => x.FileBucket)
                 .FirstOrDefaultAsync();
 
-            if (fileReader == null) return NotFound();
+            if (fileReader == null)
+                return NotFound();
 
             // 判断是否过期
             if (fileReader.ExpireDate < DateTime.UtcNow)

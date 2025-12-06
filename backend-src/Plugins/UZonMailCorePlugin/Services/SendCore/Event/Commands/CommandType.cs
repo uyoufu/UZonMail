@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Services.SendCore.Event.Commands
+namespace UZonMail.CorePlugin.Services.SendCore.Event.Commands
 {
     /// <summary>
     /// 事件类型

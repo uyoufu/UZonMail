@@ -1,18 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
-using UZonMail.Utils.Web.Service;
-using UZonMail.Core.Utils.Database;
-using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using UZonMail.CorePlugin.Utils.Database;
 using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Base;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Common
+namespace UZonMail.CorePlugin.Services.Common
 {
     /// <summary>
     /// 通用的增删改查服务
     /// </summary>
-    public abstract class CurdService<TEntity>(SqlContext db) : IScopedService where TEntity : SqlId
+    public abstract class CurdService<TEntity>(SqlContext db) : IScopedService
+        where TEntity : SqlId
     {
         /// <summary>
         /// 执行事务
@@ -46,10 +47,13 @@ namespace UZonMail.Core.Services.Common
         /// <param name="entity"></param>
         /// <param name="modifiedPropertyNames"></param>
         /// <returns></returns>
-        public virtual async Task<TEntity> Update(TEntity entity, List<string> modifiedPropertyNames)
+        public virtual async Task<TEntity> Update(
+            TEntity entity,
+            List<string> modifiedPropertyNames
+        )
         {
             ArgumentNullException.ThrowIfNull(entity);
-            if(modifiedPropertyNames == null || modifiedPropertyNames.Count == 0)
+            if (modifiedPropertyNames == null || modifiedPropertyNames.Count == 0)
             {
                 throw new ArgumentNullException(nameof(modifiedPropertyNames));
             }
@@ -65,7 +69,8 @@ namespace UZonMail.Core.Services.Common
         /// <exception cref="ArgumentNullException"></exception>
         public virtual async Task<bool> Delete(TEntity entity)
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
             db.Remove(entity);
             await db.SaveChangesAsync();
             return true;
@@ -78,7 +83,8 @@ namespace UZonMail.Core.Services.Common
         /// <returns></returns>
         public virtual async Task<bool> DeleteById(long id)
         {
-            await db.Set<TEntity>().Where(x=>x.Id==id).ExecuteDeleteAsync();;
+            await db.Set<TEntity>().Where(x => x.Id == id).ExecuteDeleteAsync();
+            ;
             return true;
         }
 

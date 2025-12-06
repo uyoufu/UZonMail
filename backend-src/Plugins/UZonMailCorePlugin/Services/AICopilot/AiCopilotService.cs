@@ -2,7 +2,7 @@ using Microsoft.Extensions.AI;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.AICopilot
+namespace UZonMail.CorePlugin.Services.AICopilot
 {
     public class AiCopilotService(SqlContext db, AIClientsManger aIClients) : IScopedService
     {

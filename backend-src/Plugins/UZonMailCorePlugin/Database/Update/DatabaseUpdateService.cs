@@ -1,16 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Config.SubConfigs;
+using Microsoft.EntityFrameworkCore;
+using UZonMail.CorePlugin.Config.SubConfigs;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Database.Updater
+namespace UZonMail.CorePlugin.Database.Updater
 {
     /// <summary>
     /// 数据升级管理器
     /// </summary>
     /// <param name="db"></param>
-    public class DatabaseUpdateService(IServiceProvider serviceProvider, SqlContext db, IConfiguration config) : IScopedService
+    public class DatabaseUpdateService(
+        IServiceProvider serviceProvider,
+        SqlContext db,
+        IConfiguration config
+    ) : IScopedService
     {
         /// <summary>
         /// 自动升级时，要求的数据库最低版本
@@ -48,15 +52,13 @@ namespace UZonMail.Core.Database.Updater
             config.GetSection("User")?.Bind(userConfig);
 
             // 获取数据版本
-            var versionSetting = await db.AppSettings.FirstOrDefaultAsync(x => x.Key == _settingKey);
+            var versionSetting = await db.AppSettings.FirstOrDefaultAsync(x =>
+                x.Key == _settingKey
+            );
             if (versionSetting == null)
             {
                 // 初始化版本
-                versionSetting = new AppSetting
-                {
-                    Key = _settingKey,
-                    StringValue = "0.0.0.0"
-                };
+                versionSetting = new AppSetting { Key = _settingKey, StringValue = "0.0.0.0" };
                 db.AppSettings.Add(versionSetting);
             }
             else if (versionSetting.StringValue != "0.0.0.0")
@@ -72,11 +74,14 @@ namespace UZonMail.Core.Database.Updater
                 throw new ArgumentException("数据库版本高于当前所需版本，请更新程序后再使用");
 
             // 若版本一致时，说明已经更新过
-            if (originVersion == _requiredVersion) return;
+            if (originVersion == _requiredVersion)
+                return;
 
             // 执行数据库升级
             // 实例化所有的更新类
-            var updaters = GetUpdaters().Where(x => x != null).Where(x => x.Version > originVersion && x.Version <= _requiredVersion)
+            var updaters = GetUpdaters()
+                .Where(x => x != null)
+                .Where(x => x.Version > originVersion && x.Version <= _requiredVersion)
                 .OrderBy(x => x.Version); // 升序排列
             foreach (var updater in updaters)
             {

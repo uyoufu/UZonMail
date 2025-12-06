@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Core.Config.SubConfigs
+namespace UZonMail.CorePlugin.Config.SubConfigs
 {
     /// <summary>
     /// 文件存储设置
@@ -8,6 +8,6 @@
         /// <summary>
         /// 文件存储根目录
         /// </summary>
-        public string DefaultRootDir { get; set; } ="data/object-files";
+        public string DefaultRootDir { get; set; } = "data/object-files";
     }
 }

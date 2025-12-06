@@ -2,14 +2,14 @@ using System.ClientModel;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.AI;
 using OpenAI.Chat;
-using UZonMail.Core.Services.AICopilot.Model;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
+using UZonMail.CorePlugin.Services.AICopilot.Model;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.AICopilot
+namespace UZonMail.CorePlugin.Services.AICopilot
 {
     /// <summary>
     /// AI 客户端管理器

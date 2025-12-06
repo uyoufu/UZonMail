@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
+using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.SQL;
 
-namespace UZonMail.Core.Services.SendCore.WaitList
+namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
     /// 发件项元数据列表
@@ -64,7 +64,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public bool Add(SendItemMeta itemMeta, bool fromRecycle = false)
         {
-            if (itemMeta == null) return false;
+            if (itemMeta == null)
+                return false;
 
             // 如果存在，则不添加
             if (!_allWaitDic.TryAdd(itemMeta.SendingItemId, itemMeta))
@@ -115,7 +116,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public bool MoveRecycleToWaitList(long sendingItemId)
         {
-            if (!_recycleBin.TryGetValue(sendingItemId, out var meta)) return false;
+            if (!_recycleBin.TryGetValue(sendingItemId, out var meta))
+                return false;
             _recycleBin.TryRemove(sendingItemId, out _);
             return Add(meta, true);
         }
@@ -127,7 +129,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public bool ClearRecycleBin(long sendingItemId, bool success)
         {
-            if (!_recycleBin.TryRemove(sendingItemId, out _)) return false;
+            if (!_recycleBin.TryRemove(sendingItemId, out _))
+                return false;
             Counter.IncreaseSentCount(success);
             return true;
         }
@@ -139,7 +142,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public bool AddRange(IEnumerable<SendItemMeta> items)
         {
-            if (items == null) return false;
+            if (items == null)
+                return false;
             foreach (var meta in items)
             {
                 Add(meta);
@@ -180,7 +184,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         public bool RemovePendingItem(long sendingItemId)
         {
             // 找到项, 标记删除
-            if (!_allWaitDic.TryRemove(sendingItemId, out var meta)) return true;
+            if (!_allWaitDic.TryRemove(sendingItemId, out var meta))
+                return true;
 
             if (!meta.IsDeleted)
             {
@@ -197,7 +202,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public SendItemMeta? GetSendingMeta()
         {
-            if (!_anoymousList.TryTake(out var meta)) return null;
+            if (!_anoymousList.TryTake(out var meta))
+                return null;
             _allWaitDic.TryRemove(meta.SendingItemId, out _);
 
             // 若已经被删除，重新获取
@@ -215,9 +221,11 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// <returns></returns>
         public SendItemMeta? GetSendingMeta(long outboxId)
         {
-            if (!_outboxDic.TryGetValue(outboxId, out var list)) return null;
+            if (!_outboxDic.TryGetValue(outboxId, out var list))
+                return null;
 
-            if (!list.TryTake(out var meta)) return null;
+            if (!list.TryTake(out var meta))
+                return null;
             _allWaitDic.TryRemove(meta.SendingItemId, out _);
 
             // 若已经被删除，重新获取
@@ -240,12 +248,14 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             if (!onlySpecific)
             {
                 // 匿名发件
-                if (!_anoymousList.IsEmpty) return true;
+                if (!_anoymousList.IsEmpty)
+                    return true;
                 return _recycleBin.Any(x => x.Value.OutboxId == 0);
             }
 
             // 指定项
-            if (!_outboxDic.TryGetValue(outboxId, out var list)) return false;
+            if (!_outboxDic.TryGetValue(outboxId, out var list))
+                return false;
             return list.Any(x => x.OutboxId == outboxId);
         }
 
@@ -255,17 +265,24 @@ namespace UZonMail.Core.Services.SendCore.WaitList
         /// </summary>
         /// <param name="sendItemMeta"></param>
         /// <returns></returns>
-        public async Task<SendItemMeta> FillSendingItem(SqlContext sqlContext, SendItemMeta sendItemMeta)
+        public async Task<SendItemMeta> FillSendingItem(
+            SqlContext sqlContext,
+            SendItemMeta sendItemMeta
+        )
         {
-            if (sendItemMeta.SendingItem != null) return sendItemMeta;
+            if (sendItemMeta.SendingItem != null)
+                return sendItemMeta;
 
             // 批量从数据库中提取数据，每次取 100 条
-            var sendingItemMetas = _allWaitDic.Values.Where(x => x.SendingItem == null).Take(100).ToList();
+            var sendingItemMetas = _allWaitDic
+                .Values.Where(x => x.SendingItem == null)
+                .Take(100)
+                .ToList();
             sendingItemMetas.Add(sendItemMeta);
 
             var sendingItemIds = sendingItemMetas.Select(x => x.SendingItemId).ToList();
-            var sendingItems = await sqlContext.SendingItems
-                .AsNoTracking()
+            var sendingItems = await sqlContext
+                .SendingItems.AsNoTracking()
                 .Where(x => sendingItemIds.Contains(x.Id))
                 .Include(x => x.Attachments)
                 .ToListAsync();
@@ -274,7 +291,8 @@ namespace UZonMail.Core.Services.SendCore.WaitList
             foreach (var meta in sendingItemMetas)
             {
                 var sendingItem = sendingItems.FirstOrDefault(x => x.Id == meta.SendingItemId);
-                if (sendingItem == null) continue;
+                if (sendingItem == null)
+                    continue;
                 meta.SetSendingItem(sendingItem);
             }
 

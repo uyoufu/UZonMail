@@ -1,20 +1,23 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
+using UZonMail.CorePlugin.Config;
+using UZonMail.Utils.Json;
 using UZonMail.Utils.Web.Service;
 using UZonMail.Utils.Web.Token;
-using UZonMail.Utils.Json;
-using UZonMail.Core.Config;
-using Newtonsoft.Json.Linq;
 
-namespace UZonMail.Core.Services.Settings
+namespace UZonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// Token 相关的服务
     /// </summary>
     /// <param name="httpContextAccessor"></param>
     /// <param name="appConfig"></param>
-    public class TokenService(IHttpContextAccessor httpContextAccessor, IOptions<AppConfig> appConfig) : IScopedService
+    public class TokenService(
+        IHttpContextAccessor httpContextAccessor,
+        IOptions<AppConfig> appConfig
+    ) : IScopedService
     {
         private HttpRequest Request => httpContextAccessor.HttpContext.Request;
 
@@ -51,7 +54,8 @@ namespace UZonMail.Core.Services.Settings
         {
             var payloads = GetTokenPayload();
             var idResult = payloads.SelectTokenOrDefault(fieldName, "");
-            if (long.TryParse(idResult, out long longId)) return longId;
+            if (long.TryParse(idResult, out long longId))
+                return longId;
             return 0L;
         }
 
@@ -70,7 +74,7 @@ namespace UZonMail.Core.Services.Settings
         /// <returns></returns>
         public long GetDepartmentId()
         {
-           return GetLongId("departmentId");
+            return GetLongId("departmentId");
         }
 
         /// <summary>
@@ -79,7 +83,7 @@ namespace UZonMail.Core.Services.Settings
         /// <returns></returns>
         public long GetOrganizationId()
         {
-           return GetLongId("organizationId");
+            return GetLongId("organizationId");
         }
 
         /// <summary>

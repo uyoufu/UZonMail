@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Emails.Models;
-using UZonMail.Core.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.CorePlugin.Controllers.Emails.Models;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Web.PagingQuery;
+using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Emails
+namespace UZonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// 发件历史
@@ -24,7 +24,9 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<int>> GetSendingGroupsCount(string filter)
         {
             var userId = tokenService.GetUserSqlId();
-            var dbSet = db.SendingGroups.AsNoTracking().Where(x => x.UserId == userId && !x.IsDeleted);
+            var dbSet = db
+                .SendingGroups.AsNoTracking()
+                .Where(x => x.UserId == userId && !x.IsDeleted);
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Subjects.Contains(filter));
@@ -40,15 +42,22 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<SendingHistoryResult>>> GetSendingGroupsData(string filter, Pagination pagination)
+        public async Task<ResponseResult<List<SendingHistoryResult>>> GetSendingGroupsData(
+            string filter,
+            Pagination pagination
+        )
         {
             var userId = tokenService.GetUserSqlId();
-            var dbSet = db.SendingGroups.AsNoTracking().Where(x => x.UserId == userId && !x.IsDeleted);
+            var dbSet = db
+                .SendingGroups.AsNoTracking()
+                .Where(x => x.UserId == userId && !x.IsDeleted);
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x => x.Subjects.Contains(filter));
             }
-            dbSet = dbSet.Include(x => x.Templates).Include(x => x.Outboxes)
+            dbSet = dbSet
+                .Include(x => x.Templates)
+                .Include(x => x.Outboxes)
                 .Select(x => new SendingGroup()
                 {
                     Id = x.Id,
@@ -79,7 +88,9 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<List<RunningSendingGroupResult>>> GetRunningSendingGroups()
         {
             var userId = tokenService.GetUserSqlId();
-            var results = await db.SendingGroups.Where(x => x.Status == SendingGroupStatus.Sending).ToListAsync();
+            var results = await db
+                .SendingGroups.Where(x => x.Status == SendingGroupStatus.Sending)
+                .ToListAsync();
             return results.ConvertAll(x => new RunningSendingGroupResult(x)).ToSuccessResponse();
         }
 
@@ -91,8 +102,11 @@ namespace UZonMail.Core.Controllers.Emails
         public async Task<ResponseResult<string>> GetSendingGroupSubjects(long sendingGroupId)
         {
             var userId = tokenService.GetUserSqlId();
-            var result = await db.SendingGroups.FirstOrDefaultAsync(x => x.Id == sendingGroupId && x.UserId == userId);
-            if (result == null) return new ErrorResponse<string>("邮箱组不存在");
+            var result = await db.SendingGroups.FirstOrDefaultAsync(x =>
+                x.Id == sendingGroupId && x.UserId == userId
+            );
+            if (result == null)
+                return new ErrorResponse<string>("邮箱组不存在");
             return result.Subjects.ToSuccessResponse();
         }
 
@@ -102,11 +116,16 @@ namespace UZonMail.Core.Controllers.Emails
         /// <param name="sendingGroupId"></param>
         /// <returns></returns>
         [HttpGet("{sendingGroupId:long}/status-info")]
-        public async Task<ResponseResult<SendingGroupStatusInfo>> GetSendingGroupRunningInfo(long sendingGroupId)
+        public async Task<ResponseResult<SendingGroupStatusInfo>> GetSendingGroupRunningInfo(
+            long sendingGroupId
+        )
         {
             var userId = tokenService.GetUserSqlId();
-            var result = await db.SendingGroups.FirstOrDefaultAsync(x => x.Id == sendingGroupId && x.UserId == userId);
-            if (result == null) return new ErrorResponse<SendingGroupStatusInfo>("邮箱组不存在");
+            var result = await db.SendingGroups.FirstOrDefaultAsync(x =>
+                x.Id == sendingGroupId && x.UserId == userId
+            );
+            if (result == null)
+                return new ErrorResponse<SendingGroupStatusInfo>("邮箱组不存在");
             return new SendingGroupStatusInfo(result).ToSuccessResponse();
         }
 
@@ -120,7 +139,8 @@ namespace UZonMail.Core.Controllers.Emails
         {
             var userId = tokenService.GetUserSqlId();
             // 只能获取自己的发件组数据
-            var sendingGroup = await db.SendingGroups.Where(x => x.UserId == userId && x.ObjectId == sendingGroupObjId)
+            var sendingGroup = await db
+                .SendingGroups.Where(x => x.UserId == userId && x.ObjectId == sendingGroupObjId)
                 .Include(x => x.Outboxes)
                 .Include(x => x.Templates)
                 .Include(x => x.Attachments)
@@ -148,10 +168,13 @@ namespace UZonMail.Core.Controllers.Emails
         /// </summary>
         /// <returns></returns>
         [HttpDelete("ids/many")]
-        public async Task<ResponseResult<bool>> DeleteSendingGroups([FromBody] List<long> sendingGroupIds)
+        public async Task<ResponseResult<bool>> DeleteSendingGroups(
+            [FromBody] List<long> sendingGroupIds
+        )
         {
             var userId = tokenService.GetUserSqlId();
-            await db.SendingGroups.Where(x => x.UserId == userId)
+            await db
+                .SendingGroups.Where(x => x.UserId == userId)
                 .Where(x => sendingGroupIds.Contains(x.Id))
                 .ExecuteUpdateAsync(x => x.SetProperty(p => p.IsDeleted, true));
 

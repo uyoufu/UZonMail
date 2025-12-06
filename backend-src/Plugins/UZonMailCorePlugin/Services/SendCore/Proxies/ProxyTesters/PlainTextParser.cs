@@ -1,14 +1,15 @@
-﻿using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 纯文本解析器
     /// </summary>
     /// <param name="httpClient"></param>
-    public abstract class PlainTextParser(HttpClient httpClient, ProxyZoneType testerType) : BaseProxyTester(httpClient, testerType)
+    public abstract class PlainTextParser(HttpClient httpClient, ProxyZoneType testerType)
+        : BaseProxyTester(httpClient, testerType)
     {
         protected override string? RetrieveIP(string content)
         {
@@ -16,7 +17,10 @@ namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
                 return string.Empty;
 
             // 使用正则表达式进行匹配
-            var regex = new Regex(GetIpRegexMatchPrefix() + @"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var regex = new Regex(
+                GetIpRegexMatchPrefix() + @"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})",
+                RegexOptions.IgnoreCase | RegexOptions.Multiline
+            );
             var match = regex.Match(content);
             if (match.Success)
             {

@@ -1,15 +1,13 @@
-﻿using FluentValidation;
+using FluentValidation;
 using FluentValidation.Results;
-using UZonMail.Utils.Results;
 using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Results;
 
-namespace UZonMail.Core.Database.Validators
+namespace UZonMail.CorePlugin.Database.Validators
 {
     public class SendingGroupValidator : AbstractValidator<SendingGroup>
     {
-        public SendingGroupValidator()
-        {
-        }
+        public SendingGroupValidator() { }
 
         /// <summary>
         /// 手动验证
@@ -20,7 +18,8 @@ namespace UZonMail.Core.Database.Validators
         {
             var result = new ValidationResult();
             var vdResult = ValidateCore(context.InstanceToValidate);
-            if (vdResult) return result;
+            if (vdResult)
+                return result;
 
             result.Errors.Add(new ValidationFailure("", vdResult.Message));
             return result;
@@ -45,7 +44,8 @@ namespace UZonMail.Core.Database.Validators
             {
                 // 2. 没有数据
                 var globalVdResult = ValidateGlobalData(sendingGroup);
-                if (!globalVdResult) return globalVdResult;
+                if (!globalVdResult)
+                    return globalVdResult;
             }
             else
             {
@@ -61,12 +61,17 @@ namespace UZonMail.Core.Database.Validators
                     {
                         // 验证通用数据
                         var globalVdResult = ValidateGlobalData(sendingGroup);
-                        if (!globalVdResult) return globalVdResult;
+                        if (!globalVdResult)
+                            return globalVdResult;
                     }
                 }
 
                 // 验证其它数据
-                if (sendingGroup.Outboxes.Count == 0 && excelDataInfo.OutboxStatus != ExcelDataStatus.All && sendingGroup.OutboxGroups?.Count == 0)
+                if (
+                    sendingGroup.Outboxes.Count == 0
+                    && excelDataInfo.OutboxStatus != ExcelDataStatus.All
+                    && sendingGroup.OutboxGroups?.Count == 0
+                )
                 {
                     return new ErrorResult<bool>("缺失发件箱，请在数据中指定发件箱或选择发件箱");
                 }
@@ -74,7 +79,10 @@ namespace UZonMail.Core.Database.Validators
                 {
                     return new ErrorResult<bool>("请保证每条数据都有 inbox (收件人邮箱)");
                 }
-                if (!ExistGlobalBody(sendingGroup) && excelDataInfo.BodyStatus != ExcelDataStatus.All)
+                if (
+                    !ExistGlobalBody(sendingGroup)
+                    && excelDataInfo.BodyStatus != ExcelDataStatus.All
+                )
                 {
                     return new ErrorResult<bool>("缺失邮件正文，请在数据中指定邮件正文 或 选择模板 或 填写正文");
                 }
@@ -90,12 +98,18 @@ namespace UZonMail.Core.Database.Validators
                 return new ErrorResult<bool>("缺失邮件正文，请选择模板 或 填写正文");
             }
 
-            if (sendingGroup.Outboxes.Count == 0 && (sendingGroup.OutboxGroups == null || sendingGroup.OutboxGroups.Count == 0))
+            if (
+                sendingGroup.Outboxes.Count == 0
+                && (sendingGroup.OutboxGroups == null || sendingGroup.OutboxGroups.Count == 0)
+            )
             {
                 return new ErrorResult<bool>("请选择发件人");
             }
 
-            if (sendingGroup.Inboxes.Count == 0 && (sendingGroup.InboxGroups == null || sendingGroup.InboxGroups.Count == 0))
+            if (
+                sendingGroup.Inboxes.Count == 0
+                && (sendingGroup.InboxGroups == null || sendingGroup.InboxGroups.Count == 0)
+            )
             {
                 return new ErrorResult<bool>("请选择收件人");
             }

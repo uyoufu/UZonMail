@@ -1,13 +1,14 @@
-﻿using UZonMail.Core.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
 
-namespace UZonMail.Core.Services.SendCore.Event.Commands
+namespace UZonMail.CorePlugin.Services.SendCore.Event.Commands
 {
     /// <summary>
     /// 发件结束后的参数
     /// </summary>
     public class SendingTaskEndCommand : GenericCommand<long>
     {
-        public SendingTaskEndCommand(SendingContext scopeServices, long userId) : base(CommandType.SendingTaskDisposed, scopeServices, userId)
+        public SendingTaskEndCommand(SendingContext scopeServices, long userId)
+            : base(CommandType.SendingTaskDisposed, scopeServices, userId)
         {
             UserId = userId;
         }

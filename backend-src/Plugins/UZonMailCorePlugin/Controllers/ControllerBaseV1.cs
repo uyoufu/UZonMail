@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text.RegularExpressions;
-using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Json;
 using UZonMail.Utils.Web.Token;
 
-namespace UZonMail.Core.Controllers
+namespace UZonMail.CorePlugin.Controllers
 {
     /// <summary>
     /// 所有控制器基接口
@@ -19,7 +16,8 @@ namespace UZonMail.Core.Controllers
     public abstract class ControllerBaseV1 : ControllerBase
     {
         #region 控制器通用的方法
-        private JObject _requestBody;
+        private JObject? _requestBody;
+
         /// <summary>
         /// 请求数据体
         /// </summary>
@@ -47,11 +45,13 @@ namespace UZonMail.Core.Controllers
         protected int GetUserIdFromToken(TokenParams tokenParams)
         {
             var token = Request.Headers[HeaderNames.Authorization].ToString();
-            if(string.IsNullOrEmpty(token))return 0;
+            if (string.IsNullOrEmpty(token))
+                return 0;
 
             var tokenPayloads = JWTToken.GetTokenPayloads(token);
             string userId = tokenPayloads.SelectTokenOrDefault("userId", string.Empty);
-            if (int.TryParse(userId, out int intUserId)) return intUserId;
+            if (int.TryParse(userId, out int intUserId))
+                return intUserId;
             return 0;
         }
         #endregion

@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 
-namespace UZonMailService.Middlewares
+namespace UZonMail.Server.Middlewares
 {
     public static class VueASPMiddlewareExtension
     {
@@ -13,7 +13,8 @@ namespace UZonMailService.Middlewares
         {
             var vueMiddleware = new VueASPMiddleware(null);
             // 不满足条件时，不启用中间件
-            if (!vueMiddleware.IsValid) return app;
+            if (!vueMiddleware.IsValid)
+                return app;
 
             return app.Use(vueMiddleware.Invoke);
         }
@@ -29,6 +30,7 @@ namespace UZonMailService.Middlewares
         private List<string> _existNames = [];
 
         public bool IsValid { get; private set; }
+
         public VueASPMiddleware(string wwwrootPath)
         {
             if (string.IsNullOrEmpty(wwwrootPath))
@@ -37,12 +39,17 @@ namespace UZonMailService.Middlewares
             _indexFilePath = Path.Combine(wwwrootPath, "index.html");
             // 若不存在，则不启用中间件
             IsValid = File.Exists(_indexFilePath);
-            if (!IsValid) return;
+            if (!IsValid)
+                return;
 
-            if (!Directory.Exists(wwwrootPath)) return;
+            if (!Directory.Exists(wwwrootPath))
+                return;
 
             var files = Directory.GetFiles(wwwrootPath).Select(x => Path.GetFileName(x)).ToList();
-            var dirs = Directory.GetDirectories(wwwrootPath).Select(x => Path.GetFileName(x)).ToList();
+            var dirs = Directory
+                .GetDirectories(wwwrootPath)
+                .Select(x => Path.GetFileName(x))
+                .ToList();
             _existNames.AddRange(files);
             _existNames.AddRange(dirs);
         }
@@ -52,7 +59,8 @@ namespace UZonMailService.Middlewares
             await next();
 
             // 找到的，直接返回
-            if (context.Response.StatusCode != 404) return;
+            if (context.Response.StatusCode != 404)
+                return;
 
             var requestPath = context.Request.Path.Value;
             if (string.IsNullOrEmpty(requestPath) || requestPath.StartsWith("/api"))

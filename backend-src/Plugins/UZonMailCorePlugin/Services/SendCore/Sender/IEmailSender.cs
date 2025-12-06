@@ -1,12 +1,12 @@
-﻿using MimeKit;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.DB.SQL.Core.Emails;
+using MimeKit;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
 using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Service;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
+using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.Sender
+namespace UZonMail.CorePlugin.Services.SendCore.Sender
 {
     /// <summary>
     /// 邮件发送器接口

@@ -1,8 +1,8 @@
-﻿using MimeKit;
-using UZonMail.Core.Services.EmailDecorator.Interfaces;
+using MimeKit;
+using UZonMail.CorePlugin.Services.EmailDecorator.Interfaces;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.EmailDecorator
+namespace UZonMail.CorePlugin.Services.EmailDecorator
 {
     /// <summary>
     /// 邮件消息体装饰器
@@ -16,7 +16,10 @@ namespace UZonMail.Core.Services.EmailDecorator
         /// <param name="decoratorParams"></param>
         /// <param name="mimeMessage"></param>
         /// <returns></returns>
-        public async Task<MimeMessage> Decorate(IContentDecoratorParams decoratorParams, MimeMessage mimeMessage)
+        public async Task<MimeMessage> Decorate(
+            IContentDecoratorParams decoratorParams,
+            MimeMessage mimeMessage
+        )
         {
             var decorators = serviceProvider.GetServices<IMimeMessageDecroator>();
             foreach (var decorator in decorators)

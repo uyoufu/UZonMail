@@ -1,21 +1,26 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.Files;
-using UZonMail.Core.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.PagingQuery;
 using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.CorePlugin.Services.Config;
+using UZonMail.CorePlugin.Services.Files;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Files;
-using UZonMail.Core.Services.Config;
+using UZonMail.Utils.Web.PagingQuery;
+using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Files
+namespace UZonMail.CorePlugin.Controllers.Files
 {
     /// <summary>
     /// 文件控制器
     /// </summary>
-    public class FileController(SqlContext db, FileStoreService fileStoreService, TokenService tokenService, DebugConfig debugConfig) : ControllerBaseV1
+    public class FileController(
+        SqlContext db,
+        FileStoreService fileStoreService,
+        TokenService tokenService,
+        DebugConfig debugConfig
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 获取文件ID
@@ -26,12 +31,17 @@ namespace UZonMail.Core.Controllers.Files
         {
             // 判断是否存在 fileObject
             FileObject? fileObject = await fileStoreService.GetExistFileObject(sha256);
-            if (fileObject == null) return (-1L).ToSuccessResponse();
+            if (fileObject == null)
+                return (-1L).ToSuccessResponse();
 
             var userId = tokenService.GetUserSqlId();
 
             // 获取 fileUsageId
-            FileUsage fileUsage = await fileStoreService.GetOrCreateFileUsage(userId, fileName, sha256);
+            FileUsage fileUsage = await fileStoreService.GetOrCreateFileUsage(
+                userId,
+                fileName,
+                sha256
+            );
             return fileUsage.Id.ToSuccessResponse();
         }
 
@@ -100,7 +110,11 @@ namespace UZonMail.Core.Controllers.Files
         public ResponseResult<string> UploadToStaticFile(StaticFileUploaderBody fileParams)
         {
             var userId = tokenService.GetUserSqlId();
-            var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(userId.ToString(), fileParams.SubPath, fileParams.File.FileName);
+            var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(
+                userId.ToString(),
+                fileParams.SubPath,
+                fileParams.File.FileName
+            );
 
             using var stream = new FileStream(fullPath, FileMode.Create);
             fileParams.File.CopyTo(stream);
@@ -120,7 +134,9 @@ namespace UZonMail.Core.Controllers.Files
             var dbSet = db.FileUsages.Where(x => x.OwnerUserId == userId);
             if (!string.IsNullOrEmpty(filter))
             {
-                dbSet = dbSet.Where(x => x.DisplayName.Contains(filter) || x.FileName.Contains(filter));
+                dbSet = dbSet.Where(x =>
+                    x.DisplayName.Contains(filter) || x.FileName.Contains(filter)
+                );
             }
             int count = await dbSet.CountAsync();
             return count.ToSuccessResponse();
@@ -133,14 +149,19 @@ namespace UZonMail.Core.Controllers.Files
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("file-usages/filtered-data")]
-        public async Task<ResponseResult<List<FileUsage>>> GetFileUsagesData(string? filter, [FromBody] Pagination pagination)
+        public async Task<ResponseResult<List<FileUsage>>> GetFileUsagesData(
+            string? filter,
+            [FromBody] Pagination pagination
+        )
         {
             var userId = tokenService.GetUserSqlId();
             // 收件箱
             var dbSet = db.FileUsages.Where(x => x.OwnerUserId == userId);
             if (!string.IsNullOrEmpty(filter))
             {
-                dbSet = dbSet.Where(x => x.DisplayName.Contains(filter) || x.FileName.Contains(filter));
+                dbSet = dbSet.Where(x =>
+                    x.DisplayName.Contains(filter) || x.FileName.Contains(filter)
+                );
             }
             var results = await dbSet.Include(x => x.FileObject).Page(pagination).ToListAsync();
             return results.ToSuccessResponse();
@@ -154,12 +175,20 @@ namespace UZonMail.Core.Controllers.Files
         [HttpDelete("file-usages/{fileUsageId:long}")]
         public async Task<ResponseResult<bool>> DeleteFileUsage(long fileUsageId)
         {
-            var fileUsage = await db.FileUsages.Where(x => x.Id == fileUsageId).Include(x => x.FileObject).FirstOrDefaultAsync();
-            if (fileUsage == null) return true.ToSuccessResponse();
+            var fileUsage = await db
+                .FileUsages.Where(x => x.Id == fileUsageId)
+                .Include(x => x.FileObject)
+                .FirstOrDefaultAsync();
+            if (fileUsage == null)
+                return true.ToSuccessResponse();
             db.FileUsages.Remove(fileUsage);
 
             // 若文件不存在 fileUsage引用，则删除原始文件
-            var otherFileUsagesCount = await db.FileUsages.Where(x => x.FileObjectId == fileUsage.FileObjectId && x.Id != fileUsageId).CountAsync();
+            var otherFileUsagesCount = await db
+                .FileUsages.Where(x =>
+                    x.FileObjectId == fileUsage.FileObjectId && x.Id != fileUsageId
+                )
+                .CountAsync();
             if (otherFileUsagesCount == 0 && fileUsage.FileObject != null)
             {
                 await fileStoreService.DeleteFileObject(fileUsage.FileObject.Sha256);
@@ -176,13 +205,19 @@ namespace UZonMail.Core.Controllers.Files
         /// <param name="displayName"></param>
         /// <returns></returns>
         [HttpPut("file-usages/{fileUsageId:long}/display-name")]
-        public async Task<ResponseResult<bool>> UpdateDisplayName(long fileUsageId, [FromQuery] string displayName)
+        public async Task<ResponseResult<bool>> UpdateDisplayName(
+            long fileUsageId,
+            [FromQuery] string displayName
+        )
         {
             var fileUsage = await db.FileUsages.FirstOrDefaultAsync(x => x.Id == fileUsageId);
-            if (fileUsage == null) return false.ToFailResponse("文件不存在");
+            if (fileUsage == null)
+                return false.ToFailResponse("文件不存在");
 
-            if (string.IsNullOrWhiteSpace(displayName)) fileUsage.DisplayName = fileUsage.FileName;
-            else fileUsage.DisplayName = displayName;
+            if (string.IsNullOrWhiteSpace(displayName))
+                fileUsage.DisplayName = fileUsage.FileName;
+            else
+                fileUsage.DisplayName = displayName;
             await db.SaveChangesAsync();
 
             return true.ToSuccessResponse();

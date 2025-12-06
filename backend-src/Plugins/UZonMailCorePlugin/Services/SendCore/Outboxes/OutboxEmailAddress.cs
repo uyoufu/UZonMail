@@ -1,10 +1,10 @@
 using log4net;
-using UZonMail.Core.Services.Encrypt.Models;
+using UZonMail.CorePlugin.Services.Encrypt.Models;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Extensions;
 
-namespace UZonMail.Core.Services.SendCore.Outboxes
+namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
 {
     /// <summary>
     /// 发件箱地址

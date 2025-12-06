@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
-using UZonMail.Core.Services.SendCore.Event.Commands;
+using UZonMail.CorePlugin.Services.SendCore.Event.Commands;
 
-namespace UZonMail.Core.Services.SendCore.Event
+namespace UZonMail.CorePlugin.Services.SendCore.Event
 {
     /// <summary>
     /// 事件中心
@@ -15,7 +15,9 @@ namespace UZonMail.Core.Services.SendCore.Event
     public class EventCenter
     {
         private EventCenter() { }
+
         private static readonly Lazy<EventCenter> _instance = new(() => new EventCenter());
+
         /// <summary>
         /// 事件中心的实例
         /// 该实例是线程安全的

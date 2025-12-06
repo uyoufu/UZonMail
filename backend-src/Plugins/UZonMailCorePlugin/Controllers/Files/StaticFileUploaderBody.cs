@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
-namespace UZonMail.Core.Controllers.Files
+namespace UZonMail.CorePlugin.Controllers.Files
 {
     public class StaticFileUploaderBody
     {

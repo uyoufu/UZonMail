@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Settings.Request;
-using UZonMail.Core.Services.Settings;
+using UZonMail.CorePlugin.Controllers.Settings.Request;
+using UZonMail.CorePlugin.Services.Settings;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Settings
+namespace UZonMail.CorePlugin.Controllers.Settings
 {
     /// <summary>
     /// 用户级设置
@@ -16,7 +16,11 @@ namespace UZonMail.Core.Controllers.Settings
     /// <param name="db"></param>
     /// <param name="tokenService"></param>
     /// <param name="settingService"></param>
-    public class UserSettingController(SqlContext db, TokenService tokenService, AppSettingService settingService) : ControllerBaseV1
+    public class UserSettingController(
+        SqlContext db,
+        TokenService tokenService,
+        AppSettingService settingService
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 更新系统设置
@@ -46,7 +50,10 @@ namespace UZonMail.Core.Controllers.Settings
         /// <param name="value"></param>
         /// <returns></returns>
         [HttpPut("json")]
-        public async Task<ResponseResult<bool>> UpdateUserSettingJson(string key, [FromBody] JToken value)
+        public async Task<ResponseResult<bool>> UpdateUserSettingJson(
+            string key,
+            [FromBody] JToken value
+        )
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -90,7 +97,6 @@ namespace UZonMail.Core.Controllers.Settings
             await settingService.UpdateAppSetting(key, value, AppSettingType.User);
             return true.ToSuccessResponse();
         }
-
 
         /// <summary>
         /// 获取系统设置

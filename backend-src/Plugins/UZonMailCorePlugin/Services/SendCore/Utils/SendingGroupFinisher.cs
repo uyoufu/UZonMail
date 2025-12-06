@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Services.Notification.EmailNotifier;
-using UZonMail.Core.SignalRHubs;
-using UZonMail.Core.SignalRHubs.Extensions;
-using UZonMail.Core.SignalRHubs.SendEmail;
+using UZonMail.CorePlugin.Services.Notification.EmailNotifier;
+using UZonMail.CorePlugin.SignalRHubs;
+using UZonMail.CorePlugin.SignalRHubs.Extensions;
+using UZonMail.CorePlugin.SignalRHubs.SendEmail;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.Utils
+namespace UZonMail.CorePlugin.Services.SendCore.Utils
 {
     public class SendingGroupFinisher(
         SqlContext db,

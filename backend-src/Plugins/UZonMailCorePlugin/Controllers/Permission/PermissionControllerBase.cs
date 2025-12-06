@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
-namespace UZonMail.Core.Controllers.Permission
+namespace UZonMail.CorePlugin.Controllers.Permission
 {
     [Route("api/v1/permission/[controller]")]
-    public class PermissionControllerBase: ControllerBaseV1
-    {
-    }
+    public class PermissionControllerBase : ControllerBaseV1 { }
 }

@@ -1,8 +1,8 @@
-﻿using Org.BouncyCastle.Asn1.Ocsp;
 using System.Reflection.Metadata;
-using UZonMail.Core.Services.SendCore.Contexts;
+using Org.BouncyCastle.Asn1.Ocsp;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
 
-namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
+namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// 子类通过修改 status 来控制是否继续向下执行
@@ -19,7 +19,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
         public async Task Handle(SendingContext context)
         {
             // 触发当前处理者的处理方法
-            if(!context.Status.HasFlag(ContextStatus.BreakChain))
+            if (!context.Status.HasFlag(ContextStatus.BreakChain))
             {
                 await HandleCore(context);
             }

@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Controllers.Settings.Validators;
-using UZonMail.Core.Services.Permission;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
-using UZonMail.Core.Utils.Extensions;
+using UZonMail.CorePlugin.Controllers.Settings.Validators;
+using UZonMail.CorePlugin.Services.Permission;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
+using UZonMail.CorePlugin.Utils.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Settings
+namespace UZonMail.CorePlugin.Controllers.Settings
 {
     /// <summary>
     /// 程序设置控制器
@@ -189,7 +189,7 @@ namespace UZonMail.Core.Controllers.Settings
             var appSetting = await settingService.UpdateAppSetting(sendingSetting, key, type);
 
             // 更新缓存
-            settingsManager.ResetSetting<SendingSetting>(appSetting);
+            await settingsManager.ResetSetting<SendingSetting>(appSetting, db);
 
             return true.ToSuccessResponse();
         }

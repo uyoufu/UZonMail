@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.SendCore.Sender;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.SendCore.Sender;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Settings
+namespace UZonMail.CorePlugin.Controllers.Settings
 {
     /// <summary>
     /// 通知设置
@@ -83,7 +83,7 @@ namespace UZonMail.Core.Controllers.Settings
             var newSetting = await settingService.UpdateAppSetting(smtpSettings, type: type);
 
             // 更新缓存
-            settingsManager.ResetSetting<SmtpNotificationSetting>(newSetting);
+            await settingsManager.ResetSetting<SmtpNotificationSetting>(newSetting, db);
 
             if (!result.Ok)
                 return false.ToFailResponse(result.Message);

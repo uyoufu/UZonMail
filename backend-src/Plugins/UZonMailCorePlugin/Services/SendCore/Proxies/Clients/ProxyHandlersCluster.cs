@@ -1,13 +1,13 @@
-﻿using log4net;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
-using UZonMail.Core.Services.SendCore.Sender;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
+using log4net;
+using UZonMail.CorePlugin.Services.SendCore.Sender;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Organization;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.Clients
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// 代理客户端集群基类
@@ -29,7 +29,9 @@ namespace UZonMail.Core.Services.SendCore.Proxies.Clients
         /// 获取 IP 地址
         /// </summary>
         /// <returns></returns>
-        protected abstract Task<List<ProxyHandler>> GetProxyHandlersAsync(IServiceProvider serviceProvider);
+        protected abstract Task<List<ProxyHandler>> GetProxyHandlersAsync(
+            IServiceProvider serviceProvider
+        );
 
         /// <summary>
         /// 获取匹配的代理客户端
@@ -37,7 +39,10 @@ namespace UZonMail.Core.Services.SendCore.Proxies.Clients
         /// <param name="scopeServiceProvider"></param>
         /// <param name="email"></param>
         /// <returns></returns>
-        public override async Task<ProxyClientAdapter?> GetProxyClientAsync(IServiceProvider scopeServiceProvider, string email)
+        public override async Task<ProxyClientAdapter?> GetProxyClientAsync(
+            IServiceProvider scopeServiceProvider,
+            string email
+        )
         {
             // 移除不可用的代理客户端
             DisposeHandler();
@@ -57,15 +62,23 @@ namespace UZonMail.Core.Services.SendCore.Proxies.Clients
             var ipRateLimiter = scopeServiceProvider.GetRequiredService<IPRateLimiter>();
             var settingsManager = scopeServiceProvider.GetRequiredService<AppSettingsManager>();
             var sqlContext = scopeServiceProvider.GetRequiredService<SqlContext>();
-            var sendingSetting = await settingsManager.GetSetting<SendingSetting>(sqlContext, UserId);
+            var sendingSetting = await settingsManager.GetSetting<SendingSetting>(
+                sqlContext,
+                UserId
+            );
 
             // 判断是否没有 email 可用的代理客户端
-            var matchedHandler = _handlers.Values.Where(x => x.IsMatch(email) && x.IsEnable())
+            var matchedHandler = _handlers
+                .Values.Where(x => x.IsMatch(email) && x.IsEnable())
                 .Where(x =>
                 {
                     // 验证是否满足域名约束
                     // 若不满足约束，请求新的动态代理
-                    return !ipRateLimiter.IsLimited(domain, x.Host, sendingSetting.MaxCountPerIPDomainHour);
+                    return !ipRateLimiter.IsLimited(
+                        domain,
+                        x.Host,
+                        sendingSetting.MaxCountPerIPDomainHour
+                    );
                 })
                 .FirstOrDefault();
             if (matchedHandler == null)
@@ -81,13 +94,18 @@ namespace UZonMail.Core.Services.SendCore.Proxies.Clients
             }
 
             // 选择第一个可用的代理
-            matchedHandler = _handlers.Values.Where(x => x.IsMatch(email) && x.IsEnable())
-                 .Where(x =>
-                 {
-                     // 验证是否满足域名约束
-                     // 若不满足约束，请求新的动态代理
-                     return !ipRateLimiter.IsLimited(domain, x.Host, sendingSetting.MaxCountPerIPDomainHour);
-                 })
+            matchedHandler = _handlers
+                .Values.Where(x => x.IsMatch(email) && x.IsEnable())
+                .Where(x =>
+                {
+                    // 验证是否满足域名约束
+                    // 若不满足约束，请求新的动态代理
+                    return !ipRateLimiter.IsLimited(
+                        domain,
+                        x.Host,
+                        sendingSetting.MaxCountPerIPDomainHour
+                    );
+                })
                 .FirstOrDefault();
             if (matchedHandler == null)
             {
@@ -125,7 +143,8 @@ namespace UZonMail.Core.Services.SendCore.Proxies.Clients
         public override bool IsMatch(string email)
         {
             // 为空全部匹配
-            if (string.IsNullOrEmpty(ProxyInfo.MatchRegex)) return true;
+            if (string.IsNullOrEmpty(ProxyInfo.MatchRegex))
+                return true;
 
             // 规则匹配
             return Regex.IsMatch(email, ProxyInfo.MatchRegex);
@@ -141,6 +160,7 @@ namespace UZonMail.Core.Services.SendCore.Proxies.Clients
         }
 
         private bool _isHealthless = false;
+
         /// <summary>
         /// 标记非健康状态
         /// </summary>

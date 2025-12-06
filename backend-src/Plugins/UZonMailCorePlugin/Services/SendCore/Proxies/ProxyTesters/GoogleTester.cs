@@ -1,12 +1,13 @@
-﻿using UZonMail.Utils.Http.Request;
+using UZonMail.Utils.Http.Request;
 
-namespace UZonMail.Core.Services.SendCore.Proxies.ProxyTesters
+namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// Google 网站连通性测试
     /// </summary>
     /// <param name="httpClient"></param>
-    public class GoogleTester(HttpClient httpClient) : BaseProxyTester(httpClient, ProxyZoneType.Google)
+    public class GoogleTester(HttpClient httpClient)
+        : BaseProxyTester(httpClient, ProxyZoneType.Google)
     {
         public override int Order { get; } = -1;
 

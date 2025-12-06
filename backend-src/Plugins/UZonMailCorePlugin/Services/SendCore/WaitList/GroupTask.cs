@@ -1,17 +1,17 @@
 using log4net;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Database.SQL.EmailSending;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.Encrypt.Models;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.EmailWaitList;
-using UZonMail.Core.Services.SendCore.Interfaces;
-using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.Proxies;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
-using UZonMail.Core.SignalRHubs.Extensions;
-using UZonMail.Core.SignalRHubs.SendEmail;
+using UZonMail.CorePlugin.Database.SQL.EmailSending;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.Encrypt.Models;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.EmailWaitList;
+using UZonMail.CorePlugin.Services.SendCore.Interfaces;
+using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UZonMail.CorePlugin.Services.SendCore.Proxies;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
+using UZonMail.CorePlugin.SignalRHubs.Extensions;
+using UZonMail.CorePlugin.SignalRHubs.SendEmail;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Base;
@@ -19,7 +19,7 @@ using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.WaitList
+namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
     /// 一次发件任务

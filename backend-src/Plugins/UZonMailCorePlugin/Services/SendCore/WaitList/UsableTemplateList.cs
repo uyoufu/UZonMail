@@ -4,7 +4,7 @@ using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Templates;
 
-namespace UZonMail.Core.Services.SendCore.EmailWaitList
+namespace UZonMail.CorePlugin.Services.SendCore.EmailWaitList
 {
     /// <summary>
     /// 可用的模板列表

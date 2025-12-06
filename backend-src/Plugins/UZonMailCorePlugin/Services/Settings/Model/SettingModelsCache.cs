@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using UZonMail.Core.Utils.Cache;
+using UZonMail.CorePlugin.Utils.Cache;
 
-namespace UZonMail.Core.Services.Settings.Model
+namespace UZonMail.CorePlugin.Services.Settings.Model
 {
     /// <summary>
     /// 设置缓存单例
@@ -14,6 +14,10 @@ namespace UZonMail.Core.Services.Settings.Model
 
         private SettingModelsCache() { }
 
-        public readonly ConcurrentDictionary<CacheKey, BaseSettingModel> AllSettingModels = [];
+        // 使用 Lazy<Task<BaseSettingModel>> 支持一次性、异步的懒初始化，避免并发创建多个实例
+        public readonly ConcurrentDictionary<
+            CacheKey,
+            Lazy<Task<BaseSettingModel>>
+        > AllSettingModels = [];
     }
 }

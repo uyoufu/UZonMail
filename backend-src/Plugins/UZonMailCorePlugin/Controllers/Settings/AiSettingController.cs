@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.Settings;
-using UZonMail.Core.Services.Settings.Model;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.Settings;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Core.Controllers.Settings
+namespace UZonMail.CorePlugin.Controllers.Settings
 {
     public class AiSettingController(
         SqlContext db,
@@ -53,8 +53,10 @@ namespace UZonMail.Core.Controllers.Settings
         {
             // 对 ApiKey 进行加密
             if (!encryptService.IsPasswordMask(copilotSetting.ApiKey))
+            {
                 copilotSetting.ApiKey = encryptService.EncrytPassword(copilotSetting.ApiKey);
-            else if (string.IsNullOrWhiteSpace(copilotSetting.ApiKey))
+            }
+            else
             {
                 // 从数据库中找到已经存在的密码并赋予
                 var key = nameof(AICopilotSetting);
@@ -65,17 +67,12 @@ namespace UZonMail.Core.Controllers.Settings
                     copilotSetting.ApiKey = existingSettingModel.ApiKey;
                 }
             }
-            else
-            {
-                // 对原有密码加密
-                copilotSetting.ApiKey = encryptService.EncrytPassword(copilotSetting.ApiKey);
-            }
 
             // 保存到数据库
             var newSetting = await settingService.UpdateAppSetting(copilotSetting, type: type);
 
             // 更新缓存
-            settingsManager.ResetSetting<AICopilotSetting>(newSetting);
+            await settingsManager.ResetSetting<AICopilotSetting>(newSetting, db);
 
             return true.ToSuccessResponse();
         }

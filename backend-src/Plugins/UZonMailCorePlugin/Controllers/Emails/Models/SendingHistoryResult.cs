@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.Controllers.Emails.Models
+namespace UZonMail.CorePlugin.Controllers.Emails.Models
 {
     /// <summary>
     /// 发件历史结果
@@ -35,7 +35,7 @@ namespace UZonMail.Core.Controllers.Emails.Models
             ScheduleDate = sendingGroup.ScheduleDate;
             TotalCount = sendingGroup.TotalCount;
             SuccessCount = sendingGroup.SuccessCount;
-            SentCount = sendingGroup.SentCount;            
+            SentCount = sendingGroup.SentCount;
         }
     }
 }

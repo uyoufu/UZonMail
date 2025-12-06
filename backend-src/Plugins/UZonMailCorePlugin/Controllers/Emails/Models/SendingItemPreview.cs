@@ -1,6 +1,6 @@
 using Newtonsoft.Json.Linq;
 
-namespace UZonMail.Core.Controllers.Emails.Models
+namespace UZonMail.CorePlugin.Controllers.Emails.Models
 {
     /// <summary>
     /// 发件项预览数据

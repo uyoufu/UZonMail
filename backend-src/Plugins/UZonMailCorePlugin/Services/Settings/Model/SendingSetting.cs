@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
-using UZonMail.Core.Utils.Cache;
+using UZonMail.CorePlugin.Utils.Cache;
 using UZonMail.Utils.Extensions;
 
-namespace UZonMail.Core.Services.Settings.Model
+namespace UZonMail.CorePlugin.Services.Settings.Model
 {
     /// <summary>
     /// 发送设置

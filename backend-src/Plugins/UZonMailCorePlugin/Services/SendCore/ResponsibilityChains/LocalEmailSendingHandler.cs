@@ -1,18 +1,21 @@
-﻿using log4net;
+using log4net;
 using MimeKit;
-using UZonMail.Core.Services.EmailDecorator;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.Sender;
-using UZonMail.Core.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.EmailDecorator;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Sender;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
 
-namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
+namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// 本机邮件发送器
     /// </summary>
-    public class LocalEmailSendingHandler(EmailSendersManager sendersManager) : AbstractSendingHandler
+    public class LocalEmailSendingHandler(EmailSendersManager sendersManager)
+        : AbstractSendingHandler
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(LocalEmailSendingHandler));
+        private static readonly ILog _logger = LogManager.GetLogger(
+            typeof(LocalEmailSendingHandler)
+        );
 
         protected override async Task HandleCore(SendingContext context)
         {
@@ -38,7 +41,10 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             var mimeMessage = await CreateMimeMessage(context);
 
             // 调用发件器进行发件
-            var emailSender = sendersManager.GetEmailSender(sendItem.Outbox.Email,sendItem.Outbox.SmtpHost);
+            var emailSender = sendersManager.GetEmailSender(
+                sendItem.Outbox.Email,
+                sendItem.Outbox.SmtpHost
+            );
             if (emailSender == null)
             {
                 _logger.Error($"没有找到匹配的邮件发送器，发件箱：{sendItem.Outbox.Email}");
@@ -58,7 +64,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             var message = new MimeMessage();
             // 发件人
             message.From.Add(new MailboxAddress(sendItem.Outbox.Name, sendItem.Outbox.Email));
-            // 收件人、抄送、密送           
+            // 收件人、抄送、密送
             foreach (var address in sendItem.Inboxes)
             {
                 if (string.IsNullOrEmpty(address.Email))
@@ -82,26 +88,25 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             // 回信人
             if (sendItem.ReplyToEmails.Count > 0)
             {
-                message.ReplyTo.AddRange(sendItem.ReplyToEmails.Select(x =>
-                {
-                    return new MailboxAddress(x, x);
-                }));
+                message.ReplyTo.AddRange(
+                    sendItem.ReplyToEmails.Select(x =>
+                    {
+                        return new MailboxAddress(x, x);
+                    })
+                );
             }
             // 主题
             message.Subject = sendItem.Subject;
 
             // 正文
             var htmlBody = sendItem.HtmlBody;
-            BodyBuilder bodyBuilder = new()
-            {
-                HtmlBody = htmlBody
-            };
+            BodyBuilder bodyBuilder = new() { HtmlBody = htmlBody };
 
             // 附件
             var attachments = sendItem.Attachments;
             foreach (var attachment in attachments)
             {
-                // 添加附件                
+                // 添加附件
                 bodyBuilder.Attachments.Add(attachment.FullName);
                 // 修改文件名
                 var lastOne = bodyBuilder.Attachments.Last();
@@ -112,7 +117,8 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
 
             // 对 message 进行额外的设置
             var emailDecoratorParams = await sendItem.GetEmailDecoratorParams(context);
-            var mimeMessageDecorator = context.Provider.GetRequiredService<MimeMessageDecorateService>();
+            var mimeMessageDecorator =
+                context.Provider.GetRequiredService<MimeMessageDecorateService>();
             message = await mimeMessageDecorator.Decorate(emailDecoratorParams, message);
             return message;
         }

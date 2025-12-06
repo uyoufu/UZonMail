@@ -2,13 +2,13 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Uamazing.Utils.Web.Token;
-using UZonMail.Core.Config;
-using UZonMail.Core.Controllers.Users.Model;
-using UZonMail.Core.Services.Config;
-using UZonMail.Core.Services.Encrypt;
-using UZonMail.Core.Services.Permission;
-using UZonMail.Core.Services.Plugin;
-using UZonMail.Core.Services.Settings;
+using UZonMail.CorePlugin.Config;
+using UZonMail.CorePlugin.Controllers.Users.Model;
+using UZonMail.CorePlugin.Services.Config;
+using UZonMail.CorePlugin.Services.Encrypt;
+using UZonMail.CorePlugin.Services.Permission;
+using UZonMail.CorePlugin.Services.Plugin;
+using UZonMail.CorePlugin.Services.Settings;
 using UZonMail.DB.Managers.Cache;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Organization;
@@ -19,7 +19,7 @@ using UZonMail.Utils.Web.PagingQuery;
 using UZonMail.Utils.Web.Service;
 using UZonMail.Utils.Web.Token;
 
-namespace UZonMail.Core.Services.UserInfos
+namespace UZonMail.CorePlugin.Services.UserInfos
 {
     /// <summary>
     /// 只在请求生命周期内有效的服务

@@ -1,12 +1,15 @@
-﻿using UZonMail.Core.Services.SendCore.Outboxes;
-using UZonMail.Core.Services.SendCore.WaitList;
-using UZonMail.Core.Services.Settings.Model;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.Core.Services.EmailDecorator.Interfaces
+namespace UZonMail.CorePlugin.Services.EmailDecorator.Interfaces
 {
-    public class EmailDecoratorParams(SendingSetting sendingSetting, SendItemMeta sendItemMeta, Outbox outbox) : IContentDecoratorParams
+    public class EmailDecoratorParams(
+        SendingSetting sendingSetting,
+        SendItemMeta sendItemMeta,
+        Outbox outbox
+    ) : IContentDecoratorParams
     {
         /// <summary>
         /// 发件设置

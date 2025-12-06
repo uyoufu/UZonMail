@@ -1,9 +1,9 @@
-﻿using System.Collections.Concurrent;
-using UZonMail.Core.Services.SendCore.Contexts;
+using System.Collections.Concurrent;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
+namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     public class MsGraphClientFactory(IServiceProvider serviceProvider) : ISingletonService
     {
@@ -19,7 +19,9 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// </summary>
         /// <param name="sendingContext"></param>
         /// <returns></returns>
-        public async Task<Result<MsGraphClient>> GetMsGraphClientAsync(SendingContext sendingContext)
+        public async Task<Result<MsGraphClient>> GetMsGraphClientAsync(
+            SendingContext sendingContext
+        )
         {
             var email = sendingContext.OutboxAddress!.Email;
 

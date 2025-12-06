@@ -1,15 +1,15 @@
-﻿using MailKit.Security;
-using UZonMail.Core.Config.SubConfigs;
+using MailKit.Security;
+using UZonMail.CorePlugin.Config.SubConfigs;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
+namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     /// <summary>
     /// 解析 Outbox 的 graph 设置
     /// 用户名有以下 2 种格式:
     /// 1. client_id
     /// 2. client_id/tenant_id
-    /// 
+    ///
     /// 密码有以下 3 种格式:
     /// 1. refresh_token
     /// 2. client_secret
@@ -82,7 +82,8 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
                 ClientSecret = _msEntraApp.ClientSecret;
             }
 
-            if (string.IsNullOrEmpty(plainPassword)) return;
+            if (string.IsNullOrEmpty(plainPassword))
+                return;
 
             // 解析密码
             // 可能的情况:
@@ -114,7 +115,9 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
             }
             else
             {
-                throw new ArgumentException("密码格式不正确，应为 refresh_token 或 refresh_token/client_secret");
+                throw new ArgumentException(
+                    "密码格式不正确，应为 refresh_token 或 refresh_token/client_secret"
+                );
             }
         }
 
@@ -129,7 +132,8 @@ namespace UZonMail.Core.Services.SendCore.Sender.MsGraph
         /// <returns></returns>
         public string GetUserNameForDB()
         {
-            if (_useDefaultApp) return string.Empty;
+            if (_useDefaultApp)
+                return string.Empty;
 
             return string.IsNullOrEmpty(TenantId) ? ClientId : $"{ClientId}/{TenantId}";
         }

@@ -1,9 +1,9 @@
-﻿using UZonMail.Core.Services.Encrypt.Models;
+using UZonMail.CorePlugin.Services.Encrypt.Models;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Configs;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Encrypt
+namespace UZonMail.CorePlugin.Services.Encrypt
 {
     /// <summary>
     /// 加密相关的服务
@@ -31,6 +31,8 @@ namespace UZonMail.Core.Services.Encrypt
         /// <returns></returns>
         public bool IsPasswordMask(string password)
         {
+            if (string.IsNullOrEmpty(password))
+                return true;
             return password == GetPasswordMask();
         }
 

@@ -1,7 +1,7 @@
-﻿using UZonMail.Utils.Database.Redis;
+using UZonMail.Utils.Database.Redis;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.Core.Services.Cache
+namespace UZonMail.CorePlugin.Services.Cache
 {
     /// <summary>
     /// 获取缓存服务
@@ -15,7 +15,7 @@ namespace UZonMail.Core.Services.Cache
 
         /// <summary>
         /// 缓存服务单例
-        /// </summary>       
+        /// </summary>
         public CacheService(IConfiguration configuration)
         {
             // 初始化 Redis
@@ -40,7 +40,11 @@ namespace UZonMail.Core.Services.Cache
         /// <param name="value"></param>
         /// <param name="absoluteExpirat">过期日期</param>
         /// <returns></returns>
-        public async Task<bool> SetAsync<T>(string key, T? value, TimeSpan? absoluteExpirationRelativeToNow = null)
+        public async Task<bool> SetAsync<T>(
+            string key,
+            T? value,
+            TimeSpan? absoluteExpirationRelativeToNow = null
+        )
         {
             if (string.IsNullOrEmpty(key) || value == null)
                 return false;

@@ -1,8 +1,7 @@
-﻿
 using System.Runtime.Intrinsics.X86;
-using UZonMail.Core.Services.Config;
+using UZonMail.CorePlugin.Services.Config;
 
-namespace UZonMail.Core.Services.HostedServices
+namespace UZonMail.CorePlugin.Services.HostedServices
 {
     /// <summary>
     /// 服务启动后的后台服务
@@ -14,7 +13,8 @@ namespace UZonMail.Core.Services.HostedServices
             using var scope = ssf.CreateScope();
             var serviceProvider = scope.ServiceProvider;
 
-            var postServices = serviceProvider.GetServices<IHostedServiceStart>()
+            var postServices = serviceProvider
+                .GetServices<IHostedServiceStart>()
                 .OrderBy(x => x.Order);
             foreach (var postService in postServices)
             {

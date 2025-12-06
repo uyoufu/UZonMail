@@ -1,8 +1,8 @@
-﻿using log4net;
-using UZonMail.Core.Services.SendCore.Contexts;
-using UZonMail.Core.Services.SendCore.WaitList;
+using log4net;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
 
-namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
+namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// 发送项获取器
@@ -28,7 +28,7 @@ namespace UZonMail.Core.Services.SendCore.ResponsibilityChains
             context.EmailItem = emailItem;
 
             // 标记失败
-            if(emailItem == null)
+            if (emailItem == null)
             {
                 context.Status |= ContextStatus.Fail;
             }
