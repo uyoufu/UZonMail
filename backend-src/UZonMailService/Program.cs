@@ -98,7 +98,8 @@ var mvcBuilder = services
     });
 
 // 加载插件
-builder.AddPlugins();
+var pluginLoader = new PluginLoader("Plugins");
+pluginLoader.ConfigureServices(builder);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
@@ -268,7 +269,7 @@ app.UseAuthorization();
 app.UseVueASP();
 
 // 使用插件
-app.UsePlugins();
+pluginLoader.ConfigureApp(app);
 
 // http 路由
 app.MapControllers();

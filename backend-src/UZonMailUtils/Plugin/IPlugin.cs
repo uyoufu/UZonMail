@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 namespace UZonMail.Utils.Plugin
 {
     /// <summary>
-    /// Plugiin 的一些配置项
+    /// 插件
     /// </summary>
     public interface IPlugin
     {
