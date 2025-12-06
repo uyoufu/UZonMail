@@ -449,6 +449,10 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Extra")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Icon")
                         .HasColumnType("TEXT");
 
@@ -554,10 +558,11 @@ namespace UZonMailService.Migrations.SqLite
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email");
+
                     b.HasIndex("EmailGroupId");
 
-                    b.HasIndex("Email", "UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Inboxes");
                 });
@@ -650,8 +655,9 @@ namespace UZonMailService.Migrations.SqLite
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email", "UserId")
-                        .IsUnique();
+                    b.HasIndex("Email");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Outboxes");
                 });
@@ -1162,7 +1168,7 @@ namespace UZonMailService.Migrations.SqLite
                     b.Property<string>("StringValue")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("Type")
+                    b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("UserId")

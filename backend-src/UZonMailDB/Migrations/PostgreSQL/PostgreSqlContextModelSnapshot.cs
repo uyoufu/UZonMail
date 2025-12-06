@@ -466,6 +466,10 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<string>("Extra")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Icon")
                         .HasColumnType("text");
 
@@ -573,10 +577,11 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email");
+
                     b.HasIndex("EmailGroupId");
 
-                    b.HasIndex("Email", "UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Inboxes");
                 });
@@ -671,8 +676,9 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email", "UserId")
-                        .IsUnique();
+                    b.HasIndex("Email");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Outboxes");
                 });
@@ -1205,7 +1211,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.Property<string>("StringValue")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Type")
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.Property<long>("UserId")
