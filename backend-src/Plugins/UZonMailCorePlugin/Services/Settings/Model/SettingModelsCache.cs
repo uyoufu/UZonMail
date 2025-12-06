@@ -14,6 +14,10 @@ namespace UZonMail.CorePlugin.Services.Settings.Model
 
         private SettingModelsCache() { }
 
-        public readonly ConcurrentDictionary<CacheKey, BaseSettingModel> AllSettingModels = [];
+        // 使用 Lazy<Task<BaseSettingModel>> 支持一次性、异步的懒初始化，避免并发创建多个实例
+        public readonly ConcurrentDictionary<
+            CacheKey,
+            Lazy<Task<BaseSettingModel>>
+        > AllSettingModels = [];
     }
 }

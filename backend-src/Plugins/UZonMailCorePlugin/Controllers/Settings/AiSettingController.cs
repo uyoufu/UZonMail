@@ -72,7 +72,7 @@ namespace UZonMail.CorePlugin.Controllers.Settings
             var newSetting = await settingService.UpdateAppSetting(copilotSetting, type: type);
 
             // 更新缓存
-            settingsManager.ResetSetting<AICopilotSetting>(newSetting);
+            await settingsManager.ResetSetting<AICopilotSetting>(newSetting, db);
 
             return true.ToSuccessResponse();
         }

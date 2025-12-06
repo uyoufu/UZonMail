@@ -83,7 +83,7 @@ namespace UZonMail.CorePlugin.Controllers.Settings
             var newSetting = await settingService.UpdateAppSetting(smtpSettings, type: type);
 
             // 更新缓存
-            settingsManager.ResetSetting<SmtpNotificationSetting>(newSetting);
+            await settingsManager.ResetSetting<SmtpNotificationSetting>(newSetting, db);
 
             if (!result.Ok)
                 return false.ToFailResponse(result.Message);

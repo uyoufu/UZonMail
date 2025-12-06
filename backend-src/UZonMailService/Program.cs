@@ -51,7 +51,7 @@ var services = builder.Services;
 Console.WriteLine($"Current Environment：{builder.Environment.EnvironmentName}");
 
 // 多语言
-services.AddI18N(["zh-CN", "en"]);
+//services.AddI18N(["zh-CN", "en"]);
 
 // 保证只有一个实例
 // services.UseSingleApp();
@@ -220,7 +220,7 @@ services.AddServices();
 var app = builder.Build();
 
 // 使用多语言中间件
-app.UseRequestLocalization();
+//app.UseRequestLocalization();
 
 app.UseDefaultFiles();
 

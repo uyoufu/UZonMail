@@ -189,7 +189,7 @@ namespace UZonMail.CorePlugin.Controllers.Settings
             var appSetting = await settingService.UpdateAppSetting(sendingSetting, key, type);
 
             // 更新缓存
-            settingsManager.ResetSetting<SendingSetting>(appSetting);
+            await settingsManager.ResetSetting<SendingSetting>(appSetting, db);
 
             return true.ToSuccessResponse();
         }
