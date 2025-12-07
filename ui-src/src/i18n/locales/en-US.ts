@@ -53,6 +53,7 @@ export default {
     yes: 'Yes',
     no: 'No',
     empty: 'Empty',
+    save: 'Save',
   },
   // #endregion
 
@@ -162,6 +163,8 @@ export default {
     login: 'Login',
     singlePages: 'Single Pages',
     unsubscribe: 'Unsubscribe',
+    tiktokCrawler: 'TikTok Crawler',
+    qqGroupMembersGetter: 'QQ Group Members Collector',
     exception: 'Exception',
   },
   // #endregion
@@ -544,6 +547,16 @@ export default {
   unsubscribePage: {
     unsubscribe: 'Unsubscribe',
     unsubscribed: 'Unsubscribed'
+  },
+
+  qqGetter: {
+    qqNumber: 'QQ Number',
+    qqNickname: 'QQ Nickname',
+    save: 'Save',
+    saveAsInbox: 'Save as Inbox',
+    selectGroup: 'Select Group',
+    confirmSaveAllMembersAsInboxes: 'Save all {count} members from this QQ group as inboxes?',
+    saveMembersAsInboxesSuccess: 'Group members saved as inboxes successfully',
   },
 
   basicSettings: {

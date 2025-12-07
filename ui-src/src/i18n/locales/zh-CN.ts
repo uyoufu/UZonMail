@@ -142,7 +142,7 @@ export default {
     unsubscribeStatistics: '退订统计',
     emailCrawler: '邮件爬虫',
     tiktokCrawler: 'TikTok爬虫',
-    qqGroupMembersGetter: 'QQ群友获取',
+    qqGroupMembersGetter: 'QQ 群采集',
     tiktokDevice: 'TikTok设备',
     crawlerTask: '爬虫任务',
     crawlerResult: '爬取结果',
