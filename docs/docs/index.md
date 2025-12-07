@@ -47,7 +47,7 @@ highlights:
       - title: 自带爬虫, 外贸神器
         details: 自带 tiktok 邮箱爬虫，帮助您快速发现客户。
 
-      - title: 支持 QQ 群成员导出
+      - title: 支持 QQ 群成员采集
         details: 可以一键将 QQ 群成员转换成收件箱，实现精准获客
 
   # - header: 我们的优势
