@@ -20,9 +20,11 @@ QQ  1群：[877458612 (已满)](https://qm.qq.com/q/xe3923GZ9Y)
 
 QQ  2群：[124340073](https://qm.qq.com/q/L6S6EMyKIM)
 
+Telegram:  https://t.me/uzonmail
+
 公众号: 逛逛开源界 (WanderOpenSource)
 
-邮  箱：260827400@qq.com
+邮  箱：uyoufu@foxmail.com
 
 GitHub：[uyoufu/UZonMail](https://github.com/uyoufu/UZonMail)
 
