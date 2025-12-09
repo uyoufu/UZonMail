@@ -33,14 +33,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             new();
 
         private readonly ProxiesManager _proxyManager;
-        private readonly GroupTasksList _groupTaskList;
+        private readonly GroupTasksManager _groupTaskList;
         private readonly AppSettingsManager _settingsService;
 
         private readonly Timer _timer;
 
         public SmtpClientsManager(
             ProxiesManager proxyManager,
-            GroupTasksList groupTaskList,
+            GroupTasksManager groupTaskList,
             AppSettingsManager settingsService
         )
         {

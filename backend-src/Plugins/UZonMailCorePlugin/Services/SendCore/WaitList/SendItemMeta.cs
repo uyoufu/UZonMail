@@ -12,7 +12,8 @@ using UZonMail.DB.SQL.Core.EmailSending;
 namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
-    /// SendItem的元数据
+    /// SendItem 的元数据
+    /// 包括发件箱的数据
     /// </summary>
     public class SendItemMeta
     {

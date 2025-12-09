@@ -6,16 +6,13 @@ using UZonMail.CorePlugin.Services.SendCore.Outboxes;
 namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
-    /// 单个用户的发件任务管理
-    /// 先添加先发送
+    /// 单个用户的发件任务池
+    /// 先添加的任务先发送
     /// </summary>
-    /// <remarks>
-    /// 构造函数
-    /// </remarks>
     /// <param name="userId"></param>
-    public class GroupTasks(long userId)
+    public class UserGroupTasksPool(long userId)
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasks));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(UserGroupTasksPool));
         private readonly ConcurrentDictionary<long, GroupTask> _tasks = [];
 
         /// <summary>

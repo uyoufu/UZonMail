@@ -14,14 +14,14 @@ using UZonMail.DB.SQL.Core.EmailSending;
 namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     public class OutboxesPostHandler(
-        GroupTasksList groupTasksList,
+        UserGroupTasksPools userGroupTasksPools,
         OutboxesManager outboxManager,
         AppSettingsManager settingsService
     ) : AbstractSendingHandler
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(OutboxesPostHandler));
 
-        protected override async Task HandleCore(SendingContext context)
+        protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
             // 移除发件箱：
             // 1. 发件箱错误
@@ -33,9 +33,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             var outbox = context.OutboxAddress;
             var emailItem = context.EmailItem;
 
-            // outbox 要延迟到
             if (outbox == null)
-                return;
+                return HandlerResult.Failed();
+
             if (emailItem == null)
             {
                 // 没有发件项时，可会存在所有发件正在发送中的情况，因此 outbox 不能立马释放, 需要进行判断
@@ -46,7 +46,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                     // 移除
                     outboxManager.RemoveOutbox(outbox, message);
                 }
-                return;
+                return HandlerResult.Failed();
+                ;
             }
 
             // 增加发件数量
@@ -74,6 +75,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 // 2. 共享发件箱，判断是否还有多余的发件箱，若没有，则整体移除
                 await RemoveLinkingGroups(context, outbox);
             }
+
+            return HandlerResult.Success();
         }
 
         /// <summary>
@@ -83,7 +86,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
         /// <returns></returns>
         private bool MatchEmailItem(OutboxEmailAddress outbox)
         {
-            if (!groupTasksList.TryGetValue(outbox.UserId, out var groupTasks))
+            if (!userGroupTasksPools.TryGetValue(outbox.UserId, out var groupTasks))
                 return false;
             return groupTasks.MatchEmailItem(outbox);
         }
@@ -140,7 +143,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
         )
         {
             // 受影响的发件任务
-            if (!groupTasksList.TryGetValue(outbox.UserId, out var groupTasks))
+            if (!userGroupTasksPools.TryGetValue(outbox.UserId, out var groupTasks))
                 return;
 
             var sqlContext = sendingContext.SqlContext;
@@ -187,7 +190,6 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                     );
                     continue;
                 }
-                ;
 
                 // 发件组不存在任何发件箱时，需要移除整个发件组
                 if (!groupTasks.TryRemove(sendingGroupId, out var removedGroupTask))

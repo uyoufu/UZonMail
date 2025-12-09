@@ -19,10 +19,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
         public async Task Handle(SendingContext context)
         {
             // 触发当前处理者的处理方法
-            if (!context.Status.HasFlag(ContextStatus.BreakChain))
-            {
-                await HandleCore(context);
-            }
+            var handleResult = await HandleCore(context);
+            context.HandleResults.Add(handleResult);
 
             // 调用下一个处理者
             await this.Next(context);
@@ -42,6 +40,6 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             }
         }
 
-        protected abstract Task HandleCore(SendingContext context);
+        protected abstract Task<IHandlerResult> HandleCore(SendingContext context);
     }
 }

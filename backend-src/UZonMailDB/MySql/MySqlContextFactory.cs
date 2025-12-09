@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using SQLitePCL;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SqLite;
 
 namespace UZonMail.DB.MySql
 {
@@ -11,6 +10,8 @@ namespace UZonMail.DB.MySql
         public MySqlContext CreateDbContext(string[] args)
         {
             Batteries.Init();
+
+            // 可以尝试使用 IDbContextFactory<SqlContext> dbFactory 创建 sqlContext
 
             var connection = new MySqlConnectionConfig()
             {
@@ -24,7 +25,10 @@ namespace UZonMail.DB.MySql
             };
 
             var optionsBuilder = new DbContextOptionsBuilder<SqlContext>();
-            optionsBuilder.UseMySql(connection.ConnectionString, new MySqlServerVersion(connection.MysqlVersion));
+            optionsBuilder.UseMySql(
+                connection.ConnectionString,
+                new MySqlServerVersion(connection.MysqlVersion)
+            );
 
             return new MySqlContext(optionsBuilder.Options);
         }

@@ -38,9 +38,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
         /// <param name="context"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public async Task SendAsync(SendingContext context, MimeMessage message)
+        public async Task<IHandlerResult> SendAsync(SendingContext context, MimeMessage message)
         {
-            await SendAsync(context, message, 3);
+            return await SendAsync(context, message, 3);
         }
 
         /// <summary>
@@ -50,7 +50,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
         /// <param name="message"></param>
         /// <param name="tryCount"></param>
         /// <returns></returns>
-        private async Task SendAsync(SendingContext context, MimeMessage message, int tryCount)
+        private async Task<IHandlerResult> SendAsync(
+            SendingContext context,
+            MimeMessage message,
+            int tryCount
+        )
         {
             SendItemMeta sendItem = context.EmailItem!;
 
@@ -60,10 +64,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             // 若返回 null,说明这个发件箱不能建立 smtp 连接，对它进行取消
             if (!clientResult)
             {
-                _logger.Error($"发件箱 {sendItem.Outbox.Email} 错误。{clientResult.Message}");
+                var errorMessage = $"发件箱 {sendItem.Outbox.Email} 错误。{clientResult.Message}";
+                _logger.Error(errorMessage);
                 // 标记发件箱有问题
                 context.OutboxAddress?.MarkShouldDispose(clientResult.Message);
-                return;
+                return HandlerResult.Failed(errorMessage);
             }
             // throw new NullReferenceException("测试报错");
             var smtpClient = clientResult.Data;
@@ -78,8 +83,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             if (smtpClient.ProxyClient is ProxyClientAdapter proxyAdapter && !proxyAdapter.IsEnable)
             {
                 // 动态代理不可用，重新执行发送逻辑
-                await SendAsync(context, message, tryCount - 1);
-                return;
+                return await SendAsync(context, message, tryCount - 1);
             }
             try
             {
@@ -90,8 +94,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
 
                 // 标记邮件状态
                 sendItem.SetStatus(SendItemMetaStatus.Success, sendResult);
-                // 标记上下文状态
-                context.Status |= ContextStatus.Success;
+                return HandlerResult.Success(sendResult);
             }
             // 错误情况分类
             // 1. 代理刚好失效，导致发生 ServiceNotConnectedException ，从而导致失败
@@ -103,12 +106,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                 {
                     _logger.Warn(smtpCommandException);
                     sendItem.SetStatus(SendItemMetaStatus.Error, smtpCommandException.Message);
-                    return;
+                    return HandlerResult.Failed(smtpCommandException.Message);
                 }
-
-                // 发件箱有问题
-                sendItem.Outbox?.MarkShouldDispose(smtpCommandException.Message);
-                return;
+                else
+                {
+                    // 发件箱有问题
+                    sendItem.Outbox?.MarkShouldDispose(smtpCommandException.Message);
+                    return HandlerResult.Failed(smtpCommandException.Message);
+                }
             }
             catch (ServiceNotConnectedException ex)
             {
@@ -118,7 +123,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                     _logger.Error(ex);
                     // 发件箱问题，返回失败
                     sendItem.Outbox?.MarkShouldDispose(ex.Message);
-                    return;
+                    return HandlerResult.Failed(ex.Message);
                 }
 
                 // 代理无法连接到服务器
@@ -129,14 +134,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                     clientAdapter.MarkHealthless();
                 }
 
-                await SendAsync(context, message, tryCount - 1);
+                return await SendAsync(context, message, tryCount - 1);
             }
             catch (Exception error)
             {
                 _logger.Error(error);
                 // 发件箱问题，返回失败
                 sendItem.Outbox?.MarkShouldDispose(error.Message);
-                return;
+                return HandlerResult.Failed(error.Message);
             }
         }
 

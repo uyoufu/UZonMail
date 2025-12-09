@@ -2,17 +2,26 @@ using System.Collections.Concurrent;
 using log4net;
 using UZonMail.CorePlugin.Services.SendCore.Contexts;
 using UZonMail.DB.Extensions;
+using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
+    /// 任务单例缓存数据
+    /// </summary>
+    public class UserGroupTasksPools
+        : ConcurrentDictionary<long, UserGroupTasksPool>,
+            ISingletonService { }
+
+    /// <summary>
     /// 系统级的待发件调度器
     /// </summary>
-    public class GroupTasksList : ConcurrentDictionary<long, GroupTasks>, ISingletonService
+    public class GroupTasksManager(UserGroupTasksPools userTasksPools, SqlContext sqlContext)
+        : IScopedService
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasksList));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasksManager));
 
         /// <summary>
         /// 将发件组添加到待发件队列
@@ -33,11 +42,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
                 return false;
 
             // 判断是否有用户发件管理器
-            if (!this.TryGetValue(group.UserId, out var groupTasks))
+            if (!userTasksPools.TryGetValue(group.UserId, out var groupTasks))
             {
                 // 新建用户发件管理器
-                groupTasks = new GroupTasks(group.UserId);
-                this.TryAdd(group.UserId, groupTasks);
+                groupTasks = new UserGroupTasksPool(group.UserId);
+                userTasksPools.TryAdd(group.UserId, groupTasks);
             }
 
             // 向发件管理器添加发件组
@@ -48,7 +57,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             );
 
             // 更新发件组状态为发送中
-            await sendingContext.SqlContext.SendingGroups.UpdateAsync(
+            await sqlContext.SendingGroups.UpdateAsync(
                 x => x.Id == group.Id,
                 x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending)
             );
@@ -70,34 +79,35 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
                 return null;
             }
 
-            // 用户发件池
-            var groupTasks = GetGroupTasks(outbox.UserId);
-            if (groupTasks == null)
+            // 获取用户的发件任务
+            // 发件任务可能每次都为空，导致无法获取到有效的发件项，需要避免
+            var userGroupTasksPool = GetUserGroupTasksPool(outbox.UserId);
+            if (userGroupTasksPool == null)
             {
                 return null;
             }
 
-            return await groupTasks.GetEmailItem(sendingContext);
+            return await userGroupTasksPool.GetEmailItem(sendingContext);
         }
 
         /// <summary>
+        /// 获取用户的发件任务池
         /// 已经对空的发件池进行了处理
         /// </summary>
         /// <param name="userId"></param>
-        /// <returns></returns>
-        private GroupTasks? GetGroupTasks(long userId)
+        /// <returns>
+        /// 为 null 则表示无发件任务 或者 发件任务池已被释放
+        /// </returns>
+        private UserGroupTasksPool? GetUserGroupTasksPool(long userId)
         {
-            if (this.IsEmpty)
+            if (userTasksPools.IsEmpty)
             {
-                _logger.Info("系统发件任务池为空");
+                _logger.Info($"获取发件池失败，用户 {userId} 发件任务池为空");
                 return null;
             }
 
             // 依次获取发件项
-            // 返回 null 有以下几种情况：
-            // 1. manager 为空
-            // 2. 所有发件箱都在冷却中
-            if (!this.TryGetValue(userId, out var sendingGroupsPool))
+            if (!userTasksPools.TryGetValue(userId, out var sendingGroupsPool))
             {
                 _logger.Info($"无法获取用户 {userId} 发件任务队列，该队列已释放");
                 return null;
@@ -107,7 +117,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             if (sendingGroupsPool.IsEmpty)
             {
                 // 移除自己
-                this.TryRemove(userId, out _);
+                userTasksPools.TryRemove(userId, out _);
                 return null;
             }
 
@@ -123,7 +133,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <returns></returns>
         public void RemoveSendingGroupTask(long userId, long sendingGroupId)
         {
-            if (!this.TryGetValue(userId, out var userSendingGroupsPool))
+            if (!userTasksPools.TryGetValue(userId, out var userSendingGroupsPool))
                 return;
             userSendingGroupsPool.TryRemove(sendingGroupId, out _);
         }

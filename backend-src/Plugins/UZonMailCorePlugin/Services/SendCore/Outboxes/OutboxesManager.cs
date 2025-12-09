@@ -4,6 +4,9 @@ using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
 {
+    /// <summary>
+    /// 发件箱管理器
+    /// </summary>
     public class OutboxesManager
         : ConcurrentDictionary<string, OutboxEmailAddress>,
             ISingletonService
@@ -26,24 +29,12 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         }
 
         /// <summary>
-        /// 通过用户发件池的权重先筛选出发件池，然后从这个用户的发件池中选择一个发件箱
-        /// </summary>
-        /// <returns></returns>
-        [Obsolete("后期将移除")]
-        public OutboxEmailAddress? GetOutbox()
-        {
-            // 随机返回一个值
-            var randIndex = new Random().Next(0, this.Count);
-            return this.Values.ElementAt(randIndex);
-        }
-
-        /// <summary>
         /// 移除发件箱
         /// </summary>
         /// <param name="outbox"></param>
         public bool RemoveOutbox(OutboxEmailAddress outbox, string message = "系统检测到发件箱不可用或取消，主动释放")
         {
-            if (!this.TryRemove(outbox.Email, out var existValue))
+            if (!this.TryRemove(outbox.Email, out _))
             {
                 return false;
             }

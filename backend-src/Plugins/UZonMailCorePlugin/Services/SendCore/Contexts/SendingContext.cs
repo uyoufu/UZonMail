@@ -7,25 +7,32 @@ using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.SendCore.Contexts
 {
-    public class SendingContext(IServiceProvider provider) : ITransientService
+    /// <summary>
+    /// 服务上下文
+    /// 任何地方不要保存此对象引用，避免跨请求污染数据
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <param name="hubClient"></param>
+    /// <param name="sqlContext"></param>
+    public class SendingContext(
+        IServiceProvider provider,
+        IHubContext<UzonMailHub, IUzonMailClient> hubClient,
+        SqlContext sqlContext
+    ) : IScopedService
     {
-        public IServiceProvider Provider => provider;
+        public List<IHandlerResult> HandleResults { get; private set; } = [HandlerResult.Normal()];
 
-        /// <summary>
-        /// 上下文状态
-        /// </summary>
-        public ContextStatus Status { get; set; }
+        public IServiceProvider Provider => provider;
 
         /// <summary>
         /// 获取 SignalR 客户端
         /// </summary>
-        public IHubContext<UzonMailHub, IUzonMailClient> HubClient =>
-            Provider.GetRequiredService<IHubContext<UzonMailHub, IUzonMailClient>>();
+        public IHubContext<UzonMailHub, IUzonMailClient> HubClient => hubClient;
 
         /// <summary>
         /// 数据库上下文
         /// </summary>
-        public SqlContext SqlContext => Provider.GetRequiredService<SqlContext>();
+        public SqlContext SqlContext => sqlContext;
 
         #region 中间变量
         /// <summary>
@@ -52,6 +59,24 @@ namespace UZonMail.CorePlugin.Services.SendCore.Contexts
         {
             this.OutboxAddress = outbox;
             return this;
+        }
+
+        /// <summary>
+        /// 是否有失败的处理器
+        /// </summary>
+        /// <returns></returns>
+        public bool IsFailed()
+        {
+            return HandleResults.Any(result => result.HandlerStatus == HandlerStatus.Failed);
+        }
+
+        /// <summary>
+        /// 是否有需要退出任务的处理器
+        /// </summary>
+        /// <returns></returns>
+        public bool ShouldExitTask()
+        {
+            return HandleResults.Any(result => result.ChainStatus == ChainStatus.ShouldExitTask);
         }
         #endregion
     }

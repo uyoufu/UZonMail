@@ -12,14 +12,15 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
         OutboxesManager outboxesPoolList
     ) : AbstractSendingHandler
     {
-        protected override Task HandleCore(SendingContext context)
+        protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
             // 不存在或者发件箱待释放时，直接返回
             var outbox = context.EmailItem?.Outbox;
             if (outbox == null)
-                return Task.CompletedTask;
+                return HandlerResult.Skiped();
+
             if (!outbox.ShouldDispose)
-                return Task.CompletedTask;
+                return HandlerResult.Skiped();
 
             // 释放发件箱
             var keys = clientFactory.SmtpClientKeys.Where(x => x.Email == outbox.Email).ToList();
@@ -31,7 +32,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 clientFactory.DisposeSmtpClient(key);
             }
 
-            return Task.CompletedTask;
+            return HandlerResult.Success();
         }
     }
 }

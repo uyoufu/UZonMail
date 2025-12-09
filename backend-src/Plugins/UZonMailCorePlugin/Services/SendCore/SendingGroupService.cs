@@ -35,7 +35,7 @@ namespace UZonMail.CorePlugin.Services.SendCore
         DebugConfig debugConfig,
         TokenService tokenService,
         ISendingTasksManager tasksService,
-        GroupTasksList waitList,
+        GroupTasksManager waitList,
         OutboxesManager outboxesManager,
         SmtpClientsManager clientFactory,
         AppSettingsManager settingsService,
@@ -375,7 +375,7 @@ namespace UZonMail.CorePlugin.Services.SendCore
             }
 
             // 创建新的上下文
-            var sendingContext = new SendingContext(serviceProvider);
+            var sendingContext = serviceProvider.GetRequiredService<SendingContext>();
             // 添加到发件列表
             await waitList.AddSendingGroup(sendingContext, sendingGroup, sendItemIds);
             // 开始发件

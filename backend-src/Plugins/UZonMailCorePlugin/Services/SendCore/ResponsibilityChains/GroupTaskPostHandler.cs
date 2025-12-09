@@ -13,18 +13,19 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
     /// 2. 若发件失败，添加失败项
     /// 3. 发送消息通知
     /// </summary>
-    public class GroupTaskPostHandler(GroupTasksList groupTasksList) : AbstractSendingHandler
+    public class GroupTaskPostHandler(UserGroupTasksPools userGroupTasksPools)
+        : AbstractSendingHandler
     {
-        protected override async Task HandleCore(SendingContext context)
+        protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
             // 判断是否有发件项，若没有，则直接返回
             var emailItem = context.EmailItem;
             if (emailItem == null)
-                return;
+                return HandlerResult.Skiped();
 
             // 保存组的发送进度及通知前端
             if (!emailItem.IsErrorOrSuccess())
-                return;
+                return HandlerResult.Skiped();
 
             // 向数据库中保存状态
             var sqlContext = context.SqlContext;
@@ -47,13 +48,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 
             var outbox = context.OutboxAddress;
             if (outbox == null)
-                return;
+                return HandlerResult.Skiped();
             if (emailItem.Parent.ToSendingCount > 0)
-                return;
+                return HandlerResult.Skiped();
 
             // 若是最后一封邮件，要标记办结
-            if (!groupTasksList.TryGetValue(outbox.UserId, out var groupTasks))
-                return;
+            if (!userGroupTasksPools.TryGetValue(outbox.UserId, out var groupTasks))
+                return HandlerResult.Skiped();
+
             if (groupTasks.TryRemove(sendingGroup.Id, out _))
             {
                 var finisher = context.Provider.GetRequiredService<SendingGroupFinisher>();
@@ -62,6 +64,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                     context.GroupTaskStartDate
                 );
             }
+
+            return HandlerResult.Success();
         }
     }
 }

@@ -183,6 +183,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
                 _sendingTargetIds.Add(new SendingTargetId(sendingGroupId));
             }
 
+            // 特定发件箱
             if (sendingItemIds != null)
             {
                 if (!Type.HasFlag(OutboxEmailAddressType.Specific))
@@ -253,7 +254,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// <returns></returns>
         public List<long> GetSendingGroupIds()
         {
-            return _sendingTargetIds.Select(x => x.SendingGroupId).ToList();
+            return [.. _sendingTargetIds.Select(x => x.SendingGroupId)];
         }
 
         /// <summary>
@@ -262,10 +263,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// <returns></returns>
         public List<long> GetSpecificSendingItemIds()
         {
-            return _sendingTargetIds
-                .Where(x => x.SendingGroupId > 0)
-                .Select(x => x.SendingItemId)
-                .ToList();
+            return
+            [
+                .. _sendingTargetIds.Where(x => x.SendingGroupId > 0).Select(x => x.SendingItemId)
+            ];
         }
 
         /// <summary>

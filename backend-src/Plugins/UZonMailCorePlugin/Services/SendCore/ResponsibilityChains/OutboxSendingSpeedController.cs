@@ -15,19 +15,20 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             typeof(OutboxSendingSpeedController)
         );
 
-        protected override async Task HandleCore(SendingContext context)
+        protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
             // 没有成功，不需要冷却
-            if (!context.Status.HasFlag(ContextStatus.Success))
-                return;
+            if (context.IsFailed())
+                return HandlerResult.Skiped();
+            ;
 
             var outbox = context.OutboxAddress;
             if (outbox == null)
-                return;
+                return HandlerResult.Skiped();
 
             // 被释放后，直接返回
             if (outbox.ShouldDispose)
-                return;
+                return HandlerResult.Success();
 
             // 计算冷却时间
             var orgSetting = await settingsService.GetSetting<SendingSetting>(
@@ -37,11 +38,12 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 
             int cooldownMilliseconds = orgSetting.GetCooldownMilliseconds();
             if (cooldownMilliseconds <= 0)
-                return;
+                return HandlerResult.Skiped();
 
             _logger.Info($"发件箱 {outbox.Email} 进入冷却状态，冷却时间 {cooldownMilliseconds} 毫秒");
             await Task.Delay(cooldownMilliseconds);
             _logger.Info($"发件箱 {outbox.Email} 冷却结束");
+            return HandlerResult.Success();
         }
     }
 }
