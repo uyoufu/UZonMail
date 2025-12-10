@@ -126,11 +126,12 @@ namespace UZonMail.CorePlugin.Controllers.Emails
             }
 
             // 移除发件组任务
-            await sendingService.RemoveSendingGroupTask(sendingGroup);
+            var message = "手动暂停";
+            await sendingService.RemoveSendingGroupTask(sendingGroup, message);
             await sendingService.UpdateSendingGroupStatus(
                 sendingGroup.Id,
                 SendingGroupStatus.Pause,
-                "手动暂停"
+                message
             );
 
             return true.ToSuccessResponse();
@@ -178,11 +179,12 @@ namespace UZonMail.CorePlugin.Controllers.Emails
                 return false.ToFailResponse("发件组不存在");
             }
 
-            await sendingService.RemoveSendingGroupTask(sendingGroup);
+            var message = "手动取消";
+            await sendingService.RemoveSendingGroupTask(sendingGroup, message);
             await sendingService.UpdateSendingGroupStatus(
                 sendingGroup.Id,
                 SendingGroupStatus.Pause,
-                "手动取消"
+                message
             );
 
             return true.ToSuccessResponse();

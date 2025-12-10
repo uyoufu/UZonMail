@@ -6,13 +6,13 @@ using UZonMail.DB.SQL;
 
 namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
-    public class OutboxSendingSpeedController(
+    public class OutboxSendingThrottleHandler(
         SqlContext sqlContext,
         AppSettingsManager settingsService
     ) : AbstractSendingHandler
     {
         private static readonly ILog _logger = LogManager.GetLogger(
-            typeof(OutboxSendingSpeedController)
+            typeof(OutboxSendingThrottleHandler)
         );
 
         protected override async Task<IHandlerResult> HandleCore(SendingContext context)

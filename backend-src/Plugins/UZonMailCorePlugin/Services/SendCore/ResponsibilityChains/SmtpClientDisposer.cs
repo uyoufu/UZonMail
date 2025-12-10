@@ -27,7 +27,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             foreach (var key in keys)
             {
                 // 判断是否存在，若存在，则不释放
-                if (!outboxesPoolList.ExistOutbox(key.Email))
+                if (!outboxesPoolList.ExistValidOutbox(key.Email))
                     continue;
                 clientFactory.DisposeSmtpClient(key);
             }

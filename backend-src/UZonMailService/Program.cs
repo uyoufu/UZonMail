@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Localization;
@@ -122,6 +124,14 @@ services.AddSwaggerGen(
 // 添加 signalR，还需要在 app 中使用 MapHub
 // 参考: https://learn.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-8.0&tabs=visual-studio
 services.AddSignalR();
+
+// 取消序列化为字符串
+//.AddJsonProtocol(options =>
+//{
+//    options.PayloadSerializerOptions.Converters.Add(
+//        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+//    );
+//});
 
 // Change to use Name as the user identifier for SignalR
 // WARNING: This requires that the source of your JWT token

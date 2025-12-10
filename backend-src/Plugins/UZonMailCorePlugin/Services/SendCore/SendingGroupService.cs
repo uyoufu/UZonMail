@@ -458,13 +458,13 @@ namespace UZonMail.CorePlugin.Services.SendCore
         /// <param name="sendingGroup"></param>
         /// <param name="cancelMessage"></param>
         /// <returns></returns>
-        public async Task RemoveSendingGroupTask(SendingGroup sendingGroup)
+        public async Task RemoveSendingGroupTask(SendingGroup sendingGroup, string removeReason)
         {
             // 若处于发送中，则取消
             if (sendingGroup.Status == SendingGroupStatus.Sending)
             {
                 // 找到关联的发件箱移除
-                var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id);
+                var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id, removeReason);
 
                 // 移除关联的客户端
                 foreach (var outbox in removedOutboxes)

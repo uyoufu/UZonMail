@@ -7,16 +7,16 @@ namespace UZonMail.CorePlugin.SignalRHubs.Notify
         /// <summary>
         /// 类型有：info, success, warning, error
         /// </summary>
-        public string Type { get; set; } = NotifyType.success.ToString();
+        public NotifyType Type { get; set; } = NotifyType.Success;
 
         public string? Title { get; set; }
     }
 
     public enum NotifyType
     {
-        info,
-        success,
-        warning,
-        error
+        Info,
+        Success,
+        Warning,
+        Error
     }
 }

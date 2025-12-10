@@ -82,11 +82,12 @@ namespace UZonMail.CorePlugin.Services.SendCore
                     {
                         typeof(EmailItemGetter), // 获取邮件
                         typeof(LocalEmailSendingHandler), // 开始发件
-                        typeof(EmailItemPostHandler), // 发件回调
-                        typeof(GroupTaskPostHandler), // 发件任务回调
-                        typeof(OutboxesPostHandler), // 发件箱回调
+                        typeof(EmailItemUpdateHandler), // 发件回调
+                        typeof(GroupTaskUpdateHandler), // 发件任务回调
+                        typeof(OutboxesUpdateHandler), // 发件箱回调
+                        typeof(OutboxDisposer), // 释放发件箱
                         typeof(SmtpClientDisposer), // 释放 smtp 连接
-                        typeof(OutboxSendingSpeedController) // 发件箱发送速度控制
+                        typeof(OutboxSendingThrottleHandler) // 发件箱发送速度控制
                     }
                         .Select(iterationProvider.GetRequiredService)
                         .Where(x => x != null)

@@ -92,7 +92,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 是否应该释放
         /// </summary>
-        public bool ShouldDispose => _sendingItemMetas.ToSendingCount == 0;
+        public bool ShouldDispose => _sendingItemMetas.WaitSendingCount == 0;
 
         /// <summary>
         /// 任务开始日期

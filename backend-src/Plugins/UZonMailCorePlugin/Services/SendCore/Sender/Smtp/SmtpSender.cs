@@ -61,13 +61,19 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             // 获取 smtp 客户端
             var smtpClientManager = context.Provider.GetRequiredService<SmtpClientsManager>();
             var clientResult = await smtpClientManager.GetSmtpClientAsync(context);
+
+            //#if DEBUG
+            //            // 模拟获取 smtp 客户端失败的情况
+            //            clientResult.Ok = false;
+            //#endif
+
             // 若返回 null,说明这个发件箱不能建立 smtp 连接，对它进行取消
             if (!clientResult)
             {
                 var errorMessage = $"发件箱 {sendItem.Outbox.Email} 错误。{clientResult.Message}";
                 _logger.Error(errorMessage);
                 // 标记发件箱有问题
-                context.OutboxAddress?.MarkShouldDispose(clientResult.Message);
+                context.OutboxAddress?.MarkShouldDispose(errorMessage);
                 return HandlerResult.Failed(errorMessage);
             }
             // throw new NullReferenceException("测试报错");

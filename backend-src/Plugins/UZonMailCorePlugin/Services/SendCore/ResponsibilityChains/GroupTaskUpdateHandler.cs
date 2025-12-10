@@ -13,7 +13,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
     /// 2. 若发件失败，添加失败项
     /// 3. 发送消息通知
     /// </summary>
-    public class GroupTaskPostHandler(UserGroupTasksPools userGroupTasksPools)
+    public class GroupTaskUpdateHandler(UserGroupTasksPools userGroupTasksPools)
         : AbstractSendingHandler
     {
         protected override async Task<IHandlerResult> HandleCore(SendingContext context)
@@ -35,7 +35,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             );
 
             var lastMessage =
-                $"[{context.OutboxAddress.Email}] -> [{string.Join(",", emailItem.Inboxes.Select(x => x.Email))}]";
+                $"[{context.OutboxAddress!.Email}] -> [{string.Join(",", emailItem.Inboxes.Select(x => x.Email))}]";
             sendingGroup.LastMessage = lastMessage;
             await sqlContext.SaveChangesAsync();
 
@@ -50,7 +50,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             var outbox = context.OutboxAddress;
             if (outbox == null)
                 return HandlerResult.Skiped();
-            if (emailItem.Parent.ToSendingCount > 0)
+
+            // 判断是否还有待发送的邮件，若有，则直接返回
+            if (emailItem.Parent.WaitSendingCount > 0)
                 return HandlerResult.Skiped();
 
             // 若是最后一封邮件，要标记办结

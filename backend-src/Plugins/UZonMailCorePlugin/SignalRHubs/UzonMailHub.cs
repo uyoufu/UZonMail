@@ -39,7 +39,7 @@ namespace UZonMail.CorePlugin.SignalRHubs
                 new Notify.NotifyMessage()
                 {
                     Message = "欢迎使用 UzonMail !",
-                    Type = Notify.NotifyType.success.ToString()
+                    Type = Notify.NotifyType.Success
                 }
             );
         }

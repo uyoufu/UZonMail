@@ -15,7 +15,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
     /// 2. 更新发件状态到数据库
     /// 3. 发送通知
     /// </summary>
-    public class EmailItemPostHandler : AbstractSendingHandler
+    public class EmailItemUpdateHandler : AbstractSendingHandler
     {
         protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {

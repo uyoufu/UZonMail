@@ -32,7 +32,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// 移除发件箱
         /// </summary>
         /// <param name="outbox"></param>
-        public bool RemoveOutbox(OutboxEmailAddress outbox, string message = "系统检测到发件箱不可用或取消，主动释放")
+        public bool RemoveOutbox(OutboxEmailAddress outbox, string message)
         {
             if (!this.TryRemove(outbox.Email, out _))
             {
@@ -48,7 +48,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// 移除组对应的发件箱
         /// </summary>
         /// <returns></returns>
-        public List<OutboxEmailAddress> RemoveOutbox(long sendingGroupId)
+        public List<OutboxEmailAddress> RemoveOutbox(long sendingGroupId, string message)
         {
             List<OutboxEmailAddress> removedResults = [];
             var keys = this.Keys.ToList();
@@ -63,7 +63,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
                     continue;
 
                 // 移除
-                this.RemoveOutbox(outbox);
+                this.RemoveOutbox(outbox, message);
                 removedResults.Add(outbox);
             }
 
@@ -75,9 +75,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// </summary>
         /// <param name="sendingGroupId"></param>
         /// <returns></returns>
-        public bool ExistOutboxes(long sendingGroupId)
+        public bool ExistValidOutbox(long sendingGroupId)
         {
-            return this.Values.Any(x => x.ContainsSendingGroup(sendingGroupId));
+            return this
+                .Values.Where(x => !x.ShouldDispose)
+                .Any(x => x.ContainsSendingGroup(sendingGroupId));
         }
 
         /// <summary>
@@ -85,9 +87,12 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public bool ExistOutbox(string email)
+        public bool ExistValidOutbox(string email)
         {
-            return this.ContainsKey(email);
+            if (!this.TryGetValue(email, out var value))
+                return false;
+
+            return !value.ShouldDispose;
         }
     }
 }

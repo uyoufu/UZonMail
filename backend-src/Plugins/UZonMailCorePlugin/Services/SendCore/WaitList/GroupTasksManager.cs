@@ -65,6 +65,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             return result;
         }
 
+        public bool TryGetUserTasksPool(long sendingGroupId, out UserGroupTasksPool? tasksPool)
+        {
+            return userTasksPools.TryGetValue(sendingGroupId, out tasksPool);
+        }
+
         /// <summary>
         /// 发送模块调用该方法获取发件项
         /// 若返回空，会导致发送任务暂停
