@@ -44,6 +44,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
                 if (newTask == null)
                     return false;
 
+                // 初始化发件项，可能只发送部分邮件
                 var success = await newTask.InitSendingItems(scopeServices, sendingItemIds);
                 if (!success)
                     return false;

@@ -3,7 +3,7 @@ using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
-    public interface ISendingHandler : ITransientService
+    public interface ISendingHandler : IScopedService
     {
         /// <summary>
         /// 设置下一个处理者

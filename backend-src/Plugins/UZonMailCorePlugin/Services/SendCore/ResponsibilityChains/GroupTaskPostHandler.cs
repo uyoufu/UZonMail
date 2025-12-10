@@ -40,11 +40,12 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             await sqlContext.SaveChangesAsync();
 
             // 向用户推送发送组的进度
-            var client = context.HubClient.GetUserClient(emailItem.UserId);
-            // 推送发送组进度
-            await client.SendingGroupProgressChanged(
-                new SendingGroupProgressArg(sendingGroup, context.GroupTaskStartDate)
-            );
+            await context
+                .HubClient.GetUserClient(emailItem.UserId)
+                // 推送发送组进度
+                .SendingGroupProgressChanged(
+                    new SendingGroupProgressArg(sendingGroup, context.GroupTaskStartDate)
+                );
 
             var outbox = context.OutboxAddress;
             if (outbox == null)

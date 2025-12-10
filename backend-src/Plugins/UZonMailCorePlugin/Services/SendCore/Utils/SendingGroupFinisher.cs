@@ -25,16 +25,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.Utils
             await db.SaveChangesAsync();
 
             // 通知发件组发送完成
-            var client = hubContext.GetUserClient(sendingGroup.UserId);
-            if (client != null)
-            {
-                await client.SendingGroupProgressChanged(
+            await hubContext
+                .GetUserClient(sendingGroup.UserId)
+                .SendingGroupProgressChanged(
                     new SendingGroupProgressArg(sendingGroup, groupTaskStartDate)
                     {
                         ProgressType = ProgressType.End
                     }
                 );
-            }
 
             await notification.Notify(sendingGroup);
         }

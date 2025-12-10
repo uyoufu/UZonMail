@@ -5,7 +5,7 @@ using UZonMail.CorePlugin.Services.SendCore.Contexts;
 namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
-    /// 子类通过修改 status 来控制是否继续向下执行
+    /// 不要在子类中保存状态，职责链模式的处理者应该是无状态的
     /// </summary>
     public abstract class AbstractSendingHandler : ISendingHandler
     {

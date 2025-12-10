@@ -356,13 +356,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             }
 
             // 通知用户，任务已开始
-            var client = sendingContext.HubClient.GetUserClient(UserId);
-            await client.SendingGroupProgressChanged(
-                new SendingGroupProgressArg(_sendingGroup, _startDate)
-                {
-                    ProgressType = ProgressType.Start
-                }
-            );
+            await sendingContext
+                .HubClient.GetUserClient(UserId)
+                .SendingGroupProgressChanged(
+                    new SendingGroupProgressArg(_sendingGroup, _startDate)
+                    {
+                        ProgressType = ProgressType.Start
+                    }
+                );
 
             return true;
         }
@@ -447,13 +448,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             sendItemMeta.SetReplyToEmails(outbox.ReplyToEmails, sendingSetting.ReplyToEmailsList);
 
             // 推送开始发件
-            var client = sendingContext.HubClient.GetUserClient(UserId);
-            client?.SendingItemStatusChanged(
-                new SendingItemStatusChangedArg(sendItemMeta.SendingItem)
-                {
-                    Status = SendingItemStatus.Sending
-                }
-            );
+            await sendingContext
+                .HubClient.GetUserClient(UserId)
+                .SendingItemStatusChanged(
+                    new SendingItemStatusChangedArg(sendItemMeta.SendingItem)
+                    {
+                        Status = SendingItemStatus.Sending
+                    }
+                );
 
             return sendItemMeta;
         }

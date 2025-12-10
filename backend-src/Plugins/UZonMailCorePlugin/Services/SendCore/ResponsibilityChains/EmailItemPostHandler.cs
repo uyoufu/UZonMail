@@ -48,8 +48,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             var sendingItem = await SaveSendingItemInfos(context);
 
             // 通知前端发件项状态变化
-            var client = context.HubClient.GetUserClient(context.OutboxAddress.UserId);
-            await client.SendingItemStatusChanged(new SendingItemStatusChangedArg(sendingItem));
+            await context
+                .HubClient.GetUserClient(context.OutboxAddress!.UserId)
+                .SendingItemStatusChanged(new SendingItemStatusChangedArg(sendingItem));
 
             return HandlerResult.Success();
         }

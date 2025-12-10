@@ -467,7 +467,6 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasColumnType("longtext");
 
                     b.Property<string>("Extra")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Icon")

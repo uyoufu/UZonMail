@@ -33,19 +33,13 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             new();
 
         private readonly ProxiesManager _proxyManager;
-        private readonly GroupTasksManager _groupTaskList;
         private readonly AppSettingsManager _settingsService;
 
         private readonly Timer _timer;
 
-        public SmtpClientsManager(
-            ProxiesManager proxyManager,
-            GroupTasksManager groupTaskList,
-            AppSettingsManager settingsService
-        )
+        public SmtpClientsManager(ProxiesManager proxyManager, AppSettingsManager settingsService)
         {
             _proxyManager = proxyManager;
-            _groupTaskList = groupTaskList;
             _settingsService = settingsService;
 
             // 新建定时器，对 smtp 连接进行保活
