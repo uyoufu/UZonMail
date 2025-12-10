@@ -42,7 +42,8 @@
       "#q-app/bex/content": ["./node_modules/@quasar/app-vite/types/bex/entrypoints/content.d.ts"],
       "#q-app/bex/private/bex-bridge": ["./node_modules/@quasar/app-vite/types/bex/bex-bridge.d.ts"],
       "public/*": ["./public/*"]
-    }
+    },
+    "outDir": "/tmp/uzonmail"
   },
   "include": ["./*.d.ts", "./**/*"],
   "exclude": ["./dist", "./node_modules", "./src-capacitor", "./src-cordova", "./quasar.config.*.temporary.compiled*"]
