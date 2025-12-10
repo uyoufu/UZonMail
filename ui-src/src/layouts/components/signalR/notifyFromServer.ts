@@ -3,9 +3,17 @@ import { UzonMailClientMethods } from 'src/signalR/types'
 import { notifyAny } from 'src/utils/dialog'
 import logger from 'loglevel'
 
+export enum NotifyType {
+  Info,
+  Success,
+  Warning,
+  Error
+}
+
+
 export interface INotifyMessage {
   message?: string,
-  type: 'success' | 'error' | 'info' | 'warning',
+  type: NotifyType,
   title?: string
 }
 
@@ -16,7 +24,10 @@ export function useNotifyRegister () {
   function receivedNotify (message: INotifyMessage) {
     logger.debug('[signalR] receive message from server:', message)
 
-    notifyAny(message)
+    notifyAny({
+      message: message.message,
+      type: NotifyType[message.type].toLowerCase(),
+    })
   }
 
   subscribeOne(UzonMailClientMethods.notify, receivedNotify)
