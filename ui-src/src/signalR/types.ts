@@ -1,5 +1,5 @@
 /**
- * 服务器可调用的方法
+ * 表明服务器可调用的方法
  * 当注册后，服务器即可调用该方法
  */
 export enum UzonMailClientMethods {

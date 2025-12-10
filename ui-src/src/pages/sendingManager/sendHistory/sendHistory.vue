@@ -37,6 +37,8 @@
 </template>
 
 <script lang="ts" setup>
+import logger from 'loglevel'
+
 import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
 import ClickableText from 'src/components/clickableText/ClickableText.vue'
@@ -189,6 +191,7 @@ import { SendingGroupProgressType, UzonMailClientMethods } from 'src/signalR/typ
 
 // 进度变化
 function onSendingGroupProgressChanged (arg: ISendingGroupProgressArg) {
+  logger.debug('[SendHistory] onSendingGroupProgressChanged:', arg, arg.progressType === SendingGroupProgressType.start)
   const row = rows.value.find(r => r.id === arg.sendingGroupId)
   if (!row) return
 

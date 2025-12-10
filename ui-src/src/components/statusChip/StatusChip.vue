@@ -1,5 +1,5 @@
 <template>
-  <q-chip v-bind="$attrs" dense :color="statusStyle.color" :text-color="statusStyle.textColor"
+  <q-chip v-bind="$attrs" dense outline square :color="statusStyle.color" :text-color="statusStyle.textColor"
     :label="statusStyle.label">
     <slot name="default"></slot>
   </q-chip>
