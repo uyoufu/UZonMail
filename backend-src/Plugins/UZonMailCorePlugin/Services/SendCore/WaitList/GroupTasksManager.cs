@@ -133,9 +133,19 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <returns></returns>
         public void RemoveSendingGroupTask(long userId, long sendingGroupId)
         {
+            // 获取用户的发件任务池
             if (!userTasksPools.TryGetValue(userId, out var userSendingGroupsPool))
                 return;
-            userSendingGroupsPool.TryRemove(sendingGroupId, out _);
+
+            // 从池中移除发件组任务
+            if (!userSendingGroupsPool.TryRemove(sendingGroupId, out _))
+                return;
+
+            // 若池中为空，同时移除任务池
+            if (userSendingGroupsPool.IsEmpty)
+            {
+                userTasksPools.TryRemove(userId, out _);
+            }
         }
     }
 }
