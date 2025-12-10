@@ -20,6 +20,9 @@ highlights:
   - header: 一款好用的 邮件群发 APP
     description: '现代化UI、企业级性能、多端适配，致力于成为最好用的邮件群发软件!'
     features:
+      - title: 原生企业级品质
+        details: 采用 mysql、redis 数据库，支持多用户，大并发。支持Windows、Linux、MacOS操作系统, 支持服务器私有化部署。
+
       - title: AI 支持
         details: 支持配置 AI 大模型实现邮件正文生成和优化，邮件主题生成，自动添加邮件变量。
 
@@ -44,8 +47,8 @@ highlights:
       - title: 自带爬虫, 外贸神器
         details: 自带 tiktok 邮箱爬虫，帮助您快速发现客户。
 
-      - title: 原生企业级品质
-        details: 采用 mysql、redis 数据库，支持多用户，大并发。支持Windows、Linux、MacOS操作系统, 支持服务器私有化部署。
+      - title: 支持 QQ 群成员采集
+        details: 可以一键将 QQ 群成员转换成收件箱，实现精准获客
 
   # - header: 我们的优势
   #   image: /images/blog.svg
