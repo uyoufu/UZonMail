@@ -1,9 +1,9 @@
 {
   "name": "uzon-mail",
-  "version": "0.0.1",
-  "description": "A app for sending emails",
-  "productName": "UZon Mail",
-  "author": "galens",
+  "version": "0.20.3",
+  "description": "宇正群邮是一款开源的邮件群发软件，提供邮件群发、邮件营销(EDM)、邮箱采集、任意变量、AI 生成、多线程并发等功能。支持所有类型邮箱账号。原生企业级品质，支持多端用户，支持Windows、Linux、MacOS等操作系统, 支持服务器部署。已在外贸营销、教育培训、财务会计等多个行业广泛使用。 UZonMail is an open-source, enterprise‑grade bulk email and mass‑mailing platform designed for high‑volume EDM and email marketing campaigns.  Widely adopted in industries such as  education and finance. Github: https://github.com/uyoufu/UZonMail, Official：https://mail.uzoncloud.com",
+  "productName": "宇正群邮 | UZonMail",
+  "author": "李有福|uyoufu",
   "type": "module",
   "private": true,
   "scripts": {
