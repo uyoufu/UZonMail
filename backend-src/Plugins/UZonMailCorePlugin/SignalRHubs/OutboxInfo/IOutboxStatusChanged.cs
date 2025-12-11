@@ -1,4 +1,3 @@
-using UZonMail.CorePlugin.SignalRHubs.Notify;
 using UZonMail.DB.SQL.Core.Emails;
 
 namespace UZonMail.CorePlugin.SignalRHubs.OutboxInfo

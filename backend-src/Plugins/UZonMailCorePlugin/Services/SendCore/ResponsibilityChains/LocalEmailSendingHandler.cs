@@ -17,25 +17,25 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             typeof(LocalEmailSendingHandler)
         );
 
-        protected override async Task HandleCore(SendingContext context)
+        protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
             _logger.Debug("线程调用本地发件器进行发件");
 
             // 如果前面失败了，跳过
-            if (context.Status.HasFlag(ContextStatus.Fail))
-                return;
+            if (context.IsFailed())
+                return HandlerResult.Skiped();
 
             var sendItem = context.EmailItem;
             if (sendItem == null)
             {
-                return;
+                return HandlerResult.Skiped();
             }
 
             if (!sendItem.Validate(out var status))
             {
                 // 数据验证失败，需要移除当前发件项，并标记数据验证失败
                 sendItem.SetStatus(SendItemMetaStatus.Error, "发件项数据验证失败，取消发件");
-                return;
+                return HandlerResult.Skiped();
             }
 
             var mimeMessage = await CreateMimeMessage(context);
@@ -49,10 +49,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             {
                 _logger.Error($"没有找到匹配的邮件发送器，发件箱：{sendItem.Outbox.Email}");
                 sendItem.SetStatus(SendItemMetaStatus.Error, "没有找到匹配的邮件发送器");
-                return;
+                return HandlerResult.Skiped();
             }
 
-            await emailSender.SendAsync(context, mimeMessage);
+            return await emailSender.SendAsync(context, mimeMessage);
         }
 
         private static async Task<MimeMessage> CreateMimeMessage(SendingContext context)

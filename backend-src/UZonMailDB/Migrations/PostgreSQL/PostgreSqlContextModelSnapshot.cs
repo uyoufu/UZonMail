@@ -467,7 +467,6 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                         .HasColumnType("text");
 
                     b.Property<string>("Extra")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Icon")

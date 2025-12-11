@@ -92,7 +92,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 是否应该释放
         /// </summary>
-        public bool ShouldDispose => _sendingItemMetas.ToSendingCount == 0;
+        public bool ShouldDispose => _sendingItemMetas.WaitSendingCount == 0;
 
         /// <summary>
         /// 任务开始日期
@@ -239,7 +239,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             {
                 dbSet = dbSet.Where(x => sendingItemIds.Contains(x.Id));
             }
-            // 只获取需要的数据，完整数据在执行过程中获取
+
+            // 只获取需要的数据，完整数据在执行过程中再次获取
             List<SendingItem> toSendingItems = await dbSet
                 .Select(x => new SendingItem()
                 {
@@ -355,13 +356,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             }
 
             // 通知用户，任务已开始
-            var client = sendingContext.HubClient.GetUserClient(UserId);
-            await client.SendingGroupProgressChanged(
-                new SendingGroupProgressArg(_sendingGroup, _startDate)
-                {
-                    ProgressType = ProgressType.Start
-                }
-            );
+            await sendingContext
+                .HubClient.GetUserClient(UserId)
+                .SendingGroupProgressChanged(
+                    new SendingGroupProgressArg(_sendingGroup, _startDate)
+                    {
+                        ProgressType = ProgressType.Start
+                    }
+                );
 
             return true;
         }
@@ -420,12 +422,12 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             // 保存当前组的开始日期
             sendingContext.GroupTaskStartDate = _startDate;
 
-            var outboxEmailAddress = sendingContext.OutboxAddress;
-            if (outboxEmailAddress == null)
+            var outbox = sendingContext.OutboxAddress;
+            if (outbox == null)
                 return null;
 
             // 判断是否为当前组对应的发件箱
-            if (!outboxEmailAddress.ContainsSendingGroup(SendingGroupId))
+            if (!outbox.ContainsSendingGroup(SendingGroupId))
                 return null;
 
             // 从列表中移除发件项并转换成 sendItem
@@ -435,7 +437,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 
             // 为 sendItem 动态赋值
             // 赋予发件箱
-            sendItemMeta.SetOutbox(outboxEmailAddress);
+            sendItemMeta.SetOutbox(outbox);
 
             var sendingSetting = await sendingContext
                 .Provider.GetRequiredService<AppSettingsManager>()
@@ -443,19 +445,17 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
                     sendingContext.SqlContext,
                     sendItemMeta.SendingItem.UserId
                 );
-            sendItemMeta.SetReplyToEmails(
-                outboxEmailAddress.ReplyToEmails,
-                sendingSetting.ReplyToEmailsList
-            );
+            sendItemMeta.SetReplyToEmails(outbox.ReplyToEmails, sendingSetting.ReplyToEmailsList);
 
             // 推送开始发件
-            var client = sendingContext.HubClient.GetUserClient(UserId);
-            client?.SendingItemStatusChanged(
-                new SendingItemStatusChangedArg(sendItemMeta.SendingItem)
-                {
-                    Status = SendingItemStatus.Sending
-                }
-            );
+            await sendingContext
+                .HubClient.GetUserClient(UserId)
+                .SendingItemStatusChanged(
+                    new SendingItemStatusChangedArg(sendItemMeta.SendingItem)
+                    {
+                        Status = SendingItemStatus.Sending
+                    }
+                );
 
             return sendItemMeta;
         }
@@ -478,8 +478,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
                 sendItemMeta = _sendingItemMetas.GetSendingMeta(outbox.Id);
             }
 
-            // 从当前组中获取
-            if (outbox.Type.HasFlag(OutboxEmailAddressType.Shared) && sendItemMeta == null)
+            // 若特定项已经发完，则从共享项中获取
+            if (sendItemMeta == null && outbox.Type.HasFlag(OutboxEmailAddressType.Shared))
             {
                 sendItemMeta = _sendingItemMetas.GetSendingMeta();
             }

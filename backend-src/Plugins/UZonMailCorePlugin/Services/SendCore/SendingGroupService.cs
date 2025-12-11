@@ -1,6 +1,7 @@
 using log4net;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 using Quartz;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.CorePlugin.Database.SQL.EmailSending;
@@ -35,7 +36,7 @@ namespace UZonMail.CorePlugin.Services.SendCore
         DebugConfig debugConfig,
         TokenService tokenService,
         ISendingTasksManager tasksService,
-        GroupTasksList waitList,
+        GroupTasksManager waitList,
         OutboxesManager outboxesManager,
         SmtpClientsManager clientFactory,
         AppSettingsManager settingsService,
@@ -375,7 +376,7 @@ namespace UZonMail.CorePlugin.Services.SendCore
             }
 
             // 创建新的上下文
-            var sendingContext = new SendingContext(serviceProvider);
+            var sendingContext = serviceProvider.GetRequiredService<SendingContext>();
             // 添加到发件列表
             await waitList.AddSendingGroup(sendingContext, sendingGroup, sendItemIds);
             // 开始发件
@@ -457,16 +458,13 @@ namespace UZonMail.CorePlugin.Services.SendCore
         /// <param name="sendingGroup"></param>
         /// <param name="cancelMessage"></param>
         /// <returns></returns>
-        public async Task RemoveSendingGroupTask(
-            SendingGroup sendingGroup,
-            string cancelMessage = ""
-        )
+        public async Task RemoveSendingGroupTask(SendingGroup sendingGroup, string removeReason)
         {
             // 若处于发送中，则取消
             if (sendingGroup.Status == SendingGroupStatus.Sending)
             {
                 // 找到关联的发件箱移除
-                var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id);
+                var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id, removeReason);
 
                 // 移除关联的客户端
                 foreach (var outbox in removedOutboxes)
@@ -484,15 +482,47 @@ namespace UZonMail.CorePlugin.Services.SendCore
             {
                 await RemoveSendSchedule(sendingGroup.Id);
             }
+        }
 
-            // 更新状态
+        public async Task UpdateSendingGroupStatus(
+            long sendingGroupId,
+            SendingGroupStatus status,
+            string updateReason = ""
+        )
+        {
+            await UpdateSendingGroupStatus([sendingGroupId], status, updateReason);
+        }
+
+        public async Task UpdateSendingGroupStatus(
+            List<long> sendingGroupIds,
+            SendingGroupStatus status,
+            string updateReason = ""
+        )
+        {
+            var sendingItemStatus = status switch
+            {
+                SendingGroupStatus.Cancel => SendingItemStatus.Cancel,
+                SendingGroupStatus.Pause => SendingItemStatus.Failed,
+                SendingGroupStatus.Finish => SendingItemStatus.Success,
+                _ => SendingItemStatus.Failed,
+            };
+
+            // 修改组状态
             await db.SendingGroups.UpdateAsync(
-                x => x.Id == sendingGroup.Id,
-                x => x.SetProperty(y => y.Status, SendingGroupStatus.Cancel)
+                x => sendingGroupIds.Contains(x.Id),
+                x => x.SetProperty(y => y.Status, status)
             );
+            // 修改邮件项状态
             await db.SendingItems.UpdateAsync(
-                x => x.SendingGroupId == sendingGroup.Id && x.Status == SendingItemStatus.Pending,
-                x => x.SetProperty(y => y.Status, SendingItemStatus.Cancel)
+                x =>
+                    sendingGroupIds.Contains(x.SendingGroupId)
+                    && (
+                        x.Status == SendingItemStatus.Pending
+                        || x.Status == SendingItemStatus.Sending
+                    ),
+                x =>
+                    x.SetProperty(y => y.Status, sendingItemStatus)
+                        .SetProperty(y => y.SendResult, updateReason)
             );
         }
 

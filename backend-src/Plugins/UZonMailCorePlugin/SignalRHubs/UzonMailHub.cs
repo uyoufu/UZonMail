@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
-using UZonMail.CorePlugin.Controllers.Users.Model;
 using UZonMail.CorePlugin.Services.Encrypt;
 
 namespace UZonMail.CorePlugin.SignalRHubs
@@ -40,7 +39,7 @@ namespace UZonMail.CorePlugin.SignalRHubs
                 new Notify.NotifyMessage()
                 {
                     Message = "欢迎使用 UzonMail !",
-                    Type = Notify.NotifyType.success.ToString()
+                    Type = Notify.NotifyType.Success
                 }
             );
         }

@@ -45,7 +45,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 待发送的数量
         /// </summary>
-        public int ToSendingCount => WaitListCount + RecycleBinCount;
+        public int WaitSendingCount => WaitListCount + RecycleBinCount;
 
         /// <summary>
         /// 所有的发送项 Id

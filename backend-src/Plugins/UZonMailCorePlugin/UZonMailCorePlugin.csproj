@@ -20,27 +20,35 @@
 	<ItemGroup>
 	  <Compile Remove="bin\**" />
 	  <Compile Remove="Controllers\Organization\**" />
+	  <Compile Remove="Services\Encrypt\Base\**" />
 	  <Compile Remove="Services\LLM\**" />
 	  <Compile Remove="Services\Settings\Core\**" />
 	  <Compile Remove="Services\UzonMailCore\**" />
+	  <Compile Remove="SignalRHubs\SeverFuncHub\**" />
 	  <Compile Remove="UZonMailCorePlugin\**" />
 	  <Content Remove="bin\**" />
 	  <Content Remove="Controllers\Organization\**" />
+	  <Content Remove="Services\Encrypt\Base\**" />
 	  <Content Remove="Services\LLM\**" />
 	  <Content Remove="Services\Settings\Core\**" />
 	  <Content Remove="Services\UzonMailCore\**" />
+	  <Content Remove="SignalRHubs\SeverFuncHub\**" />
 	  <Content Remove="UZonMailCorePlugin\**" />
 	  <EmbeddedResource Remove="bin\**" />
 	  <EmbeddedResource Remove="Controllers\Organization\**" />
+	  <EmbeddedResource Remove="Services\Encrypt\Base\**" />
 	  <EmbeddedResource Remove="Services\LLM\**" />
 	  <EmbeddedResource Remove="Services\Settings\Core\**" />
 	  <EmbeddedResource Remove="Services\UzonMailCore\**" />
+	  <EmbeddedResource Remove="SignalRHubs\SeverFuncHub\**" />
 	  <EmbeddedResource Remove="UZonMailCorePlugin\**" />
 	  <None Remove="bin\**" />
 	  <None Remove="Controllers\Organization\**" />
+	  <None Remove="Services\Encrypt\Base\**" />
 	  <None Remove="Services\LLM\**" />
 	  <None Remove="Services\Settings\Core\**" />
 	  <None Remove="Services\UzonMailCore\**" />
+	  <None Remove="SignalRHubs\SeverFuncHub\**" />
 	  <None Remove="UZonMailCorePlugin\**" />
 	</ItemGroup>
 
@@ -53,8 +61,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Services\Encrypt\Base\" />
-		<Folder Include="SignalRHubs\SeverFuncHub\" />
+		<Folder Include="Services\SendCore\Reactive\Observables\" />
 		<Folder Include="Utils\Attributes\" />
 		<Folder Include="Utils\Helpers\" />
 	</ItemGroup>
@@ -76,6 +83,7 @@
 		<PackageReference Include="Quartz" Version="3.14.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.3.1" />
+		<PackageReference Include="System.Reactive" Version="7.0.0-preview.1" />
 	</ItemGroup>
 
 	<ItemGroup>

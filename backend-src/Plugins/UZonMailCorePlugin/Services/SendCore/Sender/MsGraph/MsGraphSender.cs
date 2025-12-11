@@ -1,12 +1,10 @@
 using log4net;
 using MimeKit;
-using UZonMail.CorePlugin.Services.Config;
 using UZonMail.CorePlugin.Services.Encrypt;
 using UZonMail.CorePlugin.Services.SendCore.Contexts;
 using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Results;
 
 namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
@@ -29,7 +27,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
         /// <param name="sendingContext"></param>
         /// <param name="mimeMessage"></param>
         /// <returns></returns>
-        public async Task SendAsync(SendingContext context, MimeMessage message)
+        public async Task<IHandlerResult> SendAsync(SendingContext context, MimeMessage message)
         {
             SendItemMeta sendItem = context.EmailItem!;
             var outbox = sendItem.Outbox;
@@ -39,10 +37,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
             // 若返回 null,说明这个发件箱不能建立 smtp 连接，对它进行取消
             if (!clientResult)
             {
-                _logger.Error($"发件箱 {sendItem.Outbox.Email} 错误。{clientResult.Message}");
+                var errorMessage = $"发件箱 {sendItem.Outbox.Email} 错误。{clientResult.Message}";
+                _logger.Error(errorMessage);
                 // 标记发件箱有问题
-                context.OutboxAddress?.MarkShouldDispose(clientResult.Message);
-                return;
+                context.OutboxAddress?.MarkShouldDispose(errorMessage);
+                return HandlerResult.Failed(errorMessage);
             }
             var client = clientResult.Data;
             try
@@ -63,14 +62,16 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 // 标记邮件状态
                 sendItem.SetStatus(SendItemMetaStatus.Success, sendResult);
                 // 标记上下文状态
-                context.Status |= ContextStatus.Success;
+                return HandlerResult.Success();
             }
             catch (Exception error)
             {
                 _logger.Error(error);
                 // 发件箱问题，返回失败
                 sendItem.Outbox?.MarkShouldDispose(error.Message);
-                return;
+                return HandlerResult.Failed(
+                    $"使用发件箱 {sendItem.Outbox?.Email} 发送邮件失败：{error.Message}"
+                );
             }
         }
 

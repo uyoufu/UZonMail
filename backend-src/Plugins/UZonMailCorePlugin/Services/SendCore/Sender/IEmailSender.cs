@@ -1,7 +1,5 @@
 using MimeKit;
-using UZonMail.CorePlugin.Services.Encrypt;
 using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
@@ -31,7 +29,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender
         /// <param name="sendingContext"></param>
         /// <param name="mimeMessage"></param>
         /// <returns></returns>
-        Task SendAsync(SendingContext sendingContext, MimeMessage mimeMessage);
+        Task<IHandlerResult> SendAsync(SendingContext sendingContext, MimeMessage mimeMessage);
 
         /// <summary>
         /// 获取验证客户端

@@ -15,13 +15,13 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
     /// 2. 更新发件状态到数据库
     /// 3. 发送通知
     /// </summary>
-    public class EmailItemPostHandler : AbstractSendingHandler
+    public class EmailItemUpdateHandler : AbstractSendingHandler
     {
-        protected override async Task HandleCore(SendingContext context)
+        protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
             // 发送发件进度
             if (context.EmailItem == null)
-                return;
+                return HandlerResult.Skiped();
 
             // 根据状态发送进度信息
             var emailItem = context.EmailItem;
@@ -42,14 +42,17 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             emailItem.Done();
 
             if (!emailItem.IsErrorOrSuccess())
-                return;
+                return HandlerResult.Skiped();
 
             // 保存结果到数据库
             var sendingItem = await SaveSendingItemInfos(context);
 
             // 通知前端发件项状态变化
-            var client = context.HubClient.GetUserClient(context.OutboxAddress.UserId);
-            await client.SendingItemStatusChanged(new SendingItemStatusChangedArg(sendingItem));
+            await context
+                .HubClient.GetUserClient(context.OutboxAddress!.UserId)
+                .SendingItemStatusChanged(new SendingItemStatusChangedArg(sendingItem));
+
+            return HandlerResult.Success();
         }
 
         /// <summary>

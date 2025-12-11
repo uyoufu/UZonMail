@@ -61,8 +61,9 @@ namespace UZonMail.DB.SQL.Core.Emails
         /// <summary>
         /// 额外的数据
         /// 比如关联qq组号
+        /// 允许为空
         /// </summary>
-        public string Extra { get; set; }
+        public string? Extra { get; set; }
 
         /// <summary>
         /// 获取默认的邮箱组
