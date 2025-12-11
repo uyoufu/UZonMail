@@ -386,7 +386,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     // 对密码进行加密
     for (const [index, row] of data.entries()) {
       if (!row.email) {
-        logger.info(translateOutboxManager('emaiEmptyAtRow', { row: index + 1 }))
+        logger.info(translateOutboxManager('emailEmptyAtRow', { row: index + 1 }))
         continue
       }
 
