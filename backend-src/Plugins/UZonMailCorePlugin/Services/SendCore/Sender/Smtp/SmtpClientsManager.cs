@@ -343,7 +343,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             {
                 await client.ConnectAsync(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL);
             }
-            catch (SocketException ex)
+            catch (SocketException)
             {
                 // 若没有代理，说明是其它错误，不进行尝试
                 if (client.ProxyClient == null)
@@ -360,16 +360,17 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                     tryCount - 1
                 );
             }
-            catch (SslHandshakeException ex)
-            {
-                _logger.Warn(ex);
-                // 证书过期
-                await client.ConnectAsync(
-                    outbox.SmtpHost,
-                    outbox.SmtpPort,
-                    SecureSocketOptions.None
-                );
-            }
+            // 证书过期不再回退
+            //catch (SslHandshakeException ex)
+            //{
+            //    _logger.Warn(ex);
+            //    // 证书过期
+            //    await client.ConnectAsync(
+            //        outbox.SmtpHost,
+            //        outbox.SmtpPort,
+            //        SecureSocketOptions.None
+            //    );
+            //}
 
             // Note: only needed if the SMTP server requires authentication
             // 进行鉴权

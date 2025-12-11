@@ -220,18 +220,19 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                 }
                 return Result<string>.Success(sendResult);
             }
-            catch (SslHandshakeException ex)
-            {
-                _logger.Warn(ex);
-                // 可能是证书过期
-                await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.None);
-                // 鉴权
-                if (!string.IsNullOrEmpty(smtpPassword))
-                {
-                    await client.AuthenticateAsync(email, smtpUserName, smtpPassword);
-                }
-                return Result<string>.Success(sendResult);
-            }
+            // 证书过期不再回退
+            //catch (SslHandshakeException ex)
+            //{
+            //    _logger.Warn(ex);
+            //    // 可能是证书过期
+            //    await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.None);
+            //    // 鉴权
+            //    if (!string.IsNullOrEmpty(smtpPassword))
+            //    {
+            //        await client.AuthenticateAsync(email, smtpUserName, smtpPassword);
+            //    }
+            //    return Result<string>.Success(sendResult);
+            //}
             catch (Exception ex)
             {
                 _logger.Warn(ex);
