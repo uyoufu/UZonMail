@@ -37,5 +37,13 @@ export function useVersionChecker () {
           .replace(/<\/p>/g, "</div>")
       )
     }
+
+    await showHtmlDialog(`<div class="text-accent text-subtitle1">发现新版本: <span class="text-negative">${latestVersion}</span><div>`,
+      latestReleaseInfo.replace(/h2/g, "div")
+        .replace(/h3/g, "div")
+        .replace(/blockquote/g, "span")
+        .replace(/<p>/g, "<div>")
+        .replace(/<\/p>/g, "</div>")
+    )
   })
 }

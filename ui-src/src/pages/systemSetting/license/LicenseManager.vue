@@ -41,7 +41,7 @@ import logger from 'loglevel'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import dayjs from 'dayjs'
-import type { ILicenseInfo } from 'src/api/pro/license';
+import type { ILicenseInfo } from 'src/api/pro/license'
 import { LicenseType, updateLicenseInfo, getLicenseInfo, updateExistingLicenseInfo, removeLicense } from 'src/api/pro/license'
 
 const license = ref<string>('')
@@ -90,7 +90,7 @@ async function onActiveLicense () {
     // 调用升级接口
     const { data: licenseInfo } = await updateLicenseInfo(license.value)
     activeInfo.value = licenseInfo
-  }, "企业版升级", '升级中...')
+  }, "版本授权", '升级中...')
 
   // 更新用户权限
   await updateUserAccess()

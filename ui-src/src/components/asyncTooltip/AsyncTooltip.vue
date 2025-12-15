@@ -72,7 +72,7 @@ const props = defineProps({
   // tooltip: async (params) => { return ['this is 1st line', 'this is 2nd line'] }
   tooltip: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    type: [Array, Function, String] as PropType<Array<any> | ((params?: object) => Promise<string[]>) | string>,
+    type: [Array, Function, String] as PropType<Array<any> | ((params?: object) => Promise<string[]> | string[] | string) | string>,
     default: () => []
   },
 
@@ -116,13 +116,14 @@ async function onTooltipBeforeShow () {
   }
 }
 
+import type { toolTipType } from './types'
 /**
  * 生成提示信息
  * @param tooltip
  * @param params
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function generateTooltips (tooltip: Array<any> | ((params?: object) => Promise<string[]>) | string, params: object) {
+
+async function generateTooltips (tooltip: toolTipType, params: object) {
   const tooltipResults: string[] = []
   // 字符串
   if (typeof tooltip === 'string') {

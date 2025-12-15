@@ -22,8 +22,12 @@ export default navbar(
         //   link: '/video-introduction'
         // },
         {
-          text: 'Demo演示',
+          text: 'Demo 演示',
           link: 'https://maildemo.uzoncloud.com:2234/'
+        },
+        {
+          text: '自建邮局',
+          link: '/self-hosted/postfix/README.md'
         }
       ]
     },
