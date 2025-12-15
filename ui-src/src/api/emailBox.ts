@@ -31,11 +31,31 @@ export enum OutboxStatus {
   Invalid,
 }
 
+export enum ConnectionSecurity {
+  None,
+  SSL,
+  TLS,
+  StartTLS
+}
+
+export enum OutboxType {
+  /// <summary>
+  /// Smtp 认证
+  /// </summary>
+  SMTP = 1,
+
+  /// <summary>
+  /// MsGraph OAuth 认证
+  /// </summary>
+  MsGraph,
+}
+
 /**
  * 发件箱
  */
 export interface IOutbox extends IInbox {
   objectId?: string,
+  type: OutboxType,
   smtpHost: string,
   smtpPort?: number,
   userName?: string,
@@ -46,7 +66,8 @@ export interface IOutbox extends IInbox {
   // 密码已解密
   decryptedPassword?: boolean,
   replyToEmails?: string,
-  enableSSL: boolean, // 是否使用 ssl
+  // enableSSL: boolean, // 是否使用 ssl
+  connectionSecurity: ConnectionSecurity, // 安全套接字选项
   isValid?: boolean,
   status?: OutboxStatus
   validFailReason?: string

@@ -39,6 +39,7 @@ export interface IPopupDialogField {
   required?: boolean, // 是否必须
   validate?: (value: any, parsedValue: any, allValues: Record<string, any>) => Promise<IFunctionResult> | IFunctionResult, // 验证函数
   parser?: (value: any) => any, // 解析函数,在返回时，对数据进行转换
+  visible?: ((allValues: Record<string, any>) => boolean) | boolean, // 若存在，则 true 显示，否则隐藏
   tooltip?: Array<any> | ((params?: object) => Promise<string[]>) | string, // 提示
   disable?: boolean, // 是否禁用，一般用于仅显示数据,
   disableAutogrow?: boolean, // 当为 textarea 时，是否自动增长
@@ -69,7 +70,7 @@ export interface IPopupDialogParams {
   // 数据源
   dataSet?: Record<string, Array<string | number | boolean | object> | Promise<any[]>>,
   // 用于数据验证
-  validate?: (data: Record<string, any>) => Promise<IFunctionResult>,
+  validate?: (data: Record<string, any>) => Promise<IFunctionResult> | IFunctionResult,
   // 窗体保持
   persistent?: boolean,
   // ok 最后执行的逻辑

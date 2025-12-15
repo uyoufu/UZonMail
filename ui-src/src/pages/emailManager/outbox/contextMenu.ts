@@ -16,7 +16,7 @@ import { translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
 
 import logger from 'loglevel'
 
-import { tryOutlookDelegateAuthorization, isExchangeOutbox } from './headerFunctions'
+import { tryOutlookDelegateAuthorization, isMsGraphOutbox } from './headerFunctions'
 
 
 export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType, refreshTable: () => void) {
@@ -59,7 +59,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
         label: translateOutboxManager('outlookDelegateAuthorization'),
         tooltip: translateOutboxManager('outlookDelegateAuthorization'),
         onClick: onRequestOutlookDelegateAuthorization,
-        vif: row => isExchangeOutbox(row.smtpHost, row.email)
+        vif: row => isMsGraphOutbox(row)
       },
     ])
 
@@ -112,41 +112,15 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     const fields = await getOutboxFields()
     // 修改默认值
     fields.forEach(field => {
-      switch (field.name) {
-        case 'email':
-          field.value = outbox.email
-          break
-        case 'name':
-          field.value = outbox.name
-          break
-        case 'userName':
-          field.value = outbox.userName
-          break
-        case 'password':
-          field.value = outbox.password
-          break
-        case 'smtpHost':
-          field.value = outbox.smtpHost
-          break
-        case 'smtpPort':
-          field.value = outbox.smtpPort
-          break
-        case 'description':
-          field.value = outbox.description
-          break
-        case 'proxyId':
-          field.value = outbox.proxyId
-          break
-        case 'replyToEmails':
-          field.value = outbox.replyToEmails
-          break
-        case 'enableSSL':
-          field.value = outbox.enableSSL
-          break
-        default:
-          break
+      // 根据字段名，获取默认值
+      const defaultValue = (outbox as any)[field.name]
+      if (defaultValue !== undefined) {
+        field.value = defaultValue
+        return
       }
     })
+
+    logger.debug('[onUpdateOutbox] fields', row, fields)
 
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
@@ -155,7 +129,6 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     }
 
     // 弹出对话框
-
     const { ok, data } = await showDialog<IOutbox>(popupParams)
     if (!ok) return
 

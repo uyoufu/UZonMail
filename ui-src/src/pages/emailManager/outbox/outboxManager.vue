@@ -72,7 +72,7 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
 import { useQTable } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
-import { getOutboxesCount, getOutboxesData, OutboxStatus } from 'src/api/emailBox'
+import { ConnectionSecurity, getOutboxesCount, getOutboxesData, OutboxStatus } from 'src/api/emailBox'
 import type { IOutbox } from 'src/api/emailBox'
 import type { IEmailGroupListItem } from '../components/types'
 
@@ -153,12 +153,12 @@ const columns: ComputedRef<QTableColumn[]> = computed(() => [
     sortable: true
   },
   {
-    name: 'enableSSL',
+    name: 'connectionSecurity',
     required: true,
-    label: translateOutboxManager('col_enableSSL'),
+    label: translateOutboxManager('col_connectionSecurity'),
     align: 'left',
-    field: 'enableSSL',
-    format: v => v ? translateGlobal('yes') : translateGlobal('no'),
+    field: 'connectionSecurity',
+    format: v => ConnectionSecurity[v] as string,
     sortable: true
   },
   {

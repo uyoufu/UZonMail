@@ -29,7 +29,8 @@
           </q-input>
 
           <PasswordInput v-if="isMatchedType(field, 'password')" class="q-mb-sm low-code__field q-px-sm"
-            :class="field.classes" no-icon :label="field.label" v-model="fieldsModel[field.name]" dense>
+            :class="field.classes" no-icon :label="field.label" :placeholder="field.placeholder"
+            v-model="fieldsModel[field.name]" dense>
             <AsyncTooltip :tooltip="field.tooltip" />
           </PasswordInput>
 
@@ -232,6 +233,17 @@ const validFields = computed(() => {
     // 过滤没有 name 和 type 的字段
     if (!field.name || !field.type) {
       continue
+    }
+
+    if (field.visible === false) {
+      continue
+    }
+
+    if (typeof field.visible === 'function') {
+      const isVisible = field.visible(fieldsModel.value)
+      if (!isVisible) {
+        continue
+      }
     }
 
     // 对字段内容进行格式化，比如单选可能需要从数据源中获取

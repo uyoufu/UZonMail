@@ -103,9 +103,14 @@ main.cf 文件提供最少的配置参数。
 #  3. postfix 从主机名中提取域名
 # 主机名习惯上是 mail.uzoncloud.com, 也可以设置为其它的
 sudo postconf -e "myhostname = mail1.uzoncloud.com"
-
 # 配置邮箱目录
-sudo postconf -e 'home_mailbox = Maildir /'
+sudo postconf -e 'home_mailbox = Maildir/'
+# 设置接收服务器
+sudo postconf -e 'mydestination = $myhostname, localhost.$mydomain, localhost, uzoncloud.com, mx.uzoncloud.com'
+# 配置日志文件，方便调试
+sudo postconf -e 'maillog_file=/var/log/postfix.log'
+# 设置邮件大小限制，0 表示不限制
+sudo postconf -e 'mailbox_size_limit = 0'
 
 # 使用 SASL（Dovecot SASL）配置 Postfix 的 SMTP-AUTH
 # 授权验证使用 dovecot
@@ -365,17 +370,19 @@ nano /etc/dovecot/conf.d/10-ssl.conf
    # 编辑 /etc/postfix/main.cf，添加 milter 配置
    # 添加到 main.cf 末尾
    milter_default_action = accept
-   smtpd_milters = inet:localhost:8891  # 或 unix:/var/run/opendkim/opendkim.sock
+   # 或 unix:/var/run/opendkim/opendkim.sock
+   smtpd_milters = inet:localhost:8891
    non_smtpd_milters = $smtpd_milters
    ```
-
-   **编辑 /etc/postfix/master.cf [可选]**
-
+```
+   
+**编辑 /etc/postfix/master.cf [可选]**
+   
    ``` bash
    # 编辑 /etc/postfix/master.cf，在 smtp 和 submission 服务下添加 milter（可选，用于特定端口）
    smtp      inet  n       -       y       -       -       smtpd
      -o smtpd_milters=inet:localhost:8891
-   ```
+```
 
 ### 用户管理
 
@@ -391,7 +398,7 @@ sudo systemctl restart postfix dovecot opendkim
 sudo systemctl enable postfix dovecot opendkim
 
 # 新建用户
-# 用户格式建议为邮箱号, 因为有的客户端不支持自定义 smtp 用户名
+# 使用本机用户时，不要包含 @域名
 useradd -m username
 # 禁止用户登录
 sudo usermod -s /usr/sbin/nologin username
@@ -447,11 +454,11 @@ PTR（Pointer）记录是 DNS 中的反向 DNS（Reverse DNS）记录，用于�
 
 **原始配置发件结果：**
 
-![未配置验证](https://oss.uzoncloud.com:2234/public/files/images/image-20251214181802651.png)
+![image-20251214181802651](https://oss.uzoncloud.com:2234/public/files/images/image-20251214181802651.png)
 
 **配置完成后结果：**
 
-![配置验证](https://oss.uzoncloud.com:2234/public/files/images/image-20251215124148996.png)
+![image-20251215124148996](https://oss.uzoncloud.com:2234/public/files/images/image-20251215124148996.png)
 
 ## 高级配置
 
