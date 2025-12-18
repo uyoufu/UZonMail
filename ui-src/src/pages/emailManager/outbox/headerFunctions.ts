@@ -5,7 +5,13 @@ import { PopupDialogFieldType } from 'src/components/popupDialog/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { IOutbox } from 'src/api/emailBox'
-import { createOutbox, createOutboxes, startOutlookDelegateAuthorization, getOutboxInfo } from 'src/api/emailBox'
+import {
+  createOutbox,
+  createOutboxes,
+  startOutlookDelegateAuthorization,
+  ConnectionSecurity,
+  OutboxType
+} from 'src/api/emailBox'
 import { GuessSmtpInfoGet } from 'src/api/smtpInfo'
 
 import { confirmOperation, notifyError, notifySuccess, notifyWarning } from 'src/utils/dialog'
@@ -13,6 +19,7 @@ import { isEmail } from 'src/utils/validator'
 
 import type { IExcelColumnMapper } from 'src/utils/file'
 import { readExcel, writeExcel } from 'src/utils/file'
+import { enumEntries } from 'src/utils/enum'
 import type { IProxy } from 'src/api/proxy'
 import { getUsableProxies } from 'src/api/proxy'
 import { debounce } from 'lodash'
@@ -52,6 +59,10 @@ export function isExchangeOutbox (smtpHost: string, email: string): boolean {
   return true
 }
 
+export function isMsGraphOutbox (outbox: IOutbox): boolean {
+  return outbox.type === OutboxType.MsGraph
+}
+
 /**
  * 获取发件箱字段
  * @returns
@@ -65,7 +76,37 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
     isActive: true,
     url: ''
   } as IProxy)
+
+  // 获取连接安全协议选项
+  const secureSocketOptions = enumEntries(ConnectionSecurity).map(([key, value]) => ({
+    label: key,
+    value: value
+  }))
+
+  logger.debug('[outbox] secureSocketOptions', secureSocketOptions)
+
+  function isSmtp (value: Record<string, any>) {
+    return value.type === OutboxType.SMTP
+  }
+
+  function isMsGraph (value: Record<string, any>) {
+    return value.type === OutboxType.MsGraph
+  }
+
   return [
+    {
+      name: 'type',
+      type: PopupDialogFieldType.selectOne,
+      options: enumEntries(OutboxType).map(([key, value]) => ({
+        label: key,
+        value: value
+      })),
+      mapOptions: true,
+      emitValue: true,
+      label: translateOutboxManager('col_type'),
+      value: OutboxType.SMTP,
+      required: true
+    },
     {
       name: 'email',
       type: PopupDialogFieldType.email,
@@ -84,39 +125,60 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
       label: translateOutboxManager('col_smtpHost'),
       type: PopupDialogFieldType.text,
       value: '',
-      required: true
+      required: true,
+      visible: isSmtp
     },
     {
       name: 'smtpPort',
       label: translateOutboxManager('col_smtpPort'),
       type: PopupDialogFieldType.number,
       value: 465,
-      required: true
+      required: true,
+      visible: isSmtp
     },
     {
       name: 'userName',
       type: PopupDialogFieldType.text,
-      label: translateOutboxManager('col_smtpUserName'),
+      label: translateOutboxManager('smtpUserName'),
       placeholder: translateOutboxManager('ifSameAsEmailUseEmpty'),
-      value: ''
+      value: '',
+      visible: isSmtp
+    },
+    {
+      name: 'userName',
+      type: PopupDialogFieldType.text,
+      label: translateOutboxManager('clientId'),
+      placeholder: translateOutboxManager('clientIdPlaceholder'),
+      value: '',
+      visible: isMsGraph
     },
     {
       name: 'password',
-      label: translateOutboxManager('col_smtpPassword'),
+      label: translateOutboxManager('smtpPassword'),
       type: PopupDialogFieldType.password,
-      validate: (value: any, parsedValue: any, allValues: Record<string, any>) => {
-        if (isExchangeEmail(allValues.email)) {
-          // 如果是 Outlook 邮箱，则允许为空
-          return {
-            ok: true
-          }
-        }
-        return {
-          ok: value && value.length > 0,
-          message: translateOutboxManager('smtpPasswordIsRequired')
-        }
-      },
-      value: ''
+      // validate: (value: any, parsedValue: any, allValues: Record<string, any>) => {
+      //   if (isMsGraphOutbox(allValues as IOutbox)) {
+      //     // 如果是 Outlook 邮箱，则允许为空
+      //     return {
+      //       ok: true
+      //     }
+      //   }
+      //   return {
+      //     ok: value && value.length > 0,
+      //     message: translateOutboxManager('smtpPasswordIsRequired')
+      //   }
+      // },
+      value: '',
+      required: true,
+      visible: isSmtp
+    },
+    {
+      name: 'password',
+      label: translateOutboxManager('refreshToken'),
+      placeholder: translateOutboxManager('refreshTokenPlaceholder'),
+      type: PopupDialogFieldType.password,
+      value: '',
+      visible: isMsGraph
     },
     {
       name: 'description',
@@ -140,11 +202,15 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
       label: translateOutboxManager('col_replyToEmails'),
     },
     {
-      name: 'enableSSL',
-      label: translateOutboxManager('col_enableSSL'),
-      type: PopupDialogFieldType.boolean,
-      value: true,
-      required: true
+      name: 'connectionSecurity',
+      label: translateOutboxManager('col_connectionSecurity'),
+      type: PopupDialogFieldType.selectOne,
+      options: secureSocketOptions,
+      emitValue: true,
+      value: ConnectionSecurity.SSL,
+      mapOptions: true,
+      required: true,
+      visible: isSmtp
     }
   ]
 }
@@ -192,18 +258,8 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
       fieldName: 'replyToEmails'
     },
     {
-      headerName: translateOutboxManager('col_enableSSL'),
-      fieldName: 'enableSSL',
-      format: (value: boolean) => {
-        if (typeof value === 'boolean') {
-          return value ? translateGlobal('yes') : translateGlobal('no')
-        }
-
-        if (typeof value === 'string') {
-          return value === translateGlobal('yes')
-        }
-        return !!value
-      }
+      headerName: translateOutboxManager('col_connectionSecurity'),
+      fieldName: 'connectionSecurity'
     }
   ]
 }
@@ -216,10 +272,8 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
  * @returns
  */
 export async function tryOutlookDelegateAuthorization (outbox: IOutbox) {
-  if (!isExchangeEmail(outbox.email)) return
-  // 存在但非 Exchange 地址
-  if (outbox.smtpHost && !isExchangeDomain(outbox.smtpHost)) {
-    notifyWarning(translateOutboxManager('outlookDelegateAuthorizationSkippedNonExchangeSmtp'))
+  if (!isMsGraphOutbox(outbox)) {
+    notifyWarning(translateOutboxManager('outlookDelegateAuthorizationSkippedNonMsGraphType'))
     return
   }
 
@@ -229,14 +283,11 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox) {
     return
   }
 
-  // // 判断是否采用个人委托授权
-  // if (!outbox.userName || outbox.userName.includes('/')) return
-
-  // 密钥必须小于 80 位
-  // 否则可能是 refreshToken
-  const plainPassword = outbox.password
-  if (plainPassword.length > 80) {
-    notifySuccess(translateOutboxManager('existingRefreshTokenNoNeedDelegateAuthorization'))
+  // 判断是否使用 clientId + refreshToken 进行授权
+  // 该方式直接在后端检测，直接返回
+  if (outbox.userName && outbox.password) {
+    // 后端在使用时，或者前端验证时，会检测授权
+    // 此处不处理
     return
   }
 
@@ -259,7 +310,7 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox) {
     return
   }
 
-  const waitingPromise = new Promise<void>((resolve) => {
+  await new Promise<void>((resolve) => {
     const interval = setInterval(() => {
       if (win.closed) {
         clearInterval(interval)
@@ -268,13 +319,7 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox) {
     }, 200)
   })
 
-  await waitingPromise
-
-  // 更新发件箱的数据
-  const { data: newOutbox } = await getOutboxInfo(outbox.id as number)
-  outbox.password = newOutbox.password
-
-  notifySuccess(translateOutboxManager('delegateCopleted'))
+  notifySuccess(translateOutboxManager('delegateCompleted'))
 }
 
 /**
@@ -299,10 +344,12 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     })
 
     // 新增发件箱
+    const outboxFields = await getOutboxFields()
     const popupParams: IPopupDialogParams = {
       title: translateOutboxManager('newOutboxTitle', { groupName: emailGroup.value.label }),
-      fields: await getOutboxFields(),
+      fields: outboxFields,
       onSetup: (params) => {
+        // email 变化时，猜测 smtp 信息
         watch(() => params.fieldsModel.value.email, async newValue => {
           if (!newValue) return
 
@@ -311,6 +358,44 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
 
           await GuessSmtpInfoGetDebounce(newValue, params)
         })
+
+        // 加密方式变化时，更改端口号
+        watch(() => params.fieldsModel.value.connectionSecurity, (newValue) => {
+          let defaultPort = 465
+          switch (newValue) {
+            case ConnectionSecurity.None:
+              defaultPort = 25
+              break
+            case ConnectionSecurity.SSL:
+              defaultPort = 465
+              break
+            case ConnectionSecurity.TLS:
+              defaultPort = 465
+              break
+            case ConnectionSecurity.StartTLS:
+              defaultPort = 587
+              break
+            default:
+              defaultPort = 465
+          }
+          params.fieldsModel.value.smtpPort = defaultPort
+        })
+      },
+      // 整体验证
+      validate (values: Record<string, any>) {
+        if (values.type === OutboxType.MsGraph) {
+          // userName + password 必须同时存在或者同时为空
+          const hasUserName = !!values.userName
+          const hasPassword = !!values.password
+          if (hasUserName !== hasPassword) {
+            return {
+              ok: false,
+              message: translateOutboxManager('clientIdAndRefreshTokenBothRequired')
+            }
+          }
+        }
+
+        return { ok: true }
       }
     }
 
@@ -321,6 +406,9 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     // 添加邮箱组
     data.emailGroupId = emailGroup.value.id
     const { data: outbox } = await createOutbox(data)
+    // 将密码设置为本机密码
+    outbox.password = data.password
+
     // 保存到 rows 中
     addNewRow(outbox)
 
@@ -336,6 +424,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
       {
         email: translateOutboxManager('exportColumn_email'),
         name: translateOutboxManager('exportColumn_name'),
+        type: translateOutboxManager('exportColumn_type'),
         userName: translateOutboxManager('exportColumn_userName'),
         password: translateOutboxManager('exportColumn_password'),
         smtpHost: translateOutboxManager('exportColumn_smtpHost'),
@@ -343,10 +432,11 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
         description: translateOutboxManager('exportColumn_description'),
         proxy: translateOutboxManager('exportColumn_proxy'),
         replyToEmails: translateOutboxManager('exportColumn_replyToEmails'),
-        enableSSL: true
+        connectionSecurity: translateOutboxManager('exportColumn_connectionSecurity')
       }, {
         email: 'test@163.com',
         name: '',
+        type: OutboxType[OutboxType.SMTP],
         userName: '',
         password: 'ThisIsYour163SmtpPassword',
         smtpHost: 'smtp.163.com',
@@ -354,7 +444,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
         description: '',
         proxy: '',
         replyToEmails: '',
-        enableSSL: true
+        connectionSecurity: ConnectionSecurity[ConnectionSecurity.SSL]
       }
     ]
     await writeExcel(data, {
@@ -399,7 +489,14 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
         continue
       }
 
+      // 添加邮箱组 ID
       row.emailGroupId = emailGroupId || emailGroup.value.id
+      // 将安全设置转换成枚举
+      row.connectionSecurity = ConnectionSecurity[row.connectionSecurity as keyof typeof ConnectionSecurity]
+        || ConnectionSecurity.None
+      // 将类型转换成枚举
+      row.type = OutboxType[row.type as keyof typeof OutboxType] || OutboxType.SMTP
+
       validRows.push(row as IOutbox)
     }
 
@@ -424,6 +521,8 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
 
     if (emailGroupId === emailGroup.value.id) {
       outboxes.forEach(x => {
+        // 将密码设置为本机密码
+        x.password = validRows.find(y => y.email === x.email)?.password || '******'
         addNewRow(x)
       })
     }

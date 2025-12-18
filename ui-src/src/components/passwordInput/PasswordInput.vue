@@ -1,5 +1,5 @@
 <template>
-  <q-input v-bind="$attrs" :dense="dense" outlined standout v-model="password" :label="label"
+  <q-input v-bind="$attrs" :dense="dense" outlined standout v-model="password" :label="label" :placeholder="placeholder"
     :type="isPwd ? 'password' : 'text'">
     <template v-if="!noIcon" v-slot:prepend>
       <q-icon name="lock" />
@@ -26,6 +26,11 @@ const props = defineProps({
   label: {
     type: String,
     default: '密码'
+  },
+
+  placeholder: {
+    type: String,
+    default: ''
   }
 })
 const password = defineModel({

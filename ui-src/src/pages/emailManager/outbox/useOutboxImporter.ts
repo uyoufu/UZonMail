@@ -9,8 +9,9 @@ import { splitString } from 'src/utils/stringHelper'
 import type { ISmtpInfo } from 'src/api/smtpInfo'
 import { GuessSmtpInfoPost } from 'src/api/smtpInfo'
 import type { IOutbox } from 'src/api/emailBox'
-import { createOutboxes } from 'src/api/emailBox'
+import { ConnectionSecurity, createOutboxes, OutboxType } from 'src/api/emailBox'
 import { translateOutboxManager } from 'src/i18n/helpers'
+import { enumEntries } from 'src/utils/enum'
 
 /**
  * 从 txt 文件导入邮件
@@ -74,6 +75,8 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
 
     if (emailGroupId === emailGroup.value.id) {
       outboxes.forEach(x => {
+        // 将密码设置为本机密码
+        x.password = newData.find(y => y.email === x.email)?.password || '******'
         addNewRow(x)
       })
     }
@@ -90,16 +93,23 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
    */
   function __buildOutboxData (emailGroupId: number, outboxTexts: string[], smtpInfos: ISmtpInfo[]): IOutbox | null {
     const outbox: IOutbox = {
+      type: OutboxType.SMTP,
       emailGroupId,
       email: '',
       smtpHost: '',
       smtpPort: 0,
       userName: '',
       password: '',
-      enableSSL: true
+      connectionSecurity: ConnectionSecurity.SSL
     }
 
     const tempOutboxTexts = [...outboxTexts]
+
+    // 类型
+    for (const [key, value] of enumEntries(OutboxType)) {
+      if (tempOutboxTexts.some(x => x === key))
+        outbox.type = value
+    }
 
     // 获取邮箱
     const emailIndex = outboxTexts.findIndex(x => x.includes('@'))
@@ -134,7 +144,7 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
     // 开始补充数据
     if (!outbox.smtpHost) outbox.smtpHost = smtpInfo.host
     if (!outbox.smtpPort) outbox.smtpPort = smtpInfo.port
-    outbox.enableSSL = smtpInfo.enableSSL
+    outbox.connectionSecurity = smtpInfo.connectionSecurity
 
     return outbox
   }

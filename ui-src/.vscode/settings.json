@@ -25,6 +25,7 @@
     "ciphertext",
     "Cooldown",
     "dbclick",
+    "echarts",
     "loglevel",
     "Onebot",
     "retcode",
@@ -33,7 +34,8 @@
     "uyoufu",
     "uzon",
     "viewerjs",
-    "viewsource"
+    "viewsource",
+    "vueuse"
   ]
 }
 

@@ -149,7 +149,9 @@ export interface IExcelColumnMapper {
   // 过滤函数
   filter?: (value: any) => boolean,
   // 是否必须
-  required?: boolean
+  required?: boolean,
+  // 数据验证列表
+  validations?: string[]
 }
 
 export interface IExcelMapperParams {
@@ -373,6 +375,9 @@ export async function writeExcel (rows: any[], params: IExcelWriterParams) {
 
   // 创建一个新的工作表
   const newWorksheet = XLSX.utils.json_to_sheet(results)
+
+  // TODO: 后期增加数据验证
+
   // 将工作表添加到工作簿
   XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, params.sheetName || 'Sheet1')
 
