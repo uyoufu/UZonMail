@@ -141,6 +141,7 @@ export default {
     readStatistics: '阅读统计',
     unsubscribeStatistics: '退订统计',
     emailCrawler: '邮件爬虫',
+    customerCollector: '客户采集',
     tiktokCrawler: 'TikTok爬虫',
     qqGroupMembersGetter: 'QQ 群采集',
     tiktokDevice: 'TikTok设备',

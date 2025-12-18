@@ -223,15 +223,15 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     ]
   },
   {
-    name: 'EmailCrawler',
-    path: '/email-crawler',
+    name: 'CustomerCollector',
+    path: '/customer-collector',
     component: NormalLayout,
     meta: {
-      label: 'emailCrawler',
-      icon: 'bug_report',
+      label: 'customerCollector',
+      icon: 'contact_mail',
       access: ['professional']
     },
-    redirect: '/email-crawler/tiktok/task',
+    redirect: '/customer-collector/tiktok/task',
     children: [
       {
         name: 'TiktokCrawler',
@@ -249,7 +249,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
               icon: 'devices',
               label: 'tiktokDevice'
             },
-            component: () => import('pages/emailCrawler/tiktok/tikTokDevice/TikTokDeviceManager.vue')
+            component: () => import('pages/customerCollectors/tiktok/tikTokDevice/TikTokDeviceManager.vue')
           },
           {
             name: 'CrawlerTask',
@@ -258,7 +258,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
               icon: 'flag',
               label: 'crawlerTask'
             },
-            component: () => import('pages/emailCrawler/tiktok/crawlerTask/CrawlerTask.vue')
+            component: () => import('pages/customerCollectors/tiktok/crawlerTask/CrawlerTask.vue')
           },
           {
             name: 'CrawlerResult',
@@ -268,7 +268,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
               label: 'crawlerResult',
               noMenu: true
             },
-            component: () => import('pages/emailCrawler/tiktok/crawlerResult/CrawlerResult.vue')
+            component: () => import('pages/customerCollectors/tiktok/crawlerResult/CrawlerResult.vue')
           }
         ]
       },
@@ -288,7 +288,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
               icon: 'groups',
               label: 'qqGroupMembersGetter'
             },
-            component: () => import('pages/emailCrawler/qqOnebot/qqGroupMemberGetter.vue')
+            component: () => import('pages/customerCollectors/qqOnebot/qqGroupMemberGetter.vue')
           }
         ]
       },
