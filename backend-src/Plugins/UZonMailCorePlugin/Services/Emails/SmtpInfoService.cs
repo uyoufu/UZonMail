@@ -39,7 +39,7 @@ namespace UZonMail.CorePlugin.Services.Emails
                     Domain = domain,
                     Host = "smtp." + domain,
                     Port = 465,
-                    SecurityProtocol = SecurityProtocol.SSL,
+                    ConnectionSecurity = ConnectionSecurity.SSL,
                     EnableSSL = true
                 };
                 smtpInfos.Add(smtpInfo);

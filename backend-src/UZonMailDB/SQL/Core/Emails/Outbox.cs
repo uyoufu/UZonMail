@@ -1,11 +1,16 @@
-﻿namespace UZonMail.DB.SQL.Core.Emails
+using MailKit.Security;
+
+namespace UZonMail.DB.SQL.Core.Emails
 {
     /// <summary>
     /// 发件箱
     /// </summary>
     public class Outbox : EmailBox
     {
-        //public OutboxAuthType AuthType { get; set; } = OutboxAuthType.Credential;
+        /// <summary>
+        /// 类型
+        /// </summary>
+        public OutboxType Type { get; set; } = OutboxType.SMTP;
 
         /// <summary>
         /// SMTP 服务器地址
@@ -41,8 +46,14 @@
 
         /// <summary>
         /// 是否启用 SSL
+        /// 20251217 弃用
         /// </summary>
-        public bool EnableSSL { get; set; } = true;
+        //public bool EnableSSL { get; set; } = true;
+
+        /// <summary>
+        /// 安全套接字选项
+        /// </summary>
+        public ConnectionSecurity ConnectionSecurity { get; set; } = ConnectionSecurity.SSL;
 
         /// <summary>
         /// 代理 Id
@@ -99,7 +110,8 @@
         /// <returns></returns>
         public static bool IsExchangeEmail(string email, string smtpHost = "")
         {
-            if (string.IsNullOrEmpty(email)) return false;
+            if (string.IsNullOrEmpty(email))
+                return false;
             var domain = email.Trim().Split("@").Last().ToLower();
             var exchangeDomains = new List<string>() { "outlook.com", "hotmail.com" };
             if (!exchangeDomains.Contains(domain))
@@ -108,7 +120,8 @@
             }
 
             // 判断 smtpHost
-            if (string.IsNullOrEmpty(smtpHost)) return true;
+            if (string.IsNullOrEmpty(smtpHost))
+                return true;
 
             // 判断 smtpHost 是否是 exchange
             smtpHost = smtpHost.ToLower();

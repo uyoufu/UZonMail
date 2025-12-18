@@ -1,7 +1,6 @@
 using log4net;
 using MailKit;
 using MailKit.Net.Smtp;
-using MailKit.Security;
 using MimeKit;
 using UZonMail.CorePlugin.Services.Encrypt;
 using UZonMail.CorePlugin.Services.SendCore.Contexts;
@@ -172,7 +171,6 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                 ? outbox.Email
                 : outbox.UserName;
             var smtpPassword = encryptService.DecryptPassword(outbox.Password);
-            var enableSSL = outbox.EnableSSL;
 
             // 判断参数是否正确
             if (string.IsNullOrEmpty(smtpHost))
@@ -212,7 +210,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             string sendResult = $"{smtpUserName} test success";
             try
             {
-                await client.ConnectAsync(smtpHost, smtpPort, enableSSL);
+                await client.ConnectAsync(
+                    smtpHost,
+                    smtpPort,
+                    outbox.ConnectionSecurity.ToMailKitSecureSocketOptions()
+                );
                 // 鉴权
                 if (!string.IsNullOrEmpty(smtpPassword))
                 {

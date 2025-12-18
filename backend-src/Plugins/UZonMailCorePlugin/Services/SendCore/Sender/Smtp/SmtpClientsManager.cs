@@ -3,15 +3,14 @@ using System.Net.Sockets;
 using System.Timers;
 using log4net;
 using MailKit.Net.Proxy;
-using MailKit.Security;
 using UZonMail.CorePlugin.Services.Config;
 using UZonMail.CorePlugin.Services.SendCore.Contexts;
 using UZonMail.CorePlugin.Services.SendCore.Outboxes;
 using UZonMail.CorePlugin.Services.SendCore.Proxies;
 using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.CorePlugin.Services.Settings;
 using UZonMail.CorePlugin.Services.Settings.Model;
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Results;
 using UZonMail.Utils.Web.Service;
 using Timer = System.Timers.Timer;
@@ -341,7 +340,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             // 对证书过期进行兼容处理
             try
             {
-                await client.ConnectAsync(outbox.SmtpHost, outbox.SmtpPort, outbox.EnableSSL);
+                await client.ConnectAsync(
+                    outbox.SmtpHost,
+                    outbox.SmtpPort,
+                    outbox.ConnectionSecurity.ToMailKitSecureSocketOptions()
+                );
             }
             catch (SocketException)
             {
@@ -380,7 +383,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                 await client.AuthenticateAsync(
                     outbox.Email,
                     outbox.SmtpAuthUserName,
-                    outbox.AuthPassword
+                    outbox.PlainPassword
                 );
             }
             // 添加到缓存中
