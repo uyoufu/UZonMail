@@ -62,8 +62,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             if (groupTasks.TryRemove(sendingGroup.Id, out _))
             {
                 var finisher = context.Provider.GetRequiredService<SendingGroupFinisher>();
-                await finisher.MarkSendingGroupFinished(
+                await finisher.SetSendingGroupStatusAndNotify(
                     sendingGroup.Id,
+                    SendingGroupStatus.Finish,
                     context.GroupTaskStartDate
                 );
             }

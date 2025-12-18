@@ -54,7 +54,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             foreach (var sendingGroupId in sendingGroupIds)
             {
                 // 获取发件组
-                if (!groupTasks.TryGetValue(sendingGroupId, out var groupTask))
+                if (!groupTasks!.TryGetValue(sendingGroupId, out var groupTask))
                     continue;
 
                 // 判断当前发件组是否还有发件箱
@@ -112,10 +112,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                     sendingGroupId
                 );
 
-                // 标记结束
+                // 标记为暂停
                 var finisher = sendingContext.Provider.GetRequiredService<SendingGroupFinisher>();
-                await finisher.MarkSendingGroupFinished(
+                await finisher.SetSendingGroupStatusAndNotify(
                     removedSendingGroup.Id,
+                    SendingGroupStatus.Pause,
                     sendingContext.GroupTaskStartDate
                 );
             }

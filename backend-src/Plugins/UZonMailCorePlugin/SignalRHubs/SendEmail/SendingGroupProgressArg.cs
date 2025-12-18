@@ -10,6 +10,7 @@ namespace UZonMail.CorePlugin.SignalRHubs.SendEmail
     {
         public SendingGroupProgressArg(SendingGroup sendingGroup, DateTime startDate)
         {
+            Status = sendingGroup.Status;
             Total = sendingGroup.TotalCount;
             Current = sendingGroup.SentCount;
             StartDate = startDate;
@@ -23,6 +24,8 @@ namespace UZonMail.CorePlugin.SignalRHubs.SendEmail
         /// 发件组 id
         /// </summary>
         public long SendingGroupId { get; set; }
+
+        public SendingGroupStatus Status { get; set; }
 
         /// <summary>
         /// 成功的数量
