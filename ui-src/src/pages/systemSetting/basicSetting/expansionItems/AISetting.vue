@@ -11,10 +11,10 @@
         </q-checkbox>
 
         <div class="row justify-start items-center q-mb-sm">
-          <q-input outlined class="col-auto-4" standout dense v-model="aiCopilotSettingRef.providerType" :debounce="500"
-            type="number" :label="translateBasicSettings('aiProviderType')">
+          <q-select class="col-auto-4" outlined v-model="aiCopilotSettingRef.providerType" emit-value map-options
+            :options="aiProviderTypeOptions" :label="translateBasicSettings('aiProviderType')" dense options-dense>
             <AsyncTooltip :tooltip="translateBasicSettings('aiProviderTooltip')" />
-          </q-input>
+          </q-select>
 
           <q-input outlined class="col-auto-4" standout dense v-model="aiCopilotSettingRef.endpoint" :debounce="500"
             :label="translateBasicSettings('endPoint')">
@@ -80,6 +80,9 @@ const props = defineProps({
     default: AppSettingType.System
   }
 })
+
+import { enumToOptions } from 'src/utils/enum'
+const aiProviderTypeOptions = enumToOptions(AIProviderType)
 
 const defaultAISetting: AIProviderSetting = {
   status: AppSettingStatus.Disabled,

@@ -4,7 +4,8 @@ import { httpClient } from 'src/api//base/httpClient'
 import type { AppSettingType } from './appSetting'
 
 export enum AIProviderType {
-  OpenAI = 1,
+  None,
+  OpenAI,
 }
 
 export enum AppSettingStatus {
