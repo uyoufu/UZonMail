@@ -1,4 +1,3 @@
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.SendCore.Sender

@@ -4,7 +4,7 @@ using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.CorePlugin.Database.Update.Updaters
+namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
 {
     public class InitSmtpInfo(SqlContext db) : IDatabaseUpdater
     {

@@ -5,7 +5,7 @@ using UZonMail.CorePlugin.Services.Notification.EmailNotifier;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Database.Update.Updaters
+namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
 {
     public class AddSendingFinishedNotificationTemplate(SqlContext db) : IDatabaseUpdater
     {

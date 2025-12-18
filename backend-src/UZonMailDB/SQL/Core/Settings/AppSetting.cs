@@ -6,6 +6,7 @@ namespace UZonMail.DB.SQL.Core.Settings
 {
     public enum AppSettingType
     {
+        None = 0,
         System = 1,
         Organization = 2,
         User = 4

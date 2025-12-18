@@ -3,7 +3,7 @@ using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Database.Update.Updaters
+namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
 {
     /// <summary>
     /// 为既有系统设置的类型添加默认值
@@ -16,7 +16,7 @@ namespace UZonMail.CorePlugin.Database.Update.Updaters
         public async Task Update()
         {
             await db.AppSettings.UpdateAsync(
-                x => x.Type == null,
+                x => x.Type == AppSettingType.None,
                 x => x.SetProperty(x => x.Type, AppSettingType.System)
             );
         }

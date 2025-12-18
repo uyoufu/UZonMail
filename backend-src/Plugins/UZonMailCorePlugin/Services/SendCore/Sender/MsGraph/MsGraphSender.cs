@@ -50,7 +50,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 await client.AuthenticateAsync(
                     outbox.Email,
                     outbox.OutlookClientId,
-                    outbox.AuthPassword,
+                    outbox.PlainPassword,
                     outbox.UserId,
                     context.SqlContext
                 );

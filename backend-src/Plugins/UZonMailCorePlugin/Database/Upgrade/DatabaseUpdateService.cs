@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using UZonMail.CorePlugin.Config.SubConfigs;
+using UZonMail.CorePlugin.Database.Updater;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Database.Updater
+namespace UZonMail.CorePlugin.Database.Upgrade
 {
     /// <summary>
     /// 数据升级管理器
@@ -24,7 +25,7 @@ namespace UZonMail.CorePlugin.Database.Updater
         /// <summary>
         /// 当前需要的数据库版本
         /// </summary>
-        private readonly static Version _requiredVersion = new("0.13.0.4");
+        private readonly static Version _requiredVersion = new("0.14.0.0");
 
         private readonly string _settingKey = "DataVersion";
 
@@ -35,7 +36,7 @@ namespace UZonMail.CorePlugin.Database.Updater
         /// <returns></returns>
         private List<IDatabaseUpdater> GetUpdaters()
         {
-            return serviceProvider.GetServices<IDatabaseUpdater>().ToList();
+            return [.. serviceProvider.GetServices<IDatabaseUpdater>()];
         }
 
         /// <summary>

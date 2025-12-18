@@ -1,3 +1,6 @@
+using MailKit.Security;
+using UZonMail.DB.SQL.Core.Emails;
+
 namespace UZonMail.CorePlugin.Services.Settings.Model
 {
     /// <summary>
@@ -14,6 +17,9 @@ namespace UZonMail.CorePlugin.Services.Settings.Model
 
         // 该密码是明文存储的
         public string Password { get; set; }
+
+        // 安全套接字选项
+        public ConnectionSecurity ConnectionSecurity { get; set; } = ConnectionSecurity.SSL;
 
         /// <summary>
         /// 是否验证有效

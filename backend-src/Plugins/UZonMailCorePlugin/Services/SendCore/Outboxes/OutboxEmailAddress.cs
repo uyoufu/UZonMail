@@ -1,4 +1,5 @@
 using log4net;
+using MailKit.Security;
 using UZonMail.CorePlugin.Services.Encrypt.Models;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
@@ -57,16 +58,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// </summary>
         public string OutlookClientId => Outbox.UserName ?? string.Empty;
 
-        //public OutboxAuthType AuthType => _outbox.AuthType;
-
-        //public string ClientId => _outbox.ClientId ?? string.Empty;
-
-        //public string TenantId => _outbox.TenantId ?? string.Empty;
-
         /// <summary>
         /// 授权密码或者 OAuth 的 secrete
         /// </summary>
-        public string? AuthPassword { get; private set; }
+        public string? PlainPassword { get; private set; }
 
         /// <summary>
         /// SMTP 服务器地址
@@ -81,7 +76,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// <summary>
         /// 开启 SSL
         /// </summary>
-        public bool EnableSSL => Outbox.EnableSSL;
+        //public bool EnableSSL => Outbox.EnableSSL;
+        public ConnectionSecurity ConnectionSecurity => Outbox.ConnectionSecurity;
 
         /// <summary>
         /// 单日最大发送数量
@@ -174,7 +170,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         )
         {
             Outbox = outbox;
-            AuthPassword = outbox.Password.DeAES(encrypParams.Key, encrypParams.Iv);
+            PlainPassword = outbox.Password.DeAES(encrypParams.Key, encrypParams.Iv);
             Type = type;
 
             // 共享发件箱
