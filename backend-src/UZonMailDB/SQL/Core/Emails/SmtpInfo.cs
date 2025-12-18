@@ -1,4 +1,4 @@
-﻿using UZonMail.DB.SQL.Base;
+using UZonMail.DB.SQL.Base;
 
 namespace UZonMail.DB.SQL.Core.Emails
 {
@@ -25,20 +25,11 @@ namespace UZonMail.DB.SQL.Core.Emails
         /// <summary>
         /// 安全协议
         /// </summary>
-        public SecurityProtocol SecurityProtocol { get; set; }
+        public ConnectionSecurity ConnectionSecurity { get; set; }
 
         /// <summary>
         /// 是否需要身份验证
         /// </summary>
         public bool EnableSSL { get; set; } = false;
-    }
-
-    [Flags]
-    public enum SecurityProtocol
-    {
-        None = 1,
-        SSL = 2,
-        TLS = 4,
-        StartTLS = 8
     }
 }

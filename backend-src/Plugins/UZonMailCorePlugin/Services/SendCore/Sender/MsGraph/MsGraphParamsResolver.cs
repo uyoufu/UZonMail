@@ -11,9 +11,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
     /// 2. client_id/tenant_id
     ///
     /// 密码有以下 3 种格式:
-    /// 1. refresh_token
+    /// 1. refresh_token, 长度大于 80
     /// 2. client_secret
     /// 3. refresh_token/client_secret
+    ///
     /// </summary>
     public class MsGraphParamsResolver : ITransientService
     {

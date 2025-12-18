@@ -11,8 +11,9 @@ namespace UZonMail.CorePlugin.SignalRHubs
     {
         // 使用一个字典来跟踪用户的连接
         // 有可能同一个用户同时打开多个浏览器窗口
-        public static readonly ConcurrentDictionary<string, HashSet<string>> _userConnectionIds =
-            new();
+        // key: 连接 id
+        // value: userId
+        private static readonly ConcurrentDictionary<string, string> _userConnectionIds = new();
 
         /// <summary>
         /// 成功连接后
@@ -24,12 +25,7 @@ namespace UZonMail.CorePlugin.SignalRHubs
             string? userId = Context.User?.Identity?.Name;
             if (!string.IsNullOrEmpty(userId))
             {
-                if (!_userConnectionIds.TryGetValue(userId, out var connectionIds))
-                {
-                    connectionIds = [];
-                    _userConnectionIds.TryAdd(userId, connectionIds);
-                }
-                connectionIds.Add(Context.ConnectionId);
+                _userConnectionIds.TryAdd(Context.ConnectionId, userId);
             }
 
             await base.OnConnectedAsync();
@@ -52,10 +48,7 @@ namespace UZonMail.CorePlugin.SignalRHubs
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             // 当用户断开连接时，将他们从字典中移除
-            foreach (var item in _userConnectionIds)
-            {
-                item.Value.Remove(Context.ConnectionId);
-            }
+            _userConnectionIds.TryRemove(Context.ConnectionId, out _);
             await base.OnDisconnectedAsync(exception);
         }
     }

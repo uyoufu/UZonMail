@@ -1,3 +1,5 @@
+import type { SendingGroupStatus } from "src/api/sendingGroup"
+
 /**
  * 表明服务器可调用的方法
  * 当注册后，服务器即可调用该方法
@@ -25,6 +27,7 @@ export enum SendingGroupProgressType {
 }
 
 export interface ISendingGroupProgressArg {
+  status: SendingGroupStatus,
   sendingGroupId: number,
   startDate: string,
   total: number,

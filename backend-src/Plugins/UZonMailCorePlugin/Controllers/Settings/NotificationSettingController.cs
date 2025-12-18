@@ -1,3 +1,4 @@
+using MailKit.Security;
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.CorePlugin.Services.Encrypt;
@@ -70,7 +71,8 @@ namespace UZonMail.CorePlugin.Controllers.Settings
                 Password = encryptService.EncrytPassword(smtpSettings.Password),
                 SmtpHost = smtpSettings.SmtpHost,
                 SmtpPort = smtpSettings.SmtpPort,
-                EnableSSL = true
+                //EnableSSL = true
+                ConnectionSecurity = smtpSettings.ConnectionSecurity
             };
             // 开始验证
             var result = await emailSender.TestOutbox(serviceProvider, outbox);

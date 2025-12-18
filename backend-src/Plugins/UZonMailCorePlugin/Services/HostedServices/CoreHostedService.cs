@@ -1,5 +1,5 @@
 using UZonMail.CorePlugin.Database.Startup;
-using UZonMail.CorePlugin.Database.Updater;
+using UZonMail.CorePlugin.Database.Upgrade;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.HostedServices

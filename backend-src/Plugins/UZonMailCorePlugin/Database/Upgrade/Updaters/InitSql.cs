@@ -9,7 +9,7 @@ using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Configs;
 
-namespace UZonMail.CorePlugin.Database.Update.Updaters
+namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
 {
     public class InitSql(SqlContext db, IConfiguration config, EncryptService encryptService)
         : IDatabaseUpdater

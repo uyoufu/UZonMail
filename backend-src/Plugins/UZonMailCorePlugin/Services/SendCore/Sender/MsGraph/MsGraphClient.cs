@@ -27,7 +27,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
     ) : IEmailSendingClient
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(MsGraphClient));
-        private static HttpClient _httpClient = new();
+        private static readonly HttpClient _httpClient = new();
 
         private bool _isRefreshTokenChanged = false;
         private AuthenticationResult2? _authenticationResult;
@@ -46,8 +46,6 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
         }
         private MsGraphParamsResolver _msGraphParams;
 
-        private string _authenticateInputMd5 = string.Empty;
-
         private string _email;
         private int _cooldownMilliseconds;
 
@@ -58,6 +56,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
         }
 
         public IProxyClient ProxyClient { get; set; }
+
+        private string _authenticateInputMd5 = string.Empty;
 
         /// <summary>
         /// 验证邮箱是否正确
@@ -71,7 +71,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
         /// <exception cref="AuthenticationException"></exception>
         public async Task AuthenticateAsync(string email, string username, string password)
         {
-            // tempKey 保证数据修改后，会继续验证
+            // 相当一起缓存验证结果，避免重复验证
             var inputMd5 = $"{email}-{username}-{password}".MD5();
             if (
                 AuthenticationResult != null
@@ -107,18 +107,17 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
             }
 
             var tenantId = msGraphParams.TenantId;
-            var clientId = msGraphParams.ClientId;
+            username = msGraphParams.ClientId;
 
-            // 客户端凭据流（Client Credentials Flow）形式
-            if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(clientId))
+            // TODO: 还有一种授权方式，客户端凭据流（Client Credentials Flow）形式，后期再研究
+            if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(username))
             {
                 _logger.Warn("Outlook 邮箱的用户名格式不正确，应为 tenantId/clientId 的形式。");
                 throw new AuthenticationException("Outlook 邮箱的用户名格式不正确，应为 tenantId/clientId 的形式。");
             }
-
             var authenticateResult = await GetConfidentialClientOAuth2CredentialsAsync(
                 tenantId,
-                clientId,
+                username,
                 msGraphParams.ClientSecret
             );
             AuthenticationResult = AuthenticationResult2.FromAuthenticationResult(
@@ -148,6 +147,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
             await AuthenticateAsync(email, username, password);
 
             // 判断是否采用 refreshToken 的方式发件，若是，则保存 refreshToken 到数据库中
+            // 包含 '/' 的 username 说明是 tenantId/clientId 形式，不保存 refreshToken
             if (username.Contains('/'))
                 return;
 

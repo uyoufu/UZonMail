@@ -197,9 +197,9 @@ function onSendingGroupProgressChanged (arg: ISendingGroupProgressArg) {
 
   row.successCount = arg.successCount
   row.sentCount = arg.sentCount
+  row.status = arg.status
 
   if (arg.progressType === SendingGroupProgressType.end) {
-    row.status = SendingGroupStatus.Finish
     row.progress = 1
     // 不提示成功，因为全局进度条也在监听事件，由全局发出通知即可
     // notifySuccess(`邮件组 ${arg.sendingGroupId} 发送完成`)

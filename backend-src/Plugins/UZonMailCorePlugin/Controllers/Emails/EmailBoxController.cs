@@ -32,48 +32,50 @@ namespace UZonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 创建发件箱
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
         [HttpPost("outbox")]
-        public async Task<ResponseResult<Outbox>> CreateOutbox([FromBody] Outbox entity)
+        public async Task<ResponseResult<Outbox>> CreateOutbox([FromBody] Outbox data)
         {
             var outboxValidator = new OutboxValidator();
-            var vdResult = outboxValidator.Validate(entity);
+            var vdResult = outboxValidator.Validate(data);
             if (!vdResult.IsValid)
             {
                 return vdResult.ToErrorResponse<Outbox>();
             }
 
             // 设置默认端口
-            if (entity.SmtpPort == 0)
-                entity.SmtpPort = 25; // 默认端口
+            if (data.SmtpPort == 0)
+                data.SmtpPort = 25; // 默认端口
 
             var userId = tokenService.GetUserSqlId();
             // 验证发件箱是否存在，若存在，则复用原来的发件箱
             Outbox? existOne = db.Outboxes.SingleOrDefault(x =>
-                x.UserId == userId && x.Email == entity.Email
+                x.UserId == userId && x.Email == data.Email
             );
 
             // 添加用户和加密密码
-            entity.UserId = userId;
-            entity.Password = encryptService.EncrytPassword(entity.Password);
+            data.UserId = userId;
+            data.Password = encryptService.EncrytPassword(data.Password);
 
             if (existOne != null)
             {
-                existOne.EmailGroupId = entity.EmailGroupId;
-                existOne.SmtpPort = entity.SmtpPort;
-                existOne.Password = entity.Password;
-                existOne.UserName = entity.UserName;
-                existOne.Description = entity.Description;
-                existOne.ProxyId = entity.ProxyId;
-                existOne.ReplyToEmails = entity.ReplyToEmails;
+                existOne.Type = data.Type;
+                existOne.EmailGroupId = data.EmailGroupId;
+                existOne.SmtpPort = data.SmtpPort;
+                existOne.Password = data.Password;
+                existOne.UserName = data.UserName;
+                existOne.Description = data.Description;
+                existOne.ProxyId = data.ProxyId;
+                existOne.ReplyToEmails = data.ReplyToEmails;
+                existOne.ConnectionSecurity = data.ConnectionSecurity;
                 existOne.SetStatusNormal();
             }
             else
             {
                 // 新建一个发件箱
-                db.Outboxes.Add(entity);
-                existOne = entity;
+                db.Outboxes.Add(data);
+                existOne = data;
             }
             await db.SaveChangesAsync();
 
@@ -134,11 +136,13 @@ namespace UZonMail.CorePlugin.Controllers.Emails
                 var newEntity = entities.Find(x => x.Email == entity.Email);
                 if (newEntity != null)
                 {
+                    entity.Type = newEntity.Type;
                     entity.EmailGroupId = newEntity.EmailGroupId;
                     entity.SmtpPort = newEntity.SmtpPort;
                     entity.UserName = newEntity.UserName;
                     entity.Password = newEntity.Password; // 密码已经加密处理
-                    entity.EnableSSL = newEntity.EnableSSL;
+                    //entity.EnableSSL = newEntity.EnableSSL;
+                    entity.ConnectionSecurity = newEntity.ConnectionSecurity;
                     entity.Description = newEntity.Description;
                     entity.ProxyId = newEntity.ProxyId;
                     entity.Name = newEntity.Name;
@@ -291,10 +295,12 @@ namespace UZonMail.CorePlugin.Controllers.Emails
                 x =>
                     x.SetProperty(y => y.Email, entity.Email)
                         .SetProperty(y => y.Name, entity.Name)
+                        .SetProperty(y => y.Type, entity.Type)
                         .SetProperty(y => y.SmtpHost, entity.SmtpHost)
                         .SetProperty(y => y.SmtpPort, entity.SmtpPort)
                         .SetProperty(y => y.UserName, entity.UserName)
-                        .SetProperty(y => y.EnableSSL, entity.EnableSSL)
+                        //.SetProperty(y => y.EnableSSL, entity.EnableSSL)
+                        .SetProperty(y => y.ConnectionSecurity, entity.ConnectionSecurity)
                         .SetProperty(y => y.Description, entity.Description)
                         .SetProperty(y => y.ProxyId, entity.ProxyId)
                         .SetProperty(y => y.ReplyToEmails, entity.ReplyToEmails)

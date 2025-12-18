@@ -593,6 +593,9 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("ConnectionSecurity")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -608,9 +611,6 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
                     b.Property<long>("EmailGroupId")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("EnableSSL")
-                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -661,6 +661,9 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
@@ -690,6 +693,9 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("ConnectionSecurity")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -716,9 +722,6 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                         .HasColumnName("_id");
 
                     b.Property<int>("Port")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SecurityProtocol")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");

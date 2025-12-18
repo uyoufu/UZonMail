@@ -593,6 +593,9 @@ namespace UZonMail.DB.Migrations.Mysql
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("ConnectionSecurity")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime(6)");
 
@@ -608,9 +611,6 @@ namespace UZonMail.DB.Migrations.Mysql
 
                     b.Property<long>("EmailGroupId")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("EnableSSL")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
@@ -661,6 +661,9 @@ namespace UZonMail.DB.Migrations.Mysql
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
@@ -690,6 +693,9 @@ namespace UZonMail.DB.Migrations.Mysql
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("ConnectionSecurity")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime(6)");
 
@@ -716,9 +722,6 @@ namespace UZonMail.DB.Migrations.Mysql
                         .HasColumnName("_id");
 
                     b.Property<int>("Port")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SecurityProtocol")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
