@@ -144,6 +144,7 @@ export default {
     readStatistics: 'Read Statistics',
     unsubscribeStatistics: 'Unsubscribe Statistics',
     emailCrawler: 'Email Crawler',
+    customerCollector: 'Customer Collector',
     tiktokDevice: 'TikTok Device',
     crawlerTask: 'Crawler Task',
     crawlerResult: 'Crawler Result',
