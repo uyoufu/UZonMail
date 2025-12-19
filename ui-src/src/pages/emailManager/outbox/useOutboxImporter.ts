@@ -7,7 +7,7 @@ import type { IEmailGroupListItem } from '../components/types'
 import logger from 'loglevel'
 import { splitString } from 'src/utils/stringHelper'
 import type { ISmtpInfo } from 'src/api/smtpInfo'
-import { GuessSmtpInfoPost } from 'src/api/smtpInfo'
+import { guessSmtpInfoPost } from 'src/api/smtpInfo'
 import type { IOutbox } from 'src/api/emailBox'
 import { ConnectionSecurity, createOutboxes, OutboxType } from 'src/api/emailBox'
 import { translateOutboxManager } from 'src/i18n/helpers'
@@ -62,7 +62,7 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
     logger.debug('[useOutboxImporter] outboxTexts', outboxTexts)
 
     const emails = outboxTexts.map(x => x.find(y => y.includes('@')))
-    const { data: smtpInfos } = await GuessSmtpInfoPost(emails as string[])
+    const { data: smtpInfos } = await guessSmtpInfoPost(emails as string[])
 
     const newData: IOutbox[] = []
     for (const outboxText of outboxTexts) {
