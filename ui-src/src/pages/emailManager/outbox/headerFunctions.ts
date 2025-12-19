@@ -12,7 +12,7 @@ import {
   ConnectionSecurity,
   OutboxType
 } from 'src/api/emailBox'
-import { GuessSmtpInfoGet } from 'src/api/smtpInfo'
+import { guessSmtpInfoGet, updateSmtpInfo } from 'src/api/smtpInfo'
 
 import { confirmOperation, notifyError, notifySuccess, notifyWarning } from 'src/utils/dialog'
 import { isEmail } from 'src/utils/validator'
@@ -273,7 +273,6 @@ export function getOutboxExcelDataMapper (): IExcelColumnMapper[] {
  */
 export async function tryOutlookDelegateAuthorization (outbox: IOutbox) {
   if (!isMsGraphOutbox(outbox)) {
-    notifyWarning(translateOutboxManager('outlookDelegateAuthorizationSkippedNonMsGraphType'))
     return
   }
 
@@ -332,9 +331,9 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
   addNewRow: (newRow: Record<string, any>) => void) {
   // 新建发件箱
   async function onNewOutboxClick () {
-    const GuessSmtpInfoGetDebounce = debounce(async (email: string, params: IOnSetupParams) => {
+    const guessSmtpInfoGetDebounce = debounce(async (email: string, params: IOnSetupParams) => {
       // 从服务器请求数据
-      const guessResult = await GuessSmtpInfoGet(email)
+      const guessResult = await guessSmtpInfoGet(email)
 
       params.fieldsModel.value.smtpHost = guessResult.data.host
       if (!params.fieldsModel.value.smtpPort)
@@ -356,7 +355,7 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
           const host = params.fieldsModel.value.smtpHost as string
           if (host) return
 
-          await GuessSmtpInfoGetDebounce(newValue, params)
+          await guessSmtpInfoGetDebounce(newValue, params)
         })
 
         // 加密方式变化时，更改端口号
@@ -413,6 +412,16 @@ export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
     addNewRow(outbox)
 
     notifySuccess(translateOutboxManager('newOutboxSuccess'))
+
+    // 如果是 SMTP 类型，保存到 SMTP 信息库
+    if (outbox.type === OutboxType.SMTP) {
+      await updateSmtpInfo({
+        domain: outbox.email.split('@')[1]!,
+        host: outbox.smtpHost,
+        port: outbox.smtpPort!,
+        connectionSecurity: outbox.connectionSecurity
+      })
+    }
 
     // 进行 outlook 委托授权
     await tryOutlookDelegateAuthorization(outbox)
