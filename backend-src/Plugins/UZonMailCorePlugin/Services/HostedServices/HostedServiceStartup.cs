@@ -14,7 +14,7 @@ namespace UZonMail.CorePlugin.Services.HostedServices
             var serviceProvider = scope.ServiceProvider;
 
             var postServices = serviceProvider
-                .GetServices<IHostedServiceStart>()
+                .GetServices<IScopedServiceAfterStarting>()
                 .OrderBy(x => x.Order);
             foreach (var postService in postServices)
             {

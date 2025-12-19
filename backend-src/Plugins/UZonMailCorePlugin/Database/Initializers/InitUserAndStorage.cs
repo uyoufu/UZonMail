@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using UZonMail.CorePlugin.Config.SubConfigs;
-using UZonMail.CorePlugin.Database.Updater;
 using UZonMail.CorePlugin.Services.Encrypt;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Files;
@@ -9,14 +8,17 @@ using UZonMail.DB.SQL.Core.Permission;
 using UZonMail.Utils.Extensions;
 using UZonMail.Utils.Web.Configs;
 
-namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
+namespace UZonMail.CorePlugin.Database.Initializers
 {
-    public class InitSql(SqlContext db, IConfiguration config, EncryptService encryptService)
-        : IDatabaseUpdater
+    public class InitUserAndStorage(
+        SqlContext db,
+        IConfiguration config,
+        EncryptService encryptService
+    ) : IDbInitializer
     {
-        public Version Version => new("0.1.0.0");
+        public string Name => nameof(InitUserAndStorage);
 
-        public async Task Update()
+        public async Task ExecuteAsync()
         {
             // 初始化权限
             await InitPermission();
@@ -36,6 +38,12 @@ namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
         /// <returns></returns>
         private async Task InitUser()
         {
+            // 如果已经存在用户，则不进行初始化
+            if (db.Users.Any())
+            {
+                return;
+            }
+
             // 判断是否有默认组织和部门
             var systemDepartments = await db.Departments.Where(x => x.IsSystem).ToListAsync();
             string systemOrgName = Department.SystemOrganizationName;

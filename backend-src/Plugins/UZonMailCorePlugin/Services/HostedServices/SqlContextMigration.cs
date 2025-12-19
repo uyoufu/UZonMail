@@ -5,7 +5,7 @@ using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.HostedServices
 {
-    public class SqlContextMigration(SqlContext db) : IHostedServiceStart
+    public class SqlContextMigration(SqlContext db) : IScopedServiceAfterStarting
     {
         public int Order => -10000;
 

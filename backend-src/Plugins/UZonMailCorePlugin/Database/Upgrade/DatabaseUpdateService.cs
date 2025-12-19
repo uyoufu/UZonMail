@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UZonMail.CorePlugin.Config.SubConfigs;
-using UZonMail.CorePlugin.Database.Updater;
+using UZonMail.CorePlugin.Services.HostedServices;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
@@ -13,9 +13,10 @@ namespace UZonMail.CorePlugin.Database.Upgrade
     /// <param name="db"></param>
     public class DatabaseUpdateService(
         IServiceProvider serviceProvider,
+        IEnumerable<IDatabaseUpdater> updaters,
         SqlContext db,
         IConfiguration config
-    ) : IScopedService
+    ) : IScopedServiceAfterStarting
     {
         /// <summary>
         /// 自动升级时，要求的数据库最低版本
@@ -25,9 +26,12 @@ namespace UZonMail.CorePlugin.Database.Upgrade
         /// <summary>
         /// 当前需要的数据库版本
         /// </summary>
-        private readonly static Version _requiredVersion = new("0.14.0.0");
+        private static Version RequiredVersion => DbVersionInfo.RequiredVersion;
 
-        private readonly string _settingKey = "DataVersion";
+        private static string SettingKey => DbVersionInfo.VersionSettingKey;
+
+        // 最后执行
+        public int Order => 9999;
 
         /// <summary>
         /// 获取所有的更新器
@@ -36,7 +40,7 @@ namespace UZonMail.CorePlugin.Database.Upgrade
         /// <returns></returns>
         private List<IDatabaseUpdater> GetUpdaters()
         {
-            return [.. serviceProvider.GetServices<IDatabaseUpdater>()];
+            return [.. updaters];
         }
 
         /// <summary>
@@ -46,20 +50,18 @@ namespace UZonMail.CorePlugin.Database.Upgrade
         /// <param name="config"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task Update()
+        public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var cc = config;
             var userConfig = new UserConfig();
             config.GetSection("User")?.Bind(userConfig);
 
             // 获取数据版本
-            var versionSetting = await db.AppSettings.FirstOrDefaultAsync(x =>
-                x.Key == _settingKey
-            );
+            var versionSetting = await db.AppSettings.FirstOrDefaultAsync(x => x.Key == SettingKey);
             if (versionSetting == null)
             {
                 // 初始化版本
-                versionSetting = new AppSetting { Key = _settingKey, StringValue = "0.0.0.0" };
+                versionSetting = new AppSetting { Key = SettingKey, StringValue = "0.0.0.0" };
                 db.AppSettings.Add(versionSetting);
             }
             else if (versionSetting.StringValue != "0.0.0.0")
@@ -71,26 +73,27 @@ namespace UZonMail.CorePlugin.Database.Upgrade
             }
 
             var originVersion = new Version(versionSetting.StringValue);
-            if (originVersion > _requiredVersion)
+            if (originVersion > RequiredVersion)
                 throw new ArgumentException("数据库版本高于当前所需版本，请更新程序后再使用");
 
             // 若版本一致时，说明已经更新过
-            if (originVersion == _requiredVersion)
+            if (originVersion == RequiredVersion)
                 return;
 
             // 执行数据库升级
             // 实例化所有的更新类
             var updaters = GetUpdaters()
                 .Where(x => x != null)
-                .Where(x => x.Version > originVersion && x.Version <= _requiredVersion)
-                .OrderBy(x => x.Version); // 升序排列
+                .Where(x => x.Version > originVersion && x.Version <= RequiredVersion)
+                .OrderBy(x => x.Version)
+                .ToList(); // 升序排列
             foreach (var updater in updaters)
             {
-                await updater.Update();
+                await updater.ExecuteAsync();
             }
 
             // 更新版本号
-            versionSetting.StringValue = _requiredVersion.ToString();
+            versionSetting.StringValue = RequiredVersion.ToString();
             await db.SaveChangesAsync();
         }
     }
