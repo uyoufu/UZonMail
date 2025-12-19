@@ -1,14 +1,19 @@
 import { hopeTheme } from 'vuepress-theme-hope'
 
-import navbar from './navbar.js'
+import navbar, { navbarEn } from './navbar.js'
 import sidebar from './sidebar.js'
 
 export default hopeTheme({
   hostname: 'https://mail.uzoncloud.com/',
-
   author: {
     name: 'uyoufu',
     url: 'https://uyoufu.uzoncloud.com/'
+  },
+
+  locales: {
+    '/en/': {
+      navbar: navbarEn
+    }
   },
 
   iconAssets: 'fontawesome-with-brands',

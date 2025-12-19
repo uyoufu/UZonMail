@@ -3,6 +3,7 @@ title: Windows Server
 icon: server
 order: 2
 description: 宇正群邮 Windows Server 安装教程，详细介绍如何在 Windows Server 上部署宇正群邮邮件群发软件。支持开源邮件群发、邮件营销软件，助力企业和个人高效邮件群发，体验最好用的邮件群发软件。
+permalink: /guide/installation/windows-server
 ---
 
 本节将介绍如何在 Windows Server 上安装宇正群邮。服务器的安装方式，主要分为 3 个部分：

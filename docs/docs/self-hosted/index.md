@@ -2,7 +2,8 @@
 title: 自建 postfix 邮局
 icon: server
 order: 1
-description: 宇正群邮（UZonMail）是一款开源、免费、企业级的邮件群发软件，支持邮件营销、邮箱爬取、无限变量、Outlook OAuth2 等功能。多线程高效群发，支持 Windows、Linux、MacOS、Docker 等平台部署，适用于外贸、教育、财务等行业。宇正群邮——最好用的邮件群发软件，助力高效邮件营销！
+description: 本页以 uzoncloud.com 为例，讲解在低配 VPS 上按生产级标准自建 postfix 邮局：DNS（MX/SPF/DMARC/DKIM）、Postfix + Dovecot + OpenDKIM 安装配置、SMTPS/STARTTLS、用户管理与 PTR/RDNS 校验，帮助你搭建稳定可投递的私有邮件服务器，并可结合宇正群邮进行邮件群发与邮件营销。
+permalink: /self-hosted/postfix
 ---
 
 受限于 VPS 性能，入门机通常只有 1 核、1G内存、SSD20G，无法通过 Docker 的方式安装 Mailcow 之类的邮局软件，因此只能安装更底层的 postfix 来实现自建邮局。

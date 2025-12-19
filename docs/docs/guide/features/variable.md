@@ -3,6 +3,7 @@ title: 应用变量
 icon: code
 order: 4
 description: 宇正群邮邮件群发软件变量功能介绍，支持邮件内容个性化和批量邮件定制，助力邮件群发、邮件营销，开源邮件群发软件让企业和个人高效实现最好用的邮件群发解决方案。
+permalink: /guide/features/variable
 ---
 
 ## 作用

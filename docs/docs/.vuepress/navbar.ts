@@ -15,7 +15,7 @@ export default navbar(
       children: [
         {
           text: '开始使用',
-          link: 'README.md'
+          link: 'index.md'
         },
         // {
         //   text: '视频介绍',
@@ -23,11 +23,11 @@ export default navbar(
         // },
         {
           text: 'Demo 演示',
-          link: 'https://maildemo.uzoncloud.com:2234/'
+          link: 'https://mailtest.uzoncloud.com/'
         },
         {
           text: '自建邮局',
-          link: '/self-hosted/postfix/README.md'
+          link: '/self-hosted/postfix'
         }
       ]
     },
@@ -38,7 +38,7 @@ export default navbar(
     },
     {
       text: '联系我们',
-      link: 'contact-us.md',
+      link: '/contact-us',
       icon: 'message'
     },
     {
@@ -87,3 +87,56 @@ export default navbar(
   //   },
   // ]
 )
+
+export const navbarEn = navbar([
+  {
+    text: 'Home',
+    link: '/en/',
+    icon: 'home'
+  },
+  {
+    text: 'Guide',
+    link: '/en/get-started',
+    icon: 'book',
+    prefix: '/en/guide/',
+    children: [
+      {
+        text: 'Get Started',
+        link: 'index.md'
+      },
+      {
+        text: 'Demo',
+        link: 'https://mailtest.uzoncloud.com/'
+      },
+      {
+        text: 'Self-hosted',
+        link: '/en/self-hosted/postfix'
+      }
+    ]
+  },
+  {
+    text: 'Downloads',
+    link: '/en/versions',
+    icon: 'download'
+  },
+  {
+    text: 'Contact',
+    link: '/en/contact-us',
+    icon: 'message'
+  },
+  {
+    text: 'Sponsor',
+    link: '/en/sponsor',
+    icon: 'thumbs-up'
+  },
+  {
+    text: 'Thanks',
+    link: '/en/thanks-list',
+    icon: 'heart'
+  },
+  {
+    text: 'Versions',
+    link: '/en/price',
+    icon: 'code-compare'
+  }
+])

@@ -3,6 +3,7 @@ title: 手动升级
 icon: server
 order: 8
 description: 宇正群邮邮件群发软件手动升级教程，详细介绍如何手动升级宇正群邮，适用于开源邮件群发、邮件营销软件用户，助力企业和个人高效管理和升级最好用的邮件群发软件。
+permalink: /guide/installation/manual-upgrade
 ---
 
 本节将介绍如何对宇正群邮进行手动升级。

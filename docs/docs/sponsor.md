@@ -4,6 +4,7 @@ sidebar: false
 editLink: false
 comment: false
 description: 宇正群邮是一款高效易用的邮件群发软件，支持批量发送邮件、邮件营销和自动化管理。欢迎通过捐赠支持作者持续优化宇正群邮，打造最好用的邮件群发软件，让更多用户受益于专业的邮件群发工具，助力企业和个人高效开展邮件营销。
+permalink: /sponsor
 ---
 
 <div class="column justify-center items-center">

@@ -3,6 +3,7 @@ title: 使用代理
 icon: globe
 order: 3
 description: 宇正群邮（UZonMail）邮件群发软件支持固定代理和动态代理，兼容 http、https、socks4、socks5 协议，助力高效邮件群发和邮件营销。开源邮件群发，适用于企业级邮件群发场景，是最好用的邮件群发软件。
+permalink: /guide/features/proxy
 ---
 
 在进行发件时，支持固定代理和动态代理。

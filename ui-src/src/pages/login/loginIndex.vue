@@ -1,8 +1,7 @@
 <template>
-  <div class="column justify-center login-container bg-white">
+  <div class="login-container column justify-center bg-white full-height">
     <div class="row justify-center items-center  q-mb-xl animated fadeIn slower col" :class="mobileClass">
-      <q-icon :name="resolveSvgFullName('undraw_mention_re_k5xc')" :size="iconSize"
-        class="q-pa-lg animated fadeInUp"></q-icon>
+      <q-icon :name="resolveSvgFullName('logo-hero')" :size="iconSize" class="q-pa-md animated fadeInUp"></q-icon>
 
       <div
         class="longin-main q-ma-md q-pa-lg column justify-center items-center border-radius-8 animated fadeInDown hover-card card-like"
@@ -114,7 +113,7 @@ const serverVersionClass = computed(() => {
 // #region 手机兼容
 import { Platform } from 'quasar'
 const iconSize = computed(() => {
-  return Platform.is.desktop ? '220px' : '180px'
+  return Platform.is.desktop ? '260px' : '180px'
 })
 
 const mobileClass = computed(() => {

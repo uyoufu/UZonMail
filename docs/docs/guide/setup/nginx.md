@@ -3,6 +3,7 @@ title: Nginx
 icon: hexagon-nodes
 order: 2
 description: 宇正群邮邮件群发软件 Nginx 反向代理配置教程，详细介绍如何通过 Nginx 部署宇正群邮，实现高效邮件群发、邮件营销。支持开源邮件群发，助力企业和个人体验最好用的邮件群发软件。
+permalink: /guide/setup/nginx
 ---
 
 若使用 nginx 进行反向代理，可以参考如下配置：

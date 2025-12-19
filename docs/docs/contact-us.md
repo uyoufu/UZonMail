@@ -2,6 +2,7 @@
 title: 联系我们
 sidebar: false
 description: 获取宇正群邮邮件群发软件的官方联系方式，包括技术支持、问题反馈、QQ群、公众号、邮箱及GitHub地址，快速解决邮件群发相关问题，提升使用体验。
+permalink: /contact-us
 ---
 
 ## 🌵反馈与建议
@@ -24,7 +25,7 @@ Telegram:  https://t.me/uzonmail
 
 公众号: 逛逛开源界 (WanderOpenSource)
 
-邮  箱：uyoufu@foxmail.com
+邮  箱：uyoufu@uzoncloud.com
 
 GitHub：[uyoufu/UZonMail](https://github.com/uyoufu/UZonMail)
 
