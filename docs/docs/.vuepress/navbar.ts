@@ -33,7 +33,7 @@ export default navbar(
     },
     {
       text: '软件下载',
-      link: '/versions',
+      link: '/downloads',
       icon: 'download'
     },
     {
@@ -53,7 +53,7 @@ export default navbar(
     },
     {
       text: '版本对比',
-      link: '/price',
+      link: '/versions',
       icon: 'code-compare'
     }
   ]
@@ -116,7 +116,7 @@ export const navbarEn = navbar([
   },
   {
     text: 'Downloads',
-    link: '/en/versions',
+    link: '/en/downloads',
     icon: 'download'
   },
   {
@@ -136,7 +136,7 @@ export const navbarEn = navbar([
   },
   {
     text: 'Versions',
-    link: '/en/price',
+    link: '/en/versions',
     icon: 'code-compare'
   }
 ])
