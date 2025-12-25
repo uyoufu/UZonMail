@@ -1,17 +1,16 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Database.Updater;
 using UZonMail.CorePlugin.Services.Notification.EmailNotifier;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
+namespace UZonMail.CorePlugin.Database.Initializers
 {
-    public class AddSendingFinishedNotificationTemplate(SqlContext db) : IDatabaseUpdater
+    public class InitNotificationTemplate(SqlContext db) : IDbInitializer
     {
-        public Version Version => new("0.13.0.1");
+        public string Name => nameof(InitNotificationTemplate);
 
-        public async Task Update()
+        public async Task ExecuteAsync()
         {
             // 获取当前程序集所在目录
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
@@ -27,7 +26,6 @@ namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
             }
 
             var template = await File.ReadAllTextAsync(templatePath);
-
             var systemSetting = await db.AppSettings.FirstOrDefaultAsync(x =>
                 x.Key == SendingGroupFinishedNotification.NotificationTemplateKey
             );
@@ -45,7 +43,6 @@ namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
             {
                 systemSetting.StringValue = template;
             }
-
             await db.SaveChangesAsync();
         }
     }

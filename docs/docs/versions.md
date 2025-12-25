@@ -5,6 +5,27 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 permalink: /versions
 ---
 
+## 0.20.5
+
+> 更新时期：2025-12-19
+
+### 功能优化
+
+1. 数据库升级模块将初始化与升级进行拆分，减少耦合
+2. 使用发件箱历史记录来辅助 smtp 信息补全
+3. 发件任务因发件箱问题导致的退出，状态修正为 “暂停”
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.20.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.20.5.0.zip)
+
+[uzonmail-service-win-x64-0.20.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.20.5.0.zip)
+
+[uzonmail-service-linux-x64-0.20.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.20.5.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
+
 ## 0.20.4
 
 > 更新时期：2025-12-19

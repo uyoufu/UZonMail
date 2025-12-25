@@ -10,14 +10,18 @@
 
 	<ItemGroup>
 		<Compile Remove="Config\**" />
+		<Compile Remove="Path\**" />
 		<Compile Remove="Utils\**" />
 		<Compile Remove="Web\Extensions\**" />
 		<Content Remove="Config\**" />
+		<Content Remove="Path\**" />
 		<Content Remove="Web\Extensions\**" />
 		<EmbeddedResource Remove="Config\**" />
+		<EmbeddedResource Remove="Path\**" />
 		<EmbeddedResource Remove="Utils\**" />
 		<EmbeddedResource Remove="Web\Extensions\**" />
 		<None Remove="Config\**" />
+		<None Remove="Path\**" />
 		<None Remove="Utils\**" />
 		<None Remove="Web\Extensions\**" />
 	</ItemGroup>
@@ -37,7 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Path\" />
+		<Folder Include="Database\Initializer\" />
 		<Folder Include="Web\Captcha\" />
 	</ItemGroup>
 

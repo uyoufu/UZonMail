@@ -9,6 +9,33 @@ namespace UZonMail.CorePlugin.Services.Emails
     public class SmtpInfoService(SqlContext db) : IScopedService
     {
         /// <summary>
+        /// 更新 Smtp 信息
+        /// </summary>
+        /// <param name="smtpInfo"></param>
+        /// <returns></returns>
+        public async Task<SmtpInfo> UpdateSmtpInfo(SmtpInfo smtpInfo)
+        {
+            // domain 只取 @ 后面部分
+            smtpInfo.Domain = smtpInfo.Domain.Split('@').Last();
+            var existOne = await db.SmtpInfos.FirstOrDefaultAsync(x => x.Domain == smtpInfo.Domain);
+            if (existOne == null)
+            {
+                db.SmtpInfos.Add(smtpInfo);
+                existOne = smtpInfo;
+            }
+            else
+            {
+                existOne.Host = smtpInfo.Host;
+                existOne.Port = smtpInfo.Port;
+                existOne.ConnectionSecurity = smtpInfo.ConnectionSecurity;
+                existOne.EnableSSL = smtpInfo.EnableSSL;
+            }
+
+            await db.SaveChangesAsync();
+            return existOne;
+        }
+
+        /// <summary>
         /// 获取 Smtp 信息
         /// </summary>
         /// <param name="emails"></param>

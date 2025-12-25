@@ -1,4 +1,3 @@
-using UZonMail.CorePlugin.Database.Updater;
 using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
@@ -9,7 +8,7 @@ namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
     {
         public Version Version => new("0.14.0.0");
 
-        public async Task Update()
+        public async Task ExecuteAsync()
         {
             await db.Outboxes.UpdateAsync(
                 x => x.ConnectionSecurity == ConnectionSecurity.None,

@@ -6,7 +6,8 @@ namespace UZonMail.CorePlugin.Services.HostedServices
     /// <summary>
     /// 重置定时器
     /// </summary>
-    public class ResetSchedulerService(ISchedulerFactory schedulerFactory) : IHostedServiceStart
+    public class ResetSchedulerService(ISchedulerFactory schedulerFactory)
+        : IScopedServiceAfterStarting
     {
         public int Order => 0;
 

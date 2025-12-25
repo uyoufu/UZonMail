@@ -5,7 +5,7 @@ namespace UZonMail.CorePlugin.Services.HostedServices
     /// <summary>
     /// 服务启动时执行
     /// </summary>
-    public interface IHostedServiceStart : IScopedService<IHostedServiceStart>
+    public interface IScopedServiceAfterStarting : IScopedService<IScopedServiceAfterStarting>
     {
         /// <summary>
         /// 优先级

@@ -20,8 +20,6 @@ namespace UZonMail.CorePlugin.Services.Settings
         PermissionService permissionService
     ) : IScopedService
     {
-        private static readonly string _systemSmtpNotificationSettingKey = "systemSmtpNotification";
-
         /// <summary>
         /// 检查设置更新权限
         /// 若不满足要求，抛出异常

@@ -6,7 +6,7 @@ namespace UZonMail.CorePlugin.Services.HostedServices
     /// <summary>
     /// 设置前端的 BaseUrl
     /// </summary>
-    public class SetupBaseUrlWhenStartp(IConfiguration configuration) : IHostedServiceStart
+    public class SetupBaseUrlWhenStartp(IConfiguration configuration) : IScopedServiceAfterStarting
     {
         public int Order => 0;
 

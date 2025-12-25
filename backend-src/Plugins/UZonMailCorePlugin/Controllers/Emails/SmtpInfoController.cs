@@ -13,6 +13,18 @@ namespace UZonMail.CorePlugin.Controllers.Emails
     public class SmtpInfoController(SmtpInfoService smtpInfo) : ControllerBaseV1
     {
         /// <summary>
+        /// 更新 Smtp 历史信息，方便下次更准确地猜测
+        /// </summary>
+        /// <param name="smtpInfo"></param>
+        /// <returns></returns>
+        [HttpPut]
+        public async Task<ResponseResult<bool>> UpdateSmtpInfo([FromBody] SmtpInfo data)
+        {
+            await smtpInfo.UpdateSmtpInfo(data);
+            return true.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 根据邮箱推断 Smtp 信息
         /// </summary>
         /// <param name="email"></param>

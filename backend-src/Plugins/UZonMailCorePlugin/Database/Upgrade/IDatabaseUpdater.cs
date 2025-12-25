@@ -1,9 +1,6 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using UZonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Database.Updater
+namespace UZonMail.CorePlugin.Database.Upgrade
 {
     /// <summary>
     /// 数据库更新器
@@ -19,6 +16,6 @@ namespace UZonMail.CorePlugin.Database.Updater
         /// 开始更新数据
         /// </summary>
         /// <returns></returns>
-        Task Update();
+        Task ExecuteAsync();
     }
 }

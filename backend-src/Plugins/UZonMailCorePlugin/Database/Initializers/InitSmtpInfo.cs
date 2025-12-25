@@ -1,16 +1,16 @@
 using System.Reflection;
-using UZonMail.CorePlugin.Database.Updater;
+using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Json;
 
-namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
+namespace UZonMail.CorePlugin.Database.Initializers
 {
-    public class InitSmtpInfo(SqlContext db) : IDatabaseUpdater
+    public class InitSmtpInfo(SqlContext db) : IDbInitializer
     {
-        public Version Version => new("0.12.4");
+        public string Name => nameof(InitSmtpInfo);
 
-        public async Task Update()
+        public async Task ExecuteAsync()
         {
             // 获取当前程序集所在目录
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
@@ -30,7 +30,13 @@ namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
                 return;
             }
 
-            await db.SmtpInfos.AddRangeAsync(smtpInfos);
+            // 进行去重
+            var existDomains = await db.SmtpInfos.Select(x => x.Domain.ToLower()).ToListAsync();
+            var newSmtpInfos = smtpInfos
+                .Where(x => !existDomains.Contains(x.Domain.ToLower()))
+                .ToList();
+
+            await db.SmtpInfos.AddRangeAsync(newSmtpInfos);
             await db.SaveChangesAsync();
         }
     }
