@@ -15,7 +15,7 @@ export default navbar(
       children: [
         {
           text: '开始使用',
-          link: 'index.md'
+          link: '/guide/introduction'
         },
         // {
         //   text: '视频介绍',
