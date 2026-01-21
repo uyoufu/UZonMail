@@ -1,8 +1,9 @@
 ---
-title: Software Introduction
+title: Introduction
 icon: ranking-star
 order: 1
 description: UzonMail is an open-source, free, enterprise-grade bulk email software supporting marketing, mailbox scraping, unlimited variables, Outlook OAuth2 and more.
+permalink: /en/guide/introduction
 ---
 
 The software is called "UzonMail" (宇正群邮), an open-source and free bulk email software that provides features like mass emailing, email marketing, mailbox scraping, and unlimited variables. It supports all types of mail accounts, including Outlook OAuth2. Built with enterprise-grade quality, it supports multi-user, multi-platform deployments on Windows, Linux, macOS, and Docker, and is optimized for server environments. Natively multi-threaded and concurrent, it supports multiple accounts simultaneously with strong performance. With years of continuous iteration and optimization, it has been widely used across industries such as foreign trade marketing, education and training, and finance.

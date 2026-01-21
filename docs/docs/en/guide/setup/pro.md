@@ -1,6 +1,6 @@
 ---
 title: Enterprise Edition
-icon: circle-up
+icon: shield-heart
 order: 10
 description: Enterprise edition configuration notes for UzonMail, including unsubscribe header customization per domain.
 permalink: /en/guide/setup/pro

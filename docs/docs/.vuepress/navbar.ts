@@ -1,6 +1,6 @@
 import { navbar } from 'vuepress-theme-hope'
 
-export default navbar(
+export const navbarZh = navbar(
   [
     {
       text: '首页',
@@ -102,7 +102,7 @@ export const navbarEn = navbar([
     children: [
       {
         text: 'Get Started',
-        link: 'index.md'
+        link: '/en/guide/introduction'
       },
       {
         text: 'Demo',

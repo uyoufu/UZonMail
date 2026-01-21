@@ -1,7 +1,7 @@
 import { hopeTheme } from 'vuepress-theme-hope'
 
-import navbar, { navbarEn } from './navbar.js'
-import sidebar from './sidebar.js'
+import { navbarZh, navbarEn } from './navbar.js'
+import { sidebarZh, sidebarEn } from './sidebar.js'
 
 export default hopeTheme({
   hostname: 'https://mail.uzoncloud.com/',
@@ -12,7 +12,8 @@ export default hopeTheme({
 
   locales: {
     '/en/': {
-      navbar: navbarEn
+      navbar: navbarEn,
+      sidebar: sidebarEn
     }
   },
 
@@ -36,10 +37,10 @@ export default hopeTheme({
   hideSiteNameOnMobile: false,
 
   // 导航栏
-  navbar,
+  navbar: navbarZh,
 
   // 侧边栏
-  sidebar,
+  sidebar: sidebarZh,
 
   // 页脚
   footer: 'Apache-2.0 license | Copyright © 2021-persent UZonMail',

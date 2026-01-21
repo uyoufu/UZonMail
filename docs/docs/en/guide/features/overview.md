@@ -7,6 +7,7 @@ dir:
   order: 4
   icon: bars
 description: UzonMail features overview — main modules and workflows of the open-source bulk email software.
+permalink: /en/guide/features/overview
 ---
 
 ![features overview](https://oss.uzoncloud.com:2234/public/files/images/image-20240614121857800.png)
