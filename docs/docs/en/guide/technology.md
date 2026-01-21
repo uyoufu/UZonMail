@@ -1,7 +1,7 @@
 ---
 title: Technology Stack
-icon: cubes-stacked
-order: 9
+icon: signs-post
+order: 20
 description: UzonMail is an open-source bulk email software built with a frontend-backend separated architecture using TypeScript, Vue 3, Quasar, C#, WPF and ASP.NET Core.
 permalink: /en/guide/technology
 ---

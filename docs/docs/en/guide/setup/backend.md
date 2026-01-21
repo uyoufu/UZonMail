@@ -2,10 +2,6 @@
 title: Backend
 icon: sliders
 order: 1
-dir:
-  text: Configuration
-  order: 2
-  icon: gears
 ---
 
 This document explains configuration changes needed for server deployments. Desktop or LAN-only usage can ignore most of these settings.

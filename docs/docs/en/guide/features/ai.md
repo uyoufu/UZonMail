@@ -1,6 +1,6 @@
 ---
 title: AI Assistant
-icon: fab fa-openai
+icon: robot
 order: 6
 description: Introduction to the AI Assistant in UzonMail — generate and optimize email content and create multiple subject lines using large models.
 permalink: /en/guide/features/ai

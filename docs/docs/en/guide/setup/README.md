@@ -1,9 +1,9 @@
 ---
-title: 配置说明
+title: Setup
 icon: gears
 order: 1
 dir:
-  text: 配置说明
+  text: Setup
   order: 2
   icon: gears
 index: false
