@@ -21,7 +21,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        bool IsMatch(string email, string smtpHost);
+        bool IsMatch(OutboxType outboxType);
 
         /// <summary>
         /// 发送邮件

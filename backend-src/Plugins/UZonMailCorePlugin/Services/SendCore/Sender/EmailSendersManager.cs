@@ -1,3 +1,4 @@
+using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.SendCore.Sender
@@ -13,13 +14,17 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender
         /// </summary>
         /// <param name="outboxEmail"></param>
         /// <returns></returns>
-        public IEmailSender GetEmailSender(string outboxEmail, string smtpHost)
+        public IEmailSender GetEmailSender(OutboxType outboxType)
         {
             // 调用发件器进行发件
-            return emailSenders
-                .Where(x => x.IsMatch(outboxEmail, smtpHost))
-                .OrderBy(x => x.Order)
-                .First();
+            var sender =
+                emailSenders
+                    .Where(x => x.IsMatch(outboxType))
+                    .OrderBy(x => x.Order)
+                    .FirstOrDefault()
+                ?? throw new InvalidOperationException($"未找到匹配的邮件发送器，OutboxType：{outboxType}");
+
+            return sender;
         }
     }
 }

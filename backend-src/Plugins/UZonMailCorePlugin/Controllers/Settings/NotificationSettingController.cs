@@ -56,10 +56,7 @@ namespace UZonMail.CorePlugin.Controllers.Settings
             AppSettingType type = AppSettingType.System
         )
         {
-            var emailSender = sendersManager.GetEmailSender(
-                smtpSettings.Email,
-                smtpSettings.SmtpHost
-            );
+            var emailSender = sendersManager.GetEmailSender(OutboxType.SMTP);
 
             var userId = tokenService.GetUserSqlId();
 
