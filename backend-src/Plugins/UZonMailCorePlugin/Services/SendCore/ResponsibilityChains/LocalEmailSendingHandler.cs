@@ -100,15 +100,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             BodyBuilder bodyBuilder = new() { HtmlBody = htmlBody };
 
             // 附件
-            var attachments = sendItem.Attachments;
-            foreach (var attachment in attachments)
+            foreach (var attachment in sendItem.Attachments)
             {
                 // 添加附件
-                bodyBuilder.Attachments.Add(attachment.FullName);
+                bodyBuilder.Attachments.Add(attachment.Item2.FullName);
                 // 修改文件名
                 var lastOne = bodyBuilder.Attachments.Last();
-                lastOne.ContentType.Name = attachment.Name;
-                lastOne.ContentDisposition.FileName = attachment.Name;
+                lastOne.ContentType.Name = attachment.Item1;
+                lastOne.ContentDisposition.FileName = attachment.Item1;
             }
             message.Body = bodyBuilder.ToMessageBody();
 

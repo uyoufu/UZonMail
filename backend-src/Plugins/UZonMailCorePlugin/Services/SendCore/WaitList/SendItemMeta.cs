@@ -172,7 +172,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 附件
         /// </summary>
-        public List<FileInfo> Attachments { get; } = [];
+        public List<Tuple<string, FileInfo>> Attachments { get; } = [];
 
         /// <summary>
         /// 解析附件数据
@@ -201,7 +201,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
                 .ToListAsync();
 
             Attachments.AddRange(
-                attachments.Select(x => new FileInfo(x.fullPath)).Where(x => x.Exists)
+                attachments
+                    .Where(x => File.Exists(x.fullPath))
+                    .Select(x => Tuple.Create(x.fileName, new FileInfo(x.fullPath)))
             );
         }
 
