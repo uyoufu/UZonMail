@@ -5,6 +5,47 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.20.6
+
+> Release Date:2026-01-27
+
+### Improvements
+
+1. Update UzonMail icon
+
+### Bug Fixes
+
+1. Fix custom domain Outlook sending failure issue
+
+### Downloads
+[uzonmail-desktop-win-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.20.6.0.zip)
+
+[uzonmail-service-win-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.20.6.0.zip)
+
+[uzonmail-service-linux-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.20.6.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
+## 0.20.5
+
+> Release Date:2025-12-19
+
+### Improvements
+
+1. Split database upgrade module initialization and upgrade to reduce coupling.
+2. Use outbox history to assist SMTP information completion.
+3. Correct the status of sending tasks that exit due to outbox issues to "paused".
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.20.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.20.5.0.zip)
+
+[uzonmail-service-win-x64-0.20.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.20.5.0.zip)
+
+[uzonmail-service-linux-x64-0.20.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.20.5.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.20.4
 
 > Release Date: 2025-12-19
