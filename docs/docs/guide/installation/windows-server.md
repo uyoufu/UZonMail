@@ -10,8 +10,8 @@ permalink: /guide/installation/windows-server
 
 ## 环境安装
 
-1. 安装 [.NET runtime-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-9.0.7-windows-x64-installer)
-2. 安装 [.NET runtime-aspnetcore-9.0.7-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-9.0.7-windows-x64-installer)
+1. 安装 [.NET runtime-10.0.5-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-10.0.5-windows-x64-installer)
+2. 安装 [.NET runtime-aspnetcore-10.0.5-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-10.0.5-windows-x64-installer)
 
 ## 软件下载
 

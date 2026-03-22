@@ -16,7 +16,7 @@ permalink: /guide/build
 
 - Git
 - 7z
-- DotNET 9.0 SDK
+- DotNET 10.0 SDK
 - Node、yarn
 - Docker
 

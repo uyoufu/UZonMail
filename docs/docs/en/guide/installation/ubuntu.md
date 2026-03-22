@@ -19,7 +19,7 @@ Follow Microsoft's documentation to install .NET on Ubuntu: https://learn.micros
 Install with:
 
 ``` bash
-sudo apt update && sudo apt install -y aspnetcore-runtime-9.0
+sudo apt update && sudo apt install -y aspnetcore-runtime-10.0
 ```
 
 ## Download

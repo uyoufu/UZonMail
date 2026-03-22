@@ -20,7 +20,7 @@ Ubuntu 安装 `.NET` 见微软官方文档 [.NET 和 Ubuntu 概述 - .NET | Micr
 
 ```bash
 sudo apt update && \
-  sudo apt install -y aspnetcore-runtime-9.0
+  sudo apt install -y aspnetcore-runtime-10.0
 ```
 
 ## 软件下载

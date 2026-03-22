@@ -10,8 +10,8 @@ This section explains how to install UzonMail on Windows Server. The server inst
 
 ## Install runtime
 
-1. Install `.NET runtime-9.0.7-windows-x64-installer`
-2. Install `.NET runtime-aspnetcore-9.0.7-windows-x64-installer`
+1. Install `.NET runtime-10.0.5-windows-x64-installer`
+2. Install `.NET runtime-aspnetcore-10.0.5-windows-x64-installer`
 
 ## Download
 
