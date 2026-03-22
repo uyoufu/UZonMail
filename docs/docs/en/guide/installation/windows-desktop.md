@@ -12,7 +12,7 @@ There are two ways to run the Windows desktop edition: run the backend service a
 
 Steps:
 
-1. Install the .NET runtimes: `runtime-9.0.7-windows-x64-installer` and `runtime-aspnetcore-9.0.7-windows-x64-installer` from Microsoft.
+1. Install the .NET runtimes: `runtime-10.0.5-windows-x64-installer` and `runtime-aspnetcore-10.0.5-windows-x64-installer` from Microsoft.
 2. Download `uzonmail-desktop-win-x64` from Versions and unzip.
 3. Run `service/UZonMailService.exe`.
 
@@ -30,8 +30,8 @@ Windows 7 is no longer officially supported by Microsoft; limited support is pro
 
 Steps for Windows 10 and later:
 
-1. Install `.NET runtime-9.0.7-windows-x64` and `.NET runtime-aspnetcore-9.0.7-windows-x64`.
-2. Install `.NET runtime-desktop-9.0.7-windows-x64` (usually included by the OS).
+1. Install `.NET runtime-10.0.5-windows-x64` and `.NET runtime-aspnetcore-10.0.5-windows-x64`.
+2. Install `.NET runtime-desktop-10.0.5-windows-x64` (usually included by the OS).
 3. Install WebView2 (usually bundled with Edge).
 4. Download and unzip `uzonmail-desktop-win-x64` from Versions.
 5. Run `UZonMailDesktop.exe`.

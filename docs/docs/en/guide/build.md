@@ -16,7 +16,7 @@ Make sure the following tools are available in your command line:
 
 - Git
 - 7z
-- .NET 9.0 SDK
+- .NET 10.0 SDK
 - Node, yarn
 - Docker
 
