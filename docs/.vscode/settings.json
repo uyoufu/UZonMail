@@ -1,5 +1,9 @@
 {
   "cSpell.words": [
     "Uzon"
-  ]
+  ],
+  "markdown.validate.enabled": false,
+  "cSpell.enabledFileTypes": {
+    "skill": false
+  }
 }

@@ -5,6 +5,28 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.21.0
+> Release Date: 2026-03-22
+
+### Performance Improvements
+
+1. Optimized performance usage
+2. Upgraded the framework to .NET 10
+
+### Bug Fixes
+
+1. Fixed AI not working on Windows
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.21.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.21.0.0.zip)
+
+[uzonmail-service-win-x64-0.21.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.21.0.0.zip)
+
+[uzonmail-service-linux-x64-0.21.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.21.0.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.20.6
 
 > Release Date:2026-01-27
