@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using Innofactor.EfCoreJsonValueConverter;
@@ -11,6 +11,7 @@ namespace UZonMail.DB.SQL.EntityConfigs
     /// <summary>
     /// 通用的实体配置
     /// </summary>
+    /// <param name="assembly">默认为被调用的程序集</param>
     public class EntityTypeConfig(Assembly? assembly = null)
     {
         public void Configure(ModelBuilder modelBuilder)
@@ -27,11 +28,11 @@ namespace UZonMail.DB.SQL.EntityConfigs
 
             // 明确忽略 Newtonsoft.Json 的类型，避免 EF 将 JToken/JObject/JArray 误识别为实体
             // （作为保险措施，优先执行）
-            //modelBuilder.Ignore(typeof(JToken));
-            //modelBuilder.Ignore(typeof(JContainer));
-            //modelBuilder.Ignore(typeof(JObject));
-            //modelBuilder.Ignore(typeof(JArray));
-            //modelBuilder.Ignore(typeof(JValue));
+            modelBuilder.Ignore(typeof(JToken));
+            modelBuilder.Ignore(typeof(JContainer));
+            modelBuilder.Ignore(typeof(JObject));
+            modelBuilder.Ignore(typeof(JArray));
+            modelBuilder.Ignore(typeof(JValue));
 
             // 应用配置，参考：https://learn.microsoft.com/zh-cn/ef/core/modeling/#applying-all-configurations-in-an-assembly
             assembly ??= Assembly.GetCallingAssembly();

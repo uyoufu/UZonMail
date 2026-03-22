@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "../../UZonMailProPlugins/UZonMailProPlugin"
+		},
+		{
+			"path": "../scripts"
 		}
 	],
 	"settings": {}

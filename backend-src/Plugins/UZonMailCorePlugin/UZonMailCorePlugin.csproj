@@ -80,7 +80,6 @@
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.83.1" />
 		<PackageReference Include="Quartz" Version="3.16.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.12.4" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.5" />
 		<PackageReference Include="System.Reactive" Version="7.0.0-preview.1" />
 	</ItemGroup>
 

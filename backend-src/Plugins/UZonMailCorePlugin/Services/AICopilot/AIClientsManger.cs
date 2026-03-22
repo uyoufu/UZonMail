@@ -14,17 +14,19 @@ namespace UZonMail.CorePlugin.Services.AICopilot
     /// <summary>
     /// AI 客户端管理器
     /// </summary>
-    public class AIClientsManger : ISingletonService
+    public class AIClientsManger : ISingletonService, IDisposable
     {
         private readonly AppSettingsManager _settingsManager;
         private readonly IEncryptService _encryptService;
+
+        private readonly CancellationTokenSource _cleanupCts = new();
 
         public AIClientsManger(IEncryptService encryptService, AppSettingsManager settingsManager)
         {
             _encryptService = encryptService;
             _settingsManager = settingsManager;
 
-            StartIdleClientsCleanup();
+            StartIdleClientsCleanup(_cleanupCts.Token);
         }
 
         // 若长时间不使用，则移除该缓存
@@ -64,25 +66,37 @@ namespace UZonMail.CorePlugin.Services.AICopilot
             return chatClient;
         }
 
-        private void StartIdleClientsCleanup()
+        private void StartIdleClientsCleanup(CancellationToken cancellationToken)
         {
-            Task.Run(async () =>
-            {
-                var timeout = TimeSpan.FromMinutes(30);
-                while (true)
+            Task.Run(
+                async () =>
                 {
-                    foreach (var key in _aiClients.Keys)
+                    var timeout = TimeSpan.FromMinutes(30);
+                    while (!cancellationToken.IsCancellationRequested)
                     {
-                        if (_aiClients.TryGetValue(key, out var client))
+                        await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken)
+                            .ConfigureAwait(false);
+
+                        foreach (var key in _aiClients.Keys)
                         {
-                            if ((DateTimeOffset.UtcNow - client.LastUsedDate) > timeout)
+                            if (_aiClients.TryGetValue(key, out var client))
                             {
-                                _aiClients.TryRemove(key, out _);
+                                if ((DateTimeOffset.UtcNow - client.LastUsedDate) > timeout)
+                                {
+                                    _aiClients.TryRemove(key, out _);
+                                }
                             }
                         }
                     }
-                }
-            });
+                },
+                cancellationToken
+            );
+        }
+
+        public void Dispose()
+        {
+            _cleanupCts.Cancel();
+            _cleanupCts.Dispose();
         }
     }
 }

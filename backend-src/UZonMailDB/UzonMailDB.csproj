@@ -9,7 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="SQL\EntityConfigs\Attributes\" />
+    <Compile Remove="SQL\EntityConfigs\Attributes\**" />
+    <Content Remove="SQL\EntityConfigs\Attributes\**" />
+    <EmbeddedResource Remove="SQL\EntityConfigs\Attributes\**" />
+    <None Remove="SQL\EntityConfigs\Attributes\**" />
   </ItemGroup>
 
   <ItemGroup>
