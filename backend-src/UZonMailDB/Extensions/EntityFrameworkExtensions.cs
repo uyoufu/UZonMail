@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Base;
 
@@ -18,9 +18,14 @@ namespace UZonMail.DB.Extensions
         /// <param name="predicate"></param>
         /// <param name="update"></param>
         /// <returns></returns>
-        public async static Task<int> UpdateAsync<T>(this IQueryable<T> entities, Expression<Func<T, bool>> predicate, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> update) where T : SqlId
+        public async static Task<int> UpdateAsync<T>(
+            this IQueryable<T> entities,
+            Expression<Func<T, bool>> predicate,
+            Action<UpdateSettersBuilder<T>> setPropertyCalls
+        )
+            where T : SqlId
         {
-            return await entities.Where(predicate).ExecuteUpdateAsync(update);
+            return await entities.Where(predicate).ExecuteUpdateAsync<T>(setPropertyCalls);
         }
 
         /// <summary>
@@ -32,14 +37,21 @@ namespace UZonMail.DB.Extensions
         /// <param name="entity"></param>
         /// <param name="modifiedPropertyNames"></param>
         /// <returns></returns>
-        public async static Task<TEntity> UpdateById<TEntity>(this SqlContextBase ctx, TEntity entity, List<string> modifiedPropertyNames) where TEntity : SqlId
+        public async static Task<TEntity> UpdateById<TEntity>(
+            this SqlContextBase ctx,
+            TEntity entity,
+            List<string> modifiedPropertyNames
+        )
+            where TEntity : SqlId
         {
             if (entity == null || entity.Id == 0)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            var entry = ctx.ChangeTracker.Entries<TEntity>().FirstOrDefault(x => x.Entity.Id == entity.Id);
+            var entry = ctx
+                .ChangeTracker.Entries<TEntity>()
+                .FirstOrDefault(x => x.Entity.Id == entity.Id);
             if (entry == null)
             {
                 entry = ctx.Attach(entity);
@@ -76,7 +88,8 @@ namespace UZonMail.DB.Extensions
         /// <param name="target"></param>
         public static void SetList<T>(this ICollection<T> origin, IEnumerable<T> target)
         {
-            if (origin == null || target == null) return;
+            if (origin == null || target == null)
+                return;
 
             // 计算新增
             var addList = target.Except(origin).ToList();

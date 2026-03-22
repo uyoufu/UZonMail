@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Linq.Expressions;
 
 namespace UZonMail.DB.SQL.EntityConfigs.Converters
 {
@@ -32,23 +32,17 @@ namespace UZonMail.DB.SQL.EntityConfigs.Converters
 
         public override LambdaExpression ConvertFromProviderExpression
         {
-            get
-            {
-                ;
-                return base.ConvertFromProviderExpression;
-            }
+            get { return base.ConvertFromProviderExpression; }
         }
         public override LambdaExpression ConvertToProviderExpression
         {
-            get
-            {
-                ;
-                return base.ConvertToProviderExpression;
-            }
+            get { return base.ConvertToProviderExpression; }
         }
         public override Type ModelClrType { get; }
 
         public override Type ProviderClrType { get; }
+
+        public override Expression ConstructorExpression => throw new NotImplementedException();
 
         /// <summary>
         /// 转换成 Json
@@ -57,15 +51,18 @@ namespace UZonMail.DB.SQL.EntityConfigs.Converters
         /// <returns></returns>
         private string? ConvertToJson(object value)
         {
-            if (value == null) return null;
+            if (value == null)
+                return null;
             return JsonConvert.SerializeObject(value);
         }
 
         private object? ConvertFromJson(object? json)
         {
-            if (json == null) return null;
+            if (json == null)
+                return null;
             string jsonString = json.ToString();
-            if (string.IsNullOrEmpty(jsonString)) return null;
+            if (string.IsNullOrEmpty(jsonString))
+                return null;
             try
             {
                 return JsonConvert.DeserializeObject(jsonString, ModelClrType);

@@ -1,8 +1,6 @@
-using System.Threading.Tasks;
 using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.CorePlugin.Utils.Cache;
 using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.MySql;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Web.Service;
@@ -41,10 +39,6 @@ namespace UZonMail.CorePlugin.Services.Settings
             );
             try
             {
-                if (cacheKey == null)
-                {
-                    ;
-                }
                 var result = (T)await lazy.Value;
                 return result;
             }

@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "Plugins/UZonMailCorePlugin"
+		},
+		{
+			"path": "UZonMailDB"
+		},
+		{
+			"path": "UZonMailUtils"
+		},
+		{
+			"path": "UZonMailService"
+		},
+		{
+			"path": "UzonMailDesktop"
+		},
+		{
+			"path": "../../UZonMailProPlugins/UZonMailProPlugin"
+		}
+	],
+	"settings": {}
+}

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.MySql;
+using Microsoft.EntityFrameworkCore;
 using UZonMail.DB.PostgreSql;
 using UZonMail.DB.SqLite;
 
@@ -12,9 +11,13 @@ namespace UZonMail.DB.SQL
         /// </summary>
         /// <param name="options"></param>
         /// <param name="configuration"></param>
-        public static void ConfiguringSqLite(DbContextOptionsBuilder options, IConfiguration configuration)
+        public static void ConfiguringSqLite(
+            DbContextOptionsBuilder options,
+            IConfiguration configuration
+        )
         {
-            if (options.IsConfigured) return;
+            if (options.IsConfigured)
+                return;
 
             // sqlLite
             var sqLiteConnectionConfig = new SqLiteConnectionConfig();
@@ -24,23 +27,10 @@ namespace UZonMail.DB.SQL
             if (!string.IsNullOrEmpty(sqlLiteFilePath))
             {
                 var directory = Path.GetDirectoryName(sqlLiteFilePath);
-                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+                if (!string.IsNullOrEmpty(directory))
+                    Directory.CreateDirectory(directory);
             }
             options.UseSqlite(sqLiteConnectionConfig.ConnectionString);
-        }
-
-        /// <summary>
-        /// 配置 mysql
-        /// </summary>
-        /// <param name="options"></param>
-        /// <param name="configuration"></param>
-        public static void ConfiguringMySql(DbContextOptionsBuilder options, IConfiguration configuration)
-        {
-            if (options.IsConfigured) return;
-
-            var _mysqlConnectionConfig = new MySqlConnectionConfig();
-            configuration.GetSection("Database:MySql").Bind(_mysqlConnectionConfig);
-            options.UseMySql(_mysqlConnectionConfig.ConnectionString, new MySqlServerVersion(_mysqlConnectionConfig.MysqlVersion));
         }
 
         /// <summary>
@@ -48,9 +38,13 @@ namespace UZonMail.DB.SQL
         /// </summary>
         /// <param name="options"></param>
         /// <param name="configuration"></param>
-        public static void ConfiguringPostgreSql(DbContextOptionsBuilder options, IConfiguration configuration)
+        public static void ConfiguringPostgreSql(
+            DbContextOptionsBuilder options,
+            IConfiguration configuration
+        )
         {
-            if (options.IsConfigured) return;
+            if (options.IsConfigured)
+                return;
             var postgreSqlConnectionConfig = new PostgreSqlConnectionConfig();
             configuration.GetSection("Database:PostgreSql").Bind(postgreSqlConnectionConfig);
             options.UseNpgsql(postgreSqlConnectionConfig.ConnectionString);
