@@ -4,25 +4,24 @@
       <q-icon v-if="!isDesktop" :name="resolveSvgFullName('logo-hero')" :size="iconSize"
         class="q-pa-md animated fadeInUp"></q-icon>
 
-      <AnimatedCharacters v-if="isDesktop" class="self-center q-mr-xl text-h5 text-secondary" :is-typing="isFocused"
+      <AnimatedCharacters v-if="isDesktop" class="self-center text-h5 text-secondary" :is-typing="isFocused"
         :has-secret="password.length > 0" :secret-visible="showPassword" />
 
-      <div
+      <div ref="loginFormRef"
         class="longin-main q-ma-md q-pa-lg column justify-center items-center border-radius-8 animated fadeInDown hover-card card-like"
-        @keyup.enter="onUserLogin">
+        @keyup.enter="onUserLogin" @focusin="isFocused = true" @focusout="handleFocusOut">
 
         <div class="self-center q-mb-lg text-h5 text-secondary welcome-to-uzon-mail">{{ systemConfig.loginWelcome }}
         </div>
 
-        <q-input outlined class="full-width q-mb-md" standout v-model="userId" :label="translateLoginPage('userName')"
-          @focus="isFocused = true" @blur="isFocused = false">
+        <q-input outlined class="full-width q-mb-md" standout v-model="userId" :label="translateLoginPage('userName')">
           <template v-slot:prepend>
             <q-icon name="person" />
           </template>
         </q-input>
 
         <q-input outlined class="full-width q-mb-md" standout v-model="password" :label="translateLoginPage('password')"
-          :type="isPwd ? 'password' : 'text'" @focus="isFocused = true" @blur="isFocused = false">
+          :type="isPwd ? 'password' : 'text'">
           <template v-slot:prepend>
             <q-icon name="lock" />
           </template>
@@ -60,8 +59,16 @@ const userId = ref('')
 const password = ref('')
 const isPwd = ref(true)
 
-import AnimatedCharacters from './loginAnimation/AnimatedCharacters.vue'
 const isFocused = ref(false)
+const loginFormRef = ref<HTMLElement | null>(null)
+
+function handleFocusOut () {
+  requestAnimationFrame(() => {
+    isFocused.value = loginFormRef.value?.contains(document.activeElement) ?? false
+  })
+}
+
+import AnimatedCharacters from './loginAnimation/AnimatedCharacters.vue'
 const showPassword = computed(() => !isPwd.value)
 
 const router = useRouter()

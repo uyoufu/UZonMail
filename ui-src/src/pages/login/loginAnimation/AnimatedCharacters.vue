@@ -79,7 +79,7 @@ function resetToInitial () {
   isPurplePeeking.value = false
 }
 watch(() => props.isTyping, () => {
-  isPurplePeeking.value = props.isTyping
+  isPurplePeeking.value = props.isTyping && (!props.secretVisible || !props.hasSecret)
 })
 
 function calcPos (el: HTMLDivElement | null, target: { faceX: number; faceY: number; bodySkew: number }) {
