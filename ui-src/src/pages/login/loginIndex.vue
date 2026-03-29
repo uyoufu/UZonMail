@@ -1,22 +1,28 @@
 <template>
   <div class="login-container column justify-center bg-white full-height">
     <div class="row justify-center items-center  q-mb-xl animated fadeIn slower col" :class="mobileClass">
-      <q-icon :name="resolveSvgFullName('logo-hero')" :size="iconSize" class="q-pa-md animated fadeInUp"></q-icon>
+      <q-icon v-if="!isDesktop" :name="resolveSvgFullName('logo-hero')" :size="iconSize"
+        class="q-pa-md animated fadeInUp"></q-icon>
+
+      <AnimatedCharacters v-if="isDesktop" class="self-center q-mr-xl text-h5 text-secondary" :is-typing="isFocused"
+        :has-secret="password.length > 0" :secret-visible="showPassword" />
 
       <div
         class="longin-main q-ma-md q-pa-lg column justify-center items-center border-radius-8 animated fadeInDown hover-card card-like"
         @keyup.enter="onUserLogin">
+
         <div class="self-center q-mb-lg text-h5 text-secondary welcome-to-uzon-mail">{{ systemConfig.loginWelcome }}
         </div>
 
-        <q-input outlined class="full-width q-mb-md" standout v-model="userId" :label="translateLoginPage('userName')">
+        <q-input outlined class="full-width q-mb-md" standout v-model="userId" :label="translateLoginPage('userName')"
+          @focus="isFocused = true" @blur="isFocused = false">
           <template v-slot:prepend>
             <q-icon name="person" />
           </template>
         </q-input>
 
         <q-input outlined class="full-width q-mb-md" standout v-model="password" :label="translateLoginPage('password')"
-          :type="isPwd ? 'password' : 'text'">
+          :type="isPwd ? 'password' : 'text'" @focus="isFocused = true" @blur="isFocused = false">
           <template v-slot:prepend>
             <q-icon name="lock" />
           </template>
@@ -53,6 +59,10 @@ import logger from 'loglevel'
 const userId = ref('')
 const password = ref('')
 const isPwd = ref(true)
+
+import AnimatedCharacters from './loginAnimation/AnimatedCharacters.vue'
+const isFocused = ref(false)
+const showPassword = computed(() => !isPwd.value)
 
 const router = useRouter()
 const routeStore = useRoutesStore()
@@ -121,6 +131,7 @@ const mobileClass = computed(() => {
     'content-start': Platform.is.mobile,
   }
 })
+const isDesktop = computed(() => Platform.is.desktop)
 // #endregion
 
 // #region 显示的系统信息
