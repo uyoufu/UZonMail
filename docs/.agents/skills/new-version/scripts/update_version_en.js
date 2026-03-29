@@ -22,6 +22,10 @@
 
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Target file: 4 levels up from script location to workspace root, then into docs/en/
 const TARGET_FILE = path.resolve(__dirname, "../../../../docs/en/downloads.md");
