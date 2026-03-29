@@ -62,6 +62,10 @@ function validateInput(content) {
   }
 }
 
+function decodeBase64Payload(payload) {
+  return Buffer.from(payload.replace(/\s+/g, ""), "base64").toString("utf8");
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function extractVersion(content) {
@@ -152,7 +156,16 @@ async function main() {
 
   let input = "";
 
-  if (process.argv[2]) {
+  if (process.argv[2] === "--base64") {
+    if (!process.argv[3]) {
+      console.error("[Error] Missing --base64 value.");
+      process.exit(1);
+    }
+
+    input = decodeBase64Payload(process.argv[3]);
+  } else if (process.argv[2] && process.argv[2].startsWith("base64:")) {
+    input = decodeBase64Payload(process.argv[2].slice("base64:".length));
+  } else if (process.argv[2]) {
     // Command-line argument: unescape literal \n sequences
     input = process.argv[2].replace(/\\n/g, "\n");
   } else {

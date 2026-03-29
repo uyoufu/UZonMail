@@ -131,39 +131,85 @@ if ([string]::IsNullOrWhiteSpace($updateContent)) {
   exit 1
 }
 
-$today = Get-Date -Format "yyyy-MM-dd"
 $opencodePrompt = @"
-请先阅读 .agents/skills/new-version/SKILL.md 的要求，然后根据下面的输入生成新的版本文档。
+请只输出 JSON，不要输出任何解释、命令、代码块或文件操作。
 
-执行环境说明：
-- 当前目录是 docs
-- 中文文档目标：docs/docs/downloads.md
-- 英文文档目标：docs/docs/en/downloads.md
-- 必要时使用 .agents/skills/new-version/scripts/update_version_zh.js 和 update_version_en.js 更新文档
-- 不要直接读取大文件内容
-
-版本号：$version
-当前日期：$today
-
-本次更新内容：
-$updateContent
+JSON 结构：
+{
+  "zhMarkdown": "## x.y.z\n> 更新时期：YYYY-MM-DD\n...",
+  "enMarkdown": "## x.y.z\n> Release Date: YYYY-MM-DD\n..."
+}
 
 要求：
 1. 把内容整理到 功能新增、功能优化、Bug 修复 三类中。
-2. 生成符合技能规范的新版本文档。
-3. 如果内容是中文，请同步生成英文版；如果内容是英文，请同步生成中文版。
-4. 只修改文档相关文件。
+2. 版本号：$version
+3. 日期：$(Get-Date -Format "yyyy-MM-dd")
+4. 如果用户输入偏中文，zhMarkdown 和 enMarkdown 都要给出；如果偏英文，也要给出。
+5. 不要执行任何文件写入操作。
+
+用户输入：
+$updateContent
 "@
 
-Write-Host "在 docs 目录中调用 opencode 生成版本文档..." -ForegroundColor Yellow
+Write-Host "在 docs 目录中调用 opencode 生成结构化内容..." -ForegroundColor Yellow
 Push-Location -Path $docsDir
 try {
-  & opencode run -m "zai-coding-plan/glm-4.7" $opencodePrompt
-  Assert-GitSuccess -Step "opencode 生成版本文档"
+  $opencodeOutput = & opencode run -m "zai-coding-plan/glm-4.7" $opencodePrompt
+  Assert-GitSuccess -Step "opencode 生成结构化内容"
 }
 finally {
   Pop-Location
 }
+
+$opencodeText = ($opencodeOutput | Out-String).Trim()
+if ([string]::IsNullOrWhiteSpace($opencodeText)) {
+  Write-Host "未从 opencode 获取到输出。" -ForegroundColor Red
+  exit 1
+}
+
+$jsonStart = $opencodeText.IndexOf('{')
+$jsonEnd = $opencodeText.LastIndexOf('}')
+if ($jsonStart -lt 0 -or $jsonEnd -le $jsonStart) {
+  Write-Host "opencode 输出不是有效 JSON。" -ForegroundColor Red
+  Write-Host $opencodeText
+  exit 1
+}
+
+$jsonText = $opencodeText.Substring($jsonStart, $jsonEnd - $jsonStart + 1)
+try {
+  $payload = $jsonText | ConvertFrom-Json
+}
+catch {
+  Write-Host "解析 opencode JSON 失败。" -ForegroundColor Red
+  Write-Host $jsonText
+  exit 1
+}
+
+if (-not $payload.zhMarkdown -or -not $payload.enMarkdown) {
+  Write-Host "opencode 输出缺少 zhMarkdown 或 enMarkdown。" -ForegroundColor Red
+  exit 1
+}
+
+function Convert-ToBase64Utf8 {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Text
+  )
+
+  return [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Text))
+}
+
+$scriptDir = Join-Path -Path $docsDir -ChildPath ".agents/skills/new-version/scripts"
+$zhPayload = Convert-ToBase64Utf8 -Text $payload.zhMarkdown
+$enPayload = Convert-ToBase64Utf8 -Text $payload.enMarkdown
+
+Write-Host "更新中文版本文档..." -ForegroundColor Yellow
+& node (Join-Path $scriptDir "update_version_zh.js") --base64 $zhPayload
+Assert-GitSuccess -Step "更新中文版本文档"
+
+Write-Host "更新英文版本文档..." -ForegroundColor Yellow
+& node (Join-Path $scriptDir "update_version_en.js") --base64 $enPayload
+Assert-GitSuccess -Step "更新英文版本文档"
 
 Write-Host "提交生成的文档变更..." -ForegroundColor Yellow
 $allowedDocsFiles = @(

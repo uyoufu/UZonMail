@@ -60,6 +60,10 @@ function validateInput(content) {
   }
 }
 
+function decodeBase64Payload(payload) {
+  return Buffer.from(payload.replace(/\s+/g, ""), "base64").toString("utf8");
+}
+
 // ── 工具函数 ──────────────────────────────────────────────────────────────────
 
 function extractVersion(content) {
@@ -150,7 +154,16 @@ async function main() {
 
   let input = "";
 
-  if (process.argv[2]) {
+  if (process.argv[2] === "--base64") {
+    if (!process.argv[3]) {
+      console.error("[错误] 缺少 --base64 参数值。");
+      process.exit(1);
+    }
+
+    input = decodeBase64Payload(process.argv[3]);
+  } else if (process.argv[2] && process.argv[2].startsWith("base64:")) {
+    input = decodeBase64Payload(process.argv[2].slice("base64:".length));
+  } else if (process.argv[2]) {
     // 命令行参数：将字面 \n 转为真实换行符
     input = process.argv[2].replace(/\\n/g, "\n");
   } else {

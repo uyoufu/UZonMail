@@ -34,6 +34,8 @@ description: 在文档中添加新版本
 3. 下载地址中，根据版本号进行相应修改，具体格式见下方示例, 下载地址中的版本号格式为 x.y.z.b, 其中 x.y.z 是版本号，b 是构建号，构建号默认为 0, 版本号必须完整。
 4. 当用户输入的内容非中文时，翻译为中文，然后使用 `update_version_zh` 脚本将更新的信息保存到 `docs/downloads.md` 文件中。
 5. 当用户输入的内容非英文时，翻译为英文，然后使用 `update_version_en` 脚本将更新的信息保存到 `docs/en/downloads_en.md` 文件中。
+6. 只输出结构化内容，不要在 shell 中直接拼接包含 `>` 的写文件命令，也不要自行创建或修改文件；文件写入必须交给外部脚本完成。
+6. 只输出结构化内容，不要在 shell 中直接拼接包含 `>` 的写文件命令，也不要自行创建或修改文件；文件写入必须交给外部脚本完成。
 
 # update_version_x 使用方式
 
@@ -45,6 +47,7 @@ printf '## 0.20.1\n> 更新时期：...\n' | node update_version_zh.js
 # Warning
 
 一定不要读取 `docs/downloads.md` 和 `docs/en/downloads_en.md` 文件中的内容，该文件非常大，使用脚本进行更新
+不要直接执行会写文件的 shell 命令；如果需要生成内容，请输出 JSON 或纯 Markdown，由外部脚本负责落盘。
 
 # Example
 
