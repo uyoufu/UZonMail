@@ -5,6 +5,28 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.22.0
+
+> Release Date: 2026-03-29
+
+### Feature Improvements
+
+1. Optimized login screen animations
+
+### Bug Fixes
+
+1. Fixed bug where emails still appeared after deleting email groups
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.22.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.22.0.0.zip)
+
+[uzonmail-service-win-x64-0.22.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.22.0.0.zip)
+
+[uzonmail-service-linux-x64-0.22.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.22.0.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.21.0
 > Release Date: 2026-03-22
 

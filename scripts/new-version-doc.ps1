@@ -137,8 +137,8 @@ $opencodePrompt = @"
 
 执行环境说明：
 - 当前目录是 docs
-- 中文文档目标：docs/downloads.md
-- 英文文档目标：docs/en/downloads.md
+- 中文文档目标：docs/docs/downloads.md
+- 英文文档目标：docs/docs/en/downloads.md
 - 必要时使用 .agents/skills/new-version/scripts/update_version_zh.js 和 update_version_en.js 更新文档
 - 不要直接读取大文件内容
 
@@ -172,8 +172,8 @@ $changedDocsFiles += & git ls-files --others --exclude-standard -- docs
 Assert-GitSuccess -Step "获取 docs 目录未跟踪文件"
 $changedDocsFiles = $changedDocsFiles | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique
 $allowedDocsFiles = @(
-  "docs/downloads.md",
-  "docs/en/downloads.md"
+  "docs/docs/downloads.md",
+  "docs/docs/en/downloads.md"
 )
 $changedDocsFiles = $changedDocsFiles | Where-Object { $allowedDocsFiles -contains $_ }
 
