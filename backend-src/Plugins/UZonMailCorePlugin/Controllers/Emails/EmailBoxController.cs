@@ -366,16 +366,16 @@ namespace UZonMail.CorePlugin.Controllers.Emails
         [HttpGet("outbox/filtered-count")]
         public async Task<ResponseResult<int>> GetOutboxesCount(long groupId, string filter)
         {
+            if (groupId <= 0)
+                return 0.ToSuccessResponse();
+
             var userId = tokenService.GetUserSqlId();
 
-            // 收件箱
             var dbSet = db
                 .Outboxes.AsNoTracking()
-                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
-            if (groupId > 0)
-            {
-                dbSet = dbSet.Where(x => x.EmailGroupId == groupId);
-            }
+                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden)
+                .Where(x => x.EmailGroupId == groupId);
+
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
@@ -401,14 +401,15 @@ namespace UZonMail.CorePlugin.Controllers.Emails
             [FromBody] Pagination pagination
         )
         {
+            if (groupId <= 0)
+                return ResponseResult<List<Outbox>>.Success([]);
+
             var userId = tokenService.GetUserSqlId();
             var dbSet = db
                 .Outboxes.AsNoTracking()
-                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
-            if (groupId > 0)
-            {
-                dbSet = dbSet.Where(x => x.EmailGroupId == groupId);
-            }
+                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden)
+                .Where(x => x.EmailGroupId == groupId);
+
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
@@ -526,16 +527,17 @@ namespace UZonMail.CorePlugin.Controllers.Emails
         [HttpGet("inbox/filtered-count")]
         public async Task<ResponseResult<int>> GetInboxesCount(long groupId, string filter)
         {
+            if (groupId <= 0)
+                return 0.ToSuccessResponse();
+
             var userId = tokenService.GetUserSqlId();
 
             // 收件箱
             var dbSet = db
                 .Inboxes.AsNoTracking()
-                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
-            if (groupId > 0)
-            {
-                dbSet = dbSet.Where(x => x.EmailGroupId == groupId);
-            }
+                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden)
+                .Where(x => x.EmailGroupId == groupId);
+
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
@@ -585,14 +587,15 @@ namespace UZonMail.CorePlugin.Controllers.Emails
             [FromBody] Pagination pagination
         )
         {
+            if (groupId <= 0)
+                return ResponseResult<List<Inbox>>.Success([]);
+
             var userId = tokenService.GetUserSqlId();
             var dbSet = db
                 .Inboxes.AsNoTracking()
-                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden);
-            if (groupId > 0)
-            {
-                dbSet = dbSet.Where(x => x.EmailGroupId == groupId);
-            }
+                .Where(x => x.UserId == userId && !x.IsDeleted && !x.IsHidden)
+                .Where(x => x.EmailGroupId == groupId);
+
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
