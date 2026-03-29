@@ -1,11 +1,16 @@
 <template>
   <div class="login-container column justify-center bg-white full-height">
     <div class="row justify-center items-center  q-mb-xl animated fadeIn slower col" :class="mobileClass">
-      <q-icon :name="resolveSvgFullName('logo-hero')" :size="iconSize" class="q-pa-md animated fadeInUp"></q-icon>
+      <q-icon v-if="!isDesktop" :name="resolveSvgFullName('logo-hero')" :size="iconSize"
+        class="q-pa-md animated fadeInUp"></q-icon>
 
-      <div
+      <AnimatedCharacters v-if="isDesktop" class="self-center text-h5 text-secondary" :is-typing="isFocused"
+        :has-secret="password.length > 0" :secret-visible="showPassword" />
+
+      <div ref="loginFormRef"
         class="longin-main q-ma-md q-pa-lg column justify-center items-center border-radius-8 animated fadeInDown hover-card card-like"
-        @keyup.enter="onUserLogin">
+        @keyup.enter="onUserLogin" @focusin="isFocused = true" @focusout="handleFocusOut">
+
         <div class="self-center q-mb-lg text-h5 text-secondary welcome-to-uzon-mail">{{ systemConfig.loginWelcome }}
         </div>
 
@@ -53,6 +58,18 @@ import logger from 'loglevel'
 const userId = ref('')
 const password = ref('')
 const isPwd = ref(true)
+
+const isFocused = ref(false)
+const loginFormRef = ref<HTMLElement | null>(null)
+
+function handleFocusOut () {
+  requestAnimationFrame(() => {
+    isFocused.value = loginFormRef.value?.contains(document.activeElement) ?? false
+  })
+}
+
+import AnimatedCharacters from './loginAnimation/AnimatedCharacters.vue'
+const showPassword = computed(() => !isPwd.value)
 
 const router = useRouter()
 const routeStore = useRoutesStore()
@@ -121,6 +138,7 @@ const mobileClass = computed(() => {
     'content-start': Platform.is.mobile,
   }
 })
+const isDesktop = computed(() => Platform.is.desktop)
 // #endregion
 
 // #region 显示的系统信息

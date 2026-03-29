@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UZonMailCorePlugin", "UZonMailCorePlugin\UZonMailCorePlugin.csproj", "{EFD628AE-389D-1753-AA77-0F92B431A8D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UZonMailCorePluginTests", "UZonMailCorePluginTests\UZonMailCorePluginTests.csproj", "{8F927EA0-2D87-A876-5B68-2BAAFD489F16}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EFD628AE-389D-1753-AA77-0F92B431A8D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFD628AE-389D-1753-AA77-0F92B431A8D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFD628AE-389D-1753-AA77-0F92B431A8D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFD628AE-389D-1753-AA77-0F92B431A8D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F927EA0-2D87-A876-5B68-2BAAFD489F16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F927EA0-2D87-A876-5B68-2BAAFD489F16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F927EA0-2D87-A876-5B68-2BAAFD489F16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F927EA0-2D87-A876-5B68-2BAAFD489F16}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3314FB34-4D62-4055-A7FB-33DA6B32FC21}
+	EndGlobalSection
+EndGlobal

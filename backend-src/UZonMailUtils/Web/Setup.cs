@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,11 +13,9 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using UZonMail.Utils.Database.Redis;
 using UZonMail.Utils.Web.Convention;
 using UZonMail.Utils.Web.Service;
-using UZonMail.Utils.Web.Swagger;
 
 namespace UZonMail.Utils.Web
 {
@@ -75,71 +72,6 @@ namespace UZonMail.Utils.Web
             {
                 return ServiceUtils.AddServices(services, utilsAssembly);
             }
-            return services;
-        }
-
-        /// <summary>
-        /// 配置 swagger
-        /// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="apiInfo"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddSwaggerGen(
-            this IServiceCollection services,
-            OpenApiInfo apiInfo
-        )
-        {
-            services.AddSwaggerGen(swaggerOptions =>
-            {
-                swaggerOptions.SwaggerDoc("v1", apiInfo);
-
-                // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{Assembly.GetEntryAssembly()?.GetName().Name}.xml";
-                if (File.Exists(xmlFile))
-                {
-                    swaggerOptions.IncludeXmlComments(xmlFile);
-                }
-
-                // Bearer 的scheme定义
-                var securityScheme = new OpenApiSecurityScheme()
-                {
-                    Description =
-                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                    Name = "Authorization",
-                    //参数添加在头部
-                    In = ParameterLocation.Header,
-                    //使用Authorize头部
-                    Type = SecuritySchemeType.Http,
-                    //内容为以 bearer开头
-                    Scheme = "bearer",
-                    BearerFormat = "JWT"
-                };
-
-                // 添加过滤器，输出更多信息
-                swaggerOptions.OperationFilter<DotNETSwaggerFilter>();
-
-                //把所有方法配置为增加bearer头部信息
-                var securityRequirement = new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "bearerAuth"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
-                };
-
-                //注册到swagger中
-                swaggerOptions.AddSecurityDefinition("bearerAuth", securityScheme);
-                swaggerOptions.AddSecurityRequirement(securityRequirement);
-            });
-
             return services;
         }
 

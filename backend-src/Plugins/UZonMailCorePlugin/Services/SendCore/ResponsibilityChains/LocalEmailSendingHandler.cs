@@ -41,10 +41,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             var mimeMessage = await CreateMimeMessage(context);
 
             // 调用发件器进行发件
-            var emailSender = sendersManager.GetEmailSender(
-                sendItem.Outbox.Email,
-                sendItem.Outbox.SmtpHost
-            );
+            var emailSender = sendersManager.GetEmailSender(sendItem.Outbox.OutboxType);
             if (emailSender == null)
             {
                 _logger.Error($"没有找到匹配的邮件发送器，发件箱：{sendItem.Outbox.Email}");
@@ -103,15 +100,14 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             BodyBuilder bodyBuilder = new() { HtmlBody = htmlBody };
 
             // 附件
-            var attachments = sendItem.Attachments;
-            foreach (var attachment in attachments)
+            foreach (var attachment in sendItem.Attachments)
             {
                 // 添加附件
-                bodyBuilder.Attachments.Add(attachment.FullName);
+                bodyBuilder.Attachments.Add(attachment.Item2.FullName);
                 // 修改文件名
                 var lastOne = bodyBuilder.Attachments.Last();
-                lastOne.ContentType.Name = attachment.Name;
-                lastOne.ContentDisposition.FileName = attachment.Name;
+                lastOne.ContentType.Name = attachment.Item1;
+                lastOne.ContentDisposition.FileName = attachment.Item1;
             }
             message.Body = bodyBuilder.ToMessageBody();
 

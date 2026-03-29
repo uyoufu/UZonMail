@@ -32,6 +32,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         #endregion
 
         #region 公开属性
+        public OutboxType OutboxType => Outbox.Type;
+
         public OutboxEmailAddressType Type { get; private set; } = OutboxEmailAddressType.Specific;
 
         /// <summary>

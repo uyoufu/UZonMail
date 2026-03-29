@@ -16,9 +16,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 
         public int Order => 0;
 
-        public bool IsMatch(string email, string smtpHost = "")
+        public bool IsMatch(OutboxType outboxType)
         {
-            return Outbox.IsExchangeEmail(email, smtpHost);
+            return outboxType == OutboxType.MsGraph;
         }
 
         /// <summary>

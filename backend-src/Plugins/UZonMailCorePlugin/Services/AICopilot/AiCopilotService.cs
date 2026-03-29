@@ -1,10 +1,15 @@
 using Microsoft.Extensions.AI;
 using UZonMail.DB.SQL;
+using UZonMail.Utils.Web.Exceptions;
 using UZonMail.Utils.Web.Service;
 
 namespace UZonMail.CorePlugin.Services.AICopilot
 {
-    public class AiCopilotService(SqlContext db, AIClientsManger aIClients) : IScopedService
+    public class AiCopilotService(
+        SqlContext db,
+        AIClientsManger aIClients,
+        ILogger<AiCopilotService> logger
+    ) : IScopedService
     {
         /// <summary>
         /// Ask AI Copilot once
@@ -17,7 +22,7 @@ namespace UZonMail.CorePlugin.Services.AICopilot
         {
             var chatClient =
                 await aIClients.GetChatClient(db, userId)
-                ?? throw new Exception("AI Copilot is not configured properly.");
+                ?? throw new KnownException("AI Copilot is not configured properly.");
 
             var response = await chatClient.GetResponseAsync(messages);
             return response.Messages.Last().Text;

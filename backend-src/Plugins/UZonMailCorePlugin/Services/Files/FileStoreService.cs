@@ -39,7 +39,7 @@ namespace UZonMail.CorePlugin.Services.Files
         /// <param name="prefix"></param>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        private (string, string) GetObjectStorePath(FileBucket fileBucket, string fileName)
+        private static (string, string) GetObjectStorePath(FileBucket fileBucket, string fileName)
         {
             // 年/月/日/文件名
             string relativePath =

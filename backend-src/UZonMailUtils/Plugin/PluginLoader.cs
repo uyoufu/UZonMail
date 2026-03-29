@@ -47,7 +47,11 @@ namespace UZonMail.Utils.Plugin
 
             // 插件相互引用时，要到各自的目录中去加载
             // TODO: 目前由插件自己控制，需保证不引用其它插件依赖
-            var dllFullName = _allDllNames.Where(x => x.EndsWith(dllName)).FirstOrDefault();
+            // 注意：必须使用 Path.GetFileName 精确匹配文件名，避免 EndsWith 误匹配
+            // 例如：查找 "OpenAI.dll" 时，EndsWith 会错误地匹配到 "Microsoft.Extensions.AI.OpenAI.dll"
+            var dllFullName = _allDllNames
+                .Where(x => Path.GetFileName(x) == dllName)
+                .FirstOrDefault();
 
             if (dllFullName == null)
             {
@@ -59,6 +63,8 @@ namespace UZonMail.Utils.Plugin
 
             // 有可能插件间相互引用，在此处也要进行插件加载
             var assembly = LoadAssembly(absDllFullName);
+
+            _logger.Debug($"加载依赖 dll: {dllName}，路径: {absDllFullName}");
             return assembly;
         }
 

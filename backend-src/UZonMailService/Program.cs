@@ -1,15 +1,9 @@
-using System.Globalization;
 using System.Security.Claims;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpLogging;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.OpenApi.Models;
 using Quartz;
-using UZonMail.DB.MySql;
 using UZonMail.DB.PostgreSql;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SqLite;
@@ -103,22 +97,9 @@ var mvcBuilder = services
 var pluginLoader = new PluginLoader("Plugins");
 pluginLoader.ConfigureServices(builder);
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-services.AddEndpointsApiExplorer();
-
-// 配置 swagger
-services.AddSwaggerGen(
-    new OpenApiInfo()
-    {
-        Title = "UZonMail API",
-        Contact = new OpenApiContact()
-        {
-            Name = "galens",
-            Url = new Uri("https://galens.uamazing.cn"),
-            Email = "260827400@qq.com"
-        },
-    }
-);
+// OpenApi
+// 参考: https://learn.microsoft.com/zh-tw/aspnet/core/fundamentals/openapi/overview?view=aspnetcore-10.0
+services.AddOpenApi();
 
 // 验证在 jwt 中实现
 // 添加 signalR，还需要在 app 中使用 MapHub
@@ -145,9 +126,7 @@ services.AddSignalR();
 services.SetupSlugifyCaseRoute();
 
 // 注入数据库
-services.AddSqlContext<SqlContext, PostgreSqlContext, MySqlContext, SqLiteContext>(
-    builder.Configuration
-);
+services.AddSqlContext<SqlContext, PostgreSqlContext, SqLiteContext>(builder.Configuration);
 
 // 添加 HttpContextAccessor，以供 service 获取当前请求的用户信息
 services.AddHttpContextAccessor();
@@ -267,8 +246,7 @@ app.UseCors();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
     app.UseDeveloperExceptionPage();
 }
 

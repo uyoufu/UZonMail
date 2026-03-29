@@ -1,8 +1,7 @@
-﻿
-using log4net;
-using StackExchange.Redis;
 using System;
 using System.Threading.Tasks;
+using log4net;
+using StackExchange.Redis;
 using UZonMail.Utils.Json;
 
 namespace UZonMail.Utils.Database.Redis
@@ -62,10 +61,19 @@ namespace UZonMail.Utils.Database.Redis
             }
         }
 
-        public async Task<bool> SetAsync<T>(string key, T? value, TimeSpan? absoluteExpirationRelativeToNow)
+        public async Task<bool> SetAsync<T>(
+            string key,
+            T? value,
+            TimeSpan? absoluteExpirationRelativeToNow
+        )
         {
             // 将数据转为 json
-            return await _db.StringSetAsync(key, value.ToJson(), absoluteExpirationRelativeToNow);
+            return await _db.StringSetAsync(
+                key,
+                value.ToJson(),
+                absoluteExpirationRelativeToNow,
+                keepTtl: false
+            );
         }
     }
 }

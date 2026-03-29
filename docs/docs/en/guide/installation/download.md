@@ -21,7 +21,7 @@ UzonMail supports multiple platforms:
 
 ## Requirements
 
-The core dependency is [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
+The core dependency is [.NET 10.0.5](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
 
 Additional platform-specific dependencies may be required; refer to the corresponding installation pages.
 
