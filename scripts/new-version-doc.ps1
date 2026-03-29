@@ -87,7 +87,7 @@ Assert-CommandExists -CommandName "opencode"
 $repoRoot = & git rev-parse --show-toplevel
 Assert-GitSuccess -Step "获取仓库根目录"
 
-Set-Location -Path $repoRoot
+Push-Location -Path $repoRoot
 
 $currentBranch = & git branch --show-current
 Assert-GitSuccess -Step "获取当前分支"
@@ -165,25 +165,12 @@ finally {
   Pop-Location
 }
 
-$changedDocsFiles = @()
-$changedDocsFiles += & git diff --name-only -- docs
-Assert-GitSuccess -Step "获取 docs 目录已修改文件"
-$changedDocsFiles += & git ls-files --others --exclude-standard -- docs
-Assert-GitSuccess -Step "获取 docs 目录未跟踪文件"
-$changedDocsFiles = $changedDocsFiles | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique
+Write-Host "提交生成的文档变更..." -ForegroundColor Yellow
 $allowedDocsFiles = @(
   "docs/docs/downloads.md",
   "docs/docs/en/downloads.md"
 )
-$changedDocsFiles = $changedDocsFiles | Where-Object { $allowedDocsFiles -contains $_ }
-
-if (-not $changedDocsFiles -or $changedDocsFiles.Count -eq 0) {
-  Write-Host "opencode 未生成任何可提交的文档变更。" -ForegroundColor Red
-  exit 1
-}
-
-Write-Host "提交生成的文档变更..." -ForegroundColor Yellow
-& git add -- @changedDocsFiles
+& git add -- @allowedDocsFiles
 Assert-GitSuccess -Step "暂存文档变更"
 
 & git commit -m "docs: update version $Version documentation"
@@ -206,3 +193,4 @@ Write-Host "推送 $TargetBranch 分支..." -ForegroundColor Yellow
 Assert-GitSuccess -Step "推送 $TargetBranch 分支"
 
 Write-Host "版本文档生成、合并和推送已完成。" -ForegroundColor Green
+Pop-Location

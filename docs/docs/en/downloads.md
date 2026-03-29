@@ -9,13 +9,13 @@ permalink: /en/downloads
 
 > Release Date: 2026-03-29
 
-### Feature Improvements
+### Features Optimization
 
-1. Optimized login screen animations
+1. Optimize login interface animations
 
 ### Bug Fixes
 
-1. Fixed bug where emails still appeared after deleting email groups
+1. Fix the bug where emails still display after deleting email groups
 
 ### Downloads
 
