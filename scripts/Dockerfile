@@ -1,5 +1,5 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
-# Set the working directory
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+# Set the working directory 
 WORKDIR /app
 # Copy the published output to the container
 COPY . .
