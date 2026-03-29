@@ -20,8 +20,8 @@
 
 "use strict";
 
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 // 目标文件：从脚本位置向上 4 级到工作区根，再进入 docs/
 const TARGET_FILE = path.resolve(__dirname, "../../../../docs/downloads.md");

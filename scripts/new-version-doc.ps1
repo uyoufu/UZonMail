@@ -186,7 +186,7 @@ Write-Host "提交生成的文档变更..." -ForegroundColor Yellow
 & git add -- @changedDocsFiles
 Assert-GitSuccess -Step "暂存文档变更"
 
-& git commit -m "docs: update version documentation"
+& git commit -m "docs: update version $Version documentation"
 Assert-GitSuccess -Step "提交文档变更"
 
 $branchAfterCommit = & git branch --show-current

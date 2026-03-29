@@ -20,8 +20,8 @@
 
 "use strict";
 
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 // Target file: 4 levels up from script location to workspace root, then into docs/en/
 const TARGET_FILE = path.resolve(__dirname, "../../../../docs/en/downloads.md");
