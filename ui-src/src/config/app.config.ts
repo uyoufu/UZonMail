@@ -1,4 +1,3 @@
-
 /**
  * 可以在这里配置一些全局的配置
  * 这个配置是编译时使用，若在运行时修改配置，请修改 public/app.config.js
@@ -16,7 +15,7 @@ export default {
     logger: {
       level: 'info'
     },
-    version: '0.20.6.0'
+    version: '0.22.0.0'
   },
 
   // 生产配置
@@ -40,5 +39,4 @@ export default {
       level: 'debug'
     }
   }
-
 } as IAppConfigsContainer
