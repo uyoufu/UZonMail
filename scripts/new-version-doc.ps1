@@ -6,6 +6,11 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+# 全局设置输出编码为 UTF-8，避免外部命令中文乱码
+$OutputEncoding = [Text.Encoding]::UTF8
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
+[Console]::InputEncoding = [Text.Encoding]::UTF8
+
 function Assert-Linux {
   if (-not $IsLinux) {
     Write-Host "此脚本仅支持 Linux 执行。" -ForegroundColor Red
@@ -136,16 +141,54 @@ $opencodePrompt = @"
 
 JSON 结构：
 {
-  "zhMarkdown": "## x.y.z\n> 更新时期：YYYY-MM-DD\n...",
-  "enMarkdown": "## x.y.z\n> Release Date: YYYY-MM-DD\n..."
+  "zhMarkdown": "## x.y.z\n> 更新时期：YYYY-MM-DD\n...\n### 下载地址\n...",
+  "enMarkdown": "## x.y.z\n> Release Date: YYYY-MM-DD\n...\n### Downloads\n..."
 }
 
 要求：
 1. 把内容整理到 功能新增、功能优化、Bug 修复 三类中。
 2. 版本号：$version
 3. 日期：$(Get-Date -Format "yyyy-MM-dd")
-4. 如果用户输入偏中文，zhMarkdown 和 enMarkdown 都要给出；如果偏英文，也要给出。
-5. 不要执行任何文件写入操作。
+5. 下载地址必须存在，格式如下, version 格式为 x.y.z.b, 其中 x.y.z 是版本号，b 是构建号，构建号默认为 0, 版本号要替换为实际版本号。
+
+``` markdown
+[uzonmail-desktop-win-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-{version}.zip)
+
+[uzonmail-service-win-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-{version}.zip)
+
+[uzonmail-service-linux-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-{version}.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+```
+6. 如果用户输入偏中文，zhMarkdown 和 enMarkdown 都要给出；如果偏英文，也要给出。
+7. 单个 markdown 中完整的内容示例为：
+
+```markdown
+## 0.20.6
+
+> 更新时期：2026-01-27
+
+### 功能优化
+
+1. 更改 UzonMail 图标
+
+### Bug 修复
+
+1. 修复自定义域名的 Outlook 无法被正确识别问题
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.20.6.0.zip)
+
+[uzonmail-service-win-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.20.6.0.zip)
+
+[uzonmail-service-linux-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.20.6.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+```
+
+8. 不要执行任何文件写入操作。
+
 
 用户输入：
 $updateContent
@@ -166,6 +209,8 @@ if ([string]::IsNullOrWhiteSpace($opencodeText)) {
   Write-Host "未从 opencode 获取到输出。" -ForegroundColor Red
   exit 1
 }
+write-Host "opencode 输出已获取，正在解析..."
+Write-Host $opencodeText -ForegroundColor DarkGray
 
 $jsonStart = $opencodeText.IndexOf('{')
 $jsonEnd = $opencodeText.LastIndexOf('}')
