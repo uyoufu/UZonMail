@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-using Panuon.WPF.UI;
-using StyletIoC;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Forms;
+using Microsoft.Extensions.Configuration;
+using Panuon.WPF.UI;
+using StyletIoC;
 using UZonMailDesktop.Modules.EnvDetector;
 using UZonMailDesktop.Pages.Conductors;
 using UZonMailDesktop.Pages.MissingEnv;
@@ -15,7 +15,12 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace UZonMailDesktop.Pages
 {
-    internal class ShellViewModel(IContainer ioc, IConfiguration configuration, BackEndService backEndService, SystemTrayWinfom systemTray) : RouterConductor(ioc)
+    internal class ShellViewModel(
+        IContainer ioc,
+        IConfiguration configuration,
+        BackEndService backEndService,
+        SystemTrayWinfom systemTray
+    ) : RouterConductor(ioc)
     {
         private string _title;
         public string Title
@@ -49,7 +54,10 @@ namespace UZonMailDesktop.Pages
 
             // 验证是否已经启动了
             var currentProcess = Process.GetCurrentProcess();
-            var desktopProcess = Process.GetProcesses().Where(x => x.ProcessName == "UZonMailDesktop" && x.Id != currentProcess.Id).FirstOrDefault();
+            var desktopProcess = Process
+                .GetProcesses()
+                .Where(x => x.ProcessName == "UZonMailDesktop" && x.Id != currentProcess.Id)
+                .FirstOrDefault();
             if (desktopProcess != null)
             {
                 // 提示已经启动，直接退出
@@ -58,7 +66,8 @@ namespace UZonMailDesktop.Pages
                 Environment.Exit(0);
             }
 
-            if (!VerifyEnv()) return;
+            if (!VerifyEnv())
+                return;
 
             // 启动后台服务
             backEndService.Start();
