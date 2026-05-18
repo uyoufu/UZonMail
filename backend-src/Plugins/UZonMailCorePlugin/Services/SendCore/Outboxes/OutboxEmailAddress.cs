@@ -233,7 +233,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// <returns></returns>
         public bool IsLimited()
         {
-            return this.SentTotalToday >= this.MaxSendCountPerDay;
+            return this.SentTotalToday > this.MaxSendCountPerDay;
         }
 
         /// <summary>

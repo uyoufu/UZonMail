@@ -19,14 +19,15 @@ namespace UZonMail.CorePlugin.Services.HostedServices
             var jobKey = new JobKey($"schduleTask-resetSentCountToday");
             bool exist = await scheduler.CheckExists(jobKey, stoppingToken);
             if (exist)
-                return;
+                await scheduler.DeleteJob(jobKey, stoppingToken);
 
             var job = JobBuilder.Create<SentCountReseter>().WithIdentity(jobKey).Build();
+            var nextUtcMidnight = DateTime.UtcNow.Date.AddDays(1);
 
             var trigger = TriggerBuilder
                 .Create()
                 .ForJob(jobKey)
-                .StartAt(new DateTimeOffset(DateTime.UtcNow.AddDays(1))) // 明天凌晨开始
+                .StartAt(new DateTimeOffset(nextUtcMidnight, TimeSpan.Zero))
                 .WithDailyTimeIntervalSchedule(x => x.WithIntervalInHours(24).OnEveryDay())
                 .Build();
             await scheduler.ScheduleJob(job, trigger, stoppingToken);

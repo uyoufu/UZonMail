@@ -13,11 +13,8 @@ namespace UZonMail.CorePlugin.Jobs
     {
         public async Task Execute(IJobExecutionContext context)
         {
-            // 重置数据库
-            await db.Outboxes.UpdateAsync(
-                x => true,
-                x => x.SetProperty(y => y.MaxSendCountPerDay, 0)
-            );
+            // 重置每日已发送计数，不应改动用户配置的每日最大发送数。
+            await db.Outboxes.UpdateAsync(x => true, x => x.SetProperty(y => y.SentTotalToday, 0));
 
             // 发件池在调用时，会自动重置，此处不处理
             return;

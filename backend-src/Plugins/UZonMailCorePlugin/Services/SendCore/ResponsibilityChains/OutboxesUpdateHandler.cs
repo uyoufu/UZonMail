@@ -4,6 +4,7 @@ using UZonMail.CorePlugin.Services.SendCore.Outboxes;
 using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.CorePlugin.Services.Settings;
 using UZonMail.CorePlugin.Services.Settings.Model;
+using UZonMail.DB.Extensions;
 using UZonMail.DB.SQL;
 
 namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
@@ -50,6 +51,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             {
                 // 判断是否达到了最大的发件数限制
                 outbox.IncreaseSentCount();
+                await context.SqlContext.Outboxes.UpdateAsync(
+                    x => x.Id == outbox.Id,
+                    x => x.SetProperty(y => y.SentTotalToday, outbox.SentTotalToday)
+                );
 
                 // 从发件箱中移除特定发件项
                 outbox.RemoveSepecificSendingItem(
@@ -94,7 +99,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             var overflowLimit = false;
             if (outbox.MaxSendCountPerDay > 0)
             {
-                if (outbox.SentTotalToday > outbox.MaxSendCountPerDay)
+                if (outbox.SentTotalToday >= outbox.MaxSendCountPerDay)
                 {
                     overflowLimit = true;
                 }
