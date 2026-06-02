@@ -42,27 +42,31 @@ ssh username@ip
 #
 
 services:
-  # mysql 服务
-  uzon-mysql:
-    container_name: uzon-mysql
-    image: mysql:8.4.0
+  # PostgreSQL 服务
+  uzon-postgres:
+    container_name: uzon-postgres
+    image: postgres:16-alpine
     # [可选]对外暴露端口，方便外部管理
     # 本地端口:容器端口
-    # 若本机 3306 已使用，可更换成其它端口，例如 23306:3306
+    # 若本机 5432 已使用，可更换成其它端口，例如 25432:5432
     # ports:
-    #   - 3306:3306
+    #   - 5432:5432
     environment:
-      MYSQL_ROOT_PASSWORD: mysqlRoot3306 # root 账号的密码
-      MYSQL_DATABASE: uzon-mail # 数据库名
-      MYSQL_USER: uzon-mail # 数据库用户名
-      MYSQL_PASSWORD: uzon-mail # 数据库密码
+      POSTGRES_DB: uzon-mail # 数据库名
+      POSTGRES_USER: uzon-mail # 数据库用户名
+      POSTGRES_PASSWORD: uzon-mail # 数据库密码
     volumes:
-      - ./data/mysql/data:/var/lib/mysql # 数据库数据挂载，防止容器重构后数据丢失
+      - ./data/postgresql/data:/var/lib/postgresql/data # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U uzon-mail -d uzon-mail" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     # 连接到 uzonmail 主程序网络
     networks:
-      - uzon_mysql_network
+      - uzon_postgres_network
 
   # redis 缓存, 若要启用 redis 服务，请取消下面的注释
   uzon-redis:
@@ -91,15 +95,17 @@ services:
       - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
     networks:
       - uzonmail_network
-      - uzon_mysql_network
+      - uzon_postgres_network
       - uzon_redis_network
     command: [ "dotnet", "UZonMailService.dll" ]
     depends_on:
-      - uzon-mysql
-      - uzon-redis
+      uzon-postgres:
+        condition: service_healthy
+      uzon-redis:
+        condition: service_started
 
 networks:
-  uzon_mysql_network:
+  uzon_postgres_network:
   uzon_redis_network:
   uzonmail_network:
 ```
@@ -135,6 +141,8 @@ wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts
 
 在文件里，你可以修改数据库的连接密码、可以将端口暴露到宿主机中进行管理。
 
+若已经有可用的 PostgreSQL 数据库，可以删除 `docker-compose.yml` 中的 `uzon-postgres` 服务和 `uzon_postgres_network` 网络，并在后端配置中把 `PostgreSql.Host`、`PostgreSql.Port`、`PostgreSql.User`、`PostgreSql.Password` 和 `PostgreSql.Database` 改为已有数据库的连接信息。请确保 `uzon-mail` 容器所在网络能够访问该数据库。
+
 ### 生成配置
 
 为了方便对服务器进行配置，需要在外部创建相应的挂载文件。为了使用安全，有一些参数必须在配置进行修改。
@@ -169,23 +177,22 @@ echo '{
   },
   // 数据库设置
   // 将 Enable 设置为 true, 启用对应的数据库
-  // 程序优化使用 mysql
+  // 程序优先使用 PostgreSQL
   "Database": {
     // 免安装的数据库，系统默认使用这个
     "SqLite": {
       "Enable": false,
       "DataSource": "data/db/uzon-mail.db"
     },
-    // 对于高并发场景，建议使用 mysql
-    "MySql": {
+    // 对于高并发场景，建议使用 PostgreSQL
+    "PostgreSql": {
       "Enable": true,
-      "Version": "8.4.0.0",
-      "Host": "uzon-mysql",
-      "Port": 3306,
+      "Host": "uzon-postgres",
+      "Port": 5432,
       "Database": "uzon-mail",
       "User": "uzon-mail",
       "Password": "uzon-mail",
-      "Description": "程序会优先使用 mysql"
+      "Description": "程序会优先使用 PostgreSQL"
     },
     // 缓存数据库
     // 默认使用内存缓存
@@ -233,11 +240,10 @@ curl: (7) Failed to connect to localhost port 22345 after 0 ms: Couldn't connect
 当日志中包含类似日志时：
 
 ``` tex
-Unhandled exception. System.InvalidOperationException: An exception has been raised that is likely due to a transient failure. Consider enabling transient error resiliency by adding 'EnableRetryOnFailure()' to the 'UseMySql' call.
- ---> MySqlConnector.MySqlException (0x80004005): Unable to connect to any of the specified MySQL hosts.
+Unhandled exception. Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5432
 ```
 
-表示无法连接 mysql，可能是 mysql 还未完全启动成功，可以使用 `docker restart uzon-mail` 重新启动一下主服务。
+表示无法连接 PostgreSQL，可能是数据库还未完全启动成功，或者已有数据库的 Host、端口、账号密码配置不正确。可以先使用 `docker logs uzon-postgres` 查看内置数据库状态，再使用 `docker restart uzon-mail` 重新启动一下主服务。
 
 当日志中显示如下内容时，表示启动成功了
 

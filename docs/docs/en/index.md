@@ -21,7 +21,7 @@ highlights:
     description: 'Modern UI, enterprise-level performance, multi-platform support — committed to being the best bulk email software.'
     features:
       - title: Native Enterprise Quality
-        details: Uses MySQL and Redis, supports multi-user and high concurrency. Supports Windows, Linux, and macOS, and private server deployment.
+        details: Uses PostgreSQL and Redis, supports multi-user and high concurrency. Supports Windows, Linux, and macOS, and private server deployment.
 
       - title: AI Support
         details: Supports configuring AI models to generate and optimize email body content, generate subject lines, and auto-add variables.

@@ -63,6 +63,8 @@ If you cannot download, create `~/apps/uzon-mail/docker-compose.yml` and paste t
 
 You can modify database credentials and exposed ports in the compose file as needed.
 
+If you already have a PostgreSQL database, remove the `uzon-postgres` service and `uzon_postgres_network` network from `docker-compose.yml`, then set `PostgreSql.Host`, `PostgreSql.Port`, `PostgreSql.User`, `PostgreSql.Password`, and `PostgreSql.Database` to your existing database connection details. Make sure the `uzon-mail` container can reach that database from its Docker network.
+
 ### Generate configuration
 
 Create mounted configuration files externally. Some parameters must be customized for security.
@@ -91,15 +93,14 @@ echo '{
       "Enable": false,
       "DataSource": "data/db/uzon-mail.db"
     },
-    "MySql": {
+    "PostgreSql": {
       "Enable": true,
-      "Version": "8.4.0.0",
-      "Host": "uzon-mysql",
-      "Port": 3306,
+      "Host": "uzon-postgres",
+      "Port": 5432,
       "Database": "uzon-mail",
       "User": "uzon-mail",
       "Password": "uzon-mail",
-      "Description": "MySQL is preferred for production"
+      "Description": "PostgreSQL is preferred for production"
     },
     "Redis": {
       "Enable": true,
@@ -139,7 +140,7 @@ If `curl http://localhost:22345` fails, check logs:
 docker logs uzon-mail
 ```
 
-If logs show MySQL connection errors (e.g. Unable to connect to any of the specified MySQL hosts) then MySQL may not have finished starting. Try `docker restart uzon-mail` after MySQL is ready.
+If logs show PostgreSQL connection errors, the database may still be starting, or the Host, port, username, password, or database name may be incorrect for an existing PostgreSQL service. Check the built-in database with `docker logs uzon-postgres`, then run `docker restart uzon-mail` after PostgreSQL is ready.
 
 Successful startup shows the web UI content.
 

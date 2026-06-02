@@ -3,7 +3,7 @@
 namespace UZonMail.DB.PostgreSql
 {
     /// <summary>
-    /// mysql 连接信息
+    /// PostgreSql 连接信息
     /// </summary>
     public class PostgreSqlConnectionConfig : IConnectionString
     {

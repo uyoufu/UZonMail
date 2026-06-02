@@ -4,27 +4,25 @@
 #
 
 services:
-  # mysql 服务
-  uzon-mysql:
-    container_name: uzon-mysql
-    image: mysql:8.4.0
+  # PostgreSQL 服务
+  uzon-postgres:
+    container_name: uzon-postgres
+    image: postgres:18-alpine
     # [可选]对外暴露端口，方便外部管理
     # 本地端口:容器端口
-    # 若本机 3306 已使用，可更换成其它端口，例如 23306:3306
+    # 若本机 5432 已使用，可更换成其它端口，例如 25432:5432
     # ports:
-    #   - 3306:3306
+    #   - 5432:5432
     environment:
-      MYSQL_ROOT_PASSWORD: mysqlRoot3306 # root 账号的密码
-      MYSQL_DATABASE: uzon-mail # 数据库名
-      MYSQL_USER: uzon-mail # 数据库用户名
-      MYSQL_PASSWORD: uzon-mail # 数据库密码
+      POSTGRES_DB: uzon-mail # 数据库名
+      POSTGRES_USER: uzon-mail # 数据库用户名
+      POSTGRES_PASSWORD: uzon-mail # 数据库密码
     volumes:
-      - ./data/mysql/data:/var/lib/mysql # 数据库数据挂载，防止容器重构后数据丢失
+      - ./data/postgresql/data:/var/lib/postgresql/data # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     # 连接到 uzonmail 主程序网络
     networks:
-      - uzon_mysql_network
+      - uzon_postgres_network
 
   # redis 缓存, 若要启用 redis 服务，请取消下面的注释
   uzon-redis:
@@ -47,20 +45,22 @@ services:
     image: gmxgalens/uzon-mail:latest
     ports:
       - 22345:22345
-    volumes:
-      - ./data/appsettings.Production.json:/app/appsettings.Production.json # 生产环境配置
+    volumes:      
       - ./data/data:/app/data # 数据存储
-      # - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
+    # - ./data/appsettings.Production.json:/app/appsettings.Production.json:ro # 生产环境配置
+    # - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置, 可选
     networks:
       - uzonmail_network
-      - uzon_mysql_network
+      - uzon_postgres_network
       - uzon_redis_network
     command: [ "dotnet", "UZonMailService.dll" ]
     depends_on:
-      - uzon-mysql
-      - uzon-redis
+      uzon-postgres:
+        condition: service_started
+      uzon-redis:
+        condition: service_started
 
 networks:
-  uzon_mysql_network:
+  uzon_postgres_network:
   uzon_redis_network:
   uzonmail_network:

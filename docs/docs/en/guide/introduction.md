@@ -80,7 +80,7 @@ Online demo: [https://maildemo.uzoncloud.com:2234/](https://maildemo.uzoncloud.c
 
 14. **Enterprise-grade by design**
 
-    Designed from the ground up for enterprise use, UzonMail uses MySQL and Redis, supports multi-user and high concurrency, and runs on Windows, Linux, and macOS with server deployment support.
+    Designed from the ground up for enterprise use, UzonMail uses PostgreSQL and Redis, supports multi-user and high concurrency, and runs on Windows, Linux, and macOS with server deployment support.
 
 ## Main Advantages
 

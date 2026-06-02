@@ -10,8 +10,8 @@ namespace UZonMail.DB.SQL
         private static readonly ILog _logger = LogManager.GetLogger(typeof(UseSqlExtension));
 
         /// <summary>
-        /// 添加数据库上下文，优先使用 mysql
-        /// 同时将 PostgreSql 或 MySqlContext 或 SqLiteContext 绑定到 SqlContext
+        /// 添加数据库上下文，优先使用 PostgreSql
+        /// 同时将 PostgreSqlContext 或 SqLiteContext 绑定到 SqlContext
         /// </summary>
         /// <param name="services"></param>
         /// <param name="configuration"></param>
@@ -60,7 +60,7 @@ namespace UZonMail.DB.SQL
         )
             where T : DbContext
         {
-            // 优先使用 mysql
+            // 优先使用 PostgreSql
             var connectionConfig = new PostgreSqlConnectionConfig();
             configuration.GetSection("Database:PostgreSql").Bind(connectionConfig);
             if (connectionConfig.Enable)

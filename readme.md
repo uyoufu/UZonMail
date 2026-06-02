@@ -87,7 +87,7 @@ Common application scenarios include:
 
 14. **Native enterprise-grade quality**
 
-    Developed from the start with enterprise-level positioning, using MySQL and Redis databases, supporting multi-user, high concurrency. Compatible with Windows, Linux, macOS, supports server deployment.
+    Developed from the start with enterprise-level positioning, using PostgreSQL and Redis databases, supporting multi-user, high concurrency. Compatible with Windows, Linux, macOS, supports server deployment.
 
 ## 👍 Main Advantages
 
