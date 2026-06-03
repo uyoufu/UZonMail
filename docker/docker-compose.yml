@@ -8,6 +8,9 @@ services:
   uzon-postgres:
     container_name: ${POSTGRES_CONTAINER_NAME}
     image: ${POSTGRES_IMAGE}
+    # 通过 .env 中的 COMPOSE_PROFILES 控制是否启动内置 PostgreSQL
+    profiles:
+      - postgresql
     # [可选]对外暴露端口，方便外部管理
     # 本地端口:容器端口
     # 若本机 5432 已使用，可更换成其它端口，例如 25432:5432
@@ -18,7 +21,7 @@ services:
       POSTGRES_USER: ${Database__PostgreSql__User} # 数据库用户名
       POSTGRES_PASSWORD: ${Database__PostgreSql__Password} # 数据库密码
     volumes:
-      - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data # 数据库数据挂载，防止容器重构后数据丢失
+      - ${POSTGRES_DATA_DIR}:/var/lib/postgresql # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${Database__PostgreSql__User} -d ${Database__PostgreSql__Database}" ]
@@ -34,6 +37,9 @@ services:
   uzon-redis:
     container_name: ${REDIS_CONTAINER_NAME}
     image: ${REDIS_IMAGE}
+    # 通过 .env 中的 COMPOSE_PROFILES 控制是否启动内置 Redis
+    profiles:
+      - redis
     # [可选]对外暴露端口，方便外部管理
     # 本地端口:容器端口
     # 若本机 6379 已使用，可更换成其它端口，例如 26379:6379
@@ -70,8 +76,12 @@ services:
     depends_on:
       uzon-postgres:
         condition: service_healthy
+        # 允许用户关闭内置 PostgreSQL 后连接外部数据库
+        required: false
       uzon-redis:
         condition: service_healthy
+        # 允许用户关闭内置 Redis 后使用内存缓存或外部 Redis
+        required: false
 
 networks:
   uzon_postgres_network:

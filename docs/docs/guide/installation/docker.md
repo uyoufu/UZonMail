@@ -51,7 +51,12 @@ cd apps/uzon-mail
 
 从 github 上下载 [.env](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env) 到当前目录
 
+若无法下载，请手动创建文件 `~/apps/uzon-mail/.env`，然后将上述 `.env` 内容复制进去。
 
+``` bash
+# 确保在 ~/apps/uzon-mail 目录中，然后执行下列命令
+wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env
+```
 
 ### 下载 docker-compose 文件
 
@@ -66,73 +71,31 @@ wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/
 
 上述命令将会下载完整的 docker-compose 文件，具体的配置项说明请见文件内容。
 
-在文件里，你可以修改数据库的连接密码、可以将端口暴露到宿主机中进行管理。
+### 修改 .env 配置
 
-若已经有可用的 PostgreSQL 数据库，可以删除 `docker-compose.yml` 中的 `uzon-postgres` 服务和 `uzon_postgres_network` 网络，并在后端配置中把 `PostgreSql.Host`、`PostgreSql.Port`、`PostgreSql.User`、`PostgreSql.Password` 和 `PostgreSql.Database` 改为已有数据库的连接信息。请确保 `uzon-mail` 容器所在网络能够访问该数据库。
+Docker 部署默认通过 `.env` 注入后端配置，无需再生成 `appsettings.Production.json`。为了使用安全，启动前至少需要检查以下配置：
 
-### 生成配置
+- 将 `BaseUrl` 改为实际访问地址，例如 `https://mail.example.com`。
+- 修改 `TokenParams__Secret`，防止其他人伪造登录状态。
+- 修改 `User__AdminUser__Password`，该配置只在首次初始化管理员时生效。
+- 如需修改访问端口，保持 `UZON_MAIL_HOST_PORT` 与 `BaseUrl` 中的端口一致。
 
-为了方便对服务器进行配置，需要在外部创建相应的挂载文件。为了使用安全，有一些参数必须在配置进行修改。
+`.env` 中的 `COMPOSE_PROFILES` 用于控制是否启动内置服务：
 
-``` bash
-# 此处不再需要前端配置
+``` env
+# 默认同时启动内置 PostgreSQL 和 Redis
+COMPOSE_PROFILES=postgresql,redis
 
-# 生成后端配置文件
-# 该文件中有一些初始化配置项，建议跳转到 [后端配置] 章节阅读，添加必要项配置，然后继续
-# 当然也可以继续配置，后续再修改
-echo '{
-  // 改为实际的
-  "BaseUrl": "http://localhost:22345",
-  // Secret 必须修改，防止被其它人伪装登陆
-  "TokenParams": {
-    "Secret": "640807f8983090349cca90b9640807f8983090349cca90b9",
-    "Issuer": "127.0.0.1",
-    "Audience": "UZonMail",
-    "Expire": 86400000
-  },
-  "User": {
-    // 每个用户在服务器的文件缓存位置，可以不修改
-    "CachePath": "users/{0}",
-    // 管理员用户名和密码, 只在第一次启动时初始化
-    "AdminUser": {
-      "UserId": "admin",
-      "Password": "admin1234",
-      "Avatar": ""
-    },
-    // 新建用户时的默认密码
-    "DefaultPassword": "uzonmail123"
-  },
-  // 数据库设置
-  // 将 Enable 设置为 true, 启用对应的数据库
-  // 程序优先使用 PostgreSQL
-  "Database": {
-    // 免安装的数据库，系统默认使用这个
-    "SqLite": {
-      "Enable": false,
-      "DataSource": "data/db/uzon-mail.db"
-    },
-    // 对于高并发场景，建议使用 PostgreSQL
-    "PostgreSql": {
-      "Enable": true,
-      "Host": "uzon-postgres",
-      "Port": 5432,
-      "Database": "uzon-mail",
-      "User": "uzon-mail",
-      "Password": "uzon-mail",
-      "Description": "程序会优先使用 PostgreSQL"
-    },
-    // 缓存数据库
-    // 默认使用内存缓存
-    "Redis": {
-      "Enable": true,
-      "Host": "uzon-redis",
-      "Port": 6379,
-      "Password": "",
-      "Database": 0
-    }
-  },
-}' > data/appsettings.Production.json
+# 只启动内置 PostgreSQL，不启动内置 Redis
+COMPOSE_PROFILES=postgresql
+
+# 只启动 uzon-mail 主程序，PostgreSQL 和 Redis 都使用外部服务或关闭
+COMPOSE_PROFILES=
 ```
+
+若已经有可用的 PostgreSQL 数据库，将 `COMPOSE_PROFILES` 中的 `postgresql` 删除，并把 `.env` 中 `Database__PostgreSql__Host`、`Database__PostgreSql__Port`、`Database__PostgreSql__Database`、`Database__PostgreSql__User` 和 `Database__PostgreSql__Password` 改为已有数据库的连接信息。请确保 `uzon-mail` 容器所在网络能够访问该数据库。
+
+若不需要内置 Redis，将 `COMPOSE_PROFILES` 中的 `redis` 删除。若完全不使用 Redis，请把 `Database__Redis__Enable=false`；若使用外部 Redis，请继续保持 `Database__Redis__Enable=true`，并修改 `Database__Redis__Host`、`Database__Redis__Port`、`Database__Redis__Password` 和 `Database__Redis__Database`。
 
 ### 启动
 
@@ -186,6 +149,52 @@ sudo ufw allow 22345/tcp
 
 ## 修改配置
 
+修改配置有两种方式：
+
+1. 通过 `.env` 文件修改配置
+2. 将容器中的 `appsettings.Production.json` 文件挂载到主机，修改主机上的文件，然后重启容器
+
+### .env 文件方式
+
+Docker Compose 会把 `.env` 注入到 `uzon-mail` 容器中，后端会按 ASP.NET Core 环境变量规则读取这些配置。需要覆盖后端设置时，先在默认配置中找到对应字段，再把 JSON 路径转换成 `.env` 变量名。
+
+命名方式如下：
+
+- 根级配置直接使用字段名，例如 `BaseUrl=http://localhost:22345`。
+- 嵌套配置用两个下划线 `__` 连接，例如 `TokenParams.Secret` 写成 `TokenParams__Secret`。
+- 多级嵌套继续按层级连接，例如 `Database.PostgreSql.Host` 写成 `Database__PostgreSql__Host`。
+- 数组配置用从 `0` 开始的索引，例如 `Cors[0]` 写成 `Cors__0`，`Unsubscribe.Headers[0].Domain` 写成 `Unsubscribe__Headers__0__Domain`。
+
+示例如下：
+
+``` env
+# 根级配置
+BaseUrl=https://mail.example.com
+
+# 嵌套配置
+TokenParams__Secret=replace-with-a-long-random-secret
+Database__PostgreSql__Host=uzon-postgres
+
+# 数组配置
+Cors__0=https://mail.example.com
+Unsubscribe__Headers__0__Domain=gmail.com
+Unsubscribe__Headers__0__Header=RFC8058
+```
+
+`.env` 中也包含一些 Docker Compose 自身使用的变量，例如 `COMPOSE_PROFILES`、`UZON_MAIL_HOST_PORT`、`UZON_MAIL_IMAGE`。这些变量用于控制容器启动、镜像和端口，不属于后端 `appsettings.json` 的配置路径。
+
+需要查看所有可覆盖的后端设置时，可以参考默认配置文件：
+
+<https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/backend-src/UZonMailService/appsettings.json>
+
+修改 `.env` 后，在 `docker-compose.yml` 所在目录重新启动容器即可生效：
+
+``` bash
+docker compose up -d
+```
+
+### appsettings.Production.json 文件方式
+
 到这一步，Docker 服务就创建完成了，由于是服务器部署，您可能会将其代理到公网，因此还有一些必要的配置进行修改，请继续阅读 [后端配置](/guide/setup/) 章节。
 
 ::: warning
@@ -206,11 +215,34 @@ sudo ufw allow 22345/tcp
 
 ### .env 文件
 
-可以在 `.env` 文件中配置环境变量，然后在 `docker-compose.yml` 中使用 `${变量名}` 的方式引用，例如：
+可以在 `.env` 文件中配置环境变量，然后在 `docker-compose.yml` 中使用形如 &#36;{变量名} 的方式引用。常用配置如下：
 
 ``` env
-# 数据库连接配置
-POSTGRES_DB=uzon-mail
+# 内置服务开关：默认启动 PostgreSQL 和 Redis；删除对应名称即可关闭内置服务
+COMPOSE_PROFILES=postgresql,redis
+
+# 后端访问地址与监听端口
+BaseUrl=http://localhost:22345
+UZON_MAIL_HOST_PORT=22345
+Http__Port=22345
+
+# Token 配置，公网部署前必须修改 Secret
+TokenParams__Secret=B81806DA00600865988B2A305B91C47825750972A0A7159CCDC63A9838248D77
+
+# PostgreSQL 配置，同时用于初始化内置 PostgreSQL 容器
+Database__PostgreSql__Enable=true
+Database__PostgreSql__Host=uzon-postgres
+Database__PostgreSql__Port=5432
+Database__PostgreSql__Database=uzon-mail
+Database__PostgreSql__User=uzon-mail
+Database__PostgreSql__Password=uzon-mail
+
+# Redis 配置，内置 Redis 默认不设置密码
+Database__Redis__Enable=true
+Database__Redis__Host=uzon-redis
+Database__Redis__Port=6379
+Database__Redis__Password=
+Database__Redis__Database=0
 ```
 
 ### docker-compose 文件
@@ -226,22 +258,25 @@ POSTGRES_DB=uzon-mail
 services:
   # PostgreSQL 服务
   uzon-postgres:
-    container_name: uzon-postgres
-    image: postgres:16-alpine
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    image: ${POSTGRES_IMAGE}
+    # 通过 .env 中的 COMPOSE_PROFILES 控制是否启动内置 PostgreSQL
+    profiles:
+      - postgresql
     # [可选]对外暴露端口，方便外部管理
     # 本地端口:容器端口
     # 若本机 5432 已使用，可更换成其它端口，例如 25432:5432
     # ports:
-    #   - 5432:5432
+    #   - ${POSTGRES_HOST_PORT}:5432
     environment:
-      POSTGRES_DB: uzon-mail # 数据库名
-      POSTGRES_USER: uzon-mail # 数据库用户名
-      POSTGRES_PASSWORD: uzon-mail # 数据库密码
+      POSTGRES_DB: ${Database__PostgreSql__Database} # 数据库名
+      POSTGRES_USER: ${Database__PostgreSql__User} # 数据库用户名
+      POSTGRES_PASSWORD: ${Database__PostgreSql__Password} # 数据库密码
     volumes:
-      - ./data/postgresql/data:/var/lib/postgresql/data # 数据库数据挂载，防止容器重构后数据丢失
+      - ${POSTGRES_DATA_DIR}:/var/lib/postgresql # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U uzon-mail -d uzon-mail" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${Database__PostgreSql__User} -d ${Database__PostgreSql__Database}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -250,31 +285,41 @@ services:
     networks:
       - uzon_postgres_network
 
-  # redis 缓存, 若要启用 redis 服务，请取消下面的注释
+  # redis 缓存
   uzon-redis:
-    container_name: uzon-redis
-    image: redis:latest
+    container_name: ${REDIS_CONTAINER_NAME}
+    image: ${REDIS_IMAGE}
+    # 通过 .env 中的 COMPOSE_PROFILES 控制是否启动内置 Redis
+    profiles:
+      - redis
     # [可选]对外暴露端口，方便外部管理
     # 本地端口:容器端口
-    # 若本机 6379 已使用，可更换成其它端口，例如 26379:3306
+    # 若本机 6379 已使用，可更换成其它端口，例如 26379:6379
     # ports:
-    #   - 6379:6379
+    #   - ${REDIS_HOST_PORT}:6379
     volumes:
-      - ./data/redis/data:/data # 数据库数据挂载，防止容器重构后数据丢失
+      - ${REDIS_DATA_DIR}:/data # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     networks:
       - uzon_redis_network
 
   # 程序主体
   uzon-mail:
-    container_name: uzon-mail
-    image: gmxgalens/uzon-mail:latest
+    container_name: ${UZON_MAIL_CONTAINER_NAME}
+    image: ${UZON_MAIL_IMAGE}
+    env_file:
+      - .env # 注入 ASP.NET Core 层级配置
     ports:
-      - 22345:22345
+      - ${UZON_MAIL_HOST_PORT}:${Http__Port}
     volumes:
-      - ./data/appsettings.Production.json:/app/appsettings.Production.json # 生产环境配置
-      - ./data/data:/app/data # 数据存储
-      - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
+      - ${UZON_MAIL_DATA_DIR}:/app/data # 数据存储
+    # - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置, 可选
     networks:
       - uzonmail_network
       - uzon_postgres_network
@@ -283,8 +328,12 @@ services:
     depends_on:
       uzon-postgres:
         condition: service_healthy
+        # 允许用户关闭内置 PostgreSQL 后连接外部数据库
+        required: false
       uzon-redis:
-        condition: service_started
+        condition: service_healthy
+        # 允许用户关闭内置 Redis 后使用内存缓存或外部 Redis
+        required: false
 
 networks:
   uzon_postgres_network:
