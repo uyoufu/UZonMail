@@ -20,7 +20,7 @@ Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
 // 生成默认的配置文件
 var productConfig = "appsettings.Production.json";
-if (!File.Exists(productConfig))
+if (File.Exists(productConfig) && string.IsNullOrWhiteSpace(File.ReadAllText(productConfig)))
 {
     File.WriteAllText(productConfig, "{\n}");
 }
