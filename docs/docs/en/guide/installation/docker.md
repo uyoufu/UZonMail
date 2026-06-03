@@ -56,7 +56,7 @@ cd apps/uzon-mail
 Download the `docker-compose.yml` from GitHub:
 
 ``` bash
-wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts/docker-compose.yml
+wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/docker-compose.yml
 ```
 
 If you cannot download, create `~/apps/uzon-mail/docker-compose.yml` and paste the content from the repository.

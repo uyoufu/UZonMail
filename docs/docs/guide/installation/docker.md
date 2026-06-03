@@ -31,85 +31,6 @@ permalink: /guide/installation/docker
 ssh username@ip
 ```
 
-## docker-compose
-
-`docker-compose.yml` 文件如下，下面配置时会用到，此时无须阅读，可直接跳转到下一节：
-
-``` yaml
-# 
-# 说明
-# 该文件是 uzon-mail 的 docker-compose 配置文件，使用时，在当前目录执行 docker-compose up -d 命令即可启动程序
-#
-
-services:
-  # PostgreSQL 服务
-  uzon-postgres:
-    container_name: uzon-postgres
-    image: postgres:16-alpine
-    # [可选]对外暴露端口，方便外部管理
-    # 本地端口:容器端口
-    # 若本机 5432 已使用，可更换成其它端口，例如 25432:5432
-    # ports:
-    #   - 5432:5432
-    environment:
-      POSTGRES_DB: uzon-mail # 数据库名
-      POSTGRES_USER: uzon-mail # 数据库用户名
-      POSTGRES_PASSWORD: uzon-mail # 数据库密码
-    volumes:
-      - ./data/postgresql/data:/var/lib/postgresql/data # 数据库数据挂载，防止容器重构后数据丢失
-    restart: always
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U uzon-mail -d uzon-mail" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    # 连接到 uzonmail 主程序网络
-    networks:
-      - uzon_postgres_network
-
-  # redis 缓存, 若要启用 redis 服务，请取消下面的注释
-  uzon-redis:
-    container_name: uzon-redis
-    image: redis:latest
-    # [可选]对外暴露端口，方便外部管理
-    # 本地端口:容器端口
-    # 若本机 6379 已使用，可更换成其它端口，例如 26379:3306
-    # ports:
-    #   - 6379:6379
-    volumes:
-      - ./data/redis/data:/data # 数据库数据挂载，防止容器重构后数据丢失
-    restart: always
-    networks:
-      - uzon_redis_network
-
-  # 程序主体
-  uzon-mail:
-    container_name: uzon-mail
-    image: gmxgalens/uzon-mail:latest
-    ports:
-      - 22345:22345
-    volumes:
-      - ./data/appsettings.Production.json:/app/appsettings.Production.json # 生产环境配置
-      - ./data/data:/app/data # 数据存储
-      - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
-    networks:
-      - uzonmail_network
-      - uzon_postgres_network
-      - uzon_redis_network
-    command: [ "dotnet", "UZonMailService.dll" ]
-    depends_on:
-      uzon-postgres:
-        condition: service_healthy
-      uzon-redis:
-        condition: service_started
-
-networks:
-  uzon_postgres_network:
-  uzon_redis_network:
-  uzonmail_network:
-```
-
 ## 安装步骤
 
 ### 创建数据目录
@@ -126,15 +47,21 @@ mkdir -p apps/uzon-mail/data
 cd apps/uzon-mail
 ```
 
+### 下载 .env 配置文件
+
+从 github 上下载 [.env](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env) 到当前目录
+
+
+
 ### 下载 docker-compose 文件
 
-从 github 上下载 [docker-compose.yml](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts/docker-compose.yml) 到当前目录
+从 github 上下载 [docker-compose.yml](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/docker-compose.yml) 到当前目录
 
 若无法下载，请手动创建文件 ~/apps/uzon-mail/docker-compose.yml，然后将上述 docker-compose 内容复制进去
 
 ``` bash
 # 确保在 ~/apps/uzon-mail 目录中，然后执行下列命令
-wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts/docker-compose.yml
+wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/docker-compose.yml
 ```
 
 上述命令将会下载完整的 docker-compose 文件，具体的配置项说明请见文件内容。
@@ -272,3 +199,95 @@ sudo ufw allow 22345/tcp
 ## 网址访问
 
 访问 `http://your-docker-host-ip:22345` 登陆使用。
+
+## docker 相关文件
+
+此章节仅在需要进行深度配置时阅读
+
+### .env 文件
+
+可以在 `.env` 文件中配置环境变量，然后在 `docker-compose.yml` 中使用 `${变量名}` 的方式引用，例如：
+
+``` env
+# 数据库连接配置
+POSTGRES_DB=uzon-mail
+```
+
+### docker-compose 文件
+
+`docker-compose.yml` 文件如下，下面配置时会用到，此时无须阅读，可直接跳转到下一节：
+
+``` yaml
+# 
+# 说明
+# 该文件是 uzon-mail 的 docker-compose 配置文件，使用时，在当前目录执行 docker-compose up -d 命令即可启动程序
+#
+
+services:
+  # PostgreSQL 服务
+  uzon-postgres:
+    container_name: uzon-postgres
+    image: postgres:16-alpine
+    # [可选]对外暴露端口，方便外部管理
+    # 本地端口:容器端口
+    # 若本机 5432 已使用，可更换成其它端口，例如 25432:5432
+    # ports:
+    #   - 5432:5432
+    environment:
+      POSTGRES_DB: uzon-mail # 数据库名
+      POSTGRES_USER: uzon-mail # 数据库用户名
+      POSTGRES_PASSWORD: uzon-mail # 数据库密码
+    volumes:
+      - ./data/postgresql/data:/var/lib/postgresql/data # 数据库数据挂载，防止容器重构后数据丢失
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U uzon-mail -d uzon-mail" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # 连接到 uzonmail 主程序网络
+    networks:
+      - uzon_postgres_network
+
+  # redis 缓存, 若要启用 redis 服务，请取消下面的注释
+  uzon-redis:
+    container_name: uzon-redis
+    image: redis:latest
+    # [可选]对外暴露端口，方便外部管理
+    # 本地端口:容器端口
+    # 若本机 6379 已使用，可更换成其它端口，例如 26379:3306
+    # ports:
+    #   - 6379:6379
+    volumes:
+      - ./data/redis/data:/data # 数据库数据挂载，防止容器重构后数据丢失
+    restart: always
+    networks:
+      - uzon_redis_network
+
+  # 程序主体
+  uzon-mail:
+    container_name: uzon-mail
+    image: gmxgalens/uzon-mail:latest
+    ports:
+      - 22345:22345
+    volumes:
+      - ./data/appsettings.Production.json:/app/appsettings.Production.json # 生产环境配置
+      - ./data/data:/app/data # 数据存储
+      - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置
+    networks:
+      - uzonmail_network
+      - uzon_postgres_network
+      - uzon_redis_network
+    command: [ "dotnet", "UZonMailService.dll" ]
+    depends_on:
+      uzon-postgres:
+        condition: service_healthy
+      uzon-redis:
+        condition: service_started
+
+networks:
+  uzon_postgres_network:
+  uzon_redis_network:
+  uzonmail_network:
+```
