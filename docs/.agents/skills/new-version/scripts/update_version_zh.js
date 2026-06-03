@@ -27,7 +27,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 目标文件：从脚本位置向上 4 级到工作区根，再进入 docs/
+// 目标文件：从脚本位置向上 4 级到文档项目根，再进入 VitePress 文档目录
 const TARGET_FILE = path.resolve(__dirname, "../../../../docs/downloads.md");
 
 // ── 校验 ──────────────────────────────────────────────────────────────────────
