@@ -167,10 +167,16 @@ New-Item -Path "$serviceDest/data/db" -ItemType Directory  -ErrorAction Silently
 Copy-Item -Path "$serviceSrc/Quartz/quartz-sqlite.sqlite3" -Destination "$serviceDest/data/db/quartz-sqlite.sqlite3" -Force
 Write-Host "后端 UZonMailService 编译完成!" -ForegroundColor Green
 
-# 复制 scripts 目录中的 Dockerfile 和 docker-compose.yml 到编译目录
-$scriptFiles = @("Dockerfile", "docker-compose.yml")
-foreach ($file in $scriptFiles) {
-    Copy-Item -Path "$gitRoot/scripts/$file" -Destination $mainService -Force
+# 复制 Docker 相关文件到编译目录
+$dockerFiles = @(
+    @{ Source = "scripts/Dockerfile"; Destination = "Dockerfile" },
+    @{ Source = "docker/docker-compose.yml"; Destination = "docker-compose.yml" },
+    @{ Source = "docker/.env"; Destination = ".env" }
+)
+foreach ($file in $dockerFiles) {
+    $source = Join-Path -Path $gitRoot -ChildPath $file.Source
+    $destination = Join-Path -Path $mainService -ChildPath $file.Destination
+    Copy-Item -Path $source -Destination $destination -Force
 }
 
 # 添加 windows 服务
@@ -398,10 +404,14 @@ if ($platform -eq "linux") {
 # linux 增加 docker 启动
 if ($platform -eq "linux") {
     # 向压缩包添加启动文件: docker-deploy.sh
-    $deployFiles = @('docker-deploy.sh', 'docker-compose.yml')
+    $deployFiles = @(
+        "scripts/docker-deploy.sh",
+        "docker/docker-compose.yml",
+        "docker/.env"
+    )
     foreach ($file in $deployFiles) {
-        $dockerDeploy = Join-Path -Path $gitRoot -ChildPath "scripts/$file"
-        7z a -tzip $zipDest $dockerDeploy
+        $deployFile = Join-Path -Path $gitRoot -ChildPath $file
+        7z a -tzip $zipDest $deployFile
     }
 
     # 向压缩包中增加安装脚本
