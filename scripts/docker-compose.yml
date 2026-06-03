@@ -18,7 +18,7 @@ services:
       POSTGRES_USER: uzon-mail # 数据库用户名
       POSTGRES_PASSWORD: uzon-mail # 数据库密码
     volumes:
-      - ./data/postgresql/data:/var/lib/postgresql/data # 数据库数据挂载，防止容器重构后数据丢失
+      - ./data/postgresql:/var/lib/postgresql # 数据库数据挂载，防止容器重构后数据丢失
     restart: always
     # 连接到 uzonmail 主程序网络
     networks:
@@ -47,7 +47,8 @@ services:
       - 22345:22345
     volumes:      
       - ./data/data:/app/data # 数据存储
-    # - ./data/appsettings.Production.json:/app/appsettings.Production.json:ro # 生产环境配置
+    # 生产环境配置, 若使用 postgres 数据库，应修改 appsettings.Production.json 中的数据库连接字符串
+      - ./data/appsettings.Production.json:/app/appsettings.Production.json
     # - ./data/app.config.json:/app/wwwroot/app.config.json # 前端配置, 可选
     networks:
       - uzonmail_network
