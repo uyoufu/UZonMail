@@ -51,68 +51,54 @@ mkdir -p apps/uzon-mail/data
 cd apps/uzon-mail
 ```
 
+### Download .env file
+
+Download [.env](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env) from GitHub to the current directory.
+
+If the download fails, manually create `~/apps/uzon-mail/.env` and paste the `.env` content from the link above.
+
+``` bash
+# Make sure you are in ~/apps/uzon-mail, then run:
+wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env
+```
+
 ### Download docker-compose file
 
 Download the `docker-compose.yml` from GitHub:
 
 ``` bash
-wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/scripts/docker-compose.yml
+wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/docker-compose.yml
 ```
 
 If you cannot download, create `~/apps/uzon-mail/docker-compose.yml` and paste the content from the repository.
 
-You can modify database credentials and exposed ports in the compose file as needed.
+The command downloads the complete Docker Compose file. See the file content for detailed configuration comments.
 
-### Generate configuration
+### Modify .env configuration
 
-Create mounted configuration files externally. Some parameters must be customized for security.
+Docker deployment injects backend configuration through `.env` by default, so you do not need to generate `appsettings.Production.json`. For security, check at least these settings before startup:
 
-``` bash
-echo '{
-  // replace with your values
-  "BaseUrl": "http://localhost:22345",
-  "TokenParams": {
-    "Secret": "640807f8983090349cca90b9640807f8983090349cca90b9",
-    "Issuer": "127.0.0.1",
-    "Audience": "UZonMail",
-    "Expire": 86400000
-  },
-  "User": {
-    "CachePath": "users/{0}",
-    "AdminUser": {
-      "UserId": "admin",
-      "Password": "admin1234",
-      "Avatar": ""
-    },
-    "DefaultPassword": "uzonmail123"
-  },
-  "Database": {
-    "SqLite": {
-      "Enable": false,
-      "DataSource": "data/db/uzon-mail.db"
-    },
-    "MySql": {
-      "Enable": true,
-      "Version": "8.4.0.0",
-      "Host": "uzon-mysql",
-      "Port": 3306,
-      "Database": "uzon-mail",
-      "User": "uzon-mail",
-      "Password": "uzon-mail",
-      "Description": "MySQL is preferred for production"
-    },
-    "Redis": {
-      "Enable": true,
-      "Host": "uzon-redis",
-      "Port": 6379,
-      "Password": "",
-      "Database": 0
-    }
-  }
-}' > data/appsettings.Production.json
+- Change `BaseUrl` to the actual access URL, such as `https://mail.example.com`.
+- Change `TokenParams__Secret` to prevent forged login tokens.
+- Change `User__AdminUser__Password`. This value only takes effect when the admin user is initialized for the first time.
+- If you change the exposed port, keep `UZON_MAIL_HOST_PORT` consistent with the port in `BaseUrl`.
+
+`COMPOSE_PROFILES` in `.env` controls whether built-in services are started:
+
+``` env
+# Start both built-in PostgreSQL and Redis
+COMPOSE_PROFILES=postgresql,redis
+
+# Start built-in PostgreSQL only, without built-in Redis
+COMPOSE_PROFILES=postgresql
+
+# Start only the uzon-mail app; PostgreSQL and Redis use external services or are disabled
+COMPOSE_PROFILES=
 ```
 
-Refer to the Backend Configuration section for additional settings.
+If you already have a PostgreSQL database, remove `postgresql` from `COMPOSE_PROFILES`, then set `Database__PostgreSql__Host`, `Database__PostgreSql__Port`, `Database__PostgreSql__Database`, `Database__PostgreSql__User`, and `Database__PostgreSql__Password` in `.env` to the existing database connection details. Make sure the `uzon-mail` container can reach that database from its Docker network.
+
+If you do not need the built-in Redis service, remove `redis` from `COMPOSE_PROFILES`. If you do not use Redis at all, set `Database__Redis__Enable=false`. If you use an external Redis service, keep `Database__Redis__Enable=true`, then update `Database__Redis__Host`, `Database__Redis__Port`, `Database__Redis__Password`, and `Database__Redis__Database`.
 
 ### Start
 
@@ -139,7 +125,7 @@ If `curl http://localhost:22345` fails, check logs:
 docker logs uzon-mail
 ```
 
-If logs show MySQL connection errors (e.g. Unable to connect to any of the specified MySQL hosts) then MySQL may not have finished starting. Try `docker restart uzon-mail` after MySQL is ready.
+If logs show PostgreSQL connection errors, the database may still be starting, or the Host, port, username, password, or database name may be incorrect for an existing PostgreSQL service. Check the built-in database with `docker logs uzon-postgres`, then run `docker restart uzon-mail` after PostgreSQL is ready.
 
 Successful startup shows the web UI content.
 
@@ -152,6 +138,54 @@ sudo ufw allow 22345/tcp
 ```
 
 ## Modify configuration
+
+There are two ways to modify configuration:
+
+1. Modify configuration through the `.env` file.
+2. Mount `appsettings.Production.json` from the container to the host, modify the host file, then restart the container.
+
+### .env file method
+
+Docker Compose injects `.env` into the `uzon-mail` container, and the backend reads these values using ASP.NET Core environment variable rules. To override a backend setting, find the field in the default configuration and convert the JSON path to a `.env` variable name.
+
+The naming rules are:
+
+- Root-level settings use the field name directly, such as `BaseUrl=http://localhost:22345`.
+- Nested settings use double underscores `__`, such as `TokenParams.Secret` as `TokenParams__Secret`.
+- Deeper paths continue joining each level, such as `Database.PostgreSql.Host` as `Database__PostgreSql__Host`.
+- Array settings use zero-based indexes, such as `Cors[0]` as `Cors__0`, and `Unsubscribe.Headers[0].Domain` as `Unsubscribe__Headers__0__Domain`.
+
+Examples:
+
+``` env
+# Root-level setting
+BaseUrl=https://mail.example.com
+
+# Nested settings
+TokenParams__Secret=replace-with-a-long-random-secret
+Database__PostgreSql__Host=uzon-postgres
+
+# Array settings
+Cors__0=https://mail.example.com
+Unsubscribe__Headers__0__Domain=gmail.com
+Unsubscribe__Headers__0__Header=RFC8058
+```
+
+The `.env` file also contains variables used by Docker Compose itself, such as `COMPOSE_PROFILES`, `UZON_MAIL_HOST_PORT`, and `UZON_MAIL_IMAGE`. These control container startup, image names, and exposed ports. They are not backend `appsettings.json` paths.
+
+To view all backend settings that can be overridden, see the default configuration file:
+
+<https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/backend-src/UZonMailService/appsettings.json>
+
+After modifying `.env`, restart containers from the directory containing `docker-compose.yml`:
+
+``` bash
+docker compose up -d
+```
+
+### appsettings.Production.json file method
+
+If you prefer a mounted production configuration file, mount `appsettings.Production.json` to the host, modify the host file, and restart the container. For Docker deployments, the `.env` method is the default and is usually simpler.
 
 For server deployments you may proxy the service to the public Internet. Make related configuration changes in the [Backend Configuration](/guide/setup/) section.
 

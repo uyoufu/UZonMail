@@ -82,7 +82,7 @@ permalink: /guide/introduction
 
 14. **原生企业级品质**
 
-    开发之初便立足于企业级定位，采用 mysql、redis 数据库，支持多用户，大并发。支持Windows、Linux、MacOS等操作系统, 支持服务器部署。
+    开发之初便立足于企业级定位，采用 PostgreSQL、Redis 数据库，支持多用户，大并发。支持Windows、Linux、MacOS等操作系统, 支持服务器部署。
 
 ## 主要优势
 

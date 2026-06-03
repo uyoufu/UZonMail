@@ -15,19 +15,21 @@ services:
     init: true
     command: [ "sh", "-c", "exec sleep infinity" ]
 
-  mysql:
-    container_name: mysql
-    image: mysql:8.4.0
+  postgres:
+    container_name: postgres
+    image: postgres:16-alpine
     ports:
-      - 3306:3306
+      - 5432:5432
     environment:
-      MYSQL_ROOT_PASSWORD: root3306
-      MYSQL_DATABASE: uzon-mail
-      MYSQL_USER: uzon-mail
-      MYSQL_PASSWORD: uzon-mail
+      POSTGRES_DB: uzon-mail
+      POSTGRES_USER: uzon-mail
+      POSTGRES_PASSWORD: uzon-mail
     volumes:
-      - ./docker/db/data:/var/lib/mysql
-      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./docker/db/sql:/docker-entrypoint-initdb.d
+      - ./docker/postgresql/data:/var/lib/postgresql/data
     restart: always
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci 
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U uzon-mail -d uzon-mail" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s

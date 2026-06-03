@@ -19,7 +19,7 @@ permalink: /guide/setup/backend
 
 系统配置文件为 `appsettings.json`, 但不建议直接修改默认配置，所有默认配置如下：
 
-``` json
+```json
 {
   // 设置日志输出级别
   "Logging": {
@@ -85,23 +85,23 @@ permalink: /guide/setup/backend
 
   // 数据库设置
   // 将 Enable 设置为 true, 启用对应的数据库
-  // 程序优化使用 mysql
+  // 程序优先使用 PostgreSQL
   "Database": {
     // 免安装的数据库，系统默认使用这个
     "SqLite": {
       "Enable": true,
       "DataSource": "data/db/uzon-mail.db"
     },
-    // 对于高并发场景，建议使用 mysql
-    "MySql": {
+    // 对于高并发场景，建议使用 PostgreSQL
+    "PostgreSql": {
       "Enable": false,
-      "Version": "8.4.0.0",
-      "Host": "",
-      "Port": 3306,
+      // 使用 docker-compose 部署时
+      "Host": "uzon-postgres",
+      "Port": 5432,
       "Database": "uzon-mail",
       "User": "uzon-mail",
       "Password": "uzon-mail",
-      "Description": "程序会优先使用 mysql"
+      "Description": "程序会优先使用 PostgreSQL"
     },
     // 缓存数据库
     // 默认使用内存缓存
@@ -139,7 +139,7 @@ permalink: /guide/setup/backend
 
   // 跨域设置
   // 前后端分离、服务器部署时，都需要设置跨域
-  "Cors": [ "http://localhost:9000", "https://desktop.uzonmail.com" ],
+  "Cors": ["http://localhost:9000", "https://desktop.uzonmail.com"],
 
   // 文件存储设置
   "FileStorage": {
@@ -178,7 +178,6 @@ permalink: /guide/setup/backend
     "quartz.jobStore.performSchemaValidation": false
   }
 }
-
 ```
 
 ## 后端必要配置
@@ -189,14 +188,14 @@ permalink: /guide/setup/backend
 
 服务器部署时，此项必须要修改。
 
-``` json
+```json
 {
   "TokenParams": {
     "Secret": "640807f8983090349cca90b9640807f8983090349cca90b9",
     "Issuer": "127.0.0.1",
     "Audience": "UZonMail",
     "Expire": 86400000
-  },
+  }
 }
 ```
 
@@ -208,7 +207,7 @@ permalink: /guide/setup/backend
 若是没有进行该项配置，就启动了后端，可以在启动后修改管理员密码
 :::
 
-``` json
+```json
 {
   "User": {
     // 每个用户在服务器的文件缓存位置
@@ -221,7 +220,7 @@ permalink: /guide/setup/backend
     },
     // 新建用户时的默认密码
     "DefaultPassword": "uzonmail123"
-  },
+  }
 }
 ```
 
@@ -231,7 +230,7 @@ permalink: /guide/setup/backend
 
 在 `appsettings.Production.json` 中添加 `BaseUrl` 对管理员配置进行修改
 
-``` json
+```json
 {
   "BaseUrl": "http:/localhost:22345"
 }
@@ -241,7 +240,7 @@ permalink: /guide/setup/backend
 
 若要修改前端的配置, 可以查看 `wwwwroot/app.config.json` 文件，所有配置如下：
 
-``` json
+```json
 {
   // baseUrl 要修改成自己的域名或者 IP
   // 当后端配置了 BaseUrl 时，该字段无效

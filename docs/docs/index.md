@@ -21,7 +21,7 @@ highlights:
     description: '现代化UI、企业级性能、多端适配，致力于成为最好用的邮件群发软件!'
     features:
       - title: 原生企业级品质
-        details: 采用 mysql、redis 数据库，支持多用户，大并发。支持Windows、Linux、MacOS操作系统, 支持服务器私有化部署。
+        details: 采用 PostgreSQL、Redis 数据库，支持多用户，大并发。支持Windows、Linux、MacOS操作系统, 支持服务器私有化部署。
 
       - title: AI 支持
         details: 支持配置 AI 大模型实现邮件正文生成和优化，邮件主题生成，自动添加邮件变量。
