@@ -37,7 +37,6 @@
         "@quasar/app-vite": "~2.3.0",
         "@quasar/cli": "^2.5.0",
         "@quasar/quasar-app-extension-testing-e2e-cypress": "^6.3.0",
-        "@quasar/quasar-app-extension-testing-unit-vitest": "^1.2.4",
         "@types/crypto-js": "^4.2.2",
         "@types/lodash": "^4.17.16",
         "@types/node": "^22.13.9",
@@ -57,6 +56,7 @@
         "eslint-plugin-promise": "^7.2.1",
         "eslint-plugin-vue": "^10.0.0",
         "globals": "^16.0.0",
+        "happy-dom": "^15.11.7",
         "mockjs": "^1.1.0",
         "prettier": "^3.5.3",
         "ts-toolbelt": "^9.6.0",
@@ -64,6 +64,7 @@
         "unplugin-auto-import": "^19.1.1",
         "unplugin-vue-components": "^28.4.1",
         "vite-plugin-checker": "^0.9.0",
+        "vite-tsconfig-paths": "^5.1.4",
         "vitest": "^3.2.4",
         "vue-tsc": "^2.2.8",
       },
@@ -479,8 +480,6 @@
     "@quasar/extras": ["@quasar/extras@1.18.0", "", {}, "sha512-hIqqw56sKGujWA3sTIT1ItlVglD+eA3hAWDVxY4qjA4/BSgYJDHk6ymJCbsDPIJFT7DJsG/F3A67vELXbBAIvA=="],
 
     "@quasar/quasar-app-extension-testing-e2e-cypress": ["@quasar/quasar-app-extension-testing-e2e-cypress@6.3.0", "", { "dependencies": { "@cypress/code-coverage": "^3.14.7", "cross-env": "^7.0.3", "lodash": "^4.17.21", "nyc": "^17.1.0", "start-server-and-test": "^2.1.2", "vite-plugin-istanbul": "^9.0.1" }, "peerDependencies": { "cypress": "^12.2.0 || ^13.2.0 || ^14.0.0 || ^15.0.0", "eslint-plugin-cypress": ">=2.0.0" }, "optionalPeers": ["eslint-plugin-cypress"] }, "sha512-LhhBWx0XgOBiP3Ni63GuKDyRskQ8i6BLqFXf2ct6IBPKQrpJpGi7GXECwB6RW6ldGOP3tnnpNJ7NEjuGXKAw8g=="],
-
-    "@quasar/quasar-app-extension-testing-unit-vitest": ["@quasar/quasar-app-extension-testing-unit-vitest@1.2.4", "", { "dependencies": { "happy-dom": "^15.0.0", "lodash-es": "^4.17.21", "vite-tsconfig-paths": "^5.1.4" }, "peerDependencies": { "@vitest/ui": "^1.1.0 || ^2.0.0 || ^3.0.0", "@vue/test-utils": "^2.4.3", "quasar": "^2.12.7", "vitest": "^1.6.1 || ^2.1.9 || ^3.0.5", "vue": "^3.3.4" }, "optionalPeers": ["@vitest/ui"] }, "sha512-u7WK0q0UWu2UxGx1hJphi8MujLHXK6+j/idyrmBSHixu6sBh2/As6uN2DV7Eau+Tlff352rxzxHdCudKA54RCg=="],
 
     "@quasar/render-ssr-error": ["@quasar/render-ssr-error@1.0.4", "", { "dependencies": { "stack-trace": "^1.0.0-pre2" } }, "sha512-pkP0uvhLHu2LWk9NbMwBjs37j1pdImXDz5hS9SX14QSqKZKepsfbre7Z28/GTwL6CrHcr+k9UTYorbpQGTI7EA=="],
 
