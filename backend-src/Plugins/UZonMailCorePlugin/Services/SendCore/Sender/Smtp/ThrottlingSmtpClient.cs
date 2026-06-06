@@ -82,7 +82,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             {
                 var delayMs = controlValue - timeInverval;
                 _logger.Warn($"{_email} 发件间隔太短，将在 {delayMs} 毫秒后开始发送");
-                await Task.Delay(delayMs);
+                await Task.Delay(delayMs, cancellationToken);
             }
 
             string? sentMessage;

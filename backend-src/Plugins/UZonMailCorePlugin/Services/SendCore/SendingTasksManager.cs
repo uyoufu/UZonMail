@@ -27,7 +27,7 @@ namespace UZonMail.CorePlugin.Services.SendCore
         /// <summary>
         /// 启动发件任务
         /// </summary>
-        public void StartSending()
+        public Task StartSendingAsync(CancellationToken cancellationToken = default)
         {
             lock (_lockObj)
             {
@@ -35,19 +35,20 @@ namespace UZonMail.CorePlugin.Services.SendCore
                 var outboxes = outboxesManager.Values.ToList();
                 foreach (var outbox in outboxes)
                 {
-                    if (outbox.IsRunningInTask)
-                        continue;
                     if (outbox.ShouldDispose)
+                        continue;
+                    if (!outbox.TryMarkTaskRunning())
                         continue;
 
                     // 启动任务
-                    var task = Task.Run(async () =>
+                    _ = Task.Run(async () =>
                     {
-                        await StartSendingWorkTask(outbox);
+                        await StartSendingWorkTask(outbox, cancellationToken);
                     });
-                    outbox.SetTaskId(task.Id);
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -56,7 +57,10 @@ namespace UZonMail.CorePlugin.Services.SendCore
         /// </summary>
         /// <param name="tokenSource"></param>
         /// <returns></returns>
-        private async Task StartSendingWorkTask(OutboxEmailAddress outbox)
+        private async Task StartSendingWorkTask(
+            OutboxEmailAddress outbox,
+            CancellationToken cancellationToken
+        )
         {
             // 生成 task 的 scope
             Interlocked.Increment(ref _runningTasksCount);
@@ -64,11 +68,11 @@ namespace UZonMail.CorePlugin.Services.SendCore
             _logger.Info($"线程 {Environment.CurrentManagedThreadId} 开始执行发件任务: {outbox.Email}");
             try
             {
-                while (true)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     // 在每次循环中，生成新的数据库上下文, 确保 scoped 服务（如 SqlContext）为本次迭代新实例
                     // 后期若有据性能问题，可以动态调整创建频率
-                    var scope = provider.CreateAsyncScope();
+                    await using var scope = provider.CreateAsyncScope();
                     var iterationProvider = scope.ServiceProvider;
 
                     // 生成服务上下文
@@ -93,6 +97,11 @@ namespace UZonMail.CorePlugin.Services.SendCore
                         .Where(x => x != null)
                         .Cast<ISendingHandler>()
                         .ToList();
+                    if (chainHandlers.Count == 0)
+                    {
+                        _logger.Error("发件职责链为空，任务退出");
+                        break;
+                    }
                     _ = chainHandlers.Aggregate((a, b) => a.SetNext(b));
                     // 依次执行职责链
                     await chainHandlers.First().Handle(sendingContext);
@@ -123,7 +132,7 @@ namespace UZonMail.CorePlugin.Services.SendCore
             finally
             {
                 // 结束后，清除任务 ID
-                outbox.SetTaskId(0);
+                outbox.MarkTaskStopped();
                 Interlocked.Add(ref _runningTasksCount, -1);
             }
         }

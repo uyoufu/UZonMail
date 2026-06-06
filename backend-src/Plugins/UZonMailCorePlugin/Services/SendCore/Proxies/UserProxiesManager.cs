@@ -30,7 +30,13 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies
             _proxyHandlers
                 .Keys.Except(proxies.Select(x => x.ObjectId))
                 .ToList()
-                .ForEach(x => _proxyHandlers.TryRemove(x, out _));
+                .ForEach(x =>
+                {
+                    if (_proxyHandlers.TryRemove(x, out var removedHandler))
+                    {
+                        removedHandler.DisposeHandler();
+                    }
+                });
 
             // 更新或新增代理
             var proxyFactories = serviceProvider
@@ -124,7 +130,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies
             }
 
             // 返回一个随机代理
-            var randomIndex = new Random().Next(0, rangedProxies.Count);
+            var randomIndex = Random.Shared.Next(0, rangedProxies.Count);
             return rangedProxies[randomIndex];
         }
 

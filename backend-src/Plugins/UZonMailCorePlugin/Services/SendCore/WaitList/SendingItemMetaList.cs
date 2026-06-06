@@ -202,16 +202,19 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <returns></returns>
         public SendItemMeta? GetSendingMeta()
         {
-            if (!_anoymousList.TryTake(out var meta))
-                return null;
-            _allWaitDic.TryRemove(meta.SendingItemId, out _);
+            while (_anoymousList.TryTake(out var meta))
+            {
+                _allWaitDic.TryRemove(meta.SendingItemId, out _);
 
-            // 若已经被删除，重新获取
-            if (meta.IsDeleted)
-                return GetSendingMeta();
+                // 若已经被删除，继续获取下一项
+                if (meta.IsDeleted)
+                    continue;
 
-            MoveToRecycleBin(meta);
-            return meta;
+                MoveToRecycleBin(meta);
+                return meta;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -224,16 +227,19 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             if (!_outboxDic.TryGetValue(outboxId, out var list))
                 return null;
 
-            if (!list.TryTake(out var meta))
-                return null;
-            _allWaitDic.TryRemove(meta.SendingItemId, out _);
+            while (list.TryTake(out var meta))
+            {
+                _allWaitDic.TryRemove(meta.SendingItemId, out _);
 
-            // 若已经被删除，重新获取
-            if (meta.IsDeleted)
-                return GetSendingMeta(outboxId);
+                // 若已经被删除，继续获取下一项
+                if (meta.IsDeleted)
+                    continue;
 
-            MoveToRecycleBin(meta);
-            return meta;
+                MoveToRecycleBin(meta);
+                return meta;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -255,8 +261,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 
             // 指定项
             if (!_outboxDic.TryGetValue(outboxId, out var list))
-                return false;
-            return list.Any(x => x.OutboxId == outboxId);
+                return _recycleBin.Any(x => x.Value.OutboxId == outboxId);
+            return list.Any(x => x.OutboxId == outboxId)
+                || _recycleBin.Any(x => x.Value.OutboxId == outboxId);
         }
 
         /// <summary>

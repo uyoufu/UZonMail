@@ -26,10 +26,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             var keys = clientFactory.SmtpClientKeys.Where(x => x.Email == outbox.Email).ToList();
             foreach (var key in keys)
             {
-                // 判断是否存在，若存在，则不释放
-                if (!outboxesPoolList.ExistValidOutbox(key.Email))
+                // 仍有可用发件箱时，不释放共享的 SMTP 连接
+                if (outboxesPoolList.ExistValidOutbox(key.Email))
                     continue;
-                clientFactory.DisposeSmtpClient(key);
+                await clientFactory.DisposeSmtpClientAsync(key);
             }
 
             return HandlerResult.Success();

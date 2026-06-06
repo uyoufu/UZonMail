@@ -122,7 +122,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
                 // 使用过期日期进行判断
                 if (!_isHealthy)
                     return false;
-                _isHealthy = _expireDate < DateTime.UtcNow;
+                _isHealthy = _expireDate > DateTime.UtcNow;
                 return false;
             }
 
@@ -190,15 +190,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
         protected virtual void RecordUsage(string email)
         {
             var domain = email.Split('@').Last();
-
-            if (_usageCounter.TryGetValue(domain, out var count))
-            {
-                _usageCounter[domain] = count + 1;
-            }
-            else
-            {
-                _usageCounter.TryAdd(domain, 1);
-            }
+            _usageCounter.AddOrUpdate(domain, 1, (_, count) => count + 1);
         }
         #endregion
 
@@ -338,7 +330,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
         /// </summary>
         public virtual void DisposeHandler()
         {
-            return;
+            _timer?.Dispose();
+            _timer = null;
         }
 
         #region 静态方法

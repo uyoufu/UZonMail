@@ -58,7 +58,6 @@ namespace UZonMail.CorePlugin.Services.SendCore.EmailWaitList
             }
 
             // 随机获取一个模板
-            var random = new Random();
             var index = RandomNumberGenerator.GetInt32(0, _sendingGroupTemplateIds.Count);
             var template = allTemplates
                 .Where(x => x.Id == _sendingGroupTemplateIds[index])

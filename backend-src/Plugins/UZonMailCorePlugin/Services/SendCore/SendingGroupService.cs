@@ -259,13 +259,14 @@ namespace UZonMail.CorePlugin.Services.SendCore
         private async Task ValidateOutboxes(long userId, SendingGroup sendingGroupData)
         {
             _logger.Debug("开始验证发件箱");
-            var outboxIds = sendingGroupData.Outboxes.Select(x => x.Id).ToList();
+            var outboxIds = sendingGroupData.Outboxes?.Select(x => x.Id).ToList() ?? [];
             var groupOutboxIds = sendingGroupData.OutboxGroups?.Select(x => x.Id).ToList() ?? [];
             var dataOutboxIds =
                 sendingGroupData
                     .Data?.Select(x => x.SelectTokenOrDefault("outboxId", ""))
                     .Where(x => !string.IsNullOrEmpty(x))
-                    .Select(x => long.Parse(x)) ?? [];
+                    .Select(x => long.TryParse(x, out var id) ? id : 0)
+                    .Where(x => x > 0) ?? [];
             var dataOutboxEmails =
                 sendingGroupData
                     .Data?.Select(x => x.SelectTokenOrDefault("outbox", ""))
@@ -323,7 +324,9 @@ namespace UZonMail.CorePlugin.Services.SendCore
             // 新建 email
             // 查找默认的收件组
             var defaultInboxGroup = await db
-                .EmailGroups.Where(x => x.Type == EmailGroupType.InBox && x.IsDefault)
+                .EmailGroups.Where(x =>
+                    x.UserId == userId && x.Type == EmailGroupType.InBox && x.IsDefault
+                )
                 .FirstOrDefaultAsync();
             if (defaultInboxGroup == null)
             {
@@ -380,7 +383,7 @@ namespace UZonMail.CorePlugin.Services.SendCore
             // 添加到发件列表
             await waitList.AddSendingGroup(sendingContext, sendingGroup, sendItemIds);
             // 开始发件
-            tasksService.StartSending();
+            await tasksService.StartSendingAsync();
         }
 
         /// <summary>
@@ -400,10 +403,14 @@ namespace UZonMail.CorePlugin.Services.SendCore
                 .Build();
 
             // 先指定为 Unspecified，再转为本地时间
+            var scheduleDate =
+                sendingGroup.ScheduleDate.Kind == DateTimeKind.Unspecified
+                    ? DateTime.SpecifyKind(sendingGroup.ScheduleDate, DateTimeKind.Local)
+                    : sendingGroup.ScheduleDate;
             var trigger = TriggerBuilder
                 .Create()
                 .ForJob(jobKey)
-                .StartAt(new DateTimeOffset(sendingGroup.ScheduleDate))
+                .StartAt(new DateTimeOffset(scheduleDate))
                 .Build();
 
             await scheduler.ScheduleJob(job, trigger);
@@ -424,7 +431,11 @@ namespace UZonMail.CorePlugin.Services.SendCore
                 return vdResult.ToErrorResponse<SendingGroup>();
             }
 
-            var isSchedule = sendingData.ScheduleDate > DateTime.UtcNow.AddMinutes(1);
+            var scheduleDate =
+                sendingData.ScheduleDate.Kind == DateTimeKind.Unspecified
+                    ? DateTime.SpecifyKind(sendingData.ScheduleDate, DateTimeKind.Local)
+                    : sendingData.ScheduleDate;
+            var isSchedule = scheduleDate.ToUniversalTime() > DateTime.UtcNow.AddMinutes(1);
 
             // 创建发件组
             sendingData.SendingType = isSchedule
@@ -470,7 +481,7 @@ namespace UZonMail.CorePlugin.Services.SendCore
                 foreach (var outbox in removedOutboxes)
                 {
                     // 释放发件箱
-                    clientFactory.DisposeSmtpClients(outbox.Email);
+                    await clientFactory.DisposeSmtpClientsAsync(outbox.Email);
                 }
 
                 // 移除任务

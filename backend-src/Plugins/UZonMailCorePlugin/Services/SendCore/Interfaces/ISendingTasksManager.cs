@@ -5,6 +5,6 @@ namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
         /// <summary>
         /// 开始发送
         /// </summary>
-        void StartSending();
+        Task StartSendingAsync(CancellationToken cancellationToken = default);
     }
 }

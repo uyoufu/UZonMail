@@ -12,17 +12,18 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender
     /// <summary>
     /// 按邮箱域名及 IP 限制发送速率
     /// </summary>
-    public class IPRateLimiter : ISingletonService
+    public class IPRateLimiter : ISingletonService, IDisposable
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(IPRateLimiter));
         private readonly ConcurrentDictionary<string, DateTime> _lastSendedDateDic = new();
+        private readonly ConcurrentDictionary<string, SemaphoreSlim> _keyLocks = new();
         private readonly Timer? _cleanupTimer;
 
         public IPRateLimiter()
         {
             // 定时释放过期的数据
             // 1h 清理一次
-            _cleanupTimer = new Timer(1 * 60 * 60 * 1000);
+            _cleanupTimer = new Timer(1 * 60 * 60 * 1000) { AutoReset = true, Enabled = true };
             _cleanupTimer.Elapsed += CleanupTimer_Elapsed;
         }
 
@@ -37,6 +38,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender
                     if ((DateTime.UtcNow - lastDate).TotalHours > 1)
                     {
                         _lastSendedDateDic.TryRemove(key, out _);
+                        if (_keyLocks.TryRemove(key, out var keyLock))
+                        {
+                            keyLock.Dispose();
+                        }
                     }
                 }
             }
@@ -77,22 +82,30 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender
             var cooldownMilliseconds = 60 * 60 * 1000 / maxCountPerIPDomainHour;
 
             var key = GetKey(outbox, hostIp);
-            if (_lastSendedDateDic.TryGetValue(key, out var lastDate))
+            var keyLock = _keyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
+            await keyLock.WaitAsync();
+            try
             {
-                var timeSinceLastSend = DateTime.UtcNow - lastDate;
-                if (timeSinceLastSend.TotalMilliseconds < cooldownMilliseconds)
+                if (_lastSendedDateDic.TryGetValue(key, out var lastDate))
                 {
-                    var waitTime = cooldownMilliseconds - (int)timeSinceLastSend.TotalMilliseconds;
-                    _logger.Info($"等待 {waitTime} 毫秒以满足发送速率限制，Outbox: {outbox}, HostIp: {hostIp}");
-                    await Task.Delay(waitTime);
+                    var timeSinceLastSend = DateTime.UtcNow - lastDate;
+                    if (timeSinceLastSend.TotalMilliseconds < cooldownMilliseconds)
+                    {
+                        var waitTime =
+                            cooldownMilliseconds - (int)timeSinceLastSend.TotalMilliseconds;
+                        _logger.Info(
+                            $"等待 {waitTime} 毫秒以满足发送速率限制，Outbox: {outbox}, HostIp: {hostIp}"
+                        );
+                        await Task.Delay(waitTime);
+                    }
                 }
 
                 // 更新发送时间
                 _lastSendedDateDic[key] = DateTime.UtcNow;
             }
-            else
+            finally
             {
-                _lastSendedDateDic.TryAdd(key, DateTime.UtcNow);
+                keyLock.Release();
             }
         }
 
@@ -126,6 +139,17 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender
             if (string.IsNullOrEmpty(hostIp))
                 return domain;
             return $"{domain}_{hostIp}";
+        }
+
+        public void Dispose()
+        {
+            _cleanupTimer?.Stop();
+            _cleanupTimer?.Dispose();
+            foreach (var keyLock in _keyLocks.Values)
+            {
+                keyLock.Dispose();
+            }
+            _keyLocks.Clear();
         }
     }
 }

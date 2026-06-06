@@ -263,7 +263,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         {
             return
             [
-                .. _sendingTargetIds.Where(x => x.SendingGroupId > 0).Select(x => x.SendingItemId)
+                .. _sendingTargetIds.Where(x => x.SendingItemId > 0).Select(x => x.SendingItemId)
             ];
         }
 
@@ -298,17 +298,31 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
             ShouldDispose = true;
         }
 
-        private int _taskId = 0;
+        private int _isRunningInTask = 0;
 
+        [Obsolete("Use TryMarkTaskRunning/MarkTaskStopped instead.")]
         public void SetTaskId(int taskId)
         {
-            _taskId = taskId;
+            if (taskId > 0)
+                TryMarkTaskRunning();
+            else
+                MarkTaskStopped();
+        }
+
+        public bool TryMarkTaskRunning()
+        {
+            return Interlocked.CompareExchange(ref _isRunningInTask, 1, 0) == 0;
+        }
+
+        public void MarkTaskStopped()
+        {
+            Interlocked.Exchange(ref _isRunningInTask, 0);
         }
 
         /// <summary>
         /// 是否正在任务中运行
         /// </summary>
-        public bool IsRunningInTask => _taskId > 0;
+        public bool IsRunningInTask => Volatile.Read(ref _isRunningInTask) > 0;
         #endregion
     }
 }

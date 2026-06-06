@@ -192,7 +192,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
             var disabledHandlers = _handlers.Values.Where(x => !x.IsEnable());
             foreach (var disabledHandler in disabledHandlers)
             {
-                _handlers.TryRemove(disabledHandler.Id, out _);
+                if (_handlers.TryRemove(disabledHandler.Id, out var removedHandler))
+                {
+                    removedHandler.DisposeHandler();
+                }
             }
         }
 

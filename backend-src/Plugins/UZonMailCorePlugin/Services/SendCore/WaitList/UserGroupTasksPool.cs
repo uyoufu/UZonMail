@@ -14,6 +14,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(UserGroupTasksPool));
         private readonly ConcurrentDictionary<long, GroupTask> _tasks = [];
+        private readonly ConcurrentQueue<long> _taskOrder = [];
 
         /// <summary>
         /// 用户 id
@@ -64,9 +65,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         public async Task<SendItemMeta?> GetEmailItem(SendingContext context)
         {
             // 依次获取发件项
-            foreach (var kv in _tasks)
+            foreach (var sendingGroupId in _taskOrder)
             {
-                var groupTask = kv.Value;
+                if (!_tasks.TryGetValue(sendingGroupId, out var groupTask))
+                    continue;
                 var result = await groupTask.GetEmailItem(context);
                 if (result != null)
                     return result;
@@ -81,9 +83,10 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
                 return false;
 
             // 依次获取发件项
-            foreach (var kv in _tasks)
+            foreach (var sendingGroupId in _taskOrder)
             {
-                var groupTask = kv.Value;
+                if (!_tasks.TryGetValue(sendingGroupId, out var groupTask))
+                    continue;
                 var match = groupTask.MatchEmailItem(outbox);
                 if (match)
                     return true;
@@ -99,7 +102,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
 
         public bool TryAdd(long key, GroupTask value)
         {
-            return _tasks.TryAdd(key, value);
+            if (!_tasks.TryAdd(key, value))
+                return false;
+
+            _taskOrder.Enqueue(key);
+            return true;
         }
 
         public bool TryGetValue(long key, out GroupTask value)

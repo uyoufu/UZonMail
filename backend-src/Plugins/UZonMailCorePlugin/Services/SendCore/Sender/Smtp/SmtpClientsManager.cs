@@ -20,7 +20,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
     /// <summary>
     /// 按发件任务缓存 SmtpClient, 因此发件完成后，要手动进行释放
     /// </summary>
-    public class SmtpClientsManager : ISingletonService
+    public class SmtpClientsManager : ISingletonService, IAsyncDisposable
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpClientsManager));
 
@@ -42,39 +42,48 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             _settingsService = settingsService;
 
             // 新建定时器，对 smtp 连接进行保活
-            _timer = new Timer(1000 * 30); // 30s
+            _timer = new Timer(1000 * 30) { AutoReset = true, Enabled = true }; // 30s
             _timer.Elapsed += Timer_Elapsed;
         }
 
         #region 连接保活
-        private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
+        private int _keepAliveRunning = 0;
+
+        private async void Timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
             // 保活
-            KeepAlive();
+            if (Interlocked.CompareExchange(ref _keepAliveRunning, 1, 0) != 0)
+                return;
+
+            try
+            {
+                await KeepAlive();
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _keepAliveRunning, 0);
+            }
         }
 
-        private void KeepAlive()
+        private async Task KeepAlive()
         {
             _logger.Info("开始对缓存的 SMTP 连接进行保活");
-            Task.Run(async () =>
+            var keys = _smptClients.Keys.ToList();
+            foreach (var key in keys)
             {
-                var keys = _smptClients.Keys.ToList();
-                foreach (var key in keys)
+                if (!_smptClients.TryGetValue(key, out var client))
+                    continue;
+                try
                 {
-                    if (!_smptClients.TryGetValue(key, out var client))
-                        continue;
-                    try
-                    {
-                        await client.NoOpAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Warn($"保活 SMTP 连接 {key.Email} 失败，断开连接并移除缓存");
-                        await client.DisconnectAsync(true);
-                        _smptClients.TryRemove(key, out _);
-                    }
+                    await client.NoOpAsync();
                 }
-            });
+                catch (Exception ex)
+                {
+                    _logger.Warn($"保活 SMTP 连接 {key.Email} 失败，断开连接并移除缓存");
+                    _logger.Warn(ex);
+                    await DisposeSmtpClientAsync(key);
+                }
+            }
         }
         #endregion
 
@@ -91,7 +100,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             var outbox = sendingContext.EmailItem!.Outbox;
 
             // 获取缓存客户端是否可用
-            var shouldProxy = await ShouldUseProxy(sendingContext);
+            var shouldProxy = ShouldUseProxy(sendingContext);
             var existClient = GetSmtpClientFromCache(outbox.Email, shouldProxy);
 
             if (existClient != null)
@@ -104,9 +113,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                 }
 
                 // 说明客户端不可用了，需要移除
-                _smptClients.TryRemove(existClient.GetClientKey(), out _);
-                // 不等待，后台断开
-                await existClient.DisconnectAsync(true);
+                await DisposeSmtpClientAsync(existClient.GetClientKey());
             }
 
             _logger.Debug($"初始化 SmtpClient: {outbox.SmtpAuthUserName}");
@@ -140,7 +147,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
         /// 是否应使用代理
         /// </summary>
         /// <returns></returns>
-        private async Task<bool> ShouldUseProxy(SendingContext sendingContext)
+        private static bool ShouldUseProxy(SendingContext sendingContext)
         {
             // 判断发件项是否指定了代理
             // 指定代理，不需要更换
@@ -150,17 +157,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
                 return true;
             }
 
-            // 未设置代理更换时，不更换代理，直到代理失效为止
-            var orgSetting = await _settingsService.GetSetting<SendingSetting>(
-                sendingContext.SqlContext,
-                sendingContext.EmailItem.UserId
-            );
-            if (orgSetting.ChangeIpAfterEmailCount <= 0)
-            {
-                return true;
-            }
-
-            return false;
+            return sendingContext.EmailItem.AvailableProxyIds.Count > 0;
         }
 
         /// <summary>
@@ -333,6 +330,16 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             int tryCount = 3
         )
         {
+            if (tryCount < 0)
+            {
+                return new Result<ThrottlingSmtpClient>()
+                {
+                    Ok = false,
+                    Message = "SMTP 连接重试次数已达上限",
+                    Data = null,
+                };
+            }
+
             // 获取代理
             var proxyAdapter = await GetProxyClient(sendingContext);
             client.ProxyClient = proxyAdapter;
@@ -397,7 +404,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
         /// </summary>
         public ICollection<SmtpClientKey> SmtpClientKeys => _smptClients.Keys;
 
-        public void DisposeSmtpClient(SmtpClientKey key)
+        public async Task DisposeSmtpClientAsync(SmtpClientKey key)
         {
             if (!_smptClients.TryRemove(key, out var client))
                 return;
@@ -405,17 +412,41 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
             // 进行释放
             if (client.IsConnected)
             {
-                client.DisconnectAsync(true);
+                await client.DisconnectAsync(true);
+            }
+            client.Dispose();
+        }
+
+        public async Task DisposeSmtpClientsAsync(string email)
+        {
+            _logger.Debug($"移除 SmtpClient {email}");
+            var keys = _smptClients.Keys.Where(x => x.Email == email).ToList();
+            foreach (var key in keys)
+            {
+                await DisposeSmtpClientAsync(key);
             }
         }
 
+        [Obsolete("Use DisposeSmtpClientAsync instead.")]
+        public void DisposeSmtpClient(SmtpClientKey key)
+        {
+            _ = DisposeSmtpClientAsync(key);
+        }
+
+        [Obsolete("Use DisposeSmtpClientsAsync instead.")]
         public void DisposeSmtpClients(string email)
         {
-            _logger.Debug($"移除 SmtpClient {email}");
-            var keys = _smptClients.Keys.Where(x => x.Email == email);
-            foreach (var key in keys)
+            _ = DisposeSmtpClientsAsync(email);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            _timer.Stop();
+            _timer.Dispose();
+
+            foreach (var key in _smptClients.Keys.ToList())
             {
-                DisposeSmtpClient(key);
+                await DisposeSmtpClientAsync(key);
             }
         }
     }

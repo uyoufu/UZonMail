@@ -30,16 +30,18 @@ namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
                 _logger.Error($"所有 {typeof(TValue).Name} 权重和为 0");
                 return null;
             }
-            var randomWeight = new Random().Next(totalWeight);
+            var randomWeight = Random.Shared.Next(totalWeight);
             int total = 0;
             int index = 0;
-            while (total < randomWeight)
+            while (index < useableValues.Count)
             {
-                total += useableValues[total].Weight;
+                total += useableValues[index].Weight;
+                if (randomWeight < total)
+                    return useableValues[index];
                 index++;
             }
 
-            return useableValues[index];
+            return useableValues.Last();
         }
     }
 }

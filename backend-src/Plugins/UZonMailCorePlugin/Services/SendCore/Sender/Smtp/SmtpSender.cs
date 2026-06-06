@@ -56,6 +56,12 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
         )
         {
             SendItemMeta sendItem = context.EmailItem!;
+            if (tryCount < 0)
+            {
+                var retryMessage = "SMTP 发送重试次数已达上限";
+                sendItem.Outbox?.MarkShouldDispose(retryMessage);
+                return HandlerResult.Failed(retryMessage);
+            }
 
             // 获取 smtp 客户端
             var smtpClientManager = context.Provider.GetRequiredService<SmtpClientsManager>();

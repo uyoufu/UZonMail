@@ -13,7 +13,8 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
     /// </summary>
     public class UserGroupTasksPools
         : ConcurrentDictionary<long, UserGroupTasksPool>,
-            ISingletonService { }
+            ISingletonService
+    { }
 
     /// <summary>
     /// 系统级的待发件调度器
@@ -65,9 +66,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             return result;
         }
 
-        public bool TryGetUserTasksPool(long sendingGroupId, out UserGroupTasksPool? tasksPool)
+        public bool TryGetUserTasksPool(long userId, out UserGroupTasksPool? tasksPool)
         {
-            return userTasksPools.TryGetValue(sendingGroupId, out tasksPool);
+            return userTasksPools.TryGetValue(userId, out tasksPool);
         }
 
         /// <summary>

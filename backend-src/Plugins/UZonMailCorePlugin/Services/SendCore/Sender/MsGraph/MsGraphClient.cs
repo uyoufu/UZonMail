@@ -268,9 +268,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 return "调试模式中已阻止真实发件";
             }
 
-            var encodedEmail = Uri.EscapeDataString(_email);
-
-            var apiPath = _authenticationResult!.IsPersonalAccount ? "me" : $"users{encodedEmail}";
+            var apiPath = GetSendMailApiPath(_email, _authenticationResult!.IsPersonalAccount);
             var request = new MsGraphSendMailRequest()
                 .WithAccessToken(AuthenticationResult!.AccessToken)
                 .WithMimeMessage(mimeMessage)
@@ -291,6 +289,15 @@ namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 
             // 抛出异常
             throw new Exception($"发件箱 {_email} 错误：{response.ReasonPhrase}，详情：{responseResult}");
+        }
+
+        public static string GetSendMailApiPath(string email, bool isPersonalAccount)
+        {
+            if (isPersonalAccount)
+                return "me";
+
+            var encodedEmail = Uri.EscapeDataString(email);
+            return $"users/{encodedEmail}";
         }
     }
 }
