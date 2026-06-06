@@ -1,112 +1,51 @@
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using log4net;
+using UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
 using UZonMail.CorePlugin.Services.SendCore.Sender;
 using UZonMail.CorePlugin.Services.Settings;
 using UZonMail.CorePlugin.Services.Settings.Model;
 using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Organization;
+using UZonMail.DB.SQL.Core.Settings;
 
 namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     /// <summary>
-    /// 代理客户端集群基类
-    /// 动态代理使用该类
-    /// 1. 动态代理按照域名进行数量控制
+    /// 动态代理池基类。
     /// </summary>
     public abstract class ProxyHandlersCluster : ProxyHandler
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyHandlersCluster));
         private readonly ConcurrentDictionary<string, ProxyHandler> _handlers = [];
-
-        /// <summary>
-        /// 最小数量
-        /// 当小于这个数量时，就会重新获取代理
-        /// </summary>
+        private readonly SemaphoreSlim _refreshLock = new(1, 1);
         private readonly int _minimumCount = 1;
+        private volatile bool _isHealthless;
+        private volatile bool _disposed;
 
-        /// <summary>
-        /// 获取 IP 地址
-        /// </summary>
-        /// <returns></returns>
         protected abstract Task<List<ProxyHandler>> GetProxyHandlersAsync(
             IServiceProvider serviceProvider
         );
 
-        /// <summary>
-        /// 获取匹配的代理客户端
-        /// </summary>
-        /// <param name="scopeServiceProvider"></param>
-        /// <param name="email"></param>
-        /// <returns></returns>
         public override async Task<ProxyClientAdapter?> GetProxyClientAsync(
             IServiceProvider scopeServiceProvider,
             string email
         )
         {
-            // 移除不可用的代理客户端
-            DisposeHandler();
+            if (_disposed)
+                return null;
 
-            // 判断是否有可用代理客户端，若没有，则更新
+            CleanupExpiredResources();
+
             if (_handlers.Count < _minimumCount)
-            {
-                var updateTask = UpdateProxyHandlers(scopeServiceProvider);
-                if (_handlers.IsEmpty)
-                {
-                    // 若没有任何可用的代理，则等待更新完成
-                    await updateTask;
-                }
-            }
+                await UpdateProxyHandlers(scopeServiceProvider);
 
-            var domain = email.Split('@').Last();
-            var ipRateLimiter = scopeServiceProvider.GetRequiredService<IPRateLimiter>();
-            var settingsManager = scopeServiceProvider.GetRequiredService<AppSettingsManager>();
-            var sqlContext = scopeServiceProvider.GetRequiredService<SqlContext>();
-            var sendingSetting = await settingsManager.GetSetting<SendingSetting>(
-                sqlContext,
-                UserId
-            );
-
-            // 判断是否没有 email 可用的代理客户端
-            var matchedHandler = _handlers
-                .Values.Where(x => x.IsMatch(email) && x.IsEnable())
-                .Where(x =>
-                {
-                    // 验证是否满足域名约束
-                    // 若不满足约束，请求新的动态代理
-                    return !ipRateLimiter.IsLimited(
-                        domain,
-                        x.Host,
-                        sendingSetting.MaxCountPerIPDomainHour
-                    );
-                })
-                .FirstOrDefault();
+            var matchedHandler = await SelectMatchedHandler(scopeServiceProvider, email);
             if (matchedHandler == null)
             {
-                // 说明没有匹配的可用的代理，重新获取
                 await UpdateProxyHandlers(scopeServiceProvider);
+                matchedHandler = await SelectMatchedHandler(scopeServiceProvider, email);
             }
 
-            if (_handlers.IsEmpty)
-            {
-                _logger.Warn("没有可用的代理客户端");
-                return null;
-            }
-
-            // 选择第一个可用的代理
-            matchedHandler = _handlers
-                .Values.Where(x => x.IsMatch(email) && x.IsEnable())
-                .Where(x =>
-                {
-                    // 验证是否满足域名约束
-                    // 若不满足约束，请求新的动态代理
-                    return !ipRateLimiter.IsLimited(
-                        domain,
-                        x.Host,
-                        sendingSetting.MaxCountPerIPDomainHour
-                    );
-                })
-                .FirstOrDefault();
             if (matchedHandler == null)
             {
                 _logger.Warn($"没有可用的代理客户端匹配 {email}");
@@ -116,110 +55,190 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
             return await matchedHandler.GetProxyClientAsync(scopeServiceProvider, email);
         }
 
+        private async Task<ProxyHandler?> SelectMatchedHandler(
+            IServiceProvider scopeServiceProvider,
+            string email
+        )
+        {
+            if (_handlers.IsEmpty)
+                return null;
+
+            var domain = GetEmailDomain(email);
+            var ipRateLimiter = scopeServiceProvider.GetRequiredService<IPRateLimiter>();
+            var settingsManager = scopeServiceProvider.GetRequiredService<AppSettingsManager>();
+            var sqlContext = scopeServiceProvider.GetRequiredService<SqlContext>();
+            var sendingSetting = await settingsManager.GetSetting<SendingSetting>(sqlContext, UserId);
+
+            return _handlers
+                .Values.Where(x => x.IsMatch(email) && x.IsEnable())
+                .Where(x =>
+                    !ipRateLimiter.IsLimited(
+                        domain,
+                        x.Host,
+                        sendingSetting.MaxCountPerIPDomainHour
+                    )
+                )
+                .FirstOrDefault();
+        }
+
         private async Task UpdateProxyHandlers(IServiceProvider serviceProvider)
         {
-            var handlers = await GetProxyHandlersAsync(serviceProvider);
-            // 可能存在重复的代理
-            foreach (var handler in handlers)
+            await _refreshLock.WaitAsync();
+            try
             {
-                if (_handlers.TryGetValue(handler.Id, out var existOne))
-                {
-                    // 更新代理信息
-                    existOne.Update(handler.ProxyInfo);
-                }
-                else
-                {
-                    // 首次添加时，对代理先进行健康检查
-                    await handler.HealthCheck();
-                    _handlers.TryAdd(handler.Id, handler);
-                }
-            }
+                if (_disposed)
+                    return;
 
-            // 如果 _handlers 仍然为空，则说明没有获取到任何代理，标记为不可用
-            if (_handlers.IsEmpty)
+                var handlers = await GetProxyHandlersAsync(serviceProvider);
+                foreach (var handler in handlers)
+                {
+                    if (!await handler.HealthCheck())
+                    {
+                        handler.DisposeHandler();
+                        continue;
+                    }
+
+                    if (_handlers.TryGetValue(handler.Id, out var existOne))
+                    {
+                        if (_handlers.TryUpdate(handler.Id, handler, existOne))
+                            existOne.DisposeHandler();
+                        else
+                            handler.DisposeHandler();
+                    }
+                    else if (!_handlers.TryAdd(handler.Id, handler))
+                    {
+                        handler.DisposeHandler();
+                    }
+                }
+
+                if (_handlers.IsEmpty)
+                    MarkHealthless();
+                else
+                    _isHealthless = false;
+            }
+            catch (Exception ex)
+            {
                 MarkHealthless();
+                _logger.Warn($"动态代理 {Id} 更新失败");
+                _logger.Warn(ex);
+            }
+            finally
+            {
+                _refreshLock.Release();
+            }
         }
 
         public override bool IsMatch(string email)
         {
-            // 为空全部匹配
+            if (ProxyInfo == null)
+                return false;
+
             if (string.IsNullOrEmpty(ProxyInfo.MatchRegex))
                 return true;
 
-            // 规则匹配
-            return Regex.IsMatch(email, ProxyInfo.MatchRegex);
+            try
+            {
+                return Regex.IsMatch(email, ProxyInfo.MatchRegex);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        /// <summary>
-        /// 始终可用
-        /// </summary>
-        /// <returns></returns>
         public override bool IsEnable()
         {
-            return !_isHealthless;
+            return !_disposed && !_isHealthless && ProxyInfo?.IsActive != false;
         }
 
-        private bool _isHealthless = false;
+        public override void Update(
+            Proxy proxy,
+            ProxyZoneType proxyZoneType = ProxyZoneType.Default,
+            int expireSeconds = int.MaxValue,
+            int maxUsedCountPerDomain = -1,
+            long userId = 0
+        )
+        {
+            ProxyInfo = proxy;
+            if (userId > 0)
+                UserId = userId;
 
-        /// <summary>
-        /// 标记非健康状态
-        /// </summary>
+            _disposed = false;
+            _isHealthless = false;
+        }
+
         public override void MarkHealthless()
         {
             _isHealthless = true;
         }
 
-        /// <summary>
-        /// 动态代理集不进行健康状态检测
-        /// </summary>
-        /// <returns></returns>
-        public override async Task<bool> HealthCheck()
+        public override bool ShouldHealthCheck => false;
+
+        public override Task<bool> HealthCheck()
         {
-            return true;
+            return Task.FromResult(IsEnable());
         }
 
         protected override void AutoHealthCheck()
         {
-            // 不做任何操作
+            // 动态代理池按需刷新，不参与集中健康检测。
         }
 
-        /// <summary>
-        /// 在调用时会自动处理
-        /// </summary>
-        public override void DisposeHandler()
+        public override void CleanupExpiredResources()
         {
-            // 移除不可用的代理客户端
-            var disabledHandlers = _handlers.Values.Where(x => !x.IsEnable());
-            foreach (var disabledHandler in disabledHandlers)
+            foreach (var handler in _handlers.Values.Where(x => !x.IsEnable() || x.IsExpired).ToList())
             {
-                if (_handlers.TryRemove(disabledHandler.Id, out var removedHandler))
-                {
+                if (_handlers.TryRemove(handler.Id, out var removedHandler))
                     removedHandler.DisposeHandler();
-                }
             }
         }
 
-        #region 工具类
-        /// <summary>
-        /// 默认为 5 分钟
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
+        public override void DisposeHandler()
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            foreach (var handler in _handlers.Values)
+                handler.DisposeHandler();
+            _handlers.Clear();
+            base.DisposeHandler();
+        }
+
+        protected ProxyHandler CreateProxyHandler(
+            IServiceProvider serviceProvider,
+            Proxy proxy,
+            ProxyZoneType proxyZoneType,
+            int expireSeconds
+        )
+        {
+            var handler = serviceProvider.GetRequiredService<ProxyHandler>();
+            handler.Update(proxy, proxyZoneType, expireSeconds, userId: UserId);
+            return handler;
+        }
+
         protected int GetExpireMinutes(string url)
         {
             var match = Regex.Match(url, "expireMinutes=(\\d+)");
-            if (!match.Success)
-                return 5;
-            return int.Parse(match.Groups[1].Value);
+            if (!match.Success && ProxyInfo != null)
+                match = Regex.Match(ProxyInfo.Url, "expireMinutes=(\\d+)");
+
+            return match.Success ? int.Parse(match.Groups[1].Value) : 5;
         }
 
         protected string GetProtocol(string url)
         {
             var match = Regex.Match(url, "protocol=(socks4|socks5|http|https)");
-            if (!match.Success)
-                return "socks5";
-            return match.Groups[1].Value;
+            if (!match.Success && ProxyInfo != null)
+                match = Regex.Match(ProxyInfo.Url, "protocol=(socks4|socks5|http|https)");
+
+            return match.Success ? match.Groups[1].Value : "socks5";
         }
-        #endregion
+
+        private static string GetEmailDomain(string email)
+        {
+            var index = email.LastIndexOf('@');
+            return index >= 0 && index < email.Length - 1 ? email[(index + 1)..] : email;
+        }
     }
 }

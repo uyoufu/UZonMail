@@ -10,14 +10,6 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.HandlerFactory
     {
         public virtual int Order => 100;
 
-        private static readonly List<string> _supportProtoco =
-        [
-            "http",
-            "https",
-            "socks4",
-            "socks5"
-        ];
-
         /// <summary>
         /// 接口中定义了的是异步方法
         /// </summary>
@@ -26,11 +18,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.HandlerFactory
         /// <returns></returns>
         public Task<IProxyHandler?> CreateProxy(IServiceProvider serviceProvider, Proxy proxy)
         {
-            if (string.IsNullOrWhiteSpace(proxy.Url))
-                return Task.FromResult<IProxyHandler?>(null);
-
-            var protocol = proxy.Url.ToLower().Split("://")[0];
-            if (!_supportProtoco.Contains(protocol))
+            if (!ProxyEndpoint.CanParse(proxy.Url))
                 return Task.FromResult<IProxyHandler?>(null);
 
             var handler = serviceProvider.GetRequiredService<ProxyHandler>();

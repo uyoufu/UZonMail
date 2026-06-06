@@ -1,292 +1,228 @@
 using System.Collections.Concurrent;
-using System.Net;
 using System.Text.RegularExpressions;
 using log4net;
-using MailKit.Net.Proxy;
 using UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
 using UZonMail.DB.SQL.Core.Settings;
 
 namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     /// <summary>
-    /// 处理单个代理
-    /// 使用 DI 进行使用
+    /// 处理单个代理端点。
     /// </summary>
-    /// <param name="url"></param>
-    public class ProxyHandler : IProxyHandler
+    public class ProxyHandler
+        : IProxyHandler,
+            IProxyHealthCheckable,
+            IProxyResourceCleaner
     {
-        protected ProxyHandler() { }
+        protected ProxyHandler()
+        {
+            _iPQueries = [];
+        }
 
-        private readonly List<IProxyHealthChecker> _iPQueries;
-
-        /// <summary>
-        /// 参数从 DI 注入
-        /// </summary>
-        /// <param name="iPQueries"></param>
         public ProxyHandler(IEnumerable<IProxyHealthChecker> iPQueries)
         {
             _iPQueries = [.. iPQueries];
         }
 
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxyHandler));
+        private static readonly TimeSpan HealthCheckInterval = TimeSpan.FromSeconds(20);
 
-        public Proxy ProxyInfo { get; private set; }
+        private readonly List<IProxyHealthChecker> _iPQueries;
+        private readonly SemaphoreSlim _healthCheckLock = new(1, 1);
+        private readonly object _clientLock = new();
+        private readonly ConcurrentDictionary<string, int> _usageCounter = new();
+
+        private volatile bool _isHealthy;
+        private volatile bool _disposed;
+        private DateTime _expireDate = DateTime.MaxValue;
+        private DateTime _nextHealthCheckDate = DateTime.MinValue;
+        private int _healthCheckCount = 2;
+        private int _maxUsedCountPerDomain = -1;
+        private ProxyZoneType _testerType = ProxyZoneType.Default;
+        private ProxyEndpoint? _endpoint;
+        private ProxyClientAdapter? _proxyClientAdapter;
+
+        public Proxy ProxyInfo { get; protected set; } = null!;
 
         #region 协议相关
-        /// <summary>
-        /// 协议
-        /// </summary>
-        public string Schema { get; set; }
+        public string Schema { get; private set; } = string.Empty;
 
-        /// <summary>
-        /// 地址
-        /// </summary>
-        public string Host { get; set; }
+        public string Host { get; private set; } = string.Empty;
 
-        /// <summary>
-        /// 端口
-        /// </summary>
-        public int Port { get; set; }
+        public int Port { get; private set; }
 
-        /// <summary>
-        /// 用户名
-        /// </summary>
-        public string Username { get; set; } = string.Empty;
+        public string Username { get; private set; } = string.Empty;
 
-        /// <summary>
-        /// 密码
-        /// </summary>
-        public string Password { get; set; } = string.Empty;
+        public string Password { get; private set; } = string.Empty;
         #endregion
 
-        #region 是否可用
-        private bool _isHealthy = false;
+        public long UserId { get; protected set; }
 
-        /// <summary>
-        /// 是否 ping 通
-        /// </summary>
-        /// <returns></returns>
-        public virtual bool IsEnable()
+        public string Id
         {
-            return ProxyInfo.IsActive && _isHealthy;
+            get
+            {
+                if (ProxyInfo == null)
+                    return string.Empty;
+
+                return ProxyInfo.Id > 0 ? ProxyInfo.Id.ToString() : ProxyInfo.ObjectId;
+            }
         }
 
-        /// <summary>
-        /// 标记为不健康，只有下一次 ping 通后才会恢复
-        /// </summary>
-        public virtual void MarkHealthless()
-        {
-            _isHealthy = false;
-        }
+        public bool IsExpired => _expireDate <= DateTime.UtcNow;
 
         /// <summary>
-        /// Handler 的 Id
-        /// </summary>
-        public string Id => ProxyInfo.Id > 0 ? ProxyInfo.Id.ToString() : ProxyInfo.ObjectId;
-
-        /// <summary>
-        /// 是否是动态代理: 当过期时间小于 30 分钟时，判断为动态代理
-        /// 动态代理当检测不到时，就会自动停止检测
+        /// 过期时间小于 30 分钟时按动态代理子节点处理。
         /// </summary>
         public bool IsDynamic => _expireDate - DateTime.UtcNow < TimeSpan.FromMinutes(30);
 
-        /// <summary>
-        /// 过期时间
-        /// </summary>
-        private DateTime _expireDate = DateTime.MaxValue;
-        private ProxyZoneType _testerType = ProxyZoneType.Default;
-
-        /// <summary>
-        /// 设置代理健康检测类型
-        /// </summary>
-        /// <param name="testerType"></param>
-        private void SetProxyTesterType(ProxyZoneType testerType)
+        public virtual bool ShouldHealthCheck
         {
-            if (testerType.HasFlag(ProxyZoneType.Default))
+            get
             {
-                return;
+                if (_disposed || ProxyInfo == null || !ProxyInfo.IsActive || IsExpired)
+                    return false;
+
+                if (IsDynamic && !_isHealthy && _healthCheckCount < 0)
+                    return false;
+
+                return DateTime.UtcNow >= _nextHealthCheckDate;
             }
-            _testerType = testerType;
+        }
+
+        public virtual bool IsEnable()
+        {
+            return !_disposed && ProxyInfo?.IsActive == true && _isHealthy && !IsExpired;
+        }
+
+        public virtual void MarkHealthless()
+        {
+            _isHealthy = false;
+            _nextHealthCheckDate = DateTime.MinValue;
         }
 
         public virtual async Task<bool> HealthCheck()
         {
-            var validIpQueries = _iPQueries
-                .Where(x => x.Enable)
-                .Where(x => x.ProxyZoneType.HasFlag(_testerType))
-                .OrderBy(x => x.Order)
-                .ToList();
-            if (validIpQueries.Count == 0)
-            {
-                _logger.Error("没有可用的有效代理检测接口, 代理将变得不稳定,请联系开发者解决");
-                // 使用过期日期进行判断
-                if (!_isHealthy)
-                    return false;
-                _isHealthy = _expireDate > DateTime.UtcNow;
-                return false;
-            }
+            if (!await _healthCheckLock.WaitAsync(0))
+                return _isHealthy;
 
-            // 开始检测
-            foreach (var ipQuery in validIpQueries)
+            try
             {
-                var ipResult = await ipQuery.GetIP(ProxyInfo.Url);
-                if (ipResult.Ok)
+                if (_disposed || ProxyInfo == null || _endpoint == null || !ProxyInfo.IsActive)
                 {
-                    // 网络通即说明使用了代理
-                    // _isHealthy = Host.Equals(ipResult.Data);
+                    _isHealthy = false;
+                    return false;
+                }
 
-                    _isHealthy = true;
-                    _logger.Debug($"代理 {Id} 检测结果: {_isHealthy}");
+                if (IsExpired)
+                {
+                    _isHealthy = false;
+                    return false;
+                }
+
+                _nextHealthCheckDate = DateTime.UtcNow.Add(HealthCheckInterval);
+
+                var validIpQueries = _iPQueries
+                    .Where(x => x.Enable)
+                    .Where(x => x.ProxyZoneType.HasFlag(_testerType))
+                    .OrderBy(x => x.Order)
+                    .ToList();
+                if (validIpQueries.Count == 0)
+                {
+                    _logger.Error("没有可用的有效代理检测接口, 代理将变得不稳定,请联系开发者解决");
+                    _isHealthy = _expireDate > DateTime.UtcNow && _isHealthy;
                     return _isHealthy;
                 }
-            }
 
-            _isHealthy = false;
-            _logger.Debug($"代理 {Id} 检测失败");
-            return false;
-        }
-
-        private int _healthCheckCount = 2;
-        private Timer? _timer;
-
-        /// <summary>
-        /// 自动检测
-        /// 每隔 1 分钟自动检测一次
-        /// 若是动态代理，最多检测 2 次
-        /// </summary>
-        protected virtual void AutoHealthCheck()
-        {
-            if (_timer != null)
-                return;
-            _timer = new Timer(
-                async _ =>
+                foreach (var ipQuery in validIpQueries)
                 {
-                    // 动态代理，检测不到就停止检测
-                    if (IsDynamic && !_isHealthy && _healthCheckCount < 0)
+                    var ipResult = await ipQuery.GetIP(ProxyInfo.Url);
+                    if (ipResult.Ok)
                     {
-                        _timer?.Dispose();
-                        _timer = null;
-                        return;
+                        _isHealthy = true;
+                        _healthCheckCount = 2;
+                        _logger.Debug($"代理 {Id} 检测结果: {_isHealthy}");
+                        return true;
                     }
+                }
 
-                    _isHealthy = await HealthCheck();
-                    _healthCheckCount--;
-                },
-                null,
-                0,
-                1000 * 20
-            ); // 30s 检测一次
+                _isHealthy = false;
+                _healthCheckCount--;
+                _logger.Debug($"代理 {Id} 检测失败");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _isHealthy = false;
+                _healthCheckCount--;
+                _logger.Warn($"代理 {Id} 健康检测异常");
+                _logger.Warn(ex);
+                return false;
+            }
+            finally
+            {
+                _healthCheckLock.Release();
+            }
         }
-        #endregion
 
-        #region 使用历史记录
-        private int _maxUsedCountPerDomain = -1;
-        private readonly ConcurrentDictionary<string, int> _usageCounter = new();
-
-        /// <summary>
-        /// 记录使用信息
-        /// </summary>
-        /// <param name="email"></param>
         protected virtual void RecordUsage(string email)
         {
-            var domain = email.Split('@').Last();
+            var domain = GetEmailDomain(email);
             _usageCounter.AddOrUpdate(domain, 1, (_, count) => count + 1);
         }
-        #endregion
 
-        #region 用户信息
-        public long UserId { get; private set; } = 0;
-        #endregion
-
-        /// <summary>
-        /// 与字符串的转换
-        /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
+            if (_endpoint == null)
+                return string.Empty;
+
+            if (string.IsNullOrEmpty(Username))
+                return $"{Schema}://{Host}:{Port}";
+
             return $"{Schema}://{Username}:{Password}@{Host}:{Port}";
         }
 
-        /// <summary>
-        /// 是否匹配
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
         public virtual bool IsMatch(string email)
         {
-            // 为空时，默认全部匹配
-            if (string.IsNullOrEmpty(ProxyInfo.MatchRegex))
-                return true;
-
-            // 规则不匹配时，返回 false
-            if (!Regex.IsMatch(email, ProxyInfo.MatchRegex))
+            if (ProxyInfo == null)
                 return false;
 
-            // 未设置限制时，默认全部匹配
+            if (!IsRegexMatch(email, ProxyInfo.MatchRegex))
+                return false;
+
             if (_maxUsedCountPerDomain < 0)
                 return true;
 
-            // 判断使用次数是否超限
-            var domain = email.Split('@').Last();
-            if (_usageCounter.TryGetValue(domain, out var usedCount))
-            {
-                if (usedCount >= _maxUsedCountPerDomain)
-                    return false;
-            }
-
-            return true;
+            var domain = GetEmailDomain(email);
+            return !_usageCounter.TryGetValue(domain, out var usedCount)
+                || usedCount < _maxUsedCountPerDomain;
         }
 
-        private ProxyClientAdapter _proxyClientAdapter;
-
-        /// <summary>
-        /// 生成代理客户端
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <returns></returns>
         public virtual async Task<ProxyClientAdapter?> GetProxyClientAsync(
             IServiceProvider serviceProvider,
             string email
         )
         {
-            // 登记使用
-            RecordUsage(email);
-
-            if (_proxyClientAdapter != null)
-                return _proxyClientAdapter;
-
-            IProxyClient _proxyClient;
-            NetworkCredential networkCredential = new(Username, Password);
-            switch (Schema.ToLower())
+            if (!IsEnable())
             {
-                case "socks5":
-                    _proxyClient = new Socks5Client(Host, Port, networkCredential);
-                    break;
-                case "http":
-                    _proxyClient = new HttpProxyClient(Host, Port, networkCredential);
-                    break;
-                case "https":
-                    _proxyClient = new HttpsProxyClient(Host, Port, networkCredential);
-                    break;
-                case "socks4":
-                    _proxyClient = new Socks4Client(Host, Port, networkCredential);
-                    break;
-                case "socks4a":
-                    _proxyClient = new Socks4aClient(Host, Port, networkCredential);
-                    break;
-                default:
-                    _logger.Error($"不支持的代理协议: {Schema}");
+                await HealthCheck();
+                if (!IsEnable())
                     return null;
             }
-            _proxyClientAdapter = new ProxyClientAdapter(this, _proxyClient);
-            return _proxyClientAdapter;
+
+            var endpoint = _endpoint;
+            if (endpoint == null)
+                return null;
+
+            RecordUsage(email);
+
+            lock (_clientLock)
+            {
+                _proxyClientAdapter ??= ProxyClientFactory.Create(this, endpoint, _logger);
+                return _proxyClientAdapter;
+            }
         }
 
-        /// <summary>
-        /// 更新代理，并更新过期时间
-        /// </summary>
-        /// <param name="proxy"></param>
-        /// <param name="expireSeconds">单位秒</param>
         public virtual void Update(
             Proxy proxy,
             ProxyZoneType proxyZoneType = ProxyZoneType.Default,
@@ -295,56 +231,95 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
             long userId = 0
         )
         {
-            // 更新代理数据
             ProxyInfo = proxy;
-            SetProxyTesterType(proxyZoneType);
-            _expireDate = DateTime.UtcNow.AddSeconds(expireSeconds);
+            _testerType = proxyZoneType;
+            _expireDate =
+                expireSeconds == int.MaxValue
+                    ? DateTime.MaxValue
+                    : DateTime.UtcNow.AddSeconds(expireSeconds);
             _maxUsedCountPerDomain = maxUsedCountPerDomain;
+            _healthCheckCount = 2;
+            _nextHealthCheckDate = DateTime.MinValue;
+            _disposed = false;
+
             if (userId > 0)
                 UserId = userId;
 
-            // 将字符串转换为代理
-            Uri uri = new(proxy.Url);
-            Host = uri.Host;
-            Port = uri.Port;
-            Schema = uri.Scheme;
-
-            var userInfos = uri.UserInfo.Split(':');
-            if (userInfos.Length > 0)
+            if (!ProxyEndpoint.TryCreate(proxy, out var endpoint, out var errorMessage))
             {
-                Username = userInfos[0];
-            }
-            if (userInfos.Length > 1)
-            {
-                Password = userInfos[1];
+                _logger.Error($"代理 {Id} 解析失败: {errorMessage}");
+                MarkHealthless();
+                return;
             }
 
-            // 强制检测，可能拖慢启动速度
-            // HealthCheck().Wait();
+            var connectionChanged = _endpoint == null || !_endpoint.HasSameConnection(endpoint!);
+            _endpoint = endpoint;
+            Schema = endpoint!.Scheme;
+            Host = endpoint.Host;
+            Port = endpoint.Port;
+            Username = endpoint.Username;
+            Password = endpoint.Password;
 
-            AutoHealthCheck();
+            if (connectionChanged)
+            {
+                lock (_clientLock)
+                {
+                    _proxyClientAdapter = null;
+                }
+                _usageCounter.Clear();
+                MarkHealthless();
+            }
         }
 
-        /// <summary>
-        /// 释放资源
-        /// </summary>
+        public virtual void CleanupExpiredResources()
+        {
+            if (IsExpired)
+                MarkHealthless();
+        }
+
         public virtual void DisposeHandler()
         {
-            _timer?.Dispose();
-            _timer = null;
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            _isHealthy = false;
+            _usageCounter.Clear();
+            lock (_clientLock)
+            {
+                _proxyClientAdapter = null;
+            }
         }
 
-        #region 静态方法
-        /// <summary>
-        /// 尝试解析代理字符串
-        /// </summary>
-        /// <param name="proxyString"></param>
-        /// <param name="proxyInfo"></param>
-        /// <returns></returns>
         public static bool CanParse(string proxyString)
         {
-            return Uri.TryCreate(proxyString, UriKind.RelativeOrAbsolute, out _);
+            return ProxyEndpoint.CanParse(proxyString);
         }
-        #endregion
+
+        protected virtual void AutoHealthCheck()
+        {
+            // 健康检测由 ProxiesManager 集中调度，保留该方法避免破坏继承层级。
+        }
+
+        private static bool IsRegexMatch(string email, string? matchRegex)
+        {
+            if (string.IsNullOrEmpty(matchRegex))
+                return true;
+
+            try
+            {
+                return Regex.IsMatch(email, matchRegex);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string GetEmailDomain(string email)
+        {
+            var index = email.LastIndexOf('@');
+            return index >= 0 && index < email.Length - 1 ? email[(index + 1)..] : email;
+        }
     }
 }

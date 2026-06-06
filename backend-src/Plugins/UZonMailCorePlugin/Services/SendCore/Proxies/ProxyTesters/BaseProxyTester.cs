@@ -81,7 +81,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
         protected abstract string? RetrieveIP(string content);
 
         private DateTime _lastValidateTime = DateTime.MinValue;
-        private bool _validating = false;
+        private int _validating = 0;
 
         /// <summary>
         /// 不使用代理验证可访问性
@@ -89,33 +89,43 @@ namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
         /// <returns></returns>
         protected virtual async Task<bool> Validate()
         {
-            if (Interlocked.Exchange(ref _validating, true))
+            if (Interlocked.Exchange(ref _validating, 1) == 1)
                 return false;
 
-            _validating = true;
-            _lastValidateTime = DateTime.UtcNow;
-
-            var response = await GetHttpRequestWithoutProxy()
-                .WithHttpClient(_httpClient)
-                .SendAsync();
-            if (!response.IsSuccessStatusCode)
+            try
             {
+                _lastValidateTime = DateTime.UtcNow;
+
+                var response = await GetHttpRequestWithoutProxy()
+                    .WithHttpClient(_httpClient)
+                    .SendAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    Enable = false;
+                    return false;
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(content))
+                {
+                    Enable = false;
+                    return false;
+                }
+
+                Enable = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn("代理检测接口验证失败");
+                _logger.Warn(ex);
                 Enable = false;
-                _validating = false;
                 return false;
             }
-
-            var content = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(content))
+            finally
             {
-                Enable = false;
-                _validating = false;
-                return false;
+                Interlocked.Exchange(ref _validating, 0);
             }
-
-            Enable = true;
-            _validating = false;
-            return true;
         }
     }
 }

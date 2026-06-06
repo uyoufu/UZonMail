@@ -2,11 +2,15 @@ using UZonMail.CorePlugin.Services.Encrypt.Models;
 using UZonMail.CorePlugin.Services.SendCore;
 using UZonMail.CorePlugin.Services.SendCore.Interfaces;
 using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
 using UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph;
 using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.DB.SQL.Core.Emails;
 using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.DB.SQL.Core.Settings;
 using UZonMail.Utils.Extensions;
+using UZonMail.Utils.Results;
 
 namespace UZonMail.CorePluginTests.Services.SendCore
 {
@@ -102,6 +106,87 @@ namespace UZonMail.CorePluginTests.Services.SendCore
             Assert.AreEqual(OutboxEmailAddressType.Specific | OutboxEmailAddressType.Shared, specific.Type);
         }
 
+        [TestMethod]
+        public void ProxyEndpoint_CanParseSupportedProxySchemes()
+        {
+            var parsed = ProxyEndpoint.TryCreate(
+                "socks4a://user:pass@127.0.0.1:1080",
+                out var endpoint,
+                out var errorMessage
+            );
+
+            Assert.IsTrue(parsed, errorMessage);
+            Assert.IsNotNull(endpoint);
+            Assert.AreEqual("socks4a", endpoint.Scheme);
+            Assert.AreEqual("127.0.0.1", endpoint.Host);
+            Assert.AreEqual(1080, endpoint.Port);
+            Assert.AreEqual("user", endpoint.Username);
+            Assert.AreEqual("pass", endpoint.Password);
+        }
+
+        [TestMethod]
+        public void ProxyEndpoint_RejectsDynamicApiUrls()
+        {
+            var parsed = ProxyEndpoint.TryCreate(
+                "http://api.proxy.ipidea.io/getBalanceProxyIp?num=100&return_type=txt",
+                out _,
+                out _
+            );
+
+            Assert.IsFalse(parsed);
+        }
+
+        [TestMethod]
+        public async Task ProxyHandler_GetProxyClientAsync_CreatesSingleAdapterConcurrently()
+        {
+            var handler = CreateHealthyProxyHandler("socks5://user:pass@127.0.0.1:1080");
+            await handler.HealthCheck();
+
+            var clients = await Task.WhenAll(
+                Enumerable
+                    .Range(0, 20)
+                    .Select(_ => handler.GetProxyClientAsync(new EmptyServiceProvider(), "sender@example.com"))
+            );
+
+            Assert.IsTrue(clients.All(x => x != null));
+            Assert.IsTrue(clients.All(x => ReferenceEquals(clients[0], x)));
+        }
+
+        [TestMethod]
+        public async Task ProxyHandler_Update_RebuildsAdapterWhenEndpointChanges()
+        {
+            var handler = CreateHealthyProxyHandler("socks5://127.0.0.1:1080");
+            await handler.HealthCheck();
+            var firstClient = await handler.GetProxyClientAsync(
+                new EmptyServiceProvider(),
+                "sender@example.com"
+            );
+
+            handler.Update(CreateProxy("socks5://127.0.0.2:1080"));
+            await handler.HealthCheck();
+            var secondClient = await handler.GetProxyClientAsync(
+                new EmptyServiceProvider(),
+                "sender@example.com"
+            );
+
+            Assert.IsNotNull(firstClient);
+            Assert.IsNotNull(secondClient);
+            Assert.AreNotSame(firstClient, secondClient);
+            Assert.AreEqual("127.0.0.2", secondClient.ProxyHost);
+        }
+
+        [TestMethod]
+        public async Task ProxyHandler_HealthCheck_DoesNotRunConcurrently()
+        {
+            var checker = new TestProxyHealthChecker(delayMs: 100);
+            var handler = new ProxyHandler([checker]);
+            handler.Update(CreateProxy("socks5://127.0.0.1:1080"));
+
+            await Task.WhenAll(Enumerable.Range(0, 10).Select(_ => handler.HealthCheck()));
+
+            Assert.AreEqual(1, checker.CallCount);
+        }
+
         private static OutboxEmailAddress CreateOutboxEmailAddress(
             OutboxEmailAddressType type,
             List<long>? sendingItemIds = null
@@ -118,14 +203,33 @@ namespace UZonMail.CorePluginTests.Services.SendCore
                     Password = "password".AES(encryptParams.Key, encryptParams.Iv),
                     ReplyToEmails = "",
                     SmtpHost = "smtp.example.com",
-                    SmtpPort = 465,
-                    Weight = 1
-                },
+                SmtpPort = 465,
+                Weight = 1
+            },
                 1,
                 encryptParams,
                 type,
-                sendingItemIds
+                sendingItemIds ?? []
             );
+        }
+
+        private static ProxyHandler CreateHealthyProxyHandler(string url)
+        {
+            var handler = new ProxyHandler([new TestProxyHealthChecker()]);
+            handler.Update(CreateProxy(url));
+            return handler;
+        }
+
+        private static Proxy CreateProxy(string url)
+        {
+            return new Proxy()
+            {
+                Id = 1,
+                ObjectId = "proxy-object-id",
+                Url = url,
+                IsActive = true,
+                Name = "test proxy",
+            };
         }
 
         private sealed class TestWeight(int weight, bool enable) : IWeight
@@ -133,6 +237,33 @@ namespace UZonMail.CorePluginTests.Services.SendCore
             public int Weight => weight;
 
             public bool Enable => enable;
+        }
+
+        private sealed class TestProxyHealthChecker(int delayMs = 0) : IProxyHealthChecker
+        {
+            private int _callCount;
+
+            public bool Enable => true;
+
+            public int Order => 0;
+
+            public ProxyZoneType ProxyZoneType => ProxyZoneType.Default;
+
+            public int CallCount => _callCount;
+
+            public async Task<Result<string?>> GetIP(string proxyUrl)
+            {
+                Interlocked.Increment(ref _callCount);
+                if (delayMs > 0)
+                    await Task.Delay(delayMs);
+
+                return Result<string?>.Success("127.0.0.1");
+            }
+        }
+
+        private sealed class EmptyServiceProvider : IServiceProvider
+        {
+            public object? GetService(Type serviceType) => null;
         }
     }
 }
