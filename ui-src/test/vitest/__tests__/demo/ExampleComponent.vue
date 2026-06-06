@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref } from 'vue';
 
 interface Todo {
   id: number;
@@ -33,15 +33,19 @@ const props = withDefaults(
     active?: boolean;
   }>(),
   {
-    todos: () => []
-  }
-)
+    todos: () => [],
+  },
+);
 
-const clickCount = ref(0)
-function increment () {
-  clickCount.value += 1
-  return clickCount.value
+const clickCount = ref(0);
+function increment() {
+  clickCount.value += 1;
+  return clickCount.value;
 }
 
-const todoCount = computed(() => props.todos.length)
+const todoCount = computed(() => props.todos.length);
+
+defineExpose({
+  clickCount,
+});
 </script>
