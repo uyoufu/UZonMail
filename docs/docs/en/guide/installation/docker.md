@@ -51,6 +51,19 @@ mkdir -p apps/uzon-mail/data
 cd apps/uzon-mail
 ```
 
+### Quick install
+
+With quick install, you can skip the later manual steps for downloading `.env`, downloading `docker-compose.yml`, and starting the service. The installer downloads the required files from GitHub, guides you through key configuration, and starts the service after confirmation.
+
+Make sure Docker and Docker Compose v2 are installed, and that you are in `~/apps/uzon-mail`, then run:
+
+``` bash
+curl -fsSL https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/install.sh -o install.sh
+bash ./install.sh
+```
+
+After quick install, continue reading the configuration notes and security warning to confirm the public access URL, initial admin password, Token Secret, and related settings match your deployment environment.
+
 ### Download .env file
 
 Download [.env](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env) from GitHub to the current directory.
