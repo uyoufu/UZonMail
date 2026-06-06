@@ -115,7 +115,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 
             if (overflowLimit)
             {
-                var message = $"发件箱 {outbox.Email} 已达当日最大发件量: ${outbox.SentTotalToday}";
+                var message = $"发件箱 {outbox.Email} 已达当日最大发件量: {outbox.SentTotalToday}";
                 _logger.Warn(message);
                 outbox.MarkShouldDispose(message);
             }

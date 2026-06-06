@@ -1,6 +1,5 @@
 using log4net;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Database.SQL.EmailSending;
 using UZonMail.CorePlugin.Services.Encrypt;
 using UZonMail.CorePlugin.Services.Encrypt.Models;
 using UZonMail.CorePlugin.Services.SendCore.Contexts;
@@ -60,7 +59,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 通过组 id 获取的组
         /// </summary>
-        private SendingGroup _sendingGroup;
+        private SendingGroup _sendingGroup = null!;
 
         /// <summary>
         /// 密钥
@@ -87,7 +86,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 可用的模板
         /// </summary>
-        private UsableTemplateList _usableTemplates;
+        private UsableTemplateList _usableTemplates = null!;
 
         /// <summary>
         /// 是否应该释放
@@ -509,12 +508,11 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
             }
             sendItemMeta.Initialized = true;
 
-            // 添加局部使用的代理
-            var sqlContext = sendingContext.SqlContext;
-            sendItemMeta.AvailableProxyIds = ProxyIds;
-
             // 拉取发件项
-            sendItemMeta = await _sendingItemMetas.FillSendingItem(sqlContext, sendItemMeta);
+            sendItemMeta = await _sendingItemMetas.FillSendingItem(
+                sendingContext.SqlContext,
+                sendItemMeta
+            );
             if (sendItemMeta.SendingItem == null)
             {
                 sendItemMeta.SetStatus(SendItemMetaStatus.Error, "发件项不存在或已被删除");
@@ -522,106 +520,16 @@ namespace UZonMail.CorePlugin.Services.SendCore.WaitList
                 return null;
             }
 
-            // 获取附件
-            await sendItemMeta.ResolveAttachments(sendingContext);
-
-            // 生成正文原始内容
-            var originBody = await GetSendingItemOriginBody(
-                sqlContext,
-                sendItemMeta.SendingItem,
-                sendItemMeta.BodyData
+            var preparer = sendingContext.Provider.GetRequiredService<ISendItemPreparer>();
+            await preparer.Prepare(
+                sendingContext,
+                sendItemMeta,
+                _sendingGroup,
+                _usableTemplates,
+                ProxyIds
             );
-            await sendItemMeta.SetHtmlBody(sendingContext, originBody);
-
-            // 设置主题
-            var subject = GetSubject(sendItemMeta.BodyData);
-            await sendItemMeta.SetSubject(sendingContext, subject);
-
-            // 添加最大重试次数
-            var sendingSetting = await sendingContext
-                .Provider.GetRequiredService<AppSettingsManager>()
-                .GetSetting<SendingSetting>(sqlContext, sendItemMeta.SendingItem.UserId);
-            await sendItemMeta.SetMaxRetryCount(sendingSetting.MaxRetryCount);
 
             return sendItemMeta;
-        }
-
-        /// <summary>
-        /// 获取原始发件内容
-        /// 变量未经过处理
-        /// </summary>
-        /// <param name="sendItemMeta"></param>
-        /// <param name="templates"></param>
-        /// <returns></returns>
-        private async Task<string> GetSendingItemOriginBody(
-            SqlContext sqlContext,
-            SendingItem sendingItem,
-            SendingItemExcelData? bodyData
-        )
-        {
-            // 批量发送的情况
-            if (sendingItem.IsSendingBatch)
-            {
-                if (!string.IsNullOrEmpty(_sendingGroup.Body))
-                    return _sendingGroup.Body;
-
-                var template = await _usableTemplates.GetTemplate(sqlContext, sendingItem.Id);
-                return template?.Content ?? string.Empty;
-            }
-
-            // 非批量发送
-            // 当有用户数据时
-            if (bodyData != null)
-            {
-                // 判断是否有 body
-                if (!string.IsNullOrEmpty(bodyData.Body))
-                    return bodyData.Body;
-
-                // 判断是否有模板 id 或者模板名称
-                if (bodyData.TemplateId > 0)
-                {
-                    var template = await _usableTemplates.GetTemplateById(
-                        sqlContext,
-                        bodyData.TemplateId
-                    );
-                    if (template != null)
-                        return template.Content;
-                }
-
-                // 判断是否有模板名称
-                if (!string.IsNullOrEmpty(bodyData.TemplateName))
-                {
-                    var template = await _usableTemplates.GetTemplateByName(
-                        sqlContext,
-                        bodyData.TemplateName
-                    );
-                    if (template != null)
-                        return template.Content;
-                }
-            }
-
-            // 没有数据时，优先使用组中的 body
-            if (!string.IsNullOrEmpty(_sendingGroup.Body))
-                return _sendingGroup.Body;
-
-            // 返回随机模板
-            var randTemplate = await _usableTemplates.GetTemplate(sqlContext, sendingItem.Id);
-            return randTemplate?.Content ?? string.Empty;
-        }
-
-        /// <summary>
-        /// 获取主题
-        /// 随机主题只需要在发送时确定即可
-        /// </summary>
-        /// <returns></returns>
-        private string GetSubject(SendingItemExcelData? bodyData)
-        {
-            // 若本身有主题，则使用自身的主题
-            if (bodyData != null && !string.IsNullOrEmpty(bodyData.Subject))
-            {
-                return bodyData.Subject;
-            }
-            return _sendingGroup.GetRandSubject();
         }
 
         /// <summary>

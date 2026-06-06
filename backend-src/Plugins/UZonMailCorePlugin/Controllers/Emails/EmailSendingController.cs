@@ -4,7 +4,7 @@ using Uamazing.Utils.Web.ResponseModel;
 using UZonMail.CorePlugin.Controllers.Emails.Models;
 using UZonMail.CorePlugin.Services.EmailDecorator;
 using UZonMail.CorePlugin.Services.EmailDecorator.Interfaces;
-using UZonMail.CorePlugin.Services.SendCore;
+using UZonMail.CorePlugin.Services.SendCore.Interfaces;
 using UZonMail.CorePlugin.Services.SendCore.WaitList;
 using UZonMail.CorePlugin.Services.Settings;
 using UZonMail.CorePlugin.Services.Settings.Model;
@@ -22,7 +22,8 @@ namespace UZonMail.CorePlugin.Controllers.Emails
     /// </summary>
     public class EmailSendingController(
         SqlContext db,
-        SendingGroupService sendingService,
+        ISendingGroupCommandService sendingService,
+        ISendingGroupStatusService sendingGroupStatusService,
         TokenService tokenService,
         EmailContentDecorateService decorateService
     ) : ControllerBaseV1
@@ -128,7 +129,7 @@ namespace UZonMail.CorePlugin.Controllers.Emails
             // 移除发件组任务
             var message = "手动暂停";
             await sendingService.RemoveSendingGroupTask(sendingGroup, message);
-            await sendingService.UpdateSendingGroupStatus(
+            await sendingGroupStatusService.UpdateSendingGroupStatus(
                 sendingGroup.Id,
                 SendingGroupStatus.Pause,
                 message
@@ -181,9 +182,9 @@ namespace UZonMail.CorePlugin.Controllers.Emails
 
             var message = "手动取消";
             await sendingService.RemoveSendingGroupTask(sendingGroup, message);
-            await sendingService.UpdateSendingGroupStatus(
+            await sendingGroupStatusService.UpdateSendingGroupStatus(
                 sendingGroup.Id,
-                SendingGroupStatus.Pause,
+                SendingGroupStatus.Cancel,
                 message
             );
 

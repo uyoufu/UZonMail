@@ -1,7 +1,7 @@
 using log4net;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using UZonMail.CorePlugin.Services.SendCore;
+using UZonMail.CorePlugin.Services.SendCore.Interfaces;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
@@ -11,7 +11,7 @@ namespace UZonMail.CorePlugin.Jobs
     /// <summary>
     /// 邮件发送定时任务
     /// </summary>
-    public class EmailSendingJob(SqlContext db, SendingGroupService sendingService)
+    public class EmailSendingJob(SqlContext db, ISendingGroupCommandService sendingService)
         : IJob,
             IScopedService
     {

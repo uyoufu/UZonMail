@@ -38,7 +38,9 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             }
             else
             {
-                _logger.Info($"线程申请发件项成功，收件箱：{emailItem.Inboxes.Select(x => x.Email)}");
+                _logger.Info(
+                    $"线程申请发件项成功，收件箱：{string.Join(",", emailItem.Inboxes.Select(x => x.Email))}"
+                );
             }
 
             return HandlerResult.Success();

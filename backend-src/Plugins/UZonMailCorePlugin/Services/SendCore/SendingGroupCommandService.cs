@@ -1,0 +1,109 @@
+using Microsoft.EntityFrameworkCore;
+using Uamazing.Utils.Web.ResponseModel;
+using UZonMail.CorePlugin.Database.Validators;
+using UZonMail.CorePlugin.Services.Config;
+using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UZonMail.CorePlugin.Services.SendCore.Interfaces;
+using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UZonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+using UZonMail.CorePlugin.Services.SendCore.WaitList;
+using UZonMail.CorePlugin.Utils.Extensions;
+using UZonMail.DB.SQL;
+using UZonMail.DB.SQL.Core.EmailSending;
+using UZonMail.Utils.Web.Exceptions;
+using UZonMail.Utils.Web.ResponseModel;
+using UZonMail.Utils.Web.Service;
+
+namespace UZonMail.CorePlugin.Services.SendCore
+{
+    public class SendingGroupCommandService(
+        SqlContext db,
+        DebugConfig debugConfig,
+        ISendingGroupCreationService creationService,
+        ISendingScheduleService scheduleService,
+        ISendingWorkerCoordinator workerCoordinator,
+        GroupTasksManager waitList,
+        OutboxesManager outboxesManager,
+        SmtpClientsManager clientFactory,
+        IServiceProvider serviceProvider
+    ) : ISendingGroupCommandService, IScopedService<ISendingGroupCommandService>
+    {
+        public async Task<ResponseResult<SendingGroup>> StartSending(SendingGroup sendingData)
+        {
+            var sendingGroupValidator = new SendingGroupValidator();
+            var vdResult = sendingGroupValidator.Validate(sendingData);
+            if (!vdResult.IsValid)
+            {
+                return vdResult.ToErrorResponse<SendingGroup>();
+            }
+
+            var scheduleDate =
+                sendingData.ScheduleDate.Kind == DateTimeKind.Unspecified
+                    ? DateTime.SpecifyKind(sendingData.ScheduleDate, DateTimeKind.Local)
+                    : sendingData.ScheduleDate;
+            var isSchedule = scheduleDate.ToUniversalTime() > DateTime.UtcNow.AddMinutes(1);
+
+            sendingData.SendingType = isSchedule
+                ? SendingGroupType.Scheduled
+                : SendingGroupType.Instant;
+            var sendingGroup = await creationService.CreateSendingGroup(sendingData);
+
+            if (isSchedule)
+            {
+                await scheduleService.ScheduleSending(sendingGroup);
+            }
+            else
+            {
+                await SendNow(sendingGroup);
+            }
+
+            return new SendingGroup()
+            {
+                Id = sendingGroup.Id,
+                ObjectId = sendingGroup.ObjectId,
+                TotalCount = sendingGroup.TotalCount
+            }.ToSuccessResponse();
+        }
+
+        public async Task SendNow(SendingGroup sendingGroup, List<long>? sendItemIds = null)
+        {
+            if (debugConfig.IsDemo)
+            {
+                var sendingItemsCount = await db.SendingItems.CountAsync(x =>
+                    x.SendingGroupId == sendingGroup.Id
+                );
+                if (sendingItemsCount > 5)
+                {
+                    throw new KnownException("示例环境最多群发 5 条");
+                }
+            }
+
+            var sendingContext = serviceProvider.GetRequiredService<SendingContext>();
+            await waitList.AddSendingGroup(sendingContext, sendingGroup, sendItemIds);
+            await workerCoordinator.StartSendingAsync();
+        }
+
+        public async Task RemoveSendingGroupTask(SendingGroup sendingGroup, string removeReason)
+        {
+            if (sendingGroup.Status == SendingGroupStatus.Sending)
+            {
+                var removedOutboxes = outboxesManager.RemoveOutbox(
+                    sendingGroup.Id,
+                    removeReason
+                );
+
+                foreach (var outbox in removedOutboxes)
+                {
+                    await clientFactory.DisposeSmtpClientsAsync(outbox.Email);
+                }
+
+                waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);
+            }
+
+            if (sendingGroup.SendingType == SendingGroupType.Scheduled)
+            {
+                await scheduleService.RemoveSendSchedule(sendingGroup.Id);
+            }
+        }
+    }
+}

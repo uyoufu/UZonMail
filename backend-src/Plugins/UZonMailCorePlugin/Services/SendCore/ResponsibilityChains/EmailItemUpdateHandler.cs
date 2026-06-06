@@ -94,12 +94,19 @@ namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             );
 
             // 更新收件箱的最近收件日期
+            var inboxIds = emailItem.Inboxes.Select(x => x.Id).ToList();
             await db.Inboxes.UpdateAsync(
-                x => emailItem.Inboxes.Select(x => x.Id).Contains(x.Id),
-                x =>
-                    x.SetProperty(y => y.LastBeDeliveredDate, DateTime.UtcNow)
-                        .SetProperty(y => y.LastSuccessDeliveryDate, DateTime.UtcNow)
+                x => inboxIds.Contains(x.Id),
+                x => x.SetProperty(y => y.LastBeDeliveredDate, DateTime.UtcNow)
             );
+
+            if (success)
+            {
+                await db.Inboxes.UpdateAsync(
+                    x => inboxIds.Contains(x.Id),
+                    x => x.SetProperty(y => y.LastSuccessDeliveryDate, DateTime.UtcNow)
+                );
+            }
 
             await db.SaveChangesAsync();
 

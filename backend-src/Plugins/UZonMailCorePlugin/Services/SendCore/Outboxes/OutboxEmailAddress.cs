@@ -252,7 +252,7 @@ namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
         /// <returns></returns>
         public List<long> GetSendingGroupIds()
         {
-            return [.. _sendingTargetIds.Select(x => x.SendingGroupId)];
+            return [.. _sendingTargetIds.Select(x => x.SendingGroupId).Distinct()];
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UZonMail.CorePlugin.Services.HostedServices;
-using UZonMail.CorePlugin.Services.SendCore;
+using UZonMail.CorePlugin.Services.SendCore.Interfaces;
 using UZonMail.DB.SQL;
 using UZonMail.DB.SQL.Core.EmailSending;
 using UZonMail.Utils.Web.Service;
@@ -12,7 +12,7 @@ namespace UZonMail.CorePlugin.Database.Startup
     /// 每次启动时，都需要执行
     /// </summary>
     /// <param name="db"></param>
-    public class DatabaseReset(SqlContext db, SendingGroupService sendingGroup)
+    public class DatabaseReset(SqlContext db, ISendingGroupStatusService sendingGroup)
         : IScopedServiceAfterStarting
     {
         public int Order => 99;
