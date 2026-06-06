@@ -10,13 +10,13 @@ import { api as viewerApi } from 'v-viewer'
 import { useConfig } from 'src/config'
 
 // 生成邮件模板数据
-export function useEmailTemplateTable () {
-  async function getRowsNumberCount (filterObj: TTableFilterObject) {
+export function useEmailTemplateTable() {
+  async function getRowsNumberCount(filterObj: TTableFilterObject) {
     const { data } = await getEmailTemplatesCount(filterObj.filter)
     return data
   }
-  async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
-    const { data } = await getEmailTemplatesData(filterObj.filter as string, pagination)
+  async function onRequest(filterObj: TTableFilterObject, pagination: IRequestPagination) {
+    const { data } = await getEmailTemplatesData(filterObj.filter, pagination)
     return data
   }
 
@@ -27,7 +27,7 @@ export function useEmailTemplateTable () {
 
   const config = useConfig()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function getTemplateImage (row: Record<string, any>) {
+  function getTemplateImage(row: Record<string, any>) {
     if (!row) return '/icons/undraw_mailbox_re_dvds.svg'
     const url = `${config.baseUrl}/${row.thumbnail}`
     // console.log(url)
@@ -36,7 +36,7 @@ export function useEmailTemplateTable () {
 
   // 查看缩略图
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function onPreviewThumbnail (row: Record<string, any>) {
+  function onPreviewThumbnail(row: Record<string, any>) {
     const imageUrl = getTemplateImage(row)
 
     viewerApi({
@@ -61,39 +61,32 @@ export function useEmailTemplateTable () {
 /**
  * 获取 WYSIWYG (what you see is what you get) 编辑器配置
  */
-export function useWysiwygEditor () {
+export function useWysiwygEditor() {
   const editorDefinitions = {}
   const $q = useQuasar()
   const editorToolbar = [
-    [{
-      label: $q.lang.editor.align,
-      icon: $q.iconSet.editor.align,
-      fixedLabel: true,
-      list: 'only-icons',
-      options: ['left', 'center', 'right', 'justify']
-    },
-    // {
-    //   label: $q.lang.editor.formatting,
-    //   icon: $q.iconSet.editor.formatting,
-    //   list: 'no-icons',
-    //   options: ['p', 'code', 'h6', 'h5', 'h4', 'h3', 'h2', 'h1']
-    // },
-    {
-      label: $q.lang.editor.fontSize,
-      icon: $q.iconSet.editor.fontSize,
-      fixedLabel: true,
-      fixedIcon: true,
-      list: 'no-icons',
-      options: [
-        'size-1',
-        'size-2',
-        'size-3',
-        'size-4',
-        'size-5',
-        'size-6',
-        'size-7'
-      ]
-    },
+    [
+      {
+        label: $q.lang.editor.align,
+        icon: $q.iconSet.editor.align,
+        fixedLabel: true,
+        list: 'only-icons',
+        options: ['left', 'center', 'right', 'justify']
+      },
+      // {
+      //   label: $q.lang.editor.formatting,
+      //   icon: $q.iconSet.editor.formatting,
+      //   list: 'no-icons',
+      //   options: ['p', 'code', 'h6', 'h5', 'h4', 'h3', 'h2', 'h1']
+      // },
+      {
+        label: $q.lang.editor.fontSize,
+        icon: $q.iconSet.editor.fontSize,
+        fixedLabel: true,
+        fixedIcon: true,
+        list: 'no-icons',
+        options: ['size-1', 'size-2', 'size-3', 'size-4', 'size-5', 'size-6', 'size-7']
+      },
       'textColor'
     ],
     // ['left', 'center', 'right', 'justify'],
@@ -107,7 +100,7 @@ export function useWysiwygEditor () {
   const editorRef: Ref<QEditor | null> = ref(null)
   const textColorDropdownRef: Ref<QBtnDropdown | null> = ref(null)
 
-  function setColor (cmd: string, name: string) {
+  function setColor(cmd: string, name: string) {
     if (!textColorDropdownRef.value) return
     if (!editorRef.value) return
     textColorDropdownRef.value.hide()
@@ -161,4 +154,3 @@ export function useWysiwygEditor () {
     highlightColorPalette
   }
 }
-

@@ -128,12 +128,12 @@ const columns: QTableColumn[] = [
 ]
 
 
-async function getRowsNumberCount (filterObj: TTableFilterObject) {
+async function getRowsNumberCount(filterObj: TTableFilterObject) {
   const { data } = await getSendingItemsCount(sendingGroupId.value as number, filterObj.filter, statusTab.value)
   return data || 0
 }
 
-async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
+async function onRequest(filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getSendingItemsData(sendingGroupId.value as number, filterObj.filter, statusTab.value, pagination)
   return data || []
 }
@@ -146,7 +146,7 @@ const { pagination, rows, filter, onTableRequest, loading, refreshTable } = useQ
 import { removeHistory } from 'src/layouts/components/tags/routeHistories'
 import type { IRouteHistory } from 'src/layouts/components/tags/types'
 const router = useRouter()
-async function goBackToSendHistory () {
+async function goBackToSendHistory() {
   await removeHistory(router, route as unknown as IRouteHistory, '/send-management/history')
 }
 
@@ -174,7 +174,7 @@ onMounted(async () => {
   sendingGroupProgressValue.value = data.sentCount / data.totalCount
 })
 // 注册单个邮件发送进度回调
-function onSendingItemStatusChanged (arg: ISendingItemStatusChangedArg) {
+function onSendingItemStatusChanged(arg: ISendingItemStatusChangedArg) {
   // 更新单个进度
   const row = rows.value.find(r => r.id === arg.sendingItemId)
   if (!row) return
@@ -184,7 +184,7 @@ function onSendingItemStatusChanged (arg: ISendingItemStatusChangedArg) {
 }
 subscribeOne(UzonMailClientMethods.sendingItemStatusChanged, onSendingItemStatusChanged)
 // 注册由件组的发送进度
-function onSendingGroupProgressChanged (arg: ISendingGroupProgressArg) {
+function onSendingGroupProgressChanged(arg: ISendingGroupProgressArg) {
   // 更新总进度
   if (arg.sendingGroupId !== sendingGroupId.value) return
   if (arg.progressType === SendingGroupProgressType.end) {
@@ -214,7 +214,7 @@ import { writeExcel } from 'src/utils/file'
 const { sendDetailContextItems, ContextMenu } = useContextMenu()
 
 // 导出
-async function onExportCurrentSendingItems () {
+async function onExportCurrentSendingItems() {
   if (rows.value.length === 0) {
     notifyError('数据为空')
     return
