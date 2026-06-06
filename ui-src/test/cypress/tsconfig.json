@@ -1,0 +1,14 @@
+// This file should be dropped entirely when Cypress 15 is released and all these problems are fixed at their roots
+// See https://github.com/cypress-io/cypress/pull/31520
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // This is needed when using Typescript >= 5 and Cypress < 13.12, can be removed otherwise
+    "sourceMap": false,
+    // Cypress uses ts-node, which is quite outdated. So, it doesn't correctly process "module": "preserve".
+    // As a result, it doesn't set moduleResolution accordingly.
+    // See: https://github.com/quasarframework/quasar/discussions/16877#discussioncomment-11434734
+    // Cypress 15 will fix this by replacing ts-node with tsx: https://github.com/cypress-io/cypress/issues/31185
+    "moduleResolution": "bundler"
+  }
+}
