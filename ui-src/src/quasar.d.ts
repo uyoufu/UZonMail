@@ -7,3 +7,18 @@
 //  this declaration also apply `quasar` own
 //  augmentations (eg. adds `$q` into Vue component context)
 /// <reference types="@quasar/app-vite" />
+
+import 'quasar';
+import type { QVueGlobals } from 'quasar/dist/types/globals';
+
+declare module 'vue' {
+  interface ComponentCustomProperties {
+    $q: QVueGlobals;
+  }
+}
+
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $q: QVueGlobals;
+  }
+}

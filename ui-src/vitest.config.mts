@@ -1,10 +1,10 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig, type UserConfig } from 'vite'
+import type { InlineConfig } from 'vitest'
 import vue from '@vitejs/plugin-vue'
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
-// https://vitejs.dev/config/
-export default defineConfig({
+const config = {
   test: {
     environment: 'happy-dom',
     setupFiles: 'test/vitest/setup-file.ts',
@@ -24,4 +24,7 @@ export default defineConfig({
     }),
     tsconfigPaths()
   ]
-})
+} satisfies UserConfig & { test: InlineConfig }
+
+// https://vitejs.dev/config/
+export default defineConfig(config)

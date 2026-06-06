@@ -14,7 +14,7 @@ describe('QuasarDark', () => {
     cy.dataCy('dark-card')
       .should('have.class', 'q-dark')
       .then(() => {
-        Cypress.vueWrapper.vm.$q.dark.set(false)
+        Dark.set(false)
       })
 
     cy.dataCy('dark-card').should('not.have.class', 'q-dark')
