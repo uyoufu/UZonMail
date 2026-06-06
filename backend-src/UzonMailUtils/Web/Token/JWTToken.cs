@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Web.Token
+namespace UzonMail.Utils.Web.Token
 {
     /// <summary>
     /// jwt 授权验证

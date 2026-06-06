@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Dictionary
+namespace UzonMail.Utils.Dictionary
 {
     /// <summary>
     /// 特性

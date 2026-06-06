@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Controllers.AICopilot.DTOs
+namespace UzonMail.CorePlugin.Controllers.AICopilot.DTOs
 {
     public class GenerateEmailSubjectsData : EmailBodyData
     {

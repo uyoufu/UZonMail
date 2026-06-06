@@ -1,7 +1,7 @@
 using System.Data;
-using UZonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.CorePlugin.Database.Validators.Tests
+namespace UzonMail.CorePlugin.Database.Validators.Tests
 {
     [TestClass()]
     public class InboxValidatorTests

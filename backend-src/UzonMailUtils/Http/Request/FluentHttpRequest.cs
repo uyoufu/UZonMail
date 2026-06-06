@@ -10,9 +10,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using UZonMail.Utils.Json;
+using UzonMail.Utils.Json;
 
-namespace UZonMail.Utils.Http.Request
+namespace UzonMail.Utils.Http.Request
 {
     /// <summary>
     /// HttpRequestMessage 的 Fluent 接口

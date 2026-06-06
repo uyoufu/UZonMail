@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Utils.Web.Service
+﻿namespace UzonMail.Utils.Web.Service
 {
     /// <summary>
     /// 带有键的瞬态服务

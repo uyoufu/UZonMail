@@ -2,22 +2,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Controllers.Users.Model;
-using UZonMail.CorePlugin.Database.Validators;
-using UZonMail.CorePlugin.Services.Encrypt;
-using UZonMail.CorePlugin.Services.Files;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.UserInfos;
-using UZonMail.CorePlugin.Utils.Extensions;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Organization;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.PagingQuery;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Users.Model;
+using UzonMail.CorePlugin.Database.Validators;
+using UzonMail.CorePlugin.Services.Encrypt;
+using UzonMail.CorePlugin.Services.Files;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.UserInfos;
+using UzonMail.CorePlugin.Utils.Extensions;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Organization;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.PagingQuery;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Users
+namespace UzonMail.CorePlugin.Controllers.Users
 {
     /// <summary>
     /// 用户相关

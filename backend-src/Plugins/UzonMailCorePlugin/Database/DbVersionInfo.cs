@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Database
+namespace UzonMail.CorePlugin.Database
 {
     public class DbVersionInfo
     {

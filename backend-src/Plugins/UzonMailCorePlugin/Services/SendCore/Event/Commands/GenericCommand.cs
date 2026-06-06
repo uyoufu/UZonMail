@@ -1,6 +1,6 @@
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Event.Commands
+namespace UzonMail.CorePlugin.Services.SendCore.Event.Commands
 {
     /// <summary>
     /// 泛型事件参数

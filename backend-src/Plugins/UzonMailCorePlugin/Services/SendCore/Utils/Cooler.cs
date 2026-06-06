@@ -1,7 +1,7 @@
 using log4net;
 using Timer = System.Timers.Timer;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Utils
+namespace UzonMail.CorePlugin.Services.SendCore.Utils
 {
     /// <summary>
     /// 冷却器

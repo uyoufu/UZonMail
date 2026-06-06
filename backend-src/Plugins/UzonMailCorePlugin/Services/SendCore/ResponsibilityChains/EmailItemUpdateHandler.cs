@@ -1,13 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Sender.Smtp;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.CorePlugin.SignalRHubs.Extensions;
-using UZonMail.CorePlugin.SignalRHubs.SendEmail;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL.Core.EmailSending;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.SignalRHubs.Extensions;
+using UzonMail.CorePlugin.SignalRHubs.SendEmail;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
+namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// 发件项后处理器

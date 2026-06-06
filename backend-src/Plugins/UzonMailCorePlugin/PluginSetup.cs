@@ -1,10 +1,10 @@
-using UZonMail.CorePlugin.Config;
-using UZonMail.CorePlugin.SignalRHubs;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Plugin;
-using UZonMail.Utils.Web;
+using UzonMail.CorePlugin.Config;
+using UzonMail.CorePlugin.SignalRHubs;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Plugin;
+using UzonMail.Utils.Web;
 
-namespace UZonMail.CorePlugin
+namespace UzonMail.CorePlugin
 {
     public class PluginSetup : IPlugin
     {

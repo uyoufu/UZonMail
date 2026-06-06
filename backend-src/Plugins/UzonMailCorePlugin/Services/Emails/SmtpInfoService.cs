@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Validators;
-using UZonMail.Utils.Web.Service;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Validators;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Emails
+namespace UzonMail.CorePlugin.Services.Emails
 {
     public class SmtpInfoService(SqlContext db) : IScopedService
     {

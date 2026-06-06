@@ -1,7 +1,7 @@
 using MailKit.Security;
-using UZonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.CorePlugin.Services.Settings.Model
+namespace UzonMail.CorePlugin.Services.Settings.Model
 {
     /// <summary>
     /// smtp 通知设置

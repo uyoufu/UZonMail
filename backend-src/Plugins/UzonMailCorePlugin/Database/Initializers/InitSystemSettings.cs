@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Database.Initializers
+namespace UzonMail.CorePlugin.Database.Initializers
 {
     public class InitSystemSettings(SqlContext db) : IDbInitializer
     {

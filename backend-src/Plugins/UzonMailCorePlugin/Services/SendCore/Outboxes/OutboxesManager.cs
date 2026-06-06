@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using log4net;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
+namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
 {
     /// <summary>
     /// 发件箱管理器

@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.SignalR;
-using UZonMail.CorePlugin.Services.Cache;
-using UZonMail.CorePlugin.SignalRHubs;
-using UZonMail.CorePlugin.SignalRHubs.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Permission;
-using UZonMail.Utils.Web.Access;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.Cache;
+using UzonMail.CorePlugin.SignalRHubs;
+using UzonMail.CorePlugin.SignalRHubs.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Permission;
+using UzonMail.Utils.Web.Access;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Permission
+namespace UzonMail.CorePlugin.Services.Permission
 {
     /// <summary>
     /// 权限服务

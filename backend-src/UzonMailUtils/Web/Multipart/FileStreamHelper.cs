@@ -9,9 +9,9 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using UZonMail.Utils.Extensions;
+using UzonMail.Utils.Extensions;
 
-namespace UZonMail.Utils.Web.Multipart
+namespace UzonMail.Utils.Web.Multipart
 {
     /// <summary>
     /// 文件流帮助类

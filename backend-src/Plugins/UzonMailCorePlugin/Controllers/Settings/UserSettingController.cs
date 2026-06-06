@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Controllers.Settings.Request;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Settings.Request;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Settings
+namespace UzonMail.CorePlugin.Controllers.Settings
 {
     /// <summary>
     /// 用户级设置

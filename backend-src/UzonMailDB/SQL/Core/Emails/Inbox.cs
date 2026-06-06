@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.SQL.Core.Emails
+﻿namespace UzonMail.DB.SQL.Core.Emails
 {
     /// <summary>
     /// 收件箱

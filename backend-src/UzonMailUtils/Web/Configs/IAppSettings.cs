@@ -1,4 +1,4 @@
-namespace UZonMail.Utils.Web.Configs
+namespace UzonMail.Utils.Web.Configs
 {
     public interface IAppSettings<T>
     {

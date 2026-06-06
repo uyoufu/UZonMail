@@ -21,7 +21,7 @@ export default hopeTheme({
 
   logo: '/images/logo.svg',
 
-  repo: 'uyoufu/UZonMail',
+  repo: 'uyoufu/UzonMail',
 
   docsDir: 'src',
 
@@ -43,7 +43,7 @@ export default hopeTheme({
   sidebar: sidebarZh,
 
   // 页脚
-  footer: 'Apache-2.0 license | Copyright © 2021-persent UZonMail',
+  footer: 'Apache-2.0 license | Copyright © 2021-persent UzonMail',
   displayFooter: true,
 
   // 加密配置

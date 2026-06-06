@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Organization;
-using UZonMail.Utils.Web.Access;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Organization;
+using UzonMail.Utils.Web.Access;
 
-namespace UZonMail.CorePlugin.Services.Permission
+namespace UzonMail.CorePlugin.Services.Permission
 {
     public class CoreAccessBuilder(SqlContext db) : IAccessBuilder
     {

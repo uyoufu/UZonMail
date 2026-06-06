@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.SignalRHubs.Notify
+namespace UzonMail.CorePlugin.SignalRHubs.Notify
 {
     public class NotifyMessage
     {

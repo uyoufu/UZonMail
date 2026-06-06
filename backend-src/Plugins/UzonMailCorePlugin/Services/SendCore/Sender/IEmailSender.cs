@@ -1,10 +1,10 @@
 using MimeKit;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Results;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Results;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender
+namespace UzonMail.CorePlugin.Services.SendCore.Sender
 {
     /// <summary>
     /// 邮件发送器接口

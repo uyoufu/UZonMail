@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 
-namespace UZonMail.Server.Middlewares
+namespace UzonMail.Server.Middlewares
 {
     public static class VueASPMiddlewareExtension
     {

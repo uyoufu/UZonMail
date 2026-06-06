@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace UZonMail.CorePlugin.Services.EmailDecorator
+namespace UzonMail.CorePlugin.Services.EmailDecorator
 {
     public class EmailVariableHelper
     {

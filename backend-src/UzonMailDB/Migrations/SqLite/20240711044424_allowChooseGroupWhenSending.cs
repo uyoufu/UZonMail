@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace UZonMailService.Migrations.SqLite
+namespace UzonMailService.Migrations.SqLite
 {
     /// <inheritdoc />
     public partial class allowChooseGroupWhenSending : Migration

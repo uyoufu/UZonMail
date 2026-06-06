@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.Encrypt
+namespace UzonMail.CorePlugin.Services.Encrypt
 {
     public interface IEncryptService
     {

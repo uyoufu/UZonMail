@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Database.LiteDB
+namespace UzonMail.Utils.Database.LiteDB
 {
     public abstract class AutoObjectId
     {

@@ -1,11 +1,11 @@
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.CorePlugin.Utils.Cache;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.CorePlugin.Utils.Cache;
+using UzonMail.DB.Managers.Cache;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Settings
+namespace UzonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// 设置管理中心

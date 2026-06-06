@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UZonMail.Utils.Json;
+using UzonMail.Utils.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMailUtilsTests.Json
+namespace UzonMailUtilsTests.Json
 {
     [TestClass()]
     public class JsonExtensionTests

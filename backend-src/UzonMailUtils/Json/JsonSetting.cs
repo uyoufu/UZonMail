@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
-namespace UZonMail.Utils.Json
+namespace UzonMail.Utils.Json
 {
     public class JsonSetting : JsonSerializerSettings
     {

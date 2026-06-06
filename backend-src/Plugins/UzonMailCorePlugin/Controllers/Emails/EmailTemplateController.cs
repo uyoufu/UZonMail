@@ -1,19 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Database.Validators;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Utils.Database;
-using UZonMail.CorePlugin.Utils.Extensions;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Templates;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.PagingQuery;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Database.Validators;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Utils.Database;
+using UzonMail.CorePlugin.Utils.Extensions;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Templates;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.PagingQuery;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Emails
+namespace UzonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// 邮箱模板

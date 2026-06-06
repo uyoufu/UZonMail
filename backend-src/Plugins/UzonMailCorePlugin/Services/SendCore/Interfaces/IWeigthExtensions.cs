@@ -1,6 +1,6 @@
 using log4net;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
+namespace UzonMail.CorePlugin.Services.SendCore.Interfaces
 {
     public static class IWeigthExtensions
     {

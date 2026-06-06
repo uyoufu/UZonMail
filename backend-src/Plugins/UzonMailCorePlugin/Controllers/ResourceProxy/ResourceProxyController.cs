@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace UZonMail.CorePlugin.Controllers.ResourceProxy
+namespace UzonMail.CorePlugin.Controllers.ResourceProxy
 {
     /// <summary>
     /// 资源代理控制器

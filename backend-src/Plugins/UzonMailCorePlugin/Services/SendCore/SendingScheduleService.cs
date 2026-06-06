@@ -1,10 +1,10 @@
 using Quartz;
-using UZonMail.CorePlugin.Jobs;
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Jobs;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore
+namespace UzonMail.CorePlugin.Services.SendCore
 {
     public class SendingScheduleService(ISchedulerFactory schedulerFactory)
         : ISendingScheduleService,

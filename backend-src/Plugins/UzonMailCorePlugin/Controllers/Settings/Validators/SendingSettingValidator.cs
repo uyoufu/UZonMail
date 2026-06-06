@@ -1,8 +1,8 @@
 using FluentValidation;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Controllers.Settings.Validators
+namespace UzonMail.CorePlugin.Controllers.Settings.Validators
 {
     /// <summary>
     /// 组织设置验证器

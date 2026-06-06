@@ -1,9 +1,9 @@
 using Microsoft.Extensions.AI;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.Service;
+using UzonMail.DB.SQL;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.AICopilot
+namespace UzonMail.CorePlugin.Services.AICopilot
 {
     public class AiCopilotService(
         SqlContext db,

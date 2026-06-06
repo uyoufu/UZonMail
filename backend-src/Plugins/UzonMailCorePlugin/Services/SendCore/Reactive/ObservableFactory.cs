@@ -1,4 +1,4 @@
-﻿namespace UZonMail.CorePlugin.Services.SendCore.Reactive
+﻿namespace UzonMail.CorePlugin.Services.SendCore.Reactive
 {
     public class ObservableFactory
     {

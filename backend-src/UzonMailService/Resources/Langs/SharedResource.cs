@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Localization;
 
-namespace UZonMailService.Resources.Langs
+namespace UzonMailService.Resources.Langs
 {
     /// <summary>
     /// Dummy class to group shared resources

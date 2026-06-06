@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMail.Utils.Extensions
+namespace UzonMail.Utils.Extensions
 {
     public static class IsExtensions
     {

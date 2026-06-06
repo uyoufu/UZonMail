@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Controllers.Statistics.Model
+namespace UzonMail.CorePlugin.Controllers.Statistics.Model
 {
     /// <summary>
     /// 每月发送详细

@@ -2,15 +2,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Controllers.AICopilot.DTOs;
-using UZonMail.CorePlugin.Services.AICopilot;
-using UZonMail.CorePlugin.Services.AICopilot.Config;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Configs;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.AICopilot.DTOs;
+using UzonMail.CorePlugin.Services.AICopilot;
+using UzonMail.CorePlugin.Services.AICopilot.Config;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.Utils.Web.Configs;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.AICopilot
+namespace UzonMail.CorePlugin.Controllers.AICopilot
 {
     /// <summary>
     /// 邮件 AI 助手

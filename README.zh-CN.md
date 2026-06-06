@@ -1,9 +1,9 @@
 # 宇正群邮邮件群发软件介绍
 
-[![Github release](https://img.shields.io/github/v/tag/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/releases)
-[![GitHub](https://img.shields.io/github/license/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/blob/main/LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/commits/main)
-[![GitHub issues](https://img.shields.io/github/issues/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/issues)
+[![Github release](https://img.shields.io/github/v/tag/uyoufu/UzonMail)](https://github.com/uyoufu/UzonMail/releases)
+[![GitHub](https://img.shields.io/github/license/uyoufu/UzonMail)](https://github.com/uyoufu/UzonMail/blob/main/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/uyoufu/UzonMail)](https://github.com/uyoufu/UzonMail/commits/main)
+[![GitHub issues](https://img.shields.io/github/issues/uyoufu/UzonMail)](https://github.com/uyoufu/UzonMail/issues)
 
 [简体中文](/README.zh-CN.md) | [English](/README.md) 
 
@@ -11,7 +11,7 @@
 
 [![uzon-mail-login-3](https://oss.uzoncloud.com:2234/public/files/images/image-20260329140345090.png)](https://github.com/user-attachments/assets/8cc1332e-aa63-4a84-bb99-2dc467874a7b)
 
-本软件名为 "宇正群邮 (UZonMail)"，是一款开源免费的邮件群发软件，提供邮件群发、邮件营销(EDM)、邮箱爬取、任意变量、AI 生成等诸多功能。支持所有类型邮箱账号，包括Outlook的OAuth2。原生企业级品质，支持多端用户，支持 Windows、Linux、MacOS 等操作系统, 支持服务器部署。原生多线程并发，支持多账号同时使用，性能强劲。长期持续迭代更新优化，已被外贸营销、教育培训、财务会计等多个行业广泛使用。
+本软件名为 "宇正群邮 (UzonMail)"，是一款开源免费的邮件群发软件，提供邮件群发、邮件营销(EDM)、邮箱爬取、任意变量、AI 生成等诸多功能。支持所有类型邮箱账号，包括Outlook的OAuth2。原生企业级品质，支持多端用户，支持 Windows、Linux、MacOS 等操作系统, 支持服务器部署。原生多线程并发，支持多账号同时使用，性能强劲。长期持续迭代更新优化，已被外贸营销、教育培训、财务会计等多个行业广泛使用。
 
 常见的应用场景有：
 
@@ -28,7 +28,7 @@
 
 ## ⭐ 特色功能
 
-![image-20240614121857801](https://github.com/uyoufu/UZonMail/raw/master/resource/images/uzon-mail-send.png)
+![image-20240614121857801](https://github.com/uyoufu/UzonMail/raw/master/resource/images/uzon-mail-send.png)
 
 1. **支持多个发件人同时发件**
 

@@ -1,9 +1,9 @@
 using System.Collections;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Templates;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Templates;
 
-namespace UZonMail.DB.Managers.Cache
+namespace UzonMail.DB.Managers.Cache
 {
     /// <summary>
     /// 用户模板缓存

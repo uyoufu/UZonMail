@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     [Flags]
     public enum ProxyZoneType

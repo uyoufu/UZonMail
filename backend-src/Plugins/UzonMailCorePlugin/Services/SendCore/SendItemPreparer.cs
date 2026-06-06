@@ -1,15 +1,15 @@
-using UZonMail.CorePlugin.Database.SQL.EmailSending;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.EmailWaitList;
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Database.SQL.EmailSending;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.EmailWaitList;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore
+namespace UzonMail.CorePlugin.Services.SendCore
 {
     public class SendItemPreparer(AppSettingsManager settingsService)
         : ISendItemPreparer,

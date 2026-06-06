@@ -1,6 +1,6 @@
 using MailKit.Security;
 
-namespace UZonMail.DB.SQL.Core.Emails
+namespace UzonMail.DB.SQL.Core.Emails
 {
     public enum ConnectionSecurity
     {

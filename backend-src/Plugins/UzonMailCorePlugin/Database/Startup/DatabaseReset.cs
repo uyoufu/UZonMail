@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Services.HostedServices;
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.HostedServices;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Database.Startup
+namespace UzonMail.CorePlugin.Database.Startup
 {
     /// <summary>
     /// 初始化数据库

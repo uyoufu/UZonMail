@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace UZonMail.Utils.Web.PagingQuery
+namespace UzonMail.Utils.Web.PagingQuery
 {
     /// <summary>
     /// IEnumerable 扩展,用于分页排序

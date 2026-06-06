@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 
-namespace UZonMail.Utils.Log
+namespace UzonMail.Utils.Log
 {
     public static class LoggerExtension
     {

@@ -13,11 +13,11 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using UZonMail.Utils.Database.Redis;
-using UZonMail.Utils.Web.Convention;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Database.Redis;
+using UzonMail.Utils.Web.Convention;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.Utils.Web
+namespace UzonMail.Utils.Web
 {
     /// <summary>
     /// DotNETCore 扩展类

@@ -21,7 +21,7 @@ export default {
 
   // #region Global
   global: {
-    appName: 'UZonMail',
+    appName: 'UzonMail',
 
     order: 'Order',
     failed: 'Action failed',

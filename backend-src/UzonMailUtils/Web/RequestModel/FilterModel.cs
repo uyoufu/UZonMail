@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UZonMail.Utils.Web.RequestModel
+namespace UzonMail.Utils.Web.RequestModel
 {
     public class FilterModel
     {

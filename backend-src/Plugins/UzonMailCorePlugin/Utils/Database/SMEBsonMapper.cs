@@ -1,10 +1,10 @@
 using LiteDB;
-using UZonMail.Utils.Database.Attributes;
-using UZonMail.Utils.Database.LiteDB;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Helpers;
+using UzonMail.Utils.Database.Attributes;
+using UzonMail.Utils.Database.LiteDB;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Helpers;
 
-namespace UZonMail.CorePlugin.Utils.Database
+namespace UzonMail.CorePlugin.Utils.Database
 {
     /// <summary>
     /// 自定义的 BsonMapper

@@ -1,6 +1,6 @@
-﻿using UZonMail.Utils.Results;
+﻿using UzonMail.Utils.Results;
 
-namespace UZonMail.Utils.Results
+namespace UzonMail.Utils.Results
 {
     public class ErrorResult<T> : Result<T>
     {

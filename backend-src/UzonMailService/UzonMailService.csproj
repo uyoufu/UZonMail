@@ -55,7 +55,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\UzonMailDB\UzonMailDB.csproj" />
-		<ProjectReference Include="..\UZonMailUtils\UZonMailUtils.csproj" />
+		<ProjectReference Include="..\UzonMailUtils\UzonMailUtils.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

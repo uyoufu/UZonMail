@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Utils
+namespace UzonMail.CorePlugin.Services.SendCore.Utils
 {
     /// <summary>
     /// 发件项更新器

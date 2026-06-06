@@ -7,9 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static UZonMail.Utils.Extensions.NameStylesExtension;
+using static UzonMail.Utils.Extensions.NameStylesExtension;
 
-namespace UZonMail.Utils.Json
+namespace UzonMail.Utils.Json
 {
     /// <summary>
     /// json 帮助类

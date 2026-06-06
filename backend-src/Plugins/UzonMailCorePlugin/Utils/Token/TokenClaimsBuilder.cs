@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using Uamazing.Utils.Web.Token;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Organization;
-using UZonMail.Utils.Web.Service;
-using UZonMail.Utils.Web.Token;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Organization;
+using UzonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Token;
 
-namespace UZonMail.CorePlugin.Utils.Token
+namespace UzonMail.CorePlugin.Utils.Token
 {
     /// <summary>
     /// TokenClaims 生成器

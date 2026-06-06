@@ -15,7 +15,7 @@ permalink: /guide/installation/windows-server
 
 ## 软件下载
 
-从 [历史版本](/versions) 中下载 `uzonmail-service-win-x64-version.zip` 解压后，单击 `UZonMailService.exe` 启动。
+从 [历史版本](/versions) 中下载 `uzonmail-service-win-x64-version.zip` 解压后，单击 `UzonMailService.exe` 启动。
 
 若截图如下所示，则说明安装成功：
 
@@ -26,7 +26,7 @@ permalink: /guide/installation/windows-server
 测试成功后，关闭上述终端，进行服务注册
 
 ## 服务注册
-为了实现后台启动宇正群邮，可以将启动程序 `UZonMailService.exe` 注册为 Windows 服务。具体操作如下：
+为了实现后台启动宇正群邮，可以将启动程序 `UzonMailService.exe` 注册为 Windows 服务。具体操作如下：
 
 使用管理员打开 cmd 或 powershell（建议使用 powershell），进入到解压后的目录中，执行下列命令:
 
@@ -58,11 +58,11 @@ uzon-mail start
 
 ``` powershell
 # 放行端口 22345
-netsh advfirewall firewall add rule name="UZonMail" dir=in action=allow protocol=TCP localport=22345
+netsh advfirewall firewall add rule name="UzonMail" dir=in action=allow protocol=TCP localport=22345
 
 # 查看防火墙规则
-netsh advfirewall firewall show rule name="UZonMail"
+netsh advfirewall firewall show rule name="UzonMail"
 
 # 若要删除，执行以下命令
-netsh advfirewall firewall delete rule name="UZonMail"
+netsh advfirewall firewall delete rule name="UzonMail"
 ```

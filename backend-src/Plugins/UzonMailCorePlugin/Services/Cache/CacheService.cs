@@ -1,7 +1,7 @@
-using UZonMail.Utils.Database.Redis;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Database.Redis;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Cache
+namespace UzonMail.CorePlugin.Services.Cache
 {
     /// <summary>
     /// 获取缓存服务

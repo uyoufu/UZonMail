@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMailService.Resources.Langs;
+using UzonMail.Utils.Web.ResponseModel;
+using UzonMailService.Resources.Langs;
 
-namespace UZonMail.Server.Controllers
+namespace UzonMail.Server.Controllers
 {
     /// <summary>
     /// 测试用的控制器

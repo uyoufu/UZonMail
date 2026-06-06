@@ -1,10 +1,10 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Json;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Json;
 
-namespace UZonMail.CorePlugin.Database.Initializers
+namespace UzonMail.CorePlugin.Database.Initializers
 {
     public class InitSmtpInfo(SqlContext db) : IDbInitializer
     {

@@ -1,11 +1,11 @@
 using log4net;
 using MimeKit;
-using UZonMail.CorePlugin.Services.EmailDecorator;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Sender;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.Services.EmailDecorator;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Sender;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
 
-namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
+namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// 本机邮件发送器

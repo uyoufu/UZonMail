@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Templates;
+using UzonMail.DB.Managers.Cache;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Templates;
 
-namespace UZonMail.CorePlugin.Services.SendCore.EmailWaitList
+namespace UzonMail.CorePlugin.Services.SendCore.EmailWaitList
 {
     /// <summary>
     /// 可用的模板列表

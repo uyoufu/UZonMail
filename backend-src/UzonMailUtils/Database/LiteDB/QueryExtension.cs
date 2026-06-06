@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using UZonMail.Utils.Web.RequestModel;
+using UzonMail.Utils.Web.RequestModel;
 
-namespace UZonMail.Utils.Database.LiteDB
+namespace UzonMail.Utils.Database.LiteDB
 {
     internal static class QueryExtension
     {

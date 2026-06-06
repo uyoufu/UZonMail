@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 
-namespace UZonMail.Utils.Web.Exceptions
+namespace UzonMail.Utils.Web.Exceptions
 {
     /// <summary>
     /// 已知的异常

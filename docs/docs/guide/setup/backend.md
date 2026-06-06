@@ -39,7 +39,7 @@ permalink: /guide/setup/backend
   "TokenParams": {
     "Secret": "640807f8983090349cca90b9640807f8983090349cca90b9",
     "Issuer": "127.0.0.1",
-    "Audience": "UZonMail",
+    "Audience": "UzonMail",
     "Expire": 86400000
   },
 
@@ -193,7 +193,7 @@ permalink: /guide/setup/backend
   "TokenParams": {
     "Secret": "640807f8983090349cca90b9640807f8983090349cca90b9",
     "Issuer": "127.0.0.1",
-    "Audience": "UZonMail",
+    "Audience": "UzonMail",
     "Expire": 86400000
   }
 }

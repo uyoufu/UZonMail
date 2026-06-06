@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.NetworkInformation;
 
-namespace UZonMail.Utils.Web.Token
+namespace UzonMail.Utils.Web.Token
 {
     /// <summary>
     /// 创建 token 的参数

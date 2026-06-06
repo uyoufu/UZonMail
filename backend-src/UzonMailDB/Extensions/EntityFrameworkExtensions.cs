@@ -1,10 +1,10 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Base;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Base;
 
-namespace UZonMail.DB.Extensions
+namespace UzonMail.DB.Extensions
 {
     public static class EntityFrameworkExtensions
     {

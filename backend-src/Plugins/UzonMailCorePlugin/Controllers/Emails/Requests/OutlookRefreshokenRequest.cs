@@ -1,8 +1,8 @@
-using UZonMail.CorePlugin.Config.SubConfigs;
-using UZonMail.Utils.Http.Request;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Config.SubConfigs;
+using UzonMail.Utils.Http.Request;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Controllers.Emails.Requests
+namespace UzonMail.CorePlugin.Controllers.Emails.Requests
 {
     /// <summary>
     /// Outlook 刷新令牌请求

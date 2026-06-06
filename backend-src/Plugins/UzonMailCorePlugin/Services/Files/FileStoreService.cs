@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Services.UserInfos;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Files;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.UserInfos;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Files;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Files
+namespace UzonMail.CorePlugin.Services.Files
 {
     /// <summary>
     /// 文件存储服务

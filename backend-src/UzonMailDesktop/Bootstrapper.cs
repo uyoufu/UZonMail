@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Stylet;
 using StyletIoC;
-using UZonMailDesktop.Pages;
-using UZonMailDesktop.Pages.Tray;
-using UZonMailDesktop.Utils;
+using UzonMailDesktop.Pages;
+using UzonMailDesktop.Pages.Tray;
+using UzonMailDesktop.Utils;
 
-namespace UZonMailDesktop
+namespace UzonMailDesktop
 {
     internal class Bootstrapper : Bootstrapper<ShellViewModel>
     {

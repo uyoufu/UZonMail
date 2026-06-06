@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.ComponentModel.DataAnnotations.Schema;
-using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Core.Organization;
 
-namespace UZonMail.DB.SQL.Core.Templates
+namespace UzonMail.DB.SQL.Core.Templates
 {
     /// <summary>
     /// 邮箱模板

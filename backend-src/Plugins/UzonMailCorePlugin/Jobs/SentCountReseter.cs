@@ -1,10 +1,10 @@
 using Quartz;
-using UZonMail.CorePlugin.Utils.Database;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Utils.Database;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Jobs
+namespace UzonMail.CorePlugin.Jobs
 {
     /// <summary>
     /// 发送计数重置任务

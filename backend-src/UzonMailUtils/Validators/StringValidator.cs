@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace UZonMail.Utils.Validators
+namespace UzonMail.Utils.Validators
 {
     public static class StringValidator
     {

@@ -4,16 +4,16 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Quartz;
-using UZonMail.DB.PostgreSql;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SqLite;
-using UZonMail.Server.Middlewares;
-using UZonMail.Utils.Database.Redis;
-using UZonMail.Utils.Log;
-using UZonMail.Utils.Plugin;
-using UZonMail.Utils.Web;
-using UZonMail.Utils.Web.Filters;
-using UZonMail.Utils.Web.Token;
+using UzonMail.DB.PostgreSql;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SqLite;
+using UzonMail.Server.Middlewares;
+using UzonMail.Utils.Database.Redis;
+using UzonMail.Utils.Log;
+using UzonMail.Utils.Plugin;
+using UzonMail.Utils.Web;
+using UzonMail.Utils.Web.Filters;
+using UzonMail.Utils.Web.Token;
 
 // 修改当前目录
 Directory.SetCurrentDirectory(AppContext.BaseDirectory);

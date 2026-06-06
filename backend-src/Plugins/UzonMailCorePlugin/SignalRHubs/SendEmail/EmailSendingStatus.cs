@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.SignalRHubs.SendEmail
+namespace UzonMail.CorePlugin.SignalRHubs.SendEmail
 {
     public class EmailSendingStatus
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace UZonMail.Utils.Web.Configs
+namespace UzonMail.Utils.Web.Configs
 {
     /// <summary>
     /// 用于拕配置项名称

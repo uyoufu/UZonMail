@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace UZonMail.Utils.Results
+namespace UzonMail.Utils.Results
 {
     /// <summary>
     /// 返回的结果值

@@ -1,6 +1,6 @@
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.DB.Managers.Cache
+namespace UzonMail.DB.Managers.Cache
 {
     public interface IAppSettingCacheArg
     {

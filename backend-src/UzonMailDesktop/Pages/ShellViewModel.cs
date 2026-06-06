@@ -5,15 +5,15 @@ using System.Windows.Forms;
 using Microsoft.Extensions.Configuration;
 using Panuon.WPF.UI;
 using StyletIoC;
-using UZonMailDesktop.Modules.EnvDetector;
-using UZonMailDesktop.Pages.Conductors;
-using UZonMailDesktop.Pages.MissingEnv;
-using UZonMailDesktop.Pages.Tray;
-using UZonMailDesktop.Pages.Webview;
-using UZonMailDesktop.Utils;
+using UzonMailDesktop.Modules.EnvDetector;
+using UzonMailDesktop.Pages.Conductors;
+using UzonMailDesktop.Pages.MissingEnv;
+using UzonMailDesktop.Pages.Tray;
+using UzonMailDesktop.Pages.Webview;
+using UzonMailDesktop.Utils;
 using MessageBox = System.Windows.MessageBox;
 
-namespace UZonMailDesktop.Pages
+namespace UzonMailDesktop.Pages
 {
     internal class ShellViewModel(
         IContainer ioc,
@@ -56,7 +56,7 @@ namespace UZonMailDesktop.Pages
             var currentProcess = Process.GetCurrentProcess();
             var desktopProcess = Process
                 .GetProcesses()
-                .Where(x => x.ProcessName == "UZonMailDesktop" && x.Id != currentProcess.Id)
+                .Where(x => x.ProcessName == "UzonMailDesktop" && x.Id != currentProcess.Id)
                 .FirstOrDefault();
             if (desktopProcess != null)
             {

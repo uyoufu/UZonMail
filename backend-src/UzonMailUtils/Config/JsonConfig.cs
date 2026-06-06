@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Config
+namespace UzonMail.Utils.Config
 {
     /// <summary>
     /// json 配置文件帮助类

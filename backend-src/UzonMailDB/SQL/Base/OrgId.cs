@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.SQL.Base
+﻿namespace UzonMail.DB.SQL.Base
 {
     /// <summary>
     /// 带有组织 Id 的基类

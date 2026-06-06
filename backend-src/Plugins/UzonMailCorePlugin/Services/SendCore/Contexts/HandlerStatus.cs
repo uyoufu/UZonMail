@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.SendCore.Contexts
+namespace UzonMail.CorePlugin.Services.SendCore.Contexts
 {
     public enum HandlerStatus
     {

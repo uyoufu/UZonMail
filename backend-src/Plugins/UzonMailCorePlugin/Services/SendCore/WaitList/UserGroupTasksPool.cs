@@ -1,9 +1,9 @@
 using System.Collections.Concurrent;
 using log4net;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 
-namespace UZonMail.CorePlugin.Services.SendCore.WaitList
+namespace UzonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
     /// 单个用户的发件任务池

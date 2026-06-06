@@ -1,8 +1,8 @@
-using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies
 {
     /// <summary>
     /// Proxy 工厂，通过工厂创建具体的代理

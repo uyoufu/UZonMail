@@ -3,19 +3,19 @@ using System.Net.Sockets;
 using System.Timers;
 using log4net;
 using MailKit.Net.Proxy;
-using UZonMail.CorePlugin.Services.Config;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Outboxes;
-using UZonMail.CorePlugin.Services.SendCore.Proxies;
-using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Results;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.Config;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.Proxies;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Results;
+using UzonMail.Utils.Web.Service;
 using Timer = System.Timers.Timer;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// 按发件任务缓存 SmtpClient, 因此发件完成后，要手动进行释放

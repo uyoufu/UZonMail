@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 
-namespace UZonMail.Utils.Plugin
+namespace UzonMail.Utils.Plugin
 {
     /// <summary>
     /// 插件

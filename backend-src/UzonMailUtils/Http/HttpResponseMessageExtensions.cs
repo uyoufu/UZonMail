@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Http
+namespace UzonMail.Utils.Http
 {
     public static class HttpResponseMessageExtensions
     {

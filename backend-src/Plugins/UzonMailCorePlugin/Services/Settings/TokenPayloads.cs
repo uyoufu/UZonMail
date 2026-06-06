@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using Newtonsoft.Json.Linq;
-using UZonMail.DB.SQL.Core.Organization;
-using UZonMail.DB.SQL.Core.Permission;
+using UzonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL.Core.Permission;
 
-namespace UZonMail.CorePlugin.Services.Settings
+namespace UzonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// 生成 token 时的 payload

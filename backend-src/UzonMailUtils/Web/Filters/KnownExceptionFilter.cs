@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Text.Json;
 using System.Threading.Tasks;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Utils.Web.Filters
+namespace UzonMail.Utils.Web.Filters
 {
     /// <summary>
     /// 对 KnownException 异常进行处理

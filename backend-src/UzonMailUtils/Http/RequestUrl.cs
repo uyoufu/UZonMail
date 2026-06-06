@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Utils.Http
+﻿namespace UzonMail.Utils.Http
 {
     /// <summary>
     /// 请求的 URL

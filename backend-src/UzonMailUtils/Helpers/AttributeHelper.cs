@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Helpers
+namespace UzonMail.Utils.Helpers
 {
     /// <summary>
     /// Attribute 的扩展

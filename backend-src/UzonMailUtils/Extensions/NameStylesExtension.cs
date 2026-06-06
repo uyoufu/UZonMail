@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Extensions
+namespace UzonMail.Utils.Extensions
 {
     /// <summary>
     /// 命名转换

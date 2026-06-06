@@ -1,7 +1,7 @@
 using System.Net;
 using MailKit.Net.Proxy;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// IProxyClient 适配器

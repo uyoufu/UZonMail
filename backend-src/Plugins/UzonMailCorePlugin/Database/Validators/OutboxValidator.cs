@@ -1,7 +1,7 @@
 using FluentValidation;
-using UZonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.CorePlugin.Database.Validators
+namespace UzonMail.CorePlugin.Database.Validators
 {
     /// <summary>
     /// Outbox 验证器

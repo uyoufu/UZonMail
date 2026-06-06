@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.Utils.Web.Configs
+namespace UzonMail.Utils.Web.Configs
 {
     /// <summary>
     /// 设置类配置

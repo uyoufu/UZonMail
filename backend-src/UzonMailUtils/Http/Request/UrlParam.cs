@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Utils.Http.Request
+﻿namespace UzonMail.Utils.Http.Request
 {
     public class UrlParam : Parameter
     {

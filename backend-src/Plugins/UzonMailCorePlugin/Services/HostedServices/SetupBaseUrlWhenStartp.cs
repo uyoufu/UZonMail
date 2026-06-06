@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 
-namespace UZonMail.CorePlugin.Services.HostedServices
+namespace UzonMail.CorePlugin.Services.HostedServices
 {
     /// <summary>
     /// 设置前端的 BaseUrl

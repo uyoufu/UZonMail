@@ -1,7 +1,7 @@
 using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     /// <summary>
     /// 当前程序专业的 OAuth2 认证结果类

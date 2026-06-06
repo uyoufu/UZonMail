@@ -1,9 +1,9 @@
 using System.Net.Http;
 using System.Threading.Tasks;
-using UZonMail.Utils.Http.Request;
-using UZonMail.Utils.Json;
+using UzonMail.Utils.Http.Request;
+using UzonMail.Utils.Json;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 基于 http://httpbin.org/ip 实现的 IP 查询

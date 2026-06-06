@@ -8,9 +8,9 @@ import { useI18n } from "vue-i18n"
 export function useSystemConfig () {
   const systemConfig: Ref<ISystemConfig> = ref({
     name: translateGlobal('appName'),
-    loginWelcome: 'Welcome to UZonMail',
+    loginWelcome: 'Welcome to UzonMail',
     icon: '',
-    copyright: '© 2023 UZonMail',
+    copyright: '© 2023 UzonMail',
     icpInfo: '粤ICP备2023000000号',
   })
 

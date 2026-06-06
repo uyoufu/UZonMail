@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UZonMail.DB.SqLite;
+using UzonMail.DB.SqLite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.DB.SqLite.Tests
+namespace UzonMail.DB.SqLite.Tests
 {
     [TestClass()]
     public class SqLiteContextFactoryTests

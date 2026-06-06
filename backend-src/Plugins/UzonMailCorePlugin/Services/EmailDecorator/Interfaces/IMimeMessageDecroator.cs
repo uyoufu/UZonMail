@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using MimeKit;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.EmailDecorator.Interfaces
+namespace UzonMail.CorePlugin.Services.EmailDecorator.Interfaces
 {
     /// <summary>
     /// 邮件正文修饰器

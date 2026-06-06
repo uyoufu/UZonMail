@@ -5,7 +5,7 @@ order: 1
 dir:
   order: 4
   icon: bars
-description: 宇正群邮（UZonMail）功能概览，详细介绍开源邮件群发软件的主要模块与使用流程。支持邮件群发、邮件营销、模板管理、邮箱管理等，适用于企业级邮件群发场景，是最好用的开源邮件群发软件。
+description: 宇正群邮（UzonMail）功能概览，详细介绍开源邮件群发软件的主要模块与使用流程。支持邮件群发、邮件营销、模板管理、邮箱管理等，适用于企业级邮件群发场景，是最好用的开源邮件群发软件。
 permalink: /guide/features/introduction
 ---
 

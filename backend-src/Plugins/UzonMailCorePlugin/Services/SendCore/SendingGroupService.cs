@@ -1,9 +1,9 @@
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore
+namespace UzonMail.CorePlugin.Services.SendCore
 {
     /// <summary>
     /// Compatibility facade for existing callers. New code should depend on the SendCore interfaces.

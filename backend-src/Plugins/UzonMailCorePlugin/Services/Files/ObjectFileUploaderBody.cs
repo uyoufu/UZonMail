@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace UZonMail.CorePlugin.Services.Files
+namespace UzonMail.CorePlugin.Services.Files
 {
     /// <summary>
     /// 上传的文件体

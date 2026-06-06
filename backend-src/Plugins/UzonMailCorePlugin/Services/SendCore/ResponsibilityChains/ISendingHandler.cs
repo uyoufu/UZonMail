@@ -1,7 +1,7 @@
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
+namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     public interface ISendingHandler : IScopedService
     {

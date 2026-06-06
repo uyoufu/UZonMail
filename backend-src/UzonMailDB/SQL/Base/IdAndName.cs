@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.SQL.Base
+﻿namespace UzonMail.DB.SQL.Base
 {
     /// <summary>
     /// Id 和名字

@@ -3,14 +3,14 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<RootNamespace>UZonMail.CorePlugin</RootNamespace>	
+		<RootNamespace>UzonMail.CorePlugin</RootNamespace>	
 		<OutputType>Library</OutputType>
-		<AssemblyName>UZonMail.CorePlugin</AssemblyName>
+		<AssemblyName>UzonMail.CorePlugin</AssemblyName>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-		<BaseOutputPath>..\..\UZonMailService\bin\Debug\net10.0\Plugins\UZonMailCore</BaseOutputPath>
+		<BaseOutputPath>..\..\UzonMailService\bin\Debug\net10.0\Plugins\UzonMailCore</BaseOutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -25,7 +25,7 @@
 	  <Compile Remove="Services\Settings\Core\**" />
 	  <Compile Remove="Services\UzonMailCore\**" />
 	  <Compile Remove="SignalRHubs\SeverFuncHub\**" />
-	  <Compile Remove="UZonMailCorePlugin\**" />
+	  <Compile Remove="UzonMailCorePlugin\**" />
 	  <Content Remove="bin\**" />
 	  <Content Remove="Controllers\Organization\**" />
 	  <Content Remove="Services\Encrypt\Base\**" />
@@ -33,7 +33,7 @@
 	  <Content Remove="Services\Settings\Core\**" />
 	  <Content Remove="Services\UzonMailCore\**" />
 	  <Content Remove="SignalRHubs\SeverFuncHub\**" />
-	  <Content Remove="UZonMailCorePlugin\**" />
+	  <Content Remove="UzonMailCorePlugin\**" />
 	  <EmbeddedResource Remove="bin\**" />
 	  <EmbeddedResource Remove="Controllers\Organization\**" />
 	  <EmbeddedResource Remove="Services\Encrypt\Base\**" />
@@ -41,7 +41,7 @@
 	  <EmbeddedResource Remove="Services\Settings\Core\**" />
 	  <EmbeddedResource Remove="Services\UzonMailCore\**" />
 	  <EmbeddedResource Remove="SignalRHubs\SeverFuncHub\**" />
-	  <EmbeddedResource Remove="UZonMailCorePlugin\**" />
+	  <EmbeddedResource Remove="UzonMailCorePlugin\**" />
 	  <None Remove="bin\**" />
 	  <None Remove="Controllers\Organization\**" />
 	  <None Remove="Services\Encrypt\Base\**" />
@@ -49,7 +49,7 @@
 	  <None Remove="Services\Settings\Core\**" />
 	  <None Remove="Services\UzonMailCore\**" />
 	  <None Remove="SignalRHubs\SeverFuncHub\**" />
-	  <None Remove="UZonMailCorePlugin\**" />
+	  <None Remove="UzonMailCorePlugin\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -85,7 +85,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\UzonMailDB\UzonMailDB.csproj" />
-	  <ProjectReference Include="..\..\UZonMailUtils\UZonMailUtils.csproj" />
+	  <ProjectReference Include="..\..\UzonMailUtils\UzonMailUtils.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

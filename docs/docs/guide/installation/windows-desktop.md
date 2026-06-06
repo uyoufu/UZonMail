@@ -18,7 +18,7 @@ Web 方式按如下步骤进行安装：
 
 2. 从历史版本中下载 `uzonmail-desktop-win-x64` 版本，解压
 
-3. 打开 `service/UZonMailService.exe` 程序
+3. 打开 `service/UzonMailService.exe` 程序
 
   打开后界面如下图所示，其中黄颜色的 WARN 不用理会。	![image-20241017221814354](https://oss.uzoncloud.com:2234/public/files/images/image-20241017221814354.png)
 
@@ -37,10 +37,10 @@ Windows 10 及以上系统按如下步骤进行安装
 2. 安装 [.NET runtime-desktop-10.0.5-windows-x64-installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-10.0.5-windows-x64-installer)(一般系统自带)
 3. 安装 [Webview2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/)(有 edge 浏览器，一般都自带)
 4. 从历史版本中下载 `uzonmail-desktop-win-x64` 版本，解压
-5. 打开 `UZonMailDesktop.exe` 开始使用
+5. 打开 `UzonMailDesktop.exe` 开始使用
 
 ::: tip
-第 3 步可以忽略，若打开 `UZonMailDesktop.exe` 时出现闪退或者空白，说明这个环境缺失，需要手动安装一下
+第 3 步可以忽略，若打开 `UzonMailDesktop.exe` 时出现闪退或者空白，说明这个环境缺失，需要手动安装一下
 :::
 
 ## 高级应用

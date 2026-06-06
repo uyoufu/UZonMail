@@ -1,7 +1,7 @@
 using FluentValidation;
-using UZonMail.DB.SQL.Core.Permission;
+using UzonMail.DB.SQL.Core.Permission;
 
-namespace UZonMail.CorePlugin.Database.Validators
+namespace UzonMail.CorePlugin.Database.Validators
 {
     public class UserRoleValidator : AbstractValidator<UserRoles>
     {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using UZonMail.DB.SQL.EntityConfigs;
+using UzonMail.DB.SQL.EntityConfigs;
 
-namespace UZonMail.DB.SQL
+namespace UzonMail.DB.SQL
 {
     public class SqlContextBase : DbContext
     {

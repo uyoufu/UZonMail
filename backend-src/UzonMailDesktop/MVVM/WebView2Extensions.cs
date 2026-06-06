@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace UZonMailDesktop.MVVM
+namespace UzonMailDesktop.MVVM
 {
     /// <summary>
     /// WebView2 扩展类

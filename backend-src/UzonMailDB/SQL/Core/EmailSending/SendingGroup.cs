@@ -3,12 +3,12 @@ using Innofactor.EfCoreJsonValueConverter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json.Linq;
-using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.Files;
-using UZonMail.DB.SQL.Core.Templates;
+using UzonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.Files;
+using UzonMail.DB.SQL.Core.Templates;
 
-namespace UZonMail.DB.SQL.Core.EmailSending
+namespace UzonMail.DB.SQL.Core.EmailSending
 {
     /// <summary>
     /// 发件组

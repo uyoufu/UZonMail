@@ -3,7 +3,7 @@ using Sigin.ObjectId;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace UZonMail.DB.SQL.Base
+namespace UzonMail.DB.SQL.Base
 {
     /// <summary>
     /// 所有数据库的基类

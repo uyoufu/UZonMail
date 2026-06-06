@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 
-namespace UZonMail.Utils.Http
+namespace UzonMail.Utils.Http
 {
     public static class HttpClientExtensions
     {

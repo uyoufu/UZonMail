@@ -3,7 +3,7 @@ using MailKit.Net.Proxy;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
-namespace UZonMail.DB.SQL.Core.Emails
+namespace UzonMail.DB.SQL.Core.Emails
 {
     /// <summary>
     /// 代理类

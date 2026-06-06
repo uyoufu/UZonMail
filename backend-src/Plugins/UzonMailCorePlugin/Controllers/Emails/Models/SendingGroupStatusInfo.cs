@@ -1,6 +1,6 @@
-using UZonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.CorePlugin.Controllers.Emails.Models
+namespace UzonMail.CorePlugin.Controllers.Emails.Models
 {
     public class SendingGroupStatusInfo
     {

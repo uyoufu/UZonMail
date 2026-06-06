@@ -14,8 +14,8 @@ namespace Uamazing.Utils.Envs
         {
             get
             {
-                // 从环境变量: DebugUZonMail 中获取值
-                var debug = Environment.GetEnvironmentVariable("DebugUZonMail");
+                // 从环境变量: DebugUzonMail 中获取值
+                var debug = Environment.GetEnvironmentVariable("DebugUzonMail");
                 if (bool.TryParse(debug, out var value)) return value;
                 return false;
             }

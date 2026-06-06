@@ -1,7 +1,7 @@
 using LiteDB;
-using UZonMail.CorePlugin.Config.SubConfigs;
+using UzonMail.CorePlugin.Config.SubConfigs;
 
-namespace UZonMail.CorePlugin.Utils.Database
+namespace UzonMail.CorePlugin.Utils.Database
 {
     /// <summary>
     /// LiteDB管理器

@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
-using UZonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.CorePlugin.Database.Validators
+namespace UzonMail.CorePlugin.Database.Validators
 {
     /// <summary>
     /// 收件箱验证器

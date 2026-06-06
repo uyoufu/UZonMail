@@ -1,7 +1,7 @@
-using UZonMail.CorePlugin.Config.SubConfigs;
-using UZonMail.Utils.Web.Token;
+using UzonMail.CorePlugin.Config.SubConfigs;
+using UzonMail.Utils.Web.Token;
 
-namespace UZonMail.CorePlugin.Config
+namespace UzonMail.CorePlugin.Config
 {
     /// <summary>
     /// 程序所有的配置

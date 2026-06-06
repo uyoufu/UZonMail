@@ -1,9 +1,9 @@
 using log4net;
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.CorePlugin.Services.SendCore.Outboxes;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore
+namespace UzonMail.CorePlugin.Services.SendCore
 {
     /// <summary>
     /// 发件箱任务管理器

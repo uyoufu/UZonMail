@@ -1,9 +1,9 @@
 using Innofactor.EfCoreJsonValueConverter;
 using Newtonsoft.Json.Linq;
-using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Core.Organization;
 
-namespace UZonMail.DB.SQL.Core.Emails
+namespace UzonMail.DB.SQL.Core.Emails
 {
     /// <summary>
     /// 邮箱组

@@ -1,8 +1,8 @@
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Outboxes;
-using UZonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
 
-namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
+namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// SmtpClient 释放

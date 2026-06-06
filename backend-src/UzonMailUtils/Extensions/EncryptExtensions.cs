@@ -5,9 +5,9 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography;
 using System.Text;
-using UZonMail.Utils.Results;
+using UzonMail.Utils.Results;
 
-namespace UZonMail.Utils.Extensions
+namespace UzonMail.Utils.Extensions
 {
     /// <summary>
     /// MD5 验证器

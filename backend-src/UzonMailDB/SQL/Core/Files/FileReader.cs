@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.Base;
+﻿using UzonMail.DB.SQL.Base;
 
-namespace UZonMail.DB.SQL.Core.Files
+namespace UzonMail.DB.SQL.Core.Files
 {
     /// <summary>
     /// 文件临时读取

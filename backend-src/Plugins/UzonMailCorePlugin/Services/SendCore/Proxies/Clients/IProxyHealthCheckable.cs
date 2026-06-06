@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// 可由代理管理器集中维护健康状态的代理处理器。

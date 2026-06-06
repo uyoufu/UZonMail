@@ -1,9 +1,9 @@
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.EmailSending;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.CorePlugin.Services.EmailDecorator.Interfaces
+namespace UzonMail.CorePlugin.Services.EmailDecorator.Interfaces
 {
     public interface IContentDecoratorParams
     {

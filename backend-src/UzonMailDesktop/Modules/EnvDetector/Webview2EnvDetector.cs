@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UZonMailDesktop.Helpers;
+using UzonMailDesktop.Helpers;
 
-namespace UZonMailDesktop.Modules.EnvDetector
+namespace UzonMailDesktop.Modules.EnvDetector
 {
     internal class Webview2EnvDetector : IRuntimeEnvDetector
     {

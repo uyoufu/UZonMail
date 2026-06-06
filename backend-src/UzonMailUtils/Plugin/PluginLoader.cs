@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace UZonMail.Utils.Plugin
+namespace UzonMail.Utils.Plugin
 {
     /// <summary>
     /// 插件加载器

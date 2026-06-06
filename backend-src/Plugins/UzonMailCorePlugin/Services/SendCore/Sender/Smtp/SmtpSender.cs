@@ -2,15 +2,15 @@ using log4net;
 using MailKit;
 using MailKit.Net.Smtp;
 using MimeKit;
-using UZonMail.CorePlugin.Services.Encrypt;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Proxies;
-using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Results;
+using UzonMail.CorePlugin.Services.Encrypt;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Proxies;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Results;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// 本机邮件发送器

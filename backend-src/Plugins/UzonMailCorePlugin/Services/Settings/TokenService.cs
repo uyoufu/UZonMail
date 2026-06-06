@@ -2,12 +2,12 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
-using UZonMail.CorePlugin.Config;
-using UZonMail.Utils.Json;
-using UZonMail.Utils.Web.Service;
-using UZonMail.Utils.Web.Token;
+using UzonMail.CorePlugin.Config;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Token;
 
-namespace UZonMail.CorePlugin.Services.Settings
+namespace UzonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// Token 相关的服务

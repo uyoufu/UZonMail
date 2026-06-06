@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMail.Utils.Results
+namespace UzonMail.Utils.Results
 {
     /// <summary>
     /// 字符串结果

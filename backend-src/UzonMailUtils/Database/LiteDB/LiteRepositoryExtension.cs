@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Database.LiteDB
+namespace UzonMail.Utils.Database.LiteDB
 {
     public static class LiteRepositoryExtension
     {

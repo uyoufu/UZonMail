@@ -1,6 +1,6 @@
-using UZonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL.Core.Organization;
 
-namespace UZonMail.CorePlugin.Services.UserInfos
+namespace UzonMail.CorePlugin.Services.UserInfos
 {
     /// <summary>
     /// 用户登陆结果

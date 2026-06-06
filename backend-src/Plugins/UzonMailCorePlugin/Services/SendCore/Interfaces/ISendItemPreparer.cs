@@ -1,11 +1,11 @@
-using UZonMail.CorePlugin.Database.SQL.EmailSending;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.EmailWaitList;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.EmailSending;
+using UzonMail.CorePlugin.Database.SQL.EmailSending;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.EmailWaitList;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
+namespace UzonMail.CorePlugin.Services.SendCore.Interfaces
 {
     public interface ISendItemPreparer
     {

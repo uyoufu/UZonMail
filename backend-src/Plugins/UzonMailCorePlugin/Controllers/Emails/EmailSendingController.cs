@@ -1,21 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Controllers.Emails.Models;
-using UZonMail.CorePlugin.Services.EmailDecorator;
-using UZonMail.CorePlugin.Services.EmailDecorator.Interfaces;
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Json;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Emails.Models;
+using UzonMail.CorePlugin.Services.EmailDecorator;
+using UzonMail.CorePlugin.Services.EmailDecorator.Interfaces;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Emails
+namespace UzonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// 发件相关接口

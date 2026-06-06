@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace UZonMail.Utils.Web.Configs
+namespace UzonMail.Utils.Web.Configs
 {
     public partial class AppSettingsHelper
     {

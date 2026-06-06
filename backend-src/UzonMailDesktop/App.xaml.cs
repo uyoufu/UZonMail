@@ -2,7 +2,7 @@
 using System.Windows;
 using Application = System.Windows.Application;
 
-namespace UZonMailDesktop
+namespace UzonMailDesktop
 {
     /// <summary>
     /// Interaction logic for App.xaml

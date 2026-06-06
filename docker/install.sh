@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_DOWNLOAD_URL="https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env"
-COMPOSE_DOWNLOAD_URL="https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/docker-compose.yml"
+ENV_DOWNLOAD_URL="https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/.env"
+COMPOSE_DOWNLOAD_URL="https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/docker-compose.yml"
 DEFAULT_CONTAINER_NAME="uzon-mail"
 DEFAULT_TOKEN_SECRET="B81806DA00600865988B2A305B91C47825750972A0A7159CCDC63A9838248D77"
 DEFAULT_ADMIN_PASSWORD="admin1234"
@@ -10,12 +10,12 @@ DEFAULT_DATABASE_PASSWORD="uzon-mail"
 
 # 输出普通安装日志。
 write_install_log() {
-  echo "[UZonMail] $*" >&2
+  echo "[UzonMail] $*" >&2
 }
 
 # 输出错误日志。
 write_error_log() {
-  echo "[UZonMail] $*" >&2
+  echo "[UzonMail] $*" >&2
 }
 
 # 检查 Docker 与 Docker Compose v2 是否可用。

@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Http;
 
-namespace UZonMail.Utils.Http
+namespace UzonMail.Utils.Http
 {
     /// <summary>
     /// HttpClientHandler 扩展

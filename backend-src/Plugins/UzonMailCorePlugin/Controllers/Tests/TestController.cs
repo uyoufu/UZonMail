@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Resources.Langs;
-using UZonMail.CorePlugin.SignalRHubs;
-using UZonMail.CorePlugin.SignalRHubs.Extensions;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Resources.Langs;
+using UzonMail.CorePlugin.SignalRHubs;
+using UzonMail.CorePlugin.SignalRHubs.Extensions;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Tests
+namespace UzonMail.CorePlugin.Controllers.Tests
 {
     /// <summary>
     /// 测试用的控制器

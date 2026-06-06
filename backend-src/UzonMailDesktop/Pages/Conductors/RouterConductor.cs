@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMailDesktop.Pages.Conductors
+namespace UzonMailDesktop.Pages.Conductors
 {
     /// <summary>
     /// 只允许一个活动项的 Conductor

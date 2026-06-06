@@ -1,7 +1,7 @@
 ﻿using System.Net;
-using UZonMail.Utils.Results;
+using UzonMail.Utils.Results;
 
-namespace UZonMail.Utils.Web.ResponseModel
+namespace UzonMail.Utils.Web.ResponseModel
 {
     /// <summary>
     /// 用于在控制器中方便返回结果值

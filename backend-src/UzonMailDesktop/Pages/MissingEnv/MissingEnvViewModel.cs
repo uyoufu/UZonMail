@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using UZonMailDesktop.Modules.EnvDetector;
-using UZonMailDesktop.Pages.Conductors;
+using UzonMailDesktop.Modules.EnvDetector;
+using UzonMailDesktop.Pages.Conductors;
 
-namespace UZonMailDesktop.Pages.MissingEnv
+namespace UzonMailDesktop.Pages.MissingEnv
 {
     internal class MissingEnvViewModel(IRuntimeEnvDetector env) : RouteScreen
     {

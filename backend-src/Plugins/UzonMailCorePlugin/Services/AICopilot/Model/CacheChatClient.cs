@@ -1,6 +1,6 @@
 using Microsoft.Extensions.AI;
 
-namespace UZonMail.CorePlugin.Services.AICopilot.Model
+namespace UzonMail.CorePlugin.Services.AICopilot.Model
 {
     public class CacheChatClient(IChatClient chatClient) : IChatClient
     {

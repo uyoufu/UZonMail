@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Database.Redis
+namespace UzonMail.Utils.Database.Redis
 {
     public interface ICacheAdapter
     {

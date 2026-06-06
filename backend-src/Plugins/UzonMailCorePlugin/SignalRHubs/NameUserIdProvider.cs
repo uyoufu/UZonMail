@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 
-namespace UZonMail.CorePlugin.SignalRHubs
+namespace UzonMail.CorePlugin.SignalRHubs
 {
     /// <summary>
     /// SignalR 用户 ID 提供者

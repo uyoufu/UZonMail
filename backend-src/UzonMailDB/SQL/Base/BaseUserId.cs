@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.SQL.Base
+﻿namespace UzonMail.DB.SQL.Base
 {
     /// <summary>
     /// 仅包含用户 ID 的 SqlId 类

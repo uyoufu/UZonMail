@@ -4,9 +4,9 @@ using System.Reflection.Emit;
 using Innofactor.EfCoreJsonValueConverter;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using UZonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Base;
 
-namespace UZonMail.DB.SQL.EntityConfigs
+namespace UzonMail.DB.SQL.EntityConfigs
 {
     /// <summary>
     /// 通用的实体配置

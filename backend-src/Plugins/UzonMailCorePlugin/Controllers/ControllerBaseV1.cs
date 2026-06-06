@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
-using UZonMail.Utils.Json;
-using UZonMail.Utils.Web.Token;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.Token;
 
-namespace UZonMail.CorePlugin.Controllers
+namespace UzonMail.CorePlugin.Controllers
 {
     /// <summary>
     /// 所有控制器基接口

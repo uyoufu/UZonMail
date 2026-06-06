@@ -1,8 +1,8 @@
 using MailKit.Security;
-using UZonMail.CorePlugin.Config.SubConfigs;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Config.SubConfigs;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     /// <summary>
     /// 解析 Outbox 的 graph 设置

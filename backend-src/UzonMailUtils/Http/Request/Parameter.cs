@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UZonMail.Utils.Http.Request
+namespace UzonMail.Utils.Http.Request
 {
     public class Parameter(string name, string value, ParameterType type)
     {

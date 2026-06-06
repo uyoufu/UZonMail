@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using log4net;
 
-namespace UZonMail.Utils.Network
+namespace UzonMail.Utils.Network
 {
     /// <summary>
     /// 基于多次 Ping 的 Ping 类

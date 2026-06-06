@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
-namespace UZonMail.Utils.Json
+namespace UzonMail.Utils.Json
 {
     public static class JsonExtension
     {

@@ -1,6 +1,6 @@
-using UZonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL.Core.EmailSending;
 
-namespace UZonMail.CorePlugin.Services.SendCore
+namespace UzonMail.CorePlugin.Services.SendCore
 {
     public static class SendingGroupStatusMapper
     {

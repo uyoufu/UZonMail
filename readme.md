@@ -1,9 +1,9 @@
-# UZonMail
+# UzonMail
 
-[![Github release](https://img.shields.io/github/v/tag/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/releases)
-[![GitHub](https://img.shields.io/github/license/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/blob/main/LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/commits/main)
-[![GitHub issues](https://img.shields.io/github/issues/uyoufu/UZonMail)](https://github.com/uyoufu/UZonMail/issues)
+[![Github release](https://img.shields.io/github/v/tag/uyoufu/UzonMail)](https://github.com/uyoufu/UzonMail/releases)
+[![GitHub](https://img.shields.io/github/license/uyoufu/UzonMail)](https://github.com/uyoufu/UzonMail/blob/main/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/uyoufu/UzonMail)](https://github.com/uyoufu/UzonMail/commits/main)
+[![GitHub issues](https://img.shields.io/github/issues/uyoufu/UzonMail)](https://github.com/uyoufu/UzonMail/issues)
 
 [English](/README.md) | [简体中文](/README.zh-CN.md)
 
@@ -12,7 +12,7 @@
 
 ![image-20251108135045436](https://oss.uzoncloud.com:2234/public/files/images/image-20260329140345090.png)
 
-This software is named "UZonMail", an open-source and free bulk email software that provides features such as bulk emailing, email marketing, email scraping, and arbitrary variables. It supports all types of email accounts, including Outlook's OAuth2. Native enterprise-grade quality, supports multi-platform users, compatible with Windows, Linux, macOS, and other operating systems, supports server deployment. Native multi-threaded concurrency, supports multiple accounts simultaneously, with powerful performance. Years of continuous iteration, updates, and optimizations, widely used in industries such as foreign trade marketing, education and training, finance and accounting.
+This software is named "UzonMail", an open-source and free bulk email software that provides features such as bulk emailing, email marketing, email scraping, and arbitrary variables. It supports all types of email accounts, including Outlook's OAuth2. Native enterprise-grade quality, supports multi-platform users, compatible with Windows, Linux, macOS, and other operating systems, supports server deployment. Native multi-threaded concurrency, supports multiple accounts simultaneously, with powerful performance. Years of continuous iteration, updates, and optimizations, widely used in industries such as foreign trade marketing, education and training, finance and accounting.
 
 Common application scenarios include:
 
@@ -91,7 +91,7 @@ Common application scenarios include:
 
 ## 👍 Main Advantages
 
-Compared to other bulk email software on the market, UZonMail's advantages mainly include:
+Compared to other bulk email software on the market, UzonMail's advantages mainly include:
 
 1. Enterprise-grade quality: Multi-user, high concurrency, low hardware requirements, powerful performance
 2. Web architecture, supports private deployment, adapts to multiple platforms

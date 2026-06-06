@@ -1,8 +1,8 @@
-using UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// 代理解析器

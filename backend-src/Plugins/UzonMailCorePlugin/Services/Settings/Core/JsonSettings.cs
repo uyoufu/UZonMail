@@ -1,9 +1,9 @@
 using Newtonsoft.Json.Linq;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Json;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Json;
 
-namespace UZonMail.Core.Services.Settings.Core
+namespace UzonMail.Core.Services.Settings.Core
 {
     /// <summary>
     /// 多级设置

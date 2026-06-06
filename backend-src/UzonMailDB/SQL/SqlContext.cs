@@ -1,16 +1,16 @@
 ﻿using log4net;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.DB.SQL.Core.Files;
-using UZonMail.DB.SQL.Core.Organization;
-using UZonMail.DB.SQL.Core.Permission;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.DB.SQL.Core.Templates;
-using UZonMail.DB.SQL.EntityConfigs;
-using UZonMail.Utils.Web.Service;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL.Core.Files;
+using UzonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL.Core.Permission;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.DB.SQL.Core.Templates;
+using UzonMail.DB.SQL.EntityConfigs;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.DB.SQL
+namespace UzonMail.DB.SQL
 {
     /// <summary>
     /// Sql 上下文

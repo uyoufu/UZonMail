@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
-namespace UZonMail.Utils.Json
+namespace UzonMail.Utils.Json
 {
     /// <summary>
     /// json 模型的基类

@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// SmtpClient 的 Key 对象

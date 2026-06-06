@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Utils.Database;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Results;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Utils.Database;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Results;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Settings
+namespace UzonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// 代理服务

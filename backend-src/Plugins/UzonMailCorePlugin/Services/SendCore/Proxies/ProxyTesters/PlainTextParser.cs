@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
-using UZonMail.Utils.Json;
+using UzonMail.Utils.Json;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 纯文本解析器

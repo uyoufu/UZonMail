@@ -1,8 +1,8 @@
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
+namespace UzonMail.CorePlugin.Database.Upgrade.Updaters
 {
     /// <summary>
     /// 为既有系统设置的类型添加默认值

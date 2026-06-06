@@ -5,7 +5,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace UZonMail.Utils.Web.Service
+namespace UzonMail.Utils.Web.Service
 {
     public class ServiceUtils
     {

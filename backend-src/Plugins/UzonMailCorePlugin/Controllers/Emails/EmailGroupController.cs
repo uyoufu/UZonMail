@@ -2,17 +2,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Controllers.Users.Model;
-using UZonMail.CorePlugin.Services.Emails;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.SignalRHubs;
-using UZonMail.CorePlugin.SignalRHubs.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Users.Model;
+using UzonMail.CorePlugin.Services.Emails;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.SignalRHubs;
+using UzonMail.CorePlugin.SignalRHubs.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Emails
+namespace UzonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// 邮件管理

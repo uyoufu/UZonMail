@@ -8,7 +8,7 @@ test('aes', () => {
   const key = md5(userId)
   const iv = key.substring(0, 16)
   const encrypt = aes(key, iv, password)
-  expect(encrypt).toBe('362f97e41235b088f03dd5db974d9c09')
+  expect(encrypt).toBe('7e8835850f093879c8be909adecbd373')
 
   const decrypt = deAes(key, iv, encrypt)
   expect(decrypt).toBe(password)

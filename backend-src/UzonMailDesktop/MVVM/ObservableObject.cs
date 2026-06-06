@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 
-namespace UZonMailDesktop.MVVM
+namespace UzonMailDesktop.MVVM
 {
     public class ObservableObject : INotifyPropertyChanged
     {

@@ -1,17 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Database.Validators;
-using UZonMail.CorePlugin.Services.Permission;
-using UZonMail.CorePlugin.Utils.Database;
-using UZonMail.CorePlugin.Utils.Extensions;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Permission;
-using UZonMail.Utils.Web.PagingQuery;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Database.Validators;
+using UzonMail.CorePlugin.Services.Permission;
+using UzonMail.CorePlugin.Utils.Database;
+using UzonMail.CorePlugin.Utils.Extensions;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Permission;
+using UzonMail.Utils.Web.PagingQuery;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Permission
+namespace UzonMail.CorePlugin.Controllers.Permission
 {
     public class UserRoleController(SqlContext db, PermissionService permission)
         : PermissionControllerBase

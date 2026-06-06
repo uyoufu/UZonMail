@@ -1,4 +1,4 @@
-namespace UZonMail.DB.Managers.Cache
+namespace UzonMail.DB.Managers.Cache
 {
     public class DBCacheKey(Type type, string argString)
     {

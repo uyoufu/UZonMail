@@ -1,13 +1,13 @@
 using log4net;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Outboxes;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
 
-namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
+namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     public class OutboxesUpdateHandler(
         UserGroupTasksPools userGroupTasksPools,

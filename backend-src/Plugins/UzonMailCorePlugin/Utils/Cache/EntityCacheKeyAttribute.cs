@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Utils.Cache
+namespace UzonMail.CorePlugin.Utils.Cache
 {
     /// <summary>
     /// 设置的键名称特性

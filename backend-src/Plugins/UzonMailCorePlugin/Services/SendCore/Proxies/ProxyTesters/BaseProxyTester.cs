@@ -1,10 +1,10 @@
 using log4net;
 using Newtonsoft.Json.Linq;
-using UZonMail.Utils.Http.Request;
-using UZonMail.Utils.Json;
-using UZonMail.Utils.Results;
+using UzonMail.Utils.Http.Request;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Results;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 代理查询基类

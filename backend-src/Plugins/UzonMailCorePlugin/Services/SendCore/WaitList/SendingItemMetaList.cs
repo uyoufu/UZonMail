@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
+using UzonMail.DB.SQL;
 
-namespace UZonMail.CorePlugin.Services.SendCore.WaitList
+namespace UzonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
     /// 发件项元数据列表

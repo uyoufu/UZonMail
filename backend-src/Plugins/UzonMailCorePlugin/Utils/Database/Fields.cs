@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.CorePlugin.Utils.Database
+namespace UzonMail.CorePlugin.Utils.Database
 {
     class Fields
     {

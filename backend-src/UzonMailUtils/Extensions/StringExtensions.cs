@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace UZonMail.Utils.Extensions
+namespace UzonMail.Utils.Extensions
 {
     /// <summary>
     /// 字符串扩展

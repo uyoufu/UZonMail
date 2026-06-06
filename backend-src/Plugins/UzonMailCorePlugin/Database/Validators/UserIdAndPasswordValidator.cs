@@ -1,7 +1,7 @@
 using FluentValidation;
-using UZonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL.Core.Organization;
 
-namespace UZonMail.CorePlugin.Database.Validators
+namespace UzonMail.CorePlugin.Database.Validators
 {
     /// <summary>
     /// 验证用户名称和密码

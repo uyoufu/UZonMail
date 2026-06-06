@@ -1,4 +1,4 @@
-namespace UZonMail.Core.Services.Settings.Core
+namespace UzonMail.Core.Services.Settings.Core
 {
     public enum AppSettingStatus
     {

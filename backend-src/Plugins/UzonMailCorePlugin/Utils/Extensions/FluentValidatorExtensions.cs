@@ -1,7 +1,7 @@
 using FluentValidation.Results;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Utils.Extensions
+namespace UzonMail.CorePlugin.Utils.Extensions
 {
     public static class FluentValidatorExtensions
     {

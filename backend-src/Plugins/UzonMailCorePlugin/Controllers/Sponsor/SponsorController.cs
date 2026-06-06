@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Sponsor
+namespace UzonMail.CorePlugin.Controllers.Sponsor
 {
     /// <summary>
     /// 赞助相关接口
@@ -16,8 +16,8 @@ namespace UZonMail.CorePlugin.Controllers.Sponsor
         [HttpGet("content")]
         public async Task<ResponseResult<string>> GetSponsorPageHtml()
         {
-            // 从 https://gitee.com/uzonmail/UZonMail/raw/master/docs/docs/sponsor.md 读取内容
-            string url = "https://gitee.com/uzonmail/UZonMail/raw/master/docs/docs/sponsor.md";
+            // 从 https://gitee.com/uzonmail/UzonMail/raw/master/docs/docs/sponsor.md 读取内容
+            string url = "https://gitee.com/uzonmail/UzonMail/raw/master/docs/docs/sponsor.md";
             var httpClient = httpClientFactory.CreateClient();
             var content = await httpClient.GetStringAsync(url);
 

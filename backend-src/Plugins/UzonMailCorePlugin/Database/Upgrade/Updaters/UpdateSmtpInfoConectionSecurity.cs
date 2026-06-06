@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
+using UzonMail.DB.SQL;
 
-namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
+namespace UzonMail.CorePlugin.Database.Upgrade.Updaters
 {
     public class UpdateSmtpInfoConectionSecurity(SqlContext db) : IDatabaseUpdater
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace UZonMail.Utils.Helpers
+namespace UzonMail.Utils.Helpers
 {
     public class NetworkHelper
     {

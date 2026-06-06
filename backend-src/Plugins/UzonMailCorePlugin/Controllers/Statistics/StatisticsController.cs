@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Controllers.Statistics.Model;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Statistics.Model;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Statistics
+namespace UzonMail.CorePlugin.Controllers.Statistics
 {
     public class StatisticsController(SqlContext db, TokenService tokenService) : ControllerBaseV1
     {

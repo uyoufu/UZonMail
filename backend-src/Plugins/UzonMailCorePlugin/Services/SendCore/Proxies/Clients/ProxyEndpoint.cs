@@ -1,7 +1,7 @@
 using System.Net;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     public sealed record ProxyEndpoint(
         string Scheme,

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "UZonMailDB": {
+    "UzonMailDB": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

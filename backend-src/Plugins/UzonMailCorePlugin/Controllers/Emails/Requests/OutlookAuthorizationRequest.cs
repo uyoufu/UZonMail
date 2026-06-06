@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
-using UZonMail.Utils.Http.Request;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Http.Request;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Controllers.Emails.Requests
+namespace UzonMail.CorePlugin.Controllers.Emails.Requests
 {
     /// <summary>
     /// 参考: https://learn.microsoft.com/en-us/graph/sdks/choose-authentication-providers?tabs=csharp#client-credentials-provider

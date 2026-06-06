@@ -2,15 +2,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Services.Config;
-using UZonMail.CorePlugin.Services.Files;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Files;
-using UZonMail.Utils.Web.PagingQuery;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Services.Config;
+using UzonMail.CorePlugin.Services.Files;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Files;
+using UzonMail.Utils.Web.PagingQuery;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Files
+namespace UzonMail.CorePlugin.Controllers.Files
 {
     /// <summary>
     /// 文件控制器

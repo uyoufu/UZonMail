@@ -1,8 +1,8 @@
-using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL.Core.Permission;
-using UZonMail.Utils.Web.Token;
+using UzonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Core.Permission;
+using UzonMail.Utils.Web.Token;
 
-namespace UZonMail.DB.SQL.Core.Organization
+namespace UzonMail.DB.SQL.Core.Organization
 {
     /// <summary>
     /// 用户上下文

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Base;
 
-namespace UZonMail.DB.SQL.Core.Emails
+namespace UzonMail.DB.SQL.Core.Emails
 {
     /// <summary>
     /// EmailBox 基类

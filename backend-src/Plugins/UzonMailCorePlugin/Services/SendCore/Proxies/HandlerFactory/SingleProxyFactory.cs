@@ -1,7 +1,7 @@
-using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.HandlerFactory
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.HandlerFactory
 {
     /// <summary>
     /// 单个代理

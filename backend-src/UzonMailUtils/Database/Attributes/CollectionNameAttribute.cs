@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMail.Utils.Database.Attributes
+namespace UzonMail.Utils.Database.Attributes
 {
     /// <summary>
     /// 用于标记集合名称

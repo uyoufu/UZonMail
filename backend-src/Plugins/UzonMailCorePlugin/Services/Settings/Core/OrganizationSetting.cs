@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.Core.Utils.Cache;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.Core.Utils.Cache;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.Core.Services.Settings.Core
+namespace UzonMail.Core.Services.Settings.Core
 {
     /// <summary>
     /// 组织级设置

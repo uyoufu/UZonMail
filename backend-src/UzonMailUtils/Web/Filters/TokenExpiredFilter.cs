@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 using System.Threading.Tasks;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.Utils.Web.Filters
+namespace UzonMail.Utils.Web.Filters
 {
     public class TokenExpiredFilter : IAsyncExceptionFilter
     {

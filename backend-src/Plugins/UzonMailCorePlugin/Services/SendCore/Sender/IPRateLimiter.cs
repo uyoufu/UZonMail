@@ -1,13 +1,13 @@
 using System.Collections.Concurrent;
 using log4net;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.SQL;
+using UzonMail.Utils.Web.Service;
 using Timer = System.Timers.Timer;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender
+namespace UzonMail.CorePlugin.Services.SendCore.Sender
 {
     /// <summary>
     /// 按邮箱域名及 IP 限制发送速率

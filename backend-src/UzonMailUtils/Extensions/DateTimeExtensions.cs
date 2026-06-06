@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UZonMail.Utils.Extensions
+namespace UzonMail.Utils.Extensions
 {
     /// <summary>
     /// 时间相关的扩展

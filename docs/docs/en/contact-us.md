@@ -1,7 +1,7 @@
 ---
 title: Contact Us
 sidebar: false
-description: Find official contact information for UZonMail mass-mailing software, including technical support, issue reporting, QQ groups, WeChat public account, email, and GitHub — quickly resolve mailing issues and improve your experience.
+description: Find official contact information for UzonMail mass-mailing software, including technical support, issue reporting, QQ groups, WeChat public account, email, and GitHub — quickly resolve mailing issues and improve your experience.
 permalink: /en/contact-us
 ---
 
@@ -9,7 +9,7 @@ permalink: /en/contact-us
 
 If you find a bug while using the software, or have any suggestions, you're welcome to contact me — let's make this software better together!
 
-For bug reports, please prefer [GitHub Issues](https://github.com/uyoufu/UZonMail/issues?q=is%3Aissue) so I can see them as soon as possible.
+For bug reports, please prefer [GitHub Issues](https://github.com/uyoufu/UzonMail/issues?q=is%3Aissue) so I can see them as soon as possible.
 
 If there's an urgent problem, please contact me by email.
 
@@ -27,6 +27,6 @@ WeChat Official Account: 逛逛开源界 (WanderOpenSource)
 
 Email: uyoufu@uzoncloud.com
 
-GitHub: [uyoufu/UZonMail](https://github.com/uyoufu/UZonMail)
+GitHub: [uyoufu/UzonMail](https://github.com/uyoufu/UzonMail)
 
 Personal website: [星辰大海 - uyoufu.uzoncloud.com](https://uyoufu.uzoncloud.com)

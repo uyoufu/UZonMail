@@ -2,7 +2,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace UZonMail.Utils.Web.Convention
+namespace UzonMail.Utils.Web.Convention
 {
     /// <summary>
     /// 将路由转成破折号连接的小写样式

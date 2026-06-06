@@ -1,7 +1,7 @@
 using MimeKit;
-using UZonMail.Utils.Http.Request;
+using UzonMail.Utils.Http.Request;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     public class MsGraphSendMailRequest : FluentHttpRequest
     {

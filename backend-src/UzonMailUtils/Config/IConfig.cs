@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Config
+namespace UzonMail.Utils.Config
 {
     public interface IConfig
     {

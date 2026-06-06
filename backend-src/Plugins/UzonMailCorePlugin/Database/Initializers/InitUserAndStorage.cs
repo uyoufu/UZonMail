@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Config.SubConfigs;
-using UZonMail.CorePlugin.Services.Encrypt;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Files;
-using UZonMail.DB.SQL.Core.Organization;
-using UZonMail.DB.SQL.Core.Permission;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.Configs;
+using UzonMail.CorePlugin.Config.SubConfigs;
+using UzonMail.CorePlugin.Services.Encrypt;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Files;
+using UzonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL.Core.Permission;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Web.Configs;
 
-namespace UZonMail.CorePlugin.Database.Initializers
+namespace UzonMail.CorePlugin.Database.Initializers
 {
     public class InitUserAndStorage(
         SqlContext db,

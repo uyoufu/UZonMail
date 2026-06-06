@@ -1,14 +1,14 @@
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using log4net;
-using UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
-using UZonMail.CorePlugin.Services.SendCore.Sender;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
+using UzonMail.CorePlugin.Services.SendCore.Sender;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     /// <summary>
     /// 动态代理池基类。

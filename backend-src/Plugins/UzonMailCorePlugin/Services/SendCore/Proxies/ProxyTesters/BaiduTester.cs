@@ -1,6 +1,6 @@
-using UZonMail.Utils.Http.Request;
+using UzonMail.Utils.Http.Request;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// 百度网站连通性测试

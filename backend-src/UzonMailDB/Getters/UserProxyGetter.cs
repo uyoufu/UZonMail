@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Organization;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.DB.Managers.Cache;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.DB.Getters
+namespace UzonMail.DB.Getters
 {
     public class UserProxyGetter(SqlContext db, long userId)
     {

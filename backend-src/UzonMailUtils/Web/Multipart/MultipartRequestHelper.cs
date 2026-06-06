@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.Net.Http.Headers;
 
-namespace UZonMail.Utils.Web.Multipart
+namespace UzonMail.Utils.Web.Multipart
 {
     /// <summary>
     /// Multipart 操作类

@@ -1,8 +1,8 @@
 using System.Reflection.Metadata;
 using Org.BouncyCastle.Asn1.Ocsp;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
 
-namespace UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains
+namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
     /// <summary>
     /// 不要在子类中保存状态，职责链模式的处理者应该是无状态的

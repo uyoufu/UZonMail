@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.DB.SQL.Core.Files;
-using UZonMail.Utils.Json;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL.Core.Files;
+using UzonMail.Utils.Json;
 
-namespace UZonMail.CorePlugin.Database.SQL.EmailSending
+namespace UzonMail.CorePlugin.Database.SQL.EmailSending
 {
     /// <summary>
     /// 用于生成发送项

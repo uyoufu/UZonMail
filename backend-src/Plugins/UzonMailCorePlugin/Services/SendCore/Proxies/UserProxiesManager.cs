@@ -1,13 +1,13 @@
 using System.Collections.Concurrent;
 using log4net;
-using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.Getters;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.Getters;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies
 {
     /// <summary>
     /// 用户代理管理器。

@@ -1,6 +1,6 @@
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
+namespace UzonMail.CorePlugin.Services.SendCore.Interfaces
 {
     public interface ISendingPipeline
     {

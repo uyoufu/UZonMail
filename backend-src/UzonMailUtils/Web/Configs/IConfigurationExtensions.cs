@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.Configuration;
 
-namespace UZonMail.Utils.Web.Configs
+namespace UzonMail.Utils.Web.Configs
 {
     public static class IConfigurationExtensions
     {

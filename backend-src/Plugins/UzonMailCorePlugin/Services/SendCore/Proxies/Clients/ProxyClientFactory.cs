@@ -1,7 +1,7 @@
 using log4net;
 using MailKit.Net.Proxy;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.Clients
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
 {
     public static class ProxyClientFactory
     {

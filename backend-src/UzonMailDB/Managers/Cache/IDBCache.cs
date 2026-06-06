@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using UZonMail.DB.SQL;
+using UzonMail.DB.SQL;
 
-namespace UZonMail.DB.Managers.Cache
+namespace UzonMail.DB.Managers.Cache
 {
     /// <summary>
     /// 设置接口

@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Resources.Langs
+namespace UzonMail.CorePlugin.Resources.Langs
 {
     /// <summary>
     /// Dummy class to group shared resources

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Services.Common;
-using UZonMail.DB.SQL.Base;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Services.Common;
+using UzonMail.DB.SQL.Base;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Common
+namespace UzonMail.CorePlugin.Controllers.Common
 {
     /// <summary>
     /// 通用的增删改查控制器

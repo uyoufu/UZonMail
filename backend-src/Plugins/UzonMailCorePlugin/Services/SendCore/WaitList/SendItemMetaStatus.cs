@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.SendCore.WaitList
+namespace UzonMail.CorePlugin.Services.SendCore.WaitList
 {
     /// <summary>
     /// 发件项元数据状态

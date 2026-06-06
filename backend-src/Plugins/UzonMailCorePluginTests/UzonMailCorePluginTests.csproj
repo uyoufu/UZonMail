@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UZonMailCorePlugin\UZonMailCorePlugin.csproj" />
+    <ProjectReference Include="..\UzonMailCorePlugin\UzonMailCorePlugin.csproj" />
   </ItemGroup>
 
   <ItemGroup>

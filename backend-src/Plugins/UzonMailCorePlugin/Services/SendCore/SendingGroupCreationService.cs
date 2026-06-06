@@ -1,21 +1,21 @@
 using log4net;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using UZonMail.CorePlugin.Database.SQL.EmailSending;
-using UZonMail.CorePlugin.Services.Emails;
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.CorePlugin.Utils.Extensions;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Json;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Database.SQL.EmailSending;
+using UzonMail.CorePlugin.Services.Emails;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.CorePlugin.Utils.Extensions;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore
+namespace UzonMail.CorePlugin.Services.SendCore
 {
     public class SendingGroupCreationService(
         SqlContext db,

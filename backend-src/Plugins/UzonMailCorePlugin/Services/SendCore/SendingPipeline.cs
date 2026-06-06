@@ -1,10 +1,10 @@
 using log4net;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.CorePlugin.Services.SendCore.ResponsibilityChains;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore
+namespace UzonMail.CorePlugin.Services.SendCore
 {
     public class SendingPipeline(IServiceProvider provider)
         : ISendingPipeline,

@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using UZonMail.CorePlugin.Services.Permission;
-using UZonMail.CorePlugin.Utils.Cache;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Json;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.Permission;
+using UzonMail.CorePlugin.Utils.Cache;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Settings
+namespace UzonMail.CorePlugin.Services.Settings
 {
     /// <summary>
     /// 系统通知设置

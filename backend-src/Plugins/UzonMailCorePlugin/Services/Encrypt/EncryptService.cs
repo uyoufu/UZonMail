@@ -1,9 +1,9 @@
-using UZonMail.CorePlugin.Services.Encrypt.Models;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Web.Configs;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.Encrypt.Models;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Web.Configs;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Encrypt
+namespace UzonMail.CorePlugin.Services.Encrypt
 {
     /// <summary>
     /// 加密相关的服务

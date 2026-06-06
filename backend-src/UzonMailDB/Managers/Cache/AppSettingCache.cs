@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.DB.Managers.Cache
+namespace UzonMail.DB.Managers.Cache
 {
     /// <summary>
     /// 系统设置缓存

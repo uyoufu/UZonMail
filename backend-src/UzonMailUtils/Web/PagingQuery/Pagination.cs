@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using UZonMail.Utils.Web.RequestModel;
+using UzonMail.Utils.Web.RequestModel;
 
-namespace UZonMail.Utils.Web.PagingQuery
+namespace UzonMail.Utils.Web.PagingQuery
 {
     /// <summary>
     /// 获取分页数据

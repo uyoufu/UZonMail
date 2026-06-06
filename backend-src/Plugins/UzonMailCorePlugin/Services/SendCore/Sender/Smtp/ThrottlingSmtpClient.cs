@@ -3,10 +3,10 @@ using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using UZonMail.CorePlugin.Services.Config;
-using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.CorePlugin.Services.Config;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender.Smtp
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
 {
     /// <summary>
     /// 具有发件速率限制的 smtp 客户端

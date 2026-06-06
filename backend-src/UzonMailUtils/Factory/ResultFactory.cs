@@ -1,7 +1,7 @@
-﻿using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Utils.Results;
+﻿using UzonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Results;
 
-namespace UZonMail.Utils.Factory
+namespace UzonMail.Utils.Factory
 {
     /// <summary>
     /// 此静态类用于更方便地生成结果

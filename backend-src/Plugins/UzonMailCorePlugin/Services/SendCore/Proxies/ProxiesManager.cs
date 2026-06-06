@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using log4net;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies
 {
     /// <summary>
     /// 代理管理器。

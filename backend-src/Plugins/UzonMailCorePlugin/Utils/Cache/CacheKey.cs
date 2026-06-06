@@ -1,8 +1,8 @@
 using System.Reflection;
-using UZonMail.DB.Managers.Cache;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.DB.Managers.Cache;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Utils.Cache
+namespace UzonMail.CorePlugin.Utils.Cache
 {
     /// <summary>
     /// 可以将该对象当成缓存的复合 key 来使用

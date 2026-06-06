@@ -1,11 +1,11 @@
 using log4net;
 using MailKit.Security;
-using UZonMail.CorePlugin.Services.Encrypt.Models;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Extensions;
+using UzonMail.CorePlugin.Services.Encrypt.Models;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Extensions;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
+namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
 {
     /// <summary>
     /// 发件箱地址

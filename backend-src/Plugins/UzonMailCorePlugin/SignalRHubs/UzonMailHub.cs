@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
-using UZonMail.CorePlugin.Services.Encrypt;
+using UzonMail.CorePlugin.Services.Encrypt;
 
-namespace UZonMail.CorePlugin.SignalRHubs
+namespace UzonMail.CorePlugin.SignalRHubs
 {
     /// <summary>
     /// 邮件发送进度 Hub

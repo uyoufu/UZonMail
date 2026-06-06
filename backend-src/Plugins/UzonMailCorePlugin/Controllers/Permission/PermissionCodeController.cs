@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Permission;
-using UZonMail.Utils.Web.PagingQuery;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Permission;
+using UzonMail.Utils.Web.PagingQuery;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Permission
+namespace UzonMail.CorePlugin.Controllers.Permission
 {
     /// <summary>
     /// 权限码路由

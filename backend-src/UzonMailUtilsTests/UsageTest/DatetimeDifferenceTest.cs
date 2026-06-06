@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UZonMail.Utils.Json;
+using UzonMail.Utils.Json;
 
-namespace UZonMailUtilsTests.UsageTest
+namespace UzonMailUtilsTests.UsageTest
 {
     [TestClass()]
     public class DatetimeDifferenceTest

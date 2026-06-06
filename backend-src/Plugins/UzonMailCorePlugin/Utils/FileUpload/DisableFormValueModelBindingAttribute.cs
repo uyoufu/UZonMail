@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMail.Utils.Web.FileUpload
+namespace UzonMail.Utils.Web.FileUpload
 {
     /// <summary>
     /// 禁用模型绑定

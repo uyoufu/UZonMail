@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
+namespace UzonMail.CorePlugin.Services.SendCore.Interfaces
 {
     public interface ISendingWorkerCoordinator
     {

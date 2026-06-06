@@ -1,7 +1,7 @@
 using System.Runtime.Intrinsics.X86;
-using UZonMail.CorePlugin.Services.Config;
+using UzonMail.CorePlugin.Services.Config;
 
-namespace UZonMail.CorePlugin.Services.HostedServices
+namespace UzonMail.CorePlugin.Services.HostedServices
 {
     /// <summary>
     /// 服务启动后的后台服务

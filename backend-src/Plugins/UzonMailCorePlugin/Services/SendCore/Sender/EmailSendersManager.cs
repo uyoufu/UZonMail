@@ -1,7 +1,7 @@
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Web.Service;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender
+namespace UzonMail.CorePlugin.Services.SendCore.Sender
 {
     /// <summary>
     /// 邮件发送管理器

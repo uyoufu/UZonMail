@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using UZonMail.Utils.Database.Redis;
+using UzonMail.Utils.Database.Redis;
 
-namespace UZonMail.CorePlugin.Services.Cache
+namespace UzonMail.CorePlugin.Services.Cache
 {
     public class MemoryCacheAdapter : ICacheAdapter
     {

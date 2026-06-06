@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Controllers.Settings.Request
+namespace UzonMail.CorePlugin.Controllers.Settings.Request
 {
     public class UpdateBaseApiUrlBody
     {

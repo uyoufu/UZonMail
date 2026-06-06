@@ -5,16 +5,16 @@ using System.Management;
 using System.Windows;
 using MessageBox = System.Windows.MessageBox;
 
-namespace UZonMailDesktop.Utils
+namespace UzonMailDesktop.Utils
 {
     /// <summary>
     /// 后台服务
     /// </summary>
     public class BackEndService(IConfiguration configuration)
     {
-        private static List<Process> GetUZonMailProcesses()
+        private static List<Process> GetUzonMailProcesses()
         {
-            return Process.GetProcesses().Where(x => x.ProcessName == "UZonMailService").ToList();
+            return Process.GetProcesses().Where(x => x.ProcessName == "UzonMailService").ToList();
         }
 
         public void Start()
@@ -23,7 +23,7 @@ namespace UZonMailDesktop.Utils
             CloseExist();
 
             // 判断是否有后台服务，若有，则不再启动
-            var processes = GetUZonMailProcesses();
+            var processes = GetUzonMailProcesses();
             if (processes.Count > 0)
             {
                 return;
@@ -32,7 +32,7 @@ namespace UZonMailDesktop.Utils
             try
             {
                 // 判断是否存在文件，若不存在，则进行提示
-                var servicePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "service", "UZonMailService.exe");
+                var servicePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "service", "UzonMailService.exe");
                 if (!File.Exists(servicePath))
                 {
                     MessageBox.Show("后台服务缺失，请检查！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -61,7 +61,7 @@ namespace UZonMailDesktop.Utils
         /// </summary>
         public void CloseIfNotSelf()
         {
-            var processes = GetUZonMailProcesses();
+            var processes = GetUzonMailProcesses();
             string servicePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "service");
 
             foreach (var process in processes)
@@ -89,8 +89,8 @@ namespace UZonMailDesktop.Utils
         /// </summary>
         public void CloseAll()
         {
-            // 查找进程名为 UZonMailService 的进程并杀死
-            var processes = GetUZonMailProcesses();
+            // 查找进程名为 UzonMailService 的进程并杀死
+            var processes = GetUzonMailProcesses();
             foreach (var item in processes)
             {
                 item.Kill();

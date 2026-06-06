@@ -1,6 +1,6 @@
-using UZonMail.Utils.Http.Request;
+using UzonMail.Utils.Http.Request;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     public class OneIPQuery(HttpClient httpClient)
         : PlainTextParser(httpClient, ProxyZoneType.Default)

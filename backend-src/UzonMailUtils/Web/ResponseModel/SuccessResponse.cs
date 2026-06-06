@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMail.Utils.Web.ResponseModel
+namespace UzonMail.Utils.Web.ResponseModel
 {
     /// <summary>
     /// 响应成功

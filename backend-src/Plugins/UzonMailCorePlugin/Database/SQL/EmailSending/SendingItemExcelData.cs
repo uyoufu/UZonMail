@@ -1,9 +1,9 @@
 using Newtonsoft.Json.Linq;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Json;
-using UZonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.Exceptions;
 
-namespace UZonMail.CorePlugin.Database.SQL.EmailSending
+namespace UzonMail.CorePlugin.Database.SQL.EmailSending
 {
     /// <summary>
     /// 发件组中的 Excel 数据

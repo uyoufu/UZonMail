@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.Utils
+﻿namespace UzonMail.DB.Utils
 {
     /// <summary>
     /// 分页加载器

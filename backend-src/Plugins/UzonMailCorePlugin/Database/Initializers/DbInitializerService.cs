@@ -1,10 +1,10 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Services.HostedServices;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.CorePlugin.Services.HostedServices;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Database.Initializers
+namespace UzonMail.CorePlugin.Database.Initializers
 {
     public class DbInitializerService(IEnumerable<IDbInitializer> dbInitializers, SqlContext db)
         : IScopedServiceAfterStarting

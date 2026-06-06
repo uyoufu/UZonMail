@@ -6,9 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UZonMail.Utils.Dictionary;
+using UzonMail.Utils.Dictionary;
 
-namespace UZonMail.Utils.Config
+namespace UzonMail.Utils.Config
 {
     /// <summary>
     /// 配置容器，可有多个配置

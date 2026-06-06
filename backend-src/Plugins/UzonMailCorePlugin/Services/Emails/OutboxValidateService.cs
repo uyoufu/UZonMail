@@ -1,16 +1,16 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Controllers.Users.Model;
-using UZonMail.CorePlugin.Services.Config;
-using UZonMail.CorePlugin.Services.SendCore.Sender;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Web.Exceptions;
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Controllers.Users.Model;
+using UzonMail.CorePlugin.Services.Config;
+using UzonMail.CorePlugin.Services.SendCore.Sender;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Web.Exceptions;
+using UzonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Emails
+namespace UzonMail.CorePlugin.Services.Emails
 {
     /// <summary>
     /// 邮箱验证服务

@@ -24,7 +24,7 @@ Make sure the following tools are available in your command line:
 
 1. Open a terminal.
 
-2. Clone the repository: `git clone https://github.com/GalensGan/UZonMail` and switch to the `master` branch.
+2. Clone the repository: `git clone https://github.com/GalensGan/UzonMail` and switch to the `master` branch.
 
 3. Go to the `scripts` directory in the project root and run the commands below to start the build. Build outputs are placed in the `build` directory.
 

@@ -1,16 +1,16 @@
 using MailKit.Security;
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Services.Encrypt;
-using UZonMail.CorePlugin.Services.SendCore.Sender;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Services.Encrypt;
+using UzonMail.CorePlugin.Services.SendCore.Sender;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Settings
+namespace UzonMail.CorePlugin.Controllers.Settings
 {
     /// <summary>
     /// 通知设置

@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Utils.Results
+﻿namespace UzonMail.Utils.Results
 {
     /// <summary>
     /// 结果基类

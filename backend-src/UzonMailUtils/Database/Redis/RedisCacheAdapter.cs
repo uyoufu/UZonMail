@@ -2,9 +2,9 @@ using System;
 using System.Threading.Tasks;
 using log4net;
 using StackExchange.Redis;
-using UZonMail.Utils.Json;
+using UzonMail.Utils.Json;
 
-namespace UZonMail.Utils.Database.Redis
+namespace UzonMail.Utils.Database.Redis
 {
     public class RedisCacheAdapter : ICacheAdapter
     {

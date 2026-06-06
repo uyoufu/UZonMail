@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace UZonMail.Utils.Http
+namespace UzonMail.Utils.Http
 {
     public class Uri2 : Uri
     {

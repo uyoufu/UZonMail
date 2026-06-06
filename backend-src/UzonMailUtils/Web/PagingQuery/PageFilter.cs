@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Utils.Web.PagingQuery
+﻿namespace UzonMail.Utils.Web.PagingQuery
 {
     /// <summary>
     /// 分页过滤

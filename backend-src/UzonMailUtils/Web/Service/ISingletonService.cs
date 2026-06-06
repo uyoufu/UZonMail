@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMail.Utils.Web.Service
+namespace UzonMail.Utils.Web.Service
 {
     /// <summary>
     /// 标记为单例

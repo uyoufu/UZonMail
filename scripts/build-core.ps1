@@ -132,11 +132,11 @@ function Update-Frontend {
 }
 Update-Frontend
 
-# 编译后端 UZonMailService
-Write-Host "开始编译后端 UZonMailService ..." -ForegroundColor Yellow
+# 编译后端 UzonMailService
+Write-Host "开始编译后端 UzonMailService ..." -ForegroundColor Yellow
 $backendSrc = Join-Path -Path $gitRoot -ChildPath "backend-src"
 
-$serviceSrc = Join-Path -Path $backendSrc -ChildPath "UZonMailService"
+$serviceSrc = Join-Path -Path $backendSrc -ChildPath "UzonMailService"
 # 使用 dotnet 编译
 Set-Location -Path $serviceSrc
 $mainService = "$gitRoot/build/service-$publishPlatform"
@@ -165,7 +165,7 @@ if (Test-Path -Path $developSettingPath -PathType Leaf) {
 # 复制 Quartz/quartz-sqlite.sqlite3 到 data/db 目录中
 New-Item -Path "$serviceDest/data/db" -ItemType Directory  -ErrorAction SilentlyContinue
 Copy-Item -Path "$serviceSrc/Quartz/quartz-sqlite.sqlite3" -Destination "$serviceDest/data/db/quartz-sqlite.sqlite3" -Force
-Write-Host "后端 UZonMailService 编译完成!" -ForegroundColor Green
+Write-Host "后端 UzonMailService 编译完成!" -ForegroundColor Green
 
 # 复制 Docker 相关文件到编译目录
 $dockerFiles = @(
@@ -324,11 +324,11 @@ function Publish-PluginProject {
     Write-Host "后端 $projectName 编译完成!" -ForegroundColor Green
 
 }
-Publish-PluginProject "UZonMailCorePlugin" "data"
+Publish-PluginProject "UzonMailCorePlugin" "data"
 #endregion
 
-# region 编译后端 UZonMailProPlugin
-Publish-PluginProject "UZonMailProPlugin" "Scripts"
+# region 编译后端 UzonMailProPlugin
+Publish-PluginProject "UzonMailProPlugin" "Scripts"
 #endregion
 
 
@@ -344,8 +344,8 @@ $buildVersion = "error"
 $zipSrc = "$mainService/*"
 
 # 读取服务端的版本号
-$UZonMailServiceDll = Join-Path -Path $mainService -ChildPath "UZonMailService.dll"
-$serviceVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($UZonMailServiceDll).FileVersion
+$UzonMailServiceDll = Join-Path -Path $mainService -ChildPath "UzonMailService.dll"
+$serviceVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($UzonMailServiceDll).FileVersion
 # 生成文件路径
 $zipDest = Join-Path -Path $gitRoot -ChildPath "build\uzonmail-service-$publishPlatform-$serviceVersion.zip"
 

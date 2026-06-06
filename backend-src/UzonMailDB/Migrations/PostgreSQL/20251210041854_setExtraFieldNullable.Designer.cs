@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using UZonMail.DB.PostgreSql;
+using UzonMail.DB.PostgreSql;
 
 #nullable disable
 
-namespace UZonMail.DB.Migrations.PostgreSQL
+namespace UzonMail.DB.Migrations.PostgreSQL
 {
     [DbContext(typeof(PostgreSqlContext))]
     [Migration("20251210041854_setExtraFieldNullable")]
@@ -145,7 +145,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("RoleUserRoles");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Base.IdAndName", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Base.IdAndName", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -179,7 +179,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("IdAndName");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.EmailAddress", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailSending.EmailAddress", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -213,7 +213,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("EmailAddress");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailSending.SendingGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -311,7 +311,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("SendingGroups");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -407,7 +407,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("SendingItems");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItemInbox", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailSending.SendingItemInbox", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -455,7 +455,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("SendingItemInboxes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -512,7 +512,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("EmailGroups");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.Inbox", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.Inbox", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -588,7 +588,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("Inboxes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.Outbox", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.Outbox", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -685,7 +685,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("Outboxes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.SmtpInfo", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.SmtpInfo", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -729,7 +729,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("SmtpInfos");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileBucket", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileBucket", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -770,7 +770,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("FileBuckets");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileObject", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileObject", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -819,7 +819,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("FileObjects");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileReader", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileReader", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -873,7 +873,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("FileReaders");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileUsage", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileUsage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -924,7 +924,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("FileUsages");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.Department", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Organization.Department", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -971,7 +971,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("Departments");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.User", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Organization.User", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1043,7 +1043,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.PermissionCode", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Permission.PermissionCode", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1084,7 +1084,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("PermissionCodes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.Role", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Permission.Role", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1130,7 +1130,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.UserRoles", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Permission.UserRoles", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1166,7 +1166,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.AppSetting", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Settings.AppSetting", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1224,7 +1224,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("AppSettings");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Settings.Proxy", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Settings.Proxy", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1280,7 +1280,7 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.ToTable("Proxies");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Templates.EmailTemplate", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Templates.EmailTemplate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1326,13 +1326,13 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("DepartmentEmailTemplate", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Templates.EmailTemplate", null)
                         .WithMany()
                         .HasForeignKey("EmailTemplateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.Organization.Department", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Organization.Department", null)
                         .WithMany()
                         .HasForeignKey("ShareToOrganizationsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1341,13 +1341,13 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("EmailTemplateSendingGroup", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
                         .WithMany()
                         .HasForeignKey("SendingGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Templates.EmailTemplate", null)
                         .WithMany()
                         .HasForeignKey("TemplatesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1356,13 +1356,13 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("EmailTemplateUser", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Templates.EmailTemplate", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Templates.EmailTemplate", null)
                         .WithMany()
                         .HasForeignKey("EmailTemplateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.Organization.User", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Organization.User", null)
                         .WithMany()
                         .HasForeignKey("ShareToUsersId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1371,13 +1371,13 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("FileUsageSendingGroup", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileUsage", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Files.FileUsage", null)
                         .WithMany()
                         .HasForeignKey("AttachmentsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
                         .WithMany()
                         .HasForeignKey("SendingGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1386,13 +1386,13 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("FileUsageSendingItem", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileUsage", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Files.FileUsage", null)
                         .WithMany()
                         .HasForeignKey("AttachmentsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingItem", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.EmailSending.SendingItem", null)
                         .WithMany()
                         .HasForeignKey("SendingItemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1401,13 +1401,13 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("OutboxSendingGroup", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Emails.Outbox", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Emails.Outbox", null)
                         .WithMany()
                         .HasForeignKey("OutboxesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.EmailSending.SendingGroup", null)
                         .WithMany()
                         .HasForeignKey("SendingGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1416,13 +1416,13 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("PermissionCodeRole", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Permission.PermissionCode", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Permission.PermissionCode", null)
                         .WithMany()
                         .HasForeignKey("PermissionCodesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.Permission.Role", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Permission.Role", null)
                         .WithMany()
                         .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1431,22 +1431,22 @@ namespace UZonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("RoleUserRoles", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Permission.Role", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Permission.Role", null)
                         .WithMany()
                         .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.Permission.UserRoles", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Permission.UserRoles", null)
                         .WithMany()
                         .HasForeignKey("UserRolesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.EmailSending.SendingGroup", "SendingGroup")
+                    b.HasOne("UzonMail.DB.SQL.Core.EmailSending.SendingGroup", "SendingGroup")
                         .WithMany()
                         .HasForeignKey("SendingGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1455,9 +1455,9 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.Navigation("SendingGroup");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Organization.User", "User")
+                    b.HasOne("UzonMail.DB.SQL.Core.Organization.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1466,18 +1466,18 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.Inbox", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.Inbox", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Emails.EmailGroup", null)
+                    b.HasOne("UzonMail.DB.SQL.Core.Emails.EmailGroup", null)
                         .WithMany("Inboxes")
                         .HasForeignKey("EmailGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileObject", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileObject", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileBucket", "FileBucket")
+                    b.HasOne("UzonMail.DB.SQL.Core.Files.FileBucket", "FileBucket")
                         .WithMany()
                         .HasForeignKey("FileBucketId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1486,9 +1486,9 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.Navigation("FileBucket");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileReader", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileReader", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileObject", "FileObject")
+                    b.HasOne("UzonMail.DB.SQL.Core.Files.FileObject", "FileObject")
                         .WithMany()
                         .HasForeignKey("FileObjectId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1497,15 +1497,15 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.Navigation("FileObject");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Files.FileUsage", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileUsage", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Files.FileObject", "FileObject")
+                    b.HasOne("UzonMail.DB.SQL.Core.Files.FileObject", "FileObject")
                         .WithMany()
                         .HasForeignKey("FileObjectId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UZonMail.DB.SQL.Core.Organization.User", "OwnerUser")
+                    b.HasOne("UzonMail.DB.SQL.Core.Organization.User", "OwnerUser")
                         .WithMany()
                         .HasForeignKey("OwnerUserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1516,23 +1516,23 @@ namespace UZonMail.DB.Migrations.PostgreSQL
                     b.Navigation("OwnerUser");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Permission.UserRoles", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Permission.UserRoles", b =>
                 {
-                    b.HasOne("UZonMail.DB.SQL.Core.Organization.User", "User")
+                    b.HasOne("UzonMail.DB.SQL.Core.Organization.User", "User")
                         .WithOne("UserRoles")
-                        .HasForeignKey("UZonMail.DB.SQL.Core.Permission.UserRoles", "UserId")
+                        .HasForeignKey("UzonMail.DB.SQL.Core.Permission.UserRoles", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Emails.EmailGroup", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
                     b.Navigation("Inboxes");
                 });
 
-            modelBuilder.Entity("UZonMail.DB.SQL.Core.Organization.User", b =>
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Organization.User", b =>
                 {
                     b.Navigation("UserRoles");
                 });

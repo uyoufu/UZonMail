@@ -1,18 +1,18 @@
-using UZonMail.CorePlugin.Services.Encrypt.Models;
-using UZonMail.CorePlugin.Services.SendCore;
-using UZonMail.CorePlugin.Services.SendCore.Interfaces;
-using UZonMail.CorePlugin.Services.SendCore.Outboxes;
-using UZonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
-using UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Extensions;
-using UZonMail.Utils.Results;
+using UzonMail.CorePlugin.Services.Encrypt.Models;
+using UzonMail.CorePlugin.Services.SendCore;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
+using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters;
+using UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Results;
 
-namespace UZonMail.CorePluginTests.Services.SendCore
+namespace UzonMail.CorePluginTests.Services.SendCore
 {
     [TestClass]
     public class SendCoreUtilityTests
@@ -209,7 +209,8 @@ namespace UZonMail.CorePluginTests.Services.SendCore
                 1,
                 encryptParams,
                 type,
-                sendingItemIds ?? []
+                // 保留 null 语义，避免共享发件箱被当成空的特定发件项列表。
+                sendingItemIds!
             );
         }
 

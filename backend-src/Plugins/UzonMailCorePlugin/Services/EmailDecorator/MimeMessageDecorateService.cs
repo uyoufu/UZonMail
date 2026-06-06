@@ -1,8 +1,8 @@
 using MimeKit;
-using UZonMail.CorePlugin.Services.EmailDecorator.Interfaces;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.EmailDecorator.Interfaces;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.EmailDecorator
+namespace UzonMail.CorePlugin.Services.EmailDecorator
 {
     /// <summary>
     /// 邮件消息体装饰器

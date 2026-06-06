@@ -1,6 +1,6 @@
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.HostedServices
+namespace UzonMail.CorePlugin.Services.HostedServices
 {
     /// <summary>
     /// 服务启动时执行

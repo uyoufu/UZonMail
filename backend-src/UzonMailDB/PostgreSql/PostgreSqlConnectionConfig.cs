@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL;
+﻿using UzonMail.DB.SQL;
 
-namespace UZonMail.DB.PostgreSql
+namespace UzonMail.DB.PostgreSql
 {
     /// <summary>
     /// PostgreSql 连接信息

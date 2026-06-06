@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMailUtilsTests.Web.TestSource
+namespace UzonMailUtilsTests.Web.TestSource
 {
     internal class TransientServiceTest : ITransientService<TransientServiceTest>
     {

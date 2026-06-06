@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace UZonMail.Utils.Web
+namespace UzonMail.Utils.Web
 {
     /// <summary>
     /// Url地址的格式化和反格式化

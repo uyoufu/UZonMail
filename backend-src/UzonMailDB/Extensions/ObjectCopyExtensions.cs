@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.Extensions
+﻿namespace UzonMail.DB.Extensions
 {
     public static class ObjectCopyExtensions
     {

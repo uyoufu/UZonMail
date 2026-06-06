@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Organization;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Organization;
 
-namespace UZonMail.DB.Managers.Cache
+namespace UzonMail.DB.Managers.Cache
 {
     /// <summary>
     /// 用户信息缓存

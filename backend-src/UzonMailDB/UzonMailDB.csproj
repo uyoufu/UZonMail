@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>UZonMail.DB</RootNamespace>
+    <RootNamespace>UzonMail.DB</RootNamespace>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 
@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UZonMailUtils\UZonMailUtils.csproj" />
+    <ProjectReference Include="..\UzonMailUtils\UzonMailUtils.csproj" />
   </ItemGroup>
 
 </Project>

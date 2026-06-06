@@ -1,6 +1,6 @@
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Database.Initializers
+namespace UzonMail.CorePlugin.Database.Initializers
 {
     /// <summary>
     /// 数据库初始化器

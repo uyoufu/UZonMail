@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace UZonMailService.Migrations.SqLite
+namespace UzonMailService.Migrations.SqLite
 {
     /// <inheritdoc />
     public partial class updateRoleModel : Migration

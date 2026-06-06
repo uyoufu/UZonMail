@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Utils.Web.Token
+﻿namespace UzonMail.Utils.Web.Token
 {
     public interface ITokenSource
     {

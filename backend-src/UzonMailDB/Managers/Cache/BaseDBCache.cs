@@ -1,6 +1,6 @@
-using UZonMail.DB.SQL;
+using UzonMail.DB.SQL;
 
-namespace UZonMail.DB.Managers.Cache
+namespace UzonMail.DB.Managers.Cache
 {
     /// <summary>
     /// 数据库缓存的基类

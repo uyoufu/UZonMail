@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Services.Emails;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Validators;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Services.Emails;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Validators;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Emails
+namespace UzonMail.CorePlugin.Controllers.Emails
 {
     /// <summary>
     /// Smtp 信息控制器

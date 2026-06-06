@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
-using UZonMail.Utils.Json;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.ResponseModel;
 
 namespace Uamazing.Utils.Web.ResponseModel
 {

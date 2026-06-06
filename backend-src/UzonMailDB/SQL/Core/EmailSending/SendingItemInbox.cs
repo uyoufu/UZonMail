@@ -1,7 +1,7 @@
-﻿using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL.Core.Emails;
+﻿using UzonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.DB.SQL.Core.EmailSending
+namespace UzonMail.DB.SQL.Core.EmailSending
 {
     /// <summary>
     /// 发件项与发件箱对应的表

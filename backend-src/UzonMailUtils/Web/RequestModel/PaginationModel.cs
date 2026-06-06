@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMail.Utils.Web.RequestModel
+namespace UzonMail.Utils.Web.RequestModel
 {
     /// <summary>
     /// 分页数据

@@ -2,9 +2,9 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.ServerSystem
+namespace UzonMail.CorePlugin.Controllers.ServerSystem
 {
     public class SystemInfoController : ControllerBaseV1
     {

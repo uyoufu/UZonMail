@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.Utils.Web.Access
+namespace UzonMail.Utils.Web.Access
 {
     /// <summary>
     /// 权限码构建器

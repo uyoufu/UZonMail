@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL;
+using UzonMail.DB.SQL;
 
-namespace UZonMail.DB.PostgreSql
+namespace UzonMail.DB.PostgreSql
 {
     public class PostgreSqlContext : SqlContext
     {

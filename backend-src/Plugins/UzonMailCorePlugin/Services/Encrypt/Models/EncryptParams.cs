@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.Encrypt.Models
+namespace UzonMail.CorePlugin.Services.Encrypt.Models
 {
     public class EncryptParams
     {

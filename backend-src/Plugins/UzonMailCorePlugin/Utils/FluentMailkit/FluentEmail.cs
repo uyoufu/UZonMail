@@ -2,12 +2,12 @@ using MailKit.Net.Proxy;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using UZonMail.CorePlugin.Services.Emails;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.DB.SQL.Core.Emails;
+using UzonMail.CorePlugin.Services.Emails;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.CorePlugin.Utils.FluentMailkit
+namespace UzonMail.CorePlugin.Utils.FluentMailkit
 {
     /// <summary>
     /// SmtpClient 的 fluent 版本

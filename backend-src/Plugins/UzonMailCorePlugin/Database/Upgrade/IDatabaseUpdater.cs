@@ -1,6 +1,6 @@
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Database.Upgrade
+namespace UzonMail.CorePlugin.Database.Upgrade
 {
     /// <summary>
     /// 数据库更新器

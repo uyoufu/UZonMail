@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "UZonMailCore": {
+    "UzonMailCore": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

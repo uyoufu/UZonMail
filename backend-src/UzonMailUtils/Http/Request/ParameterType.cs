@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Utils.Http.Request
+﻿namespace UzonMail.Utils.Http.Request
 {
     /// <summary>
     /// Types of parameters that can be added to requests

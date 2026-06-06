@@ -1,4 +1,4 @@
-﻿namespace UZonMail.Utils.Database.Redis
+﻿namespace UzonMail.Utils.Database.Redis
 {
     /// <summary>
     /// Redis 连接配置

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Event
+namespace UzonMail.CorePlugin.Services.SendCore.Event
 {
     /// <summary>
     /// 异步弱事件

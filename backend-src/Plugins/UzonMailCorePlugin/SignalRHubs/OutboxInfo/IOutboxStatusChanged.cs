@@ -1,6 +1,6 @@
-using UZonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.CorePlugin.SignalRHubs.OutboxInfo
+namespace UzonMail.CorePlugin.SignalRHubs.OutboxInfo
 {
     /// <summary>
     /// 发件箱状态变更

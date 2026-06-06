@@ -1,9 +1,9 @@
 using System.Collections.Concurrent;
-using UZonMail.CorePlugin.Services.SendCore.Contexts;
-using UZonMail.Utils.Results;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.Utils.Results;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Sender.MsGraph
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     public class MsGraphClientFactory(IServiceProvider serviceProvider) : ISingletonService
     {

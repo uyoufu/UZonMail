@@ -1,6 +1,6 @@
-﻿using UZonMail.DB.SQL.Base;
+﻿using UzonMail.DB.SQL.Base;
 
-namespace UZonMail.DB.SQL.Core.Organization
+namespace UzonMail.DB.SQL.Core.Organization
 {
     /// <summary>
     /// 部门表

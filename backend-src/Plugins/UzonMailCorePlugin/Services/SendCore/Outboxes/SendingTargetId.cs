@@ -1,4 +1,4 @@
-namespace UZonMail.CorePlugin.Services.SendCore.Outboxes
+namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
 {
     /// <summary>
     /// 用于在发件箱地址中保存发送项的 Id

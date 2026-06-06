@@ -16,7 +16,7 @@ permalink: /guide/features/variable
 
 ## 变量分类
 
-UZonMail 中的变量分为两种:
+UzonMail 中的变量分为两种:
 
 1. 固定值变量
 2. 随机值变量

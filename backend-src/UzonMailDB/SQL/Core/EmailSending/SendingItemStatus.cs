@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.SQL.Core.EmailSending
+﻿namespace UzonMail.DB.SQL.Core.EmailSending
 {
     /// <summary>
     /// 邮件状态

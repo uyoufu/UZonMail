@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.SQL
+﻿namespace UzonMail.DB.SQL
 {
     public interface IConnectionString
     {

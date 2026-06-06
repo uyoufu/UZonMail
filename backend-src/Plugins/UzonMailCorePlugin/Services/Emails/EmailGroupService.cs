@@ -1,13 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Services.Common;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Utils.Database;
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
-using UZonMail.Utils.Web.Exceptions;
+using UzonMail.CorePlugin.Services.Common;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Utils.Database;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Web.Exceptions;
 
-namespace UZonMail.CorePlugin.Services.Emails
+namespace UzonMail.CorePlugin.Services.Emails
 {
     /// <summary>
     /// 邮件组

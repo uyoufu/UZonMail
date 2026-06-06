@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
-using UZonMail.Utils.Results;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Results;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
 {
     /// <summary>
     /// IP 查询接口的基类

@@ -1,10 +1,10 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Services.Notification.EmailNotifier;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
+using UzonMail.CorePlugin.Services.Notification.EmailNotifier;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
 
-namespace UZonMail.CorePlugin.Database.Initializers
+namespace UzonMail.CorePlugin.Database.Initializers
 {
     public class InitNotificationTemplate(SqlContext db) : IDbInitializer
     {

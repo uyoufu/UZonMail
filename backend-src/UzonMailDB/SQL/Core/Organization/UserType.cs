@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.SQL.Core.Organization
+﻿namespace UzonMail.DB.SQL.Core.Organization
 {
     public enum UserType
     {

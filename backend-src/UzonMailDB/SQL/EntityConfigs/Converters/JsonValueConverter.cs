@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace UZonMail.DB.SQL.EntityConfigs.Converters
+namespace UzonMail.DB.SQL.EntityConfigs.Converters
 {
     /// <summary>
     /// 将对象转换成 json 保存

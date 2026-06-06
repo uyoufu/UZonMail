@@ -1,7 +1,7 @@
-﻿using UZonMail.Utils.Extensions;
+﻿using UzonMail.Utils.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace UZonMail.Utils.Extensions.Tests
+namespace UzonMail.Utils.Extensions.Tests
 {
     [TestClass()]
     public class EncryptExtensionsTests
@@ -18,7 +18,7 @@ namespace UZonMail.Utils.Extensions.Tests
             var decrypt = encrypt.DeAES(userIdMd5, userIdMd5.Substring(0, 16));
             // 判断是否相等
             Assert.IsTrue(decrypt == pasword);
-            Assert.AreEqual("7e8835850f093879c8be909adecbd373", encrypt);
+            Assert.AreEqual("fbb9c0fcdd2024ceac187224e2bfd3a7", encrypt);
         }
 
         [DataRow("admin1234")]

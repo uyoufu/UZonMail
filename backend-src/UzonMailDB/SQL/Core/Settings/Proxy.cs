@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
-using UZonMail.DB.SQL.Base;
-using UZonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.DB.SQL.Core.Settings
+namespace UzonMail.DB.SQL.Core.Settings
 {
     /// <summary>
     /// 组织中的代理

@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
-using UZonMail.CorePlugin.Services.Files;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Files;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Services.Files;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Files;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Controllers.Files
+namespace UzonMail.CorePlugin.Controllers.Files
 {
     public class FileReaderController(SqlContext db, FileStoreService fileStoreService)
         : ControllerBaseV1

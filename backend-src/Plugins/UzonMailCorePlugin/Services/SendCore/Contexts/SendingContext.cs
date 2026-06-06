@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.SignalR;
-using UZonMail.CorePlugin.Services.SendCore.Outboxes;
-using UZonMail.CorePlugin.Services.SendCore.WaitList;
-using UZonMail.CorePlugin.SignalRHubs;
-using UZonMail.DB.SQL;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.SignalRHubs;
+using UzonMail.DB.SQL;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Contexts
+namespace UzonMail.CorePlugin.Services.SendCore.Contexts
 {
     /// <summary>
     /// 服务上下文

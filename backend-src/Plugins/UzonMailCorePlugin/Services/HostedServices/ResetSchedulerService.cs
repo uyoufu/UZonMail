@@ -1,7 +1,7 @@
 using Quartz;
-using UZonMail.CorePlugin.Jobs;
+using UzonMail.CorePlugin.Jobs;
 
-namespace UZonMail.CorePlugin.Services.HostedServices
+namespace UzonMail.CorePlugin.Services.HostedServices
 {
     /// <summary>
     /// 重置定时器

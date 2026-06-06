@@ -1,8 +1,8 @@
 using Innofactor.EfCoreJsonValueConverter;
 using Newtonsoft.Json.Linq;
-using UZonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Base;
 
-namespace UZonMail.DB.SQL.Core.Settings
+namespace UzonMail.DB.SQL.Core.Settings
 {
     public enum AppSettingType
     {

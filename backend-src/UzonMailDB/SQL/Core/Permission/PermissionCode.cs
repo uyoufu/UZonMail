@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Base;
 
-namespace UZonMail.DB.SQL.Core.Permission
+namespace UzonMail.DB.SQL.Core.Permission
 {
     /// <summary>
     /// 权限码

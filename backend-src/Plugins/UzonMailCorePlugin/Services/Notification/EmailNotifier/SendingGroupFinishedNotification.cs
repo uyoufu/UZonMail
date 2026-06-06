@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Services.Settings;
-using UZonMail.CorePlugin.Services.Settings.Model;
-using UZonMail.CorePlugin.Utils.FluentMailkit;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Services.Settings;
+using UzonMail.CorePlugin.Services.Settings.Model;
+using UzonMail.CorePlugin.Utils.FluentMailkit;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Notification.EmailNotifier
+namespace UzonMail.CorePlugin.Services.Notification.EmailNotifier
 {
     /// <summary>
     /// 发件组完成通知
@@ -69,7 +69,7 @@ namespace UZonMail.CorePlugin.Services.Notification.EmailNotifier
                 );
 
             await new FluentEmail()
-                .WithFrom(settings.Email, "UZonMail")
+                .WithFrom(settings.Email, "UzonMail")
                 .WithTo(email)
                 .WithSubject($"【SMTP 通知】您的发件任务 #{sendingGroup.Id} 已完成")
                 .WithHtmlBody(htmlBody)

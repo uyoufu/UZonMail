@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.CorePlugin.Config.SubConfigs;
-using UZonMail.CorePlugin.Services.HostedServices;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Settings;
-using UZonMail.Utils.Web.Service;
+using UzonMail.CorePlugin.Config.SubConfigs;
+using UzonMail.CorePlugin.Services.HostedServices;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Settings;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Database.Upgrade
+namespace UzonMail.CorePlugin.Database.Upgrade
 {
     /// <summary>
     /// 数据升级管理器

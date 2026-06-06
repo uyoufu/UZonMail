@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using UZonMail.DB.PostgreSql;
-using UZonMail.DB.SqLite;
+using UzonMail.DB.PostgreSql;
+using UzonMail.DB.SqLite;
 
-namespace UZonMail.DB.SQL
+namespace UzonMail.DB.SQL
 {
     public class SqlContextHelper
     {

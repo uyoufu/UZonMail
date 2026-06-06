@@ -1,22 +1,22 @@
 {
 	"folders": [
 		{
-			"path": "Plugins/UZonMailCorePlugin"
+			"path": "Plugins/UzonMailCorePlugin"
 		},
 		{
-			"path": "UZonMailDB"
+			"path": "UzonMailDB"
 		},
 		{
-			"path": "UZonMailUtils"
+			"path": "UzonMailUtils"
 		},
 		{
-			"path": "UZonMailService"
+			"path": "UzonMailService"
 		},
 		{
 			"path": "UzonMailDesktop"
 		},
 		{
-			"path": "../../UZonMailProPlugins/UZonMailProPlugin"
+			"path": "../../UzonMailProPlugins/UzonMailProPlugin"
 		},
 		{
 			"path": "../scripts"

@@ -1,8 +1,8 @@
-using UZonMail.DB.Extensions;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SQL.Core.Emails;
+using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
 
-namespace UZonMail.CorePlugin.Database.Upgrade.Updaters
+namespace UzonMail.CorePlugin.Database.Upgrade.Updaters
 {
     public class UpdateOutboxConectionSecurity(SqlContext db) : IDatabaseUpdater
     {

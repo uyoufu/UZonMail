@@ -1,9 +1,9 @@
 using FluentValidation;
 using FluentValidation.Results;
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Results;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Results;
 
-namespace UZonMail.CorePlugin.Database.Validators
+namespace UzonMail.CorePlugin.Database.Validators
 {
     public class SendingGroupValidator : AbstractValidator<SendingGroup>
     {

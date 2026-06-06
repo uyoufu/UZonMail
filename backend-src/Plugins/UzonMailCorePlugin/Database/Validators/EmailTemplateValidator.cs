@@ -1,7 +1,7 @@
 using FluentValidation;
-using UZonMail.DB.SQL.Core.Templates;
+using UzonMail.DB.SQL.Core.Templates;
 
-namespace UZonMail.CorePlugin.Database.Validators
+namespace UzonMail.CorePlugin.Database.Validators
 {
     /// <summary>
     /// 模板验证器

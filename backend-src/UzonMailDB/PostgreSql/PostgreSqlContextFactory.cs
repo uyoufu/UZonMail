@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
-using UZonMail.DB.SQL;
-using UZonMail.DB.SqLite;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SqLite;
 
-namespace UZonMail.DB.PostgreSql
+namespace UzonMail.DB.PostgreSql
 {
     /// <summary>
     /// 设计时创建 DbContext 实例通。常用于 Entity Framework Core 的工具（如迁移工具），以便在没有运行时配置的情况下生成或更新数据库架构。

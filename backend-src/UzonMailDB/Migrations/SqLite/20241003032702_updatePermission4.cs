@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace UZonMail.DB.Migrations.SqLite
+namespace UzonMail.DB.Migrations.SqLite
 {
     /// <inheritdoc />
     public partial class updatePermission4 : Migration

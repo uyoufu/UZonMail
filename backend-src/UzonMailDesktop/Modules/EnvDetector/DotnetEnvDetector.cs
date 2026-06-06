@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMailDesktop.Modules.EnvDetector
+namespace UzonMailDesktop.Modules.EnvDetector
 {
     internal class DotnetEnvDetector(string versionRequired): IRuntimeEnvDetector
     {

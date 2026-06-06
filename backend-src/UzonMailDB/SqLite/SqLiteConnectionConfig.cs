@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
-using UZonMail.DB.SQL;
+using UzonMail.DB.SQL;
 
-namespace UZonMail.DB.SqLite
+namespace UzonMail.DB.SqLite
 {
     public class SqLiteConnectionConfig : IConnectionString
     {

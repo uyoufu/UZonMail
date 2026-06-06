@@ -1,4 +1,4 @@
-﻿namespace UZonMail.DB.SQL.Core.Organization
+﻿namespace UzonMail.DB.SQL.Core.Organization
 {
     /// <summary>
     /// 子用户的策略

@@ -1,7 +1,7 @@
-using UZonMail.DB.SQL.Core.EmailSending;
-using UZonMail.Utils.Web.ResponseModel;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Web.ResponseModel;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Interfaces
+namespace UzonMail.CorePlugin.Services.SendCore.Interfaces
 {
     public interface ISendingGroupCommandService
     {

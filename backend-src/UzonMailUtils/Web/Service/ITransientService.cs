@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UZonMail.Utils.Web.Service
+namespace UzonMail.Utils.Web.Service
 {
     /// <summary>
     /// 只要调用，就会创建一个新的实例的服务

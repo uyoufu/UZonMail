@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using UZonMail.Utils.Web.Service;
-using UZonMail.Utils.Web.Token;
+using UzonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.Token;
 
 namespace Uamazing.Utils.Web.Token
 {

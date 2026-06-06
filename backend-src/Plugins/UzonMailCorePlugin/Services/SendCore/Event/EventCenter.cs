@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using UZonMail.CorePlugin.Services.SendCore.Event.Commands;
+using UzonMail.CorePlugin.Services.SendCore.Event.Commands;
 
-namespace UZonMail.CorePlugin.Services.SendCore.Event
+namespace UzonMail.CorePlugin.Services.SendCore.Event
 {
     /// <summary>
     /// 事件中心

@@ -1,7 +1,7 @@
-using UZonMail.Utils.Web.ResponseModel;
-using UZonMail.Utils.Web.Service;
+using UzonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Web.Service;
 
-namespace UZonMail.CorePlugin.Services.Plugin
+namespace UzonMail.CorePlugin.Services.Plugin
 {
     /// <summary>
     /// 插件服务
