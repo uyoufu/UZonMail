@@ -6,6 +6,6 @@ export const sidebarZh = sidebar({
 })
 
 export const sidebarEn = sidebar({
-  '/en/guide/': 'structure',
-  '/en/': []
+  '/en/': [],
+  '/en/guide/': 'structure'
 })

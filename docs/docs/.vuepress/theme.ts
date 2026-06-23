@@ -4,7 +4,7 @@ import { navbarZh, navbarEn } from './navbar.js'
 import { sidebarZh, sidebarEn } from './sidebar.js'
 
 export default hopeTheme({
-  hostname: 'https://mail.uzoncloud.com/',
+  hostname: 'https://uzonmail.uzoncloud.com/',
   author: {
     name: 'uyoufu',
     url: 'https://uyoufu.uzoncloud.com/'

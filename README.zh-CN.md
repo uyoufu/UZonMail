@@ -117,4 +117,4 @@
 
 ## 📖 更多文档
 
-更多详细内容：[https://mail.uzoncloud.com/](https://mail.uzoncloud.com/)
+更多详细内容：[https://uzonmail.uzoncloud.com/](https://uzonmail.uzoncloud.com/)

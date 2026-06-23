@@ -110,4 +110,4 @@ Compared to other bulk email software on the market, UzonMail's advantages mainl
 
 ## 📖 More Documentation
 
-For more detailed content: [https://mail.uzoncloud.com/](https://mail.uzoncloud.com/)
+For more detailed content: [https://uzonmail.uzoncloud.com/](https://uzonmail.uzoncloud.com/)
