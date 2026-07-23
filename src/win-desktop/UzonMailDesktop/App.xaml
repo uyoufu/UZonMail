@@ -1,20 +1,16 @@
 <Application x:Class="UzonMailDesktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:pu="https://opensource.panuon.com/wpf-ui"
              xmlns:view="clr-namespace:UzonMailDesktop.Views"
              xmlns:vm="clr-namespace:UzonMailDesktop.ViewModels">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <pu:StyleDictionary Includes="All" />
-            </ResourceDictionary.MergedDictionaries>
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <DataTemplate DataType="{x:Type vm:StartupViewModel}">
-                <view:StartupView />
+                <view:StartupView/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
-                <view:BrowserView />
+                <view:BrowserView/>
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
