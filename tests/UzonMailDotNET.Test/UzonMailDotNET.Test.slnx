@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../../src/win-desktop/UzonMailDesktop/UzonMailDesktop.csproj" />
+  <Project Path="UzonMailDotNET.Test.csproj" />
+</Solution>
