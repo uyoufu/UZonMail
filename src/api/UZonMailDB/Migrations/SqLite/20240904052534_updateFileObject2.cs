@@ -10,9 +10,7 @@ namespace UzonMail.DB.Migrations.SqLite
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "AllowAnonymousReading",
-                table: "FileObjects");
+            migrationBuilder.DropColumn(name: "AllowAnonymousReading", table: "FileObjects");
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -22,7 +20,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -32,7 +31,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -42,7 +42,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -52,7 +53,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -62,7 +64,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -72,7 +75,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -82,7 +86,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -92,7 +97,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -102,7 +108,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -112,7 +119,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -122,7 +130,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -132,7 +141,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -142,7 +152,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -152,7 +163,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -162,7 +174,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -172,21 +185,24 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "MaxVisitCount",
                 table: "FileReaders",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "VisitedCount",
                 table: "FileReaders",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -196,7 +212,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -206,7 +223,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -216,7 +234,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -226,7 +245,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -236,7 +256,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -246,7 +267,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -256,19 +278,16 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "MaxVisitCount",
-                table: "FileReaders");
+            migrationBuilder.DropColumn(name: "MaxVisitCount", table: "FileReaders");
 
-            migrationBuilder.DropColumn(
-                name: "VisitedCount",
-                table: "FileReaders");
+            migrationBuilder.DropColumn(name: "VisitedCount", table: "FileReaders");
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -276,7 +295,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -284,7 +304,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -292,7 +313,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -300,7 +322,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -308,7 +331,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -316,7 +340,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -324,7 +349,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -332,7 +358,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -340,7 +367,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -348,7 +376,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -356,7 +385,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -364,7 +394,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -372,7 +403,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -380,7 +412,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -388,7 +421,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -396,7 +430,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -404,14 +439,16 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AddColumn<bool>(
                 name: "AllowAnonymousReading",
                 table: "FileObjects",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -419,7 +456,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -427,7 +465,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -435,7 +474,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -443,7 +483,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -451,7 +492,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "_id",
@@ -459,7 +501,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
         }
     }
 }

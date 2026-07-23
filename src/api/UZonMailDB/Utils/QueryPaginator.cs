@@ -3,7 +3,8 @@
     /// <summary>
     /// 分页加载器
     /// </summary>
-    public class QueryPaginator<T>(IQueryable<T> query, int pageSize = 100) where T : class
+    public class QueryPaginator<T>(IQueryable<T> query, int pageSize = 100)
+        where T : class
     {
         private int _skip = 0;
         private int _take = pageSize;
@@ -18,6 +19,7 @@
             _skip += _take;
             return results;
         }
+
         /// <summary>
         /// 设置分页大小
         /// </summary>

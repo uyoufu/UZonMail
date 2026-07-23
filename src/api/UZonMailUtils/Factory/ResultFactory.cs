@@ -1,5 +1,5 @@
-﻿using UzonMail.Utils.Web.ResponseModel;
-using UzonMail.Utils.Results;
+﻿using UzonMail.Utils.Results;
+using UzonMail.Utils.Web.ResponseModel;
 
 namespace UzonMail.Utils.Factory
 {
@@ -18,7 +18,7 @@ namespace UzonMail.Utils.Factory
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static Result<T> SuccessResult<T>(T data,string message="success")
+        public static Result<T> SuccessResult<T>(T data, string message = "success")
         {
             return new Result<T>()
             {
@@ -36,11 +36,7 @@ namespace UzonMail.Utils.Factory
         /// <returns></returns>
         public static Result<T> ErrorResult<T>(string message)
         {
-            return new Result<T>()
-            {
-                Ok = false,
-                Message = message
-            };
+            return new Result<T>() { Ok = false, Message = message };
         }
 
         /// <summary>
@@ -60,7 +56,6 @@ namespace UzonMail.Utils.Factory
             };
         }
 
-
         /// <summary>
         /// 失败响应
         /// </summary>
@@ -69,11 +64,7 @@ namespace UzonMail.Utils.Factory
         /// <returns></returns>
         public static ResponseResult<T> ErrorResponse<T>(string message)
         {
-            return new ResponseResult<T>()
-            {
-                Ok = false,
-                Message = message
-            };
+            return new ResponseResult<T>() { Ok = false, Message = message };
         }
     }
 }

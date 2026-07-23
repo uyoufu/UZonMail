@@ -11,17 +11,18 @@ namespace UzonMail.Utils.Dictionary
     /// 当有重复键值时，可设置忽略或者覆盖
     /// 支持多个键值对
     /// </summary>
-    public class DictionaryPlus<TKey, TValue> : Dictionary<TKey, TValue> where TKey : notnull
+    public class DictionaryPlus<TKey, TValue> : Dictionary<TKey, TValue>
+        where TKey : notnull
     {
         private readonly DictionaryPlusSetting _setting;
+
         public DictionaryPlus(DictionaryPlusSetting setting)
         {
             _setting = setting;
         }
 
-        public DictionaryPlus() : this(DictionaryPlusSetting.IgnoreWhenSameKey)
-        {
-        }
+        public DictionaryPlus()
+            : this(DictionaryPlusSetting.IgnoreWhenSameKey) { }
 
         /// <summary>
         /// 覆盖父类 add 方法
@@ -51,8 +52,8 @@ namespace UzonMail.Utils.Dictionary
             base.Add(key, value);
         }
 
-
         private List<List<TKey>> _groupKeys = new List<List<TKey>>();
+
         /// <summary>
         /// 可以添加多个键
         /// </summary>
@@ -91,7 +92,6 @@ namespace UzonMail.Utils.Dictionary
         /// 当同名键时忽略
         /// </summary>
         IgnoreWhenSameKey = 1,
-
 
         /// <summary>
         /// 当同名键时替换

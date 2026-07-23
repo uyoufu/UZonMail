@@ -11,17 +11,16 @@ namespace UzonMail.DB.Migrations.SqLite
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "OrganizationSettings");
+            migrationBuilder.DropTable(name: "OrganizationSettings");
 
-            migrationBuilder.DropTable(
-                name: "SystemSettings");
+            migrationBuilder.DropTable(name: "SystemSettings");
 
             migrationBuilder.CreateTable(
                 name: "AppSettings",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     OrganizationId = table.Column<long>(type: "INTEGER", nullable: false),
@@ -41,20 +40,21 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AppSettings", x => x.Id);
-                });
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AppSettings");
+            migrationBuilder.DropTable(name: "AppSettings");
 
             migrationBuilder.CreateTable(
                 name: "OrganizationSettings",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ChangeIpAfterEmailCount = table.Column<int>(type: "INTEGER", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -75,13 +75,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrganizationSettings", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "SystemSettings",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BoolValue = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -101,7 +103,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SystemSettings", x => x.Id);
-                });
+                }
+            );
         }
     }
 }

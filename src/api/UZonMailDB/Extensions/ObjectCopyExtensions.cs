@@ -14,10 +14,14 @@
             var sourceProperties = source.GetType().GetProperties();
             foreach (var targetProperty in targetProperties)
             {
-                if (!targetProperty.CanWrite || !targetProperty.GetSetMethod(true).IsPublic) continue;
+                if (!targetProperty.CanWrite || !targetProperty.GetSetMethod(true).IsPublic)
+                    continue;
 
-                var sourceProperty = sourceProperties.FirstOrDefault(x => x.Name == targetProperty.Name && x.CanRead);
-                if (targetProperty == null) continue;
+                var sourceProperty = sourceProperties.FirstOrDefault(x =>
+                    x.Name == targetProperty.Name && x.CanRead
+                );
+                if (targetProperty == null)
+                    continue;
 
                 // 开始赋值
                 targetProperty.SetValue(target, sourceProperty.GetValue(source));

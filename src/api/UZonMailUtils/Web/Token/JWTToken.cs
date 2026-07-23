@@ -1,12 +1,12 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 
 namespace UzonMail.Utils.Web.Token
 {
@@ -24,14 +24,15 @@ namespace UzonMail.Utils.Web.Token
         {
             // 和 Startup 中的配置一致
             SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(tokenParam.UniqueSecret));
-            JwtSecurityToken token = new(
-                issuer: tokenParam.Issuer,
-                audience: tokenParam.Audience,
-                claims: claims,
-                notBefore: DateTime.UtcNow,
-                expires: tokenParam.ExpireDate,
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-            );
+            JwtSecurityToken token =
+                new(
+                    issuer: tokenParam.Issuer,
+                    audience: tokenParam.Audience,
+                    claims: claims,
+                    notBefore: DateTime.UtcNow,
+                    expires: tokenParam.ExpireDate,
+                    signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+                );
 
             string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
             return jwtToken;
@@ -49,7 +50,8 @@ namespace UzonMail.Utils.Web.Token
             var securityToken = new JwtSecurityTokenHandler().ReadJwtToken(token); //validatedToken:解密后的对象
             var jwtPayload = securityToken.Payload.SerializeToJson(); //获取payload中的数据
             var jobj = JObject.Parse(jwtPayload);
-            if (jobj == null) return new JObject();
+            if (jobj == null)
+                return new JObject();
             return jobj;
         }
     }

@@ -15,26 +15,27 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "SendingGroups",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "ChangeIpAfterEmailCount",
                 table: "OrganizationSettings",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ProxyIds",
-                table: "SendingGroups");
+            migrationBuilder.DropColumn(name: "ProxyIds", table: "SendingGroups");
 
             migrationBuilder.DropColumn(
                 name: "ChangeIpAfterEmailCount",
-                table: "OrganizationSettings");
+                table: "OrganizationSettings"
+            );
         }
     }
 }

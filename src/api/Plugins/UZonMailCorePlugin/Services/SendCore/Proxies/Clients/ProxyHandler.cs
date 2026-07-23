@@ -9,10 +9,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
     /// <summary>
     /// 处理单个代理端点。
     /// </summary>
-    public class ProxyHandler
-        : IProxyHandler,
-            IProxyHealthCheckable,
-            IProxyResourceCleaner
+    public class ProxyHandler : IProxyHandler, IProxyHealthCheckable, IProxyResourceCleaner
     {
         protected ProxyHandler()
         {

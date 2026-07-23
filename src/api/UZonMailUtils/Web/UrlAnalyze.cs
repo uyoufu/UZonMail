@@ -17,14 +17,17 @@ namespace UzonMail.Utils.Web
         /// 协议名称
         /// </summary>
         public string Protocol { get; set; }
+
         /// <summary>
         /// 是否以反斜杠结尾
         /// </summary>
         public bool Slashes { get; set; }
+
         /// <summary>
         /// 验证信息，暂时不使用
         /// </summary>
         public string Auth { get; set; }
+
         /// <summary>
         /// 全小写主机部分，包括端口
         /// </summary>
@@ -37,26 +40,32 @@ namespace UzonMail.Utils.Web
                 return string.Format("{0}:{1}", this.HostName, this.Port);
             }
         }
+
         /// <summary>
         /// 端口，为空时http默认是80
         /// </summary>
         public int? Port { get; set; }
+
         /// <summary>
         /// 小写主机部分
         /// </summary>
         public string HostName { get; set; }
+
         /// <summary>
         /// 页面锚点参数部分 #one#two
         /// </summary>
         public string Hash { get; set; }
+
         /// <summary>
         /// 链接查询参数部分(带问号) '?one=1&two=2'
         /// </summary>
         public string Search { get; set; }
+
         /// <summary>
         /// 路径部分
         /// </summary>
         public string PathName { get; set; }
+
         /// <summary>
         /// 路径+参数部分(没有锚点)
         /// </summary>
@@ -69,6 +78,7 @@ namespace UzonMail.Utils.Web
                 return PathName + Search;
             }
         }
+
         /// <summary>
         /// 转码后的原链接
         /// </summary>
@@ -78,11 +88,16 @@ namespace UzonMail.Utils.Web
         /// 参数的key=value 列表
         /// </summary>
         private Dictionary<string, string> _SearchList = null;
+
         #region 初始化处理
         /// <summary>
         /// 空初始化
         /// </summary>
-        public UrlAnalyze() { _SearchList = new Dictionary<string, string>(); }
+        public UrlAnalyze()
+        {
+            _SearchList = new Dictionary<string, string>();
+        }
+
         /// <summary>
         /// 初始化处理
         /// </summary>
@@ -98,6 +113,7 @@ namespace UzonMail.Utils.Web
             //初始化参数列表
             _SearchList = GetSearchList();
         }
+
         /// <summary>
         /// 将字符串格式化成对象时初始化处理
         /// </summary>
@@ -130,6 +146,7 @@ namespace UzonMail.Utils.Web
                 InitPath(url);
             }
         }
+
         /// <summary>
         /// 字符串url格式化时，路径和参数的初始化处理
         /// </summary>
@@ -168,6 +185,7 @@ namespace UzonMail.Utils.Web
             }
             return _SearchList;
         }
+
         /// <summary>
         /// 获取查询参数的值
         /// </summary>
@@ -177,6 +195,7 @@ namespace UzonMail.Utils.Web
         {
             return _SearchList[key];
         }
+
         /// <summary>
         /// 添加参数key=value,如果值已经存在则修改
         /// </summary>
@@ -198,6 +217,7 @@ namespace UzonMail.Utils.Web
                 _SearchList.Add(key, value);
             }
         }
+
         /// <summary>
         /// 删除指定key 的键值对
         /// </summary>
@@ -207,6 +227,7 @@ namespace UzonMail.Utils.Web
             if (_SearchList.Any(q => q.Key == key))
                 _SearchList.Remove(key);
         }
+
         /// <summary>
         /// 获取锚点列表
         /// </summary>
@@ -216,8 +237,7 @@ namespace UzonMail.Utils.Web
             List<string> list = new List<string>();
             if (!string.IsNullOrEmpty(Hash))
             {
-                list = Hash.Split('#').Where(q => string.IsNullOrEmpty(q) == false)
-                    .ToList();
+                list = Hash.Split('#').Where(q => string.IsNullOrEmpty(q) == false).ToList();
             }
             return list;
         }
@@ -262,7 +282,11 @@ namespace UzonMail.Utils.Web
                         builder.Append('&');
                     }
                     isFirst = false;
-                    builder.AppendFormat("{0}={1}", item.Key, EncodeValue ? HttpUtility.UrlEncode(item.Value) : item.Value);
+                    builder.AppendFormat(
+                        "{0}={1}",
+                        item.Key,
+                        EncodeValue ? HttpUtility.UrlEncode(item.Value) : item.Value
+                    );
                 }
             }
             //锚点
@@ -291,6 +315,7 @@ namespace UzonMail.Utils.Web
             }
             return list;
         }
+
         /// <summary>
         /// 将字符串中的链接成 a 标签
         /// </summary>
@@ -302,7 +327,10 @@ namespace UzonMail.Utils.Web
             MatchCollection mc = re.Matches(content);
             foreach (Match m in mc)
             {
-                content = content.Replace(m.Result("${url}"), String.Format("<a href='{0}'>{0}</a>", m.Result("${url}")));
+                content = content.Replace(
+                    m.Result("${url}"),
+                    String.Format("<a href='{0}'>{0}</a>", m.Result("${url}"))
+                );
             }
             return content;
         }

@@ -7,7 +7,8 @@ namespace UzonMail.Utils.Http
     {
         public UriUserInfo UserInfo2 { get; private set; }
 
-        public Uri2([StringSyntax("Uri")] string uriString) : base(uriString)
+        public Uri2([StringSyntax("Uri")] string uriString)
+            : base(uriString)
         {
             UserInfo2 = new UriUserInfo(UserInfo);
         }

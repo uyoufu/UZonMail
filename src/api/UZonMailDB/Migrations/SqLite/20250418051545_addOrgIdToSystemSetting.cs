@@ -15,36 +15,33 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "SystemSettings",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "Type",
                 table: "SystemSettings",
                 type: "INTEGER",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<long>(
                 name: "UserId",
                 table: "SystemSettings",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "OrganizationId",
-                table: "SystemSettings");
+            migrationBuilder.DropColumn(name: "OrganizationId", table: "SystemSettings");
 
-            migrationBuilder.DropColumn(
-                name: "Type",
-                table: "SystemSettings");
+            migrationBuilder.DropColumn(name: "Type", table: "SystemSettings");
 
-            migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "SystemSettings");
+            migrationBuilder.DropColumn(name: "UserId", table: "SystemSettings");
         }
     }
 }

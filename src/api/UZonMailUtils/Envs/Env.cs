@@ -16,7 +16,8 @@ namespace Uamazing.Utils.Envs
             {
                 // 从环境变量: DebugUzonMail 中获取值
                 var debug = Environment.GetEnvironmentVariable("DebugUzonMail");
-                if (bool.TryParse(debug, out var value)) return value;
+                if (bool.TryParse(debug, out var value))
+                    return value;
                 return false;
             }
         }

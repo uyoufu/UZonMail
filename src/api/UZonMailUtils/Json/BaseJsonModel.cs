@@ -11,8 +11,12 @@ namespace UzonMail.Utils.Json
     public abstract class BaseJsonModel
     {
         #region Json 相关帮助方法
-        private readonly static JsonSerializerSettings _cameCaseSetting = new JsonSetting().WithCameCase().WithStringEnumConverter();
-        private readonly static JsonSerializerSettings _snakeCaseSetting = new JsonSetting().WithSnakeCase().WithStringEnumConverter();
+        private readonly static JsonSerializerSettings _cameCaseSetting = new JsonSetting()
+            .WithCameCase()
+            .WithStringEnumConverter();
+        private static readonly JsonSerializerSettings _snakeCaseSetting = new JsonSetting()
+            .WithSnakeCase()
+            .WithStringEnumConverter();
 
         public string ToCamelCaseJson()
         {

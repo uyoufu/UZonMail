@@ -15,7 +15,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 name: "DepartmentSettings",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     DepartmentId = table.Column<long>(type: "INTEGER", nullable: false),
                     SubUserStrategy = table.Column<int>(type: "INTEGER", nullable: false),
@@ -26,14 +27,14 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DepartmentSettings", x => x.Id);
-                });
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "DepartmentSettings");
+            migrationBuilder.DropTable(name: "DepartmentSettings");
         }
     }
 }

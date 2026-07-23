@@ -1,8 +1,8 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using UzonMailDesktop.Configuration;
 
 namespace UzonMailDesktop.Services;
@@ -14,7 +14,10 @@ internal sealed class BackendProcessManager : IBackendProcessManager
     private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(3) };
     private Process? _process;
 
-    public BackendProcessManager(IOptions<BackendOptions> options, ILogger<BackendProcessManager> logger)
+    public BackendProcessManager(
+        IOptions<BackendOptions> options,
+        ILogger<BackendProcessManager> logger
+    )
     {
         _options = options.Value;
         _logger = logger;
@@ -105,10 +108,15 @@ internal sealed class BackendProcessManager : IBackendProcessManager
     {
         try
         {
-            using var response = await _httpClient.GetAsync(_options.ReadinessUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            using var response = await _httpClient.GetAsync(
+                _options.ReadinessUrl,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken
+            );
             return (int)response.StatusCode < 500;
         }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        catch (Exception exception)
+            when (exception is HttpRequestException or TaskCanceledException)
         {
             return false;
         }
@@ -127,9 +135,7 @@ internal sealed class BackendProcessManager : IBackendProcessManager
                 await _process.WaitForExitAsync();
             }
         }
-        catch (InvalidOperationException)
-        {
-        }
+        catch (InvalidOperationException) { }
         finally
         {
             _process.Dispose();

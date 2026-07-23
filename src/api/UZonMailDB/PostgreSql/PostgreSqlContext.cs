@@ -7,15 +7,13 @@ namespace UzonMail.DB.PostgreSql
     {
         private readonly IConfiguration _configuration;
 
-        internal PostgreSqlContext(DbContextOptions<SqlContext> options) : base(options)
-        {
-        }
+        internal PostgreSqlContext(DbContextOptions<SqlContext> options)
+            : base(options) { }
 
         [ActivatorUtilitiesConstructor]
         public PostgreSqlContext(IConfiguration configuration)
         {
             _configuration = configuration;
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

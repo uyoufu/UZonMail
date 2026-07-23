@@ -15,15 +15,14 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "Users",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Salt",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "Salt", table: "Users");
         }
     }
 }

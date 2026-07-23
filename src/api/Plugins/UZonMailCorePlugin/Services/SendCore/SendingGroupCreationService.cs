@@ -68,7 +68,9 @@ namespace UzonMail.CorePlugin.Services.SendCore
                         .ToList();
                     sendingGroupData.Attachments =
                         fileUsageIds.Count > 0
-                            ? await ctx.FileUsages.Where(x => fileUsageIds.Contains(x.Id)).ToListAsync()
+                            ? await ctx
+                                .FileUsages.Where(x => fileUsageIds.Contains(x.Id))
+                                .ToListAsync()
                             : [];
                 }
 
@@ -265,7 +267,10 @@ namespace UzonMail.CorePlugin.Services.SendCore
             sendingGroupData.OutboxesCount += outboxCount;
         }
 
-        private static async Task IncreaseAttachmentLinkCount(SqlContext ctx, List<SendingItem> items)
+        private static async Task IncreaseAttachmentLinkCount(
+            SqlContext ctx,
+            List<SendingItem> items
+        )
         {
             var incInfos = items
                 .Select(x => x.Attachments)

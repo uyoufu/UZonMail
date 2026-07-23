@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace UzonMail.Utils.Http
 {
@@ -14,7 +14,7 @@ namespace UzonMail.Utils.Http
         public static async Task<JObject> ToJson(this HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();
-            if(string.IsNullOrWhiteSpace(content))
+            if (string.IsNullOrWhiteSpace(content))
             {
                 return [];
             }

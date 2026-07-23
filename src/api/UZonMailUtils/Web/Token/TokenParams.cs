@@ -59,7 +59,10 @@ namespace UzonMail.Utils.Web.Token
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
             {
                 // 只考虑物理网络接口
-                if (nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet && nic.OperationalStatus == OperationalStatus.Up)
+                if (
+                    nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+                    && nic.OperationalStatus == OperationalStatus.Up
+                )
                 {
                     return nic.GetPhysicalAddress().ToString();
                 }

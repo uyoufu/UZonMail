@@ -10,29 +10,25 @@ namespace UzonMail.DB.Migrations.SqLite
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_UserRole_Roles_RoleId",
-                table: "UserRole");
+            migrationBuilder.DropForeignKey(name: "FK_UserRole_Roles_RoleId", table: "UserRole");
 
-            migrationBuilder.DropIndex(
-                name: "IX_UserRole_RoleId",
-                table: "UserRole");
+            migrationBuilder.DropIndex(name: "IX_UserRole_RoleId", table: "UserRole");
 
-            migrationBuilder.DropIndex(
-                name: "IX_UserRole_UserId",
-                table: "UserRole");
+            migrationBuilder.DropIndex(name: "IX_UserRole_UserId", table: "UserRole");
 
             migrationBuilder.RenameColumn(
                 name: "RoleId",
                 table: "UserRole",
-                newName: "OrganizationId");
+                newName: "OrganizationId"
+            );
 
             migrationBuilder.AddColumn<long>(
                 name: "OrganizationId",
                 table: "Roles",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
 
             migrationBuilder.CreateTable(
                 name: "RoleUserRoles",
@@ -48,61 +44,65 @@ namespace UzonMail.DB.Migrations.SqLite
                         name: "FK_RoleUserRoles_Roles_RolesId",
                         column: x => x.RolesId,
                         principalTable: "Roles",
-                        principalColumn: "Id");
+                        principalColumn: "Id"
+                    );
                     table.ForeignKey(
                         name: "FK_RoleUserRoles_UserRole_UserRolesId",
                         column: x => x.UserRolesId,
                         principalTable: "UserRole",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRole_UserId",
                 table: "UserRole",
                 column: "UserId",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleUserRoles_UserRolesId",
                 table: "RoleUserRoles",
-                column: "UserRolesId");
+                column: "UserRolesId"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "RoleUserRoles");
+            migrationBuilder.DropTable(name: "RoleUserRoles");
 
-            migrationBuilder.DropIndex(
-                name: "IX_UserRole_UserId",
-                table: "UserRole");
+            migrationBuilder.DropIndex(name: "IX_UserRole_UserId", table: "UserRole");
 
-            migrationBuilder.DropColumn(
-                name: "OrganizationId",
-                table: "Roles");
+            migrationBuilder.DropColumn(name: "OrganizationId", table: "Roles");
 
             migrationBuilder.RenameColumn(
                 name: "OrganizationId",
                 table: "UserRole",
-                newName: "RoleId");
+                newName: "RoleId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRole_RoleId",
                 table: "UserRole",
-                column: "RoleId");
+                column: "RoleId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRole_UserId",
                 table: "UserRole",
-                column: "UserId");
+                column: "UserId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserRole_Roles_RoleId",
                 table: "UserRole",
                 column: "RoleId",
                 principalTable: "Roles",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
         }
     }
 }

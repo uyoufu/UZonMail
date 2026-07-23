@@ -1,7 +1,4 @@
-﻿using log4net;
-using log4net.Core;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -10,6 +7,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using log4net;
+using log4net.Core;
+using Newtonsoft.Json.Linq;
 using UzonMail.Utils.Json;
 
 namespace UzonMail.Utils.Http.Request
@@ -21,16 +21,16 @@ namespace UzonMail.Utils.Http.Request
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(FluentHttpRequest));
 
-        public FluentHttpRequest()
-        {
-        }
+        public FluentHttpRequest() { }
 
-        public FluentHttpRequest(HttpMethod method, string url) : base(method, url)
+        public FluentHttpRequest(HttpMethod method, string url)
+            : base(method, url)
         {
             _url = url;
         }
 
         private HttpClient _httpClient;
+
         public FluentHttpRequest WithHttpClient(HttpClient client)
         {
             _httpClient = client;
@@ -47,7 +47,8 @@ namespace UzonMail.Utils.Http.Request
         /// <returns></returns>
         public FluentHttpRequest WithProxy(string proxyUrl)
         {
-            if (string.IsNullOrEmpty(proxyUrl)) return this;
+            if (string.IsNullOrEmpty(proxyUrl))
+                return this;
 
             _httpClientHandler ??= new HttpClientHandler();
             _httpClientHandler.WithProxy(proxyUrl);
@@ -66,6 +67,7 @@ namespace UzonMail.Utils.Http.Request
         }
 
         private TimeSpan _timeout = TimeSpan.FromMicroseconds(5);
+
         /// <summary>
         /// 指定超时
         /// 每个 HttpClient 只能设置一次超时
@@ -79,6 +81,7 @@ namespace UzonMail.Utils.Http.Request
         }
 
         private string _url;
+
         /// <summary>
         /// 添加请求 URL
         /// 若需要修改 params 参数，url 中的参数需要使用 {paramName} 的形式
@@ -171,7 +174,8 @@ namespace UzonMail.Utils.Http.Request
 
         private void ThrowErrorIfInvalid()
         {
-            if (string.IsNullOrEmpty(_url)) throw new ArgumentNullException(nameof(_url));
+            if (string.IsNullOrEmpty(_url))
+                throw new ArgumentNullException(nameof(_url));
         }
 
         /// <summary>
@@ -182,10 +186,7 @@ namespace UzonMail.Utils.Http.Request
         {
             BuildUri();
 
-            _httpClient ??= new HttpClient(_httpClientHandler)
-            {
-                Timeout = _timeout
-            };
+            _httpClient ??= new HttpClient(_httpClientHandler) { Timeout = _timeout };
 
             try
             {
@@ -204,7 +205,7 @@ namespace UzonMail.Utils.Http.Request
             catch (Exception ex)
             {
                 // 获取内容
-                _logger.Error(ex.Message);               
+                _logger.Error(ex.Message);
 
                 // 捕获其他异常并返回自定义的 HttpResponseMessage
                 return new HttpResponseMessage
@@ -212,7 +213,7 @@ namespace UzonMail.Utils.Http.Request
                     StatusCode = HttpStatusCode.InternalServerError,
                     ReasonPhrase = $"Unexpected error: {ex.Message}"
                 };
-            }            
+            }
         }
 
         /// <summary>
@@ -229,8 +230,10 @@ namespace UzonMail.Utils.Http.Request
             var response = await SendAsync();
             if (!response.IsSuccessStatusCode)
             {
-                var message  = await response.Content.ReadAsStringAsync();
-                _logger.Warn($"请求失败：{response.StatusCode}, 原因: {response.ReasonPhrase}, 消息：{message}");
+                var message = await response.Content.ReadAsStringAsync();
+                _logger.Warn(
+                    $"请求失败：{response.StatusCode}, 原因: {response.ReasonPhrase}, 消息：{message}"
+                );
                 return default;
             }
 

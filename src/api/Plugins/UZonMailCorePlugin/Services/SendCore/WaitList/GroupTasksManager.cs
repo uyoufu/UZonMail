@@ -13,8 +13,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
     /// </summary>
     public class UserGroupTasksPools
         : ConcurrentDictionary<long, UserGroupTasksPool>,
-            ISingletonService
-    { }
+            ISingletonService { }
 
     /// <summary>
     /// 系统级的待发件调度器

@@ -14,7 +14,9 @@ namespace UzonMail.Utils.Extensions
         public static bool IsEmail(this string emailStr)
         {
             // 使用正则验证是否是邮箱
-            var regex = new System.Text.RegularExpressions.Regex(@"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$");
+            var regex = new System.Text.RegularExpressions.Regex(
+                @"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$"
+            );
             return regex.IsMatch(emailStr);
         }
     }

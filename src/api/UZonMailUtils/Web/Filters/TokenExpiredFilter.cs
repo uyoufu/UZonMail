@@ -1,24 +1,25 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.IdentityModel.Tokens;
-using System.Text.Json;
-using System.Threading.Tasks;
 using UzonMail.Utils.Web.ResponseModel;
 
 namespace UzonMail.Utils.Web.Filters
 {
     public class TokenExpiredFilter : IAsyncExceptionFilter
     {
-        private readonly static JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        private static readonly JsonSerializerOptions _jsonSerializerOptions =
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
         public Task OnExceptionAsync(ExceptionContext context)
         {
             // 如果异常没有被处理则进行处理
-            if (context.ExceptionHandled == false && context.Exception is SecurityTokenExpiredException expiredTokenException)
+            if (
+                context.ExceptionHandled == false
+                && context.Exception is SecurityTokenExpiredException expiredTokenException
+            )
             {
                 // 定义返回类型
                 var result = new ResponseResult<string>

@@ -1,13 +1,14 @@
-using Microsoft.Extensions.Logging;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
+using Microsoft.Extensions.Logging;
 using Application = System.Windows.Application;
 using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
 
 namespace UzonMailDesktop.Services;
 
-internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconService> logger) : ITrayIconService
+internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconService> logger)
+    : ITrayIconService
 {
     private NotifyIcon? _notifyIcon;
     private Window? _window;
@@ -25,8 +26,10 @@ internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconSe
         menu.Items.Add("打开", null, (_, _) => ShowWindow());
         menu.Items.Add("退出", null, (_, _) => Exit());
 
-        using var iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/Resource/uzon-mail.ico"))?.Stream
-            ?? throw new InvalidOperationException("托盘图标资源缺失。");
+        using var iconStream =
+            Application
+                .GetResourceStream(new Uri("pack://application:,,,/Resource/uzon-mail.ico"))
+                ?.Stream ?? throw new InvalidOperationException("托盘图标资源缺失。");
         using var sourceIcon = new Icon(iconStream);
 
         _notifyIcon = new NotifyIcon

@@ -15,7 +15,8 @@ namespace UzonMailService.Migrations.SqLite
                 name: "Departments",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
@@ -30,13 +31,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Departments", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "EmailTemplates",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
@@ -50,13 +53,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EmailTemplates", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "FileBuckets",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BucketName = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
@@ -69,13 +74,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FileBuckets", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Outboxes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     SmtpHost = table.Column<string>(type: "TEXT", nullable: false),
                     SmtpPort = table.Column<int>(type: "INTEGER", nullable: false),
@@ -101,13 +108,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Outboxes", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "RolePermissionCodes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     RoleId = table.Column<long>(type: "INTEGER", nullable: false),
                     PermissionCodeId = table.Column<long>(type: "INTEGER", nullable: false),
@@ -118,13 +127,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RolePermissionCodes", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -134,13 +145,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "SendingGroups",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     Subjects = table.Column<string>(type: "TEXT", nullable: false),
@@ -166,13 +179,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SendingGroups", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "SystemSettings",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
                     StringValue = table.Column<string>(type: "TEXT", nullable: true),
@@ -185,13 +200,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SystemSettings", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "UserProxies",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
@@ -208,13 +225,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserProxies", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "UserSettings",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     MaxSendCountPerEmailDay = table.Column<int>(type: "INTEGER", nullable: false),
@@ -229,13 +248,15 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserSettings", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "FileObjects",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     FileBucketId = table.Column<long>(type: "INTEGER", nullable: false),
                     LastModifyDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -254,14 +275,17 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_FileObjects_FileBuckets_FileBucketId",
                         column: x => x.FileBucketId,
                         principalTable: "FileBuckets",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PermissionCodes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Code = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
@@ -277,14 +301,17 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_PermissionCodes_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     OrganizationId = table.Column<long>(type: "INTEGER", nullable: false),
                     DepartmentId = table.Column<long>(type: "INTEGER", nullable: false),
@@ -308,8 +335,10 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_Users_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "EmailTemplateSendingGroup",
@@ -320,20 +349,26 @@ namespace UzonMailService.Migrations.SqLite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmailTemplateSendingGroup", x => new { x.SendingGroupId, x.TemplatesId });
+                    table.PrimaryKey(
+                        "PK_EmailTemplateSendingGroup",
+                        x => new { x.SendingGroupId, x.TemplatesId }
+                    );
                     table.ForeignKey(
                         name: "FK_EmailTemplateSendingGroup_EmailTemplates_TemplatesId",
                         column: x => x.TemplatesId,
                         principalTable: "EmailTemplates",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_EmailTemplateSendingGroup_SendingGroups_SendingGroupId",
                         column: x => x.SendingGroupId,
                         principalTable: "SendingGroups",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "OutboxSendingGroup",
@@ -344,26 +379,33 @@ namespace UzonMailService.Migrations.SqLite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OutboxSendingGroup", x => new { x.OutboxesId, x.SendingGroupId });
+                    table.PrimaryKey(
+                        "PK_OutboxSendingGroup",
+                        x => new { x.OutboxesId, x.SendingGroupId }
+                    );
                     table.ForeignKey(
                         name: "FK_OutboxSendingGroup_Outboxes_OutboxesId",
                         column: x => x.OutboxesId,
                         principalTable: "Outboxes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_OutboxSendingGroup_SendingGroups_SendingGroupId",
                         column: x => x.SendingGroupId,
                         principalTable: "SendingGroups",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "SendingItems",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     SendingGroupId = table.Column<long>(type: "INTEGER", nullable: false),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
@@ -396,14 +438,17 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_SendingItems_SendingGroups_SendingGroupId",
                         column: x => x.SendingGroupId,
                         principalTable: "SendingGroups",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "FileReaders",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     FileName = table.Column<string>(type: "TEXT", nullable: false),
                     FileObjectId = table.Column<long>(type: "INTEGER", nullable: false),
@@ -420,14 +465,17 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_FileReaders_FileObjects_FileObjectId",
                         column: x => x.FileObjectId,
                         principalTable: "FileObjects",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "EmailGroups",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
@@ -448,14 +496,17 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_EmailGroups_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "FileUsages",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     OwnerUserId = table.Column<long>(type: "INTEGER", nullable: false),
                     UniqueName = table.Column<string>(type: "TEXT", nullable: true),
@@ -474,19 +525,23 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_FileUsages_FileObjects_FileObjectId",
                         column: x => x.FileObjectId,
                         principalTable: "FileObjects",
-                        principalColumn: "Id");
+                        principalColumn: "Id"
+                    );
                     table.ForeignKey(
                         name: "FK_FileUsages_Users_OwnerUserId",
                         column: x => x.OwnerUserId,
                         principalTable: "Users",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "UserRoles",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
                     RoleId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -503,19 +558,23 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_UserRoles_Roles_RoleId1",
                         column: x => x.RoleId1,
                         principalTable: "Roles",
-                        principalColumn: "Id");
+                        principalColumn: "Id"
+                    );
                     table.ForeignKey(
                         name: "FK_UserRoles_Users_UserId1",
                         column: x => x.UserId1,
                         principalTable: "Users",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Inboxes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     OrganizationId = table.Column<long>(type: "INTEGER", nullable: false),
                     LastSuccessDeliveryDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -540,8 +599,10 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_Inboxes_EmailGroups_EmailGroupId",
                         column: x => x.EmailGroupId,
                         principalTable: "EmailGroups",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "FileUsageSendingGroup",
@@ -552,20 +613,26 @@ namespace UzonMailService.Migrations.SqLite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FileUsageSendingGroup", x => new { x.AttachmentsId, x.SendingGroupId });
+                    table.PrimaryKey(
+                        "PK_FileUsageSendingGroup",
+                        x => new { x.AttachmentsId, x.SendingGroupId }
+                    );
                     table.ForeignKey(
                         name: "FK_FileUsageSendingGroup_FileUsages_AttachmentsId",
                         column: x => x.AttachmentsId,
                         principalTable: "FileUsages",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_FileUsageSendingGroup_SendingGroups_SendingGroupId",
                         column: x => x.SendingGroupId,
                         principalTable: "SendingGroups",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "FileUsageSendingItem",
@@ -576,26 +643,33 @@ namespace UzonMailService.Migrations.SqLite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FileUsageSendingItem", x => new { x.AttachmentsId, x.SendingItemId });
+                    table.PrimaryKey(
+                        "PK_FileUsageSendingItem",
+                        x => new { x.AttachmentsId, x.SendingItemId }
+                    );
                     table.ForeignKey(
                         name: "FK_FileUsageSendingItem_FileUsages_AttachmentsId",
                         column: x => x.AttachmentsId,
                         principalTable: "FileUsages",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_FileUsageSendingItem_SendingItems_SendingItemId",
                         column: x => x.SendingItemId,
                         principalTable: "SendingItems",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "SendingItemInboxes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     SendingItemId = table.Column<long>(type: "INTEGER", nullable: false),
                     InboxId = table.Column<long>(type: "INTEGER", nullable: false),
@@ -615,186 +689,180 @@ namespace UzonMailService.Migrations.SqLite
                         name: "FK_SendingItemInboxes_Inboxes_InboxId",
                         column: x => x.InboxId,
                         principalTable: "Inboxes",
-                        principalColumn: "Id");
+                        principalColumn: "Id"
+                    );
                     table.ForeignKey(
                         name: "FK_SendingItemInboxes_SendingItems_SendingItemId",
                         column: x => x.SendingItemId,
                         principalTable: "SendingItems",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_EmailGroups_UserId",
                 table: "EmailGroups",
-                column: "UserId");
+                column: "UserId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_EmailTemplateSendingGroup_TemplatesId",
                 table: "EmailTemplateSendingGroup",
-                column: "TemplatesId");
+                column: "TemplatesId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileObjects_FileBucketId",
                 table: "FileObjects",
-                column: "FileBucketId");
+                column: "FileBucketId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileReaders_FileObjectId",
                 table: "FileReaders",
-                column: "FileObjectId");
+                column: "FileObjectId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileUsages_FileObjectId",
                 table: "FileUsages",
-                column: "FileObjectId");
+                column: "FileObjectId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileUsages_OwnerUserId",
                 table: "FileUsages",
-                column: "OwnerUserId");
+                column: "OwnerUserId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileUsageSendingGroup_SendingGroupId",
                 table: "FileUsageSendingGroup",
-                column: "SendingGroupId");
+                column: "SendingGroupId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileUsageSendingItem_SendingItemId",
                 table: "FileUsageSendingItem",
-                column: "SendingItemId");
+                column: "SendingItemId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Inboxes_Email",
                 table: "Inboxes",
                 column: "Email",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Inboxes_EmailGroupId",
                 table: "Inboxes",
-                column: "EmailGroupId");
+                column: "EmailGroupId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Outboxes_Email",
                 table: "Outboxes",
                 column: "Email",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_OutboxSendingGroup_SendingGroupId",
                 table: "OutboxSendingGroup",
-                column: "SendingGroupId");
+                column: "SendingGroupId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PermissionCodes_RoleId",
                 table: "PermissionCodes",
-                column: "RoleId");
+                column: "RoleId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_SendingItemInboxes_InboxId",
                 table: "SendingItemInboxes",
-                column: "InboxId");
+                column: "InboxId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_SendingItemInboxes_SendingItemId",
                 table: "SendingItemInboxes",
-                column: "SendingItemId");
+                column: "SendingItemId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_SendingItems_SendingGroupId",
                 table: "SendingItems",
-                column: "SendingGroupId");
+                column: "SendingGroupId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId1",
                 table: "UserRoles",
-                column: "RoleId1");
+                column: "RoleId1"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_UserId1",
                 table: "UserRoles",
-                column: "UserId1");
+                column: "UserId1"
+            );
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_RoleId",
-                table: "Users",
-                column: "RoleId");
+            migrationBuilder.CreateIndex(name: "IX_Users_RoleId", table: "Users", column: "RoleId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Departments");
+            migrationBuilder.DropTable(name: "Departments");
 
-            migrationBuilder.DropTable(
-                name: "EmailTemplateSendingGroup");
+            migrationBuilder.DropTable(name: "EmailTemplateSendingGroup");
 
-            migrationBuilder.DropTable(
-                name: "FileReaders");
+            migrationBuilder.DropTable(name: "FileReaders");
 
-            migrationBuilder.DropTable(
-                name: "FileUsageSendingGroup");
+            migrationBuilder.DropTable(name: "FileUsageSendingGroup");
 
-            migrationBuilder.DropTable(
-                name: "FileUsageSendingItem");
+            migrationBuilder.DropTable(name: "FileUsageSendingItem");
 
-            migrationBuilder.DropTable(
-                name: "OutboxSendingGroup");
+            migrationBuilder.DropTable(name: "OutboxSendingGroup");
 
-            migrationBuilder.DropTable(
-                name: "PermissionCodes");
+            migrationBuilder.DropTable(name: "PermissionCodes");
 
-            migrationBuilder.DropTable(
-                name: "RolePermissionCodes");
+            migrationBuilder.DropTable(name: "RolePermissionCodes");
 
-            migrationBuilder.DropTable(
-                name: "SendingItemInboxes");
+            migrationBuilder.DropTable(name: "SendingItemInboxes");
 
-            migrationBuilder.DropTable(
-                name: "SystemSettings");
+            migrationBuilder.DropTable(name: "SystemSettings");
 
-            migrationBuilder.DropTable(
-                name: "UserProxies");
+            migrationBuilder.DropTable(name: "UserProxies");
 
-            migrationBuilder.DropTable(
-                name: "UserRoles");
+            migrationBuilder.DropTable(name: "UserRoles");
 
-            migrationBuilder.DropTable(
-                name: "UserSettings");
+            migrationBuilder.DropTable(name: "UserSettings");
 
-            migrationBuilder.DropTable(
-                name: "EmailTemplates");
+            migrationBuilder.DropTable(name: "EmailTemplates");
 
-            migrationBuilder.DropTable(
-                name: "FileUsages");
+            migrationBuilder.DropTable(name: "FileUsages");
 
-            migrationBuilder.DropTable(
-                name: "Outboxes");
+            migrationBuilder.DropTable(name: "Outboxes");
 
-            migrationBuilder.DropTable(
-                name: "Inboxes");
+            migrationBuilder.DropTable(name: "Inboxes");
 
-            migrationBuilder.DropTable(
-                name: "SendingItems");
+            migrationBuilder.DropTable(name: "SendingItems");
 
-            migrationBuilder.DropTable(
-                name: "FileObjects");
+            migrationBuilder.DropTable(name: "FileObjects");
 
-            migrationBuilder.DropTable(
-                name: "EmailGroups");
+            migrationBuilder.DropTable(name: "EmailGroups");
 
-            migrationBuilder.DropTable(
-                name: "SendingGroups");
+            migrationBuilder.DropTable(name: "SendingGroups");
 
-            migrationBuilder.DropTable(
-                name: "FileBuckets");
+            migrationBuilder.DropTable(name: "FileBuckets");
 
-            migrationBuilder.DropTable(
-                name: "Users");
+            migrationBuilder.DropTable(name: "Users");
 
-            migrationBuilder.DropTable(
-                name: "Roles");
+            migrationBuilder.DropTable(name: "Roles");
         }
     }
 }

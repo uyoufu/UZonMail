@@ -14,7 +14,9 @@ namespace UzonMail.Utils.Extensions
         /// <returns></returns>
         public static long ToTimestamp(this DateTime dateTime)
         {
-           return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(dateTime)).ToUnixTimeMilliseconds();
+            return new DateTimeOffset(
+                TimeZoneInfo.ConvertTimeToUtc(dateTime)
+            ).ToUnixTimeMilliseconds();
         }
     }
 }

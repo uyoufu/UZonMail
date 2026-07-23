@@ -27,6 +27,7 @@ namespace UzonMail.Utils.Json
         }
 
         private bool _isStringEnumConverterAdded = false;
+
         /// <summary>
         /// 枚举转为字符串
         /// 可以使用 EnumMemberAttribute 来指定字符串
@@ -34,7 +35,8 @@ namespace UzonMail.Utils.Json
         /// <returns></returns>
         public JsonSetting WithStringEnumConverter()
         {
-            if (_isStringEnumConverterAdded) return this;
+            if (_isStringEnumConverterAdded)
+                return this;
 
             _isStringEnumConverterAdded = true;
             Converters.Add(new StringEnumConverter());

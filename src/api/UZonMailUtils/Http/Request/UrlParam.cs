@@ -2,8 +2,7 @@
 {
     public class UrlParam : Parameter
     {
-        public UrlParam(string name, string value) : base(name, value, ParameterType.Params)
-        {
-        }
+        public UrlParam(string name, string value)
+            : base(name, value, ParameterType.Params) { }
     }
 }

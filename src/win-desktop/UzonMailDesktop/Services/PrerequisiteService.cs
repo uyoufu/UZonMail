@@ -1,6 +1,3 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.Web.WebView2.Core;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -9,6 +6,9 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.Web.WebView2.Core;
 using UzonMailDesktop.Configuration;
 
 namespace UzonMailDesktop.Services;
@@ -27,40 +27,66 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
     public PrerequisiteService(
         IOptions<BackendOptions> backend,
         IOptions<PrerequisiteOptions> options,
-        ILogger<PrerequisiteService> logger)
+        ILogger<PrerequisiteService> logger
+    )
     {
         _backend = backend.Value;
         _options = options.Value;
         _logger = logger;
     }
 
-    public async Task<IReadOnlyList<PrerequisiteItem>> DetectAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PrerequisiteItem>> DetectAsync(
+        CancellationToken cancellationToken = default
+    )
     {
         var requiredFrameworks = RuntimeConfigReader.Read(_backend);
         var installedFrameworks = await ReadInstalledFrameworksAsync(cancellationToken);
         var results = new List<PrerequisiteItem>();
 
-        foreach (var required in requiredFrameworks.Where(x =>
-                     x.Name is "Microsoft.NETCore.App" or "Microsoft.AspNetCore.App"))
+        foreach (
+            var required in requiredFrameworks.Where(x =>
+                x.Name is "Microsoft.NETCore.App" or "Microsoft.AspNetCore.App"
+            )
+        )
         {
             var installed = installedFrameworks.Any(x =>
-                x.Name == required.Name && IsCompatible(required.Version, x.Version));
-            var id = required.Name == "Microsoft.NETCore.App" ? DotNetRuntimeId : AspNetCoreRuntimeId;
-            results.Add(new PrerequisiteItem(id, $"{required.Name} {required.Version.Major}.{required.Version.Minor}", installed, required.Version));
+                x.Name == required.Name && IsCompatible(required.Version, x.Version)
+            );
+            var id =
+                required.Name == "Microsoft.NETCore.App" ? DotNetRuntimeId : AspNetCoreRuntimeId;
+            results.Add(
+                new PrerequisiteItem(
+                    id,
+                    $"{required.Name} {required.Version.Major}.{required.Version.Minor}",
+                    installed,
+                    required.Version
+                )
+            );
         }
 
-        results.Add(new PrerequisiteItem(WebView2RuntimeId, "Microsoft Edge WebView2 Runtime", HasWebView2()));
+        results.Add(
+            new PrerequisiteItem(
+                WebView2RuntimeId,
+                "Microsoft Edge WebView2 Runtime",
+                HasWebView2()
+            )
+        );
         return results;
     }
 
     public async Task InstallAsync(
         IEnumerable<PrerequisiteItem> prerequisites,
         IProgress<InstallProgress>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var missing = prerequisites.Where(x => !x.IsInstalled).ToArray();
         var metadataCache = new Dictionary<string, JsonDocument>();
-        var temporaryDirectory = Path.Combine(Path.GetTempPath(), "UzonMailDesktop", "prerequisites");
+        var temporaryDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "UzonMailDesktop",
+            "prerequisites"
+        );
         Directory.CreateDirectory(temporaryDirectory);
 
         try
@@ -74,27 +100,51 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
 
                 if (item.Id == WebView2RuntimeId)
                 {
-                    var webViewInstallerPath = Path.Combine(temporaryDirectory, "MicrosoftEdgeWebView2Setup.exe");
+                    var webViewInstallerPath = Path.Combine(
+                        temporaryDirectory,
+                        "MicrosoftEdgeWebView2Setup.exe"
+                    );
                     await DownloadAsync(
                         _options.WebView2BootstrapperUrl,
                         webViewInstallerPath,
-                        p => progress?.Report(new InstallProgress("正在下载 WebView2...", basePercentage + p * stepPercentage)),
-                        cancellationToken);
+                        p =>
+                            progress?.Report(
+                                new InstallProgress(
+                                    "正在下载 WebView2...",
+                                    basePercentage + p * stepPercentage
+                                )
+                            ),
+                        cancellationToken
+                    );
                     ValidateMicrosoftSignature(webViewInstallerPath);
-                    progress?.Report(new InstallProgress("正在安装 WebView2...", basePercentage + stepPercentage * 0.95));
-                    await RunInstallerAsync(webViewInstallerPath, cancellationToken, "/silent", "/install");
+                    progress?.Report(
+                        new InstallProgress(
+                            "正在安装 WebView2...",
+                            basePercentage + stepPercentage * 0.95
+                        )
+                    );
+                    await RunInstallerAsync(
+                        webViewInstallerPath,
+                        cancellationToken,
+                        "/silent",
+                        "/install"
+                    );
                     continue;
                 }
 
-                var requiredVersion = item.RequiredVersion
+                var requiredVersion =
+                    item.RequiredVersion
                     ?? throw new InvalidOperationException($"{item.Name} 未声明所需版本。");
                 var channel = $"{requiredVersion.Major}.{requiredVersion.Minor}";
                 if (!metadataCache.TryGetValue(channel, out var metadata))
                 {
-                    var metadataUrl = $"{_options.DotNetReleaseMetadataBaseUrl.TrimEnd('/')}/{channel}/releases.json";
+                    var metadataUrl =
+                        $"{_options.DotNetReleaseMetadataBaseUrl.TrimEnd('/')}/{channel}/releases.json";
                     using var response = await _httpClient.GetAsync(metadataUrl, cancellationToken);
                     response.EnsureSuccessStatusCode();
-                    metadata = JsonDocument.Parse(await response.Content.ReadAsStreamAsync(cancellationToken));
+                    metadata = JsonDocument.Parse(
+                        await response.Content.ReadAsStreamAsync(cancellationToken)
+                    );
                     metadataCache[channel] = metadata;
                 }
 
@@ -103,11 +153,29 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
                 await DownloadAsync(
                     package.Url,
                     installerPath,
-                    p => progress?.Report(new InstallProgress($"正在下载 {item.Name}...", basePercentage + p * stepPercentage)),
-                    cancellationToken);
+                    p =>
+                        progress?.Report(
+                            new InstallProgress(
+                                $"正在下载 {item.Name}...",
+                                basePercentage + p * stepPercentage
+                            )
+                        ),
+                    cancellationToken
+                );
                 ValidateSha512(installerPath, package.Hash);
-                progress?.Report(new InstallProgress($"正在安装 {item.Name}...", basePercentage + stepPercentage * 0.95));
-                await RunInstallerAsync(installerPath, cancellationToken, "/install", "/quiet", "/norestart");
+                progress?.Report(
+                    new InstallProgress(
+                        $"正在安装 {item.Name}...",
+                        basePercentage + stepPercentage * 0.95
+                    )
+                );
+                await RunInstallerAsync(
+                    installerPath,
+                    cancellationToken,
+                    "/install",
+                    "/quiet",
+                    "/norestart"
+                );
             }
 
             progress?.Report(new InstallProgress("依赖安装完成，正在重新检测...", 100));
@@ -121,9 +189,9 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
     }
 
     internal static bool IsCompatible(Version required, Version installed) =>
-        required.Major == installed.Major &&
-        required.Minor == installed.Minor &&
-        installed >= required;
+        required.Major == installed.Major
+        && required.Minor == installed.Minor
+        && installed >= required;
 
     internal static IReadOnlyList<RequiredFramework> ParseRuntimeList(string output)
     {
@@ -137,7 +205,9 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         return result;
     }
 
-    private async Task<IReadOnlyList<RequiredFramework>> ReadInstalledFrameworksAsync(CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<RequiredFramework>> ReadInstalledFrameworksAsync(
+        CancellationToken cancellationToken
+    )
     {
         var dotnetPath = ResolveDotNetPath();
         if (dotnetPath is null)
@@ -168,8 +238,10 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         if (File.Exists(installedPath))
             return installedPath;
 
-        var pathEntries = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
-            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var pathEntries = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(
+            Path.PathSeparator,
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+        );
         return pathEntries.Select(x => Path.Combine(x, "dotnet.exe")).FirstOrDefault(File.Exists);
     }
 
@@ -177,7 +249,9 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
     {
         try
         {
-            return !string.IsNullOrWhiteSpace(CoreWebView2Environment.GetAvailableBrowserVersionString());
+            return !string.IsNullOrWhiteSpace(
+                CoreWebView2Environment.GetAvailableBrowserVersionString()
+            );
         }
         catch (WebView2RuntimeNotFoundException)
         {
@@ -191,15 +265,18 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
 
     internal static InstallerPackage SelectInstaller(JsonElement root, string prerequisiteId)
     {
-        var releases = root.GetProperty("releases").EnumerateArray()
+        var releases = root.GetProperty("releases")
+            .EnumerateArray()
             .Where(x => Version.TryParse(x.GetProperty("release-version").GetString(), out _))
             .OrderByDescending(x => Version.Parse(x.GetProperty("release-version").GetString()!));
 
         var componentName = prerequisiteId == DotNetRuntimeId ? "runtime" : "aspnetcore-runtime";
         foreach (var release in releases)
         {
-            if (!release.TryGetProperty(componentName, out var component) ||
-                !component.TryGetProperty("files", out var files))
+            if (
+                !release.TryGetProperty(componentName, out var component)
+                || !component.TryGetProperty("files", out var files)
+            )
                 continue;
 
             foreach (var file in files.EnumerateArray())
@@ -212,7 +289,8 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
                 return new InstallerPackage(
                     name,
                     file.GetProperty("url").GetString()!,
-                    file.GetProperty("hash").GetString()!);
+                    file.GetProperty("hash").GetString()!
+                );
             }
         }
 
@@ -223,14 +301,26 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         string url,
         string destination,
         Action<double> reportProgress,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         _logger.LogInformation("Downloading prerequisite from {Url}", url);
-        using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        using var response = await _httpClient.GetAsync(
+            url,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken
+        );
         response.EnsureSuccessStatusCode();
         var length = response.Content.Headers.ContentLength;
         await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
-        await using var output = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true);
+        await using var output = new FileStream(
+            destination,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            81920,
+            useAsync: true
+        );
         var buffer = new byte[81920];
         long total = 0;
         int read;
@@ -238,7 +328,9 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         {
             await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
             total += read;
-            reportProgress(length is > 0 ? Math.Min(0.9, (double)total / length.Value * 0.9) : 0.45);
+            reportProgress(
+                length is > 0 ? Math.Min(0.9, (double)total / length.Value * 0.9) : 0.45
+            );
         }
     }
 
@@ -259,11 +351,20 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         var certificate = X509Certificate.CreateFromSignedFile(filePath);
         using var certificate2 = new X509Certificate2(certificate);
 #pragma warning restore SYSLIB0057
-        if (!certificate2.Subject.Contains("Microsoft Corporation", StringComparison.OrdinalIgnoreCase))
+        if (
+            !certificate2.Subject.Contains(
+                "Microsoft Corporation",
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
             throw new CryptographicException("WebView2 安装器不是由 Microsoft Corporation 签名的。");
     }
 
-    private static async Task RunInstallerAsync(string filePath, CancellationToken cancellationToken, params string[] arguments)
+    private static async Task RunInstallerAsync(
+        string filePath,
+        CancellationToken cancellationToken,
+        params string[] arguments
+    )
     {
         var startInfo = new ProcessStartInfo
         {
@@ -277,8 +378,8 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
 
         try
         {
-            using var process = Process.Start(startInfo)
-                ?? throw new InvalidOperationException("安装器未能启动。");
+            using var process =
+                Process.Start(startInfo) ?? throw new InvalidOperationException("安装器未能启动。");
             await process.WaitForExitAsync(cancellationToken);
             if (process.ExitCode is not 0 and not 3010)
                 throw new InvalidOperationException($"安装器返回错误代码 {process.ExitCode}。");
@@ -296,12 +397,8 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
             if (Directory.Exists(path))
                 Directory.Delete(path, recursive: true);
         }
-        catch (IOException)
-        {
-        }
-        catch (UnauthorizedAccessException)
-        {
-        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
     }
 
     public void Dispose() => _httpClient.Dispose();
@@ -348,7 +445,8 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         private static extern uint WinVerifyTrust(
             IntPtr windowHandle,
             [MarshalAs(UnmanagedType.LPStruct)] Guid actionId,
-            ref WinTrustData trustData);
+            ref WinTrustData trustData
+        );
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         private struct WinTrustFileInfo

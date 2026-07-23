@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.ComponentModel.DataAnnotations.Schema;
 using UzonMail.DB.SQL.Base;
 using UzonMail.DB.SQL.Core.Organization;
 
@@ -52,11 +52,10 @@ namespace UzonMail.DB.SQL.Core.Templates
         [NotMapped]
         public TemplateType Type { get; set; }
 
-
         public void Configure(EntityTypeBuilder<EmailTemplate> builder)
         {
             builder.HasMany(x => x.ShareToUsers).WithMany();
-            builder.HasMany(x=>x.ShareToOrganizations).WithMany();
+            builder.HasMany(x => x.ShareToOrganizations).WithMany();
         }
     }
 

@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace UzonMail.Utils.Config
 {
@@ -12,15 +12,16 @@ namespace UzonMail.Utils.Config
     /// </summary>
     public class JsonConfig : IConfig
     {
-        public JObject Data { get;private set; }
+        public JObject Data { get; private set; }
+
         public JsonConfig(JObject data)
         {
             Data = data;
         }
-        
+
         public string GetStringValue(string path)
         {
-          return GetValue<string>(path);
+            return GetValue<string>(path);
         }
 
         public T GetValue<T>(string path)

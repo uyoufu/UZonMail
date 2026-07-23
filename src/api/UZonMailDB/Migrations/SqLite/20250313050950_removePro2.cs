@@ -14,19 +14,22 @@ namespace UzonMail.DB.Migrations.SqLite
                 name: "SendingGroupId",
                 table: "Outboxes",
                 type: "INTEGER",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Outboxes_SendingGroupId",
                 table: "Outboxes",
-                column: "SendingGroupId");
+                column: "SendingGroupId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Outboxes_SendingGroups_SendingGroupId",
                 table: "Outboxes",
                 column: "SendingGroupId",
                 principalTable: "SendingGroups",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
         }
 
         /// <inheritdoc />
@@ -34,15 +37,12 @@ namespace UzonMail.DB.Migrations.SqLite
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_Outboxes_SendingGroups_SendingGroupId",
-                table: "Outboxes");
+                table: "Outboxes"
+            );
 
-            migrationBuilder.DropIndex(
-                name: "IX_Outboxes_SendingGroupId",
-                table: "Outboxes");
+            migrationBuilder.DropIndex(name: "IX_Outboxes_SendingGroupId", table: "Outboxes");
 
-            migrationBuilder.DropColumn(
-                name: "SendingGroupId",
-                table: "Outboxes");
+            migrationBuilder.DropColumn(name: "SendingGroupId", table: "Outboxes");
         }
     }
 }

@@ -5,7 +5,8 @@
         /// <summary>
         /// 发件箱
         /// </summary>
-        OutBox =1,
+        OutBox = 1,
+
         /// <summary>
         /// 收件箱
         /// </summary>

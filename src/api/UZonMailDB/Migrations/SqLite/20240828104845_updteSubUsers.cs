@@ -16,20 +16,23 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "UserSettings",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "Type",
                 table: "Users",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.CreateTable(
                 name: "EmailAddress",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
@@ -40,13 +43,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EmailAddress", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "IdAndName",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
@@ -57,25 +62,20 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_IdAndName", x => x.Id);
-                });
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "EmailAddress");
+            migrationBuilder.DropTable(name: "EmailAddress");
 
-            migrationBuilder.DropTable(
-                name: "IdAndName");
+            migrationBuilder.DropTable(name: "IdAndName");
 
-            migrationBuilder.DropColumn(
-                name: "DepartmentId",
-                table: "UserSettings");
+            migrationBuilder.DropColumn(name: "DepartmentId", table: "UserSettings");
 
-            migrationBuilder.DropColumn(
-                name: "Type",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "Type", table: "Users");
         }
     }
 }

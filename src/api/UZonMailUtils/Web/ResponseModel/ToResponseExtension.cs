@@ -40,7 +40,10 @@ namespace Uamazing.Utils.Web.ResponseModel
         /// <param name="data"></param>
         /// <param name="errorMessage"></param>
         /// <returns></returns>
-        public static ResponseResult<T> ToSmartResponse<T>(this T data, string errorMessage = "数据不存在")
+        public static ResponseResult<T> ToSmartResponse<T>(
+            this T data,
+            string errorMessage = "数据不存在"
+        )
         {
             if (data == null)
             {
@@ -55,9 +58,11 @@ namespace Uamazing.Utils.Web.ResponseModel
         /// <typeparam name="T"></typeparam>
         /// <param name="httpResponseMessage"></param>
         /// <returns></returns>
-        public static async Task<ResponseResult<T>> ToResponseResult<T>(this HttpResponseMessage httpResponseMessage)
+        public static async Task<ResponseResult<T>> ToResponseResult<T>(
+            this HttpResponseMessage httpResponseMessage
+        )
         {
-            if(!httpResponseMessage.IsSuccessStatusCode)
+            if (!httpResponseMessage.IsSuccessStatusCode)
             {
                 return new ErrorResponse<T>(httpResponseMessage.ReasonPhrase);
             }

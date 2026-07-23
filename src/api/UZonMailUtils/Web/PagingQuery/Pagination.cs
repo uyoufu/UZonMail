@@ -22,7 +22,7 @@ namespace UzonMail.Utils.Web.PagingQuery
         public IQueryable<T> Run<T>(IQueryable<T> values)
         {
             if (!string.IsNullOrEmpty(SortBy))
-            {                
+            {
                 values = values.OrderBy(SortBy, !Descending);
             }
             if (Skip > 0)

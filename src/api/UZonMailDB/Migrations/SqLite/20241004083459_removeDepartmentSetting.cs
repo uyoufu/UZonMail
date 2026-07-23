@@ -11,8 +11,7 @@ namespace UzonMail.DB.Migrations.SqLite
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "DepartmentSettings");
+            migrationBuilder.DropTable(name: "DepartmentSettings");
         }
 
         /// <inheritdoc />
@@ -22,7 +21,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 name: "DepartmentSettings",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DepartmentId = table.Column<long>(type: "INTEGER", nullable: false),
@@ -34,7 +34,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DepartmentSettings", x => x.Id);
-                });
+                }
+            );
         }
     }
 }

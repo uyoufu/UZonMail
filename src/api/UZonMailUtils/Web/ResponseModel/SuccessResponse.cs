@@ -18,7 +18,8 @@ namespace UzonMail.Utils.Web.ResponseModel
             Code = (int)HttpStatusCode.OK;
         }
 
-        public SuccessResponse(T data):this()
+        public SuccessResponse(T data)
+            : this()
         {
             Data = data;
         }

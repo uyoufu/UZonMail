@@ -11,7 +11,11 @@ namespace UzonMail.Utils.Extensions
         /// <param name="encryptedData"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public static string FromRSA(this byte[] encryptedData, string privateKey, int keySizeInBit = 2048)
+        public static string FromRSA(
+            this byte[] encryptedData,
+            string privateKey,
+            int keySizeInBit = 2048
+        )
         {
             var rsa = RSA.Create(keySizeInBit);
             rsa.ImportFromPem(privateKey);

@@ -15,7 +15,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 name: "UnsubscribeEmails",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     _id = table.Column<string>(type: "TEXT", nullable: false),
@@ -27,13 +28,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UnsubscribeEmails", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "UnsubscribePages",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Language = table.Column<string>(type: "TEXT", nullable: false),
                     HtmlContent = table.Column<string>(type: "TEXT", nullable: false),
@@ -46,13 +49,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UnsubscribePages", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "UnsubscribeSettings",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Enable = table.Column<bool>(type: "INTEGER", nullable: false),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
@@ -68,20 +73,18 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UnsubscribeSettings", x => x.Id);
-                });
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "UnsubscribeEmails");
+            migrationBuilder.DropTable(name: "UnsubscribeEmails");
 
-            migrationBuilder.DropTable(
-                name: "UnsubscribePages");
+            migrationBuilder.DropTable(name: "UnsubscribePages");
 
-            migrationBuilder.DropTable(
-                name: "UnsubscribeSettings");
+            migrationBuilder.DropTable(name: "UnsubscribeSettings");
         }
     }
 }

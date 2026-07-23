@@ -29,14 +29,14 @@ namespace UzonMailDesktop.Pages.Tray
             _window.Closing += Window_Closing;
 
             var contextMenu = new ContextMenuStrip();
-            contextMenu.Items.Add("退出", null, Exit_Click);//添加退出菜单项
+            contextMenu.Items.Add("退出", null, Exit_Click); //添加退出菜单项
 
             //设置托盘的各个属性
             _notifyIcon = new NotifyIcon
             {
-                BalloonTipText = $"{window.Title} 运行中...",//托盘气泡显示内容
+                BalloonTipText = $"{window.Title} 运行中...", //托盘气泡显示内容
                 Text = window.Title,
-                Visible = true,//托盘按钮是否可见
+                Visible = true, //托盘按钮是否可见
                 Icon = new Icon("./Resource/uzon-mail.ico"), //托盘中显示的图标
                 ContextMenuStrip = contextMenu,
             };
@@ -59,17 +59,20 @@ namespace UzonMailDesktop.Pages.Tray
             //鼠标左键，实现窗体最小化隐藏或显示窗体
             if (e.Button == MouseButtons.Left)
             {
-                if (_window.Visibility == Visibility.Visible && _window.WindowState != WindowState.Minimized)
+                if (
+                    _window.Visibility == Visibility.Visible
+                    && _window.WindowState != WindowState.Minimized
+                )
                 {
                     _window.Visibility = Visibility.Hidden;
                     //解决最小化到任务栏可以强行关闭程序的问题。
-                    _window.ShowInTaskbar = false;//使Form不在任务栏上显示
+                    _window.ShowInTaskbar = false; //使Form不在任务栏上显示
                 }
                 else
                 {
                     _window.Visibility = Visibility.Visible;
                     _window.WindowState = WindowState.Normal;
-                    _window.ShowInTaskbar = true;//使Form在任务栏上显示
+                    _window.ShowInTaskbar = true; //使Form在任务栏上显示
                     _window.Activate();
                 }
             }
@@ -78,7 +81,15 @@ namespace UzonMailDesktop.Pages.Tray
         // 退出选项
         private void Exit_Click(object? sender, EventArgs e)
         {
-            if (System.Windows.MessageBox.Show("即将退出宇正群邮, 是否继续?", "温馨提醒", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes) == MessageBoxResult.Yes)
+            if (
+                System.Windows.MessageBox.Show(
+                    "即将退出宇正群邮, 是否继续?",
+                    "温馨提醒",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question,
+                    MessageBoxResult.Yes
+                ) == MessageBoxResult.Yes
+            )
             {
                 // 关闭后台程序
                 backEndService.CloseExist();

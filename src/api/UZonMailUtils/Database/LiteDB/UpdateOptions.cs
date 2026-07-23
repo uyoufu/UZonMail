@@ -16,7 +16,8 @@ namespace UzonMail.Utils.Database.LiteDB
             IsExclude = isExclude;
         }
 
-        public UpdateOptions(IList<string> keys, bool isExclude = false) : base(keys)
+        public UpdateOptions(IList<string> keys, bool isExclude = false)
+            : base(keys)
         {
             IsExclude = isExclude;
         }
@@ -38,12 +39,14 @@ namespace UzonMail.Utils.Database.LiteDB
             {
                 var valueTemp = value.ToLower();
                 bool isIncluding = this.Any(x => x.ToLower() == valueTemp);
-                if (IsExclude) return !isIncluding;
+                if (IsExclude)
+                    return !isIncluding;
                 return isIncluding;
             }
             else
             {
-                if (IsExclude) return !Contains(value);
+                if (IsExclude)
+                    return !Contains(value);
                 return Contains(value);
             }
         }
@@ -63,16 +66,19 @@ namespace UzonMail.Utils.Database.LiteDB
             foreach (var prop in properties)
             {
                 object value = prop.GetValue(data);
-                if (value == null) continue;
+                if (value == null)
+                    continue;
 
-                if (value is string && string.IsNullOrEmpty(value.ToString())) continue;
-                if (value is ICollection collection && collection.Count == 0) continue;
+                if (value is string && string.IsNullOrEmpty(value.ToString()))
+                    continue;
+                if (value is ICollection collection && collection.Count == 0)
+                    continue;
                 if (value.GetType().IsEnum)
                 {
                     var enumValue = (int)value;
-                    if (enumValue == 0) continue;
+                    if (enumValue == 0)
+                        continue;
                 }
-
 
                 keys.Add(prop.Name);
             }

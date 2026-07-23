@@ -103,7 +103,10 @@ namespace UzonMail.CorePluginTests.Services.SendCore
             specific.RemoveSepecificSendingItem(1, 10);
 
             Assert.IsTrue(specific.ContainsSendingGroup(1));
-            Assert.AreEqual(OutboxEmailAddressType.Specific | OutboxEmailAddressType.Shared, specific.Type);
+            Assert.AreEqual(
+                OutboxEmailAddressType.Specific | OutboxEmailAddressType.Shared,
+                specific.Type
+            );
         }
 
         [TestMethod]
@@ -145,7 +148,12 @@ namespace UzonMail.CorePluginTests.Services.SendCore
             var clients = await Task.WhenAll(
                 Enumerable
                     .Range(0, 20)
-                    .Select(_ => handler.GetProxyClientAsync(new EmptyServiceProvider(), "sender@example.com"))
+                    .Select(_ =>
+                        handler.GetProxyClientAsync(
+                            new EmptyServiceProvider(),
+                            "sender@example.com"
+                        )
+                    )
             );
 
             Assert.IsTrue(clients.All(x => x != null));
@@ -203,9 +211,9 @@ namespace UzonMail.CorePluginTests.Services.SendCore
                     Password = "password".AES(encryptParams.Key, encryptParams.Iv),
                     ReplyToEmails = "",
                     SmtpHost = "smtp.example.com",
-                SmtpPort = 465,
-                Weight = 1
-            },
+                    SmtpPort = 465,
+                    Weight = 1
+                },
                 1,
                 encryptParams,
                 type,

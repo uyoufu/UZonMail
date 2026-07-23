@@ -14,12 +14,14 @@ namespace UzonMail.DB.Migrations.SqLite
                 name: "Host",
                 table: "UnsubscribeEmails",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_UnsubscribeEmails_OrganizationId_Email",
                 table: "UnsubscribeEmails",
-                columns: new[] { "OrganizationId", "Email" });
+                columns: new[] { "OrganizationId", "Email" }
+            );
         }
 
         /// <inheritdoc />
@@ -27,11 +29,10 @@ namespace UzonMail.DB.Migrations.SqLite
         {
             migrationBuilder.DropIndex(
                 name: "IX_UnsubscribeEmails_OrganizationId_Email",
-                table: "UnsubscribeEmails");
+                table: "UnsubscribeEmails"
+            );
 
-            migrationBuilder.DropColumn(
-                name: "Host",
-                table: "UnsubscribeEmails");
+            migrationBuilder.DropColumn(name: "Host", table: "UnsubscribeEmails");
         }
     }
 }

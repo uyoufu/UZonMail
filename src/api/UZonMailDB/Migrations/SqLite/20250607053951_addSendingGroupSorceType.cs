@@ -15,15 +15,14 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "SendingGroups",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "SourceType",
-                table: "SendingGroups");
+            migrationBuilder.DropColumn(name: "SourceType", table: "SendingGroups");
         }
     }
 }

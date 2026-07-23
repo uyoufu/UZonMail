@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using UzonMail.DB.SQL.EntityConfigs;
 
 namespace UzonMail.DB.SQL
@@ -8,9 +8,9 @@ namespace UzonMail.DB.SQL
     {
         #region 初始化
         public SqlContextBase() { }
-        public SqlContextBase(DbContextOptions options) : base(options)
-        {
-        }
+
+        public SqlContextBase(DbContextOptions options)
+            : base(options) { }
 
         /// <summary>
         /// 配置数据库
@@ -29,7 +29,9 @@ namespace UzonMail.DB.SQL
             return base.SaveChanges();
         }
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default
+        )
         {
             //ConvertDateTimesToUtc();
             return await base.SaveChangesAsync(cancellationToken);
@@ -41,7 +43,9 @@ namespace UzonMail.DB.SQL
             {
                 if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
                 {
-                    var properties = entry.Entity.GetType().GetProperties()
+                    var properties = entry
+                        .Entity.GetType()
+                        .GetProperties()
                         .Where(p => p.PropertyType == typeof(DateTime));
                     foreach (var prop in properties)
                     {
@@ -53,7 +57,10 @@ namespace UzonMail.DB.SQL
                         else if (value.Kind == DateTimeKind.Unspecified)
                         {
                             // 可选：假设未指定的时间为本地时间
-                            prop.SetValue(entry.Entity, DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime());
+                            prop.SetValue(
+                                entry.Entity,
+                                DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime()
+                            );
                         }
                     }
                 }

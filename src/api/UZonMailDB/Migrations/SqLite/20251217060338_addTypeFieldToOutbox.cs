@@ -13,37 +13,32 @@ namespace UzonMail.DB.Migrations.SqLite
             migrationBuilder.RenameColumn(
                 name: "SecurityProtocol",
                 table: "SmtpInfos",
-                newName: "ConnectionSecurity");
+                newName: "ConnectionSecurity"
+            );
 
-            migrationBuilder.RenameColumn(
-                name: "EnableSSL",
-                table: "Outboxes",
-                newName: "Type");
+            migrationBuilder.RenameColumn(name: "EnableSSL", table: "Outboxes", newName: "Type");
 
             migrationBuilder.AddColumn<int>(
                 name: "ConnectionSecurity",
                 table: "Outboxes",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ConnectionSecurity",
-                table: "Outboxes");
+            migrationBuilder.DropColumn(name: "ConnectionSecurity", table: "Outboxes");
 
             migrationBuilder.RenameColumn(
                 name: "ConnectionSecurity",
                 table: "SmtpInfos",
-                newName: "SecurityProtocol");
+                newName: "SecurityProtocol"
+            );
 
-            migrationBuilder.RenameColumn(
-                name: "Type",
-                table: "Outboxes",
-                newName: "EnableSSL");
+            migrationBuilder.RenameColumn(name: "Type", table: "Outboxes", newName: "EnableSSL");
         }
     }
 }

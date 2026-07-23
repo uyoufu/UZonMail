@@ -235,7 +235,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                     .SendingItems.AsNoTracking()
                     .Where(x => x.SendingGroupId == SendingGroupId)
                     .Where(x =>
-                        x.Status == SendingItemStatus.Created || x.Status == SendingItemStatus.Failed
+                        x.Status == SendingItemStatus.Created
+                        || x.Status == SendingItemStatus.Failed
                     ); // 获取可发送项
 
                 if (sendingItemIds != null && sendingItemIds.Count > 0)
@@ -260,7 +261,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 toSendingItems = toSendingItems.Where(x => !existIds.Contains(x.Id)).ToList();
 
                 // 获取发件箱
-                HashSet<long> outboxIds = [.. toSendingItems.Select(x => x.OutBoxId).Where(x => x > 0)];
+                HashSet<long> outboxIds =
+                [
+                    .. toSendingItems.Select(x => x.OutBoxId).Where(x => x > 0)
+                ];
                 var outboxes = await sqlContext
                     .Outboxes.Where(x => outboxIds.Contains(x.Id))
                     .ToListAsync();
@@ -311,7 +315,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                                 .SetProperty(y => y.SendDate, DateTime.UtcNow)
                                 .SetProperty(y => y.SendResult, "发件项过滤器判定为无效")
                     );
-                    toSendingItems = toSendingItems.FindAll(x => !filteredInvalidIdsSet.Contains(x.Id));
+                    toSendingItems = toSendingItems.FindAll(x =>
+                        !filteredInvalidIdsSet.Contains(x.Id)
+                    );
                 }
 
                 // 更新待发件列表
@@ -338,7 +344,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 await UpdateSendingGroupInfo(sqlContext, SendingGroupId);
 
                 // 新增特定发件箱
-                var outboxesPoolList = sendingContext.Provider.GetRequiredService<OutboxesManager>();
+                var outboxesPoolList =
+                    sendingContext.Provider.GetRequiredService<OutboxesManager>();
                 foreach (var outbox in outboxes)
                 {
                     // 获取收件项 Id

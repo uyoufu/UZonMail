@@ -16,7 +16,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(long),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "DeviceId",
@@ -24,22 +25,22 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(long),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsShared",
                 table: "TikTokDevices",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsShared",
-                table: "TikTokDevices");
+            migrationBuilder.DropColumn(name: "IsShared", table: "TikTokDevices");
 
             migrationBuilder.AlterColumn<long>(
                 name: "OdinId",
@@ -47,7 +48,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<long>(
                 name: "DeviceId",
@@ -55,7 +57,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
         }
     }
 }

@@ -14,6 +14,7 @@
         /// <summary>
         /// 连接字符串
         /// </summary>
-        public string ConnectionString => $"{Host}:{Port},password={Password},defaultDatabase={Database}";
+        public string ConnectionString =>
+            $"{Host}:{Port},password={Password},defaultDatabase={Database}";
     }
 }

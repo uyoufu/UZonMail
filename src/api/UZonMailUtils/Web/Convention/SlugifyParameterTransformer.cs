@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Routing;
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Routing;
 
 namespace UzonMail.Utils.Web.Convention
 {
@@ -11,14 +11,19 @@ namespace UzonMail.Utils.Web.Convention
     {
         public string TransformOutbound(object? value)
         {
-            if (value == null) return string.Empty;
+            if (value == null)
+                return string.Empty;
 
             // Slugify value
-            return Regex.Replace(value.ToString()!,
-                                 "([a-z])([A-Z])",
-                                 "$1-$2",
-                                 RegexOptions.CultureInvariant,
-                                 TimeSpan.FromMilliseconds(100)).ToLowerInvariant();
+            return Regex
+                .Replace(
+                    value.ToString()!,
+                    "([a-z])([A-Z])",
+                    "$1-$2",
+                    RegexOptions.CultureInvariant,
+                    TimeSpan.FromMilliseconds(100)
+                )
+                .ToLowerInvariant();
         }
     }
 }

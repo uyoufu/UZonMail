@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using static UzonMail.Utils.Extensions.NameStylesExtension;
 
 namespace UzonMail.Utils.Json
@@ -28,7 +28,10 @@ namespace UzonMail.Utils.Json
                 StreamReader sr = File.OpenText(fileName);
                 JsonTextReader reader = new JsonTextReader(sr);
                 var obj = JToken.ReadFrom(reader);
-                result.Merge(obj, new JsonMergeSettings() { MergeArrayHandling = MergeArrayHandling.Union });
+                result.Merge(
+                    obj,
+                    new JsonMergeSettings() { MergeArrayHandling = MergeArrayHandling.Union }
+                );
             }
             return result;
         }
@@ -40,9 +43,14 @@ namespace UzonMail.Utils.Json
         /// <param name="searchPattern"></param>
         /// <param name="searchOption"></param>
         /// <returns></returns>
-        public static JObject ReadAndMergeJsonFiles(string dirName, string searchPattern, SearchOption searchOption = SearchOption.AllDirectories)
+        public static JObject ReadAndMergeJsonFiles(
+            string dirName,
+            string searchPattern,
+            SearchOption searchOption = SearchOption.AllDirectories
+        )
         {
-            if (!searchPattern.ToLower().EndsWith(".json")) throw new ArgumentException($"only json files allowed to read");
+            if (!searchPattern.ToLower().EndsWith(".json"))
+                throw new ArgumentException($"only json files allowed to read");
 
             var files = Directory.GetFiles(dirName, searchPattern, searchOption);
             return ReadAndMergeJsonFiles(files.ToList());
@@ -57,18 +65,28 @@ namespace UzonMail.Utils.Json
         /// <param name="nameStylesType"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static T UpdateModelByJObject<T>(T model,JObject data, NameStylesType nameStylesType = NameStylesType.PascalCase)
+        public static T UpdateModelByJObject<T>(
+            T model,
+            JObject data,
+            NameStylesType nameStylesType = NameStylesType.PascalCase
+        )
         {
-            if (model == null || data == null) throw new ArgumentNullException("model or data is null");
-            T updateData = data.ToObject<T>() ?? throw new ArgumentNullException($"could not convert JObject to {model.GetType()}");
+            if (model == null || data == null)
+                throw new ArgumentNullException("model or data is null");
+            T updateData =
+                data.ToObject<T>()
+                ?? throw new ArgumentNullException(
+                    $"could not convert JObject to {model.GetType()}"
+                );
 
             // 更新数据
             var propertyInfos = model.GetType().GetProperties();
-            foreach(var item in data)
+            foreach (var item in data)
             {
                 var fieldName = item.Key.ToNameStyle(nameStylesType);
-                var propertyInfo = propertyInfos.FirstOrDefault(x=> x.Name == fieldName);
-                if(propertyInfo == null)continue;
+                var propertyInfo = propertyInfos.FirstOrDefault(x => x.Name == fieldName);
+                if (propertyInfo == null)
+                    continue;
 
                 propertyInfo.SetValue(model, propertyInfo.GetValue(updateData));
             }

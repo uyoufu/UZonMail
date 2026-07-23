@@ -16,7 +16,8 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "text");
+                oldType: "text"
+            );
         }
 
         /// <inheritdoc />
@@ -30,7 +31,8 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "text",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
     }
 }

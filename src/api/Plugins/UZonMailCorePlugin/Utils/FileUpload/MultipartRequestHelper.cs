@@ -1,6 +1,6 @@
-﻿using Microsoft.Net.Http.Headers;
-using System;
+﻿using System;
 using System.IO;
+using Microsoft.Net.Http.Headers;
 
 namespace UzonMail.Utils.Web.FileUpload
 {
@@ -30,7 +30,8 @@ namespace UzonMail.Utils.Web.FileUpload
             if (boundary.Length > lengthLimit)
             {
                 throw new InvalidDataException(
-                    $"Multipart boundary length limit {lengthLimit} exceeded.");
+                    $"Multipart boundary length limit {lengthLimit} exceeded."
+                );
             }
 
             return boundary;
@@ -44,7 +45,7 @@ namespace UzonMail.Utils.Web.FileUpload
         public static bool IsMultipartContentType(string contentType)
         {
             return !string.IsNullOrEmpty(contentType)
-                   && contentType.Contains("multipart/", StringComparison.OrdinalIgnoreCase);
+                && contentType.Contains("multipart/", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -52,7 +53,9 @@ namespace UzonMail.Utils.Web.FileUpload
         /// </summary>
         /// <param name="contentDisposition"></param>
         /// <returns></returns>
-        public static bool HasFormDataContentDisposition(ContentDispositionHeaderValue contentDisposition)
+        public static bool HasFormDataContentDisposition(
+            ContentDispositionHeaderValue contentDisposition
+        )
         {
             // Content-Disposition: form-data; name="key";
             return contentDisposition != null
@@ -66,13 +69,17 @@ namespace UzonMail.Utils.Web.FileUpload
         /// </summary>
         /// <param name="contentDisposition"></param>
         /// <returns></returns>
-        public static bool HasFileContentDisposition(ContentDispositionHeaderValue contentDisposition)
+        public static bool HasFileContentDisposition(
+            ContentDispositionHeaderValue contentDisposition
+        )
         {
             // Content-Disposition: form-data; name="myfile1"; filename="Misc 002.jpg"
             return contentDisposition != null
                 && contentDisposition.DispositionType.Equals("form-data")
-                && (!string.IsNullOrEmpty(contentDisposition.FileName.Value)
-                    || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value));
+                && (
+                    !string.IsNullOrEmpty(contentDisposition.FileName.Value)
+                    || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value)
+                );
         }
     }
 }

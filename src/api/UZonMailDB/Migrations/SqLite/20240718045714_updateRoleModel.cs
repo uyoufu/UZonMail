@@ -13,42 +13,34 @@ namespace UzonMailService.Migrations.SqLite
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_PermissionCodes_Roles_RoleId",
-                table: "PermissionCodes");
+                table: "PermissionCodes"
+            );
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Users_Roles_RoleId",
-                table: "Users");
+            migrationBuilder.DropForeignKey(name: "FK_Users_Roles_RoleId", table: "Users");
 
-            migrationBuilder.DropTable(
-                name: "RolePermissionCodes");
+            migrationBuilder.DropTable(name: "RolePermissionCodes");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Users_RoleId",
-                table: "Users");
+            migrationBuilder.DropIndex(name: "IX_Users_RoleId", table: "Users");
 
-            migrationBuilder.DropIndex(
-                name: "IX_PermissionCodes_RoleId",
-                table: "PermissionCodes");
+            migrationBuilder.DropIndex(name: "IX_PermissionCodes_RoleId", table: "PermissionCodes");
 
-            migrationBuilder.DropColumn(
-                name: "RoleId",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "RoleId", table: "Users");
 
-            migrationBuilder.DropColumn(
-                name: "RoleId",
-                table: "PermissionCodes");
+            migrationBuilder.DropColumn(name: "RoleId", table: "PermissionCodes");
 
             migrationBuilder.AddColumn<string>(
                 name: "Description",
                 table: "Roles",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "Icon",
                 table: "Roles",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.CreateTable(
                 name: "PermissionCodeRole",
@@ -59,66 +51,70 @@ namespace UzonMailService.Migrations.SqLite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PermissionCodeRole", x => new { x.PermissionCodesId, x.RolesId });
+                    table.PrimaryKey(
+                        "PK_PermissionCodeRole",
+                        x => new { x.PermissionCodesId, x.RolesId }
+                    );
                     table.ForeignKey(
                         name: "FK_PermissionCodeRole_PermissionCodes_PermissionCodesId",
                         column: x => x.PermissionCodesId,
                         principalTable: "PermissionCodes",
-                        principalColumn: "Id");
+                        principalColumn: "Id"
+                    );
                     table.ForeignKey(
                         name: "FK_PermissionCodeRole_Roles_RolesId",
                         column: x => x.RolesId,
                         principalTable: "Roles",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PermissionCodes_Code",
                 table: "PermissionCodes",
                 column: "Code",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PermissionCodeRole_RolesId",
                 table: "PermissionCodeRole",
-                column: "RolesId");
+                column: "RolesId"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "PermissionCodeRole");
+            migrationBuilder.DropTable(name: "PermissionCodeRole");
 
-            migrationBuilder.DropIndex(
-                name: "IX_PermissionCodes_Code",
-                table: "PermissionCodes");
+            migrationBuilder.DropIndex(name: "IX_PermissionCodes_Code", table: "PermissionCodes");
 
-            migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Roles");
+            migrationBuilder.DropColumn(name: "Description", table: "Roles");
 
-            migrationBuilder.DropColumn(
-                name: "Icon",
-                table: "Roles");
+            migrationBuilder.DropColumn(name: "Icon", table: "Roles");
 
             migrationBuilder.AddColumn<long>(
                 name: "RoleId",
                 table: "Users",
                 type: "INTEGER",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<long>(
                 name: "RoleId",
                 table: "PermissionCodes",
                 type: "INTEGER",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.CreateTable(
                 name: "RolePermissionCodes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -129,31 +125,32 @@ namespace UzonMailService.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RolePermissionCodes", x => x.Id);
-                });
+                }
+            );
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_RoleId",
-                table: "Users",
-                column: "RoleId");
+            migrationBuilder.CreateIndex(name: "IX_Users_RoleId", table: "Users", column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PermissionCodes_RoleId",
                 table: "PermissionCodes",
-                column: "RoleId");
+                column: "RoleId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PermissionCodes_Roles_RoleId",
                 table: "PermissionCodes",
                 column: "RoleId",
                 principalTable: "Roles",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Users_Roles_RoleId",
                 table: "Users",
                 column: "RoleId",
                 principalTable: "Roles",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
         }
     }
 }

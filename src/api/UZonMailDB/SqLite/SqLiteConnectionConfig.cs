@@ -19,14 +19,15 @@ namespace UzonMail.DB.SqLite
         {
             get
             {
-                SqliteConnectionStringBuilder builder = new()
-                {
-                    { "Data Source", DataSource },
-                    { "Mode", Mode },
-                    { "Cache", Cache },
-                    { "Password", Password },
-                    { "Version", Version }
-                };
+                SqliteConnectionStringBuilder builder =
+                    new()
+                    {
+                        { "Data Source", DataSource },
+                        { "Mode", Mode },
+                        { "Cache", Cache },
+                        { "Password", Password },
+                        { "Version", Version }
+                    };
 
                 return builder.ConnectionString;
             }

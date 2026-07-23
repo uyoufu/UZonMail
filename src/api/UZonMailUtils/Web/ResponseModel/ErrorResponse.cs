@@ -11,7 +11,7 @@ namespace UzonMail.Utils.Web.ResponseModel
     /// 响应失败
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ErrorResponse<T>: ResponseResult<T>
+    public class ErrorResponse<T> : ResponseResult<T>
     {
         public ErrorResponse()
         {
@@ -23,12 +23,14 @@ namespace UzonMail.Utils.Web.ResponseModel
         /// 返回错误
         /// </summary>
         /// <param name="message"></param>
-        public ErrorResponse(string message):this()
+        public ErrorResponse(string message)
+            : this()
         {
             Message = message;
         }
 
-        public ErrorResponse(string message,T data):this(message)
+        public ErrorResponse(string message, T data)
+            : this(message)
         {
             Data = data;
         }

@@ -1,12 +1,12 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using Hardcodet.Wpf.TaskbarNotification;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using CommunityToolkit.Mvvm.Input;
+using Hardcodet.Wpf.TaskbarNotification;
 
 namespace UzonMailDesktop.Pages.Tray
 {
@@ -32,40 +32,50 @@ namespace UzonMailDesktop.Pages.Tray
             {
                 _window.Visibility = Visibility.Visible;
                 _window.WindowState = WindowState.Normal;
-                _window.ShowInTaskbar = true;//使Form在任务栏上显示
+                _window.ShowInTaskbar = true; //使Form在任务栏上显示
                 _window.Activate();
             });
-            ctxMenu.Items.Add(new MenuItem()
-            {
-                Header = "打开",
-                Command = openCommand
-            });
-            ctxMenu.Items.Add(new MenuItem()
-            {
-                Header = "退出",
-                Command = new RelayCommand(() =>
+            ctxMenu.Items.Add(new MenuItem() { Header = "打开", Command = openCommand });
+            ctxMenu.Items.Add(
+                new MenuItem()
                 {
-                    if (MessageBox.Show(_window, "即将退出宇正群邮, 是否继续?", "温馨提醒", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes) == MessageBoxResult.Yes)
+                    Header = "退出",
+                    Command = new RelayCommand(() =>
                     {
-                        // 退出应用
-                        Environment.Exit(0);
-                    }
-                })
-            });
+                        if (
+                            MessageBox.Show(
+                                _window,
+                                "即将退出宇正群邮, 是否继续?",
+                                "温馨提醒",
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Question,
+                                MessageBoxResult.Yes
+                            ) == MessageBoxResult.Yes
+                        )
+                        {
+                            // 退出应用
+                            Environment.Exit(0);
+                        }
+                    })
+                }
+            );
 
             var leftClickCommand = new RelayCommand(() =>
             {
-                if (_window.Visibility == Visibility.Visible && _window.WindowState != WindowState.Minimized)
+                if (
+                    _window.Visibility == Visibility.Visible
+                    && _window.WindowState != WindowState.Minimized
+                )
                 {
                     _window.Visibility = Visibility.Hidden;
                     //解决最小化到任务栏可以强行关闭程序的问题。
-                    _window.ShowInTaskbar = false;//使Form不在任务栏上显示
+                    _window.ShowInTaskbar = false; //使Form不在任务栏上显示
                 }
                 else
                 {
                     _window.Visibility = Visibility.Visible;
                     _window.WindowState = WindowState.Normal;
-                    _window.ShowInTaskbar = true;//使Form在任务栏上显示
+                    _window.ShowInTaskbar = true; //使Form在任务栏上显示
                     _window.Activate();
                 }
             });

@@ -1,7 +1,7 @@
+using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Windows;
 using UzonMailDesktop.Configuration;
 using UzonMailDesktop.Services;
 using UzonMailDesktop.ViewModels;
@@ -59,7 +59,11 @@ public partial class App : Application
         if (_host is not null)
         {
             _host.Services.GetService<ITrayIconService>()?.Dispose();
-            _host.Services.GetService<IBackendProcessManager>()?.StopAsync().GetAwaiter().GetResult();
+            _host
+                .Services.GetService<IBackendProcessManager>()
+                ?.StopAsync()
+                .GetAwaiter()
+                .GetResult();
             _host.StopAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
             _host.Dispose();
         }
@@ -70,32 +74,52 @@ public partial class App : Application
     private static IHost BuildHost(string[] args)
     {
         var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
-        var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
-        {
-            Args = args,
-            ContentRootPath = AppContext.BaseDirectory,
-            EnvironmentName = environment
-        });
+        var builder = Host.CreateApplicationBuilder(
+            new HostApplicationBuilderSettings
+            {
+                Args = args,
+                ContentRootPath = AppContext.BaseDirectory,
+                EnvironmentName = environment
+            }
+        );
 
-        builder.Configuration
-            .SetBasePath(AppContext.BaseDirectory)
+        builder
+            .Configuration.SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
             .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: false)
             .AddEnvironmentVariables("UZONMAIL_DESKTOP_");
 
-        builder.Services
-            .AddOptions<BackendOptions>()
+        builder
+            .Services.AddOptions<BackendOptions>()
             .Bind(builder.Configuration.GetSection(BackendOptions.SectionName))
-            .Validate(x => !string.IsNullOrWhiteSpace(x.ExecutablePath), "Backend:ExecutablePath 不能为空。")
-            .Validate(x => Uri.TryCreate(x.WebUrl, UriKind.Absolute, out _), "Backend:WebUrl 必须是绝对 URL。")
-            .Validate(x => Uri.TryCreate(x.ReadinessUrl, UriKind.Absolute, out _), "Backend:ReadinessUrl 必须是绝对 URL。")
-            .Validate(x => x.StartupTimeoutSeconds is >= 1 and <= 600, "Backend:StartupTimeoutSeconds 必须介于 1 和 600 之间。")
+            .Validate(
+                x => !string.IsNullOrWhiteSpace(x.ExecutablePath),
+                "Backend:ExecutablePath 不能为空。"
+            )
+            .Validate(
+                x => Uri.TryCreate(x.WebUrl, UriKind.Absolute, out _),
+                "Backend:WebUrl 必须是绝对 URL。"
+            )
+            .Validate(
+                x => Uri.TryCreate(x.ReadinessUrl, UriKind.Absolute, out _),
+                "Backend:ReadinessUrl 必须是绝对 URL。"
+            )
+            .Validate(
+                x => x.StartupTimeoutSeconds is >= 1 and <= 600,
+                "Backend:StartupTimeoutSeconds 必须介于 1 和 600 之间。"
+            )
             .ValidateOnStart();
-        builder.Services
-            .AddOptions<PrerequisiteOptions>()
+        builder
+            .Services.AddOptions<PrerequisiteOptions>()
             .Bind(builder.Configuration.GetSection(PrerequisiteOptions.SectionName))
-            .Validate(x => Uri.TryCreate(x.DotNetReleaseMetadataBaseUrl, UriKind.Absolute, out _), "Prerequisites:DotNetReleaseMetadataBaseUrl 必须是绝对 URL。")
-            .Validate(x => Uri.TryCreate(x.WebView2BootstrapperUrl, UriKind.Absolute, out _), "Prerequisites:WebView2BootstrapperUrl 必须是绝对 URL。")
+            .Validate(
+                x => Uri.TryCreate(x.DotNetReleaseMetadataBaseUrl, UriKind.Absolute, out _),
+                "Prerequisites:DotNetReleaseMetadataBaseUrl 必须是绝对 URL。"
+            )
+            .Validate(
+                x => Uri.TryCreate(x.WebView2BootstrapperUrl, UriKind.Absolute, out _),
+                "Prerequisites:WebView2BootstrapperUrl 必须是绝对 URL。"
+            )
             .ValidateOnStart();
 
         builder.Services.AddSingleton<MainWindow>();

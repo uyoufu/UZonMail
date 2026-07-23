@@ -15,15 +15,14 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "CrawlerTaskInfos",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Count",
-                table: "CrawlerTaskInfos");
+            migrationBuilder.DropColumn(name: "Count", table: "CrawlerTaskInfos");
         }
     }
 }

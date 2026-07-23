@@ -1,5 +1,5 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using System.Reflection;
+using CommunityToolkit.Mvvm.ComponentModel;
 using UzonMailDesktop.Services;
 
 namespace UzonMailDesktop.ViewModels;

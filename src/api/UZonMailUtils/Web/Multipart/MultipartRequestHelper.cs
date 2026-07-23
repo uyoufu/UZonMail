@@ -25,7 +25,8 @@ namespace UzonMail.Utils.Web.Multipart
             if (boundary.Length > lengthLimit)
             {
                 throw new InvalidDataException(
-                    $"Multipart boundary length limit {lengthLimit} exceeded.");
+                    $"Multipart boundary length limit {lengthLimit} exceeded."
+                );
             }
 
             return boundary;
@@ -39,7 +40,7 @@ namespace UzonMail.Utils.Web.Multipart
         public static bool IsMultipartContentType(string contentType)
         {
             return !string.IsNullOrEmpty(contentType)
-                    && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
+                && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>
@@ -47,13 +48,15 @@ namespace UzonMail.Utils.Web.Multipart
         /// </summary>
         /// <param name="contentDisposition"></param>
         /// <returns></returns>
-        public static bool HasFormDataContentDisposition(ContentDispositionHeaderValue contentDisposition)
+        public static bool HasFormDataContentDisposition(
+            ContentDispositionHeaderValue contentDisposition
+        )
         {
             // Content-Disposition: form-data; name="key";
             return contentDisposition != null
-                    && contentDisposition.DispositionType.Equals("form-data")
-                    && string.IsNullOrEmpty(contentDisposition.FileName.Value) // For .NET Core <2.0 remove ".Value"
-                    && string.IsNullOrEmpty(contentDisposition.FileNameStar.Value); // For .NET Core <2.0 remove ".Value"
+                && contentDisposition.DispositionType.Equals("form-data")
+                && string.IsNullOrEmpty(contentDisposition.FileName.Value) // For .NET Core <2.0 remove ".Value"
+                && string.IsNullOrEmpty(contentDisposition.FileNameStar.Value); // For .NET Core <2.0 remove ".Value"
         }
 
         /// <summary>
@@ -61,13 +64,17 @@ namespace UzonMail.Utils.Web.Multipart
         /// </summary>
         /// <param name="contentDisposition"></param>
         /// <returns></returns>
-        public static bool HasFileContentDisposition(ContentDispositionHeaderValue contentDisposition)
+        public static bool HasFileContentDisposition(
+            ContentDispositionHeaderValue contentDisposition
+        )
         {
             // Content-Disposition: form-data; name="myfile1"; filename="Misc 002.jpg"
             return contentDisposition != null
-                    && contentDisposition.DispositionType.Equals("form-data")
-                    && (!string.IsNullOrEmpty(contentDisposition.FileName.Value) // For .NET Core <2.0 remove ".Value"
-                        || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value)); // For .NET Core <2.0 remove ".Value"
+                && contentDisposition.DispositionType.Equals("form-data")
+                && (
+                    !string.IsNullOrEmpty(contentDisposition.FileName.Value) // For .NET Core <2.0 remove ".Value"
+                    || !string.IsNullOrEmpty(contentDisposition.FileNameStar.Value)
+                ); // For .NET Core <2.0 remove ".Value"
         }
 
         /// <summary>
@@ -76,7 +83,9 @@ namespace UzonMail.Utils.Web.Multipart
         /// </summary>
         /// <param name="contentDisposition"></param>
         /// <returns></returns>
-        public static string GetFileContentInputName(ContentDispositionHeaderValue contentDisposition)
+        public static string GetFileContentInputName(
+            ContentDispositionHeaderValue contentDisposition
+        )
         {
             return contentDisposition.Name.Value;
         }

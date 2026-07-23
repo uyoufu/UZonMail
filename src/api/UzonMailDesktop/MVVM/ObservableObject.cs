@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
 
 namespace UzonMailDesktop.MVVM
 {
@@ -32,7 +32,9 @@ namespace UzonMailDesktop.MVVM
             RaisePropertyChanged(propertyName);
         }
 
-        protected virtual void NotifyOfPropertyChange<TProperty>(Expression<Func<TProperty>> property)
+        protected virtual void NotifyOfPropertyChange<TProperty>(
+            Expression<Func<TProperty>> property
+        )
         {
             RaisePropertyChanged(GetMemberInfo(property).Name);
         }
@@ -46,7 +48,10 @@ namespace UzonMailDesktop.MVVM
         [DebuggerStepThrough]
         public void VerifyPropertyName(string propertyName)
         {
-            if (!string.IsNullOrEmpty(propertyName) && TypeDescriptor.GetProperties(this)[propertyName] == null)
+            if (
+                !string.IsNullOrEmpty(propertyName)
+                && TypeDescriptor.GetProperties(this)[propertyName] == null
+            )
             {
                 string message = "Invalid property name: " + propertyName;
                 if (ThrowOnInvalidPropertyName)
@@ -59,7 +64,9 @@ namespace UzonMailDesktop.MVVM
         private MemberInfo GetMemberInfo(Expression expression)
         {
             LambdaExpression lambdaExpression = (LambdaExpression)expression;
-            MemberExpression memberExpression = !(lambdaExpression.Body is UnaryExpression expression1)
+            MemberExpression memberExpression = !(
+                lambdaExpression.Body is UnaryExpression expression1
+            )
                 ? (MemberExpression)lambdaExpression.Body
                 : (MemberExpression)expression1.Operand;
             return memberExpression.Member;

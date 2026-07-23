@@ -16,34 +16,39 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "UserSettings",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
 
             migrationBuilder.AddColumn<bool>(
                 name: "EnableEmailTracker",
                 table: "SendingItems",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "FirstDate",
                 table: "FileReaders",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+            );
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastDate",
                 table: "FileReaders",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+            );
 
             migrationBuilder.CreateTable(
                 name: "EmailAnchors",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     SendingGroupId = table.Column<long>(type: "INTEGER", nullable: false),
                     SendingItemId = table.Column<long>(type: "INTEGER", nullable: false),
@@ -60,13 +65,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EmailAnchors", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "IPInfos",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     IP = table.Column<string>(type: "TEXT", nullable: false),
                     Country = table.Column<string>(type: "TEXT", nullable: true),
@@ -87,13 +94,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_IPInfos", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "EmailVisitHistories",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     IP = table.Column<string>(type: "TEXT", nullable: false),
                     EmailAnchorId = table.Column<long>(type: "INTEGER", nullable: true),
@@ -109,47 +118,36 @@ namespace UzonMail.DB.Migrations.SqLite
                         name: "FK_EmailVisitHistories_EmailAnchors_EmailAnchorId",
                         column: x => x.EmailAnchorId,
                         principalTable: "EmailAnchors",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_EmailVisitHistories_EmailAnchorId",
                 table: "EmailVisitHistories",
-                column: "EmailAnchorId");
+                column: "EmailAnchorId"
+            );
 
-            migrationBuilder.CreateIndex(
-                name: "IX_IPInfos_IP",
-                table: "IPInfos",
-                column: "IP");
+            migrationBuilder.CreateIndex(name: "IX_IPInfos_IP", table: "IPInfos", column: "IP");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "EmailVisitHistories");
+            migrationBuilder.DropTable(name: "EmailVisitHistories");
 
-            migrationBuilder.DropTable(
-                name: "IPInfos");
+            migrationBuilder.DropTable(name: "IPInfos");
 
-            migrationBuilder.DropTable(
-                name: "EmailAnchors");
+            migrationBuilder.DropTable(name: "EmailAnchors");
 
-            migrationBuilder.DropColumn(
-                name: "EnableEmailTracker",
-                table: "UserSettings");
+            migrationBuilder.DropColumn(name: "EnableEmailTracker", table: "UserSettings");
 
-            migrationBuilder.DropColumn(
-                name: "EnableEmailTracker",
-                table: "SendingItems");
+            migrationBuilder.DropColumn(name: "EnableEmailTracker", table: "SendingItems");
 
-            migrationBuilder.DropColumn(
-                name: "FirstDate",
-                table: "FileReaders");
+            migrationBuilder.DropColumn(name: "FirstDate", table: "FileReaders");
 
-            migrationBuilder.DropColumn(
-                name: "LastDate",
-                table: "FileReaders");
+            migrationBuilder.DropColumn(name: "LastDate", table: "FileReaders");
         }
     }
 }

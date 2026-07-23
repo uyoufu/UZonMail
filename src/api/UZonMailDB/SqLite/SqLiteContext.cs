@@ -7,9 +7,8 @@ namespace UzonMail.DB.SqLite
     {
         private readonly IConfiguration _configuration;
 
-        internal SqLiteContext(DbContextOptions<SqlContext> options) : base(options)
-        {
-        }
+        internal SqLiteContext(DbContextOptions<SqlContext> options)
+            : base(options) { }
 
         [ActivatorUtilitiesConstructor]
         public SqLiteContext(IConfiguration configuration)
@@ -19,7 +18,7 @@ namespace UzonMail.DB.SqLite
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            SqlContextHelper.ConfiguringSqLite(options, _configuration);            
+            SqlContextHelper.ConfiguringSqLite(options, _configuration);
         }
     }
 }

@@ -13,7 +13,8 @@ namespace UzonMail.DB.Migrations.SqLite
             migrationBuilder.RenameColumn(
                 name: "ForbiddenToLogin",
                 table: "Users",
-                newName: "Status");
+                newName: "Status"
+            );
         }
 
         /// <inheritdoc />
@@ -22,7 +23,8 @@ namespace UzonMail.DB.Migrations.SqLite
             migrationBuilder.RenameColumn(
                 name: "Status",
                 table: "Users",
-                newName: "ForbiddenToLogin");
+                newName: "ForbiddenToLogin"
+            );
         }
     }
 }

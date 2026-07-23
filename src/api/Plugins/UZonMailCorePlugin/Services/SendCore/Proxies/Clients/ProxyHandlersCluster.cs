@@ -67,16 +67,15 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
             var ipRateLimiter = scopeServiceProvider.GetRequiredService<IPRateLimiter>();
             var settingsManager = scopeServiceProvider.GetRequiredService<AppSettingsManager>();
             var sqlContext = scopeServiceProvider.GetRequiredService<SqlContext>();
-            var sendingSetting = await settingsManager.GetSetting<SendingSetting>(sqlContext, UserId);
+            var sendingSetting = await settingsManager.GetSetting<SendingSetting>(
+                sqlContext,
+                UserId
+            );
 
             return _handlers
                 .Values.Where(x => x.IsMatch(email) && x.IsEnable())
                 .Where(x =>
-                    !ipRateLimiter.IsLimited(
-                        domain,
-                        x.Host,
-                        sendingSetting.MaxCountPerIPDomainHour
-                    )
+                    !ipRateLimiter.IsLimited(domain, x.Host, sendingSetting.MaxCountPerIPDomainHour)
                 )
                 .FirstOrDefault();
         }
@@ -186,7 +185,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
 
         public override void CleanupExpiredResources()
         {
-            foreach (var handler in _handlers.Values.Where(x => !x.IsEnable() || x.IsExpired).ToList())
+            foreach (
+                var handler in _handlers.Values.Where(x => !x.IsEnable() || x.IsExpired).ToList()
+            )
             {
                 if (_handlers.TryRemove(handler.Id, out var removedHandler))
                     removedHandler.DisposeHandler();

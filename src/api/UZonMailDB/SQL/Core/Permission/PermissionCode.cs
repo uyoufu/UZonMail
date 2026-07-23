@@ -30,7 +30,6 @@ namespace UzonMail.DB.SQL.Core.Permission
         /// </summary>
         public List<Role> Roles { get; set; }
 
-
         #region 静态变量
         public static string OrganizationPermissionCode => "organizationAdmin";
         public static string SuperAdminPermissionCode => "*";

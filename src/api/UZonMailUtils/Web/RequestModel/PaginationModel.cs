@@ -17,7 +17,7 @@ namespace UzonMail.Utils.Web.RequestModel
         /// <summary>
         /// 是否降序
         /// </summary>
-        public bool Descending { get; set; }=false;
+        public bool Descending { get; set; } = false;
 
         /// <summary>
         /// 跳过的记录数

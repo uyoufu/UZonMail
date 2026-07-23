@@ -18,7 +18,10 @@ namespace UzonMail.Utils.Helpers
             string hostName = Dns.GetHostName();
             // 获取当前主机的 IP 地址
             IPHostEntry ipEntry = Dns.GetHostEntry(hostName);
-            return ipEntry.AddressList.Where(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            return ipEntry
+                .AddressList.Where(x =>
+                    x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+                )
                 .ToList();
         }
     }

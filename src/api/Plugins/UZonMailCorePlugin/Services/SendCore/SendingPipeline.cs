@@ -26,7 +26,8 @@ namespace UzonMail.CorePlugin.Services.SendCore
 
         public async Task Handle(SendingContext context)
         {
-            var chainHandlers = HandlerTypes.Select(provider.GetRequiredService)
+            var chainHandlers = HandlerTypes
+                .Select(provider.GetRequiredService)
                 .Cast<ISendingHandler>()
                 .ToList();
 

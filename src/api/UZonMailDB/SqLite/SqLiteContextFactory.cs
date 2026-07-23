@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore;
-using UzonMail.DB.SQL;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using SQLitePCL;
+using UzonMail.DB.SQL;
 
 namespace UzonMail.DB.SqLite
 {

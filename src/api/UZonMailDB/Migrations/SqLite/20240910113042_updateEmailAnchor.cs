@@ -13,27 +13,28 @@ namespace UzonMail.DB.Migrations.SqLite
             migrationBuilder.RenameColumn(
                 name: "InboxEmail",
                 table: "EmailAnchors",
-                newName: "InboxEmails");
+                newName: "InboxEmails"
+            );
 
             migrationBuilder.AddColumn<long>(
                 name: "UserId",
                 table: "EmailAnchors",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "EmailAnchors");
+            migrationBuilder.DropColumn(name: "UserId", table: "EmailAnchors");
 
             migrationBuilder.RenameColumn(
                 name: "InboxEmails",
                 table: "EmailAnchors",
-                newName: "InboxEmail");
+                newName: "InboxEmail"
+            );
         }
     }
 }

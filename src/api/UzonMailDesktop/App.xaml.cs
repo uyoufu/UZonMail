@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Windows;
+﻿using System.Windows;
+using Microsoft.Extensions.Configuration;
 using Application = System.Windows.Application;
 
 namespace UzonMailDesktop
@@ -9,8 +9,6 @@ namespace UzonMailDesktop
     /// </summary>
     public partial class App : Application
     {
-        public App()
-        {
-        }
+        public App() { }
     }
 }

@@ -29,7 +29,6 @@
             return null;
         }
 
-
         /// <summary>
         /// ResultFlag 转换成 bool
         /// </summary>

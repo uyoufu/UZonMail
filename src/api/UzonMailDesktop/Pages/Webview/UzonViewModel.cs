@@ -20,7 +20,7 @@ namespace UzonMailDesktop.Pages.Webview
         public UzonViewModel(IConfiguration config)
         {
             var url = config.GetSection("Webview2Url").Value!.ToString();
-            URL = url??"";
+            URL = url ?? "";
         }
     }
 }

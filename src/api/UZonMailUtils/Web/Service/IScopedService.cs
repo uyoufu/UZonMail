@@ -8,17 +8,11 @@ namespace UzonMail.Utils.Web.Service
     /// 生命周期为请求周期内的服务
     /// 服务注册为本身
     /// </summary>
-    public interface IScopedService : IService
-    {
-    }
-
+    public interface IScopedService : IService { }
 
     /// <summary>
     /// 服务注册为本身和指定类型T
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IScopedService<T> : IScopedService
-    {
-
-    }
+    public interface IScopedService<T> : IScopedService { }
 }

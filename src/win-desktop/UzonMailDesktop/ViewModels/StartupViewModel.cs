@@ -1,9 +1,9 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Options;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Options;
 using UzonMailDesktop.Configuration;
 using UzonMailDesktop.Services;
 using Application = System.Windows.Application;
@@ -40,7 +40,8 @@ public sealed partial class StartupViewModel : ObservableObject
         IBackendProcessManager backend,
         INavigationService navigation,
         IOptions<BackendOptions> backendOptions,
-        IOptions<PrerequisiteOptions> prerequisiteOptions)
+        IOptions<PrerequisiteOptions> prerequisiteOptions
+    )
     {
         _prerequisites = prerequisites;
         _backend = backend;

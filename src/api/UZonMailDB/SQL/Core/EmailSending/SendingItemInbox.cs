@@ -26,7 +26,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// <summary>
         /// 标识角色
         /// </summary>
-        public InboxRole Role { get; set; } 
+        public InboxRole Role { get; set; }
 
         /// <summary>
         /// 发送日期
@@ -40,10 +40,12 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// 收件人
         /// </summary>
         Recipient,
+
         /// <summary>
         /// 抄送人
         /// </summary>
         CC,
+
         /// <summary>
         /// 密送人
         /// </summary>

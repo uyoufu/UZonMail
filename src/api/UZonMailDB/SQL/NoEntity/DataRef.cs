@@ -25,11 +25,11 @@
             Description = description;
         }
 
-        public DataRef(IDataRef data) : this(data.Id, data.Name, data.Description)
-        {
-        }
+        public DataRef(IDataRef data)
+            : this(data.Id, data.Name, data.Description) { }
 
-        public DataRef(IDataRefName data) : this(data.Id, data.Name) { }
+        public DataRef(IDataRefName data)
+            : this(data.Id, data.Name) { }
 
         /// <summary>
         /// 从实体中创建一个引用
@@ -42,7 +42,12 @@
         /// <param name="descriptionField"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static DataRef From<T>(T data, string idField = "Id", string nameField="Name",string descriptionField="Description")
+        public static DataRef From<T>(
+            T data,
+            string idField = "Id",
+            string nameField = "Name",
+            string descriptionField = "Description"
+        )
         {
             var type = typeof(T);
             var id = type.GetProperty(idField)?.GetValue(data);

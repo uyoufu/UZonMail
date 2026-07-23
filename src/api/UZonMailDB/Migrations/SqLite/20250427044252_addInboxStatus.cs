@@ -14,25 +14,23 @@ namespace UzonMail.DB.Migrations.SqLite
                 name: "Status",
                 table: "Inboxes",
                 type: "INTEGER",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "ValidFailReason",
                 table: "Inboxes",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "Inboxes");
+            migrationBuilder.DropColumn(name: "Status", table: "Inboxes");
 
-            migrationBuilder.DropColumn(
-                name: "ValidFailReason",
-                table: "Inboxes");
+            migrationBuilder.DropColumn(name: "ValidFailReason", table: "Inboxes");
         }
     }
 }

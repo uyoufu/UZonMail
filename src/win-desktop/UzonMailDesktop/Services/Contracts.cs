@@ -2,7 +2,12 @@ using System.Windows;
 
 namespace UzonMailDesktop.Services;
 
-public sealed record PrerequisiteItem(string Id, string Name, bool IsInstalled, Version? RequiredVersion = null);
+public sealed record PrerequisiteItem(
+    string Id,
+    string Name,
+    bool IsInstalled,
+    Version? RequiredVersion = null
+);
 
 public sealed record InstallProgress(string Message, double Percentage);
 
@@ -19,8 +24,14 @@ public interface ISingleInstanceService : IDisposable
 
 public interface IPrerequisiteService
 {
-    Task<IReadOnlyList<PrerequisiteItem>> DetectAsync(CancellationToken cancellationToken = default);
-    Task InstallAsync(IEnumerable<PrerequisiteItem> prerequisites, IProgress<InstallProgress>? progress = null, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<PrerequisiteItem>> DetectAsync(
+        CancellationToken cancellationToken = default
+    );
+    Task InstallAsync(
+        IEnumerable<PrerequisiteItem> prerequisites,
+        IProgress<InstallProgress>? progress = null,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public interface IBackendProcessManager : IDisposable

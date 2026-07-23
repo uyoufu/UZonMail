@@ -1,13 +1,13 @@
-﻿using log4net.Core;
-using log4net.Repository.Hierarchy;
-using log4net;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
+using log4net;
+using log4net.Core;
+using log4net.Repository.Hierarchy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace UzonMail.Utils.Log
 {
@@ -19,9 +19,20 @@ namespace UzonMail.Utils.Log
         /// <param name="builder"></param>
         public static void AttachLevelToLog4Net(this IHostApplicationBuilder builder)
         {
-            var logLevel = builder.Configuration.GetSection("Logging:LogLevel:Default").Get<LogLevel>();
+            var logLevel = builder
+                .Configuration.GetSection("Logging:LogLevel:Default")
+                .Get<LogLevel>();
 
-            var log4netLevelNames = new List<string>() { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL", "ALL" };
+            var log4netLevelNames = new List<string>()
+            {
+                "TRACE",
+                "DEBUG",
+                "INFO",
+                "WARN",
+                "ERROR",
+                "CRITICAL",
+                "ALL"
+            };
 
             var hierarchy = (Hierarchy)LogManager.GetRepository();
             var rootLogger = hierarchy.Root;

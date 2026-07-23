@@ -26,7 +26,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
 
         public async Task UpdateUserProxies(IServiceProvider serviceProvider, long userId)
         {
-            var manager = _userProxyManagers.GetOrAdd(userId, static id => new UserProxiesManager(id));
+            var manager = _userProxyManagers.GetOrAdd(
+                userId,
+                static id => new UserProxiesManager(id)
+            );
             await manager.UpdateProxies(serviceProvider);
         }
 
@@ -55,7 +58,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
             List<long>? availableProxyIds = null
         )
         {
-            var manager = _userProxyManagers.GetOrAdd(userId, static id => new UserProxiesManager(id));
+            var manager = _userProxyManagers.GetOrAdd(
+                userId,
+                static id => new UserProxiesManager(id)
+            );
             await manager.EnsureLoadedAsync(serviceProvider);
 
             if (proxyId > 0)
@@ -73,7 +79,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
             string matchStr
         )
         {
-            var manager = _userProxyManagers.GetOrAdd(userId, static id => new UserProxiesManager(id));
+            var manager = _userProxyManagers.GetOrAdd(
+                userId,
+                static id => new UserProxiesManager(id)
+            );
             await manager.EnsureLoadedAsync(serviceProvider);
 
             return manager.RandomProxyHandler(matchStr);

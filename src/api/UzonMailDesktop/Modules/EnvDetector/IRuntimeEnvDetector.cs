@@ -11,7 +11,7 @@ namespace UzonMailDesktop.Modules.EnvDetector
         /// <summary>
         /// 名称
         /// </summary>
-        string Name { get;}
+        string Name { get; }
 
         /// <summary>
         /// 环境是否已安装

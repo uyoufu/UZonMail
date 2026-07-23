@@ -16,7 +16,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
         }
 
         /// <inheritdoc />
@@ -30,7 +31,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
     }
 }

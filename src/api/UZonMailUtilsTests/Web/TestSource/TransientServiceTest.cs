@@ -7,7 +7,5 @@ using UzonMail.Utils.Web.Service;
 
 namespace UzonMailUtilsTests.Web.TestSource
 {
-    internal class TransientServiceTest : ITransientService<TransientServiceTest>
-    {
-    }
+    internal class TransientServiceTest : ITransientService<TransientServiceTest> { }
 }

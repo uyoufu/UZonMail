@@ -12,19 +12,23 @@ namespace UzonMail.DB.Migrations.SqLite
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_SendingItemInboxes_Inboxes_InboxId",
-                table: "SendingItemInboxes");
+                table: "SendingItemInboxes"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_SendingItemInboxes_SendingItems_SendingItemId",
-                table: "SendingItemInboxes");
+                table: "SendingItemInboxes"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_SendingItemInboxes_InboxId",
-                table: "SendingItemInboxes");
+                table: "SendingItemInboxes"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_SendingItemInboxes_SendingItemId",
-                table: "SendingItemInboxes");
+                table: "SendingItemInboxes"
+            );
         }
 
         /// <inheritdoc />
@@ -33,26 +37,30 @@ namespace UzonMail.DB.Migrations.SqLite
             migrationBuilder.CreateIndex(
                 name: "IX_SendingItemInboxes_InboxId",
                 table: "SendingItemInboxes",
-                column: "InboxId");
+                column: "InboxId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_SendingItemInboxes_SendingItemId",
                 table: "SendingItemInboxes",
-                column: "SendingItemId");
+                column: "SendingItemId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_SendingItemInboxes_Inboxes_InboxId",
                 table: "SendingItemInboxes",
                 column: "InboxId",
                 principalTable: "Inboxes",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_SendingItemInboxes_SendingItems_SendingItemId",
                 table: "SendingItemInboxes",
                 column: "SendingItemId",
                 principalTable: "SendingItems",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
         }
     }
 }

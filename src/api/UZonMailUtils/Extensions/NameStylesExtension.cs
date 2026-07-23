@@ -27,11 +27,12 @@ namespace UzonMail.Utils.Extensions
             HyphenCase,
         }
 
-        
-
         // 大写字母开头
         // 不是小写字母 或者是 大写字母
-        private static readonly Regex WORD_REGEX = new Regex(@"[A-Z]+(?![a-z])|[A-Z](?=[a-z])", RegexOptions.Multiline);
+        private static readonly Regex WORD_REGEX = new Regex(
+            @"[A-Z]+(?![a-z])|[A-Z](?=[a-z])",
+            RegexOptions.Multiline
+        );
 
         /// <summary>
         /// 转换成指定样式
@@ -60,10 +61,13 @@ namespace UzonMail.Utils.Extensions
         {
             var temp = WORD_REGEX.Replace(str, m => $"_{m.Value}").ToLower();
             var regex = new Regex(@"[-_\s]+([a-z])");
-            temp = regex.Replace(temp, m =>
-            {
-               return char.ToUpper(m.Value[m.Value.Length - 1]).ToString();
-            });
+            temp = regex.Replace(
+                temp,
+                m =>
+                {
+                    return char.ToUpper(m.Value[m.Value.Length - 1]).ToString();
+                }
+            );
             return temp;
         }
 
@@ -133,6 +137,6 @@ namespace UzonMail.Utils.Extensions
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static string ToHyphenCase(this string str)=> str.ToKebabCase();
+        public static string ToHyphenCase(this string str) => str.ToKebabCase();
     }
 }

@@ -22,9 +22,9 @@ namespace UzonMail.DB.SQL
 
         #region 初始化
         public SqlContext() { }
-        public SqlContext(DbContextOptions<SqlContext> options) : base(options)
-        {
-        }
+
+        public SqlContext(DbContextOptions<SqlContext> options)
+            : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

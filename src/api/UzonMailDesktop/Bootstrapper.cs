@@ -23,9 +23,9 @@ namespace UzonMailDesktop
 
             // 添加配置
             var configuration = new ConfigurationBuilder()
-               .AddJsonFile("appsettings.json")
-               .AddJsonFile($"appsettings.{env}.json", optional: true)
-               .Build();
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{env}.json", optional: true)
+                .Build();
             builder.Bind<IConfiguration>().ToInstance(configuration);
 
             // Bootstrapper 默认自动绑定
@@ -38,7 +38,7 @@ namespace UzonMailDesktop
 
         protected override void Configure()
         {
-            // Perform any other configuration before the application starts            
+            // Perform any other configuration before the application starts
         }
     }
 }

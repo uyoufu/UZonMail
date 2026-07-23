@@ -1,10 +1,10 @@
-﻿using LiteDB;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using LiteDB;
 
 namespace UzonMail.Utils.Database.LiteDB
 {
@@ -46,7 +46,8 @@ namespace UzonMail.Utils.Database.LiteDB
         public object GetValue(string fieldName)
         {
             var propertyInfo = GetType().GetProperty(fieldName);
-            if (propertyInfo == null) return string.Empty;
+            if (propertyInfo == null)
+                return string.Empty;
 
             return propertyInfo.GetValue(this, null);
         }

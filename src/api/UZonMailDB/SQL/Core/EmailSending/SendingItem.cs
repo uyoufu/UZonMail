@@ -45,11 +45,13 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// </summary>
         [JsonField]
         public List<EmailAddress> Inboxes { get; set; }
+
         /// <summary>
         /// 抄送人
         /// </summary>
         [JsonField]
         public List<EmailAddress>? CC { get; set; }
+
         /// <summary>
         /// 密送人
         /// </summary>

@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace UzonMail.Utils.Web.FileUpload
 {
@@ -20,8 +20,6 @@ namespace UzonMail.Utils.Web.FileUpload
             factories.RemoveType<JQueryFormValueProviderFactory>();
         }
 
-        public void OnResourceExecuted(ResourceExecutedContext context)
-        {
-        }
+        public void OnResourceExecuted(ResourceExecutedContext context) { }
     }
 }

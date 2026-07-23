@@ -1,8 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UzonMail.Utils.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using UzonMail.Utils.Json;
 
 namespace UzonMailUtilsTests.Json
 {

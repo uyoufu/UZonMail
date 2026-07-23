@@ -1,7 +1,7 @@
-﻿using System.Net.NetworkInformation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using log4net;
 
@@ -28,7 +28,7 @@ namespace UzonMail.Utils.Network
                 _pingReplies.Clear();
                 using Ping ping = new();
                 try
-                {                    
+                {
                     for (int i = 0; i < pingCount; i++)
                     {
                         PingReply reply = ping.Send(host, 1000); // 超时时间为 1000 毫秒
@@ -40,8 +40,10 @@ namespace UzonMail.Utils.Network
                     _logger.Warn($"Ping 过程中发生错误: {ex.Message}");
                 }
             });
-            
-            var ok = _pingReplies.Where(x => x.Status == IPStatus.Success).Count() > Math.Min(pingCount * 2 / 3, pingCount - 1);
+
+            var ok =
+                _pingReplies.Where(x => x.Status == IPStatus.Success).Count()
+                > Math.Min(pingCount * 2 / 3, pingCount - 1);
             _logger.Debug($"正在 Ping {host}，次数：{pingCount}, 状态: {ok}");
             return ok;
         }
@@ -52,8 +54,9 @@ namespace UzonMail.Utils.Network
         /// <returns></returns>
         public double GetAverageRoundtripTime()
         {
-            return _pingReplies.Where(x => x.Status == IPStatus.Success).Average(x => x.RoundtripTime);
+            return _pingReplies
+                .Where(x => x.Status == IPStatus.Success)
+                .Average(x => x.RoundtripTime);
         }
-
     }
 }

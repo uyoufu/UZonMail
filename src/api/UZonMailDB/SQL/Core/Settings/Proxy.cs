@@ -58,7 +58,8 @@ namespace UzonMail.DB.SQL.Core.Settings
         /// <returns></returns>
         public bool IsMatch(string outboxEmail)
         {
-            if (string.IsNullOrEmpty(MatchRegex)) return true;
+            if (string.IsNullOrEmpty(MatchRegex))
+                return true;
 
             try
             {
@@ -79,7 +80,8 @@ namespace UzonMail.DB.SQL.Core.Settings
         /// <returns></returns>
         public ProxyInfo? ToProxyInfo()
         {
-            if (string.IsNullOrEmpty(Url)) return null;
+            if (string.IsNullOrEmpty(Url))
+                return null;
             return new ProxyInfo(Url);
         }
     }

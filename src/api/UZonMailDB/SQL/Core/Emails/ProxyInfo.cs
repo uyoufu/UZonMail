@@ -1,7 +1,7 @@
-﻿using log4net;
+﻿using System.Net;
+using log4net;
 using MailKit.Net.Proxy;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 
 namespace UzonMail.DB.SQL.Core.Emails
 {
@@ -74,7 +74,8 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// <returns></returns>
         public ProxyClient? GetProxyClient(ILog logger)
         {
-            if (_proxyClient != null) return _proxyClient;
+            if (_proxyClient != null)
+                return _proxyClient;
 
             NetworkCredential networkCredential = new(Username, Password);
             switch (Schema.ToLower())

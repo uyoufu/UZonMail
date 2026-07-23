@@ -10,13 +10,9 @@ namespace UzonMail.DB.Migrations.SqLite
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "UnsubscribeSettings");
+            migrationBuilder.DropColumn(name: "UserId", table: "UnsubscribeSettings");
 
-            migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "UnsubscribePages");
+            migrationBuilder.DropColumn(name: "UserId", table: "UnsubscribePages");
         }
 
         /// <inheritdoc />
@@ -27,14 +23,16 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "UnsubscribeSettings",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
 
             migrationBuilder.AddColumn<long>(
                 name: "UserId",
                 table: "UnsubscribePages",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
         }
     }
 }

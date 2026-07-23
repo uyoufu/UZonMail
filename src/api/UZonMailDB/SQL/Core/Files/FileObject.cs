@@ -5,7 +5,7 @@ namespace UzonMail.DB.SQL.Core.Files
     /// <summary>
     /// 文件类
     /// </summary>
-    public class FileObject:SqlId
+    public class FileObject : SqlId
     {
         public long FileBucketId { get; set; }
         public FileBucket FileBucket { get; set; }

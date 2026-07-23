@@ -14,25 +14,23 @@ namespace UzonMailService.Migrations.SqLite
                 name: "ReplyToEmails",
                 table: "UserSettings",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "ReplyToEmails",
                 table: "Outboxes",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ReplyToEmails",
-                table: "UserSettings");
+            migrationBuilder.DropColumn(name: "ReplyToEmails", table: "UserSettings");
 
-            migrationBuilder.DropColumn(
-                name: "ReplyToEmails",
-                table: "Outboxes");
+            migrationBuilder.DropColumn(name: "ReplyToEmails", table: "Outboxes");
         }
     }
 }

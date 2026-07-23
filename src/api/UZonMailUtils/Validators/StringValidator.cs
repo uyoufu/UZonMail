@@ -11,7 +11,8 @@ namespace UzonMail.Utils.Validators
         /// <returns></returns>
         public static bool IsValidEmail(this string email)
         {
-            if (string.IsNullOrEmpty(email))return false;
+            if (string.IsNullOrEmpty(email))
+                return false;
 
             // 邮箱正则表达式
             var pattern = @"^[a-zA-Z0-9_%+-]+(\.[a-zA-Z0-9_%+-]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$";

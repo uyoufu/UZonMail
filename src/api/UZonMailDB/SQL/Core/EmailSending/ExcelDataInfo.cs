@@ -20,7 +20,8 @@ namespace UzonMail.DB.SQL.Core.EmailSending
             // 计算 inboxes , outboxes, body 的数量
             foreach (var item in excelData)
             {
-                if (item is not JObject row) continue;
+                if (item is not JObject row)
+                    continue;
                 var inbox = row.GetValue("inbox")?.ToString();
                 var outbox = row.GetValue("outbox")?.ToString();
                 var body = row.GetValue("body")?.ToString();

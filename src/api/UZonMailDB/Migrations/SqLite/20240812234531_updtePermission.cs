@@ -16,13 +16,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "PermissionCodes",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
 
             migrationBuilder.CreateTable(
                 name: "LicenseInfos",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     LicenseKey = table.Column<string>(type: "TEXT", nullable: false),
                     ActiveDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -36,18 +38,16 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LicenseInfos", x => x.Id);
-                });
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "LicenseInfos");
+            migrationBuilder.DropTable(name: "LicenseInfos");
 
-            migrationBuilder.DropColumn(
-                name: "IsNegative",
-                table: "PermissionCodes");
+            migrationBuilder.DropColumn(name: "IsNegative", table: "PermissionCodes");
         }
     }
 }

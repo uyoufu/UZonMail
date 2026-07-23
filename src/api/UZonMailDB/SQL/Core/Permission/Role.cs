@@ -1,13 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.ComponentModel.DataAnnotations.Schema;
 using UzonMail.DB.SQL.Base;
 
 namespace UzonMail.DB.SQL.Core.Permission
 {
     /// <summary>
     /// 权限角色
-    /// </summary>    
+    /// </summary>
     [Index(nameof(Name), IsUnique = true)]
     public class Role : OrgId, IEntityTypeConfiguration<Role>
     {
@@ -31,9 +31,8 @@ namespace UzonMail.DB.SQL.Core.Permission
         /// </summary>
         public int PermissionCodesCount { get; set; }
 
-
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [NotMapped]
         public List<long> PermissionCodeIds { get; set; } = [];
@@ -58,7 +57,6 @@ namespace UzonMail.DB.SQL.Core.Permission
         {
             builder.HasMany(x => x.PermissionCodes).WithMany(x => x.Roles);
         }
-
 
         #region 静态属性
         /// <summary>

@@ -1,5 +1,5 @@
-﻿using UzonMail.Utils.Extensions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using UzonMail.Utils.Extensions;
 
 namespace UzonMail.Utils.Extensions.Tests
 {

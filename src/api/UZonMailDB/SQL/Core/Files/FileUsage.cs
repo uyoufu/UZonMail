@@ -28,6 +28,7 @@ namespace UzonMail.DB.SQL.Core.Files
         public string? UniqueName { get; set; }
 
         private string _fileName;
+
         /// <summary>
         /// 文件名（包含后缀）
         /// 若 DisplayName 为空，则 DisplayName = FileName
@@ -38,7 +39,7 @@ namespace UzonMail.DB.SQL.Core.Files
             set
             {
                 _fileName = value;
-                if(string.IsNullOrEmpty(DisplayName))
+                if (string.IsNullOrEmpty(DisplayName))
                 {
                     DisplayName = value;
                 }

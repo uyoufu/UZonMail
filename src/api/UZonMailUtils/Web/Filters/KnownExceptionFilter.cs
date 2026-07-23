@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Text.Json;
-using System.Threading.Tasks;
 using UzonMail.Utils.Web.Exceptions;
 using UzonMail.Utils.Web.ResponseModel;
 
@@ -13,10 +13,8 @@ namespace UzonMail.Utils.Web.Filters
     /// </summary>
     public class KnownExceptionFilter : IAsyncExceptionFilter
     {
-        private readonly static JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        private static readonly JsonSerializerOptions _jsonSerializerOptions =
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
         /// <summary>
         /// 重写OnExceptionAsync方法，定义自己的处理逻辑
@@ -26,7 +24,10 @@ namespace UzonMail.Utils.Web.Filters
         public Task OnExceptionAsync(ExceptionContext context)
         {
             // 如果异常没有被处理则进行处理
-            if (context.ExceptionHandled == false && context.Exception is KnownException knownException)
+            if (
+                context.ExceptionHandled == false
+                && context.Exception is KnownException knownException
+            )
             {
                 // 定义返回类型
                 var result = new ResponseResult<string>
@@ -46,7 +47,7 @@ namespace UzonMail.Utils.Web.Filters
                 // 设置为true，表示异常已经被处理了
                 context.ExceptionHandled = true;
             }
-            
+
             return Task.CompletedTask;
         }
     }

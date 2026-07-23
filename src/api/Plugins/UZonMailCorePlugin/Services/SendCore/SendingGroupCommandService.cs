@@ -87,10 +87,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
         {
             if (sendingGroup.Status == SendingGroupStatus.Sending)
             {
-                var removedOutboxes = outboxesManager.RemoveOutbox(
-                    sendingGroup.Id,
-                    removeReason
-                );
+                var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id, removeReason);
 
                 foreach (var outbox in removedOutboxes)
                 {

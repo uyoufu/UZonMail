@@ -10,7 +10,10 @@ public partial class BrowserView : System.Windows.Controls.UserControl
         InitializeComponent();
     }
 
-    private void OnInitializationCompleted(object? sender, CoreWebView2InitializationCompletedEventArgs e)
+    private void OnInitializationCompleted(
+        object? sender,
+        CoreWebView2InitializationCompletedEventArgs e
+    )
     {
         if (!e.IsSuccess && DataContext is BrowserViewModel viewModel)
             viewModel.ErrorMessage = $"WebView2 初始化失败：{e.InitializationException?.Message}";

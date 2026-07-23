@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Management;
 using System.Windows;
+using Microsoft.Extensions.Configuration;
 using MessageBox = System.Windows.MessageBox;
 
 namespace UzonMailDesktop.Utils
@@ -32,10 +32,19 @@ namespace UzonMailDesktop.Utils
             try
             {
                 // 判断是否存在文件，若不存在，则进行提示
-                var servicePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "service", "UzonMailService.exe");
+                var servicePath = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "service",
+                    "UzonMailService.exe"
+                );
                 if (!File.Exists(servicePath))
                 {
-                    MessageBox.Show("后台服务缺失，请检查！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(
+                        "后台服务缺失，请检查！",
+                        "错误",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
                     return;
                 }
 
@@ -43,14 +52,17 @@ namespace UzonMailDesktop.Utils
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = servicePath,
-                    WorkingDirectory = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "service"),
+                    WorkingDirectory = System.IO.Path.Combine(
+                        AppDomain.CurrentDomain.BaseDirectory,
+                        "service"
+                    ),
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden
                 };
                 Process.Start(startInfo);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show(e.Message);
             }
@@ -66,7 +78,8 @@ namespace UzonMailDesktop.Utils
 
             foreach (var process in processes)
             {
-                string query = $"SELECT ProcessId,ExecutablePath FROM Win32_Process WHERE ProcessId = {process.Id}";
+                string query =
+                    $"SELECT ProcessId,ExecutablePath FROM Win32_Process WHERE ProcessId = {process.Id}";
                 using ManagementObjectSearcher searcher = new(query);
                 ManagementObject? mo = searcher.Get().Cast<ManagementObject>().FirstOrDefault();
                 if (mo == null)
@@ -105,7 +118,7 @@ namespace UzonMailDesktop.Utils
             // 获取配置
             var keepBackService = configuration.GetSection("KeepBackEndAliveWhenExit").Value;
 
-            if(bool.TryParse(keepBackService, out bool keep) && keep)
+            if (bool.TryParse(keepBackService, out bool keep) && keep)
             {
                 CloseIfNotSelf();
             }

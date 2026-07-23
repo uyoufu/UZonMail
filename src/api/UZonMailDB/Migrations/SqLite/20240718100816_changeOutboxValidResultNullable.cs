@@ -15,7 +15,8 @@ namespace UzonMailService.Migrations.SqLite
                 table: "Roles",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "ValidFailReason",
@@ -23,25 +24,23 @@ namespace UzonMailService.Migrations.SqLite
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
                 table: "Roles",
                 column: "Name",
-                unique: true);
+                unique: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_Roles_Name",
-                table: "Roles");
+            migrationBuilder.DropIndex(name: "IX_Roles_Name", table: "Roles");
 
-            migrationBuilder.DropColumn(
-                name: "PermissionCodesCount",
-                table: "Roles");
+            migrationBuilder.DropColumn(name: "PermissionCodesCount", table: "Roles");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ValidFailReason",
@@ -51,7 +50,8 @@ namespace UzonMailService.Migrations.SqLite
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
     }
 }

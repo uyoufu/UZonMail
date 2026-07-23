@@ -18,7 +18,8 @@ namespace UzonMail.Utils.Database.LiteDB
         /// <param name="pagination"></param>
         /// <param name="orderFunc"></param>
         /// <returns></returns>
-        public static int GetPageDatasCount<T>(this IEnumerable<T> source, FilterModel filter) where T : AutoObjectId
+        public static int GetPageDatasCount<T>(this IEnumerable<T> source, FilterModel filter)
+            where T : AutoObjectId
         {
             var regex = new Regex(filter.Filter);
 
@@ -36,7 +37,12 @@ namespace UzonMail.Utils.Database.LiteDB
         /// <param name="pagination"></param>
         /// <param name="orderFunc"></param>
         /// <returns></returns>
-        public static IEnumerable<T> GetPageDatas<T>(this IEnumerable<T> source, FilterModel filter, PaginationModel pagination) where T : AutoObjectId
+        public static IEnumerable<T> GetPageDatas<T>(
+            this IEnumerable<T> source,
+            FilterModel filter,
+            PaginationModel pagination
+        )
+            where T : AutoObjectId
         {
             var regex = new Regex(filter.Filter);
 

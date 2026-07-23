@@ -13,7 +13,8 @@ namespace UzonMailDesktop.Modules.EnvDetector
 
         public string FailedMessage => "Webview2 环境环境缺失";
 
-        public string RedirectUrl => "https://developer.microsoft.com/zh-cn/microsoft-edge/webview2?form=MA13LH#download";
+        public string RedirectUrl =>
+            "https://developer.microsoft.com/zh-cn/microsoft-edge/webview2?form=MA13LH#download";
 
         public Lazy<bool> IsInstalled => new(() => DetectEnv());
 

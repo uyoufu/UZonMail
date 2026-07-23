@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
+using Microsoft.AspNetCore.Http;
 
 namespace UzonMail.Utils.Web.Exceptions
 {
@@ -11,8 +11,7 @@ namespace UzonMail.Utils.Web.Exceptions
     {
         public int Code { get; set; } = StatusCodes.Status500InternalServerError;
 
-        public KnownException(string message) : base(message)
-        {
-        }
+        public KnownException(string message)
+            : base(message) { }
     }
 }

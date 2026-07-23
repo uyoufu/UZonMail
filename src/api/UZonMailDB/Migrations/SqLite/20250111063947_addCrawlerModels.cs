@@ -11,14 +11,14 @@ namespace UzonMail.DB.Migrations.SqLite
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "UserProxies");
+            migrationBuilder.DropTable(name: "UserProxies");
 
             migrationBuilder.CreateTable(
                 name: "CrawlerEmailResults",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CrawlerTaskId = table.Column<long>(type: "INTEGER", nullable: false),
                     Nickname = table.Column<string>(type: "TEXT", nullable: false),
@@ -32,13 +32,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CrawlerEmailResults", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "CrawlerTaskInfos",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
@@ -57,13 +59,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CrawlerTaskInfos", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Proxies",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Priority = table.Column<int>(type: "INTEGER", nullable: false),
@@ -82,13 +86,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Proxies", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "TiktokAuthors",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     AvatarLarger = table.Column<string>(type: "TEXT", nullable: false),
                     AvatarMedium = table.Column<string>(type: "TEXT", nullable: false),
@@ -122,13 +128,15 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TiktokAuthors", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "TikTokAuthorDiversifications",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     TikTokAuthorId = table.Column<long>(type: "INTEGER", nullable: false),
                     _id = table.Column<string>(type: "TEXT", nullable: false),
@@ -143,14 +151,17 @@ namespace UzonMail.DB.Migrations.SqLite
                         name: "FK_TikTokAuthorDiversifications_TiktokAuthors_TikTokAuthorId",
                         column: x => x.TikTokAuthorId,
                         principalTable: "TiktokAuthors",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "TikTokAuthStats",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     TikTokAuthorId = table.Column<long>(type: "INTEGER", nullable: false),
                     DiggCount = table.Column<int>(type: "INTEGER", nullable: false),
@@ -172,46 +183,45 @@ namespace UzonMail.DB.Migrations.SqLite
                         name: "FK_TikTokAuthStats_TiktokAuthors_TikTokAuthorId",
                         column: x => x.TikTokAuthorId,
                         principalTable: "TiktokAuthors",
-                        principalColumn: "Id");
-                });
+                        principalColumn: "Id"
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TikTokAuthorDiversifications_TikTokAuthorId",
                 table: "TikTokAuthorDiversifications",
-                column: "TikTokAuthorId");
+                column: "TikTokAuthorId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_TikTokAuthStats_TikTokAuthorId",
                 table: "TikTokAuthStats",
-                column: "TikTokAuthorId");
+                column: "TikTokAuthorId"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "CrawlerEmailResults");
+            migrationBuilder.DropTable(name: "CrawlerEmailResults");
 
-            migrationBuilder.DropTable(
-                name: "CrawlerTaskInfos");
+            migrationBuilder.DropTable(name: "CrawlerTaskInfos");
 
-            migrationBuilder.DropTable(
-                name: "Proxies");
+            migrationBuilder.DropTable(name: "Proxies");
 
-            migrationBuilder.DropTable(
-                name: "TikTokAuthorDiversifications");
+            migrationBuilder.DropTable(name: "TikTokAuthorDiversifications");
 
-            migrationBuilder.DropTable(
-                name: "TikTokAuthStats");
+            migrationBuilder.DropTable(name: "TikTokAuthStats");
 
-            migrationBuilder.DropTable(
-                name: "TiktokAuthors");
+            migrationBuilder.DropTable(name: "TiktokAuthors");
 
             migrationBuilder.CreateTable(
                 name: "UserProxies",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                    Id = table
+                        .Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
@@ -230,7 +240,8 @@ namespace UzonMail.DB.Migrations.SqLite
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserProxies", x => x.Id);
-                });
+                }
+            );
         }
     }
 }

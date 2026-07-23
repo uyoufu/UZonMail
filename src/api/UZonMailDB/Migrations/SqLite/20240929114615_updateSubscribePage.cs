@@ -15,26 +15,24 @@ namespace UzonMail.DB.Migrations.SqLite
                 table: "UnsubscribePages",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
 
             migrationBuilder.AddColumn<long>(
                 name: "UserId",
                 table: "UnsubscribePages",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsDefault",
-                table: "UnsubscribePages");
+            migrationBuilder.DropColumn(name: "IsDefault", table: "UnsubscribePages");
 
-            migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "UnsubscribePages");
+            migrationBuilder.DropColumn(name: "UserId", table: "UnsubscribePages");
         }
     }
 }

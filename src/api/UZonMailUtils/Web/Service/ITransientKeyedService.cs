@@ -3,8 +3,5 @@
     /// <summary>
     /// 带有键的瞬态服务
     /// </summary>
-    public class ITransientKeyedService : IService
-    {
-        
-    }
+    public class ITransientKeyedService : IService { }
 }

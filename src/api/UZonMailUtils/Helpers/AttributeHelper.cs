@@ -16,7 +16,8 @@ namespace UzonMail.Utils.Helpers
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IEnumerable<T> GetAttributes<T>(Type targetType) where T : Attribute
+        public static IEnumerable<T> GetAttributes<T>(Type targetType)
+            where T : Attribute
         {
             return targetType.GetCustomAttributes(typeof(T), true).OfType<T>();
         }
@@ -27,7 +28,8 @@ namespace UzonMail.Utils.Helpers
         /// <typeparam name="T"></typeparam>
         /// <param name="targe"></param>
         /// <returns></returns>
-        public static T GetAttribute<T>(Type targetType) where T : Attribute
+        public static T GetAttribute<T>(Type targetType)
+            where T : Attribute
         {
             return GetAttributes<T>(targetType).FirstOrDefault();
         }

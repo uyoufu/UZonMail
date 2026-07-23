@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UzonMail.Utils.Dictionary;
 
 namespace UzonMail.Utils.Config
@@ -39,7 +39,8 @@ namespace UzonMail.Utils.Config
         /// <param name="configPath"></param>
         public static void AddFileConfig(string configPath, ConfigType configType)
         {
-            if (!File.Exists(configPath)) throw new ArgumentNullException($"文件{configPath}不存在");
+            if (!File.Exists(configPath))
+                throw new ArgumentNullException($"文件{configPath}不存在");
 
             // 读取配置，然后激活
             // 通过 T 类型来生成 config
@@ -49,7 +50,8 @@ namespace UzonMail.Utils.Config
                 case ConfigType.Json:
                     ReadJsonConfig(configPath);
                     break;
-                default: break;
+                default:
+                    break;
             }
         }
 
@@ -69,9 +71,10 @@ namespace UzonMail.Utils.Config
         /// 获取激活的配置
         /// </summary>
         /// <returns></returns>
-        public static IConfig GetActiveConfig() 
+        public static IConfig GetActiveConfig()
         {
-            if (Instance.ActivatedConfig == null) throw new ArgumentNullException("没有激活的配置");
+            if (Instance.ActivatedConfig == null)
+                throw new ArgumentNullException("没有激活的配置");
             return Instance.ActivatedConfig;
         }
 
@@ -84,11 +87,11 @@ namespace UzonMail.Utils.Config
             var streamReader = new StreamReader(configPath);
             JsonReader jsonReader = new JsonTextReader(streamReader);
             var configObj = JToken.ReadFrom(jsonReader) as JObject;
-            if (configObj == null) throw new ArgumentNullException($"{configPath} 不是有效的 json 格式");
+            if (configObj == null)
+                throw new ArgumentNullException($"{configPath} 不是有效的 json 格式");
 
             Instance._configs.Add(configPath, new JsonConfig(data: configObj));
         }
         #endregion
-
     }
 }

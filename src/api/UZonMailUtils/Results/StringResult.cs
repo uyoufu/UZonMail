@@ -9,9 +9,8 @@ namespace UzonMail.Utils.Results
     /// </summary>
     public class StringResult : Result<string>
     {
-        public StringResult(bool ok, string message, string data = "") : base(ok, message, data)
-        {
-        }
+        public StringResult(bool ok, string message, string data = "")
+            : base(ok, message, data) { }
 
         /// <summary>
         /// 返回一个成功的结果

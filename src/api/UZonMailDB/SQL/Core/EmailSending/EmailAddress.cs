@@ -5,7 +5,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
 {
     /// <summary>
     /// 邮件地址
-    /// </summary>    
+    /// </summary>
     public class EmailAddress : SqlId
     {
         /// <summary>

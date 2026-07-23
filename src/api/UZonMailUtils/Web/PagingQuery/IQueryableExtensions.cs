@@ -20,15 +20,25 @@ namespace UzonMail.Utils.Web.PagingQuery
         /// <param name="ascending"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static IQueryable<T> OrderBy<T>(this IQueryable<T> list, string sortField, bool ascending)
+        public static IQueryable<T> OrderBy<T>(
+            this IQueryable<T> list,
+            string sortField,
+            bool ascending
+        )
         {
             var param = Expression.Parameter(typeof(T), "p");
-            var prop = typeof(T).GetProperty(sortField, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+            var prop = typeof(T).GetProperty(
+                sortField,
+                BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+            );
             if (prop == null)
             {
                 throw new ArgumentException("SortField is not a valid property");
             }
-            var expr = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, prop), typeof(object)), param);
+            var expr = Expression.Lambda<Func<T, object>>(
+                Expression.Convert(Expression.Property(param, prop), typeof(object)),
+                param
+            );
             return ascending ? list.OrderBy(expr) : list.OrderByDescending(expr);
         }
 
