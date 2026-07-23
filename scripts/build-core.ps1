@@ -90,11 +90,11 @@ foreach ($subDir in $subDirs) {
 }
 Write-Host "脚本位置检测通过！" -ForegroundColor Green
 
-# 判断是否存在后端项目, 获取第一个 sln 文件
-$slnFiles = @(Get-ChildItem -Path $gitRoot -Filter *.sln -Recurse)
+# 判断是否存在后端项目, 获取第一个 slnx 文件
+$slnFiles = @(Get-ChildItem -Path $gitRoot -Filter *.slnx -Recurse)
 Write-Host $slnFiles
 if (-not $slnFiles -or $slnFiles.Count -eq 0) {
-    Write-Host "未找到任何解决方案文件 (.sln)" -ForegroundColor Red
+    Write-Host "未找到任何解决方案文件 (.slnx)" -ForegroundColor Red
     exit 1
 }
 $firstSln = $slnFiles[0]
@@ -239,7 +239,7 @@ function Copy-Assets {
 
 #region 编译核心插件
 
-# 从 sln 文件中读取所有的项目
+# 从 slnx 文件中读取所有的项目
 Set-Location $slnRoot
 
 # 所有项目的路径
