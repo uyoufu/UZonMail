@@ -1,0 +1,3 @@
+[submodule "src/api/Plugins/UzonMailProPlugin"]
+	path = src/api/Plugins/UzonMailProPlugin
+	url = https://uyoufu@github.com/GalensGan/UZonMailPro.git
