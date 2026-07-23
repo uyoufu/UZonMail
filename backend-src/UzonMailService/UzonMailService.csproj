@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<UserSecretsId>f2aa302e-c8fb-40d2-9a58-a6348ffd6c03</UserSecretsId>
+		<ServerGarbageCollection>false</ServerGarbageCollection>
+		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+		<FileVersion>0.22.1.0</FileVersion> 
+		<AssemblyVersion>0.22.1.0</AssemblyVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="Data\**" />
+		<Compile Remove="wwwroot\**" />
+		<Content Remove="Data\**" />
+		<Content Remove="wwwroot\**" />
+		<EmbeddedResource Remove="Data\**" />
+		<EmbeddedResource Remove="wwwroot\**" />
+		<None Remove="Data\**" />
+		<None Remove="wwwroot\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="appsettings.Development.json" />
+		<Content Remove="log4net.config" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ConfValidation" Version="1.0.1" />
+		<PackageReference Include="IGeekFan.AspNetCore.Knife4jUI" Version="0.0.16" />
+		<PackageReference Include="LiteDB" Version="5.0.21" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="8.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="Quartz" Version="3.16.1" />
+		<PackageReference Include="Quartz.AspNetCore" Version="3.16.1" />
+		<PackageReference Include="Quartz.Serialization.Json" Version="3.16.1" />
+		<PackageReference Include="StackExchange.Redis" Version="2.12.4" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="appsettings.Development.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="log4net.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\UzonMailDB\UzonMailDB.csproj" />
+		<ProjectReference Include="..\UzonMailUtils\UzonMailUtils.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Langs\SharedResource.zh-CN.resx">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Quartz\quartz-sqlite.sqlite3">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+</Project>

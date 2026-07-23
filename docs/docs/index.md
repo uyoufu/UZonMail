@@ -4,7 +4,7 @@ icon: home
 title: 主页 | 宇正群邮|邮件群发|邮件群发软件|邮件营销软件|开源邮件群发|最好用的邮件群发软件
 shortTitle: 主页
 heroImage: /images/hero.svg
-heroText: UZonMail
+heroText: UzonMail
 tagline: ''
 
 actions:
@@ -63,5 +63,5 @@ highlights:
   #     - title: 无限变量，无限可能，可用性超出想象
 
 copyright: false
-footer: Apache-2.0 license | Copyright © 2021-persent UZonMail
+footer: Apache-2.0 license | Copyright © 2021-persent UzonMail
 ---

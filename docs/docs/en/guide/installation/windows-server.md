@@ -15,7 +15,7 @@ This section explains how to install UzonMail on Windows Server. The server inst
 
 ## Download
 
-Download `uzonmail-service-win-x64-version.zip` from [Versions], unzip and run `UZonMailService.exe`.
+Download `uzonmail-service-win-x64-version.zip` from [Versions], unzip and run `UzonMailService.exe`.
 
 If you see the following UI screenshot, the service started successfully:
 
@@ -25,7 +25,7 @@ You can test by visiting `http://localhost:22345/` in a browser. After confirmin
 
 ## Register service
 
-To run UzonMail as a background service, register `UZonMailService.exe` as a Windows service. Open an elevated CMD or PowerShell, navigate to the extracted folder, and run:
+To run UzonMail as a background service, register `UzonMailService.exe` as a Windows service. Open an elevated CMD or PowerShell, navigate to the extracted folder, and run:
 
 ``` powershell
 # Register service
@@ -55,11 +55,11 @@ To allow LAN access, open port 22345. Run PowerShell as administrator and execut
 
 ``` powershell
 # Allow port 22345
-netsh advfirewall firewall add rule name="UZonMail" dir=in action=allow protocol=TCP localport=22345
+netsh advfirewall firewall add rule name="UzonMail" dir=in action=allow protocol=TCP localport=22345
 
 # Show rule
-netsh advfirewall firewall show rule name="UZonMail"
+netsh advfirewall firewall show rule name="UzonMail"
 
 # Delete rule
-netsh advfirewall firewall delete rule name="UZonMail"
+netsh advfirewall firewall delete rule name="UzonMail"
 ```

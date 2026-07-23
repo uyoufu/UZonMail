@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Screen = Stylet.Screen;
 
-namespace UZonMailDesktop.Pages.Conductors
+namespace UzonMailDesktop.Pages.Conductors
 {
     /// <summary>
     /// 具有路由功能的页面

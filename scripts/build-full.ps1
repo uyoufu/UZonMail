@@ -52,9 +52,9 @@ if (-not (Test-Path -Path $linuxBuildPath -PathType Container)) {
 }
 
 # 获取版本号：从编译目录中的 dll 中提取
-$serviceDll = Get-ChildItem -Path $linuxBuildPath -Filter "UZonMailService.dll" | Select-Object -First 1
+$serviceDll = Get-ChildItem -Path $linuxBuildPath -Filter "UzonMailService.dll" | Select-Object -First 1
 if (-not $serviceDll) {
-  Write-Host "未找到 UZonMailService.dll，无法获取版本号" -ForegroundColor Red
+  Write-Host "未找到 UzonMailService.dll，无法获取版本号" -ForegroundColor Red
   exit 1
 }
 $serviceVersion = $serviceDll.VersionInfo.FileVersion

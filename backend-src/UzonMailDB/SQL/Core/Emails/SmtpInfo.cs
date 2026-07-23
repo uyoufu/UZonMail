@@ -1,0 +1,35 @@
+using UzonMail.DB.SQL.Base;
+
+namespace UzonMail.DB.SQL.Core.Emails
+{
+    /// <summary>
+    /// Smtp配置
+    /// </summary>
+    public class SmtpInfo : SqlId
+    {
+        /// <summary>
+        /// 域名
+        /// </summary>
+        public string Domain { get; set; }
+
+        /// <summary>
+        /// 对应的 smtp 服务器
+        /// </summary>
+        public string Host { get; set; }
+
+        /// <summary>
+        /// 端口
+        /// </summary>
+        public int Port { get; set; }
+
+        /// <summary>
+        /// 安全协议
+        /// </summary>
+        public ConnectionSecurity ConnectionSecurity { get; set; }
+
+        /// <summary>
+        /// 是否需要身份验证
+        /// </summary>
+        public bool EnableSSL { get; set; } = false;
+    }
+}

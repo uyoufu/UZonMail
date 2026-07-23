@@ -9,4 +9,4 @@ WORKDIR /app
 COPY . .
 EXPOSE 22345
 # Start the application
-ENTRYPOINT ["dotnet", "UZonMailService.dll"]
+ENTRYPOINT ["dotnet", "UzonMailService.dll"]

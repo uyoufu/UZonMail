@@ -103,7 +103,7 @@ import { getEmailTemplateById, getEmailTemplateByIdOrName } from 'src/api/emailT
 import { IInbox } from 'src/api/emailBox'
 const cacheKey = useInstanceRequestCache()
 // 主题
-function getSubjects () {
+function getSubjects() {
   // 通过分号，换行符进行分隔
   // 先将所有的 ; 和 ； 替换为 \n
   const regex = /;|；/gm
@@ -112,7 +112,7 @@ function getSubjects () {
 }
 const subjects = getSubjects()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applyVariablesToTemplate (userData?: Record<string, any>, templateContent?: string) {
+function applyVariablesToTemplate(userData?: Record<string, any>, templateContent?: string) {
   if (!templateContent || !userData) return templateContent
 
   // 应用变量
@@ -123,7 +123,7 @@ function applyVariablesToTemplate (userData?: Record<string, any>, templateConte
   return templateContent
 }
 
-async function getEmailBody (inbox: string, inboxIndex: number) {
+async function getEmailBody(inbox: string, inboxIndex: number) {
   // 正文优先级：用户数据/正文 > 用户数据/模板 > 界面/正文 > 界面/模板
   const userData = props.emailCreateInfo.data.find((item) => item.inbox === inbox)
   let templateContent = ''

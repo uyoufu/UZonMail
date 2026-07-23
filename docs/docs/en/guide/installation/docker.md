@@ -58,7 +58,7 @@ With quick install, you can skip the later manual steps for downloading `.env`, 
 Make sure Docker and Docker Compose v2 are installed, and that you are in `~/apps/uzon-mail`, then run:
 
 ``` bash
-curl -fsSL https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/install.sh -o install.sh
+curl -fsSL https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/install.sh -o install.sh
 bash ./install.sh
 ```
 
@@ -66,13 +66,13 @@ After quick install, continue reading the configuration notes and security warni
 
 ### Download .env file
 
-Download [.env](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env) from GitHub to the current directory.
+Download [.env](https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/.env) from GitHub to the current directory.
 
 If the download fails, manually create `~/apps/uzon-mail/.env` and paste the `.env` content from the link above.
 
 ``` bash
 # Make sure you are in ~/apps/uzon-mail, then run:
-wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env
+wget https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/.env
 ```
 
 ### Download docker-compose file
@@ -80,7 +80,7 @@ wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/
 Download the `docker-compose.yml` from GitHub:
 
 ``` bash
-wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/docker-compose.yml
+wget https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/docker-compose.yml
 ```
 
 If you cannot download, create `~/apps/uzon-mail/docker-compose.yml` and paste the content from the repository.
@@ -188,7 +188,7 @@ The `.env` file also contains variables used by Docker Compose itself, such as `
 
 To view all backend settings that can be overridden, see the default configuration file:
 
-<https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/backend-src/UZonMailService/appsettings.json>
+<https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/backend-src/UzonMailService/appsettings.json>
 
 After modifying `.env`, restart containers from the directory containing `docker-compose.yml`:
 

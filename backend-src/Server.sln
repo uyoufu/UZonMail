@@ -3,27 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UZonMailService", "UZonMailService\UZonMailService.csproj", "{1933B83C-82B4-4C06-9997-5C79BD971269}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailService", "UzonMailService\UzonMailService.csproj", "{1933B83C-82B4-4C06-9997-5C79BD971269}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UZonMailUtils", "UZonMailUtils\UZonMailUtils.csproj", "{E562275E-14AA-4D35-BC2A-738530661716}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailUtils", "UzonMailUtils\UzonMailUtils.csproj", "{E562275E-14AA-4D35-BC2A-738530661716}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UZonMailUtilsTests", "UZonMailUtilsTests\UZonMailUtilsTests.csproj", "{91DEBF8F-3A12-4F56-90C7-645A0CE41E49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailUtilsTests", "UzonMailUtilsTests\UzonMailUtilsTests.csproj", "{91DEBF8F-3A12-4F56-90C7-645A0CE41E49}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UZonMailDesktop", "UZonMailDesktop\UZonMailDesktop.csproj", "{B6EB2106-FA92-417C-A4E9-8B9B5342C355}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailDesktop", "UzonMailDesktop\UzonMailDesktop.csproj", "{B6EB2106-FA92-417C-A4E9-8B9B5342C355}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{FADA384A-ECE9-4E28-8335-745EAC2920D2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UZonMailCorePlugin", "Plugins\UZonMailCorePlugin\UZonMailCorePlugin.csproj", "{D0B6D031-B4DA-4CC4-A6CB-778875ED5571}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailCorePlugin", "Plugins\UzonMailCorePlugin\UzonMailCorePlugin.csproj", "{D0B6D031-B4DA-4CC4-A6CB-778875ED5571}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailDB", "UzonMailDB\UzonMailDB.csproj", "{25A1C20D-2A98-493A-B776-7246A8A5B74E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UZonMailDBTests", "UZonMailDBTests\UZonMailDBTests.csproj", "{4BAA7FC3-0B13-4038-84A2-7D946F4ABBBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailDBTests", "UzonMailDBTests\UzonMailDBTests.csproj", "{4BAA7FC3-0B13-4038-84A2-7D946F4ABBBC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UZonMailProPlugin", "..\..\UZonMailProPlugins\UZonMailProPlugin\UZonMailProPlugin.csproj", "{F1855C50-81C8-4E3B-A0EA-8B8CFC10488F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailProPlugin", "..\..\UzonMailProPlugins\UzonMailProPlugin\UzonMailProPlugin.csproj", "{F1855C50-81C8-4E3B-A0EA-8B8CFC10488F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UZonMailProPluginTests", "..\..\UZonMailProPlugins\UZonMailProPluginTests\UZonMailProPluginTests.csproj", "{F4FC9F79-3375-4748-A47C-CEA469CCCD82}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzonMailProPluginTests", "..\..\UzonMailProPlugins\UzonMailProPluginTests\UzonMailProPluginTests.csproj", "{F4FC9F79-3375-4748-A47C-CEA469CCCD82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UZonMailCorePluginTests", "Plugins\UZonMailCorePluginTests\UZonMailCorePluginTests.csproj", "{D38B6810-B474-4ACC-9022-4D91D3B0EBD1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UzonMailCorePluginTests", "Plugins\UzonMailCorePluginTests\UzonMailCorePluginTests.csproj", "{D38B6810-B474-4ACC-9022-4D91D3B0EBD1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTest", "UnitTest", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject

@@ -86,7 +86,7 @@ import { useConfig } from 'src/config'
 import { useUserInfoStore } from 'src/stores/user'
 
 const userInfoStore = useUserInfoStore()
-async function onSaveTemplate () {
+async function onSaveTemplate() {
   if (!templateName.value) {
     notifyError(translateTemplate('pleaseInputTemplateName'))
     return
@@ -152,7 +152,7 @@ async function onSaveTemplate () {
   notifySuccess(translateTemplate('saveTemplateSuccess'))
 }
 
-async function onBackToTemplateManager () {
+async function onBackToTemplateManager() {
   await removeHistory(router, route as unknown as IRouteHistory, '/template/index')
 }
 // #endregion

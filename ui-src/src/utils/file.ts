@@ -11,8 +11,8 @@ import logger from 'loglevel'
 import { translateGlobal, translateUtils } from 'src/i18n/helpers'
 
 export interface ISelectFileResult {
-  ok: boolean,
-  data: string | ArrayBuffer | undefined | null,
+  ok: boolean
+  data: string | ArrayBuffer | undefined | null
   files?: FileList
 }
 
@@ -21,7 +21,7 @@ export interface ISelectFileResult {
  * @param multiple
  * @param accept
  */
-export function selectFile (multiple: boolean = false, accept: string = ''): Promise<ISelectFileResult> {
+export function selectFile(multiple: boolean = false, accept: string = ''): Promise<ISelectFileResult> {
   const promise = new Promise<ISelectFileResult>((resolve, reject) => {
     const inputElement = document.createElement('input')
     inputElement.type = 'file'
@@ -59,18 +59,18 @@ export function selectFile (multiple: boolean = false, accept: string = ''): Pro
       const files = (ev.target as HTMLInputElement).files
       if (!files || files.length < 1) {
         notifyError(translateUtils('file_fileNotFound'))
-        return finishReject({ ok: false, data: null } as any)
+        return finishReject({ ok: false, data: null })
       }
 
       const file = files[0] as File
       const reader = new FileReader()
-      reader.onload = e => {
+      reader.onload = (e) => {
         const buffer = e.target?.result
         finishResolve({ ok: true, data: buffer, files })
       }
-      reader.onerror = err => {
+      reader.onerror = (err) => {
         logger.error('selectFile read error:', err)
-        finishReject({ ok: false, data: null } as any)
+        finishReject({ ok: false, data: null })
       }
       reader.readAsArrayBuffer(file)
     }
@@ -104,7 +104,10 @@ export function selectFile (multiple: boolean = false, accept: string = ''): Pro
  * @param multiple
  * @returns
  */
-export async function openFileSelector (multiple: boolean = false, accept: string = ''): Promise<boolean | string | ArrayBuffer | undefined | null> {
+export async function openFileSelector(
+  multiple: boolean = false,
+  accept: string = ''
+): Promise<boolean | string | ArrayBuffer | undefined | null> {
   const { data } = await selectFile(multiple, accept)
   return data
 }
@@ -114,7 +117,7 @@ export async function openFileSelector (multiple: boolean = false, accept: strin
  * @param buffer
  * @returns
  */
-export function bufferToBlob (buffer: ArrayBuffer): Blob {
+export function bufferToBlob(buffer: ArrayBuffer): Blob {
   return new Blob([buffer])
 }
 
@@ -123,7 +126,7 @@ export function bufferToBlob (buffer: ArrayBuffer): Blob {
  * @param buffer
  * @returns
  */
-export function bufferToBase64Png (buffer: ArrayBuffer): string {
+export function bufferToBase64Png(buffer: ArrayBuffer): string {
   let binary = ''
   const bytes = new Uint8Array(buffer)
   for (let len = bytes.byteLength, i = 0; i < len; i++) {
@@ -141,38 +144,38 @@ export function bufferToBase64Png (buffer: ArrayBuffer): string {
  */
 export interface IExcelColumnMapper {
   // 对应表格中的列标题名
-  headerName: string,
+  headerName: string
   // 对应数据中的字段名
-  fieldName: string,
+  fieldName: string
   // 格式化函数
-  format?: (value: any) => any,
+  format?: (value: any) => any
   // 过滤函数
-  filter?: (value: any) => boolean,
+  filter?: (value: any) => boolean
   // 是否必须
-  required?: boolean,
+  required?: boolean
   // 数据验证列表
   validations?: string[]
 }
 
 export interface IExcelMapperParams {
   // 映射
-  mappers?: IExcelColumnMapper[],
-  format?: (value: Record<string, any>) => Record<string, any>,
-  filter?: (value: Record<string, any>) => boolean,
+  mappers?: IExcelColumnMapper[]
+  format?: (value: Record<string, any>) => Record<string, any>
+  filter?: (value: Record<string, any>) => boolean
   strict?: boolean // 仅读取或保存 mappers 中对应的字段
 }
 
 export interface IExcelReaderParams extends IExcelMapperParams {
-  sheetIndex: number,
+  sheetIndex: number
   // 是否要选择 sheet
-  selectSheet?: boolean,
+  selectSheet?: boolean
   // 数字类型保留的小数位，默认最多 5 位
   numberDecimalCount?: number
 }
 
 export interface IExcelWriterParams extends IExcelMapperParams {
   // 名字应包含后缀，比如 .xlsx
-  fileName: string,
+  fileName: string
   sheetName?: string
 }
 
@@ -181,7 +184,9 @@ export interface IExcelWriterParams extends IExcelMapperParams {
  * @param params
  * @returns
  */
-export async function readExcelCore (params: IExcelReaderParams): Promise<{ data: Record<string, any>[], files?: FileList, sheetName: string }> {
+export async function readExcelCore(
+  params: IExcelReaderParams
+): Promise<{ data: Record<string, any>[]; files?: FileList; sheetName: string }> {
   // 打开文件
   const { data: buffer, files } = await selectFile()
   console.log('readExcelCore:', buffer, files)
@@ -217,7 +222,7 @@ export async function readExcelCore (params: IExcelReaderParams): Promise<{ data
   const rowsData: Record<string, any>[] = XLSX.utils.sheet_to_json(worksheet)
   // 对数据进行处理，主要是浮点数问题
   const decimalCount = params.numberDecimalCount === undefined ? 5 : params.numberDecimalCount
-  rowsData.forEach(row => {
+  rowsData.forEach((row) => {
     for (const key of Object.keys(row)) {
       const value = row[key]
       if (typeof value === 'number') {
@@ -228,7 +233,7 @@ export async function readExcelCore (params: IExcelReaderParams): Promise<{ data
   // 将 mappers 转换成对象
   const mapper: Record<string, IExcelColumnMapper> = {}
   if (params.mappers) {
-    params.mappers.forEach(item => {
+    params.mappers.forEach((item) => {
       mapper[item.headerName] = item
     })
   }
@@ -288,7 +293,7 @@ export async function readExcelCore (params: IExcelReaderParams): Promise<{ data
  * 读取 excel
  * @param params
  */
-export async function readExcel (params: IExcelReaderParams) {
+export async function readExcel(params: IExcelReaderParams) {
   // 打开文件
   const { data: results } = await readExcelCore(params)
   return results
@@ -300,7 +305,7 @@ export async function readExcel (params: IExcelReaderParams) {
  * @param params
  * @param params.fileName 文件名，包含后缀
  */
-export async function writeExcel (rows: any[], params: IExcelWriterParams) {
+export async function writeExcel(rows: any[], params: IExcelWriterParams) {
   if (params.strict && !params.mappers?.length) {
     logger.error(`[file] ${translateUtils('file_mappersCannotBeEmptyInStrictMode')}`)
     return
@@ -312,7 +317,7 @@ export async function writeExcel (rows: any[], params: IExcelWriterParams) {
   // 将 mappers 转换成对象
   const mapper: Record<string, IExcelColumnMapper> = {}
   if (params.mappers) {
-    params.mappers.forEach(item => {
+    params.mappers.forEach((item) => {
       mapper[item.fieldName] = item
     })
   }
@@ -327,7 +332,9 @@ export async function writeExcel (rows: any[], params: IExcelWriterParams) {
     let formattedRow: Record<string, any> = {}
     for (const key of Object.keys(row)) {
       // 严格模式下，只读取 mappers 中的字段
-      if (params.strict && !keys.includes(key)) { continue }
+      if (params.strict && !keys.includes(key)) {
+        continue
+      }
 
       const value = row[key]
       const map = mapper[key]
@@ -399,26 +406,26 @@ export async function writeExcel (rows: any[], params: IExcelWriterParams) {
 
 export interface IObsUploadedResult {
   // 该字段用于在初始化时使用
-  __fileName?: string,
+  __fileName?: string
   __sha256?: string
-  __key?: string,
-  __sizeLabel?: string,
-  __progressLabel?: string,
-  __fileUsageId?: string | number,
+  __key?: string
+  __sizeLabel?: string
+  __progressLabel?: string
+  __fileUsageId?: string | number
 }
 
 export interface IFileObject {
-  createDate: string,
-  fileBucket: string,
-  fileBucketId: number,
-  id: number,
-  isDeleted: boolean,
-  isHidden: boolean,
-  lastModifyDate: string,
-  linkCount: number,
-  objectId: string,
-  path: string,
-  sha256: string,
+  createDate: string
+  fileBucket: string
+  fileBucketId: number
+  id: number
+  isDeleted: boolean
+  isHidden: boolean
+  lastModifyDate: string
+  linkCount: number
+  objectId: string
+  path: string
+  sha256: string
   size: number
 }
 
@@ -426,8 +433,8 @@ export interface IFileObject {
  * 上传的文件
  */
 export interface IObsUploadedFile extends IObsUploadedResult, File {
-  __img?: string,
-  __src?: string,
+  __img?: string
+  __src?: string
 }
 
 /**
@@ -438,7 +445,7 @@ export interface IFileSha256Callback {
   process: number
   computed: number
   total: number
-  file: IObsUploadedFile,
+  file: IObsUploadedFile
   end: boolean
 }
 
@@ -451,7 +458,11 @@ export interface IFileSha256Callback {
  * @param progressStep 回调进度的步长，默认为 5 %
  * @returns
  */
-export function fileSha256 (file: File, callback?: (params: IFileSha256Callback) => void, progressStep: number = 5): Promise<string> {
+export function fileSha256(
+  file: File,
+  callback?: (params: IFileSha256Callback) => void,
+  progressStep: number = 5
+): Promise<string> {
   console.log('getSha256:', file)
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -461,7 +472,7 @@ export function fileSha256 (file: File, callback?: (params: IFileSha256Callback)
     const hashObject = CryptoJS.algo.SHA256.create()
     progressStep /= 100
     let progressDisplayLimit = 0
-    function asyncUpdate () {
+    function asyncUpdate() {
       if (start < total) {
         const process = start / total
         const progressLabel = translateUtils('file_calculatingHash') + (process * 100).toFixed(2) + '%'
@@ -485,9 +496,12 @@ export function fileSha256 (file: File, callback?: (params: IFileSha256Callback)
         }
       } else {
         const sha256 = hashObject.finalize()
-        console.log(translateUtils('file_fileHashCalculated', {
-          fileName: file.name,
-        }), sha256.toString())
+        console.log(
+          translateUtils('file_fileHashCalculated', {
+            fileName: file.name
+          }),
+          sha256.toString()
+        )
 
         if (typeof callback === 'function') {
           const callbackResult = {
@@ -515,7 +529,7 @@ export function fileSha256 (file: File, callback?: (params: IFileSha256Callback)
 
     asyncUpdate()
 
-    reader.onerror = err => {
+    reader.onerror = (err) => {
       reject({ ok: false, message: err })
     }
   })
@@ -523,7 +537,7 @@ export function fileSha256 (file: File, callback?: (params: IFileSha256Callback)
 // #endregion
 
 // #region 文件保存相关操作
-export async function saveFileSmart (fileName: string, contentOrString: string) {
+export async function saveFileSmart(fileName: string, contentOrString: string) {
   // 若不是 url，则转换成 objectUrl
   if (!validUrl(contentOrString)) {
     const blob = new Blob([contentOrString], { type: 'text/plain' })
@@ -543,7 +557,7 @@ export async function saveFileSmart (fileName: string, contentOrString: string) 
  * @param fileName
  * @param fileUrl
  */
-export function saveByUrl (fileName: string, fileUrl: string) {
+export function saveByUrl(fileName: string, fileUrl: string) {
   const aLink = document.createElement('a')
   aLink.href = fileUrl
   aLink.download = fileName
@@ -552,17 +566,17 @@ export function saveByUrl (fileName: string, fileUrl: string) {
   aLink.remove()
 }
 
-function validUrl (url: string) {
-  if (url && typeof (url) === 'string' && url.indexOf('http') >= 0) return true
+function validUrl(url: string) {
+  if (url && typeof url === 'string' && url.indexOf('http') >= 0) return true
   return false
 }
 
 declare global {
   interface Window {
     showSaveFilePicker?: (filePickerOptions: {
-      suggestedName: string,
+      suggestedName: string
       types: {
-        description: string,
+        description: string
         accept: Record<string, string[]>
       }[]
     }) => Promise<any>
@@ -576,17 +590,20 @@ declare global {
  * @param options
  * @returns
  */
-export async function saveByFileSystemAccess (fileName: string, downloadUrl: string, options: IProgressOptions = {}) {
+export async function saveByFileSystemAccess(fileName: string, downloadUrl: string, options: IProgressOptions = {}) {
   if (!validUrl(downloadUrl)) {
     throw new Error(translateUtils('file_invalidDownloadUrl'))
   }
 
-  const _options = Object.assign({
-    token: '',
-    initMessage: translateUtils('file_parsingFile'),
-    doneMessage: translateUtils('file_downloadCompleted'),
-    cancellable: false
-  }, options)
+  const _options = Object.assign(
+    {
+      token: '',
+      initMessage: translateUtils('file_parsingFile'),
+      doneMessage: translateUtils('file_downloadCompleted'),
+      cancellable: false
+    },
+    options
+  )
   if (!window.showSaveFilePicker) return false
 
   // 解析文件后缀
@@ -636,21 +653,26 @@ export async function saveByFileSystemAccess (fileName: string, downloadUrl: str
 
     const writableStream = await fileHandle.createWritable()
     const response = await fetch(downloadUrl, { signal })
-    if (!response || !response.body) { throw new Error(translateUtils('file_downloadFailed')) }
+    if (!response || !response.body) {
+      throw new Error(translateUtils('file_downloadFailed'))
+    }
     const reader = response.body.getReader()
     const writer = writableStream.getWriter()
 
     const contentLength = Number(response.headers.get('Content-Length'))
     const totalLength = isNaN(contentLength) ? 1 : contentLength
     let receivedLength = 0
-    function updateProgress (bytes: Uint8Array) {
+    function updateProgress(bytes: Uint8Array) {
       receivedLength += bytes.length
-      const percent = Math.floor(receivedLength / totalLength * 100)
+      const percent = Math.floor((receivedLength / totalLength) * 100)
       if (percent > 100) return 90
 
-      update(percent, translateUtils('file_downloadingFile', {
-        fileName: fileHandle.name
-      }))
+      update(
+        percent,
+        translateUtils('file_downloadingFile', {
+          fileName: fileHandle.name
+        })
+      )
     }
 
     while (true) {

@@ -9,7 +9,7 @@ permalink: /contact-us
 
 如果你在使用中发现了 bug, 或者对该软件有任何建议，都欢迎联系我，让我们将这款软件一起变得更优秀吧！
 
-bug 反馈优先选择 [Github Issues](https://github.com/uyoufu/UZonMail/issues?q=is%3Aissue)，这样我能第一时间知道。
+bug 反馈优先选择 [Github Issues](https://github.com/uyoufu/UzonMail/issues?q=is%3Aissue)，这样我能第一时间知道。
 
 如果有紧急问题，请通过邮件联系。
 
@@ -27,7 +27,7 @@ Telegram:  https://t.me/uzonmail
 
 邮  箱：uyoufu@uzoncloud.com
 
-GitHub：[uyoufu/UZonMail](https://github.com/uyoufu/UZonMail)
+GitHub：[uyoufu/UzonMail](https://github.com/uyoufu/UzonMail)
 
 个人主页：[星辰大海 - uyoufu.uzoncloud.com](https://uyoufu.uzoncloud.com)
 

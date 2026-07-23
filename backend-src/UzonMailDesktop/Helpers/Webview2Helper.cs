@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UZonMailDesktop.Helpers
+namespace UzonMailDesktop.Helpers
 {
     public class Webview2Helper
     {

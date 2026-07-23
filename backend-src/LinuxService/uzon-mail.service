@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/usr/local/uzon-mail
-ExecStart=/usr/bin/dotnet /usr/local/uzon-mail/UZonMailService.dll
+ExecStart=/usr/bin/dotnet /usr/local/uzon-mail/UzonMailService.dll
 Restart=always
 RestartSec=10
 SyslogIdentifier=uzon-mail

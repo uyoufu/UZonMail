@@ -2,7 +2,7 @@
 title: Outlook 发件
 icon: at
 order: 5
-description: 宇正群邮（UZonMail）Outlook发件指南，详细介绍如何通过微软Graph方式配置和使用Outlook邮箱进行邮件群发。支持开源邮件群发、邮件营销、企业级邮件群发场景，是最好用的邮件群发软件。
+description: 宇正群邮（UzonMail）Outlook发件指南，详细介绍如何通过微软Graph方式配置和使用Outlook邮箱进行邮件群发。支持开源邮件群发、邮件营销、企业级邮件群发场景，是最好用的邮件群发软件。
 permalink: /guide/features/outlook
 ---
 

@@ -25,7 +25,7 @@ The core dependency is [.NET 10.0.5](https://dotnet.microsoft.com/en-us/download
 
 Additional platform-specific dependencies may be required; refer to the corresponding installation pages.
 
-The easiest method is to use the [Docker installation](https://mail.uzoncloud.com/guide/installation/docker), which simplifies installation, configuration and upgrades. Docker works on Windows 11, Linux and macOS.
+The easiest method is to use the [Docker installation](https://uzonmail.uzoncloud.com/guide/installation/docker), which simplifies installation, configuration and upgrades. Docker works on Windows 11, Linux and macOS.
 
 ## Downloads
 

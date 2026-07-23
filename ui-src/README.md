@@ -4,9 +4,7 @@ A app for sending emails
 
 ## Install the dependencies
 ```bash
-yarn install
-# or
-npm install
+bun install
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
@@ -17,9 +15,7 @@ quasar dev
 
 ### Lint the files
 ```bash
-yarn lint
-# or
-npm run lint
+bun run lint
 ```
 
 
@@ -39,24 +35,24 @@ See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-
 cd ui-src
 docker compose up -d
 # 第一次需要安装依赖
-docker exec -it uzon-mail-dev yarn install && yarn run dev
+docker exec -it uzon-mail-dev bun install && bun run dev
 # 第二次启动
-docker exec -it uzon-mail-dev yarn run dev
+docker exec -it uzon-mail-dev bun run dev
 ```
 
 
 ## quasar 升级
 
-### yarn4
+### bun
 
 参考 https://quasar.dev/start/upgrade-guide#with-quasar-cli
 ``` bash
 # 安装 cli
-yarn dlx @quasar/cli
+bunx @quasar/cli
 
 # 检查包
-yarn dlx @quasar/cli upgrade
+bunx @quasar/cli upgrade
 
 # 开始升级
-yarn dlx @quasar/cli upgrade --install
+bunx @quasar/cli upgrade --install
 ```

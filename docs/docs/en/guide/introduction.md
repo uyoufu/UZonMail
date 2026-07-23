@@ -18,13 +18,13 @@ Common use cases include:
 4. Integration as a notification center for system-triggered emails
 
 ::: tip
-Open source: [UzonMail](https://github.com/GalensGan/UZonMail)
+Open source: [UzonMail](https://github.com/GalensGan/UzonMail)
 Online demo: [https://maildemo.uzoncloud.com:2234/](https://maildemo.uzoncloud.com:2234/), username/password: admin/admin1234
 :::
 
 ## Key Features
 
-![image-20240614121857801](https://github.com/uyoufu/UZonMail/raw/master/resource/images/uzon-mail-send.png)
+![image-20240614121857801](https://github.com/uyoufu/UzonMail/raw/master/resource/images/uzon-mail-send.png)
 
 1. **Multiple senders can send concurrently**
 

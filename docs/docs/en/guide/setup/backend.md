@@ -29,7 +29,7 @@ The default system configuration is in `appsettings.json`. It's not recommended 
   "TokenParams": {
     "Secret": "640807f8983090349cca90b9640807f8983090349cca90b9",
     "Issuer": "127.0.0.1",
-    "Audience": "UZonMail",
+    "Audience": "UzonMail",
     "Expire": 86400000
   },
   "System": {
@@ -97,7 +97,7 @@ Add `TokenParams` to `appsettings.Production.json` and change the values. If tok
   "TokenParams": {
     "Secret": "your-secret-here",
     "Issuer": "127.0.0.1",
-    "Audience": "UZonMail",
+    "Audience": "UzonMail",
     "Expire": 86400000
   }
 }

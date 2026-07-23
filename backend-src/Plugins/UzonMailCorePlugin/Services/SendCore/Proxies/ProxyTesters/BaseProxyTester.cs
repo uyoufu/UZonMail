@@ -1,0 +1,131 @@
+using log4net;
+using Newtonsoft.Json.Linq;
+using UzonMail.Utils.Http.Request;
+using UzonMail.Utils.Json;
+using UzonMail.Utils.Results;
+
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+{
+    /// <summary>
+    /// 代理查询基类
+    /// 来源：https://github.com/ihmily/ip-info-api?tab=readme-ov-file
+    /// </summary>
+    /// <param name="httpClient"></param>
+    public abstract class BaseProxyTester : IProxyHealthChecker
+    {
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(BaseProxyTester));
+
+        private readonly HttpClient _httpClient;
+        private readonly long _timeout = 5000;
+
+        public BaseProxyTester(HttpClient httpClient, ProxyZoneType testerType)
+        {
+            _httpClient = httpClient;
+            _httpClient.Timeout = TimeSpan.FromMilliseconds(_timeout);
+            ProxyZoneType = testerType;
+        }
+
+        public bool Enable { get; set; } = true;
+
+        /// <summary>
+        /// 序号
+        /// </summary>
+        public virtual int Order { get; } = 0;
+
+        /// <summary>
+        /// 代理查询类型
+        /// </summary>
+        public ProxyZoneType ProxyZoneType { get; private set; }
+
+        /// <summary>
+        /// 获取当前 IP
+        /// </summary>
+        /// <param name="proxyUrl"></param>
+        /// <returns></returns>
+        public async Task<Result<string?>> GetIP(string proxyUrl)
+        {
+            // 每天自动验证一次
+            if (DateTime.UtcNow.Date != _lastValidateTime.Date)
+            {
+                await Validate();
+            }
+            if (!Enable)
+                return Result<string?>.Fail("IP 查询接口不可用");
+
+            var response = await GetHttpRequestWithoutProxy()
+                .WithTimeout(_timeout)
+                .WithProxy(proxyUrl)
+                .SendAsync();
+
+            // 未查找成功
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.Debug(
+                    $"动态代理 {proxyUrl} 检测失败,{response.StatusCode}: {response.ReasonPhrase}"
+                );
+                return Result<string?>.Fail(string.Empty);
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var resultIP = RetrieveIP(content);
+            return Result<string?>.Success(resultIP);
+        }
+
+        protected abstract FluentHttpRequest GetHttpRequestWithoutProxy();
+
+        /// <summary>
+        /// 解析 IP
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        protected abstract string? RetrieveIP(string content);
+
+        private DateTime _lastValidateTime = DateTime.MinValue;
+        private int _validating = 0;
+
+        /// <summary>
+        /// 不使用代理验证可访问性
+        /// </summary>
+        /// <returns></returns>
+        protected virtual async Task<bool> Validate()
+        {
+            if (Interlocked.Exchange(ref _validating, 1) == 1)
+                return false;
+
+            try
+            {
+                _lastValidateTime = DateTime.UtcNow;
+
+                var response = await GetHttpRequestWithoutProxy()
+                    .WithHttpClient(_httpClient)
+                    .SendAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    Enable = false;
+                    return false;
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(content))
+                {
+                    Enable = false;
+                    return false;
+                }
+
+                Enable = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn("代理检测接口验证失败");
+                _logger.Warn(ex);
+                Enable = false;
+                return false;
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _validating, 0);
+            }
+        }
+    }
+}

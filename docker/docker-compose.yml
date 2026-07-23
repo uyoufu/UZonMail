@@ -72,7 +72,7 @@ services:
       - uzonmail_network
       - uzon_postgres_network
       - uzon_redis_network
-    command: [ "dotnet", "UZonMailService.dll" ]
+    command: [ "dotnet", "UzonMailService.dll" ]
     depends_on:
       uzon-postgres:
         condition: service_healthy

@@ -6,9 +6,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Interop;
-using UZonMailDesktop.Utils;
+using UzonMailDesktop.Utils;
 
-namespace UZonMailDesktop.Pages.Tray
+namespace UzonMailDesktop.Pages.Tray
 {
     /// <summary>
     /// windows 托盘功能

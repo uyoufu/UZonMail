@@ -72,7 +72,7 @@ import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
 import { createAbstractLabel } from 'src/utils/labelHelper'
 import SelectEmailBoxDialog from './SelectEmailBoxDialog.vue'
 
-async function onSelectOutboxes () {
+async function onSelectOutboxes() {
   logger.debug('[SelectEmailBox] onSelectOutboxes', modelValue.value, selectedGroupsModelValue.value)
 
   const { ok, data } = await showComponentDialog<{
@@ -92,7 +92,7 @@ async function onSelectOutboxes () {
       id: x.id,
       email: x.email,
       name: x.name
-    } as IInbox
+    }
   })
   modelValue.value = selectedEmailsResults
   const selectedGroupsResults = data.selectedGroups.map(x => {
@@ -107,7 +107,7 @@ async function onSelectOutboxes () {
 }
 
 // #region 格式化显示
-function formatFieldLabel () {
+function formatFieldLabel() {
   let unitLabel = '个邮箱'
   if (selectedGroupsModelValue.value.length > 0) {
     unitLabel = '个分组和邮箱'

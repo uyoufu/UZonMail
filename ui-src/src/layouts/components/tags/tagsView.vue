@@ -30,7 +30,7 @@ import type { IContextMenuItem } from 'src/components/contextMenu/types'
 
 // 显示和跳转 tag
 const { routes } = useRouteHistories()
-function getTagClass (item: IRouteHistory) {
+function getTagClass(item: IRouteHistory) {
   return {
     'bg-primary': item.isActive,
     'text-white': true
@@ -38,13 +38,13 @@ function getTagClass (item: IRouteHistory) {
 }
 
 import { translateRoutes } from 'src/i18n/helpers'
-function getTagLabel (tagItem: IRouteHistory) {
+function getTagLabel(tagItem: IRouteHistory) {
   const labelValue = translateRoutes(tagItem.label)
   if (tagItem.query.tagName) return `${labelValue} - ${String(tagItem.query.tagName)}`
   return labelValue
 }
 const router = useRouter()
-async function goToRoute (item: IRouteHistory) {
+async function goToRoute(item: IRouteHistory) {
   await router.push({
     path: item.fullPath,
     query: item.query
@@ -53,14 +53,14 @@ async function goToRoute (item: IRouteHistory) {
 
 // tags 功能
 // 首页没有移除功能
-function mouseenterTag (item: IRouteHistory) {
+function mouseenterTag(item: IRouteHistory) {
   if (item.fullPath === '/') return
   item.showCloseIcon = true
 }
 
 // 移除按钮
-async function onRemoveTag (item: IRouteHistory) {
-  await removeHistory(router, item as unknown as IRouteHistory)
+async function onRemoveTag(item: IRouteHistory) {
+  await removeHistory(router, item)
 }
 
 // 右键菜单

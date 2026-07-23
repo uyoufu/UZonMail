@@ -1,0 +1,25 @@
+using UzonMail.Utils.Http.Request;
+
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+{
+    public class OneIPQuery(HttpClient httpClient)
+        : PlainTextParser(httpClient, ProxyZoneType.Default)
+    {
+        private readonly string _apiUrl = "https://1.1.1.1/cdn-cgi/trace";
+
+        /// <summary>
+        /// 最优先
+        /// </summary>
+        public override int Order { get; } = 0;
+
+        protected override FluentHttpRequest GetHttpRequestWithoutProxy()
+        {
+            return new FluentHttpRequest(HttpMethod.Get, _apiUrl);
+        }
+
+        protected override string GetIpRegexMatchPrefix()
+        {
+            return "ip=";
+        }
+    }
+}

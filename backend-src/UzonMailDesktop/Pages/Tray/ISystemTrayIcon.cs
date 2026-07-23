@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace UZonMailDesktop.Pages.Tray
+namespace UzonMailDesktop.Pages.Tray
 {
     public interface ISystemTrayIcon
     {

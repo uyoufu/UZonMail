@@ -2,11 +2,11 @@
 title: 简介
 icon: ranking-star
 order: 1
-description: 宇正群邮（UZonMail）是一款开源、免费、企业级的邮件群发软件，支持邮件营销、邮箱爬取、无限变量、Outlook OAuth2 等功能。多线程高效群发，支持 Windows、Linux、MacOS、Docker 等平台部署，适用于外贸、教育、财务等行业。宇正群邮——最好用的邮件群发软件，助力高效邮件营销！
+description: 宇正群邮（UzonMail）是一款开源、免费、企业级的邮件群发软件，支持邮件营销、邮箱爬取、无限变量、Outlook OAuth2 等功能。多线程高效群发，支持 Windows、Linux、MacOS、Docker 等平台部署，适用于外贸、教育、财务等行业。宇正群邮——最好用的邮件群发软件，助力高效邮件营销！
 permalink: /guide/introduction
 ---
 
-本软件名为 "宇正群邮 (UZonMail)"，是一款开源免费的邮件群发软件，提供邮件群发、邮件营销、邮箱爬取、任意变量等诸多功能。支持所有类型邮箱账号，包括Outlook的OAuth2。原生企业级品质，支持多端用户，支持Windows、Linux、MacOS等操作系统, 支持服务器部署。原生多线程并发，支持多账号同时使用，性能强劲。多年持续迭代更新优化，已被外贸营销、教育培训、财务会计等多个行业广泛使用。
+本软件名为 "宇正群邮 (UzonMail)"，是一款开源免费的邮件群发软件，提供邮件群发、邮件营销、邮箱爬取、任意变量等诸多功能。支持所有类型邮箱账号，包括Outlook的OAuth2。原生企业级品质，支持多端用户，支持Windows、Linux、MacOS等操作系统, 支持服务器部署。原生多线程并发，支持多账号同时使用，性能强劲。多年持续迭代更新优化，已被外贸营销、教育培训、财务会计等多个行业广泛使用。
 
 ![宇正群邮登录页](https://oss.uzoncloud.com:2234/public/files/images/uzon-mail-login-2.png)
 
@@ -18,13 +18,13 @@ permalink: /guide/introduction
 4. 接入系统作为通知中心进行邮件群发
 
 ::: tip
-开源地址：[UZonMail](https://github.com/GalensGan/UZonMail)
+开源地址：[UzonMail](https://github.com/GalensGan/UzonMail)
 在线Demo: [https://maildemo.uzoncloud.com:2234/](https://maildemo.uzoncloud.com:2234/)，用户名/密码：admin/admin1234
 :::
 
 ## 特色功能
 
-![image-20240614121857801](https://github.com/uyoufu/UZonMail/raw/master/resource/images/uzon-mail-send.png)
+![image-20240614121857801](https://github.com/uyoufu/UzonMail/raw/master/resource/images/uzon-mail-send.png)
 
 1. **支持多个发件人同时发件**
 

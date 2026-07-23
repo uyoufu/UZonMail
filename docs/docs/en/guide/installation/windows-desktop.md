@@ -14,7 +14,7 @@ Steps:
 
 1. Install the .NET runtimes: `runtime-10.0.5-windows-x64-installer` and `runtime-aspnetcore-10.0.5-windows-x64-installer` from Microsoft.
 2. Download `uzonmail-desktop-win-x64` from Versions and unzip.
-3. Run `service/UZonMailService.exe`.
+3. Run `service/UzonMailService.exe`.
 
    The UI may show yellow WARN messages which can be ignored.
 
@@ -34,10 +34,10 @@ Steps for Windows 10 and later:
 2. Install `.NET runtime-desktop-10.0.5-windows-x64` (usually included by the OS).
 3. Install WebView2 (usually bundled with Edge).
 4. Download and unzip `uzonmail-desktop-win-x64` from Versions.
-5. Run `UZonMailDesktop.exe`.
+5. Run `UzonMailDesktop.exe`.
 
 ::: tip
-Step 3 can be skipped in many cases. If `UZonMailDesktop.exe` crashes or shows a blank screen, install WebView2 manually.
+Step 3 can be skipped in many cases. If `UzonMailDesktop.exe` crashes or shows a blank screen, install WebView2 manually.
 :::
 
 ## Advanced

@@ -54,7 +54,7 @@ cd apps/uzon-mail
 请先确保已经安装 Docker 和 Docker Compose v2，并位于 `~/apps/uzon-mail` 目录中，然后执行：
 
 ``` bash
-curl -fsSL https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/install.sh -o install.sh
+curl -fsSL https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/install.sh -o install.sh
 bash ./install.sh
 ```
 
@@ -62,24 +62,24 @@ bash ./install.sh
 
 ### 下载 .env 配置文件
 
-从 github 上下载 [.env](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env) 到当前目录
+从 github 上下载 [.env](https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/.env) 到当前目录
 
 若无法下载，请手动创建文件 `~/apps/uzon-mail/.env`，然后将上述 `.env` 内容复制进去。
 
 ``` bash
 # 确保在 ~/apps/uzon-mail 目录中，然后执行下列命令
-wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/.env
+wget https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/.env
 ```
 
 ### 下载 docker-compose 文件
 
-从 github 上下载 [docker-compose.yml](https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/docker-compose.yml) 到当前目录
+从 github 上下载 [docker-compose.yml](https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/docker-compose.yml) 到当前目录
 
 若无法下载，请手动创建文件 ~/apps/uzon-mail/docker-compose.yml，然后将上述 docker-compose 内容复制进去
 
 ``` bash
 # 确保在 ~/apps/uzon-mail 目录中，然后执行下列命令
-wget https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/docker/docker-compose.yml
+wget https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/docker/docker-compose.yml
 ```
 
 上述命令将会下载完整的 docker-compose 文件，具体的配置项说明请见文件内容。
@@ -198,7 +198,7 @@ Unsubscribe__Headers__0__Header=RFC8058
 
 需要查看所有可覆盖的后端设置时，可以参考默认配置文件：
 
-<https://raw.githubusercontent.com/uyoufu/UZonMail/refs/heads/master/backend-src/UZonMailService/appsettings.json>
+<https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/backend-src/UzonMailService/appsettings.json>
 
 修改 `.env` 后，在 `docker-compose.yml` 所在目录重新启动容器即可生效：
 
@@ -337,7 +337,7 @@ services:
       - uzonmail_network
       - uzon_postgres_network
       - uzon_redis_network
-    command: [ "dotnet", "UZonMailService.dll" ]
+    command: [ "dotnet", "UzonMailService.dll" ]
     depends_on:
       uzon-postgres:
         condition: service_healthy

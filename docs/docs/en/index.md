@@ -4,7 +4,7 @@ icon: home
 title: Home | UzonMail | Bulk Email | Email Marketing | Open Source Bulk Mailer | Best Bulk Mail Software
 shortTitle: Home
 heroImage: /images/hero.svg
-heroText: UZonMail
+heroText: UzonMail
 tagline: ''
 
 actions:
@@ -51,5 +51,5 @@ highlights:
         details: Convert QQ group members to contacts with one click for targeted acquisition.
 
 copyright: false
-footer: Apache-2.0 license | Copyright © 2021-present UZonMail
+footer: Apache-2.0 license | Copyright © 2021-present UzonMail
 ---

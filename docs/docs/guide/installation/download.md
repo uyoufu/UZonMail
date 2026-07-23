@@ -22,7 +22,7 @@ permalink: /guide/installation/download
 
 同时，在不同的平台上，还可能需要额外安装其它依赖环境，可以参考对应的介绍文档使用。
 
-最简单的方式为使用 [Docker方式](https://mail.uzoncloud.com/guide/installation/docker) 进行安装，使用这种方式安装简单、配置容易、升级方便。目前 win11、Linux、MacOS 上都可以使用该方式运行。
+最简单的方式为使用 [Docker方式](https://uzonmail.uzoncloud.com/guide/installation/docker) 进行安装，使用这种方式安装简单、配置容易、升级方便。目前 win11、Linux、MacOS 上都可以使用该方式运行。
 
 ## 软件下载
 

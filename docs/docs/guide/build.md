@@ -2,7 +2,7 @@
 title: 代码编译
 icon: code
 order: 10
-description: 宇正群邮（UZonMail）代码编译指南，详细介绍如何在 Windows 环境下手动编译开源邮件群发软件。支持邮件群发、邮件营销，适用于企业级邮件群发场景，是最好用的开源邮件群发软件。
+description: 宇正群邮（UzonMail）代码编译指南，详细介绍如何在 Windows 环境下手动编译开源邮件群发软件。支持邮件群发、邮件营销，适用于企业级邮件群发场景，是最好用的开源邮件群发软件。
 permalink: /guide/build
 ---
 
@@ -24,7 +24,7 @@ permalink: /guide/build
 
 1. 打开终端
 
-2. 克隆仓库 `git clone https://github.com/GalensGan/UZonMail`，切换到 `master` 分支
+2. 克隆仓库 `git clone https://github.com/GalensGan/UzonMail`，切换到 `master` 分支
 
 3. 进入到项目根目录下的 `scripts` 目录，执行下面的命令 开始编译，编译结果在 `build` 目录中。
 

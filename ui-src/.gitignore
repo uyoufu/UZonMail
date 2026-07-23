@@ -48,3 +48,6 @@ yarn-error.log*
 
 .quasar-temp
 /components.d.ts
+
+.nyc_output
+coverage/

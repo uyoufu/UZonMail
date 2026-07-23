@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
-using UZonMailDesktop.Pages.Conductors;
+using UzonMailDesktop.Pages.Conductors;
 
-namespace UZonMailDesktop.Pages.Webview
+namespace UzonMailDesktop.Pages.Webview
 {
     class UzonViewModel : RouteScreen
     {

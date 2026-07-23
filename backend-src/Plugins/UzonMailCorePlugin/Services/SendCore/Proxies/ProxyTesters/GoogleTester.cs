@@ -1,0 +1,26 @@
+using UzonMail.Utils.Http.Request;
+
+namespace UzonMail.CorePlugin.Services.SendCore.Proxies.ProxyTesters
+{
+    /// <summary>
+    /// Google 网站连通性测试
+    /// </summary>
+    /// <param name="httpClient"></param>
+    public class GoogleTester(HttpClient httpClient)
+        : BaseProxyTester(httpClient, ProxyZoneType.Google)
+    {
+        public override int Order { get; } = -1;
+
+        private readonly string _apiUrl = "https://www.google.com";
+
+        protected override FluentHttpRequest GetHttpRequestWithoutProxy()
+        {
+            return new FluentHttpRequest(HttpMethod.Get, _apiUrl);
+        }
+
+        protected override string? RetrieveIP(string content)
+        {
+            return string.Empty;
+        }
+    }
+}

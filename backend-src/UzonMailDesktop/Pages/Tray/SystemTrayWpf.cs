@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Threading;
 
-namespace UZonMailDesktop.Pages.Tray
+namespace UzonMailDesktop.Pages.Tray
 {
     /// <summary>
     /// windows 托盘功能
