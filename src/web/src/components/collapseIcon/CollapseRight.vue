@@ -20,7 +20,7 @@ const collapseBarClass = computed(() => {
   }
 })
 const tooltipText = computed(() => {
-  return modelValue.value ? t('collapseRight.expand') : t('collapseRight.collapse')
+  return modelValue.value ? t('collapseIcon.expand') : t('collapseIcon.collapse')
 })
 </script>
 

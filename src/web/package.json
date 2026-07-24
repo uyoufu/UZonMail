@@ -17,7 +17,8 @@
     "test:e2e:ci": "cross-env NODE_ENV=test TS_NODE_PROJECT=test/cypress/tsconfig.json start-test \"quasar dev\" http-get://127.0.0.1:22380 \"cypress run --e2e\"",
     "test:component": "cross-env NODE_ENV=test TS_NODE_PROJECT=test/cypress/tsconfig.json cypress open --component",
     "test:component:ci": "cross-env NODE_ENV=test TS_NODE_PROJECT=test/cypress/tsconfig.json cypress run --component",
-    "test:unit:ui": "vitest --ui"
+    "test:unit:ui": "vitest --ui",
+    "i18n:upsert": "bun scripts/upsert_i18n.js"
   },
   "dependencies": {
     "@microsoft/signalr": "^8.0.7",
