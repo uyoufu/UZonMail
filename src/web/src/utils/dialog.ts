@@ -148,8 +148,8 @@ export function showHtmlDialog (title: string, html: string) {
   })
 }
 
-// #region 对 components/popupDialog/PopupDialog.ts 进行导出，统一弹窗调用位置
-export { showDialog, showComponentDialog, showHtmlDialog2 } from 'src/components/popupDialog/PopupDialog'
+// #region 对 components/lowCode/PopupDialog.ts 进行导出，统一弹窗调用位置
+export { showDialog, showComponentDialog, showHtmlDialog2 } from 'src/components/lowCode/PopupDialog'
 // #endregion
 
 export function useIndeterminateProgressNotify (message: string, caption: string = '') {

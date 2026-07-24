@@ -1,7 +1,7 @@
 import type { IJsVariableSource } from "src/api/pro/jsVariable"
 import type { IContextMenuItem } from "src/components/contextMenu/types"
-import type { IPopupDialogParams } from "src/components/popupDialog/types"
-import { PopupDialogFieldType } from "src/components/popupDialog/types"
+import type { IPopupDialogParams } from "src/components/lowCode/types"
+import { PopupDialogFieldType } from "src/components/lowCode/types"
 import { notifySuccess, showDialog } from "src/utils/dialog"
 
 import { upsertJsVariableSource, deleteJsVariableSourcesData } from 'src/api/pro/jsVariable'

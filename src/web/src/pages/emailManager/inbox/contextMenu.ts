@@ -4,10 +4,10 @@ import { deleteInboxById, updateInbox, deleteAllDeliveredInboxesInGroup } from '
 import { validateAllInvalidInboxes } from 'src/api/pro/emailVerify'
 
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { getInboxFields } from './headerFunctions'
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
 
 import { translateInboxManager, translateGlobal } from 'src/i18n/helpers'
 import type { deleteRowByIdType, refreshTableType } from 'src/compositions/qTableUtils'

@@ -44,7 +44,6 @@ defineEmits([
 ])
 const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } = useDialogPluginComponent()
 
-import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'

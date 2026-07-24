@@ -268,7 +268,7 @@ function getSelectionItemLabel (itemProps: any, opt: any, field: IPopupDialogFie
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getSelectionItemTooltip (itemProps: any, opt: any, field: IPopupDialogField) {
-  // logger.debug('[popupDialog] getSelectionItemTooltip:', opt, field)
+  // logger.debug('[lowCode] getSelectionItemTooltip:', opt, field)
   if (!field || !field.optionTooltip || !opt) return ''
   if (typeof opt !== 'object') return opt
   return opt[field.optionTooltip]

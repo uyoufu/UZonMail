@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types'
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { addNewRowType } from 'src/compositions/qTableUtils'

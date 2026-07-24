@@ -4,11 +4,11 @@ import { deleteOutboxByIds, OutboxStatus, updateOutbox, validateOutbox } from 's
 import { deleteAllInvalidOutboxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
 
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getOutboxFields } from './headerFunctions'
 
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
 
 import type { getSelectedRowsType } from 'src/compositions/qTableUtils'
 

@@ -89,7 +89,7 @@ onMounted(() => {
   // 后期有需要再实现
 })
 
-function addObsFile (files: IObsUploadedResult[]) {
+function addObsFile(files: IObsUploadedResult[]) {
   // 获取不存在的项
   const shas = uploaderRef.value.uploadedFiles.map(x => x.__sha256)
   const newFiles = files.filter(x => !shas.includes(x.__sha256))
@@ -111,7 +111,7 @@ import { useUserInfoStore } from 'src/stores/user'
 const userInfoStore = useUserInfoStore()
 import { useConfig } from 'src/config'
 const appConfig = useConfig()
-function factoryFn (files: readonly IObsUploadedFile[]): Promise<QUploaderFactoryObject> {
+function factoryFn(files: readonly IObsUploadedFile[]): Promise<QUploaderFactoryObject> {
   logger.debug('[objectUploader] uploader factory called:', files)
   return new Promise((resolve) => {
     // Retrieve JWT token from your store.
@@ -135,13 +135,13 @@ function factoryFn (files: readonly IObsUploadedFile[]): Promise<QUploaderFactor
 import { getFileUsageId } from 'src/api/file'
 
 const vm = getCurrentInstance()
-function sha256Callback (params: IFileSha256Callback) {
+function sha256Callback(params: IFileSha256Callback) {
   params.file.__progressLabel = params.progressLabel
   // 强制刷新
   vm?.proxy?.$forceUpdate()
 }
 
-async function onFileAdded (files: readonly IObsUploadedFile[]) {
+async function onFileAdded(files: readonly IObsUploadedFile[]) {
   // 计算文件的 sha256 值，若已经上传过，则直接修改文件状态
   logger.debug('[objectUploader] onFileAdded files:', files, uploaderRef.value.queuedFiles)
   if (!uploaderRef.value) return
@@ -187,7 +187,7 @@ const canUpload = computed(() => {
 // 文件上传后的操作
 import { notifyError } from 'src/utils/dialog'
 import { translateComponents } from 'src/i18n/helpers'
-function onFileUploaded ({ files, xhr }: { files: readonly IObsUploadedFile[], xhr: XMLHttpRequest }) {
+function onFileUploaded({ files, xhr }: { files: readonly IObsUploadedFile[], xhr: XMLHttpRequest }) {
   const file = files[0] as IObsUploadedFile
   const response = JSON.parse(xhr.responseText)
   if (!response.ok) {
@@ -201,7 +201,7 @@ function onFileUploaded ({ files, xhr }: { files: readonly IObsUploadedFile[], x
   // 更新 v-model 值
   updateModelValue(file)
 }
-function updateModelValue (file: IObsUploadedFile) {
+function updateModelValue(file: IObsUploadedFile) {
   if (modelValue.value.find(x => x.__sha256 === file.__sha256)) return
 
   const result: IObsUploadedResult = {

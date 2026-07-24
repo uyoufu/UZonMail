@@ -82,8 +82,8 @@ const { pagination, rows, filter, onTableRequest, loading, addNewRow } = useQTab
 import { notifySuccess, showComponentDialog, showDialog } from 'src/utils/dialog'
 
 import { translations } from 'src/i18n'
-import type { IPopupDialogParams} from 'src/components/popupDialog/types';
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams} from 'src/components/lowCode/types';
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import UnsubscribePageDialog from 'src/pages/unsubscribe/UnsubscribePageDialog.vue'
 
 function getPopupParams (data: IUnsubscribePage | null = null) {

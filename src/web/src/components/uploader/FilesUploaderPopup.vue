@@ -10,8 +10,6 @@
 </template>
 
 <script lang='ts' setup>
-import LinearProgress from 'src/components/Progress/LinearProgress.vue'
-
 /**
  * warning: 该组件是一个弹窗的示例，不可直接使用
  * 参考：http://www.quasarchs.com/quasar-plugins/dialog#composition-api-variant

@@ -1,5 +1,5 @@
-import type { IPopupDialogParams } from 'src/components/popupDialog/types'
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import type { IEmailGroupListItem } from '../components/types'
 

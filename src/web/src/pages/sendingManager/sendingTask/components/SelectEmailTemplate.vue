@@ -33,7 +33,7 @@ const modelValue = defineModel({
 import { createAbstractLabel } from 'src/utils/labelHelper'
 
 // placeholder 显示
-import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
+import { showComponentDialog } from 'src/components/lowCode/PopupDialog'
 import { useCustomQField } from '../helper'
 const { isActive, fieldModelValue, fieldText } = useCustomQField(translateSendingTask('selectTemplateTooltip'))
 

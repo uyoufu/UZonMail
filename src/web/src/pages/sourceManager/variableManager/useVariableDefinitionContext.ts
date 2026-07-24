@@ -1,6 +1,6 @@
 import type { IContextMenuItem } from "src/components/contextMenu/types"
-import type { IPopupDialogParams } from "src/components/popupDialog/types"
-import { PopupDialogFieldType } from "src/components/popupDialog/types"
+import type { IPopupDialogParams } from "src/components/lowCode/types"
+import { PopupDialogFieldType } from "src/components/lowCode/types"
 import { notifySuccess, showDialog } from "src/utils/dialog"
 
 import type { IJsFunctionDefinition } from 'src/api/pro/jsFunctionDefinition';

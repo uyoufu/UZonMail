@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { checkUserId, createUser, getDefaultPassword, resetUserPassword, setUserType, setUserStatus } from 'src/api/user'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import { UserStatus, UserType } from 'src/stores/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { usePermission } from 'src/compositions/permission'

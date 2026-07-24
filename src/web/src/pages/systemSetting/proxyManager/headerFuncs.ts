@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IProxy } from 'src/api/proxy';
 import { validateProxyName, createProxy, updateProxySharedStatus } from 'src/api/proxy'
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import type { IPopupDialogField, IPopupDialogParams } from 'src/components/popupDialog/types';
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
+import type { IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types';
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
 

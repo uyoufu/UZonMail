@@ -1,6 +1,6 @@
 
-import type { IPopupDialogParams } from 'src/components/popupDialog/types'
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import { translateAI } from 'src/i18n/helpers'
 import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import { generateEmailBody, enhanceEmailBody } from 'src/api/aiCopilot'

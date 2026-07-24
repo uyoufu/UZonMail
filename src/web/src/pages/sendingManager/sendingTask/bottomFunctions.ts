@@ -7,7 +7,7 @@ import { formatDateToUTC } from 'src/utils/format'
 import type { IEmailCreateInfo } from 'src/api/emailSending'
 import { sendEmailNow, sendSchedule } from 'src/api/emailSending'
 
-import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
+import { showComponentDialog } from 'src/components/lowCode/PopupDialog'
 import PreviewSendingDialog from './components/PreviewSendingDialog.vue'
 import SendingProgress from '../sendingProgress/SendingProgress.vue'
 import SelectScheduleDate from './components/SelectScheduleDate.vue'

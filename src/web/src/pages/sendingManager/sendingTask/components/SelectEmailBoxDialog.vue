@@ -204,7 +204,7 @@ function onOKClick () {
 }
 
 // #region 左侧分组开关
-import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
+import { useTableCollapseLeft } from 'src/components/collapseIcon/useCollapseLeft'
 const outboxTableRef = ref<InstanceType<typeof QTable> | undefined>()
 const { CollapseLeft, collapseStyleRef, isCollapseGroupList } = useTableCollapseLeft(outboxTableRef, 14)
 // 默认展示

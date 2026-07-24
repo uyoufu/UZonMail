@@ -160,7 +160,6 @@ onMounted(() => {
 })
 
 // #region 发件进度相关
-import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 import { subscribeOne } from 'src/signalR/signalR'
 import type { ISendingGroupProgressArg, ISendingItemStatusChangedArg } from 'src/signalR/types'
 import { UzonMailClientMethods, SendingGroupProgressType } from 'src/signalR/types'

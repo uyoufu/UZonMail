@@ -1,6 +1,6 @@
 
-import type { IPopupDialogField, IPopupDialogParams } from 'src/components/popupDialog/types';
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types';
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import dayjs from 'dayjs'
 
 import { getUsableProxies } from 'src/api/proxy'

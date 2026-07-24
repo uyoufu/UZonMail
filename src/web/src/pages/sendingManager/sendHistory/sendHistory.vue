@@ -39,7 +39,6 @@
 <script lang="ts" setup>
 import logger from 'loglevel'
 
-import LinearProgress from 'src/components/Progress/LinearProgress.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
 import ClickableText from 'src/components/clickableText/ClickableText.vue'
 

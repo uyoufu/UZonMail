@@ -59,7 +59,7 @@ import { getInboxesCount, getInboxesData } from 'src/api/emailBox'
 import type { IEmailGroupListItem } from '../components/types'
 
 // 左侧分组开关
-import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
+import { useTableCollapseLeft } from 'src/components/collapseIcon/useCollapseLeft'
 const inboxTableRef = ref<InstanceType<typeof QTable> | undefined>()
 const { CollapseLeft, collapseStyleRef, isCollapseGroupList } = useTableCollapseLeft(inboxTableRef)
 

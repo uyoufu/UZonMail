@@ -77,7 +77,7 @@ import type { IOutbox } from 'src/api/emailBox'
 import type { IEmailGroupListItem } from '../components/types'
 
 // #region 左侧分组开关
-import { useTableCollapseLeft } from 'src/components/collapseLeft/useCollapseLeft'
+import { useTableCollapseLeft } from 'src/components/collapseIcon/useCollapseLeft'
 const outboxTableRef = ref<InstanceType<typeof QTable> | undefined>()
 const { CollapseLeft, collapseStyleRef, isCollapseGroupList } = useTableCollapseLeft(outboxTableRef)
 // #endregion

@@ -188,7 +188,7 @@ const attachmentCtxMenuItems: IContextMenuItem[] = [
 import { useConfig } from 'src/config'
 import { getFileReaderId, getFileStreamByReaderId } from 'src/api/fileReader'
 import { saveFileSmart } from 'src/utils/file'
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 const config = useConfig()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onDownloadAttachment (row: Record<string, any>) {

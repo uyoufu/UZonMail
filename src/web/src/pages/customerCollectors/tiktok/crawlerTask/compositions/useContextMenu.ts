@@ -12,7 +12,7 @@ import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 import { getCrawlerTaskFields } from './useHeaderFunctions'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { useRouter } from 'vue-router'
 
 export function useContextMenu(addNewRow: addNewRowType<ICrawlerTaskInfo>, deleteRowById: deleteRowByIdType) {

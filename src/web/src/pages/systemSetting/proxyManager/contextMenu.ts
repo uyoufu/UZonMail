@@ -6,9 +6,9 @@ import { deleteProxy, updateProxy, validateProxyName } from 'src/api/proxy'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { getCommonProxyFields } from './headerFuncs'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types';
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
+import type { IPopupDialogParams } from 'src/components/lowCode/types';
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
 
 import { useUserInfoStore } from 'src/stores/user'
 

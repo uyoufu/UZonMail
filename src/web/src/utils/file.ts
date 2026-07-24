@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
 import { notifyError } from 'src/utils/dialog'
 import * as XLSX from 'xlsx'
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import CryptoJS from 'crypto-js'
 import type { IProgressOptions } from 'src/compositions/useProgress'
 import { useNotifyProgress } from 'src/compositions/useProgress'

@@ -99,9 +99,9 @@ const { pagination, rows, filter, onTableRequest, loading, addNewRow, deleteRowB
 })
 
 // #region 新增
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types';
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
+import type { IPopupDialogParams } from 'src/components/lowCode/types';
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 async function onCreateRole () {
   // 创建新建弹窗

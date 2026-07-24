@@ -135,9 +135,9 @@ const filteredItems = computed(() => {
 // 初始化获取组
 import type { IEmailGroup } from 'src/api/emailGroup'
 import { getEmailGroups, createEmailCroup, updateEmailCroup, deleteEmailGroupById } from 'src/api/emailGroup'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types'
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
-import { showDialog } from 'src/components/popupDialog/PopupDialog'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { showDialog } from 'src/components/lowCode/PopupDialog'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 onMounted(async () => {
   const { data: groups } = await getEmailGroups(props.groupType)

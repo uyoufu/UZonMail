@@ -30,8 +30,8 @@ import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import type { IPopupDialogParams} from 'src/components/popupDialog/types';
-import { PopupDialogFieldType } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams} from 'src/components/lowCode/types';
+import { PopupDialogFieldType } from 'src/components/lowCode/types'
 
 import type { IRole, IUserRole} from 'src/api/permission';
 import { getAllRoles, getUserRolesCount, getUserRolesData, upsertUserRole, deleteUserRoles } from 'src/api/permission'

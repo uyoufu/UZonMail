@@ -17,9 +17,6 @@
 </template>
 
 <script lang="ts" setup>
-// 进度条
-import LinearProgress from 'src/components/Progress/LinearProgress.vue'
-
 // 打开详细进度弹窗
 
 import type { IRunningSendingGroup } from 'src/api/sendingGroup';

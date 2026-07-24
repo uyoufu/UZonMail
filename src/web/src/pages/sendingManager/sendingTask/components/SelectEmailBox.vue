@@ -68,7 +68,7 @@ const selectedGroupsModelValue = defineModel('selectedGroups', {
   default: () => []
 })
 
-import { showComponentDialog } from 'src/components/popupDialog/PopupDialog'
+import { showComponentDialog } from 'src/components/lowCode/PopupDialog'
 import { createAbstractLabel } from 'src/utils/labelHelper'
 import SelectEmailBoxDialog from './SelectEmailBoxDialog.vue'
 

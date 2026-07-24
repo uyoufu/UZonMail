@@ -5,7 +5,7 @@ import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 import { getTikTokDeviceInfoFields } from './useHeaderFunctions'
 import { confirmOperation, notifySuccess, showDialog } from 'src/utils/dialog'
-import type { IPopupDialogParams } from 'src/components/popupDialog/types'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
 
 export function useContextMenu (addNewRow: addNewRowType<ITikTokDevice>, deleteRowById: deleteRowByIdType) {
   const contextMenuItems: IContextMenuItem<ITikTokDevice>[] = [
