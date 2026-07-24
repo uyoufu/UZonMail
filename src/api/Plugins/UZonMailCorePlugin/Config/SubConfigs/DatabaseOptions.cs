@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UzonMail.CorePlugin.Config.SubConfigs
 {
-    public class DatabaseConfig
+    public class DatabaseOptions
     {
         /// <summary>
         /// liteDB 保存的相对路径
@@ -21,7 +21,7 @@ namespace UzonMail.CorePlugin.Config.SubConfigs
         #region 静态帮助方法
         private static string GetDatabaseConfigKey()
         {
-            return $"{nameof(DatabaseConfig).Replace("Config", "")}";
+            return $"{nameof(DatabaseOptions).Replace("Config", "")}";
         }
 
         public static string GetSqliteConnectionStringConfigKey()

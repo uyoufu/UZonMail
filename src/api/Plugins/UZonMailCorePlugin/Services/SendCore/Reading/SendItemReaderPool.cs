@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
+using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.SendCore.Reading;
@@ -23,7 +24,7 @@ public interface ISendItemReaderPool
 
 public sealed class SendItemReaderPool(
     IServiceScopeFactory scopeFactory,
-    IOptions<SendItemReaderOptions> options
+    IAppOptions<SendItemReaderOptions> options
 ) : ISendItemReaderPool, ISingletonService<ISendItemReaderPool>
 {
     private readonly Lock _sync = new();

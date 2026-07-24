@@ -1,9 +1,10 @@
+using UzonMail.Utils.Web.Configs;
+
 namespace UzonMail.CorePlugin.Services.SendCore.Reading;
 
+[OptionName("SendCore:Reader")]
 public sealed class SendItemReaderOptions
 {
-    public const string SectionName = "SendCore:Reader";
-
     public int PageSize { get; set; } = 100;
 
     public int MaxBufferedPerGroup { get; set; } = 200;

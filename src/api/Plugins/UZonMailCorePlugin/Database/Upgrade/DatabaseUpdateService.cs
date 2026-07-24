@@ -53,7 +53,7 @@ namespace UzonMail.CorePlugin.Database.Upgrade
         public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var cc = config;
-            var userConfig = new UserConfig();
+            var userConfig = new UserOptions();
             config.GetSection("User")?.Bind(userConfig);
 
             // 获取数据版本

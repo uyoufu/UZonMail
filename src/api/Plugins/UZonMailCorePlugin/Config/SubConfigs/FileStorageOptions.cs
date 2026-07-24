@@ -3,7 +3,7 @@ namespace UzonMail.CorePlugin.Config.SubConfigs
     /// <summary>
     /// 文件存储设置
     /// </summary>
-    public class FileStorageConfig
+    public class FileStorageOptions
     {
         /// <summary>
         /// 文件存储根目录

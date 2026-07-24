@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace UzonMail.CorePlugin.Config.SubConfigs
 {
-    public class WebsocketConfig { }
+    public class WebsocketOptions { }
 }

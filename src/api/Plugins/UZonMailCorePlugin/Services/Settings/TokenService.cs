@@ -4,6 +4,7 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using UzonMail.CorePlugin.Config;
 using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Service;
 using UzonMail.Utils.Web.Token;
 
@@ -16,7 +17,7 @@ namespace UzonMail.CorePlugin.Services.Settings
     /// <param name="appConfig"></param>
     public class TokenService(
         IHttpContextAccessor httpContextAccessor,
-        IOptions<AppConfig> appConfig
+        IAppOptions<AppOptions> appConfig
     ) : IScopedService
     {
         private HttpRequest Request => httpContextAccessor.HttpContext.Request;

@@ -1,9 +1,10 @@
+using UzonMail.Utils.Web.Configs;
+
 namespace UzonMail.CorePlugin.Services.SendCore.Runtime;
 
+[OptionName("SendCore:Quota")]
 public sealed class SendingQuotaOptions
 {
-    public const string SectionName = "SendCore:Quota";
-
     public int SystemHardLimit { get; set; } = 64;
 
     public int OrganizationFairShare { get; set; } = 16;

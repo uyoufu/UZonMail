@@ -18,7 +18,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
     /// </summary>
     public class MsGraphParamsResolver : ITransientService
     {
-        private MicrosoftEntraAppConfig _msEntraApp = new();
+        private MicrosoftEntraAppOptions _msEntraApp = new();
 
         public MsGraphParamsResolver(IConfiguration configuration)
         {

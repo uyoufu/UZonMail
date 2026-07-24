@@ -1,6 +1,6 @@
 namespace UzonMail.CorePlugin.Config.SubConfigs
 {
-    public class MicrosoftEntraAppConfig
+    public class MicrosoftEntraAppOptions
     {
         /// <summary>
         /// Microsoft Entra 应用程序 ID

@@ -161,7 +161,7 @@ namespace UzonMail.CorePlugin.Database.Initializers
                     IsHidden = true,
                 };
 
-                var userConfig = config.GetConfig<UserConfig>();
+                var userConfig = config.GetConfig<UserOptions>();
                 // 从配置中读取超管的信息
                 if (userConfig.AdminUser != null)
                 {
@@ -242,7 +242,7 @@ namespace UzonMail.CorePlugin.Database.Initializers
             if (existDefaultFileBucket)
                 return;
 
-            var fileStorage = config.GetConfig<FileStorageConfig>();
+            var fileStorage = config.GetConfig<FileStorageOptions>();
 
             // 新建
             var defaultBucket = new FileBucket

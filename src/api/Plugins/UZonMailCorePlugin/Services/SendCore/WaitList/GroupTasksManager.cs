@@ -7,6 +7,7 @@ using UzonMail.CorePlugin.Services.SendCore.Runtime;
 using UzonMail.DB.Extensions;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.SendCore.WaitList
@@ -38,7 +39,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
     public class GroupTasksManager(
         UserGroupTasksPools userTasksPools,
         SqlContext sqlContext,
-        IOptions<SendingQuotaOptions> quotaOptions
+        IAppOptions<SendingQuotaOptions> quotaOptions
     ) : IScopedService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasksManager));

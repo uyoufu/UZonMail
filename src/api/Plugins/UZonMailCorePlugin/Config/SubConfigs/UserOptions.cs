@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UzonMail.CorePlugin.Config.SubConfigs
 {
-    public class UserConfig
+    public class UserOptions
     {
         public string CachePath { get; set; }
 

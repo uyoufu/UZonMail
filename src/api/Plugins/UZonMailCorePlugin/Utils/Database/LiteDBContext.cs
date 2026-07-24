@@ -13,7 +13,7 @@ namespace UzonMail.CorePlugin.Utils.Database
         : LiteRepository(
             new ConnectionString()
             {
-                Filename = configuration.GetValue<string>(DatabaseConfig.GetLiteDbPathConfigKey()),
+                Filename = configuration.GetValue<string>(DatabaseOptions.GetLiteDbPathConfigKey()),
                 Upgrade = true
             },
             new SMEBsonMapper()

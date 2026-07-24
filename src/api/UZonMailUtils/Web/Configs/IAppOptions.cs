@@ -1,6 +1,6 @@
 namespace UzonMail.Utils.Web.Configs
 {
-    public interface IAppSettings<T>
+    public interface IAppOptions<T>
     {
         public T Value { get; }
     }

@@ -81,11 +81,14 @@ namespace UzonMail.CorePlugin.Services.SendCore
 
             var sendingContext = serviceProvider.GetRequiredService<SendingContext>();
             await waitList.AddSendingGroup(sendingContext, sendingGroup, sendItemIds);
+
+            // TODO: 今后可以从缓存中获取
             var organizationId = await db
                 .Users.AsNoTracking()
                 .Where(x => x.Id == sendingGroup.UserId)
                 .Select(x => x.OrganizationId)
                 .FirstOrDefaultAsync();
+
             workerCoordinator.RegisterTenant(sendingGroup.UserId, organizationId);
             await workerCoordinator.StartSendingAsync();
         }

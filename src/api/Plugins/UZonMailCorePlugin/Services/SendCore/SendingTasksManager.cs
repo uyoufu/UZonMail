@@ -6,7 +6,7 @@ using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Runtime;
-using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.SendCore;
@@ -23,7 +23,6 @@ public sealed class SendingTasksManager
     private static readonly ILog Logger = LogManager.GetLogger(typeof(SendingTasksManager));
     private readonly IServiceProvider _provider;
     private readonly OutboxesManager _outboxesManager;
-    private readonly UserGroupTasksPools _groupPools;
     private readonly SendingQuotaOptions _quotas;
     private readonly ConcurrentDictionary<OutboxKey, WorkerInfo> _workers = [];
     private readonly ConcurrentDictionary<long, long> _userOrganizations = [];
@@ -41,13 +40,11 @@ public sealed class SendingTasksManager
     public SendingTasksManager(
         IServiceProvider provider,
         OutboxesManager outboxesManager,
-        UserGroupTasksPools groupPools,
-        IOptions<SendingQuotaOptions> quotas
+        IAppOptions<SendingQuotaOptions> quotas
     )
     {
         _provider = provider;
         _outboxesManager = outboxesManager;
-        _groupPools = groupPools;
         _quotas = quotas.Value;
         _quotas.Validate();
         _dispatcher = DispatchLoopAsync(_shutdown.Token);
@@ -96,7 +93,6 @@ public sealed class SendingTasksManager
                 .ToDictionary(x => x.Key, x => x.Count());
             var candidate = _outboxesManager
                 .Values.Where(x => !x.ShouldDispose)
-                .Where(CanDispatch)
                 .Where(x => !_workers.ContainsKey(new OutboxKey(x.UserId, x.Id)))
                 .OrderBy(x =>
                     GetCount(activeByOrganization, GetOrganizationId(x.UserId))
@@ -141,7 +137,6 @@ public sealed class SendingTasksManager
         if (!await startGate)
             return;
         Logger.Info($"开始执行发件任务: {key} {outbox.Email}");
-        Contexts.SendingContext? activeContext = null;
         try
         {
             while (!cancellationToken.IsCancellationRequested && !outbox.ShouldDispose)
@@ -150,20 +145,17 @@ public sealed class SendingTasksManager
                 var sendingContext = scope
                     .ServiceProvider.GetRequiredService<Contexts.SendingContext>()
                     .SetOutbox(outbox);
-                activeContext = sendingContext;
                 var pipeline = scope.ServiceProvider.GetRequiredService<ISendingPipeline>();
                 await pipeline.Handle(sendingContext);
                 if (sendingContext.ShouldExitTask())
                     break;
                 if (sendingContext.EmailItem is null)
-                    break;
+                    await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (Exception exception)
         {
-            if (activeContext?.EmailItem is { } item)
-                activeContext.GroupTask?.ReleaseEmailItem(item);
             Logger.Error($"发件箱 {key} 发件任务异常终止", exception);
         }
         finally
@@ -192,7 +184,4 @@ public sealed class SendingTasksManager
 
     private long GetOrganizationId(long userId) =>
         _userOrganizations.TryGetValue(userId, out var organizationId) ? organizationId : 0;
-
-    private bool CanDispatch(OutboxEmailAddress outbox) =>
-        _groupPools.TryGetValue(outbox.UserId, out var pool) && pool.MatchReadyEmailItem(outbox);
 }

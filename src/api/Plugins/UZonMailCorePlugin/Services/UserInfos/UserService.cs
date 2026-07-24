@@ -14,6 +14,7 @@ using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Organization;
 using UzonMail.DB.SQL.Core.Permission;
 using UzonMail.Utils.Extensions;
+using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Exceptions;
 using UzonMail.Utils.Web.PagingQuery;
 using UzonMail.Utils.Web.Service;
@@ -27,7 +28,7 @@ namespace UzonMail.CorePlugin.Services.UserInfos
     public class UserService(
         IServiceProvider serviceProvider,
         SqlContext db,
-        IOptions<AppConfig> appConfig,
+        IAppOptions<AppOptions> appConfig,
         PermissionService permission,
         PluginService pluginService,
         TokenService tokenService,

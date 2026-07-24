@@ -22,7 +22,7 @@ namespace UzonMail.CorePlugin.Controllers.AICopilot
         SqlContext db,
         TokenService tokenService,
         AiCopilotService aiCopilot,
-        IAppSettings<AiPrompts> systemPrompts,
+        IAppOptions<AiPrompts> systemPrompts,
         ILogger<EmailCopilotController> logger
     ) : ControllerBaseV1
     {

@@ -36,7 +36,7 @@ namespace UzonMail.Utils.Web.Configs
             return typeName!;
         }
 
-        [GeneratedRegex("Config$", RegexOptions.IgnoreCase)]
+        [GeneratedRegex("Options$", RegexOptions.IgnoreCase)]
         private static partial Regex TrimEndConfigRegex();
     }
 }
