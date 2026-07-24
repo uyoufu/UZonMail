@@ -32,8 +32,6 @@ namespace UzonMail.DB.Managers.Cache
             SetDirty();
         }
 
-        public User? UserInfo { get; private set; }
-
         /// <summary>
         /// 用户 id
         /// </summary>

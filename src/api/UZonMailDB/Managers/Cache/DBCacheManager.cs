@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using log4net;
 using UzonMail.DB.SQL;
 
 namespace UzonMail.DB.Managers.Cache
@@ -12,16 +11,21 @@ namespace UzonMail.DB.Managers.Cache
     /// </summary>
     public class DBCacheManager
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(DBCacheManager));
-        private static readonly Lazy<DBCacheManager> _instance = new(() => new DBCacheManager());
+        private static class CacheContainer<TKey, TResult>
+            where TResult : IDBCache, new()
+            where TKey : notnull
+        {
+            // 这里的 Value 直接就是 TResult，不再是 IDBCache 接口
+            public static readonly ConcurrentDictionary<TKey, TResult> Dictionary = [];
+        }
+
+        public static readonly Lazy<DBCacheManager> _instance = new(() => new DBCacheManager());
 
         /// <summary>
         /// 全局缓存管理器
         /// 需要自己处理更新
         /// </summary>
         public static DBCacheManager Global => _instance.Value;
-
-        private readonly ConcurrentDictionary<DBCacheKey, IDBCache> _settingsDic = [];
 
         /// <summary>
         /// 获取完整的 Key
@@ -41,18 +45,20 @@ namespace UzonMail.DB.Managers.Cache
             where TResult : BaseDBCache<TSqlContext, TArg>, new()
         {
             var cacheKey = GetDbCacheKey<TResult, TArg>(arg);
-            if (!_settingsDic.TryGetValue(cacheKey, out var value))
-            {
-                BaseDBCache<TSqlContext, TArg> newValue = new TResult();
-                newValue.SetParams(arg);
-                _settingsDic.TryAdd(cacheKey, newValue);
+            var value = CacheContainer<DBCacheKey, TResult>.Dictionary.GetOrAdd(
+                cacheKey,
+                (key) =>
+                {
+                    var newValue = new TResult();
+                    newValue.SetParams(arg);
+                    return newValue;
+                }
+            );
 
-                value = newValue;
-            }
             // 调用进行更新
             // 若不存在，或者数据为 dirty 时，才会触发。
-            await (value as TResult)!.TryUpdate(db);
-            return (TResult)value;
+            await value.TryUpdate(db);
+            return value;
         }
 
         /// <summary>
@@ -120,7 +126,9 @@ namespace UzonMail.DB.Managers.Cache
             where TResult : IDBCache, new()
         {
             var cacheKey = GetDbCacheKey<TResult, TArg>(arg);
-            if (!_settingsDic.TryGetValue(cacheKey, out var value))
+            if (
+                !CacheContainer<DBCacheKey, TResult>.Dictionary.TryGetValue(cacheKey, out var value)
+            )
                 return false;
 
             value.SetDirty();
