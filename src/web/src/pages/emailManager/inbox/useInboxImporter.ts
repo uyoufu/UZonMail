@@ -32,7 +32,7 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
           placeholder: translateInboxManager('importFromTxtPlaceholder'),
           value: '',
           required: true,
-          disableAutogrow: true
+          disableAutoGrow: true
         }
       ]
     }

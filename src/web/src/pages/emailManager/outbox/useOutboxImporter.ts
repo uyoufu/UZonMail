@@ -36,7 +36,7 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
           placeholder: '每行一个发件箱',
           value: '',
           required: true,
-          disableAutogrow: true
+          disableAutoGrow: true
         }
       ]
     }

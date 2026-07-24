@@ -20,7 +20,7 @@
 
           <q-input v-if="isMatchedType(field, ['textarea'])" outlined class="q-mb-sm low-code__field q-px-sm"
             :class="field.classes" standout dense v-model="fieldsModel[field.name]" type="textarea"
-            :autogrow="!field.disableAutogrow" :label="field.label" :disable="field.disable"
+            :autogrow="!field.disableAutoGrow" :label="field.label" :disable="field.disable"
             :placeholder="field.placeholder || '按 Enter 可换行'">
             <template v-if="field.icon" v-slot:prepend>
               <q-icon :name="field.icon" />

@@ -42,7 +42,7 @@ export interface IPopupDialogField {
   visible?: ((allValues: Record<string, any>) => boolean) | boolean, // 若存在，则 true 显示，否则隐藏
   tooltip?: Array<any> | ((params?: object) => Promise<string[]>) | string, // 提示
   disable?: boolean, // 是否禁用，一般用于仅显示数据,
-  disableAutogrow?: boolean, // 当为 textarea 时，是否自动增长
+  disableAutoGrow?: boolean, // 当为 textarea 时，是否自动增长
   classes?: string, // 自定义样式
 }
 
