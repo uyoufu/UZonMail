@@ -1,7 +1,7 @@
 import type { IApiApiAccess } from 'src/api/pro/apiAccess'
 import { upsertApiAccess, deleteApiAccessData } from 'src/api/pro/apiAccess'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { confirmOperation, notifySuccess, showDialog, showHtmlDialog } from 'src/utils/dialog'
 import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
@@ -31,7 +31,7 @@ export function useApiAccessContext (addNewRow: addNewRowType, deleteRowById: de
         {
           name: 'expireDate',
           label: '过期时间',
-          type: PopupDialogFieldType.datetimeLocal,
+          type: LowCodeFieldType.datetimeLocal,
           required: true,
           value: apiAccess?.expireDate || '',
           disable: !!apiAccess,
@@ -60,7 +60,7 @@ export function useApiAccessContext (addNewRow: addNewRowType, deleteRowById: de
         {
           name: 'enable',
           label: '启用',
-          type: PopupDialogFieldType.boolean,
+          type: LowCodeFieldType.boolean,
           value: apiAccess?.enable || true,
         }
       ]

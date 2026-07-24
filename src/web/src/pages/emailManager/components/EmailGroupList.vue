@@ -136,7 +136,7 @@ const filteredItems = computed(() => {
 import type { IEmailGroup } from 'src/api/emailGroup'
 import { getEmailGroups, createEmailCroup, updateEmailCroup, deleteEmailGroupById } from 'src/api/emailGroup'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 onMounted(async () => {
@@ -176,20 +176,20 @@ async function onCreateEmailGroup () {
         name: 'name',
         label: translateEmailGroup('field_name'),
         value: '',
-        type: PopupDialogFieldType.text,
+        type: LowCodeFieldType.text,
         required: true
       },
       {
         name: 'description',
         label: translateEmailGroup('field_description'),
         value: '',
-        type: PopupDialogFieldType.textarea
+        type: LowCodeFieldType.textarea
       },
       {
         name: 'order',
         label: translateEmailGroup('field_order'),
         value: groupItems.value.length + 1,
-        type: PopupDialogFieldType.text
+        type: LowCodeFieldType.text
       }
     ],
     oneColumn: true
@@ -244,14 +244,14 @@ async function modifyGroup (emailGroup: Record<string, any>) {
         name: 'name',
         label: translateEmailGroup('field_name'),
         value: typedEmailGroup.label,
-        type: PopupDialogFieldType.text,
+        type: LowCodeFieldType.text,
         required: true
       },
       {
         name: 'description',
         label: translateEmailGroup('field_description'),
         value: typedEmailGroup.description,
-        type: PopupDialogFieldType.textarea
+        type: LowCodeFieldType.textarea
       },
       {
         name: 'order',
@@ -268,7 +268,7 @@ async function modifyGroup (emailGroup: Record<string, any>) {
           }
           return { ok: true }
         },
-        type: PopupDialogFieldType.text
+        type: LowCodeFieldType.text
       }
     ],
     oneColumn: true

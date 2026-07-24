@@ -1,6 +1,6 @@
 
 import type { IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types';
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import dayjs from 'dayjs'
 
 import { getUsableProxies } from 'src/api/proxy'
@@ -29,14 +29,14 @@ export async function getCrawlerTaskFields (): Promise<IPopupDialogField[]> {
   return [
     {
       name: 'name',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: '任务名称',
       value: '',
       required: true
     },
     {
       name: 'type',
-      type: PopupDialogFieldType.selectOne,
+      type: LowCodeFieldType.selectOne,
       label: '爬虫类型',
       value: 0,
       options: [
@@ -52,7 +52,7 @@ export async function getCrawlerTaskFields (): Promise<IPopupDialogField[]> {
     },
     {
       name: 'tikTokDeviceId',
-      type: PopupDialogFieldType.selectOne,
+      type: LowCodeFieldType.selectOne,
       label: '设备',
       value: 0,
       options: allDevices,
@@ -68,7 +68,7 @@ export async function getCrawlerTaskFields (): Promise<IPopupDialogField[]> {
     },
     {
       name: 'proxyId',
-      type: PopupDialogFieldType.selectOne,
+      type: LowCodeFieldType.selectOne,
       label: '代理',
       value: 0,
       options: proxies,
@@ -80,7 +80,7 @@ export async function getCrawlerTaskFields (): Promise<IPopupDialogField[]> {
     },
     {
       name: 'deadline',
-      type: PopupDialogFieldType.date,
+      type: LowCodeFieldType.date,
       label: '截止日期',
       value: dayjs().add(1, 'day').format('YYYY-MM-DD HH:mm:ss')
     }

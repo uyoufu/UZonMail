@@ -159,6 +159,7 @@ export function useReportContextMenu() {
 
 ## 国际化与多语言
 
+- 使用 src\i18n\helpers.ts 中的 t 函数进行多语言翻译
 - 多语言字段名按模块、页面、组件组织，例如 `loginPage.title`、`routes.title`、`components.tableExample.title` 等。
 - 禁止读取、编辑 `src/i18n/locales/` 目录下的文件，新增、更新、删除多语言字段应使用 `scripts/upsert_i18n.js` 脚本完成
 - 单条更新：`bun run i18n:upsert -- --key loginPage.title --zh-CN "标题" --en-US "Title"`

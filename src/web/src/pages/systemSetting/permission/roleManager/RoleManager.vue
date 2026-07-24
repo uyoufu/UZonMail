@@ -101,7 +101,7 @@ const { pagination, rows, filter, onTableRequest, loading, addNewRow, deleteRowB
 // #region 新增
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import type { IPopupDialogParams } from 'src/components/lowCode/types';
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 async function onCreateRole () {
   // 创建新建弹窗
@@ -135,7 +135,7 @@ async function getPopupDialogParams (roleData?: IRole) {
       // {
       //   name: 'icon',
       //   label: '图标',
-      //   type: PopupDialogFieldType.text,
+      //   type: LowCodeFieldType.text,
       //   required: true,
       //   value: roleData ? roleData.icon : 'supervised_user_circle',
       //   placeholder: '图标名称, 请从 https://fonts.google.com/icons 中选择'
@@ -143,14 +143,14 @@ async function getPopupDialogParams (roleData?: IRole) {
       {
         name: 'description',
         label: '描述',
-        type: PopupDialogFieldType.textarea,
+        type: LowCodeFieldType.textarea,
         required: false,
         value: roleData ? roleData.description : ''
       },
       {
         name: 'permissionCodeIds',
         label: '权限码',
-        type: PopupDialogFieldType.selectMany,
+        type: LowCodeFieldType.selectMany,
         options: permissionCodes.value,
         optionLabel: 'code',
         optionTooltip: 'description',

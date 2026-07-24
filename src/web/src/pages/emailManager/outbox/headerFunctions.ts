@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import type { IOnSetupParams, IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { IOutbox } from 'src/api/emailBox'
@@ -96,7 +96,7 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
   return [
     {
       name: 'type',
-      type: PopupDialogFieldType.selectOne,
+      type: LowCodeFieldType.selectOne,
       options: enumEntries(OutboxType).map(([key, value]) => ({
         label: key,
         value: value
@@ -109,21 +109,21 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
     },
     {
       name: 'email',
-      type: PopupDialogFieldType.email,
+      type: LowCodeFieldType.email,
       label: translateOutboxManager('col_email'),
       value: '',
       required: true
     },
     {
       name: 'name',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: translateOutboxManager('col_outboxName'),
       value: ''
     },
     {
       name: 'smtpHost',
       label: translateOutboxManager('col_smtpHost'),
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       value: '',
       required: true,
       visible: isSmtp
@@ -131,14 +131,14 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
     {
       name: 'smtpPort',
       label: translateOutboxManager('col_smtpPort'),
-      type: PopupDialogFieldType.number,
+      type: LowCodeFieldType.number,
       value: 465,
       required: true,
       visible: isSmtp
     },
     {
       name: 'userName',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: translateOutboxManager('smtpUserName'),
       placeholder: translateOutboxManager('ifSameAsEmailUseEmpty'),
       value: '',
@@ -146,7 +146,7 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
     },
     {
       name: 'userName',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: translateOutboxManager('clientId'),
       placeholder: translateOutboxManager('clientIdPlaceholder'),
       value: '',
@@ -155,7 +155,7 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
     {
       name: 'password',
       label: translateOutboxManager('smtpPassword'),
-      type: PopupDialogFieldType.password,
+      type: LowCodeFieldType.password,
       // validate: (value: any, parsedValue: any, allValues: Record<string, any>) => {
       //   if (isMsGraphOutbox(allValues as IOutbox)) {
       //     // 如果是 Outlook 邮箱，则允许为空
@@ -176,7 +176,7 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
       name: 'password',
       label: translateOutboxManager('refreshToken'),
       placeholder: translateOutboxManager('refreshTokenPlaceholder'),
-      type: PopupDialogFieldType.password,
+      type: LowCodeFieldType.password,
       value: '',
       visible: isMsGraph
     },
@@ -187,7 +187,7 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
     {
       name: 'proxyId',
       label: translateOutboxManager('col_proxy'),
-      type: PopupDialogFieldType.selectOne,
+      type: LowCodeFieldType.selectOne,
       value: 0,
       placeholder: translateOutboxManager('ifEmptyProxyUseSystemSettings'),
       options: proxyOptions,
@@ -204,7 +204,7 @@ export async function getOutboxFields (): Promise<IPopupDialogField[]> {
     {
       name: 'connectionSecurity',
       label: translateOutboxManager('col_connectionSecurity'),
-      type: PopupDialogFieldType.selectOne,
+      type: LowCodeFieldType.selectOne,
       options: secureSocketOptions,
       emitValue: true,
       value: ConnectionSecurity.SSL,

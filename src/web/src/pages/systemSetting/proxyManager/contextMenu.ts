@@ -7,7 +7,7 @@ import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { getCommonProxyFields } from './headerFuncs'
 import type { IPopupDialogParams } from 'src/components/lowCode/types';
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 
 import { useUserInfoStore } from 'src/stores/user'
@@ -63,7 +63,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void) {
     // 添加启用功能
     fields.push({
       name: 'isActive',
-      type: PopupDialogFieldType.boolean,
+      type: LowCodeFieldType.boolean,
       label: '是否启用',
       tooltip: '启用后代理开始生效',
       value: false

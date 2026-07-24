@@ -3,7 +3,7 @@
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import { notifyError } from 'src/utils/dialog'
 import * as XLSX from 'xlsx'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import CryptoJS from 'crypto-js'
 import type { IProgressOptions } from 'src/compositions/useProgress'
 import { useNotifyProgress } from 'src/compositions/useProgress'
@@ -199,7 +199,7 @@ export async function readExcelCore(
       fields: [
         {
           name: 'sheetName',
-          type: PopupDialogFieldType.selectOne,
+          type: LowCodeFieldType.selectOne,
           label: translateUtils('file_pleaseSelectWorksheet'),
           value: workbook.SheetNames[0],
           options: workbook.SheetNames

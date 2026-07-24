@@ -188,7 +188,7 @@ const attachmentCtxMenuItems: IContextMenuItem[] = [
 import { useConfig } from 'src/config'
 import { getFileReaderId, getFileStreamByReaderId } from 'src/api/fileReader'
 import { saveFileSmart } from 'src/utils/file'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 const config = useConfig()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onDownloadAttachment (row: Record<string, any>) {
@@ -235,7 +235,7 @@ async function renameAttachment (row: Record<string, any>) {
       {
         name: 'displayName',
         label: '原文件名',
-        type: PopupDialogFieldType.text,
+        type: LowCodeFieldType.text,
         required: true,
         value: row.displayName || row.fileName,
         disable: true
@@ -243,7 +243,7 @@ async function renameAttachment (row: Record<string, any>) {
       {
         name: 'newDisplayName',
         label: '新文件名',
-        type: PopupDialogFieldType.text,
+        type: LowCodeFieldType.text,
         required: true,
         value: row.displayName || row.fileName
       }

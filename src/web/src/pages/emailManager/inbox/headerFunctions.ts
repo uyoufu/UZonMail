@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import type { IEmailGroupListItem } from '../components/types'
 
 import type { addNewRowType } from 'src/compositions/qTableUtils'
@@ -20,19 +20,19 @@ export function getInboxFields () {
   return [
     {
       name: 'email',
-      type: PopupDialogFieldType.email,
+      type: LowCodeFieldType.email,
       label: translateInboxManager('col_email'),
       value: '',
       required: true
     },
     {
       name: 'name',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: translateInboxManager('col_inboxName'),
     },
     {
       name: 'minInboxCooldownHours',
-      type: PopupDialogFieldType.number,
+      type: LowCodeFieldType.number,
       label: translateInboxManager('col_minInboxCooldownHours'),
       value: 0
     },

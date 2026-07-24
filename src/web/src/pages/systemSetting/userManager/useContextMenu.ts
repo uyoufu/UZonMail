@@ -2,7 +2,7 @@
 import { checkUserId, createUser, getDefaultPassword, resetUserPassword, setUserType, setUserStatus } from 'src/api/user'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { UserStatus, UserType } from 'src/stores/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { usePermission } from 'src/compositions/permission'
@@ -123,7 +123,7 @@ export function useContextMenu (addNewRow: (newRow: Record<string, any>) => void
         {
           name: 'userId',
           label: '用户名',
-          type: PopupDialogFieldType.text,
+          type: LowCodeFieldType.text,
           required: true,
           placeholder: '请输入用户名,请仅用英文字母',
           // eslint-disable-next-line @typescript-eslint/require-await
@@ -137,7 +137,7 @@ export function useContextMenu (addNewRow: (newRow: Record<string, any>) => void
         {
           name: 'password',
           label: '初始密码',
-          type: PopupDialogFieldType.text,
+          type: LowCodeFieldType.text,
           required: true,
           placeholder: '请输入初始密码',
           // eslint-disable-next-line @typescript-eslint/require-await

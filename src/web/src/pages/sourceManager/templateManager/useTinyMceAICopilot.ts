@@ -1,6 +1,6 @@
 
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { translateAI } from 'src/i18n/helpers'
 import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import { generateEmailBody, enhanceEmailBody } from 'src/api/aiCopilot'
@@ -18,7 +18,7 @@ export function useTinyMceAICopilot (tinymceEditorValueRef: Ref<string>) {
         {
           name: 'prompt',
           label: translateAI('prompt'),
-          type: PopupDialogFieldType.textarea,
+          type: LowCodeFieldType.textarea,
           required: true
         }
       ]

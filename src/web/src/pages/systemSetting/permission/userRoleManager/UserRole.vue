@@ -31,7 +31,7 @@ import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import type { IPopupDialogParams} from 'src/components/lowCode/types';
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 
 import type { IRole, IUserRole} from 'src/api/permission';
 import { getAllRoles, getUserRolesCount, getUserRolesData, upsertUserRole, deleteUserRoles } from 'src/api/permission'
@@ -127,7 +127,7 @@ async function getPopupDialogParams (userRole?: IUserRole) {
     fields: [{
       name: 'userId',
       label: '用户名',
-      type: PopupDialogFieldType.selectOne,
+      type: LowCodeFieldType.selectOne,
       required: true,
       value: userRole?.userId || '',
       options: users.value,
@@ -139,7 +139,7 @@ async function getPopupDialogParams (userRole?: IUserRole) {
     }, {
       name: 'roles',
       label: '角色',
-      type: PopupDialogFieldType.selectMany,
+      type: LowCodeFieldType.selectMany,
       required: true,
       options: roles.value,
       optionLabel: 'name',

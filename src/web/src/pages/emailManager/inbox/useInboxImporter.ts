@@ -1,5 +1,5 @@
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import type { IEmailGroupListItem } from '../components/types'
 
@@ -28,7 +28,7 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
         {
           name: 'text',
           label: translateInboxManager('inboxText'),
-          type: PopupDialogFieldType.textarea,
+          type: LowCodeFieldType.textarea,
           placeholder: translateInboxManager('importFromTxtPlaceholder'),
           value: '',
           required: true,

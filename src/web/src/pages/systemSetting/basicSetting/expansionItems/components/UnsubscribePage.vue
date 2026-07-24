@@ -83,7 +83,7 @@ import { notifySuccess, showComponentDialog, showDialog } from 'src/utils/dialog
 
 import { translations } from 'src/i18n'
 import type { IPopupDialogParams} from 'src/components/lowCode/types';
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import UnsubscribePageDialog from 'src/pages/unsubscribe/UnsubscribePageDialog.vue'
 
 function getPopupParams (data: IUnsubscribePage | null = null) {
@@ -95,7 +95,7 @@ function getPopupParams (data: IUnsubscribePage | null = null) {
       {
         name: 'language',
         label: '语言',
-        type: PopupDialogFieldType.selectOne,
+        type: LowCodeFieldType.selectOne,
         options: translations.map(x => ({ label: x.label, value: x.locale })),
         required: true,
         emitValue: true,
@@ -105,7 +105,7 @@ function getPopupParams (data: IUnsubscribePage | null = null) {
       {
         name: 'htmlContent',
         label: 'HTML内容',
-        type: PopupDialogFieldType.editor,
+        type: LowCodeFieldType.editor,
         required: true,
         value: data?.htmlContent
       }

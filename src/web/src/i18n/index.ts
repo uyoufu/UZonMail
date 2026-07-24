@@ -1,4 +1,3 @@
-
 import enUS from './locales/en-US'
 import zhCN from './locales/zh-CN'
 
@@ -9,7 +8,7 @@ export type Translation = {
 export interface ITranslation {
   locale: string
   label: string
-  translation: Translation,
+  translation: Translation
 }
 
 const translations: ITranslation[] = [
@@ -25,12 +24,12 @@ const translations: ITranslation[] = [
   }
 ]
 
-const messages = translations.reduce((acc, cur) => {
-  acc[cur.locale] = cur.translation
-  return acc
-}, {} as Record<string, Translation>)
+const messages = translations.reduce(
+  (acc, cur) => {
+    acc[cur.locale] = cur.translation
+    return acc
+  },
+  {} as Record<string, Translation>
+)
 
-export {
-  messages,
-  translations
-}
+export { messages, translations }

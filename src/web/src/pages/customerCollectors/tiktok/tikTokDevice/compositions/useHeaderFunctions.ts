@@ -1,6 +1,6 @@
 
 import type { IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types';
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 
 import { notifySuccess, showDialog } from 'src/utils/dialog'
 import type { addNewRowType } from 'src/compositions/qTableUtils'
@@ -20,12 +20,12 @@ export function getTikTokDeviceInfoFields (): IPopupDialogField[] {
     },
     {
       name: 'deviceId',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: '设备ID (device_id)'
     },
     {
       name: 'odinId',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: 'TikTok广告ID (odinId)'
     }
   ]

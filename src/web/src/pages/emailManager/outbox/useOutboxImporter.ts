@@ -1,5 +1,5 @@
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import { useI18n } from 'vue-i18n'
 import type { IEmailGroupListItem } from '../components/types'
@@ -32,7 +32,7 @@ export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewR
         {
           name: 'text',
           label: '发件箱文本',
-          type: PopupDialogFieldType.textarea,
+          type: LowCodeFieldType.textarea,
           placeholder: '每行一个发件箱',
           value: '',
           required: true,

@@ -1,7 +1,7 @@
 import type { IJsVariableSource } from "src/api/pro/jsVariable"
 import type { IContextMenuItem } from "src/components/contextMenu/types"
 import type { IPopupDialogParams } from "src/components/lowCode/types"
-import { PopupDialogFieldType } from "src/components/lowCode/types"
+import { LowCodeFieldType } from "src/components/lowCode/types"
 import { notifySuccess, showDialog } from "src/utils/dialog"
 
 import { upsertJsVariableSource, deleteJsVariableSourcesData } from 'src/api/pro/jsVariable'
@@ -69,7 +69,7 @@ export function useDataSourceContext (addNewRow: addNewRowType,
           name: 'value',
           label: '数据源',
           tooltip: ['格式:', '1. 可以是单个值', '2. 可以是数组, 以 [ 开头, 以 ] 结尾', '3. 可以是对象, 以 { 开头, 以 } 结尾'],
-          type: PopupDialogFieldType.textarea,
+          type: LowCodeFieldType.textarea,
           value: dataSource ? JSON.stringify(dataSource.value, null, 2) : '',
           required: true,
           parser: (value: string) => {

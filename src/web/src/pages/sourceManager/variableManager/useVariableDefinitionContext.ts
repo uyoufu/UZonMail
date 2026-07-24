@@ -1,6 +1,6 @@
 import type { IContextMenuItem } from "src/components/contextMenu/types"
 import type { IPopupDialogParams } from "src/components/lowCode/types"
-import { PopupDialogFieldType } from "src/components/lowCode/types"
+import { LowCodeFieldType } from "src/components/lowCode/types"
 import { notifySuccess, showDialog } from "src/utils/dialog"
 
 import type { IJsFunctionDefinition } from 'src/api/pro/jsFunctionDefinition';
@@ -88,7 +88,7 @@ export function useVariableDefinitionContext (addNewRow: addNewRowType,
           name: 'functionBody',
           label: '表达式',
           tooltip: ['表达式为 JavaScript 代码块', '系统数据通过 uzonData 变量访问'],
-          type: PopupDialogFieldType.textarea,
+          type: LowCodeFieldType.textarea,
           value: data?.functionBody || '',
           required: true
         }

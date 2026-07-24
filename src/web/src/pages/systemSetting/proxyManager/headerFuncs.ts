@@ -3,7 +3,7 @@ import type { IProxy } from 'src/api/proxy';
 import { validateProxyName, createProxy, updateProxySharedStatus } from 'src/api/proxy'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import type { IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types';
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
 
@@ -28,7 +28,7 @@ export function getCommonProxyFields (): IPopupDialogField[] {
   return [
     {
       name: 'name',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: '名称',
       placeholder: '代理的唯一标识，需要保证唯一',
       value: '',
@@ -36,7 +36,7 @@ export function getCommonProxyFields (): IPopupDialogField[] {
     },
     {
       name: 'url',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       label: '代理地址',
       placeholder: '格式：schema://username:password@host',
       tooltip: ['代理格式:', 'schema://username:password@host', '支持的协议: http, https, socks5, socks4'],
@@ -73,14 +73,14 @@ export function getCommonProxyFields (): IPopupDialogField[] {
     {
       name: 'matchRegex',
       label: '匹配规则',
-      type: PopupDialogFieldType.text,
+      type: LowCodeFieldType.text,
       placeholder: '使用正则表达式进行匹配',
       value: '.*'
     },
     {
       name: 'priority',
       label: '优先级',
-      type: PopupDialogFieldType.number,
+      type: LowCodeFieldType.number,
       placeholder: '数字越大优先级越高',
       value: 0
     },
@@ -109,7 +109,7 @@ export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => 
     if (userInfo.isAdmin) {
       fields.push({
         name: 'isShared',
-        type: PopupDialogFieldType.boolean,
+        type: LowCodeFieldType.boolean,
         label: '是否共享',
         tooltip: '共享后,其它用户可以使用该代理',
         value: false

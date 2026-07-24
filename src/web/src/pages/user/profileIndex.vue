@@ -55,7 +55,7 @@ const userRole = computed(() => {
  * 修改密码
  */
 import { showDialog, showComponentDialog } from 'src/components/lowCode/PopupDialog'
-import { PopupDialogFieldType } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { notifySuccess } from 'src/utils/dialog'
 async function onChangeUserPassword () {
   const result = await showDialog({
@@ -64,14 +64,14 @@ async function onChangeUserPassword () {
       {
         name: 'oldPassword',
         label: '旧密码',
-        type: PopupDialogFieldType.text,
+        type: LowCodeFieldType.text,
         placeholder: '请输入旧密码',
         value: ''
       },
       {
         name: 'newPassword',
         label: '新密码',
-        type: PopupDialogFieldType.password,
+        type: LowCodeFieldType.password,
         placeholder: '请输入新密码',
         value: ''
       }
