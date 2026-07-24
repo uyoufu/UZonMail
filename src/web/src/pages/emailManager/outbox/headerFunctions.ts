@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { showDialog } from 'src/components/lowCode/PopupDialog'
-import type { IOnSetupParams, IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types'
+import type { IOnSetupParams, ILowCodeField, IPopupDialogParams } from 'src/components/lowCode/types'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import type { IEmailGroupListItem } from '../components/types'
 
@@ -67,7 +67,7 @@ export function isMsGraphOutbox (outbox: IOutbox): boolean {
  * 获取发件箱字段
  * @returns
  */
-export async function getOutboxFields (): Promise<IPopupDialogField[]> {
+export async function getOutboxFields (): Promise<ILowCodeField[]> {
   // 获取所有的代理
   const { data: proxyOptions } = await getUsableProxies()
   proxyOptions.unshift({

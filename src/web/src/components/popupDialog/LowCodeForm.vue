@@ -158,13 +158,13 @@ const props = defineProps({
 
 // 是否为匹配到的类型
 const commonInputTypes = ["text", "email", "search", "tel", "file", "number", "url", "time", "date", "datetime-local"]
-function isMatchedType (field: IPopupDialogField, types: string | string[]): boolean {
+function isMatchedType(field: IPopupDialogField, types: string | string[]): boolean {
   if (Array.isArray(types)) return types.includes(field.type as string)
   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   return field.type === types
 }
 
-function getContainerClass () {
+function getContainerClass() {
   return {
     'low-code__container_1': props.oneColumn,
     'low-code__container_2': !props.oneColumn,
@@ -175,7 +175,7 @@ function getContainerClass () {
 
 // #region 编辑器
 // 编辑器配置
-import { useWysiwygEditor } from 'src/pages/sourceManager/templateManager/compositions'
+import { useWysiwygEditor } from '../lowCode/useWysiwygEditor'
 const { editorDefinitions, editorToolbar } = useWysiwygEditor()
 // #endregion
 
@@ -185,7 +185,7 @@ const { fields, dataSet } = toRefs(props)
 const dataSetRef: Ref<Record<string, any>> = ref({})
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fieldsModel: Ref<Record<string, any>> = ref({})
-async function pullDateSet () {
+async function pullDateSet() {
   // 获取数据源
   for (const key of Object.keys(dataSet.value)) {
     const value = dataSet.value[key]
@@ -199,7 +199,7 @@ async function pullDateSet () {
     }
   }
 }
-function initFieldsModel () {
+function initFieldsModel() {
   // 生成初始值
   for (const field of fields.value) {
     // 根据不同的类型，生成不同的初始值
@@ -258,7 +258,7 @@ const validFields = computed(() => {
 // import logger from 'loglevel'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getSelectionItemLabel (itemProps: any, opt: any, field: IPopupDialogField) {
+function getSelectionItemLabel(itemProps: any, opt: any, field: IPopupDialogField) {
   const labelField = field.optionLabel || 'label'
 
   if (!field || !opt) return opt
@@ -267,7 +267,7 @@ function getSelectionItemLabel (itemProps: any, opt: any, field: IPopupDialogFie
   return opt[labelField]
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getSelectionItemTooltip (itemProps: any, opt: any, field: IPopupDialogField) {
+function getSelectionItemTooltip(itemProps: any, opt: any, field: IPopupDialogField) {
   // logger.debug('[lowCode] getSelectionItemTooltip:', opt, field)
   if (!field || !field.optionTooltip || !opt) return ''
   if (typeof opt !== 'object') return opt
@@ -292,7 +292,7 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 
 // ok 逻辑
 const okBtnLoading = ref(false)
-async function onOKClick () {
+async function onOKClick() {
   okBtnLoading.value = true
   try {
     // 验证单个值
@@ -355,7 +355,7 @@ async function onOKClick () {
 // #endregion
 
 // #region 自定义按钮
-async function onCustomBottonClicked (btn: ICustomPopupButton) {
+async function onCustomBottonClicked(btn: ICustomPopupButton) {
   // 调用
   if (typeof btn.onClick !== 'function') {
     notifyError('自定义按钮没有注册 onClick 函数')
@@ -376,7 +376,7 @@ if (props.onSetup) {
 // #endregion
 
 // #region Enter 快捷键
-async function onEnterKeyPress (event: KeyboardEvent) {
+async function onEnterKeyPress(event: KeyboardEvent) {
   // 如果 target 是 textArea，则不处理
   if (event.target && (event.target as HTMLElement).nodeName === 'TEXTAREA') {
     return

@@ -1,5 +1,5 @@
 
-import type { IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types';
+import type { ILowCodeField, IPopupDialogParams } from 'src/components/lowCode/types';
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import dayjs from 'dayjs'
 
@@ -10,7 +10,7 @@ import { getAllUserTikTokDevices } from 'src/api/pro/tikTokDevice'
 import { notifySuccess, showDialog } from 'src/utils/dialog'
 import type { addNewRowType } from 'src/compositions/qTableUtils'
 
-export async function getCrawlerTaskFields (): Promise<IPopupDialogField[]> {
+export async function getCrawlerTaskFields (): Promise<ILowCodeField[]> {
   // 获取用户的代理
   const { data: proxies } = await getUsableProxies()
   proxies.unshift({

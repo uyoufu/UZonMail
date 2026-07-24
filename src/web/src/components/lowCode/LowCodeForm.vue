@@ -61,6 +61,12 @@
           :class="[fieldClass, field.classes]" dense keep-color v-model="fieldsModel[field.name]" :label="field.label">
           <AsyncTooltip anchor="bottom left" self="top start" :tooltip="field.tooltip" />
         </q-checkbox>
+
+        <div v-if="isMatchedType(field, 'editor')" class="q-mb-sm low-code__field q-px-sm" :class="field.classes">
+          <q-editor v-model="fieldsModel[field.name]" :definitions="editorDefinitions" :toolbar="editorToolbar"
+            max-height="300px" placeholder="在此处输入模板内容, 变量使用 {{ }} 号包裹, 例如 {{ variableName }}">
+          </q-editor>
+        </div>
       </template>
     </div>
 
@@ -178,6 +184,11 @@ function isMatchedType(field: ILowCodeField, types: string | string[]): boolean 
 //     column: props.oneColumn
 //   }
 // }
+// #endregion
+
+// #region 编辑器
+import { useWysiwygEditor } from './useWysiwygEditor'
+const { editorDefinitions, editorToolbar } = useWysiwygEditor()
 // #endregion
 
 // #region 数据初始化

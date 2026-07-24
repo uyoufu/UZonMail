@@ -2,7 +2,7 @@
 import type { IProxy } from 'src/api/proxy';
 import { validateProxyName, createProxy, updateProxySharedStatus } from 'src/api/proxy'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
-import type { IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types';
+import type { ILowCodeField, IPopupDialogParams } from 'src/components/lowCode/types';
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
@@ -24,7 +24,7 @@ function canParseUrl (urlStr: string) {
 }
 if (!URL.canParse) URL.canParse = canParseUrl
 
-export function getCommonProxyFields (): IPopupDialogField[] {
+export function getCommonProxyFields (): ILowCodeField[] {
   return [
     {
       name: 'name',

@@ -1,5 +1,5 @@
 
-import type { IPopupDialogField, IPopupDialogParams } from 'src/components/lowCode/types';
+import type { ILowCodeField, IPopupDialogParams } from 'src/components/lowCode/types';
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 
 import { notifySuccess, showDialog } from 'src/utils/dialog'
@@ -7,7 +7,7 @@ import type { addNewRowType } from 'src/compositions/qTableUtils'
 import type { ITikTokDevice } from 'src/api/pro/tikTokDevice';
 import { createTikTokDevice } from 'src/api/pro/tikTokDevice'
 
-export function getTikTokDeviceInfoFields (): IPopupDialogField[] {
+export function getTikTokDeviceInfoFields (): ILowCodeField[] {
   return [
     {
       name: 'name',
