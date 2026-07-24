@@ -20,13 +20,14 @@ public sealed class SendingTasksManager
 {
     private sealed record WorkerInfo(long OrganizationId, long UserId, Task Task);
 
-    private static readonly ILog Logger = LogManager.GetLogger(typeof(SendingTasksManager));
+    private static readonly ILog _logger = LogManager.GetLogger(typeof(SendingTasksManager));
     private readonly IServiceProvider _provider;
     private readonly OutboxesManager _outboxesManager;
     private readonly SendingQuotaOptions _quotas;
+    private readonly FairSendingTaskSelector _taskSelector = new();
     private readonly ConcurrentDictionary<OutboxKey, WorkerInfo> _workers = [];
     private readonly ConcurrentDictionary<long, long> _userOrganizations = [];
-    private readonly Channel<bool> _wakeups = Channel.CreateBounded<bool>(
+    private readonly Channel<bool> _wakeUps = Channel.CreateBounded<bool>(
         new BoundedChannelOptions(1)
         {
             FullMode = BoundedChannelFullMode.DropWrite,
@@ -60,7 +61,7 @@ public sealed class SendingTasksManager
     public Task StartSendingAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        _wakeups.Writer.TryWrite(true);
+        _wakeUps.Writer.TryWrite(true);
         return Task.CompletedTask;
     }
 
@@ -68,62 +69,96 @@ public sealed class SendingTasksManager
     {
         try
         {
-            while (await _wakeups.Reader.WaitToReadAsync(cancellationToken))
+            while (await _wakeUps.Reader.WaitToReadAsync(cancellationToken))
             {
-                while (_wakeups.Reader.TryRead(out _)) { }
+                while (_wakeUps.Reader.TryRead(out _)) { }
                 DispatchAvailableWorkers(cancellationToken);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (Exception exception)
         {
-            Logger.Error("发件调度器异常退出", exception);
+            _logger.Error("发件调度器异常退出", exception);
         }
     }
 
     private void DispatchAvailableWorkers(CancellationToken cancellationToken)
     {
-        while (_workers.Count < _quotas.SystemHardLimit)
-        {
-            var activeByOrganization = _workers
-                .Values.GroupBy(x => x.OrganizationId)
-                .ToDictionary(x => x.Key, x => x.Count());
-            var activeByUser = _workers
-                .Values.GroupBy(x => x.UserId)
-                .ToDictionary(x => x.Key, x => x.Count());
-            var candidate = _outboxesManager
-                .Values.Where(x => !x.ShouldDispose)
-                .Where(x => !_workers.ContainsKey(new OutboxKey(x.UserId, x.Id)))
-                .OrderBy(x =>
-                    GetCount(activeByOrganization, GetOrganizationId(x.UserId))
-                    >= _quotas.OrganizationFairShare
-                )
-                .ThenBy(x => GetCount(activeByUser, x.UserId) >= _quotas.UserFairShare)
-                .ThenBy(x => GetCount(activeByOrganization, GetOrganizationId(x.UserId)))
-                .ThenBy(x => GetCount(activeByUser, x.UserId))
-                .ThenBy(x => x.CreateDate)
-                .FirstOrDefault();
-            if (candidate is null || !candidate.TryMarkTaskRunning())
-                return;
+        var workerSnapshot = _workers.ToArray();
+        var maxSelections = _quotas.SystemHardLimit - workerSnapshot.Length;
+        if (maxSelections <= 0)
+            return;
 
-            var key = new OutboxKey(candidate.UserId, candidate.Id);
+        var activeKeys = workerSnapshot.Select(pair => pair.Key).ToHashSet();
+        var outboxSnapshot = _outboxesManager.Values;
+        var organizations = new Dictionary<long, long>();
+        var availableOutboxes = new Dictionary<OutboxKey, OutboxEmailAddress>(outboxSnapshot.Count);
+        var candidates = new List<SendingTaskCandidate>(outboxSnapshot.Count);
+        foreach (var outbox in outboxSnapshot)
+        {
+            var key = new OutboxKey(outbox.UserId, outbox.Id);
+            if (outbox.ShouldDispose || activeKeys.Contains(key))
+                continue;
+
+            if (!organizations.TryGetValue(outbox.UserId, out var organizationId))
+            {
+                organizationId = GetOrganizationId(outbox.UserId);
+                organizations.Add(outbox.UserId, organizationId);
+            }
+
+            availableOutboxes.Add(key, outbox);
+            candidates.Add(
+                new SendingTaskCandidate(key, organizationId, outbox.UserId, outbox.CreateDate)
+            );
+        }
+
+        var snapshot = new SendingDispatchSnapshot(
+            candidates,
+            workerSnapshot
+                .Select(pair => new SendingWorkerAllocation(
+                    pair.Value.OrganizationId,
+                    pair.Value.UserId
+                ))
+                .ToArray(),
+            maxSelections,
+            _quotas.OrganizationFairShare,
+            _quotas.UserFairShare
+        );
+        var selectionCycle = _taskSelector.CreateCycle(snapshot);
+
+        while (selectionCycle.TryReserveNext(out var selected))
+        {
+            if (
+                !availableOutboxes.TryGetValue(selected.Key, out var candidate)
+                || !candidate.TryMarkTaskRunning()
+            )
+            {
+                selectionCycle.Reject(selected.Key);
+                return;
+            }
+
             var startGate = new TaskCompletionSource<bool>(
                 TaskCreationOptions.RunContinuationsAsynchronously
             );
-            var task = RunWorkerAsync(key, candidate, startGate.Task, cancellationToken);
-            var worker = new WorkerInfo(
-                GetOrganizationId(candidate.UserId),
-                candidate.UserId,
-                task
-            );
-            if (_workers.TryAdd(key, worker))
+            var task = RunWorkerAsync(selected.Key, candidate, startGate.Task, cancellationToken);
+            var worker = new WorkerInfo(selected.OrganizationId, selected.UserId, task);
+            if (_workers.TryAdd(selected.Key, worker))
             {
-                startGate.SetResult(true);
+                try
+                {
+                    selectionCycle.Commit(selected.Key);
+                }
+                finally
+                {
+                    startGate.SetResult(true);
+                }
                 continue;
             }
 
             candidate.MarkTaskStopped();
+            selectionCycle.Reject(selected.Key);
             startGate.SetResult(false);
+            return;
         }
     }
 
@@ -136,7 +171,7 @@ public sealed class SendingTasksManager
     {
         if (!await startGate)
             return;
-        Logger.Info($"开始执行发件任务: {key} {outbox.Email}");
+        _logger.Info($"开始执行发件任务: {key} {outbox.Email}");
         try
         {
             while (!cancellationToken.IsCancellationRequested && !outbox.ShouldDispose)
@@ -156,19 +191,19 @@ public sealed class SendingTasksManager
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (Exception exception)
         {
-            Logger.Error($"发件箱 {key} 发件任务异常终止", exception);
+            _logger.Error($"发件箱 {key} 发件任务异常终止", exception);
         }
         finally
         {
             outbox.MarkTaskStopped();
             _workers.TryRemove(key, out _);
-            _wakeups.Writer.TryWrite(true);
+            _wakeUps.Writer.TryWrite(true);
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        _wakeups.Writer.TryComplete();
+        _wakeUps.Writer.TryComplete();
         await _shutdown.CancelAsync();
         try
         {
@@ -178,9 +213,6 @@ public sealed class SendingTasksManager
         catch (OperationCanceledException) { }
         _shutdown.Dispose();
     }
-
-    private static int GetCount(Dictionary<long, int> counts, long key) =>
-        counts.TryGetValue(key, out var count) ? count : 0;
 
     private long GetOrganizationId(long userId) =>
         _userOrganizations.TryGetValue(userId, out var organizationId) ? organizationId : 0;
