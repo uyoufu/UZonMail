@@ -10,11 +10,13 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
     /// 先添加的任务先发送
     /// </summary>
     /// <param name="userId"></param>
-    public class UserGroupTasksPool(long userId)
+    /// <param name="groupFairShare">单组公平份额，不是硬上限。</param>
+    public class UserGroupTasksPool(long userId, int groupFairShare)
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(UserGroupTasksPool));
         private readonly ConcurrentDictionary<long, GroupTask> _tasks = [];
         private readonly ConcurrentQueue<long> _taskOrder = [];
+        private readonly SemaphoreSlim _activationLock = new(1, 1);
 
         /// <summary>
         /// 用户 id
@@ -36,25 +38,27 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             List<long>? sendingItemIds = null
         )
         {
-            // 有可能发件组已经存在
-            if (!TryGetValue(sendingGroupId, out var existTask))
+            await _activationLock.WaitAsync();
+            try
             {
-                // 重新初始化
-                // 添加到列表
+                if (TryGetValue(sendingGroupId, out var existTask))
+                    return await existTask.InitSendingItems(scopeServices, sendingItemIds);
+
                 var newTask = await GroupTask.Create(scopeServices, sendingGroupId);
                 if (newTask == null)
                     return false;
 
-                // 初始化发件项，可能只发送部分邮件
                 var success = await newTask.InitSendingItems(scopeServices, sendingItemIds);
-                if (!success)
+                if (!success || !TryAdd(sendingGroupId, newTask))
+                {
+                    newTask.Close();
                     return false;
-                return TryAdd(sendingGroupId, newTask);
+                }
+                return true;
             }
-            else
+            finally
             {
-                // 复用原来的数据
-                return await existTask.InitSendingItems(scopeServices, sendingItemIds);
+                _activationLock.Release();
             }
         }
 
@@ -64,12 +68,23 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// <returns></returns>
         public async Task<SendItemMeta?> GetEmailItem(SendingContext context)
         {
-            // 依次获取发件项
-            foreach (var sendingGroupId in _taskOrder)
+            var candidates = _taskOrder
+                .Select((groupId, order) => new { GroupId = groupId, Order = order })
+                .Where(x => _tasks.ContainsKey(x.GroupId))
+                .Select(x => new
+                {
+                    x.GroupId,
+                    x.Order,
+                    Task = _tasks[x.GroupId],
+                })
+                .OrderBy(x => x.Task.ActiveCount >= groupFairShare)
+                .ThenBy(x => x.Task.ActiveCount)
+                .ThenBy(x => x.Order)
+                .ToList();
+
+            foreach (var candidate in candidates)
             {
-                if (!_tasks.TryGetValue(sendingGroupId, out var groupTask))
-                    continue;
-                var result = await groupTask.GetEmailItem(context);
+                var result = await candidate.Task.GetEmailItem(context);
                 if (result != null)
                     return result;
             }
@@ -95,10 +110,18 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             return false;
         }
 
+        public bool MatchReadyEmailItem(OutboxEmailAddress outbox)
+        {
+            return outbox.UserId == UserId
+                && _tasks.Values.Any(task => task.MatchReadyEmailItem(outbox));
+        }
+
         #region 实现 ConcurrentDictionary 需要的接口
         public bool IsEmpty => _tasks.IsEmpty;
 
         public int Count => _tasks.Count;
+
+        public IReadOnlyList<GroupTask> GetTasks() => [.. _tasks.Values];
 
         public bool TryAdd(long key, GroupTask value)
         {
@@ -119,7 +142,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             if (!_tasks.TryRemove(key, out value))
                 return false;
 
-            // 添加到消息队列，对消息进行处理
+            value.Close();
 
             return true;
         }

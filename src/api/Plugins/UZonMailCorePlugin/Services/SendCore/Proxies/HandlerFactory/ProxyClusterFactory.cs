@@ -8,7 +8,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.HandlerFactory
     /// </summary>
     public abstract class ProxyClusterFactory : IProxyFactory
     {
+        public abstract string Kind { get; }
+
         public int Order => 0;
+
+        public abstract bool CanHandle(Uri uri);
 
         public abstract Task<IProxyHandler?> CreateProxy(
             IServiceProvider serviceProvider,

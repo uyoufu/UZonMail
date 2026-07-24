@@ -1,116 +1,198 @@
+using System.Collections.Concurrent;
+using System.Threading.Channels;
 using log4net;
+using Microsoft.Extensions.Options;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.Runtime;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.Utils.Web.Service;
 
-namespace UzonMail.CorePlugin.Services.SendCore
+namespace UzonMail.CorePlugin.Services.SendCore;
+
+public sealed class SendingTasksManager
+    : ISendingTasksManager,
+        ISendingWorkerCoordinator,
+        ISingletonService<ISendingTasksManager>,
+        ISingletonService<ISendingWorkerCoordinator>,
+        IAsyncDisposable
 {
-    /// <summary>
-    /// 发件箱任务管理器
-    /// 每个发件箱对应一个任务
-    /// </summary>
-    public class SendingTasksManager(IServiceProvider provider, OutboxesManager outboxesManager)
-        : ISendingTasksManager,
-            ISendingWorkerCoordinator,
-            ISingletonService<ISendingTasksManager>,
-            ISingletonService<ISendingWorkerCoordinator>
-    {
-        private readonly ILog _logger = LogManager.GetLogger(typeof(SendingTasksManager));
-        private readonly Lock _lockObj = new();
+    private sealed record WorkerInfo(long OrganizationId, long UserId, Task Task);
 
-        /// <summary>
-        /// 发件任务数量
-        /// </summary>
-        private int _runningTasksCount = 0;
-        public int RunningTasksCount => _runningTasksCount;
-
-        /// <summary>
-        /// 启动发件任务
-        /// </summary>
-        public Task StartSendingAsync(CancellationToken cancellationToken = default)
+    private static readonly ILog Logger = LogManager.GetLogger(typeof(SendingTasksManager));
+    private readonly IServiceProvider _provider;
+    private readonly OutboxesManager _outboxesManager;
+    private readonly UserGroupTasksPools _groupPools;
+    private readonly SendingQuotaOptions _quotas;
+    private readonly ConcurrentDictionary<OutboxKey, WorkerInfo> _workers = [];
+    private readonly ConcurrentDictionary<long, long> _userOrganizations = [];
+    private readonly Channel<bool> _wakeups = Channel.CreateBounded<bool>(
+        new BoundedChannelOptions(1)
         {
-            lock (_lockObj)
-            {
-                // 获取所有的邮箱组
-                var outboxes = outboxesManager.Values.ToList();
-                foreach (var outbox in outboxes)
-                {
-                    if (outbox.ShouldDispose)
-                        continue;
-                    if (!outbox.TryMarkTaskRunning())
-                        continue;
-
-                    // 启动任务
-                    _ = Task.Run(async () =>
-                    {
-                        await StartSendingWorkTask(outbox, cancellationToken);
-                    });
-                }
-            }
-
-            return Task.CompletedTask;
+            FullMode = BoundedChannelFullMode.DropWrite,
+            SingleReader = true,
+            SingleWriter = false,
         }
+    );
+    private readonly CancellationTokenSource _shutdown = new();
+    private readonly Task _dispatcher;
 
-        /// <summary>
-        /// 开始任务
-        /// 以发件箱的数据为索引进行发件，提高发件箱利用率
-        /// </summary>
-        /// <param name="tokenSource"></param>
-        /// <returns></returns>
-        private async Task StartSendingWorkTask(
-            OutboxEmailAddress outbox,
-            CancellationToken cancellationToken
-        )
+    public SendingTasksManager(
+        IServiceProvider provider,
+        OutboxesManager outboxesManager,
+        UserGroupTasksPools groupPools,
+        IOptions<SendingQuotaOptions> quotas
+    )
+    {
+        _provider = provider;
+        _outboxesManager = outboxesManager;
+        _groupPools = groupPools;
+        _quotas = quotas.Value;
+        _quotas.Validate();
+        _dispatcher = DispatchLoopAsync(_shutdown.Token);
+    }
+
+    public int RunningTasksCount => _workers.Count;
+
+    public void RegisterTenant(long userId, long organizationId)
+    {
+        _userOrganizations[userId] = organizationId;
+    }
+
+    public Task StartSendingAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        _wakeups.Writer.TryWrite(true);
+        return Task.CompletedTask;
+    }
+
+    private async Task DispatchLoopAsync(CancellationToken cancellationToken)
+    {
+        try
         {
-            // 生成 task 的 scope
-            Interlocked.Increment(ref _runningTasksCount);
-
-            _logger.Info($"线程 {Environment.CurrentManagedThreadId} 开始执行发件任务: {outbox.Email}");
-            try
+            while (await _wakeups.Reader.WaitToReadAsync(cancellationToken))
             {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    // 在每次循环中，生成新的数据库上下文, 确保 scoped 服务（如 SqlContext）为本次迭代新实例
-                    // 后期若有据性能问题，可以动态调整创建频率
-                    await using var scope = provider.CreateAsyncScope();
-                    var iterationProvider = scope.ServiceProvider;
-
-                    var sendingContext = iterationProvider
-                        .GetRequiredService<Contexts.SendingContext>()
-                        .SetOutbox(outbox);
-
-                    var pipeline = iterationProvider.GetRequiredService<ISendingPipeline>();
-                    await pipeline.Handle(sendingContext);
-
-                    // 根据返回值，判断线程是否需要继续
-                    if (sendingContext.ShouldExitTask())
-                    {
-                        _logger.Info(
-                            $"发件任务执行异常，线程 {Environment.CurrentManagedThreadId} 结束 {outbox.Email} 发件任务"
-                        );
-                        break;
-                    }
-
-                    // 若发件箱被标记为释放，则结束任务
-                    if (outbox.ShouldDispose)
-                    {
-                        _logger.Info(
-                            $"发件箱已标记为释放，线程 {Environment.CurrentManagedThreadId} 结束 {outbox.Email} 发件任务"
-                        );
-                        break;
-                    }
-                }
+                while (_wakeups.Reader.TryRead(out _)) { }
+                DispatchAvailableWorkers(cancellationToken);
             }
-            catch (Exception ex)
-            {
-                _logger.Error($"发件箱 {outbox.Email} 发件任务异常终止: {ex.Message}", ex);
-            }
-            finally
-            {
-                // 结束后，清除任务 ID
-                outbox.MarkTaskStopped();
-                Interlocked.Add(ref _runningTasksCount, -1);
-            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        catch (Exception exception)
+        {
+            Logger.Error("发件调度器异常退出", exception);
         }
     }
+
+    private void DispatchAvailableWorkers(CancellationToken cancellationToken)
+    {
+        while (_workers.Count < _quotas.SystemHardLimit)
+        {
+            var activeByOrganization = _workers
+                .Values.GroupBy(x => x.OrganizationId)
+                .ToDictionary(x => x.Key, x => x.Count());
+            var activeByUser = _workers
+                .Values.GroupBy(x => x.UserId)
+                .ToDictionary(x => x.Key, x => x.Count());
+            var candidate = _outboxesManager
+                .Values.Where(x => !x.ShouldDispose)
+                .Where(CanDispatch)
+                .Where(x => !_workers.ContainsKey(new OutboxKey(x.UserId, x.Id)))
+                .OrderBy(x =>
+                    GetCount(activeByOrganization, GetOrganizationId(x.UserId))
+                    >= _quotas.OrganizationFairShare
+                )
+                .ThenBy(x => GetCount(activeByUser, x.UserId) >= _quotas.UserFairShare)
+                .ThenBy(x => GetCount(activeByOrganization, GetOrganizationId(x.UserId)))
+                .ThenBy(x => GetCount(activeByUser, x.UserId))
+                .ThenBy(x => x.CreateDate)
+                .FirstOrDefault();
+            if (candidate is null || !candidate.TryMarkTaskRunning())
+                return;
+
+            var key = new OutboxKey(candidate.UserId, candidate.Id);
+            var startGate = new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously
+            );
+            var task = RunWorkerAsync(key, candidate, startGate.Task, cancellationToken);
+            var worker = new WorkerInfo(
+                GetOrganizationId(candidate.UserId),
+                candidate.UserId,
+                task
+            );
+            if (_workers.TryAdd(key, worker))
+            {
+                startGate.SetResult(true);
+                continue;
+            }
+
+            candidate.MarkTaskStopped();
+            startGate.SetResult(false);
+        }
+    }
+
+    private async Task RunWorkerAsync(
+        OutboxKey key,
+        OutboxEmailAddress outbox,
+        Task<bool> startGate,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!await startGate)
+            return;
+        Logger.Info($"开始执行发件任务: {key} {outbox.Email}");
+        Contexts.SendingContext? activeContext = null;
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested && !outbox.ShouldDispose)
+            {
+                await using var scope = _provider.CreateAsyncScope();
+                var sendingContext = scope
+                    .ServiceProvider.GetRequiredService<Contexts.SendingContext>()
+                    .SetOutbox(outbox);
+                activeContext = sendingContext;
+                var pipeline = scope.ServiceProvider.GetRequiredService<ISendingPipeline>();
+                await pipeline.Handle(sendingContext);
+                if (sendingContext.ShouldExitTask())
+                    break;
+                if (sendingContext.EmailItem is null)
+                    break;
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        catch (Exception exception)
+        {
+            if (activeContext?.EmailItem is { } item)
+                activeContext.GroupTask?.ReleaseEmailItem(item);
+            Logger.Error($"发件箱 {key} 发件任务异常终止", exception);
+        }
+        finally
+        {
+            outbox.MarkTaskStopped();
+            _workers.TryRemove(key, out _);
+            _wakeups.Writer.TryWrite(true);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _wakeups.Writer.TryComplete();
+        await _shutdown.CancelAsync();
+        try
+        {
+            await _dispatcher;
+            await Task.WhenAll(_workers.Values.Select(x => x.Task));
+        }
+        catch (OperationCanceledException) { }
+        _shutdown.Dispose();
+    }
+
+    private static int GetCount(Dictionary<long, int> counts, long key) =>
+        counts.TryGetValue(key, out var count) ? count : 0;
+
+    private long GetOrganizationId(long userId) =>
+        _userOrganizations.TryGetValue(userId, out var organizationId) ? organizationId : 0;
+
+    private bool CanDispatch(OutboxEmailAddress outbox) =>
+        _groupPools.TryGetValue(outbox.UserId, out var pool) && pool.MatchReadyEmailItem(outbox);
 }

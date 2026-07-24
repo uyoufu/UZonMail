@@ -140,6 +140,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// </summary>
         public bool ShouldDispose { get; private set; } = false;
 
+        public bool IsPermanentlyInvalid { get; private set; }
+
         /// <summary>
         /// 工作中
         /// 当没有发送目标后，working 为 false
@@ -296,6 +298,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         {
             ErroredMessage = erroredMessage;
             ShouldDispose = true;
+        }
+
+        public void MarkInvalid(string errorMessage)
+        {
+            IsPermanentlyInvalid = true;
+            MarkShouldDispose(errorMessage);
         }
 
         private int _isRunningInTask = 0;

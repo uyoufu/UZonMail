@@ -5,6 +5,7 @@ using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.SignalRHubs.Extensions;
 using UzonMail.CorePlugin.SignalRHubs.SendEmail;
 using UzonMail.DB.Extensions;
+using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
 
 namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
@@ -14,9 +15,24 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
     {
         protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
+            if (context.OutboxFailureHandled)
+                return HandlerResult.Skiped();
+
             var outbox = context.OutboxAddress;
             if (outbox != null && outbox.ShouldDispose)
             {
+                context.OutboxFailureHandled = true;
+                if (outbox.IsPermanentlyInvalid)
+                {
+                    await context.SqlContext.Outboxes.UpdateAsync(
+                        x => x.Id == outbox.Id,
+                        x =>
+                            x.SetProperty(y => y.IsValid, false)
+                                .SetProperty(y => y.Status, OutboxStatus.Invalid)
+                                .SetProperty(y => y.ValidFailReason, outbox.ErroredMessage)
+                    );
+                }
+
                 // 从发件箱池中移除
                 outboxManager.RemoveOutbox(outbox, outbox.ErroredMessage);
 
@@ -24,6 +40,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 // 1. 特定发件箱，移除特定邮件
                 // 2. 共享发件箱，判断是否还有多余的发件箱，若没有，则整体移除
                 await RemoveLinkingGroups(context, outbox);
+
+                var emailItem = context.EmailItem;
+                context.CanRetryAfterOutboxFailure =
+                    emailItem is not null
+                    && emailItem.OutboxId <= 0
+                    && outboxManager.ExistValidOutbox(emailItem.SendingItem.SendingGroupId);
             }
 
             return HandlerResult.Success();

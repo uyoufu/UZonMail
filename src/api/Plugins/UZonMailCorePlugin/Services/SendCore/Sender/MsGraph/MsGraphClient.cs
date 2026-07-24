@@ -139,7 +139,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
             string email,
             string username,
             string password,
-            long userId,
+            long outboxId,
             SqlContext db
         )
         {
@@ -162,7 +162,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 AuthenticationResult.RefreshToken
             );
             await db.Outboxes.UpdateAsync(
-                x => x.UserId == userId && x.Email == email,
+                x => x.Id == outboxId,
                 x => x.SetProperty(y => y.Password, encryptedPassword)
             );
         }

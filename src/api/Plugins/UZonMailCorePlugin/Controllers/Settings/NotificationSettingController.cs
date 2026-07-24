@@ -72,11 +72,13 @@ namespace UzonMail.CorePlugin.Controllers.Settings
                 ConnectionSecurity = smtpSettings.ConnectionSecurity
             };
             // 开始验证
-            var result = await emailSender.TestOutbox(serviceProvider, outbox);
+            var result = await emailSender.ValidateAsync(serviceProvider, outbox);
 
             // 验证通过后，更新数据库
-            smtpSettings.IsValid = result.Ok;
-            smtpSettings.Status = result.Ok ? AppSettingStatus.Enabled : AppSettingStatus.Ignored;
+            smtpSettings.IsValid = result.IsSuccess;
+            smtpSettings.Status = result.IsSuccess
+                ? AppSettingStatus.Enabled
+                : AppSettingStatus.Ignored;
 
             // 保存到数据库
             var newSetting = await settingService.UpdateAppSetting(smtpSettings, type: type);
@@ -84,7 +86,7 @@ namespace UzonMail.CorePlugin.Controllers.Settings
             // 更新缓存
             await settingsManager.ResetSetting<SmtpNotificationSetting>(newSetting, db);
 
-            if (!result.Ok)
+            if (!result.IsSuccess)
                 return false.ToFailResponse(result.Message);
             else
                 return true.ToSuccessResponse();

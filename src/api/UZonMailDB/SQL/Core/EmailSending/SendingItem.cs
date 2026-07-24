@@ -149,6 +149,15 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         public void Configure(EntityTypeBuilder<SendingItem> builder)
         {
             builder.HasMany(x => x.Attachments).WithMany();
+            builder
+                .HasIndex(x => new
+                {
+                    x.SendingGroupId,
+                    x.Status,
+                    x.OutBoxId,
+                    x.Id
+                })
+                .HasDatabaseName("IX_SendingItems_Group_Status_Outbox_Id");
         }
     }
 }

@@ -1,98 +1,63 @@
 using System.Collections.Concurrent;
-using log4net;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.Utils.Web.Service;
 
-namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
+namespace UzonMail.CorePlugin.Services.SendCore.Outboxes;
+
+public sealed class OutboxesManager : ISingletonService
 {
-    /// <summary>
-    /// 发件箱管理器
-    /// </summary>
-    public class OutboxesManager
-        : ConcurrentDictionary<string, OutboxEmailAddress>,
-            ISingletonService
+    private readonly ConcurrentDictionary<OutboxKey, OutboxEmailAddress> _outboxes = [];
+
+    public IReadOnlyCollection<OutboxEmailAddress> Values => [.. _outboxes.Values];
+
+    public int Count => _outboxes.Count;
+
+    public void AddOutbox(OutboxEmailAddress outbox)
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(OutboxesManager));
-
-        /// <summary>
-        /// 添加发件箱
-        /// </summary>
-        /// <param name="outbox"></param>
-        public void AddOutbox(OutboxEmailAddress outbox)
-        {
-            if (this.TryGetValue(outbox.Email, out var existValue))
+        var key = GetKey(outbox);
+        _outboxes.AddOrUpdate(
+            key,
+            outbox,
+            (_, existing) =>
             {
-                existValue.Update(outbox);
-                return;
+                existing.Update(outbox);
+                return existing;
             }
-            // 新增
-            this.TryAdd(outbox.Email, outbox);
-        }
-
-        /// <summary>
-        /// 移除发件箱
-        /// </summary>
-        /// <param name="outbox"></param>
-        public bool RemoveOutbox(OutboxEmailAddress outbox, string message)
-        {
-            if (!this.TryRemove(outbox.Email, out _))
-            {
-                return false;
-            }
-
-            // 更新状态
-            outbox.MarkShouldDispose(message);
-            return true;
-        }
-
-        /// <summary>
-        /// 移除组对应的发件箱
-        /// </summary>
-        /// <returns></returns>
-        public List<OutboxEmailAddress> RemoveOutbox(long sendingGroupId, string message)
-        {
-            List<OutboxEmailAddress> removedResults = [];
-            var keys = this.Keys.ToList();
-            foreach (var email in keys)
-            {
-                if (!this.TryGetValue(email, out var outbox))
-                    continue;
-
-                outbox.RemoveSendingGroup(sendingGroupId);
-                // 说明还有其它任务在使用该发件箱，不能移除
-                if (outbox.IsWorking)
-                    continue;
-
-                // 移除
-                this.RemoveOutbox(outbox, message);
-                removedResults.Add(outbox);
-            }
-
-            return removedResults;
-        }
-
-        /// <summary>
-        /// 指定发件组是否存在发件箱
-        /// </summary>
-        /// <param name="sendingGroupId"></param>
-        /// <returns></returns>
-        public bool ExistValidOutbox(long sendingGroupId)
-        {
-            return this
-                .Values.Where(x => !x.ShouldDispose)
-                .Any(x => x.ContainsSendingGroup(sendingGroupId));
-        }
-
-        /// <summary>
-        /// 是否存在发作箱
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        public bool ExistValidOutbox(string email)
-        {
-            if (!this.TryGetValue(email, out var value))
-                return false;
-
-            return !value.ShouldDispose;
-        }
+        );
     }
+
+    public bool RemoveOutbox(OutboxEmailAddress outbox, string message)
+    {
+        if (!_outboxes.TryRemove(GetKey(outbox), out var removed))
+            return false;
+        removed.MarkShouldDispose(message);
+        return true;
+    }
+
+    public List<OutboxEmailAddress> RemoveOutbox(long sendingGroupId, string message)
+    {
+        List<OutboxEmailAddress> removedResults = [];
+        foreach (var pair in _outboxes.ToArray())
+        {
+            var outbox = pair.Value;
+            outbox.RemoveSendingGroup(sendingGroupId);
+            if (outbox.IsWorking)
+                continue;
+            if (!RemoveOutbox(outbox, message))
+                continue;
+            removedResults.Add(outbox);
+        }
+        return removedResults;
+    }
+
+    public bool ExistValidOutbox(long sendingGroupId) =>
+        _outboxes.Values.Any(x => !x.ShouldDispose && x.ContainsSendingGroup(sendingGroupId));
+
+    public bool ExistValidOutbox(OutboxKey key) =>
+        _outboxes.TryGetValue(key, out var outbox) && !outbox.ShouldDispose;
+
+    public bool ExistValidOutbox(string email) =>
+        _outboxes.Values.Any(x => x.Email == email && !x.ShouldDispose);
+
+    private static OutboxKey GetKey(OutboxEmailAddress outbox) => new(outbox.UserId, outbox.Id);
 }

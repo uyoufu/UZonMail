@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.SignalRHubs;
@@ -50,6 +51,16 @@ namespace UzonMail.CorePlugin.Services.SendCore.Contexts
         /// 发件项
         /// </summary>
         public SendItemMeta? EmailItem { get; set; }
+
+        public GroupTask? GroupTask { get; set; }
+
+        public TransportResult? TransportResult { get; set; }
+
+        public bool OutboxFailureHandled { get; set; }
+
+        public bool CanRetryAfterOutboxFailure { get; set; }
+
+        private bool ExitWorkerRequested { get; set; }
         #endregion
 
         #endregion
@@ -76,7 +87,13 @@ namespace UzonMail.CorePlugin.Services.SendCore.Contexts
         /// <returns></returns>
         public bool ShouldExitTask()
         {
-            return HandleResults.Any(result => result.ChainStatus == ChainStatus.ShouldExitTask);
+            return ExitWorkerRequested
+                || HandleResults.Any(result => result.ChainStatus == ChainStatus.ShouldExitTask);
+        }
+
+        public void RequestWorkerExit()
+        {
+            ExitWorkerRequested = true;
         }
         #endregion
     }

@@ -1,12 +1,17 @@
+using System.Collections.Concurrent;
 using log4net;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using UzonMail.CorePlugin.Services.Encrypt;
 using UzonMail.CorePlugin.Services.Encrypt.Models;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.EmailWaitList;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Proxies;
+using UzonMail.CorePlugin.Services.SendCore.Reading;
+using UzonMail.CorePlugin.Services.SendCore.Runtime;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.CorePlugin.SignalRHubs.Extensions;
@@ -28,10 +33,30 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
     /// </summary>
     /// <remarks>
     /// </remarks>
-    public class GroupTask(EncryptService encryptService) : ITransientService
+    public class GroupTask(
+        EncryptService encryptService,
+        ISendItemReaderPool readerPool,
+        ISendPayloadReader payloadReader,
+        ISendLeaseStore leaseStore,
+        ISendingWorkerCoordinator workerCoordinator,
+        IOptions<SendingQuotaOptions> quotaOptions,
+        TimeProvider timeProvider
+    ) : ITransientService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTask));
         private readonly SemaphoreSlim _initLock = new(1, 1);
+        private SendItemReaderSession? _reader;
+        private bool _startNotified;
+        private readonly ConcurrentDictionary<long, DelayedItem> _delayedItems = [];
+        private readonly CancellationTokenSource _lifetime = new();
+        private int _closed;
+
+        private sealed class DelayedItem(long outboxId, int triedCount)
+        {
+            public long OutboxId { get; } = outboxId;
+            public int TriedCount { get; } = triedCount;
+            public Task Task { get; set; } = Task.CompletedTask;
+        }
 
         /// <summary>
         /// 创建一个发件任务
@@ -91,7 +116,16 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 是否应该释放
         /// </summary>
-        public bool ShouldDispose => _sendingItemMetas.WaitSendingCount == 0;
+        public bool ShouldDispose =>
+            _sendingItemMetas.Count == 0
+            && _delayedItems.IsEmpty
+            && _reader is not { IsCompleted: false };
+
+        public int ReadyCount => _sendingItemMetas.WaitListCount;
+
+        public int ActiveCount => _sendingItemMetas.ActiveCount;
+
+        public int DelayedCount => _delayedItems.Count;
 
         /// <summary>
         /// 任务开始日期
@@ -134,13 +168,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
 
             // 将收件箱重置为空，方便垃圾回收
             sendingGroup.Inboxes = [];
-
-            // 正在发送时，不添加
-            if (sendingGroup.Status == SendingGroupStatus.Sending)
-            {
-                _logger.Error($"发件组 {SendingGroupId} 正在发送中");
-                return false;
-            }
 
             // 更新用户 id
             UserId = sendingGroup.UserId;
@@ -230,163 +257,149 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             try
             {
                 var sqlContext = sendingContext.Provider.GetRequiredService<SqlContext>();
-                // 获取待发件
-                var dbSet = sqlContext
-                    .SendingItems.AsNoTracking()
-                    .Where(x => x.SendingGroupId == SendingGroupId)
-                    .Where(x =>
-                        x.Status == SendingItemStatus.Created
-                        || x.Status == SendingItemStatus.Failed
-                    ); // 获取可发送项
-
-                if (sendingItemIds != null && sendingItemIds.Count > 0)
+                if (_reader == null)
                 {
-                    dbSet = dbSet.Where(x => sendingItemIds.Contains(x.Id));
+                    _reader = readerPool.Open(
+                        SendingGroupId,
+                        sendingItemIds,
+                        includePending: _sendingGroup.Status == SendingGroupStatus.Sending
+                    );
+                    await LoadNextPage(sendingContext);
                 }
-
-                // 只获取需要的数据，完整数据在执行过程中再次获取
-                List<SendingItem> toSendingItems = await dbSet
-                    .Select(x => new SendingItem()
+                else if (sendingItemIds is { Count: > 0 })
+                {
+                    // 运行中的部分重发来自显式 ID，本身已在请求内存中，按页读取即可。
+                    foreach (var ids in sendingItemIds.Distinct().Chunk(100))
                     {
-                        EmailTemplateId = x.EmailTemplateId,
-                        Id = x.Id,
-                        OutBoxId = x.OutBoxId,
-                        Inboxes = x.Inboxes,
-                        ProxyId = x.ProxyId
-                    })
-                    .ToListAsync();
-
-                // 去掉当前组中已经包含的项
-                var existIds = _sendingItemMetas.SendingItemIds.ToList();
-                toSendingItems = toSendingItems.Where(x => !existIds.Contains(x.Id)).ToList();
-
-                // 获取发件箱
-                HashSet<long> outboxIds =
-                [
-                    .. toSendingItems.Select(x => x.OutBoxId).Where(x => x > 0)
-                ];
-                var outboxes = await sqlContext
-                    .Outboxes.Where(x => outboxIds.Contains(x.Id))
-                    .ToListAsync();
-
-                // 对于找不到发件项的邮件，给予标记非法
-                var invalidSendingItemIds = toSendingItems
-                    .Where(x => x.OutBoxId > 0)
-                    .Where(x =>
-                    {
-                        var outbox = outboxes.FirstOrDefault(o => o.Id == x.OutBoxId);
-                        return outbox == null;
-                    })
-                    .Select(x => x.Id)
-                    .ToList();
-                if (invalidSendingItemIds.Count > 0)
-                {
-                    // 更新邮件状态
-                    await sqlContext.SendingItems.UpdateAsync(
-                        x => invalidSendingItemIds.Contains(x.Id),
-                        x =>
-                            x.SetProperty(y => y.Status, SendingItemStatus.Invalid)
-                                .SetProperty(y => y.SendDate, DateTime.UtcNow)
-                                .SetProperty(y => y.SendResult, "指定的发件箱已被删除")
-                    );
-
-                    // 过滤掉无效的发件箱项
-                    toSendingItems =
-                    [
-                        .. toSendingItems.FindAll(x => !invalidSendingItemIds.Contains(x.Id))
-                    ];
-                }
-
-                // 按注册的发件项过滤无效项
-                var sendingItemFilters = sendingContext.Provider.GetServices<ISendingItemFilter>();
-                var filteredInvalidIds = new List<long>();
-                foreach (var filter in sendingItemFilters)
-                {
-                    var filterInvalidIds = await filter.GetInvalidSendingItemIds(toSendingItems);
-                    filteredInvalidIds.AddRange(filterInvalidIds);
-                }
-                var filteredInvalidIdsSet = filteredInvalidIds.ToHashSet();
-                if (filteredInvalidIdsSet.Count > 0)
-                {
-                    await sqlContext.SendingItems.UpdateAsync(
-                        x => filteredInvalidIdsSet.Contains(x.Id),
-                        x =>
-                            x.SetProperty(y => y.Status, SendingItemStatus.Invalid)
-                                .SetProperty(y => y.SendDate, DateTime.UtcNow)
-                                .SetProperty(y => y.SendResult, "发件项过滤器判定为无效")
-                    );
-                    toSendingItems = toSendingItems.FindAll(x =>
-                        !filteredInvalidIdsSet.Contains(x.Id)
-                    );
-                }
-
-                // 更新待发件列表
-                // 由于初始化时，不是并发的，不需要加锁
-                var toSendingItemMetas = toSendingItems
-                    .Select(x => new SendItemMeta(x.Id, x.OutBoxId))
-                    .ToList();
-                _sendingItemMetas.AddRange(toSendingItemMetas);
-
-                // 添加代理和模板
-                foreach (var toSendingItem in toSendingItems)
-                {
-                    // 添加特定模板
-                    _usableTemplates.AddSendingItemTemplate(
-                        toSendingItem.Id,
-                        toSendingItem.EmailTemplateId
-                    );
-
-                    // 添加特定代理
-                    //_usableProxies.AddSendingItemProxy(toSendingItem.Id, toSendingItem.ProxyId);
+                        var descriptors = await sqlContext
+                            .SendingItems.AsNoTracking()
+                            .Where(x => x.SendingGroupId == SendingGroupId && ids.Contains(x.Id))
+                            .Where(x =>
+                                x.Status == SendingItemStatus.Created
+                                || x.Status == SendingItemStatus.Failed
+                            )
+                            .OrderBy(x => x.OutBoxId)
+                            .ThenBy(x => x.Id)
+                            .Select(x => new SendItemDescriptor(
+                                x.Id,
+                                x.SendingGroupId,
+                                x.OutBoxId,
+                                x.TriedCount
+                            ))
+                            .ToListAsync();
+                        await RegisterDescriptors(sendingContext, descriptors);
+                    }
                 }
 
                 // 更新当前发件组的数据
                 await UpdateSendingGroupInfo(sqlContext, SendingGroupId);
 
-                // 新增特定发件箱
-                var outboxesPoolList =
-                    sendingContext.Provider.GetRequiredService<OutboxesManager>();
-                foreach (var outbox in outboxes)
-                {
-                    // 获取收件项 Id
-                    var sendingItemIdsTemp = toSendingItems
-                        .Where(x => x.OutBoxId == outbox.Id)
-                        .Select(x => x.Id)
-                        .ToList();
-                    var outboxAddress = new OutboxEmailAddress(
-                        outbox,
-                        SendingGroupId,
-                        SmtpPasswordSecretKeys,
-                        OutboxEmailAddressType.Specific,
-                        sendingItemIdsTemp
-                    );
-                    outboxesPoolList.AddOutbox(outboxAddress);
-                }
-
-                // 将发件项修改为发送中
-                if (toSendingItems.Count > 0)
-                {
-                    await sqlContext.SendingItems.UpdateAsync(
-                        x => toSendingItems.Select(x => x.Id).Contains(x.Id),
-                        x => x.SetProperty(y => y.Status, SendingItemStatus.Pending)
-                    );
-                }
-
                 // 通知用户，任务已开始
-                await sendingContext
-                    .HubClient.GetUserClient(UserId)
-                    .SendingGroupProgressChanged(
-                        new SendingGroupProgressArg(_sendingGroup, _startDate)
-                        {
-                            ProgressType = ProgressType.Start
-                        }
-                    );
+                if (!_startNotified)
+                {
+                    _startNotified = true;
+                    await sendingContext
+                        .HubClient.GetUserClient(UserId)
+                        .SendingGroupProgressChanged(
+                            new SendingGroupProgressArg(_sendingGroup, _startDate)
+                            {
+                                ProgressType = ProgressType.Start
+                            }
+                        );
+                }
 
                 return true;
             }
             finally
             {
                 _initLock.Release();
+            }
+        }
+
+        private async Task LoadNextPage(SendingContext sendingContext)
+        {
+            if (_reader == null || _reader.IsCompleted)
+                return;
+
+            await _reader.EnsureBufferedAsync();
+            var descriptors = new List<SendItemDescriptor>();
+            while (_reader.TryRead(out var descriptor))
+                descriptors.Add(descriptor!);
+
+            await RegisterDescriptors(sendingContext, descriptors);
+        }
+
+        private async Task RegisterDescriptors(
+            SendingContext sendingContext,
+            IReadOnlyList<SendItemDescriptor> descriptors
+        )
+        {
+            if (descriptors.Count == 0)
+                return;
+
+            var existingIds = _sendingItemMetas.SendingItemIds.ToHashSet();
+            var pending = descriptors.Where(x => !existingIds.Contains(x.Id)).ToList();
+            if (pending.Count == 0)
+                return;
+
+            var sqlContext = sendingContext.SqlContext;
+            var specificOutboxIds = pending
+                .Where(x => x.OutboxId > 0)
+                .Select(x => x.OutboxId)
+                .Distinct()
+                .ToList();
+            var outboxes = await sqlContext
+                .Outboxes.AsNoTracking()
+                .Where(x => specificOutboxIds.Contains(x.Id))
+                .ToListAsync();
+            var validOutboxIds = outboxes.Select(x => x.Id).ToHashSet();
+            var invalidIds = pending
+                .Where(x => x.OutboxId > 0 && !validOutboxIds.Contains(x.OutboxId))
+                .Select(x => x.Id)
+                .ToList();
+            if (invalidIds.Count > 0)
+            {
+                await sqlContext.SendingItems.UpdateAsync(
+                    x => invalidIds.Contains(x.Id),
+                    x =>
+                        x.SetProperty(y => y.Status, SendingItemStatus.Invalid)
+                            .SetProperty(y => y.SendDate, DateTime.UtcNow)
+                            .SetProperty(y => y.SendResult, "指定的发件箱已被删除")
+                );
+                pending.RemoveAll(x => invalidIds.Contains(x.Id));
+            }
+
+            _sendingItemMetas.AddRange(
+                pending.Select(x => new SendItemMeta(x.Id, x.OutboxId, x.TriedCount))
+            );
+
+            var outboxesPool = sendingContext.Provider.GetRequiredService<OutboxesManager>();
+            foreach (var outbox in outboxes)
+            {
+                var itemIds = pending
+                    .Where(x => x.OutboxId == outbox.Id)
+                    .Select(x => x.Id)
+                    .ToList();
+                if (itemIds.Count == 0)
+                    continue;
+                outboxesPool.AddOutbox(
+                    new OutboxEmailAddress(
+                        outbox,
+                        SendingGroupId,
+                        SmtpPasswordSecretKeys,
+                        OutboxEmailAddressType.Specific,
+                        itemIds
+                    )
+                );
+            }
+
+            var pendingIds = pending.Select(x => x.Id).ToList();
+            if (pendingIds.Count > 0)
+            {
+                await sqlContext.SendingItems.UpdateAsync(
+                    x => pendingIds.Contains(x.Id),
+                    x => x.SetProperty(y => y.Status, SendingItemStatus.Pending)
+                );
             }
         }
 
@@ -405,21 +418,18 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             if (sendingGroup == null)
                 return;
 
-            var allSendingItems = await sqlContext
-                .SendingItems.AsNoTracking()
-                .Where(x => x.SendingGroupId == sendingGroup.Id)
-                .Select(x => new { x.Status, x.SendDate, })
-                .ToListAsync();
-
             // 更新发件组的信息
             sendingGroup.Status = SendingGroupStatus.Sending;
-            sendingGroup.TotalCount = allSendingItems.Count;
-            sendingGroup.SuccessCount = allSendingItems.Count(x =>
+            var items = sqlContext
+                .SendingItems.AsNoTracking()
+                .Where(x => x.SendingGroupId == sendingGroup.Id);
+            sendingGroup.TotalCount = await items.CountAsync();
+            sendingGroup.SuccessCount = await items.CountAsync(x =>
                 x.Status >= SendingItemStatus.Success
             );
             // 有发送日期的项，表示已经发送过了
             sendingGroup.SentCount =
-                allSendingItems.Count(x => x.Status <= SendingItemStatus.Cancel)
+                await items.CountAsync(x => x.Status <= SendingItemStatus.Cancel)
                 + sendingGroup.SuccessCount;
             // 开始发送日期
             if (sendingGroup.SendStartDate == DateTime.MinValue)
@@ -443,6 +453,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         {
             // 保存当前组的开始日期
             sendingContext.GroupTaskStartDate = _startDate;
+            sendingContext.GroupTask = this;
 
             var outbox = sendingContext.OutboxAddress;
             if (outbox == null)
@@ -455,7 +466,16 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             // 从列表中移除发件项并转换成 sendItem
             var sendItemMeta = await GetEmailItemFromDb(sendingContext);
             if (sendItemMeta == null)
-                return null;
+            {
+                await LoadNextPage(sendingContext);
+                sendItemMeta = await GetEmailItemFromDb(sendingContext);
+                if (sendItemMeta == null)
+                    return null;
+            }
+
+            // 当前租约进入回收站后预取下一页，避免最后一项提交时误判组已结束。
+            if (_sendingItemMetas.WaitListCount < 50)
+                await LoadNextPage(sendingContext);
 
             // 为 sendItem 动态赋值
             // 赋予发件箱
@@ -508,6 +528,28 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             if (sendItemMeta == null)
                 return null;
 
+            if (sendItemMeta.Lease is null)
+            {
+                var acquired = leaseStore.TryAcquire(
+                    new SendItemDescriptor(
+                        sendItemMeta.SendingItemId,
+                        SendingGroupId,
+                        sendItemMeta.OutboxId,
+                        sendItemMeta.TriedCount
+                    ),
+                    new OutboxKey(outbox.UserId, outbox.Id),
+                    timeProvider.GetUtcNow(),
+                    quotaOptions.Value.LeaseDuration,
+                    out var lease
+                );
+                if (!acquired)
+                {
+                    _sendingItemMetas.Release(sendItemMeta);
+                    return null;
+                }
+                sendItemMeta.SetLease(lease);
+            }
+
             // 如果已经包含 SendingItem, 说明初始化过了，直接返回
             if (sendItemMeta.Initialized)
             {
@@ -516,14 +558,39 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             sendItemMeta.Initialized = true;
 
             // 拉取发件项
-            sendItemMeta = await _sendingItemMetas.FillSendingItem(
+            var sendingItem = await payloadReader.ReadAsync(
                 sendingContext.SqlContext,
-                sendItemMeta
+                sendItemMeta.SendingItemId
             );
-            if (sendItemMeta.SendingItem == null)
+            if (sendingItem == null)
             {
                 sendItemMeta.SetStatus(SendItemMetaStatus.Error, "发件项不存在或已被删除");
-                sendItemMeta.Done();
+                CompleteEmailItem(sendItemMeta);
+                return null;
+            }
+            sendItemMeta.SetSendingItem(sendingItem);
+
+            _usableTemplates.AddSendingItemTemplate(
+                sendItemMeta.SendingItem.Id,
+                sendItemMeta.SendingItem.EmailTemplateId
+            );
+
+            var filters = sendingContext.Provider.GetServices<ISendingItemFilter>();
+            foreach (var filter in filters)
+            {
+                var invalidIds = await filter.GetInvalidSendingItemIds([sendItemMeta.SendingItem]);
+                if (!invalidIds.Contains(sendItemMeta.SendingItemId))
+                    continue;
+
+                await sendingContext.SqlContext.SendingItems.UpdateAsync(
+                    x => x.Id == sendItemMeta.SendingItemId,
+                    x =>
+                        x.SetProperty(y => y.Status, SendingItemStatus.Invalid)
+                            .SetProperty(y => y.SendDate, DateTime.UtcNow)
+                            .SetProperty(y => y.SendResult, "发件项过滤器判定为无效")
+                );
+                sendItemMeta.SetStatus(SendItemMetaStatus.Error, "发件项过滤器判定为无效");
+                CompleteEmailItem(sendItemMeta);
                 return null;
             }
 
@@ -552,6 +619,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 var matchSpecific = _sendingItemMetas.MatchSendingMeta(outbox.Id, true);
                 if (matchSpecific)
                     return true;
+                if (_delayedItems.Values.Any(x => x.OutboxId == outbox.Id))
+                    return true;
             }
 
             // 从当前组中获取
@@ -560,9 +629,29 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 var matchShared = _sendingItemMetas.MatchSendingMeta(outbox.Id, false);
                 if (matchShared)
                     return true;
+                if (_delayedItems.Values.Any(x => x.OutboxId <= 0))
+                    return true;
             }
 
+            if (_reader is { IsCompleted: false })
+                return true;
+
             return false;
+        }
+
+        public bool MatchReadyEmailItem(OutboxEmailAddress outbox)
+        {
+            if (
+                outbox.Type.HasFlag(OutboxEmailAddressType.Specific)
+                && _sendingItemMetas.MatchReadyMeta(outbox.Id, true)
+            )
+                return true;
+            if (
+                outbox.Type.HasFlag(OutboxEmailAddressType.Shared)
+                && _sendingItemMetas.MatchReadyMeta(outbox.Id, false)
+            )
+                return true;
+            return _reader is { IsCompleted: false };
         }
 
         /// <summary>
@@ -573,6 +662,91 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         public void RemovePendingItems(List<long> sendingItemIds)
         {
             sendingItemIds.ForEach(x => _sendingItemMetas.RemovePendingItem(x));
+        }
+
+        public bool CompleteEmailItem(SendItemMeta item)
+        {
+            CompleteLease(item);
+            return _sendingItemMetas.Complete(item);
+        }
+
+        public bool ScheduleRetryEmailItem(SendItemMeta item, DateTimeOffset retryAt)
+        {
+            CompleteLease(item);
+            if (!_sendingItemMetas.Complete(item))
+                return false;
+
+            item.IncreaseTriedCount();
+            var delayed = new DelayedItem(item.OutboxId, item.TriedCount);
+            if (!_delayedItems.TryAdd(item.SendingItemId, delayed))
+            {
+                _sendingItemMetas.Add(
+                    new SendItemMeta(item.SendingItemId, item.OutboxId, item.TriedCount)
+                );
+                return false;
+            }
+
+            delayed.Task = RequeueAfterDelayAsync(item.SendingItemId, delayed, retryAt);
+            return true;
+        }
+
+        public bool ReleaseEmailItem(SendItemMeta item)
+        {
+            if (item.Lease is not null)
+                leaseStore.TryRevoke(item.Lease.LeaseId, timeProvider.GetUtcNow(), out _);
+            return _sendingItemMetas.Release(item);
+        }
+
+        public void Close()
+        {
+            if (Interlocked.Exchange(ref _closed, 1) != 0)
+                return;
+            _lifetime.Cancel();
+            foreach (var item in _sendingItemMetas.GetActiveItems())
+            {
+                if (item.Lease is not null)
+                    leaseStore.TryRevoke(item.Lease.LeaseId, timeProvider.GetUtcNow(), out _);
+            }
+            readerPool.Close(SendingGroupId);
+            _reader = null;
+        }
+
+        private async Task RequeueAfterDelayAsync(
+            long sendingItemId,
+            DelayedItem delayed,
+            DateTimeOffset retryAt
+        )
+        {
+            try
+            {
+                var delay = retryAt - timeProvider.GetUtcNow();
+                if (delay > TimeSpan.Zero)
+                    await Task.Delay(delay, timeProvider, _lifetime.Token);
+                if (Volatile.Read(ref _closed) != 0)
+                    return;
+
+                _sendingItemMetas.Add(
+                    new SendItemMeta(sendingItemId, delayed.OutboxId, delayed.TriedCount)
+                );
+                await workerCoordinator.StartSendingAsync(_lifetime.Token);
+            }
+            catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { }
+            catch (Exception exception)
+            {
+                _logger.Error($"发件项 {sendingItemId} 重新入队失败", exception);
+            }
+            finally
+            {
+                _delayedItems.TryRemove(sendingItemId, out _);
+            }
+        }
+
+        private void CompleteLease(SendItemMeta item)
+        {
+            if (item.Lease is null)
+                return;
+            if (!leaseStore.TryComplete(item.Lease.LeaseId, timeProvider.GetUtcNow(), out _))
+                _logger.Warn($"发件项 {item.SendingItemId} 的租约已过期或完成");
         }
     }
 }

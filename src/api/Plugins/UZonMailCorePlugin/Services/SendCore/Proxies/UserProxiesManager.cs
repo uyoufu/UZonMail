@@ -114,14 +114,25 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
             Proxy proxy
         )
         {
-            foreach (var factory in proxyFactories)
+            if (!Uri.TryCreate(proxy.Url, UriKind.Absolute, out var uri))
             {
-                var handler = await factory.CreateProxy(serviceProvider, proxy);
-                if (handler != null)
-                    return handler;
+                _logger.Error($"代理 {proxy.Id} 的 URL 格式无效");
+                return null;
             }
 
-            return null;
+            var matches = proxyFactories.Where(x => x.CanHandle(uri)).ToList();
+            if (matches.Count != 1)
+            {
+                var kinds = string.Join(", ", matches.Select(x => x.Kind));
+                _logger.Error(
+                    matches.Count == 0
+                        ? $"代理 {proxy.Id} 未匹配到代理类型"
+                        : $"代理 {proxy.Id} 同时匹配多个代理类型: {kinds}"
+                );
+                return null;
+            }
+
+            return await matches[0].CreateProxy(serviceProvider, proxy);
         }
 
         public IProxyHandler? RandomProxyHandler(string matchStr, List<long>? ranges = null)
@@ -141,6 +152,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
             var rangedProxies = enabledProxies
                 .Where(x => x.IsEnable())
                 .Where(x => x.IsMatch(matchStr))
+                .OrderByDescending(x => x.Priority)
                 .ToList();
 
             if (rangedProxies.Count == 0)
@@ -149,8 +161,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
                 return null;
             }
 
-            var randomIndex = Random.Shared.Next(0, rangedProxies.Count);
-            return rangedProxies[randomIndex];
+            var highestPriority = rangedProxies[0].Priority;
+            var preferred = rangedProxies.TakeWhile(x => x.Priority == highestPriority).ToList();
+            return preferred[Random.Shared.Next(0, preferred.Count)];
         }
 
         public IProxyHandler? GetProxyHandler(long proxyId)

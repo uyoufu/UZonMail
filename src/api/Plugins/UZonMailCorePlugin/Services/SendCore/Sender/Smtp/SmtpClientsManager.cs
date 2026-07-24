@@ -1,453 +1,207 @@
 using System.Collections.Concurrent;
-using System.Net.Sockets;
-using System.Timers;
 using log4net;
-using MailKit.Net.Proxy;
 using UzonMail.CorePlugin.Services.Config;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
+using UzonMail.CorePlugin.Services.SendCore.Networking;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
-using UzonMail.CorePlugin.Services.SendCore.Proxies;
 using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.Emails;
+using UzonMail.Utils.Extensions;
 using UzonMail.Utils.Results;
 using UzonMail.Utils.Web.Service;
-using Timer = System.Timers.Timer;
 
-namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+
+/// <summary>
+/// 按发件箱、协议配置和网络出口缓存 SMTP 会话。
+/// </summary>
+public sealed class SmtpClientsManager : ISingletonService, IAsyncDisposable
 {
-    /// <summary>
-    /// 按发件任务缓存 SmtpClient, 因此发件完成后，要手动进行释放
-    /// </summary>
-    public class SmtpClientsManager : ISingletonService, IAsyncDisposable
+    private static readonly ILog Logger = LogManager.GetLogger(typeof(SmtpClientsManager));
+    private readonly ConcurrentDictionary<SmtpClientKey, ThrottlingSmtpClient> _clients = [];
+    private readonly AppSettingsManager _settingsService;
+    private readonly SmtpConnector _connector;
+    private readonly CancellationTokenSource _shutdown = new();
+    private readonly Task _maintenanceTask;
+
+    public SmtpClientsManager(AppSettingsManager settingsService, SmtpConnector connector)
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpClientsManager));
+        _settingsService = settingsService;
+        _connector = connector;
+        _maintenanceTask = MaintainConnectionsAsync(_shutdown.Token);
+    }
 
-        /// <summary>
-        /// 发件客户端缓存
-        /// 同一个 email，可能同时存在带代理和不带代理的缓存
-        /// </summary>
-        private readonly ConcurrentDictionary<SmtpClientKey, ThrottlingSmtpClient> _smptClients =
-            new();
+    public async Task<Result<ThrottlingSmtpClient>> GetSmtpClientAsync(
+        SendingContext context,
+        NetworkRoute route,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var outbox = context.EmailItem!.Outbox;
+        var key = new SmtpClientKey(
+            new OutboxKey(outbox.UserId, outbox.Id),
+            GetProfileFingerprint(outbox),
+            route.Identity,
+            outbox.Email
+        );
 
-        private readonly ProxiesManager _proxyManager;
-        private readonly AppSettingsManager _settingsService;
-
-        private readonly Timer _timer;
-
-        public SmtpClientsManager(ProxiesManager proxyManager, AppSettingsManager settingsService)
+        if (_clients.TryGetValue(key, out var cached))
         {
-            _proxyManager = proxyManager;
-            _settingsService = settingsService;
+            if (await IsAvailableAsync(cached, context, cancellationToken))
+                return new Result<ThrottlingSmtpClient> { Data = cached };
 
-            // 新建定时器，对 smtp 连接进行保活
-            _timer = new Timer(1000 * 30) { AutoReset = true, Enabled = true }; // 30s
-            _timer.Elapsed += Timer_Elapsed;
+            await DisposeSmtpClientAsync(key);
         }
 
-        #region 连接保活
-        private int _keepAliveRunning = 0;
-
-        private async void Timer_Elapsed(object? sender, ElapsedEventArgs e)
+        var client = context.Provider.GetRequiredService<ThrottlingSmtpClient>();
+        client.SetParams(key, 0);
+        client.ProxyClient = route.ProxyClient;
+        try
         {
-            // 保活
-            if (Interlocked.CompareExchange(ref _keepAliveRunning, 1, 0) != 0)
-                return;
-
-            try
-            {
-                await KeepAlive();
-            }
-            finally
-            {
-                Interlocked.Exchange(ref _keepAliveRunning, 0);
-            }
-        }
-
-        private async Task KeepAlive()
-        {
-            _logger.Info("开始对缓存的 SMTP 连接进行保活");
-            var keys = _smptClients.Keys.ToList();
-            foreach (var key in keys)
-            {
-                if (!_smptClients.TryGetValue(key, out var client))
-                    continue;
-                try
-                {
-                    await client.NoOpAsync();
-                }
-                catch (Exception ex)
-                {
-                    _logger.Warn($"保活 SMTP 连接 {key.Email} 失败，断开连接并移除缓存");
-                    _logger.Warn(ex);
-                    await DisposeSmtpClientAsync(key);
-                }
-            }
-        }
-        #endregion
-
-        /// <summary>
-        /// 获取 smtp 客户端
-        /// 有可能更换了账号密码，要重新获取
-        /// </summary>
-        /// <param name="outbox"></param>
-        /// <returns></returns>
-        public async Task<Result<ThrottlingSmtpClient>> GetSmtpClientAsync(
-            SendingContext sendingContext
-        )
-        {
-            var outbox = sendingContext.EmailItem!.Outbox;
-
-            // 获取缓存客户端是否可用
-            var shouldProxy = ShouldUseProxy(sendingContext);
-            var existClient = GetSmtpClientFromCache(outbox.Email, shouldProxy);
-
-            if (existClient != null)
-            {
-                // 验证存活
-                var available = await CheckSmtpClientAvailable(existClient, sendingContext);
-                if (available)
-                {
-                    return new Result<ThrottlingSmtpClient>() { Data = existClient };
-                }
-
-                // 说明客户端不可用了，需要移除
-                await DisposeSmtpClientAsync(existClient.GetClientKey());
-            }
-
-            _logger.Debug($"初始化 SmtpClient: {outbox.SmtpAuthUserName}");
-
-            // 获取代理，若代理为空，则不使用代理
-            // 当代理失效，但是用户又选择代理时，可能会影响效率，后期进行优化
-
-            // TODO: 此处应该不需要限制频率，因为发件箱处已经处理了，后期测试后再决定是否添加
-            var client = sendingContext.Provider.GetRequiredService<ThrottlingSmtpClient>();
-            client.SetParams(outbox.Email, 0);
-            try
-            {
-                var result = await SetProxyAndConnectSmtpClient(client, outbox, sendingContext);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.Warn(ex);
-                client.Disconnect(true);
-                client.Dispose();
-                return new Result<ThrottlingSmtpClient>()
-                {
-                    Ok = false,
-                    Message = ex.Message,
-                    Data = null,
-                };
-            }
-        }
-
-        /// <summary>
-        /// 是否应使用代理
-        /// </summary>
-        /// <returns></returns>
-        private static bool ShouldUseProxy(SendingContext sendingContext)
-        {
-            // 判断发件项是否指定了代理
-            // 指定代理，不需要更换
-            var proxyId = sendingContext.EmailItem!.ProxyId;
-            if (proxyId > 0)
-            {
-                return true;
-            }
-
-            return sendingContext.EmailItem.AvailableProxyIds.Count > 0;
-        }
-
-        /// <summary>
-        /// 从缓存中获取 smtp client
-        /// </summary>
-        /// <param name="outbox"></param>
-        /// <param name="useProxy"></param>
-        /// <returns></returns>
-        private ThrottlingSmtpClient? GetSmtpClientFromCache(string email, bool useProxy)
-        {
-            // 筛选条件
-            // 1. 邮箱相同
-            // 2. 代理状态相同
-            var key = _smptClients
-                .Keys.Where(x => x.Email == email && !(x.HasProxy ^ useProxy))
-                .FirstOrDefault();
-            if (key == null)
-                return null;
-
-            if (!_smptClients.TryGetValue(key, out var value))
-                return null;
-            return value;
-        }
-
-        /// <summary>
-        /// 验证 smtp client 是否存活
-        /// 1. 已经断开连接
-        /// 2. 需要更换代理
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="sendingContext"></param>
-        /// <returns></returns>
-        private async Task<bool> CheckSmtpClientAvailable(
-            ThrottlingSmtpClient client,
-            SendingContext sendingContext
-        )
-        {
-            // 判断是否真实存活
-            try
-            {
-                await client.NoOpAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.Debug(
-                    $"SmtpClient: {sendingContext.EmailItem!.Outbox.Email} 连接不可用，断开连接并移除缓存"
-                );
-                _logger.Debug(ex);
-                return false;
-            }
-
-            if (!client.IsConnected)
-            {
-                _logger.Warn($"SmtpClient: {sendingContext.EmailItem!.Outbox.Email} 已经断开连接");
-                return false;
-            }
-
-            // 判断发件项是否指定了代理
-            // 若未指定代理，则表示可以正常
-            var proxyId = sendingContext.EmailItem!.ProxyId;
-            if (proxyId <= 0)
-                return true;
-
-            // 判断代理是否失效了
-            if (client.ProxyClient is not ProxyClientAdapter proxyClientAdapter)
-            {
-                _logger.Error(
-                    $"SmtpClient: {sendingContext.EmailItem!.Outbox.Email} 代理设置异常，赋值 ProxyClient 时请只使用 ProxyClientAdapter 或其子类"
-                );
-                return false;
-            }
-
-            if (!proxyClientAdapter.IsEnable)
-                return false;
-
-            // 指定了代理，但是没有设置更换 IP 的次数，返回正常
-            // 未设置代理更换频率时，不更换代理
-            var orgSetting = await _settingsService.GetSetting<SendingSetting>(
-                sendingContext.SqlContext,
-                sendingContext.EmailItem.UserId
-            );
-            if (orgSetting.ChangeIpAfterEmailCount <= 0)
-            {
-                return true;
-            }
-
-            // 判断是否到达了更换代理的次数
-            var sentTotal = client.SentCount;
-            if (sentTotal == 0)
-                return true;
-            if (sentTotal % orgSetting.ChangeIpAfterEmailCount == 0)
-                return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// 获取代理客户端，返回时，会对是否可用进行验证
-        /// 不能频繁调用，因为内容会验证代理的可用性
-        /// </summary>
-        /// <param name="sendingContext"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
-        private async Task<IProxyClient?> GetProxyClient(
-            SendingContext sendingContext,
-            int tryCount = 3
-        )
-        {
-            var emailItem = sendingContext.EmailItem!;
-            var outbox = emailItem.Outbox;
-            if (emailItem.AvailableProxyIds.Count == 0)
-            {
-                _logger.Debug($"邮箱 {outbox.Email} 未配置代理");
-                return null;
-            }
-
-            if (tryCount < 0)
-            {
-                _logger.Warn($"邮箱 {outbox.Email} 获取代理失败，尝试次数已达上限");
-                return null;
-            }
-
-            // 有的 smtpClient 可能不需要代理, 此处要进行判断
-            var availableProxyIds = sendingContext.EmailItem!.AvailableProxyIds;
-            if (availableProxyIds.Count == 0)
-            {
-                // 未配置代理，直接返回
-                return null;
-            }
-
-            // 获取代理，若为空，则重试
-            var proxyHandler = await _proxyManager.GetProxyHandler(sendingContext);
-            if (proxyHandler == null)
-            {
-                _logger.Warn($"未能为 {outbox.Email} 匹配到代理, 1 秒后重试...");
-                // 1 秒后重试
-                await Task.Delay(1000);
-                return await GetProxyClient(sendingContext, tryCount - 1);
-            }
-
-            // [TODO]: 此处无法完全保证代理可用，因为代理 api 在使用过程中会失效，若检测不及时，则会导致发件失败
-            var proxyClient = await proxyHandler.GetProxyClientAsync(
-                sendingContext.Provider,
-                outbox.Email
-            );
-            if (proxyClient == null)
-            {
-                _logger.Warn($"从代理 {proxyHandler.Id} 生成代理失败, 1 秒后重试...");
-                // 1 秒后重试
-                await Task.Delay(1000);
-                return await GetProxyClient(sendingContext, tryCount - 1);
-            }
-
-            _logger.Info($"{outbox.Email} 开始使用代理 {proxyHandler.Id}");
-            return proxyClient;
-        }
-
-        /// <summary>
-        /// 设置代理并连接 SmtpClient
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="outbox"></param>
-        /// <param name="sendingContext"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        private async Task<Result<ThrottlingSmtpClient>> SetProxyAndConnectSmtpClient(
-            ThrottlingSmtpClient client,
-            OutboxEmailAddress outbox,
-            SendingContext sendingContext,
-            int tryCount = 3
-        )
-        {
-            if (tryCount < 0)
-            {
-                return new Result<ThrottlingSmtpClient>()
-                {
-                    Ok = false,
-                    Message = "SMTP 连接重试次数已达上限",
-                    Data = null,
-                };
-            }
-
-            // 获取代理
-            var proxyAdapter = await GetProxyClient(sendingContext);
-            client.ProxyClient = proxyAdapter;
-
-            // 对证书过期进行兼容处理
-            try
-            {
-                await client.ConnectAsync(
+            var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
+            await _connector.ConnectAndAuthenticateAsync(
+                client,
+                new SmtpConnectionProfile(
                     outbox.SmtpHost,
                     outbox.SmtpPort,
-                    outbox.ConnectionSecurity.ToMailKitSecureSocketOptions()
-                );
-            }
-            catch (SocketException)
-            {
-                // 若没有代理，说明是其它错误，不进行尝试
-                if (client.ProxyClient == null)
-                    throw;
+                    outbox.ConnectionSecurity.ToMailKitSecureSocketOptions(),
+                    outbox.SmtpAuthUserName ?? outbox.Email,
+                    outbox.PlainPassword ?? string.Empty,
+                    debugConfig.IsDemo
+                ),
+                cancellationToken
+            );
 
-                // 重新获取代理尝试一下
-                _logger.Warn(
-                    $"初始化 {outbox.Email} SmtpClient 时，无法建立 Socket 连接，更换代理尝试，剩余尝试次数: {tryCount}"
-                );
-                return await SetProxyAndConnectSmtpClient(
-                    client,
-                    outbox,
-                    sendingContext,
-                    tryCount - 1
-                );
-            }
-            // 证书过期不再回退
-            //catch (SslHandshakeException ex)
-            //{
-            //    _logger.Warn(ex);
-            //    // 证书过期
-            //    await client.ConnectAsync(
-            //        outbox.SmtpHost,
-            //        outbox.SmtpPort,
-            //        SecureSocketOptions.None
-            //    );
-            //}
+            if (_clients.TryAdd(key, client))
+                return new Result<ThrottlingSmtpClient> { Data = client };
 
-            // Note: only needed if the SMTP server requires authentication
-            // 进行鉴权
-            var debugConfig = sendingContext.Provider.GetRequiredService<DebugConfig>();
-            if (!debugConfig.IsDemo)
-            {
-                await client.AuthenticateAsync(
-                    outbox.Email,
-                    outbox.SmtpAuthUserName,
-                    outbox.PlainPassword
-                );
-            }
-            // 添加到缓存中
-            _smptClients.TryAdd(client.GetClientKey(), client);
-
-            return new Result<ThrottlingSmtpClient>() { Data = client };
+            await DisconnectAndDisposeAsync(client);
+            return _clients.TryGetValue(key, out cached)
+                ? new Result<ThrottlingSmtpClient> { Data = cached }
+                : Result<ThrottlingSmtpClient>.Fail("SMTP 会话并发创建失败");
         }
-
-        /// <summary>
-        /// 获取所有的 SmtpClientKeys
-        /// </summary>
-        public ICollection<SmtpClientKey> SmtpClientKeys => _smptClients.Keys;
-
-        public async Task DisposeSmtpClientAsync(SmtpClientKey key)
+        catch (Exception exception)
         {
-            if (!_smptClients.TryRemove(key, out var client))
-                return;
-
-            // 进行释放
-            if (client.IsConnected)
-            {
-                await client.DisconnectAsync(true);
-            }
-            client.Dispose();
-        }
-
-        public async Task DisposeSmtpClientsAsync(string email)
-        {
-            _logger.Debug($"移除 SmtpClient {email}");
-            var keys = _smptClients.Keys.Where(x => x.Email == email).ToList();
-            foreach (var key in keys)
-            {
-                await DisposeSmtpClientAsync(key);
-            }
-        }
-
-        [Obsolete("Use DisposeSmtpClientAsync instead.")]
-        public void DisposeSmtpClient(SmtpClientKey key)
-        {
-            _ = DisposeSmtpClientAsync(key);
-        }
-
-        [Obsolete("Use DisposeSmtpClientsAsync instead.")]
-        public void DisposeSmtpClients(string email)
-        {
-            _ = DisposeSmtpClientsAsync(email);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            _timer.Stop();
-            _timer.Dispose();
-
-            foreach (var key in _smptClients.Keys.ToList())
-            {
-                await DisposeSmtpClientAsync(key);
-            }
+            Logger.Warn(exception);
+            await DisconnectAndDisposeAsync(client);
+            return Result<ThrottlingSmtpClient>.Fail(exception.Message);
         }
     }
+
+    private async Task<bool> IsAvailableAsync(
+        ThrottlingSmtpClient client,
+        SendingContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            await client.NoOpAsync(cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            Logger.Debug($"SMTP 会话 {client.GetClientKey()} 已失效", exception);
+            return false;
+        }
+
+        if (!client.IsConnected)
+            return false;
+        if (!client.GetClientKey().HasProxy)
+            return true;
+        if (client.ProxyClient is not ProxyClientAdapter proxy || !proxy.IsEnable)
+            return false;
+
+        var setting = await _settingsService.GetSetting<SendingSetting>(
+            context.SqlContext,
+            context.EmailItem!.UserId
+        );
+        return setting.ChangeIpAfterEmailCount <= 0
+            || client.SentCount == 0
+            || client.SentCount % setting.ChangeIpAfterEmailCount != 0;
+    }
+
+    private async Task MaintainConnectionsAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                foreach (var entry in _clients.ToArray())
+                {
+                    try
+                    {
+                        await entry.Value.NoOpAsync(cancellationToken);
+                    }
+                    catch (Exception exception)
+                    {
+                        Logger.Warn($"SMTP 会话 {entry.Key} 保活失败", exception);
+                        await DisposeSmtpClientAsync(entry.Key);
+                    }
+                }
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+    }
+
+    public ICollection<SmtpClientKey> SmtpClientKeys => _clients.Keys;
+
+    public async Task DisposeSmtpClientAsync(SmtpClientKey key)
+    {
+        if (_clients.TryRemove(key, out var client))
+            await DisconnectAndDisposeAsync(client);
+    }
+
+    public async Task DisposeSmtpClientsAsync(OutboxKey outbox)
+    {
+        foreach (var key in _clients.Keys.Where(x => x.Outbox == outbox).ToList())
+            await DisposeSmtpClientAsync(key);
+    }
+
+    [Obsolete("Use DisposeSmtpClientAsync instead.")]
+    public void DisposeSmtpClient(SmtpClientKey key) => _ = DisposeSmtpClientAsync(key);
+
+    [Obsolete("Use DisposeSmtpClientsAsync instead.")]
+    public void DisposeSmtpClients(string email)
+    {
+        foreach (var key in _clients.Keys.Where(x => x.Email == email).ToList())
+            _ = DisposeSmtpClientAsync(key);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _shutdown.CancelAsync();
+        try
+        {
+            await _maintenanceTask;
+        }
+        catch (OperationCanceledException) { }
+
+        foreach (var key in _clients.Keys.ToList())
+            await DisposeSmtpClientAsync(key);
+        _shutdown.Dispose();
+    }
+
+    private static async Task DisconnectAndDisposeAsync(ThrottlingSmtpClient client)
+    {
+        try
+        {
+            if (client.IsConnected)
+                await client.DisconnectAsync(true);
+        }
+        catch (Exception exception)
+        {
+            Logger.Debug("释放 SMTP 会话时断开连接失败", exception);
+        }
+        finally
+        {
+            client.Dispose();
+        }
+    }
+
+    private static string GetProfileFingerprint(OutboxEmailAddress outbox) =>
+        $"{outbox.SmtpHost}\n{outbox.SmtpPort}\n{outbox.SmtpAuthUserName}\n{outbox.PlainPassword}\n{outbox.ConnectionSecurity}".MD5();
 }

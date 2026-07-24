@@ -4,6 +4,7 @@ using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.CorePlugin.Services.EmailDecorator;
 using UzonMail.CorePlugin.Services.EmailDecorator.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
@@ -30,6 +31,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             OutboxId = outboxId;
         }
 
+        public SendItemMeta(long sendingItemId, long outboxId, int triedCount)
+            : this(sendingItemId, outboxId)
+        {
+            _triedCount = triedCount;
+        }
+
         /// <summary>
         /// 发件项
         /// </summary>
@@ -52,52 +59,17 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// </summary>
         public bool IsDeleted { get; set; } = false;
 
-        #region 容器
-        public SendingItemMetaList Parent { get; private set; }
-
-        public void SetParent(SendingItemMetaList metaList)
-        {
-            Parent = metaList;
-        }
-
-        /// <summary>
-        /// 完成：成功、失败、重试都调用该接口
-        /// 成功，失败：清除回收站数据
-        /// 其它状态：重试
-        /// </summary>
-        /// <param name="success"></param>
-        /// <exception cref="NullReferenceException"></exception>
-        public void Done()
-        {
-            if (Parent == null)
-                throw new NullReferenceException("未设置父容器");
-
-            if (Status.HasFlag(SendItemMetaStatus.Success))
-            {
-                Parent.ClearRecycleBin(SendingItemId, true);
-            }
-            else if (Status.HasFlag(SendItemMetaStatus.Error))
-            {
-                Parent.ClearRecycleBin(SendingItemId, false);
-            }
-            else
-            {
-                Retry();
-            }
-        }
-
-        /// <summary>
-        /// 重试
-        /// </summary>
-        /// <exception cref="NullReferenceException"></exception>
-        private void Retry()
+        public void IncreaseTriedCount()
         {
             _triedCount++;
-            if (Parent == null)
-                throw new NullReferenceException("未设置父容器");
-            Parent.MoveRecycleToWaitList(SendingItemId);
         }
-        #endregion
+
+        public SendLease? Lease { get; private set; }
+
+        public void SetLease(SendLease lease)
+        {
+            Lease = lease;
+        }
 
         #region 状态
         /// <summary>
@@ -127,8 +99,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// <returns></returns>
         public bool IsErrorOrSuccess()
         {
-            return Status.HasFlag(SendItemMetaStatus.Error)
-                || Status.HasFlag(SendItemMetaStatus.Success);
+            return Status is SendItemMetaStatus.Error or SendItemMetaStatus.Success;
         }
         #endregion
 
@@ -160,6 +131,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         public void SetSendingItem(SendingItem sendingItem)
         {
             SendingItem = sendingItem;
+            _triedCount = sendingItem.TriedCount;
             // 初始化其它项
             BodyData = new SendingItemExcelData(sendingItem.Data);
         }

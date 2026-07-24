@@ -92,9 +92,9 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
             MaxSendingBatchSize = GetIntValue(nameof(MaxSendingBatchSize), 20);
             MinInboxCooldownHours = GetIntValue(nameof(MinInboxCooldownHours), 0);
             ReplyToEmails = GetStringValue(nameof(ReplyToEmails), string.Empty);
-            // 重试次数必须进行限制
+            // 0 明确表示不重试，负值按无效配置回退到默认值。
             var maxRetryCount = GetIntValue(nameof(MaxRetryCount), 3);
-            MaxRetryCount = maxRetryCount <= 0 ? 3 : maxRetryCount;
+            MaxRetryCount = maxRetryCount < 0 ? 3 : maxRetryCount;
             ChangeIpAfterEmailCount = GetIntValue(nameof(ChangeIpAfterEmailCount), 0);
             MaxCountPerIPDomainHour = GetIntValue(nameof(MaxCountPerIPDomainHour), 1200);
         }

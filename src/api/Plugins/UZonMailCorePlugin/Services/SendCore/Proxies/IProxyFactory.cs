@@ -10,10 +10,14 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
     /// </summary>
     public interface IProxyFactory : IScopedService<IProxyFactory>
     {
+        string Kind { get; }
+
         /// <summary>
         /// 工厂调用优先级
         /// </summary>
         public int Order { get; }
+
+        bool CanHandle(Uri uri);
 
         /// <summary>
         /// 创建代理

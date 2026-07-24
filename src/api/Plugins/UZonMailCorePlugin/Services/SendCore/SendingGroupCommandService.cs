@@ -3,6 +3,7 @@ using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Database.Validators;
 using UzonMail.CorePlugin.Services.Config;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
@@ -80,6 +81,12 @@ namespace UzonMail.CorePlugin.Services.SendCore
 
             var sendingContext = serviceProvider.GetRequiredService<SendingContext>();
             await waitList.AddSendingGroup(sendingContext, sendingGroup, sendItemIds);
+            var organizationId = await db
+                .Users.AsNoTracking()
+                .Where(x => x.Id == sendingGroup.UserId)
+                .Select(x => x.OrganizationId)
+                .FirstOrDefaultAsync();
+            workerCoordinator.RegisterTenant(sendingGroup.UserId, organizationId);
             await workerCoordinator.StartSendingAsync();
         }
 
@@ -91,7 +98,9 @@ namespace UzonMail.CorePlugin.Services.SendCore
 
                 foreach (var outbox in removedOutboxes)
                 {
-                    await clientFactory.DisposeSmtpClientsAsync(outbox.Email);
+                    await clientFactory.DisposeSmtpClientsAsync(
+                        new OutboxKey(outbox.UserId, outbox.Id)
+                    );
                 }
 
                 waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);

@@ -16,6 +16,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
         [
             typeof(EmailItemGetter),
             typeof(LocalEmailSendingHandler),
+            typeof(OutboxDisposer),
             typeof(EmailItemUpdateHandler),
             typeof(GroupTaskUpdateHandler),
             typeof(OutboxesUpdateHandler),
@@ -38,8 +39,13 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 return;
             }
 
-            _ = chainHandlers.Aggregate((a, b) => a.SetNext(b));
-            await chainHandlers.First().Handle(context);
+            foreach (var handler in chainHandlers)
+            {
+                var result = await handler.Execute(context);
+                context.HandleResults.Add(result);
+                if (result.ChainStatus is ChainStatus.BreakChain or ChainStatus.ShouldExitTask)
+                    break;
+            }
         }
     }
 }

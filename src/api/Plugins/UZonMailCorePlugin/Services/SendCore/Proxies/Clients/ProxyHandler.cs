@@ -66,6 +66,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
             }
         }
 
+        public int Priority => ProxyInfo?.Priority ?? 0;
+
         public bool IsExpired => _expireDate <= DateTime.UtcNow;
 
         /// <summary>

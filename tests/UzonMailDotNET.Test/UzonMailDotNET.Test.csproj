@@ -8,11 +8,18 @@
 	<RootNamespace>UzonMailDotNET.Test</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\api\Plugins\UZonMailCorePlugin\UZonMailCorePlugin.csproj" />
+    <ProjectReference Include="..\..\src\api\Plugins\UzonMailProPlugin\UZonMailProPlugin.csproj" />
+    <ProjectReference Include="..\..\src\api\UzonMailDB\UzonMailDB.csproj" />
+    <ProjectReference Include="..\..\src\api\UzonMailService\UzonMailService.csproj" />
+    <ProjectReference Include="..\..\src\api\UzonMailUtils\UzonMailUtils.csproj" />
+  </ItemGroup>
+
 	<ItemGroup>
 	  <Folder Include="UzonMail.Desktop\" />
 	  <Folder Include="UzonMail.Utils\" />
 	  <Folder Include="UzonMail.DB\" />
-	  <Folder Include="UzonMail.Core\" />
 	</ItemGroup>
 
 </Project>

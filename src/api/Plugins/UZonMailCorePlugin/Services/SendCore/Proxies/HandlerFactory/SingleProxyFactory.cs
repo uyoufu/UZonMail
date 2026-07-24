@@ -8,7 +8,14 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.HandlerFactory
     /// </summary>
     public class SingleProxyFactory : IProxyFactory
     {
+        public string Kind => "static";
+
         public virtual int Order => 100;
+
+        public bool CanHandle(Uri uri)
+        {
+            return ProxyEndpoint.CanParse(uri.AbsoluteUri);
+        }
 
         /// <summary>
         /// 接口中定义了的是异步方法

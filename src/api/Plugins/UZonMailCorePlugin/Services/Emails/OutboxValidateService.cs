@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using UzonMail.CorePlugin.Controllers.Users.Model;
-using UzonMail.CorePlugin.Services.Config;
 using UzonMail.CorePlugin.Services.SendCore.Sender;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.DB.Extensions;
@@ -17,12 +16,10 @@ namespace UzonMail.CorePlugin.Services.Emails
     /// </summary>
     /// <param name="db"></param>
     /// <param name="tokenService"></param>
-    /// <param name="debugConfig"></param>
     public class OutboxValidateService(
         IServiceProvider serviceProvider,
         SqlContext db,
         TokenService tokenService,
-        DebugConfig debugConfig,
         EmailSendersManager sendersManager
     ) : IScopedService
     {
@@ -52,24 +49,24 @@ namespace UzonMail.CorePlugin.Services.Emails
         public async Task<ResponseResult<bool>> ValidateOutbox(Outbox outbox)
         {
             var emailSender = sendersManager.GetEmailSender(outbox.Type);
-            var result = await emailSender.TestOutbox(serviceProvider, outbox);
+            var result = await emailSender.ValidateAsync(serviceProvider, outbox);
 
             // 更新数据库
             await db.Outboxes.UpdateAsync(
                 x => x.Id == outbox.Id,
                 x =>
-                    x.SetProperty(y => y.IsValid, result.Ok)
+                    x.SetProperty(y => y.IsValid, result.IsSuccess)
                         .SetProperty(
                             y => y.Status,
-                            result.Ok ? OutboxStatus.Valid : OutboxStatus.Invalid
+                            result.IsSuccess ? OutboxStatus.Valid : OutboxStatus.Invalid
                         )
                         .SetProperty(x => x.ValidFailReason, result.Message)
             );
 
             return new ResponseResult<bool>()
             {
-                Ok = result.Ok,
-                Data = result.Ok,
+                Ok = result.IsSuccess,
+                Data = result.IsSuccess,
                 Message = $"[{outbox.Email}] {result.Message}",
             };
         }

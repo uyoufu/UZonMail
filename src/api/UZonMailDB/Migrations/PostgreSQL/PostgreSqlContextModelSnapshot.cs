@@ -399,7 +399,8 @@ namespace UzonMail.DB.Migrations.PostgreSQL
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SendingGroupId");
+                    b.HasIndex("SendingGroupId", "Status", "OutBoxId", "Id")
+                        .HasDatabaseName("IX_SendingItems_Group_Status_Outbox_Id");
 
                     b.ToTable("SendingItems");
                 });

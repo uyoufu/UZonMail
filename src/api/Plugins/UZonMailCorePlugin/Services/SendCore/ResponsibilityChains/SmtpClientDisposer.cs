@@ -1,4 +1,5 @@
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
 
@@ -23,11 +24,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 return HandlerResult.Skiped();
 
             // 释放发件箱
-            var keys = clientFactory.SmtpClientKeys.Where(x => x.Email == outbox.Email).ToList();
+            var outboxKey = new OutboxKey(outbox.UserId, outbox.Id);
+            var keys = clientFactory.SmtpClientKeys.Where(x => x.Outbox == outboxKey).ToList();
             foreach (var key in keys)
             {
                 // 仍有可用发件箱时，不释放共享的 SMTP 连接
-                if (outboxesPoolList.ExistValidOutbox(key.Email))
+                if (outboxesPoolList.ExistValidOutbox(key.Outbox))
                     continue;
                 await clientFactory.DisposeSmtpClientAsync(key);
             }

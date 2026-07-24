@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
@@ -15,7 +16,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
     /// 2. 更新发件状态到数据库
     /// 3. 发送通知
     /// </summary>
-    public class EmailItemUpdateHandler : AbstractSendingHandler
+    public class EmailItemUpdateHandler(TimeProvider timeProvider) : AbstractSendingHandler
     {
         protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
@@ -25,6 +26,14 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 
             // 根据状态发送进度信息
             var emailItem = context.EmailItem;
+            if (context.OutboxFailureHandled && !context.CanRetryAfterOutboxFailure)
+            {
+                emailItem.SetStatus(
+                    SendItemMetaStatus.Error,
+                    context.TransportResult?.Message ?? "发件箱已失效，无法继续发送"
+                );
+            }
+
             // 判断发件项是否需要重试
             if (!emailItem.IsErrorOrSuccess())
             {
@@ -36,16 +45,38 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                         $"当前邮箱重试已达最大次数 {emailItem.MaxRetryCount}"
                     );
                 }
+                else
+                {
+                    var retryCount = emailItem.TriedCount + 1;
+                    await context.SqlContext.SendingItems.UpdateAsync(
+                        x => x.Id == emailItem.SendingItemId,
+                        x =>
+                            x.SetProperty(y => y.Status, SendingItemStatus.Pending)
+                                .SetProperty(y => y.TriedCount, retryCount)
+                                .SetProperty(y => y.SendResult, emailItem.Message)
+                    );
+                    var baseSeconds = Math.Min(60, 1 << Math.Min(retryCount, 6));
+                    var jitterMilliseconds = RandomNumberGenerator.GetInt32(
+                        0,
+                        baseSeconds * 250 + 1
+                    );
+                    var retryAt =
+                        timeProvider.GetUtcNow()
+                        + TimeSpan.FromSeconds(baseSeconds)
+                        + TimeSpan.FromMilliseconds(jitterMilliseconds);
+                    if (context.GroupTask?.ScheduleRetryEmailItem(emailItem, retryAt) != true)
+                        throw new InvalidOperationException(
+                            $"发件项 {emailItem.SendingItemId} 无法进入延迟重试队列"
+                        );
+
+                    context.RequestWorkerExit();
+                    return HandlerResult.Skiped();
+                }
             }
-
-            // 标记结束
-            emailItem.Done();
-
-            if (!emailItem.IsErrorOrSuccess())
-                return HandlerResult.Skiped();
 
             // 保存结果到数据库
             var sendingItem = await SaveSendingItemInfos(context);
+            context.GroupTask?.CompleteEmailItem(emailItem);
 
             // 通知前端发件项状态变化
             await context
@@ -66,7 +97,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 
             var db = sendingContext.SqlContext;
 
-            var success = emailItem.Status.HasFlag(SendItemMetaStatus.Success);
+            var success = emailItem.Status == SendItemMetaStatus.Success;
             var message = emailItem.Message;
 
             // 更新 sendingItems 状态

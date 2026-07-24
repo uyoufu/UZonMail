@@ -22,3 +22,7 @@
 ## 项目规范
 
 - 项目 api、web、win-desktop 各生成了各自的 codegraph, 优先使用
+
+## 用户安装软件及命令
+
+- ripgrep : rg

@@ -52,7 +52,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 return HandlerResult.Skiped();
 
             // 判断是否还有待发送的邮件，若有，则直接返回
-            if (emailItem.Parent.WaitSendingCount > 0)
+            if (context.GroupTask is { ShouldDispose: false })
                 return HandlerResult.Skiped();
 
             // 若是最后一封邮件，要标记办结

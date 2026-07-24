@@ -2,6 +2,7 @@ using log4net;
 using MimeKit;
 using UzonMail.CorePlugin.Services.EmailDecorator;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Sender;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
 
@@ -34,6 +35,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             if (!sendItem.Validate(out var status))
             {
                 // 数据验证失败，需要移除当前发件项，并标记数据验证失败
+                context.TransportResult = TransportResult.Failure(
+                    SendFailureKind.LocalData,
+                    "发件项数据验证失败，取消发件"
+                );
                 sendItem.SetStatus(SendItemMetaStatus.Error, "发件项数据验证失败，取消发件");
                 return HandlerResult.Skiped();
             }
@@ -49,7 +54,30 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 return HandlerResult.Skiped();
             }
 
-            return await emailSender.SendAsync(context, mimeMessage);
+            var result = await emailSender.SendAsync(context, mimeMessage);
+            context.TransportResult = result;
+            if (result.IsSuccess)
+            {
+                sendItem.SetStatus(SendItemMetaStatus.Success, result.ReceiptId ?? result.Message);
+                return HandlerResult.Success(result.Message);
+            }
+
+            sendItem.SetStatus(SendItemMetaStatus.Pending, result.Message);
+            switch (result.FailureKind)
+            {
+                case SendFailureKind.RecipientPermanent:
+                case SendFailureKind.MessagePermanent:
+                case SendFailureKind.LocalData:
+                    sendItem.SetStatus(SendItemMetaStatus.Error, result.Message);
+                    break;
+                case SendFailureKind.OutboxPermanent:
+                    sendItem.Outbox.MarkInvalid(result.Message);
+                    break;
+                case SendFailureKind.Cancelled:
+                    return HandlerResult.Skiped(result.Message);
+            }
+
+            return HandlerResult.Failed(result.Message);
         }
 
         private static async Task<MimeMessage> CreateMimeMessage(SendingContext context)

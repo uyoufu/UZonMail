@@ -1,256 +1,197 @@
 using log4net;
-using MailKit;
-using MailKit.Net.Smtp;
-using MimeKit;
 using UzonMail.CorePlugin.Services.Encrypt;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
-using UzonMail.CorePlugin.Services.SendCore.Proxies;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
+using UzonMail.CorePlugin.Services.SendCore.Networking;
 using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
-using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.Services.SendCore.Transport;
 using UzonMail.DB.SQL.Core.Emails;
-using UzonMail.Utils.Results;
 
-namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+
+public sealed class SmtpSender(
+    EncryptService encryptService,
+    IPRateLimiter ipRateLimiter,
+    ITransportFailureClassifier failureClassifier,
+    SmtpConnector connector
+) : IEmailTransport
 {
-    /// <summary>
-    /// 本机邮件发送器
-    /// </summary>
-    public class SmtpSender(
-        IServiceProvider provider,
-        EncryptService encryptService,
-        ProxiesManager proxyManager,
-        IPRateLimiter iPRateLimiter
-    ) : IEmailSender
+    private const int MaxTransportAttempts = 3;
+    private static readonly ILog Logger = LogManager.GetLogger(typeof(SmtpSender));
+
+    public OutboxType Type => OutboxType.SMTP;
+
+    public async Task<TransportResult> SendAsync(
+        SendingContext context,
+        MimeKit.MimeMessage message,
+        CancellationToken cancellationToken = default
+    )
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpSender));
+        var sendItem = context.EmailItem!;
+        var clientManager = context.Provider.GetRequiredService<SmtpClientsManager>();
+        TransportResult? lastResult = null;
 
-        public int Order => int.MaxValue;
-
-        public bool IsMatch(OutboxType outboxType)
+        for (var attempt = 1; attempt <= MaxTransportAttempts; attempt++)
         {
-            return outboxType == OutboxType.SMTP;
-        }
-
-        /// <summary>
-        /// 发送邮件
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        public async Task<IHandlerResult> SendAsync(SendingContext context, MimeMessage message)
-        {
-            return await SendAsync(context, message, 3);
-        }
-
-        /// <summary>
-        /// 发送邮件
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="message"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
-        private async Task<IHandlerResult> SendAsync(
-            SendingContext context,
-            MimeMessage message,
-            int tryCount
-        )
-        {
-            SendItemMeta sendItem = context.EmailItem!;
-            if (tryCount < 0)
-            {
-                var retryMessage = "SMTP 发送重试次数已达上限";
-                sendItem.Outbox?.MarkShouldDispose(retryMessage);
-                return HandlerResult.Failed(retryMessage);
-            }
-
-            // 获取 smtp 客户端
-            var smtpClientManager = context.Provider.GetRequiredService<SmtpClientsManager>();
-            var clientResult = await smtpClientManager.GetSmtpClientAsync(context);
-
-            //#if DEBUG
-            //            // 模拟获取 smtp 客户端失败的情况
-            //            clientResult.Ok = false;
-            //#endif
-
-            // 若返回 null,说明这个发件箱不能建立 smtp 连接，对它进行取消
-            if (!clientResult)
-            {
-                var errorMessage = $"发件箱 {sendItem.Outbox.Email} 错误。{clientResult.Message}";
-                _logger.Error(errorMessage);
-                // 标记发件箱有问题
-                context.OutboxAddress?.MarkShouldDispose(errorMessage);
-                return HandlerResult.Failed(errorMessage);
-            }
-            // throw new NullReferenceException("测试报错");
-            var smtpClient = clientResult.Data;
-            // 等待发送间隔
-            // 等待之后，可能出现代理过期的问题
-            await iPRateLimiter.WaitForReleaseAsync(
-                context,
-                sendItem.Outbox.Email,
-                smtpClient.ProxyClient?.ProxyHost
+            cancellationToken.ThrowIfCancellationRequested();
+            var routeResolver = context.Provider.GetRequiredService<INetworkRouteResolver>();
+            var routeResult = await routeResolver.ResolveAsync(
+                new NetworkRouteRequest(
+                    new OutboxKey(sendItem.Outbox.UserId, sendItem.Outbox.Id),
+                    sendItem.Outbox.OutboxType,
+                    sendItem.Outbox.Email,
+                    sendItem.ProxyId,
+                    sendItem.AvailableProxyIds
+                ),
+                cancellationToken
             );
-            // 如果是动态代理，则需要检测动态代理是否过期
-            if (smtpClient.ProxyClient is ProxyClientAdapter proxyAdapter && !proxyAdapter.IsEnable)
+            if (!routeResult.IsSuccess || routeResult.Route is null)
             {
-                // 动态代理不可用，重新执行发送逻辑
-                return await SendAsync(context, message, tryCount - 1);
+                lastResult = TransportResult.Failure(routeResult.FailureKind, routeResult.Message);
+                if (attempt == MaxTransportAttempts)
+                    return lastResult;
+                continue;
             }
-            try
+
+            var clientResult = await clientManager.GetSmtpClientAsync(
+                context,
+                routeResult.Route,
+                cancellationToken
+            );
+            if (!clientResult || clientResult.Data is null)
             {
-                var sendResult = await smtpClient.SendAsync(message);
-                _logger.Info(
-                    $"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}"
+                var kind =
+                    routeResult.Route.Kind != NetworkRouteKind.Direct
+                        ? SendFailureKind.Proxy
+                        : SendFailureKind.Network;
+                lastResult = TransportResult.Failure(kind, clientResult.Message);
+                routeResult.Route.ProxyClient?.MarkHealthless();
+            }
+            else
+            {
+                var client = clientResult.Data;
+                await ipRateLimiter.WaitForReleaseAsync(
+                    context,
+                    sendItem.Outbox.Email,
+                    client.ProxyClient?.ProxyHost
                 );
 
-                // 标记邮件状态
-                sendItem.SetStatus(SendItemMetaStatus.Success, sendResult);
-                return HandlerResult.Success(sendResult);
-            }
-            // 错误情况分类
-            // 1. 代理刚好失效，导致发生 ServiceNotConnectedException ，从而导致失败
-            // 2. 发件箱有问题
-            catch (SmtpCommandException smtpCommandException)
-            {
-                // 收件箱不可达
-                if (smtpCommandException.ErrorCode == SmtpErrorCode.RecipientNotAccepted)
+                if (client.ProxyClient is ProxyClientAdapter adapter && !adapter.IsEnable)
                 {
-                    _logger.Warn(smtpCommandException);
-                    sendItem.SetStatus(SendItemMetaStatus.Error, smtpCommandException.Message);
-                    return HandlerResult.Failed(smtpCommandException.Message);
+                    lastResult = TransportResult.Failure(SendFailureKind.Proxy, "代理在发送前已失效");
+                    await clientManager.DisposeSmtpClientAsync(client.GetClientKey());
                 }
                 else
                 {
-                    // 发件箱有问题
-                    sendItem.Outbox?.MarkShouldDispose(smtpCommandException.Message);
-                    return HandlerResult.Failed(smtpCommandException.Message);
+                    try
+                    {
+                        var receiptId = await client.SendAsync(message, cancellationToken);
+                        Logger.Info(
+                            $"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}"
+                        );
+                        return TransportResult.Success(receiptId);
+                    }
+                    catch (Exception exception)
+                    {
+                        lastResult = failureClassifier.Classify(exception);
+                        if (
+                            lastResult.FailureKind
+                                is SendFailureKind.Network
+                                    or SendFailureKind.Proxy
+                            && client.ProxyClient is ProxyClientAdapter failedProxy
+                        )
+                            failedProxy.MarkHealthless();
+                        await clientManager.DisposeSmtpClientAsync(client.GetClientKey());
+                    }
                 }
             }
-            catch (ServiceNotConnectedException ex)
-            {
-                // 已经重试多次，说明发件箱有问题
-                if (tryCount < 0)
-                {
-                    _logger.Error(ex);
-                    // 发件箱问题，返回失败
-                    sendItem.Outbox?.MarkShouldDispose(ex.Message);
-                    return HandlerResult.Failed(ex.Message);
-                }
 
-                // 代理无法连接到服务器
-                // 在发件前已经验证过邮件可用，此处应当作是代理出了问题
-                // 将当前代理标记为不可用
-                if (smtpClient.ProxyClient is ProxyClientAdapter clientAdapter)
-                {
-                    clientAdapter.MarkHealthless();
-                }
-
-                return await SendAsync(context, message, tryCount - 1);
-            }
-            catch (Exception error)
-            {
-                _logger.Error(error);
-                // 发件箱问题，返回失败
-                sendItem.Outbox?.MarkShouldDispose(error.Message);
-                return HandlerResult.Failed(error.Message);
-            }
+            if (!ShouldRetryTransport(lastResult) || attempt == MaxTransportAttempts)
+                return lastResult;
         }
 
-        /// <summary>
-        /// 验证发件箱
-        /// </summary>
-        /// <param name="db"></param>
-        /// <param name="outbox">密码应是加密后的字符串</param>
-        /// <returns></returns>
-        public async Task<Result<string>> TestOutbox(
-            IServiceProvider scopeServiceProvider,
-            Outbox outbox
-        )
+        return lastResult ?? TransportResult.Failure(SendFailureKind.Unknown, "SMTP 发送未返回结果");
+    }
+
+    public async Task<TransportResult> ValidateAsync(
+        IServiceProvider scopeServiceProvider,
+        Outbox outbox,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var smtpUserName = string.IsNullOrWhiteSpace(outbox.UserName)
+            ? outbox.Email
+            : outbox.UserName;
+        var smtpPassword = encryptService.DecryptPassword(outbox.Password);
+        var localError = ValidateParameters(outbox, smtpUserName, smtpPassword);
+        if (localError is not null)
+            return localError;
+
+        var routeResolver = scopeServiceProvider.GetRequiredService<INetworkRouteResolver>();
+        var routeResult = await routeResolver.ResolveAsync(
+            new NetworkRouteRequest(
+                new OutboxKey(outbox.UserId, outbox.Id),
+                outbox.Type,
+                outbox.Email,
+                outbox.ProxyId,
+                []
+            ),
+            cancellationToken
+        );
+        if (!routeResult.IsSuccess)
+            return TransportResult.Failure(routeResult.FailureKind, routeResult.Message);
+
+        using var client = scopeServiceProvider.GetRequiredService<ThrottlingSmtpClient>();
+        client.SetParams(outbox.Email, 0);
+        client.ProxyClient = routeResult.Route!.ProxyClient;
+        try
         {
-            var client = provider.GetRequiredService<ThrottlingSmtpClient>();
-            client.SetParams(string.Empty, 0);
-
-            var email = outbox.Email;
-            var smtpHost = outbox.SmtpHost;
-            var smtpPort = outbox.SmtpPort;
-            var smtpUserName = string.IsNullOrEmpty(outbox.UserName)
-                ? outbox.Email
-                : outbox.UserName;
-            var smtpPassword = encryptService.DecryptPassword(outbox.Password);
-
-            // 判断参数是否正确
-            if (string.IsNullOrEmpty(smtpHost))
-            {
-                return Result<string>.Fail("SMTP 服务器地址不能为空");
-            }
-            if (smtpPort <= 0 || smtpPort > 65535)
-            {
-                return Result<string>.Fail("SMTP 端口号不正确");
-            }
-            if (string.IsNullOrEmpty(smtpUserName))
-            {
-                return Result<string>.Fail("SMTP 用户名不能为空");
-            }
-            if (string.IsNullOrEmpty(smtpPassword))
-            {
-                return Result<string>.Fail("SMTP 密码不能为空");
-            }
-
-            // 获取代理客户端
-            // 参考：https://github.com/jstedfast/MailKit/tree/master/Documentation/Examples
-            if (outbox.ProxyId > 0)
-            {
-                var proxyHandler = await proxyManager.GetProxyHandler(
-                    scopeServiceProvider,
-                    outbox.UserId,
-                    email,
-                    outbox.ProxyId
-                );
-                if (proxyHandler != null)
-                    client.ProxyClient = await proxyHandler.GetProxyClientAsync(
-                        scopeServiceProvider,
-                        email
-                    );
-            }
-
-            string sendResult = $"{smtpUserName} test success";
-            try
-            {
-                await client.ConnectAsync(
-                    smtpHost,
-                    smtpPort,
-                    outbox.ConnectionSecurity.ToMailKitSecureSocketOptions()
-                );
-                // 鉴权
-                if (!string.IsNullOrEmpty(smtpPassword))
-                {
-                    await client.AuthenticateAsync(email, smtpUserName, smtpPassword);
-                }
-                return Result<string>.Success(sendResult);
-            }
-            // 证书过期不再回退
-            //catch (SslHandshakeException ex)
-            //{
-            //    _logger.Warn(ex);
-            //    // 可能是证书过期
-            //    await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.None);
-            //    // 鉴权
-            //    if (!string.IsNullOrEmpty(smtpPassword))
-            //    {
-            //        await client.AuthenticateAsync(email, smtpUserName, smtpPassword);
-            //    }
-            //    return Result<string>.Success(sendResult);
-            //}
-            catch (Exception ex)
-            {
-                _logger.Warn(ex);
-                return Result<string>.Fail(ex.Message);
-            }
-            finally
-            {
-                // 断开连接
-                await client.DisconnectAsync(true);
-            }
+            await connector.ConnectAndAuthenticateAsync(
+                client,
+                new SmtpConnectionProfile(
+                    outbox.SmtpHost,
+                    outbox.SmtpPort,
+                    outbox.ConnectionSecurity.ToMailKitSecureSocketOptions(),
+                    smtpUserName!,
+                    smtpPassword
+                ),
+                cancellationToken
+            );
+            return TransportResult.Success(message: $"{smtpUserName} test success");
+        }
+        catch (Exception exception)
+        {
+            Logger.Warn(exception);
+            return failureClassifier.Classify(exception);
+        }
+        finally
+        {
+            if (client.IsConnected)
+                await client.DisconnectAsync(true, CancellationToken.None);
         }
     }
+
+    private static TransportResult? ValidateParameters(
+        Outbox outbox,
+        string? smtpUserName,
+        string smtpPassword
+    )
+    {
+        if (string.IsNullOrWhiteSpace(outbox.SmtpHost))
+            return TransportResult.Failure(SendFailureKind.LocalData, "SMTP 服务器地址不能为空");
+        if (outbox.SmtpPort is <= 0 or > 65535)
+            return TransportResult.Failure(SendFailureKind.LocalData, "SMTP 端口号不正确");
+        if (string.IsNullOrWhiteSpace(smtpUserName))
+            return TransportResult.Failure(SendFailureKind.LocalData, "SMTP 用户名不能为空");
+        if (string.IsNullOrEmpty(smtpPassword))
+            return TransportResult.Failure(SendFailureKind.LocalData, "SMTP 密码不能为空");
+        return null;
+    }
+
+    private static bool ShouldRetryTransport(TransportResult result) =>
+        result.FailureKind
+            is SendFailureKind.Transient
+                or SendFailureKind.Network
+                or SendFailureKind.Proxy
+                or SendFailureKind.Unknown;
 }

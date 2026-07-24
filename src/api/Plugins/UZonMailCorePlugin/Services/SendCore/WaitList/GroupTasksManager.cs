@@ -1,6 +1,9 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using log4net;
+using Microsoft.Extensions.Options;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Runtime;
 using UzonMail.DB.Extensions;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
@@ -11,15 +14,32 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
     /// <summary>
     /// 任务单例缓存数据
     /// </summary>
-    public class UserGroupTasksPools
-        : ConcurrentDictionary<long, UserGroupTasksPool>,
-            ISingletonService { }
+    public sealed class UserGroupTasksPools : ISingletonService
+    {
+        private readonly ConcurrentDictionary<long, UserGroupTasksPool> _pools = [];
+
+        public bool IsEmpty => _pools.IsEmpty;
+
+        public IReadOnlyCollection<UserGroupTasksPool> Values => [.. _pools.Values];
+
+        public UserGroupTasksPool GetOrAdd(long userId, Func<long, UserGroupTasksPool> factory) =>
+            _pools.GetOrAdd(userId, factory);
+
+        public bool TryGetValue(long userId, [MaybeNullWhen(false)] out UserGroupTasksPool pool) =>
+            _pools.TryGetValue(userId, out pool);
+
+        public bool TryRemove(long userId, [MaybeNullWhen(false)] out UserGroupTasksPool pool) =>
+            _pools.TryRemove(userId, out pool);
+    }
 
     /// <summary>
     /// 系统级的待发件调度器
     /// </summary>
-    public class GroupTasksManager(UserGroupTasksPools userTasksPools, SqlContext sqlContext)
-        : IScopedService
+    public class GroupTasksManager(
+        UserGroupTasksPools userTasksPools,
+        SqlContext sqlContext,
+        IOptions<SendingQuotaOptions> quotaOptions
+    ) : IScopedService
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(GroupTasksManager));
 
@@ -41,13 +61,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             if (group == null)
                 return false;
 
-            // 判断是否有用户发件管理器
-            if (!userTasksPools.TryGetValue(group.UserId, out var groupTasks))
-            {
-                // 新建用户发件管理器
-                groupTasks = new UserGroupTasksPool(group.UserId);
-                userTasksPools.TryAdd(group.UserId, groupTasks);
-            }
+            var groupTasks = userTasksPools.GetOrAdd(
+                group.UserId,
+                userId => new UserGroupTasksPool(userId, quotaOptions.Value.GroupFairShare)
+            );
 
             // 向发件管理器添加发件组
             bool result = await groupTasks.AddSendingGroup(
@@ -56,11 +73,17 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 sendingItemIds
             );
 
-            // 更新发件组状态为发送中
-            await sqlContext.SendingGroups.UpdateAsync(
-                x => x.Id == group.Id,
-                x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending)
-            );
+            if (!result && groupTasks.IsEmpty)
+                userTasksPools.TryRemove(group.UserId, out _);
+
+            if (result)
+            {
+                // 更新发件组状态为发送中
+                await sqlContext.SendingGroups.UpdateAsync(
+                    x => x.Id == group.Id,
+                    x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending)
+                );
+            }
 
             return result;
         }

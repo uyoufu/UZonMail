@@ -16,6 +16,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
         /// </summary>
         string Id { get; }
 
+        int Priority { get; }
+
+        bool IsDynamic { get; }
+
         /// <summary>
         /// 是否可用
         /// </summary>

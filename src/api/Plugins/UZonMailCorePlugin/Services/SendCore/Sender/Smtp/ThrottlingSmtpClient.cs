@@ -4,6 +4,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using UzonMail.CorePlugin.Services.Config;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
 
 namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
@@ -18,6 +19,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
 
         private string _email;
         private int _cooldownMilliseconds;
+        private SmtpClientKey _clientKey;
 
         /// <summary>
         /// 设置参数
@@ -27,6 +29,14 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
         public void SetParams(string email, int cooldownMilliseconds)
         {
             _email = email.Trim();
+            _cooldownMilliseconds = cooldownMilliseconds;
+            _clientKey = new SmtpClientKey(new OutboxKey(0, 0), string.Empty, "direct", _email);
+        }
+
+        public void SetParams(SmtpClientKey clientKey, int cooldownMilliseconds)
+        {
+            _clientKey = clientKey;
+            _email = clientKey.Email.Trim();
             _cooldownMilliseconds = cooldownMilliseconds;
         }
 
@@ -103,16 +113,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
 
         public SmtpClientKey GetClientKey()
         {
-            if (ProxyClient == null)
-                return new SmtpClientKey(_email, string.Empty);
-
-            // 如果存在代理，则返回包含代理的 host 的 key
-            if (ProxyClient is not ProxyClientAdapter proxy)
-            {
-                throw new TypeAccessException("代理客户端类型错误, 只能是 ProxyClientAdapter 或其子类");
-            }
-
-            return new SmtpClientKey(_email, proxy.ProxyHost);
+            return _clientKey;
         }
 
         /// <summary>
