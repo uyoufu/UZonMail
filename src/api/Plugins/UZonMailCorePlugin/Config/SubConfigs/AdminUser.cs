@@ -5,8 +5,8 @@ namespace UzonMail.CorePlugin.Config.SubConfigs
     /// </summary>
     public class AdminUser
     {
-        public string UserId { get; set; }
-        public string Password { get; set; }
-        public string Avatar { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Avatar { get; set; } = string.Empty;
     }
 }

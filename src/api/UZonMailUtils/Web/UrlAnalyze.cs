@@ -16,7 +16,7 @@ namespace UzonMail.Utils.Web
         /// <summary>
         /// 协议名称
         /// </summary>
-        public string Protocol { get; set; }
+        public string Protocol { get; set; } = string.Empty;
 
         /// <summary>
         /// 是否以反斜杠结尾
@@ -26,7 +26,7 @@ namespace UzonMail.Utils.Web
         /// <summary>
         /// 验证信息，暂时不使用
         /// </summary>
-        public string Auth { get; set; }
+        public string Auth { get; set; } = string.Empty;
 
         /// <summary>
         /// 全小写主机部分，包括端口
@@ -49,22 +49,22 @@ namespace UzonMail.Utils.Web
         /// <summary>
         /// 小写主机部分
         /// </summary>
-        public string HostName { get; set; }
+        public string HostName { get; set; } = string.Empty;
 
         /// <summary>
         /// 页面锚点参数部分 #one#two
         /// </summary>
-        public string Hash { get; set; }
+        public string Hash { get; set; } = string.Empty;
 
         /// <summary>
         /// 链接查询参数部分(带问号) '?one=1&two=2'
         /// </summary>
-        public string Search { get; set; }
+        public string Search { get; set; } = string.Empty;
 
         /// <summary>
         /// 路径部分
         /// </summary>
-        public string PathName { get; set; }
+        public string PathName { get; set; } = string.Empty;
 
         /// <summary>
         /// 路径+参数部分(没有锚点)
@@ -82,12 +82,12 @@ namespace UzonMail.Utils.Web
         /// <summary>
         /// 转码后的原链接
         /// </summary>
-        public string Href { get; set; }
+        public string Href { get; set; } = string.Empty;
 
         /// <summary>
         /// 参数的key=value 列表
         /// </summary>
-        private Dictionary<string, string> _SearchList = null;
+        private Dictionary<string, string> _SearchList = [];
 
         #region 初始化处理
         /// <summary>

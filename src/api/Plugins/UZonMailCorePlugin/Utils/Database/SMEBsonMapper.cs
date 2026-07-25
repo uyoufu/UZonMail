@@ -28,7 +28,7 @@ namespace UzonMail.CorePlugin.Utils.Database
         /// <returns></returns>
         private string ResolveCollectionNameFunc(Type type)
         {
-            CollectionNameAttribute att = AttributeHelper.GetAttribute<CollectionNameAttribute>(
+            CollectionNameAttribute? att = AttributeHelper.GetAttribute<CollectionNameAttribute>(
                 type
             );
             if (att == null)

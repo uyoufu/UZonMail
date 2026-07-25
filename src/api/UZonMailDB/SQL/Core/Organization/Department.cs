@@ -10,7 +10,7 @@ namespace UzonMail.DB.SQL.Core.Organization
         /// <summary>
         /// 部门名称-描述也是部门
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// 描述
@@ -26,7 +26,7 @@ namespace UzonMail.DB.SQL.Core.Organization
         /// 完整路径
         /// 用户快速查找部门下面的所有子部门
         /// </summary>
-        public string FullPath { get; set; }
+        public string FullPath { get; set; } = string.Empty;
 
         /// <summary>
         /// 部门类型

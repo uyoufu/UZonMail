@@ -91,6 +91,6 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
         /// <summary>
         /// 附件名称
         /// </summary>
-        public List<string> AttachmentNames { get; private set; }
+        public List<string> AttachmentNames { get; private set; } = [];
     }
 }

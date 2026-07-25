@@ -7,13 +7,13 @@ namespace UzonMail.CorePlugin.Services.UserInfos
     /// </summary>
     public class UserSignInResult
     {
-        public string Token { get; set; }
-        public List<string> Access { get; set; }
-        public User UserInfo { get; set; }
+        public required string Token { get; set; }
+        public required List<string> Access { get; set; }
+        public required User UserInfo { get; set; }
 
         /// <summary>
         /// 已安装的插件
         /// </summary>
-        public List<string> InstalledPlugins { get; set; }
+        public required List<string> InstalledPlugins { get; set; }
     }
 }

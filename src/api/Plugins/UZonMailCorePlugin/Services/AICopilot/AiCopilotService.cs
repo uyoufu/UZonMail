@@ -5,11 +5,7 @@ using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.AICopilot
 {
-    public class AiCopilotService(
-        SqlContext db,
-        AIClientsManger aIClients,
-        ILogger<AiCopilotService> logger
-    ) : IScopedService
+    public class AiCopilotService(SqlContext db, AIClientsManger aIClients) : IScopedService
     {
         /// <summary>
         /// Ask AI Copilot once

@@ -13,7 +13,6 @@ namespace UzonMail.CorePlugin.Services.Permission
     /// 权限服务
     /// </summary>
     public class PermissionService(
-        SqlContext db,
         CacheService cache,
         IHubContext<UzonMailHub, IUzonMailClient> hub,
         IServiceProvider serviceProvider

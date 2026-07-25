@@ -32,6 +32,7 @@ namespace UzonMail.Utils.Json
         /// <returns></returns>
         public static JToken ToJToken<T>(this T obj)
         {
+            ArgumentNullException.ThrowIfNull(obj);
             return JToken.FromObject(obj, JsonSerializer.Create(CameCaseJsonSettings));
         }
 
@@ -53,7 +54,7 @@ namespace UzonMail.Utils.Json
         /// <param name="jt"></param>
         /// <param name="default_"></param>
         /// <returns></returns>
-        public static T ToObjectOrDefault<T>(this JToken jt, T default_)
+        public static T ToObjectOrDefault<T>(this JToken? jt, T default_)
         {
             if (jt == null)
                 return default_;
@@ -73,7 +74,11 @@ namespace UzonMail.Utils.Json
         /// <param name="path"></param>
         /// <param name="default_"></param>
         /// <returns></returns>
-        public static T? SelectTokenOrDefault<T>(this JToken jt, string path, T? default_ = default)
+        public static T? SelectTokenOrDefault<T>(
+            this JToken? jt,
+            string path,
+            T? default_ = default
+        )
         {
             if (string.IsNullOrEmpty(path))
                 return default_;

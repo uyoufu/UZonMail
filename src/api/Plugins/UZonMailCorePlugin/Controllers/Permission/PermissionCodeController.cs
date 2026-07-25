@@ -13,8 +13,7 @@ namespace UzonMail.CorePlugin.Controllers.Permission
     /// <summary>
     /// 权限码路由
     /// </summary>
-    public class PermissionCodeController(TokenService tokenService, SqlContext db)
-        : PermissionControllerBase
+    public class PermissionCodeController(SqlContext db) : PermissionControllerBase
     {
         /// <summary>
         /// 获取权限码数量

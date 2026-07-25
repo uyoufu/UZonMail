@@ -86,8 +86,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (string.IsNullOrEmpty(_outlookAuthorizeCallbackPage))
             {
                 // 从文件中读取
-                var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-                var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+                var assemblyDirectory =
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+                    ?? throw new InvalidOperationException("无法确定程序集目录");
                 var smtpInfoPath = Path.Combine(
                     assemblyDirectory,
                     "data/init/outlookAuthorizeCallback.html"

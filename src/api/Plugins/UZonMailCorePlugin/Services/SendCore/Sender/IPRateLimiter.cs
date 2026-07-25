@@ -57,9 +57,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
         public async Task WaitForReleaseAsync(SendingContext context, string outbox, string? hostIp)
         {
             var settingsManager = context.Provider.GetRequiredService<AppSettingsManager>();
+            var outboxAddress =
+                context.OutboxAddress ?? throw new InvalidOperationException("限流前必须先设置发件箱");
             var sendingSetting = await settingsManager.GetSetting<SendingSetting>(
                 context.SqlContext,
-                context.OutboxAddress.UserId
+                outboxAddress.UserId
             );
             await WaitForReleaseAsync(outbox, hostIp, sendingSetting.MaxCountPerIPDomainHour);
         }

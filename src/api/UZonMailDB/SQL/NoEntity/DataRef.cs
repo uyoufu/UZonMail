@@ -7,8 +7,8 @@
     public class DataRef : IDataRef
     {
         public long Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
 
         public DataRef() { }
 
@@ -64,7 +64,11 @@
                 throw new ArgumentException("Id is not int");
             }
 
-            return new DataRef((int)id, name.ToString(), description?.ToString() ?? "");
+            return new DataRef(
+                (int)id,
+                name.ToString() ?? throw new ArgumentException("Name cannot be converted to text"),
+                description?.ToString() ?? ""
+            );
         }
     }
 }

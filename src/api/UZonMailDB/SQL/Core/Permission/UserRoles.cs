@@ -17,7 +17,7 @@ namespace UzonMail.DB.SQL.Core.Permission
         public long UserId { get; set; }
 
         #region 导航属性
-        public User User { get; set; }
+        public User User { get; set; } = null!;
 
         /// <summary>
         /// 与 Role 是多对多关系

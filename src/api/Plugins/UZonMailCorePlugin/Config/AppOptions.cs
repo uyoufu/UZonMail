@@ -9,12 +9,12 @@ namespace UzonMail.CorePlugin.Config
     /// </summary>
     public class AppOptions
     {
-        public DatabaseOptions DataBase { get; set; }
-        public HttpOptions Http { get; set; }
-        public LoggerOptions Logger { get; set; }
-        public UserOptions User { get; set; }
-        public WebsocketOptions Websocket { get; set; }
-        public TokenParams TokenParams { get; set; }
+        public DatabaseOptions DataBase { get; set; } = new();
+        public HttpOptions Http { get; set; } = new();
+        public LoggerOptions Logger { get; set; } = new();
+        public UserOptions User { get; set; } = new();
+        public WebsocketOptions Websocket { get; set; } = new();
+        public TokenParams TokenParams { get; set; } = new();
         public FileStorageOptions FileStorage { get; set; } = new FileStorageOptions();
     }
 }

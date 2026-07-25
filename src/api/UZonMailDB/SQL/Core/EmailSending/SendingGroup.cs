@@ -29,7 +29,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// 主题
         /// 多个主题使用分号或者换行分隔
         /// </summary>
-        public string Subjects { get; set; }
+        public string Subjects { get; set; } = string.Empty;
 
         /// <summary>
         /// 模板
@@ -181,6 +181,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
                 if (string.IsNullOrEmpty(Subjects))
                 {
                     _subjects = [string.Empty];
+                    return _subjects;
                 }
 
                 // 分割主题
@@ -206,8 +207,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// <returns></returns>
         public string GetFirstSubject()
         {
-            SplitSubjects();
-            return _subjects.FirstOrDefault();
+            return SplitSubjects().FirstOrDefault() ?? string.Empty;
         }
 
         #endregion

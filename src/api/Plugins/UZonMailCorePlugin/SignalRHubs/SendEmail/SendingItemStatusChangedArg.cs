@@ -31,7 +31,7 @@ namespace UzonMail.CorePlugin.SignalRHubs.SendEmail
         /// <summary>
         /// 发件箱
         /// </summary>
-        public string FromEmail { get; private set; } = sendingItem.FromEmail;
+        public string? FromEmail { get; private set; } = sendingItem.FromEmail;
 
         /// <summary>
         /// 发送日期
@@ -46,6 +46,6 @@ namespace UzonMail.CorePlugin.SignalRHubs.SendEmail
         /// <summary>
         /// 主题
         /// </summary>
-        public string Subject { get; private set; } = sendingItem.Subject;
+        public string? Subject { get; private set; } = sendingItem.Subject;
     }
 }

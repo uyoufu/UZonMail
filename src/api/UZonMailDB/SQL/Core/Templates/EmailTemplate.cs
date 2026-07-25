@@ -19,7 +19,7 @@ namespace UzonMail.DB.SQL.Core.Templates
         /// <summary>
         /// 模板名称
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// 描述
@@ -29,7 +29,7 @@ namespace UzonMail.DB.SQL.Core.Templates
         /// <summary>
         /// 模板内容
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// 缩略图

@@ -6,11 +6,11 @@ namespace UzonMail.DB.SqLite
     public class SqLiteConnectionConfig : IConnectionString
     {
         public bool Enable { get; set; } = false;
-        public string DataSource { get; set; }
-        public string Version { get; set; }
-        public string Cache { get; set; }
-        public string Mode { get; set; }
-        public string Password { get; set; }
+        public string DataSource { get; set; } = string.Empty;
+        public string Version { get; set; } = string.Empty;
+        public string Cache { get; set; } = string.Empty;
+        public string Mode { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
 
         /// <summary>
         /// 获取连接字符串

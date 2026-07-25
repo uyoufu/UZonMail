@@ -23,11 +23,12 @@ namespace UzonMail.Utils.Database.LiteDB
             this ILiteRepository liteRepository,
             Expression<Func<T, bool>> filter,
             T data,
-            UpdateOptions options = null
+            UpdateOptions? options = null
         )
+            where T : class
         {
             // 查找是否存在
-            T exist = liteRepository.Query<T>().Where(filter).FirstOrDefault();
+            T? exist = liteRepository.Query<T>().Where(filter).FirstOrDefault();
             // 如果不存在，新建
             if (exist == null)
             {
@@ -42,7 +43,7 @@ namespace UzonMail.Utils.Database.LiteDB
                 .Where(p => options == null || options.Validate(p.Name));
             foreach (var prop in properties)
             {
-                object value = prop.GetValue(data);
+                object? value = prop.GetValue(data);
                 // 给exist赋值
                 prop.SetValue(exist, value);
             }
@@ -61,19 +62,20 @@ namespace UzonMail.Utils.Database.LiteDB
         /// <param name="data"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static T UpdateOne<T>(
+        public static T? UpdateOne<T>(
             this ILiteRepository liteRepository,
             Expression<Func<T, bool>> filter,
             T data,
-            UpdateOptions options = null
+            UpdateOptions? options = null
         )
+            where T : class
         {
             // 查找是否存在
-            T exist = liteRepository.Query<T>().Where(filter).FirstOrDefault();
+            T? exist = liteRepository.Query<T>().Where(filter).FirstOrDefault();
             // 如果不存在，返回空
             if (exist == null)
             {
-                return default;
+                return null;
             }
 
             // 更新数据
@@ -83,7 +85,7 @@ namespace UzonMail.Utils.Database.LiteDB
                 .Where(p => options == null || options.Validate(p.Name));
             foreach (var prop in properties)
             {
-                object value = prop.GetValue(data);
+                object? value = prop.GetValue(data);
                 // 如果为空，说明是默认值，不进行更新
                 if (value == null)
                     continue;

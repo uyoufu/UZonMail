@@ -16,6 +16,6 @@ namespace UzonMail.CorePlugin.SignalRHubs.SendEmail
         public long SendingGroupId { get; set; }
         public int Total { get; set; }
         public int Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 }

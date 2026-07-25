@@ -59,13 +59,15 @@ namespace UzonMail.Utils.Database.LiteDB
         /// <returns></returns>
         public static UpdateOptions CreateIgnoreDefaultValue<T>(T data)
         {
+            ArgumentNullException.ThrowIfNull(data);
+
             Type dataType = data.GetType();
             var properties = dataType.GetProperties();
             List<string> keys = new List<string>();
 
             foreach (var prop in properties)
             {
-                object value = prop.GetValue(data);
+                object? value = prop.GetValue(data);
                 if (value == null)
                     continue;
 

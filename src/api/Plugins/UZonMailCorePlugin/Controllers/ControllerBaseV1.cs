@@ -49,7 +49,7 @@ namespace UzonMail.CorePlugin.Controllers
                 return 0;
 
             var tokenPayloads = JWTToken.GetTokenPayloads(token);
-            string userId = tokenPayloads.SelectTokenOrDefault("userId", string.Empty);
+            string? userId = tokenPayloads.SelectTokenOrDefault("userId", string.Empty);
             if (int.TryParse(userId, out int intUserId))
                 return intUserId;
             return 0;

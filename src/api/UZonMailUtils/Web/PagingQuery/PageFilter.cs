@@ -8,6 +8,6 @@
         /// <summary>
         /// 过滤条件
         /// </summary>
-        public string Filter { get; set; }
+        public string Filter { get; set; } = string.Empty;
     }
 }

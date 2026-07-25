@@ -37,7 +37,7 @@ namespace UzonMail.DB.SQL.Core.Settings
         /// <summary>
         /// 名称
         /// </summary>
-        public string Key { get; set; }
+        public string Key { get; set; } = string.Empty;
 
         /// <summary>
         /// 字符串值

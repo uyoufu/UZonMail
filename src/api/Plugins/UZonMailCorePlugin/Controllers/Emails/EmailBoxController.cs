@@ -23,7 +23,6 @@ namespace UzonMail.CorePlugin.Controllers.Emails
     public class EmailBoxController(
         SqlContext db,
         TokenService tokenService,
-        UserService userService,
         EmailGroupService emailGroupService,
         OutboxValidateService emailUtils,
         EncryptService encryptService
@@ -120,15 +119,16 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             List<Outbox> existEmails = await db
                 .Outboxes.Where(x => x.UserId == userId && emails.Contains(x.Email))
                 .ToListAsync();
-            List<Outbox?> newEntities =
+            List<Outbox> newEntities =
             [
                 .. emails
                     .Except(existEmails.Select(x => x.Email))
                     .Select(x => entities.Find(e => e.Email == x))
+                    .OfType<Outbox>()
             ];
 
             // 新建发件箱
-            await db.Outboxes.AddRangeAsync(newEntities.Where(x => x != null));
+            await db.Outboxes.AddRangeAsync(newEntities);
 
             // 更新现有的发件箱
             foreach (var entity in existEmails)
@@ -244,19 +244,19 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                 .Inboxes.IgnoreQueryFilters()
                 .Where(x => x.UserId == userId && emails.Contains(x.Email))
                 .ToListAsync();
-            List<Inbox?> newEntities =
+            List<Inbox> newEntities =
             [
                 .. emails
                     .Except(existEmails.Select(x => x.Email))
                     .Select(x => entities.Find(e => e.Email == x))
+                    .OfType<Inbox>()
                     .Distinct()
             ];
 
             // 新建发件箱
             foreach (var entity in newEntities)
             {
-                if (entity != null)
-                    db.Inboxes.Add(entity);
+                db.Inboxes.Add(entity);
             }
 
             // 更新现有的发件箱
@@ -379,7 +379,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
-                    x.Email.Contains(filter) || x.Description.Contains(filter)
+                    x.Email.Contains(filter) || (x.Description ?? string.Empty).Contains(filter)
                 );
             }
             int count = await dbSet.CountAsync();
@@ -413,7 +413,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
-                    x.Email.Contains(filter) || x.Description.Contains(filter)
+                    x.Email.Contains(filter) || (x.Description ?? string.Empty).Contains(filter)
                 );
             }
             var results = await dbSet.Page(pagination).ToListAsync();
@@ -476,6 +476,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             var outbox = await db
                 .Outboxes.Where(x => x.Id == outboxId && x.UserId == userId)
                 .FirstOrDefaultAsync();
+            if (outbox is null)
+                return ResponseResult<Outbox>.Fail("未找到发件箱");
+
             return outbox.ToSuccessResponse();
         }
 
@@ -541,7 +544,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
-                    x.Email.Contains(filter) || x.Description.Contains(filter)
+                    x.Email.Contains(filter) || (x.Description ?? string.Empty).Contains(filter)
                 );
             }
             int count = await dbSet.CountAsync();
@@ -599,7 +602,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
-                    x.Email.Contains(filter) || x.Description.Contains(filter)
+                    x.Email.Contains(filter) || (x.Description ?? string.Empty).Contains(filter)
                 );
             }
             var results = await dbSet.Page(pagination).ToListAsync();

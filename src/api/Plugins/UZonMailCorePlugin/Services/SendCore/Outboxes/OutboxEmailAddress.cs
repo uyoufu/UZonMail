@@ -170,7 +170,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
             long sendingGroupId,
             EncryptParams encrypParams,
             OutboxEmailAddressType type,
-            List<long> sendingItemIds = null
+            List<long>? sendingItemIds = null
         )
         {
             Outbox = outbox;

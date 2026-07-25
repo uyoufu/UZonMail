@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using UzonMail.CorePlugin.Services.UserInfos;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Files;
 using UzonMail.Utils.Extensions;
@@ -11,8 +10,7 @@ namespace UzonMail.CorePlugin.Services.Files
     /// <summary>
     /// 文件存储服务
     /// </summary>
-    public class FileStoreService(SqlContext db, UserService userService, IWebHostEnvironment env)
-        : IScopedService
+    public class FileStoreService(SqlContext db, IWebHostEnvironment env) : IScopedService
     {
         /// <summary>
         /// 获取存在的文件对象
@@ -48,7 +46,9 @@ namespace UzonMail.CorePlugin.Services.Files
             string fullPath = Path.Combine(fileBucket.RootDir, relativePath);
 
             // 创建父目录
-            string baseDir = Path.GetDirectoryName(fullPath);
+            string baseDir =
+                Path.GetDirectoryName(fullPath)
+                ?? throw new InvalidOperationException("无法确定文件存储目录");
             Directory.CreateDirectory(baseDir);
             return (relativePath, fullPath);
         }
@@ -67,6 +67,8 @@ namespace UzonMail.CorePlugin.Services.Files
             ObjectFileUploaderBody fileParams
         )
         {
+            var uploadedFile = fileParams.File ?? throw new KnownException("未找到上传文件");
+
             if (!string.IsNullOrEmpty(fileParams.UniqueName))
             {
                 await DeleteFileObject(fileParams.Sha256);
@@ -83,11 +85,11 @@ namespace UzonMail.CorePlugin.Services.Files
                     // 计算保存位置
                     var (relativePath, fullPath) = GetObjectStorePath(
                         defaultBucket,
-                        fileParams.File.FileName
+                        uploadedFile.FileName
                     );
                     // 保存文件
                     using var stream = new FileStream(fullPath, FileMode.Create);
-                    fileParams.File.CopyTo(stream);
+                    uploadedFile.CopyTo(stream);
 
                     // 说明文件不存在
                     fileObject = new FileObject()
@@ -95,7 +97,7 @@ namespace UzonMail.CorePlugin.Services.Files
                         FileBucketId = defaultBucket.Id,
                         Sha256 = fileParams.Sha256,
                         Path = relativePath,
-                        Size = fileParams.File.Length,
+                        Size = uploadedFile.Length,
                         LastModifyDate = fileParams.LastModifyDate,
                     };
                     db.FileObjects.Add(fileObject);
@@ -109,7 +111,7 @@ namespace UzonMail.CorePlugin.Services.Files
                         OwnerUserId = userId,
                         FileObjectId = fileObject.Id,
                         IsPublic = fileParams.IsPublic,
-                        FileName = fileParams.File.FileName,
+                        FileName = uploadedFile.FileName,
                     };
                 db.FileUsages.Add(fileUsage);
 
@@ -254,7 +256,9 @@ namespace UzonMail.CorePlugin.Services.Files
             var relativePath = Path.Combine(paths);
             var fullPath = Path.Combine(root.Item1, relativePath);
 
-            string baseDir = Path.GetDirectoryName(fullPath);
+            string baseDir =
+                Path.GetDirectoryName(fullPath)
+                ?? throw new InvalidOperationException("无法确定静态文件目录");
             if (!Directory.Exists(baseDir))
                 Directory.CreateDirectory(baseDir);
 

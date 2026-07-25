@@ -30,8 +30,7 @@ namespace UzonMail.CorePlugin.Controllers.Users
         SqlContext db,
         UserService userService,
         TokenService tokenService,
-        FileStoreService fileStoreService,
-        EncryptService encryptService
+        FileStoreService fileStoreService
     ) : ControllerBaseV1
     {
         /// <summary>

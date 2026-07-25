@@ -152,10 +152,14 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (sendingGroup.Attachments != null && sendingGroup.Attachments.Count > 0)
             {
                 var fileObjectIds = sendingGroup.Attachments.Select(x => x.Id);
-                var fileObjects = db.FileObjects.Where(x => fileObjectIds.Contains(x.Id));
+                var fileObjects = await db
+                    .FileObjects.Where(x => fileObjectIds.Contains(x.Id))
+                    .ToDictionaryAsync(x => x.Id);
                 foreach (var attachment in sendingGroup.Attachments)
                 {
-                    var fileObject = fileObjects.FirstOrDefault(x => x.Id == attachment.Id);
+                    if (!fileObjects.TryGetValue(attachment.Id, out var fileObject))
+                        throw new InvalidOperationException($"附件文件不存在：{attachment.Id}");
+
                     attachment.FileObject = fileObject;
                 }
             }

@@ -20,7 +20,7 @@ namespace UzonMail.Utils.Plugin
     {
         private ILog _logger = LogManager.GetLogger(typeof(PluginLoader));
         private readonly string _pluginDir;
-        private List<string> _pluginDllFullPaths;
+        private List<string> _pluginDllFullPaths = [];
         private List<Assembly> _pluginAssemblies = [];
         private List<IPlugin> _plugins = [];
 

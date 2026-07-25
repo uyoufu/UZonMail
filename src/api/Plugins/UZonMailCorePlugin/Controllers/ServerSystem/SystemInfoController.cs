@@ -17,8 +17,8 @@ namespace UzonMail.CorePlugin.Controllers.ServerSystem
         public ResponseResult<string> GetSystemVersion()
         {
             // 获取当前程序集的版本
-            var version = Assembly.GetEntryAssembly().GetName().Version;
-            return version.ToString().ToSuccessResponse();
+            var version = Assembly.GetEntryAssembly()?.GetName().Version;
+            return (version?.ToString() ?? string.Empty).ToSuccessResponse();
         }
     }
 }

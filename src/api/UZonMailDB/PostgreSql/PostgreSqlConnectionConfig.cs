@@ -8,11 +8,11 @@ namespace UzonMail.DB.PostgreSql
     public class PostgreSqlConnectionConfig : IConnectionString
     {
         public bool Enable { get; set; } = false;
-        public string Host { get; set; }
+        public string Host { get; set; } = string.Empty;
         public int Port { get; set; }
-        public string Database { get; set; }
-        public string User { get; set; }
-        public string Password { get; set; }
+        public string Database { get; set; } = string.Empty;
+        public string User { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
 
         /// <summary>
         /// 连接字符串

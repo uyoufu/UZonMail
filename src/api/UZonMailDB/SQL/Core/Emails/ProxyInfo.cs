@@ -65,7 +65,7 @@ namespace UzonMail.DB.SQL.Core.Emails
             return $"{Schema}://{Username}:{Password}@{Host}:{Port}";
         }
 
-        private ProxyClient _proxyClient;
+        private ProxyClient? _proxyClient;
 
         /// <summary>
         /// 生成代理客户端

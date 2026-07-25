@@ -8,7 +8,7 @@ namespace UzonMail.DB.SQL.Core.Files
     public class FileObject : SqlId
     {
         public long FileBucketId { get; set; }
-        public FileBucket FileBucket { get; set; }
+        public FileBucket FileBucket { get; set; } = null!;
 
         /// <summary>
         /// 最后修改日期
@@ -18,13 +18,13 @@ namespace UzonMail.DB.SQL.Core.Files
         /// <summary>
         /// 哈希值
         /// </summary>
-        public string Sha256 { get; set; }
+        public string Sha256 { get; set; } = string.Empty;
 
         /// <summary>
         /// 文件位置
         /// 相对于桶根目录的路径
         /// </summary>
-        public string Path { get; set; }
+        public string Path { get; set; } = string.Empty;
 
         /// <summary>
         /// 引用数量

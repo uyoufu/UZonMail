@@ -132,7 +132,7 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             inboxes.AddRange(group.Inboxes);
 
             // 按组添加
-            if (group.InboxGroups.Count > 0)
+            if (group.InboxGroups?.Count > 0)
             {
                 var groupIds = group.InboxGroups.Select(x => x.Id).ToList();
                 var temps = await db

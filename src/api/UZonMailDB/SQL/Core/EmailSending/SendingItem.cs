@@ -19,7 +19,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// 所属发送任务
         /// </summary>
         public long SendingGroupId { get; set; }
-        public SendingGroup SendingGroup { get; set; }
+        public SendingGroup SendingGroup { get; set; } = null!;
 
         /// <summary>
         /// 所属用户
@@ -44,7 +44,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// 可能有多个收件人
         /// </summary>
         [JsonField]
-        public List<EmailAddress> Inboxes { get; set; }
+        public List<EmailAddress> Inboxes { get; set; } = [];
 
         /// <summary>
         /// 抄送人

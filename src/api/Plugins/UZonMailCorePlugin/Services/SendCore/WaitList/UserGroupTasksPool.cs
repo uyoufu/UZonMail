@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using log4net;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
@@ -133,12 +134,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             return true;
         }
 
-        public bool TryGetValue(long key, out GroupTask value)
+        public bool TryGetValue(long key, [MaybeNullWhen(false)] out GroupTask value)
         {
             return _tasks.TryGetValue(key, out value);
         }
 
-        public bool TryRemove(long key, out GroupTask value)
+        public bool TryRemove(long key, [MaybeNullWhen(false)] out GroupTask value)
         {
             if (!_tasks.TryRemove(key, out value))
                 return false;

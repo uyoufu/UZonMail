@@ -42,7 +42,7 @@ namespace UzonMail.Utils.Results
         /// <param name="ok"></param>
         /// <param name="data"></param>
         /// <param name="message"></param>
-        public Result(bool ok, string message, T data)
+        public Result(bool ok, string message, T? data)
         {
             Data = data;
             Ok = ok;
@@ -52,9 +52,9 @@ namespace UzonMail.Utils.Results
         /// <summary>
         /// 数据
         /// </summary>
-        public T Data { get; set; }
+        public T? Data { get; set; }
 
-        public override object GetData()
+        public override object? GetData()
         {
             return Data;
         }
@@ -103,7 +103,7 @@ namespace UzonMail.Utils.Results
         /// <param name="message"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static Result<T> Fail(string message, T data = default)
+        public static Result<T> Fail(string message, T? data = default)
         {
             return new Result<T>(false, message, data);
         }

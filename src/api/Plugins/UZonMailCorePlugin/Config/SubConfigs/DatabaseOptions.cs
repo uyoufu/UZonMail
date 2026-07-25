@@ -11,12 +11,12 @@ namespace UzonMail.CorePlugin.Config.SubConfigs
         /// <summary>
         /// liteDB 保存的相对路径
         /// </summary>
-        public string LiteDbPath { get; set; }
+        public string LiteDbPath { get; set; } = string.Empty;
 
         /// <summary>
         /// SQLite 连接字符串
         /// </summary>
-        public string SqliteConnectionString { get; set; }
+        public string SqliteConnectionString { get; set; } = string.Empty;
 
         #region 静态帮助方法
         private static string GetDatabaseConfigKey()

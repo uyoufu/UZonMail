@@ -7,7 +7,7 @@ namespace UzonMail.DB.SQL.Core.Emails
     /// </summary>
     public class OutboxSetting : SqlId
     {
-        public string ProxyHost { get; set; }
+        public string ProxyHost { get; set; } = string.Empty;
 
         public string? ProxyPassword { get; set; }
     }

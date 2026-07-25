@@ -59,6 +59,9 @@ namespace UzonMail.CorePlugin.Controllers.Files
             }
             var userId = tokenService.GetUserSqlId();
             fileParams.File ??= Request.Form.Files.FirstOrDefault();
+            if (fileParams.File is null)
+                return 0L.ToFailResponse("未找到上传文件");
+
             FileUsage fileUsage = await fileStoreService.UploadFileObject(userId, fileParams);
             return fileUsage.Id.ToSuccessResponse();
         }

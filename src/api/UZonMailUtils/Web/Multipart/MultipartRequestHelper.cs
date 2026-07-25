@@ -37,7 +37,7 @@ namespace UzonMail.Utils.Web.Multipart
         /// </summary>
         /// <param name="contentType"></param>
         /// <returns></returns>
-        public static bool IsMultipartContentType(string contentType)
+        public static bool IsMultipartContentType(string? contentType)
         {
             return !string.IsNullOrEmpty(contentType)
                 && contentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -49,7 +49,7 @@ namespace UzonMail.Utils.Web.Multipart
         /// <param name="contentDisposition"></param>
         /// <returns></returns>
         public static bool HasFormDataContentDisposition(
-            ContentDispositionHeaderValue contentDisposition
+            ContentDispositionHeaderValue? contentDisposition
         )
         {
             // Content-Disposition: form-data; name="key";
@@ -65,7 +65,7 @@ namespace UzonMail.Utils.Web.Multipart
         /// <param name="contentDisposition"></param>
         /// <returns></returns>
         public static bool HasFileContentDisposition(
-            ContentDispositionHeaderValue contentDisposition
+            ContentDispositionHeaderValue? contentDisposition
         )
         {
             // Content-Disposition: form-data; name="myfile1"; filename="Misc 002.jpg"
@@ -87,7 +87,8 @@ namespace UzonMail.Utils.Web.Multipart
             ContentDispositionHeaderValue contentDisposition
         )
         {
-            return contentDisposition.Name.Value;
+            return contentDisposition.Name.Value
+                ?? throw new InvalidDataException("Multipart file section is missing a name.");
         }
 
         /// <summary>
@@ -98,7 +99,10 @@ namespace UzonMail.Utils.Web.Multipart
         /// <returns></returns>
         public static string GetFileName(ContentDispositionHeaderValue contentDisposition)
         {
-            return contentDisposition.FileName.Value;
+            var fileName =
+                contentDisposition.FileNameStar.Value ?? contentDisposition.FileName.Value;
+            return fileName
+                ?? throw new InvalidDataException("Multipart file section is missing a file name.");
         }
     }
 }

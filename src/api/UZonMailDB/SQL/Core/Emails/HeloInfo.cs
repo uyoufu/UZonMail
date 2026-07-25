@@ -11,7 +11,7 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// <summary>
         /// 主机名
         /// </summary>
-        public string Host { get; set; }
+        public string Host { get; set; } = string.Empty;
 
         /// <summary>
         /// 端口号

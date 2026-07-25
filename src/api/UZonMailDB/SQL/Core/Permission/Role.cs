@@ -14,7 +14,7 @@ namespace UzonMail.DB.SQL.Core.Permission
         /// <summary>
         /// 角色名
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// 描述

@@ -19,7 +19,7 @@ namespace UzonMail.DB.SQL.Core.Files
         /// 拥有者的用户ID
         /// </summary>
         public long OwnerUserId { get; set; }
-        public User OwnerUser { get; set; }
+        public User OwnerUser { get; set; } = null!;
 
         /// <summary>
         /// 唯一名称
@@ -27,7 +27,7 @@ namespace UzonMail.DB.SQL.Core.Files
         /// </summary>
         public string? UniqueName { get; set; }
 
-        private string _fileName;
+        private string _fileName = string.Empty;
 
         /// <summary>
         /// 文件名（包含后缀）
@@ -60,7 +60,7 @@ namespace UzonMail.DB.SQL.Core.Files
         /// <summary>
         /// 文件对象
         /// </summary>
-        public FileObject FileObject { get; set; }
+        public FileObject FileObject { get; set; } = null!;
 
         /// <summary>
         /// 是否是公共文件

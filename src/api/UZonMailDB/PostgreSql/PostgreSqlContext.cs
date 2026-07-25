@@ -5,7 +5,7 @@ namespace UzonMail.DB.PostgreSql
 {
     public class PostgreSqlContext : SqlContext
     {
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration? _configuration;
 
         internal PostgreSqlContext(DbContextOptions<SqlContext> options)
             : base(options) { }
@@ -18,7 +18,13 @@ namespace UzonMail.DB.PostgreSql
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            SqlContextHelper.ConfiguringPostgreSql(options, _configuration);
+            if (options.IsConfigured)
+                return;
+
+            SqlContextHelper.ConfiguringPostgreSql(
+                options,
+                _configuration ?? throw new InvalidOperationException("PostgreSQL 上下文缺少数据库配置。")
+            );
         }
     }
 }

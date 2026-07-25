@@ -13,7 +13,9 @@ namespace UzonMail.CorePlugin.Services.Settings
     /// <param name="httpContextAccessor"></param>
     public class TokenService(IHttpContextAccessor httpContextAccessor) : IScopedService
     {
-        private HttpRequest Request => httpContextAccessor.HttpContext.Request;
+        private HttpRequest Request =>
+            httpContextAccessor.HttpContext?.Request
+            ?? throw new InvalidOperationException("当前请求上下文不可用");
 
         /// <summary>
         /// 获取 token 值

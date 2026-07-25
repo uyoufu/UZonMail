@@ -12,7 +12,6 @@ namespace UzonMail.CorePlugin.Database.Upgrade
     /// </summary>
     /// <param name="db"></param>
     public class DatabaseUpdateService(
-        IServiceProvider serviceProvider,
         IEnumerable<IDatabaseUpdater> updaters,
         SqlContext db,
         IConfiguration config
@@ -67,12 +66,16 @@ namespace UzonMail.CorePlugin.Database.Upgrade
             else if (versionSetting.StringValue != "0.0.0.0")
             {
                 // 判断是支持升级
-                var dbVersion = new Version(versionSetting.StringValue);
+                var dbVersion = new Version(
+                    versionSetting.StringValue ?? throw new InvalidOperationException("数据库版本配置不能为空")
+                );
                 if (dbVersion < _minVersionSupport)
                     throw new ArgumentException("当前数据库版本太低，不支持直接升级。请删除数据库后，重启启动");
             }
 
-            var originVersion = new Version(versionSetting.StringValue);
+            var originVersion = new Version(
+                versionSetting.StringValue ?? throw new InvalidOperationException("数据库版本配置不能为空")
+            );
             if (originVersion > RequiredVersion)
                 throw new ArgumentException("数据库版本高于当前所需版本，请更新程序后再使用");
 

@@ -12,12 +12,12 @@ namespace UzonMail.DB.SQL.Core.Permission
         /// <summary>
         /// 权限码
         /// </summary>
-        public string Code { get; set; }
+        public string Code { get; set; } = string.Empty;
 
         /// <summary>
         /// 说明
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         /// <summary>
         /// 是否是负权限
@@ -28,7 +28,7 @@ namespace UzonMail.DB.SQL.Core.Permission
         /// <summary>
         /// 关联的角色
         /// </summary>
-        public List<Role> Roles { get; set; }
+        public List<Role> Roles { get; set; } = [];
 
         #region 静态变量
         public static string OrganizationPermissionCode => "organizationAdmin";

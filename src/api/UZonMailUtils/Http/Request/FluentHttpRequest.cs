@@ -29,7 +29,7 @@ namespace UzonMail.Utils.Http.Request
             _url = url;
         }
 
-        private HttpClient _httpClient;
+        private HttpClient? _httpClient;
 
         public FluentHttpRequest WithHttpClient(HttpClient client)
         {
@@ -37,7 +37,7 @@ namespace UzonMail.Utils.Http.Request
             return this;
         }
 
-        private HttpClientHandler _httpClientHandler;
+        private HttpClientHandler? _httpClientHandler;
 
         /// <summary>
         /// 设置代理
@@ -80,7 +80,7 @@ namespace UzonMail.Utils.Http.Request
             return this;
         }
 
-        private string _url;
+        private string? _url;
 
         /// <summary>
         /// 添加请求 URL
@@ -151,11 +151,11 @@ namespace UzonMail.Utils.Http.Request
         /// </summary>
         public Uri BuildUri()
         {
-            ThrowErrorIfInvalid();
+            var url = GetRequiredUrl();
 
             // 将 params 进行替换
             var urlParams = _parameters.Values.Where(p => p.Type == ParameterType.Params);
-            var strBuilder = new StringBuilder(_url);
+            var strBuilder = new StringBuilder(url);
             foreach (var urlParam in urlParams)
             {
                 strBuilder = strBuilder.Replace($"{{{urlParam.Name}}}", urlParam.Value);
@@ -172,10 +172,12 @@ namespace UzonMail.Utils.Http.Request
             return this.RequestUri;
         }
 
-        private void ThrowErrorIfInvalid()
+        private string GetRequiredUrl()
         {
             if (string.IsNullOrEmpty(_url))
                 throw new ArgumentNullException(nameof(_url));
+
+            return _url;
         }
 
         /// <summary>
@@ -186,7 +188,10 @@ namespace UzonMail.Utils.Http.Request
         {
             BuildUri();
 
-            _httpClient ??= new HttpClient(_httpClientHandler) { Timeout = _timeout };
+            _httpClient ??=
+                _httpClientHandler == null
+                    ? new HttpClient { Timeout = _timeout }
+                    : new HttpClient(_httpClientHandler) { Timeout = _timeout };
 
             try
             {

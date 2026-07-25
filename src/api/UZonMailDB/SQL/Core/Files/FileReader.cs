@@ -20,7 +20,7 @@ namespace UzonMail.DB.SQL.Core.Files
         /// <summary>
         /// 包含后缀的文件名
         /// </summary>
-        public string FileName { get; set; }
+        public string FileName { get; set; } = string.Empty;
 
         /// <summary>
         /// 文件对象的 Id
@@ -30,7 +30,7 @@ namespace UzonMail.DB.SQL.Core.Files
         /// <summary>
         /// 文件对象导航属性
         /// </summary>
-        public FileObject FileObject { get; set; }
+        public FileObject FileObject { get; set; } = null!;
 
         /// <summary>
         /// 过期日期

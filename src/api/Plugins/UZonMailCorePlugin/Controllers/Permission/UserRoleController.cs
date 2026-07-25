@@ -40,6 +40,9 @@ namespace UzonMail.CorePlugin.Controllers.Permission
                     .UserRole.Where(x => x.Id == userRole.Id)
                     .Include(x => x.Roles)
                     .FirstOrDefaultAsync();
+                if (existOne is null)
+                    return ResponseResult<UserRoles>.Fail("未找到对应的用户角色");
+
                 existOne.UserId = userRole.UserId;
                 existOne.Roles.SetList(userRole.Roles);
                 userRole = existOne;
@@ -65,7 +68,7 @@ namespace UzonMail.CorePlugin.Controllers.Permission
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
-                    x.User.UserName.Contains(filter) || x.User.UserName.Contains(filter)
+                    x.User != null && (x.User.UserName ?? string.Empty).Contains(filter)
                 );
             }
             int count = await dbSet.CountAsync();
@@ -87,7 +90,7 @@ namespace UzonMail.CorePlugin.Controllers.Permission
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
-                    x.User.UserName.Contains(filter) || x.User.UserName.Contains(filter)
+                    x.User != null && (x.User.UserName ?? string.Empty).Contains(filter)
                 );
             }
             var results = await dbSet

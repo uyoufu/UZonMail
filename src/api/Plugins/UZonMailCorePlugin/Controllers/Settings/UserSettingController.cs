@@ -13,14 +13,10 @@ namespace UzonMail.CorePlugin.Controllers.Settings
     /// <summary>
     /// 用户级设置
     /// </summary>
-    /// <param name="db"></param>
     /// <param name="tokenService"></param>
     /// <param name="settingService"></param>
-    public class UserSettingController(
-        SqlContext db,
-        TokenService tokenService,
-        AppSettingService settingService
-    ) : ControllerBaseV1
+    public class UserSettingController(TokenService tokenService, AppSettingService settingService)
+        : ControllerBaseV1
     {
         /// <summary>
         /// 更新系统设置

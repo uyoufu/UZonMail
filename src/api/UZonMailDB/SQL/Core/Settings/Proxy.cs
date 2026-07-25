@@ -13,7 +13,7 @@ namespace UzonMail.DB.SQL.Core.Settings
         /// <summary>
         /// 代理名称
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// 说明
@@ -49,7 +49,7 @@ namespace UzonMail.DB.SQL.Core.Settings
         /// 代理设置地址
         /// 格式：http://username:password@host:port
         /// </summary>
-        public string Url { get; set; }
+        public string Url { get; set; } = string.Empty;
 
         /// <summary>
         /// 是否匹配

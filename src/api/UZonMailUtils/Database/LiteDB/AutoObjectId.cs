@@ -43,7 +43,7 @@ namespace UzonMail.Utils.Database.LiteDB
         /// </summary>
         /// <param name="fieldName"></param>
         /// <returns></returns>
-        public object GetValue(string fieldName)
+        public object? GetValue(string fieldName)
         {
             var propertyInfo = GetType().GetProperty(fieldName);
             if (propertyInfo == null)

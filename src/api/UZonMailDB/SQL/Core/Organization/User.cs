@@ -32,7 +32,7 @@ namespace UzonMail.DB.SQL.Core.Organization
         /// <summary>
         /// 用户名
         /// </summary>
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         /// <summary>
         /// 用户姓名
@@ -48,7 +48,7 @@ namespace UzonMail.DB.SQL.Core.Organization
         /// <summary>
         /// 密码
         /// </summary>
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         /// <summary>
         /// 头像

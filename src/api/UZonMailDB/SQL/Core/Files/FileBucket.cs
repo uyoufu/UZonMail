@@ -10,7 +10,7 @@ namespace UzonMail.DB.SQL.Core.Files
         /// <summary>
         /// 桶名称
         /// </summary>
-        public string BucketName { get; set; }
+        public string BucketName { get; set; } = string.Empty;
 
         /// <summary>
         /// 描述
@@ -20,7 +20,7 @@ namespace UzonMail.DB.SQL.Core.Files
         /// <summary>
         /// 存放根目录
         /// </summary>
-        public string RootDir { get; set; }
+        public string RootDir { get; set; } = string.Empty;
 
         /// <summary>
         /// 是否是默认桶

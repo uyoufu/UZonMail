@@ -25,7 +25,7 @@ namespace UzonMail.Utils.Web.ResponseModel
         public static ResponseResult<T> Fail(
             string message,
             HttpStatusCode code = HttpStatusCode.BadRequest,
-            T data = default
+            T? data = default
         ) =>
             new()
             {

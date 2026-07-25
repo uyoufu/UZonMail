@@ -5,7 +5,7 @@ namespace UzonMail.DB.SqLite
 {
     public class SqLiteContext : SqlContext
     {
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration? _configuration;
 
         internal SqLiteContext(DbContextOptions<SqlContext> options)
             : base(options) { }
@@ -18,7 +18,13 @@ namespace UzonMail.DB.SqLite
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            SqlContextHelper.ConfiguringSqLite(options, _configuration);
+            if (options.IsConfigured)
+                return;
+
+            SqlContextHelper.ConfiguringSqLite(
+                options,
+                _configuration ?? throw new InvalidOperationException("SQLite 上下文缺少数据库配置。")
+            );
         }
     }
 }

@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Builder;
 
 namespace UzonMail.Server.Middlewares
 {
+    /// <summary>
+    /// 注册 Vue 单页应用回退中间件。
+    /// </summary>
     public static class VueASPMiddlewareExtension
     {
         /// <summary>
@@ -29,9 +32,16 @@ namespace UzonMail.Server.Middlewares
         private readonly string _indexFilePath;
         private List<string> _existNames = [];
 
-        public bool IsValid { get; private set; }
+        /// <summary>
+        /// 获取当前部署目录是否包含可用的 Vue 入口文件。
+        /// </summary>
+        public bool IsValid { get; }
 
-        public VueASPMiddleware(string wwwrootPath)
+        /// <summary>
+        /// 创建 Vue 单页应用回退中间件。
+        /// </summary>
+        /// <param name="wwwrootPath">静态文件目录；为空时使用应用程序目录下的 wwwroot。</param>
+        public VueASPMiddleware(string? wwwrootPath)
         {
             if (string.IsNullOrEmpty(wwwrootPath))
                 wwwrootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
@@ -54,6 +64,11 @@ namespace UzonMail.Server.Middlewares
             _existNames.AddRange(dirs);
         }
 
+        /// <summary>
+        /// 在后续中间件返回 404 时，将客户端路由回退到 index.html。
+        /// </summary>
+        /// <param name="context">当前 HTTP 上下文。</param>
+        /// <param name="next">后续请求管道。</param>
         public async Task Invoke(HttpContext context, Func<Task> next)
         {
             await next();

@@ -12,9 +12,16 @@ namespace UzonMail.CorePlugin.Services.Common
     /// <summary>
     /// 通用的增删改查服务
     /// </summary>
-    public abstract class CurdService<TEntity>(SqlContext db) : IScopedService
+    public abstract class CurdService<TEntity> : IScopedService
         where TEntity : SqlId
     {
+        protected CurdService(SqlContext db)
+        {
+            Db = db;
+        }
+
+        protected SqlContext Db { get; }
+
         /// <summary>
         /// 执行事务
         /// </summary>
@@ -23,7 +30,7 @@ namespace UzonMail.CorePlugin.Services.Common
         /// <returns></returns>
         public async Task<TEntity> Transaction(Func<SqlContext, Task<TEntity>> func)
         {
-            return await db.RunTransaction(func);
+            return await Db.RunTransaction(func);
         }
 
         /// <summary>
@@ -36,8 +43,8 @@ namespace UzonMail.CorePlugin.Services.Common
         {
             ArgumentNullException.ThrowIfNull(entity);
 
-            db.Add(entity);
-            await db.SaveChangesAsync();
+            Db.Add(entity);
+            await Db.SaveChangesAsync();
             return entity;
         }
 
@@ -58,7 +65,7 @@ namespace UzonMail.CorePlugin.Services.Common
                 throw new ArgumentNullException(nameof(modifiedPropertyNames));
             }
 
-            return await db.UpdateById(entity, modifiedPropertyNames);
+            return await Db.UpdateById(entity, modifiedPropertyNames);
         }
 
         /// <summary>
@@ -71,8 +78,8 @@ namespace UzonMail.CorePlugin.Services.Common
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
-            db.Remove(entity);
-            await db.SaveChangesAsync();
+            Db.Remove(entity);
+            await Db.SaveChangesAsync();
             return true;
         }
 
@@ -83,7 +90,7 @@ namespace UzonMail.CorePlugin.Services.Common
         /// <returns></returns>
         public virtual async Task<bool> DeleteById(long id)
         {
-            await db.Set<TEntity>().Where(x => x.Id == id).ExecuteDeleteAsync();
+            await Db.Set<TEntity>().Where(x => x.Id == id).ExecuteDeleteAsync();
             ;
             return true;
         }
@@ -95,7 +102,7 @@ namespace UzonMail.CorePlugin.Services.Common
         /// <returns></returns>
         public virtual async Task<TEntity?> FindOneById(long id)
         {
-            return await db.FindAsync<TEntity>(id);
+            return await Db.FindAsync<TEntity>(id);
         }
     }
 }

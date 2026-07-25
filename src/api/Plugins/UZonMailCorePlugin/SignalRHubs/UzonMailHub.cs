@@ -1,13 +1,12 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
-using UzonMail.CorePlugin.Services.Encrypt;
 
 namespace UzonMail.CorePlugin.SignalRHubs
 {
     /// <summary>
     /// 邮件发送进度 Hub
     /// </summary>
-    public partial class UzonMailHub(EncryptService encryptService) : Hub<IUzonMailClient>
+    public partial class UzonMailHub : Hub<IUzonMailClient>
     {
         // 使用一个字典来跟踪用户的连接
         // 有可能同一个用户同时打开多个浏览器窗口
@@ -45,7 +44,7 @@ namespace UzonMail.CorePlugin.SignalRHubs
         /// </summary>
         /// <param name="exception"></param>
         /// <returns></returns>
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             // 当用户断开连接时，将他们从字典中移除
             _userConnectionIds.TryRemove(Context.ConnectionId, out _);

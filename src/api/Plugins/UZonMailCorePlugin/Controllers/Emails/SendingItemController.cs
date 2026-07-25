@@ -55,9 +55,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
-                    x.Subject.Contains(filter)
-                    || x.ToEmails.Contains(filter)
-                    || x.FromEmail.Contains(filter)
+                    (x.Subject ?? string.Empty).Contains(filter)
+                    || (x.ToEmails ?? string.Empty).Contains(filter)
+                    || (x.FromEmail ?? string.Empty).Contains(filter)
                 );
             }
             var count = await dbSet.CountAsync();
@@ -111,9 +111,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (!string.IsNullOrEmpty(filter))
             {
                 dbSet = dbSet.Where(x =>
-                    x.Subject.Contains(filter)
-                    || x.ToEmails.Contains(filter)
-                    || x.FromEmail.Contains(filter)
+                    (x.Subject ?? string.Empty).Contains(filter)
+                    || (x.ToEmails ?? string.Empty).Contains(filter)
+                    || (x.FromEmail ?? string.Empty).Contains(filter)
                 );
             }
 
@@ -143,7 +143,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                 x.Id == sendingItemId && x.UserId == userId
             );
             if (sendingItem == null)
-                return "".ToFailResponse("邮件已被删除");
+                return ResponseResult<string?>.Fail("邮件已被删除");
             return sendingItem.Content.ToSuccessResponse();
         }
     }

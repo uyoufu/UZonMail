@@ -25,7 +25,7 @@ namespace UzonMail.CorePlugin.Controllers.Statistics
                 .Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)
                 .GroupBy(x => x.Domain)
-                .Select(x => new EmailCount { Domain = x.Key, Count = x.Count() })
+                .Select(x => new EmailCount { Domain = x.Key ?? string.Empty, Count = x.Count() })
                 .ToListAsync();
             return emailCounts.ToSuccessResponse();
         }
@@ -43,7 +43,7 @@ namespace UzonMail.CorePlugin.Controllers.Statistics
                 .Inboxes.Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)
                 .GroupBy(x => x.Domain)
-                .Select(x => new EmailCount { Domain = x.Key, Count = x.Count() })
+                .Select(x => new EmailCount { Domain = x.Key ?? string.Empty, Count = x.Count() })
                 .ToListAsync();
             return emailCounts.ToSuccessResponse();
         }

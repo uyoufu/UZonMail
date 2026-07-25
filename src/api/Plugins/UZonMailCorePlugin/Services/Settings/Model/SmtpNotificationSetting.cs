@@ -9,14 +9,14 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
     /// </summary>
     public class SmtpNotificationSetting : BaseSettingModel
     {
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
-        public string SmtpHost { get; set; }
+        public string SmtpHost { get; set; } = string.Empty;
 
         public int SmtpPort { get; set; }
 
         // 该密码是明文存储的
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         // 安全套接字选项
         public ConnectionSecurity ConnectionSecurity { get; set; } = ConnectionSecurity.SSL;

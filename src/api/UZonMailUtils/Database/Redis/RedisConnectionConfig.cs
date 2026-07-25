@@ -6,7 +6,7 @@
     public class RedisConnectionConfig
     {
         public bool Enable { get; set; }
-        public string Host { get; set; }
+        public string Host { get; set; } = string.Empty;
         public int Port { get; set; }
         public string? Password { get; set; }
         public int Database { get; set; }

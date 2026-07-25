@@ -87,7 +87,7 @@ namespace UzonMail.DB.SQL
                 await transaction.CommitAsync();
                 return result;
             }
-            catch (Exception e)
+            catch
             {
                 // 如果有任何操作失败，那么回滚事务
                 await transaction.RollbackAsync();

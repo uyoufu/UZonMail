@@ -18,6 +18,7 @@ namespace UzonMail.Utils.Web.Multipart
     /// </summary>
     public static class FileStreamingHelper
     {
+        private const string Utf7EncodingName = "utf-7";
         private static readonly FormOptions _defaultFormOptions = new();
 
         /// <summary>
@@ -33,9 +34,15 @@ namespace UzonMail.Utils.Web.Multipart
             string targetDirectory
         )
         {
-            if (!MultipartRequestHelper.IsMultipartContentType(request.ContentType))
+            var contentType = request.ContentType;
+            if (
+                string.IsNullOrEmpty(contentType)
+                || !MultipartRequestHelper.IsMultipartContentType(contentType)
+            )
             {
-                throw new Exception($"Expected a multipart request, but got {request.ContentType}");
+                throw new InvalidDataException(
+                    $"Expected a multipart request, but got {request.ContentType}"
+                );
             }
 
             // Used to accumulate all the form url encoded key value pairs in the
@@ -43,7 +50,7 @@ namespace UzonMail.Utils.Web.Multipart
             var formAccumulator = new KeyValueAccumulator();
 
             var boundary = MultipartRequestHelper.GetBoundary(
-                MediaTypeHeaderValue.Parse(request.ContentType),
+                MediaTypeHeaderValue.Parse(contentType),
                 _defaultFormOptions.MultipartBoundaryLengthLimit
             );
             var reader = new MultipartReader(boundary, request.Body);
@@ -53,10 +60,10 @@ namespace UzonMail.Utils.Web.Multipart
             {
                 var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(
                     section.ContentDisposition,
-                    out ContentDispositionHeaderValue contentDisposition
+                    out ContentDispositionHeaderValue? contentDisposition
                 );
 
-                if (hasContentDispositionHeader)
+                if (hasContentDispositionHeader && contentDisposition != null)
                 {
                     /*
                     用于处理上传文件类型的的section
@@ -124,6 +131,11 @@ namespace UzonMail.Utils.Web.Multipart
                         {
                             value = string.Empty;
                         }
+                        if (string.IsNullOrEmpty(key.Value))
+                            throw new InvalidDataException(
+                                "Multipart form section is missing a name."
+                            );
+
                         formAccumulator.Append(key.Value, value); // For .NET Core <2.0 remove ".Value" from key
                         if (formAccumulator.ValueCount > _defaultFormOptions.ValueCountLimit)
                         {
@@ -151,18 +163,24 @@ namespace UzonMail.Utils.Web.Multipart
 
         private static Encoding GetEncoding(MultipartSection section)
         {
-            MediaTypeHeaderValue mediaType;
             var hasMediaTypeHeader = MediaTypeHeaderValue.TryParse(
                 section.ContentType,
-                out mediaType
+                out var mediaType
             );
             // UTF-7 is insecure and should not be honored. UTF-8 will succeed in
             // most cases.
-            if (!hasMediaTypeHeader || Encoding.UTF7.Equals(mediaType.Encoding))
+            if (!hasMediaTypeHeader || mediaType?.Encoding == null)
             {
                 return Encoding.UTF8;
             }
-            return mediaType.Encoding;
+
+            return string.Equals(
+                mediaType.Encoding.WebName,
+                Utf7EncodingName,
+                StringComparison.OrdinalIgnoreCase
+            )
+                ? Encoding.UTF8
+                : mediaType.Encoding;
         }
     }
 }

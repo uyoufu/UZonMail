@@ -10,26 +10,26 @@ namespace UzonMail.CorePlugin.Controllers.Emails.Models
         /// <summary>
         /// 主题
         /// </summary>
-        public string Subject { get; set; }
+        public required string Subject { get; set; }
 
         /// <summary>
         /// 正文内容
         /// </summary>
-        public string Body { get; set; }
+        public required string Body { get; set; }
 
         /// <summary>
         /// 数据
         /// </summary>
-        public JObject Data { get; set; }
+        public required JObject Data { get; set; }
 
         /// <summary>
         /// 收件箱
         /// </summary>
-        public string Inbox { get; set; }
+        public required string Inbox { get; set; }
 
         /// <summary>
         /// 发件箱
         /// </summary>
-        public string Outbox { get; set; }
+        public required string Outbox { get; set; }
     }
 }

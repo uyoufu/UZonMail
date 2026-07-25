@@ -12,7 +12,7 @@ namespace UzonMail.DB.SQL.Core.Emails
     public class EmailGroup : SqlId
     {
         public long UserId { get; set; }
-        public User User { get; set; }
+        public User User { get; set; } = null!;
 
         /// <summary>
         /// 类型
@@ -29,7 +29,7 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// <summary>
         /// 显示名称
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public string? Description { get; set; }
 
@@ -46,7 +46,7 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// <summary>
         /// 收件箱
         /// </summary>
-        public List<Inbox> Inboxes { get; set; }
+        public List<Inbox> Inboxes { get; set; } = [];
 
         /// <summary>
         /// 是否是默认分组

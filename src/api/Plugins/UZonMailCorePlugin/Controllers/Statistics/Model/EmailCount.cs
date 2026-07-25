@@ -8,7 +8,7 @@ namespace UzonMail.CorePlugin.Controllers.Statistics.Model
         /// <summary>
         /// 邮箱类型
         /// </summary>
-        public string Domain { get; set; }
+        public string Domain { get; set; } = string.Empty;
 
         /// <summary>
         /// 数量

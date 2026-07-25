@@ -49,7 +49,7 @@ namespace UzonMail.DB.SQL.EntityConfigs.Converters
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        private string? ConvertToJson(object value)
+        private string? ConvertToJson(object? value)
         {
             if (value == null)
                 return null;
@@ -60,7 +60,7 @@ namespace UzonMail.DB.SQL.EntityConfigs.Converters
         {
             if (json == null)
                 return null;
-            string jsonString = json.ToString();
+            string? jsonString = json.ToString();
             if (string.IsNullOrEmpty(jsonString))
                 return null;
             try

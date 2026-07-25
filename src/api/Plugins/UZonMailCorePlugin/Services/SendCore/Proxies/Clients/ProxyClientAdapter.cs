@@ -12,13 +12,13 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
         : IProxyClient
     {
         #region 接口实现
-        public NetworkCredential ProxyCredentials => proxyClient.ProxyCredentials;
+        public NetworkCredential? ProxyCredentials => proxyClient.ProxyCredentials;
 
         public string ProxyHost => proxyClient.ProxyHost;
 
         public int ProxyPort => proxyClient.ProxyPort;
 
-        public IPEndPoint LocalEndPoint
+        public IPEndPoint? LocalEndPoint
         {
             get => proxyClient.LocalEndPoint;
             set => proxyClient.LocalEndPoint = value;

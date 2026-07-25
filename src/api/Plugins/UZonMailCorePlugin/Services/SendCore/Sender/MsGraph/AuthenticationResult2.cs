@@ -9,13 +9,13 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
     public class AuthenticationResult2
     {
         [JsonProperty("access_token")]
-        public string AccessToken { get; set; }
+        public string AccessToken { get; set; } = string.Empty;
 
         [JsonProperty("token_type")]
-        public string TokenType { get; set; }
+        public string TokenType { get; set; } = string.Empty;
 
         [JsonProperty("scope")]
-        public string Scope { get; set; }
+        public string Scope { get; set; } = string.Empty;
 
         [JsonProperty("expires_in")]
         public double ExpiresIn { get; set; }
@@ -62,9 +62,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 Scope = string.Join(" ", authenticationResult.Scopes),
                 TokenType = authenticationResult.TokenType,
                 ExpiresIn = (authenticationResult.ExpiresOn - DateTimeOffset.UtcNow).TotalSeconds,
-                ExtExPiresIn = (
-                    authenticationResult.ExtendedExpiresOn - DateTimeOffset.UtcNow
-                ).TotalSeconds,
                 IsPersonalAccount = false
             };
         }

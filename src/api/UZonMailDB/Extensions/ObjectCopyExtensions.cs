@@ -10,17 +10,20 @@
         /// <param name="source"></param>
         public static void CopyAllProperties<T>(this T target, T source)
         {
+            ArgumentNullException.ThrowIfNull(target);
+            ArgumentNullException.ThrowIfNull(source);
+
             var targetProperties = target.GetType().GetProperties();
             var sourceProperties = source.GetType().GetProperties();
             foreach (var targetProperty in targetProperties)
             {
-                if (!targetProperty.CanWrite || !targetProperty.GetSetMethod(true).IsPublic)
+                if (!targetProperty.CanWrite || targetProperty.GetSetMethod(true)?.IsPublic != true)
                     continue;
 
                 var sourceProperty = sourceProperties.FirstOrDefault(x =>
                     x.Name == targetProperty.Name && x.CanRead
                 );
-                if (targetProperty == null)
+                if (sourceProperty == null)
                     continue;
 
                 // 开始赋值

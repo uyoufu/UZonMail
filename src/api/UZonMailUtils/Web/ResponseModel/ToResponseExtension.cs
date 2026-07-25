@@ -64,12 +64,12 @@ namespace Uamazing.Utils.Web.ResponseModel
         {
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                return new ErrorResponse<T>(httpResponseMessage.ReasonPhrase);
+                return new ErrorResponse<T>(httpResponseMessage.ReasonPhrase ?? "请求失败");
             }
 
             var content = await httpResponseMessage.Content.ReadAsStringAsync();
             var response = content.JsonTo<ResponseResult<T>>();
-            return response;
+            return response ?? new ErrorResponse<T>("响应内容无法解析");
         }
     }
 }

@@ -11,11 +11,9 @@ namespace UzonMail.CorePlugin.Services.Notification.EmailNotifier
     /// <summary>
     /// 发件组完成通知
     /// </summary>
-    /// <param name="systemSetting"></param>
     /// <param name="userSetting"></param>
     public class SendingGroupFinishedNotification(
         SqlContext db,
-        AppSettingService systemSetting,
         UserSettingService userSetting,
         AppSettingsManager settingsManager
     ) : IScopedService

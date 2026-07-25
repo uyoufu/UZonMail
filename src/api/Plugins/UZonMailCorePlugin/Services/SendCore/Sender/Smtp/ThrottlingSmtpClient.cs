@@ -17,7 +17,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ThrottlingSmtpClient));
 
-        private string _email;
+        private string _email = string.Empty;
         private int _cooldownMilliseconds;
         private SmtpClientKey _clientKey;
 
@@ -80,7 +80,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
         public override async Task<string> SendAsync(
             MimeMessage message,
             CancellationToken cancellationToken,
-            ITransferProgress progress = null
+            ITransferProgress? progress = null
         )
         {
             var now = DateTime.UtcNow;

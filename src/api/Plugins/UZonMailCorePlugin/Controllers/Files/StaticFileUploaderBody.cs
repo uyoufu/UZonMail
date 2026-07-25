@@ -11,6 +11,6 @@ namespace UzonMail.CorePlugin.Controllers.Files
         public string SubPath { get; set; } = "default-upload";
 
         [Display(Name = "File")]
-        public IFormFile File { get; set; }
+        public required IFormFile File { get; set; }
     }
 }

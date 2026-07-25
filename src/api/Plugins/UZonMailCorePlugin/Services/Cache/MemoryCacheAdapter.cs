@@ -35,7 +35,7 @@ namespace UzonMail.CorePlugin.Services.Cache
         {
             var keyResults = _cache
                 .Keys.Select(x => new { keyStr = x.ToString(), key = x })
-                .Where(x => x.keyStr.StartsWith(prefix))
+                .Where(x => x.keyStr?.StartsWith(prefix) == true)
                 .ToList();
             foreach (var keyResult in keyResults)
             {

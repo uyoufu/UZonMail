@@ -44,9 +44,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 _authenticationResult = value;
             }
         }
-        private MsGraphParamsResolver _msGraphParams;
-
-        private string _email;
+        private string _email = string.Empty;
         private int _cooldownMilliseconds;
 
         public void SetParams(string email, int cooldownMilliseconds)
@@ -55,7 +53,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
             _cooldownMilliseconds = cooldownMilliseconds;
         }
 
-        public IProxyClient ProxyClient { get; set; }
+        public IProxyClient? ProxyClient { get; set; }
 
         private string _authenticateInputMd5 = string.Empty;
 
@@ -82,8 +80,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
             _authenticateInputMd5 = inputMd5;
 
             // 解析用户名和密码
-            _msGraphParams = new MsGraphParamsResolver(configuration);
-            var msGraphParams = _msGraphParams;
+            var msGraphParams = new MsGraphParamsResolver(configuration);
             msGraphParams.SetGraphInfo(username, password);
             if (string.IsNullOrEmpty(msGraphParams.ClientId))
             {
@@ -115,6 +112,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 _logger.Warn("Outlook 邮箱的用户名格式不正确，应为 tenantId/clientId 的形式。");
                 throw new AuthenticationException("Outlook 邮箱的用户名格式不正确，应为 tenantId/clientId 的形式。");
             }
+            if (string.IsNullOrEmpty(msGraphParams.ClientSecret))
+                throw new AuthenticationException("客户端凭据授权缺少 clientSecret。");
+
             var authenticateResult = await GetConfidentialClientOAuth2CredentialsAsync(
                 tenantId,
                 username,
@@ -175,7 +175,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
         /// <param name="clientId"></param>
         /// <param name="clientSecret"></param>
         /// <returns></returns>
-        [Obsolete("暂未完全测试")]
         private static async Task<AuthenticationResult> GetConfidentialClientOAuth2CredentialsAsync(
             string tenantId,
             string clientId,
@@ -239,7 +238,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 var errorMessage = JObject
                     .Parse(responseContent)
                     .SelectTokenOrDefault("error_description", "未知错误");
-                throw new AuthenticationException(errorMessage);
+                throw new AuthenticationException(errorMessage ?? "未知错误");
             }
             var jsonResult = responseContent.JsonTo<AuthenticationResult2>();
             if (jsonResult == null)
@@ -268,9 +267,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 return "调试模式中已阻止真实发件";
             }
 
-            var apiPath = GetSendMailApiPath(_email, _authenticationResult!.IsPersonalAccount);
+            var authenticationResult =
+                AuthenticationResult ?? throw new AuthenticationException("发送邮件前必须先完成 OAuth2 验证");
+            var apiPath = GetSendMailApiPath(_email, authenticationResult.IsPersonalAccount);
             var request = new MsGraphSendMailRequest()
-                .WithAccessToken(AuthenticationResult!.AccessToken)
+                .WithAccessToken(authenticationResult.AccessToken)
                 .WithMimeMessage(mimeMessage)
                 .WithUrl($"https://graph.microsoft.com/v1.0/{apiPath}/sendMail")
                 .WithHttpClient(_httpClient);

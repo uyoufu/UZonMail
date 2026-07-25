@@ -15,7 +15,7 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// <summary>
         /// SMTP 服务器地址
         /// </summary>
-        public string SmtpHost { get; set; }
+        public string SmtpHost { get; set; } = string.Empty;
 
         /// <summary>
         /// 端口
@@ -32,7 +32,7 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// smtp 密码或者 oauth 的 secrete，需要加密保存
         /// smpt 密码 = 原始密码  > aes (md5 作为 key)
         /// </summary>
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         ///// <summary>
         ///// 使用 OAuth 2.0 认证时的 Client Id

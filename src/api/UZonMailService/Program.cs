@@ -30,7 +30,10 @@ if (File.Exists(productConfig) && string.IsNullOrWhiteSpace(File.ReadAllText(pro
 var quartzDb = "data/db/quartz-sqlite.sqlite3";
 if (!File.Exists(quartzDb))
 {
-    Directory.CreateDirectory(Path.GetDirectoryName(quartzDb));
+    var quartzDirectory =
+        Path.GetDirectoryName(quartzDb)
+        ?? throw new InvalidOperationException("Quartz 数据库路径缺少目录信息。");
+    Directory.CreateDirectory(quartzDirectory);
     File.Copy("Quartz/quartz-sqlite.sqlite3", quartzDb);
 }
 
@@ -172,7 +175,7 @@ services.AddCors(options =>
 {
     var configuration = builder.Configuration;
     // 获取跨域配置
-    string[]? corsConfig = configuration.GetSection("Cors").Get<string[]>();
+    string[] corsConfig = configuration.GetSection("Cors").Get<string[]>() ?? [];
 
     options.AddDefaultPolicy(policy =>
     {

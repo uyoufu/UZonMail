@@ -10,12 +10,12 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// <summary>
         /// 域名
         /// </summary>
-        public string Domain { get; set; }
+        public string Domain { get; set; } = string.Empty;
 
         /// <summary>
         /// 对应的 smtp 服务器
         /// </summary>
-        public string Host { get; set; }
+        public string Host { get; set; } = string.Empty;
 
         /// <summary>
         /// 端口

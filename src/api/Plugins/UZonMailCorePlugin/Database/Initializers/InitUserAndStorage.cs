@@ -190,9 +190,10 @@ namespace UzonMail.CorePlugin.Database.Initializers
             );
             if (orgAdminRole == null)
             {
-                var permissionCode = await db.PermissionCodes.FirstOrDefaultAsync(x =>
-                    x.Code == PermissionCode.OrganizationPermissionCode
-                );
+                var permissionCode =
+                    await db.PermissionCodes.FirstOrDefaultAsync(x =>
+                        x.Code == PermissionCode.OrganizationPermissionCode
+                    ) ?? throw new InvalidOperationException("缺少组织管理权限码");
                 orgAdminRole = new Role
                 {
                     Name = Role.OrganizationAdminRoleName,

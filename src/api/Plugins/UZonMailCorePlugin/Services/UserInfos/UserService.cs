@@ -71,9 +71,9 @@ namespace UzonMail.CorePlugin.Services.UserInfos
             );
             if (organization == null)
             {
-                var parentOrganization = await ctx.Departments.FirstOrDefaultAsync(x =>
-                    x.Id == parentOrganizationId
-                );
+                var parentOrganization =
+                    await ctx.Departments.FirstOrDefaultAsync(x => x.Id == parentOrganizationId)
+                    ?? throw new InvalidOperationException("上级组织不存在");
                 // 在当前用户组织下创建新的组织
                 organization = new Department()
                 {
@@ -168,6 +168,9 @@ namespace UzonMail.CorePlugin.Services.UserInfos
                 .Include(x => x.Roles)
                 .ThenInclude(x => x.PermissionCodes)
                 .FirstOrDefaultAsync();
+            if (userRole is null)
+                return;
+
             var orgRoles = userRole
                 .Roles.Where(x =>
                     x.PermissionCodes.Any(y => y.Code == PermissionCode.OrganizationPermissionCode)

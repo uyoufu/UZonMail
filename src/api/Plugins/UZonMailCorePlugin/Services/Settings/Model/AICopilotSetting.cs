@@ -12,7 +12,7 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
         public AIProviderType ProviderType { get; set; } = AIProviderType.OpenAI;
         public string Endpoint { get; set; } = string.Empty;
         public string ApiKey { get; set; } = string.Empty;
-        public string Model { get; set; }
+        public string Model { get; set; } = string.Empty;
         public long MaxTokens { get; set; }
 
         public bool IsValid()

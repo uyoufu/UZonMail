@@ -18,13 +18,13 @@
         /// <summary>
         /// 附带的消息
         /// </summary>
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         /// <summary>
         /// 获取数据
         /// </summary>
         /// <returns></returns>
-        public virtual object GetData()
+        public virtual object? GetData()
         {
             return null;
         }

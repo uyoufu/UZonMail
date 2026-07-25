@@ -13,8 +13,9 @@ namespace UzonMail.CorePlugin.Database.Initializers
         public async Task ExecuteAsync()
         {
             // 获取当前程序集所在目录
-            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-            var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+            var assemblyDirectory =
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+                ?? throw new InvalidOperationException("无法确定程序集目录");
             var smtpInfoPath = Path.Combine(assemblyDirectory, "data/init/smtpInfo.json");
             if (!File.Exists(smtpInfoPath))
             {

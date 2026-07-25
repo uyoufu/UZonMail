@@ -5,16 +5,16 @@ namespace UzonMail.CorePlugin.Config.SubConfigs
         /// <summary>
         /// Microsoft Entra 应用程序 ID
         /// </summary>
-        public string ClientId { get; set; }
+        public string ClientId { get; set; } = string.Empty;
 
         /// <summary>
         /// Microsoft Entra 租户 ID
         /// </summary>
-        public string TenantId { get; set; }
+        public string TenantId { get; set; } = string.Empty;
 
         /// <summary>
         /// Microsoft Entra 应用程序密钥
         /// </summary>
-        public string ClientSecret { get; set; }
+        public string ClientSecret { get; set; } = string.Empty;
     }
 }

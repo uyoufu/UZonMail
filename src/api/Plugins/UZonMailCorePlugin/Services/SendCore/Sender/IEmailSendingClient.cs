@@ -31,6 +31,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
         /// <summary>
         /// 代理客户端
         /// </summary>
-        IProxyClient ProxyClient { get; set; }
+        IProxyClient? ProxyClient { get; set; }
     }
 }

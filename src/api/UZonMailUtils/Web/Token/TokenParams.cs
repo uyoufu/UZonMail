@@ -24,7 +24,7 @@ namespace UzonMail.Utils.Web.Token
         /// <summary>
         /// token 的密钥
         /// </summary>
-        public string Secret { get; set; }
+        public string Secret { get; set; } = string.Empty;
 
         /// <summary>
         /// 签发者

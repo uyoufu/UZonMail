@@ -23,7 +23,7 @@ namespace UzonMail.CorePlugin.Services.Emails
         /// <returns></returns>
         public async Task<List<EmailGroup>> GetEmailGroups(long userId, EmailGroupType groupType)
         {
-            var results = await db
+            var results = await Db
                 .EmailGroups.Where(x => x.UserId == userId && x.Type == groupType)
                 .ToListAsync();
             return results;
@@ -42,15 +42,15 @@ namespace UzonMail.CorePlugin.Services.Emails
             if (tokenPayloads.Count == 0)
                 throw new KnownException("无法获取用户信息");
 
-            var defaultGroup = await db
+            var defaultGroup = await Db
                 .EmailGroups.Where(x => x.IsDefault && x.UserId == tokenPayloads.UserId)
                 .FirstOrDefaultAsync();
             if (defaultGroup == null)
             {
                 defaultGroup = EmailGroup.GetDefaultEmailGroup(tokenPayloads.UserId, groupType);
-                await db.EmailGroups.AddAsync(defaultGroup);
+                await Db.EmailGroups.AddAsync(defaultGroup);
             }
-            await db.SaveChangesAsync();
+            await Db.SaveChangesAsync();
             return defaultGroup;
         }
 
@@ -64,7 +64,7 @@ namespace UzonMail.CorePlugin.Services.Emails
         {
             // 判断组名是否重复
             if (
-                await db.EmailGroups.AnyAsync(x =>
+                await Db.EmailGroups.AnyAsync(x =>
                     x.UserId == emailGroup.UserId
                     && x.Type == emailGroup.Type
                     && x.Name == emailGroup.Name
@@ -109,8 +109,8 @@ namespace UzonMail.CorePlugin.Services.Emails
             if (!string.IsNullOrEmpty(icon))
                 updatedNames.Add(icon);
 
-            var result = await db.UpdateById(emailGroup, updatedNames);
-            await db.SaveChangesAsync();
+            var result = await Db.UpdateById(emailGroup, updatedNames);
+            await Db.SaveChangesAsync();
             return result;
         }
 
@@ -121,7 +121,7 @@ namespace UzonMail.CorePlugin.Services.Emails
         /// <returns></returns>
         public override Task<bool> DeleteById(long id)
         {
-            return db.RunTransaction(
+            return Db.RunTransaction(
                 async (ctx) =>
                 {
                     // 先获取组

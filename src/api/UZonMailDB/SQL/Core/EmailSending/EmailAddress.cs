@@ -12,7 +12,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// 邮箱地址
         /// 最后发件时，以该地址为准
         /// </summary>
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         private string? _name;
 

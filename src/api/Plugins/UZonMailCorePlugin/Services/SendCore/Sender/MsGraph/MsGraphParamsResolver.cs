@@ -30,7 +30,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
         /// </summary>
         private bool _useDefaultApp = false;
 
-        public string ClientId { get; private set; }
+        public string ClientId { get; private set; } = string.Empty;
 
         public string? TenantId { get; private set; }
 
