@@ -80,7 +80,8 @@ namespace UzonMail.Utils.Web
                         .Any(reference =>
                             AssemblyName.ReferenceMatchesDefinition(reference, markerAssemblyName)
                         )
-                );
+                )
+                .OrderBy(assembly => assembly.FullName, StringComparer.Ordinal);
         }
 
         /// <summary>

@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Quartz;
-using UzonMail.DB.PostgreSql;
-using UzonMail.DB.SQL;
-using UzonMail.DB.SqLite;
 using UzonMail.Server.Middlewares;
 using UzonMail.Utils.Database.Redis;
 using UzonMail.Utils.Log;
@@ -98,7 +95,7 @@ var mvcBuilder = services
     });
 
 // 加载插件
-var pluginLoader = new PluginLoader("Plugins");
+using var pluginLoader = new PluginLoader("Plugins");
 pluginLoader.ConfigureServices(builder);
 
 // OpenApi
@@ -128,9 +125,6 @@ services.AddSignalR();
 
 // 设置 hyphen-case 路由
 services.SetupSlugifyCaseRoute();
-
-// 注入数据库
-services.AddSqlContext<SqlContext, PostgreSqlContext, SqLiteContext>(builder.Configuration);
 
 // 添加 HttpContextAccessor，以供 service 获取当前请求的用户信息
 services.AddHttpContextAccessor();

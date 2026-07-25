@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using UzonMail.Utils.Web.Configs;
 
 namespace UzonMail.Utils.Web.Service
 {
+    /// <summary>
+    /// 根据服务标记接口批量注册程序集中的应用服务。
+    /// </summary>
     public class ServiceUtils
     {
         /// <summary>
@@ -28,141 +31,100 @@ namespace UzonMail.Utils.Web.Service
             Assembly servicesIn
         )
         {
-            // 批量注入 Services 单例
-            var assembleyTypes = servicesIn
+            var assemblyTypes = servicesIn
                 .GetTypes()
-                .Where(type =>
-                    type.IsClass
-                    && !type.IsAbstract
-                    && !type.ContainsGenericParameters
-                    && typeof(IService).IsAssignableFrom(type)
+                .Where(type => type.IsClass && !type.IsAbstract && !type.ContainsGenericParameters)
+                .OrderBy(type => type.FullName, StringComparer.Ordinal)
+                .ToList();
+
+            AddMarkerServices(
+                services,
+                assemblyTypes,
+                typeof(ITransientService),
+                typeof(ITransientService<>),
+                ServiceLifetime.Transient
+            );
+            AddMarkerServices(
+                services,
+                assemblyTypes,
+                typeof(IScopedService),
+                typeof(IScopedService<>),
+                ServiceLifetime.Scoped
+            );
+            AddMarkerServices(
+                services,
+                assemblyTypes,
+                typeof(ISingletonService),
+                typeof(ISingletonService<>),
+                ServiceLifetime.Singleton
+            );
+
+            foreach (
+                var hostedServiceImplementation in assemblyTypes.Where(type =>
+                    typeof(IHostedService).IsAssignableFrom(type)
+                )
+            )
+            {
+                services.TryAddEnumerable(
+                    ServiceDescriptor.Singleton(typeof(IHostedService), hostedServiceImplementation)
                 );
-
-            var transientType = typeof(ITransientService);
-            // 分多种情况，注册不同的生命周期
-            // 瞬时类型
-            var transientTypes = assembleyTypes
-                .Where(x => !x.IsInterface && !x.IsAbstract)
-                .Where(x => transientType.IsAssignableFrom(x))
-                .ToList();
-            transientTypes.ForEach(type =>
-            {
-                // 获取注册类型和实现类型
-                var serviceTypes = GetServiceTypes(type);
-                serviceTypes.ForEach(serviceType =>
-                {
-                    services.AddTransient(serviceType, type);
-                });
-            });
-
-            // 请求周期
-            var scopedServiceType = typeof(IScopedService);
-            // 分多种情况，注册不同的生命周期
-            var scopedServiceTypes = assembleyTypes
-                .Where(x => !x.IsInterface && !x.IsAbstract)
-                .Where(x => scopedServiceType.IsAssignableFrom(x))
-                .ToList();
-            scopedServiceTypes.ForEach(type =>
-            {
-                var serviceTypes = GetServiceTypes(type);
-                serviceTypes.ForEach(serviceType =>
-                {
-                    services.AddScoped(GetServiceType(serviceType), type);
-                });
-            });
-
-            // 单例
-            var singletonServiceType = typeof(ISingletonService);
-            // 分多种情况，注册不同的生命周期
-            var singletonServiceTypes = assembleyTypes
-                .Where(x => !x.IsInterface && !x.IsAbstract)
-                .Where(x => singletonServiceType.IsAssignableFrom(x))
-                .ToList();
-            singletonServiceTypes.ForEach(type =>
-            {
-                var serviceTypes = GetServiceTypes(type);
-                serviceTypes.ForEach(serviceType =>
-                {
-                    services.AddSingleton(GetServiceType(serviceType), type);
-                });
-            });
-
-            // 后台服务,在启动时，就会运行
-            var hostedServiceType = typeof(IHostedService);
-            var hostedServiceTypes = assembleyTypes
-                .Where(x => !x.IsInterface && !x.IsAbstract)
-                .Where(x => hostedServiceType.IsAssignableFrom(x))
-                .ToList();
-            hostedServiceTypes.ForEach(type =>
-            {
-                services.AddSingleton(hostedServiceType, type);
-                services.AddSingleton(type);
-                // 后台服务不支持泛型注册
-            });
+                services.TryAdd(
+                    ServiceDescriptor.Singleton(
+                        hostedServiceImplementation,
+                        hostedServiceImplementation
+                    )
+                );
+            }
 
             return services;
         }
 
-        /// <summary>
-        /// 若是泛型，则获取泛型的开放类型 T<>
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private static Type GetServiceType(Type type)
+        private static void AddMarkerServices(
+            IServiceCollection services,
+            IReadOnlyList<Type> assemblyTypes,
+            Type markerType,
+            Type genericMarkerType,
+            ServiceLifetime lifetime
+        )
         {
-            if (type.IsGenericType)
-                return type.GetGenericTypeDefinition();
-            return type;
-        }
-
-        /// <summary>
-        /// 获取实现类型的服务类型列表
-        /// </summary>
-        /// <param name="implementationType">实现类型，必须继承 ITransientService 或 IScopedService 或 ISingletonService</param>
-        /// <returns></returns>
-        private static List<Type> GetServiceTypes(Type implementationType)
-        {
-            var interfaceNames = new List<Type>()
+            foreach (var implementationType in assemblyTypes.Where(markerType.IsAssignableFrom))
             {
-                typeof(ITransientService<>),
-                typeof(IScopedService<>),
-                typeof(ISingletonService<>),
-                typeof(ITransientService),
-                typeof(IScopedService),
-                typeof(ISingletonService)
-            }.ConvertAll(x => x.Name);
-
-            // 不断向上查找，直到找到 IService 为止
-            // 不使用类型相等判断，是因为程序集可能在不同的上下文中，导致类型不相等
-            var interfaces = implementationType
-                .GetInterfaces()
-                .Where(x => x.IsInterface)
-                .Where(x => interfaceNames.Contains(x.Name))
-                .ToList();
-
-            List<Type> serviceTypes = [implementationType];
-            foreach (var item in interfaces)
-            {
-                if (item.IsGenericType)
+                foreach (var serviceType in GetServiceTypes(implementationType, genericMarkerType))
                 {
-                    // 获取泛型参数
-                    var genericArguments = item.GetGenericArguments();
-                    // 接口中的类型，可能也是泛型类型
-                    foreach (var genericArg in genericArguments)
+                    var descriptor = new ServiceDescriptor(
+                        serviceType,
+                        implementationType,
+                        lifetime
+                    );
+                    if (serviceType == implementationType)
                     {
-                        if (genericArg.IsGenericType)
-                        {
-                            serviceTypes.Add(genericArg.GetGenericTypeDefinition());
-                        }
-                        else
-                        {
-                            serviceTypes.AddRange(genericArguments);
-                        }
+                        // 显式注册应拥有最终决定权，自动扫描不能覆盖数据库上下文等定制映射。
+                        services.TryAdd(descriptor);
+                        continue;
                     }
+
+                    services.TryAddEnumerable(descriptor);
                 }
             }
+        }
 
-            return serviceTypes;
+        private static IReadOnlyList<Type> GetServiceTypes(
+            Type implementationType,
+            Type genericMarkerType
+        )
+        {
+            return
+            [
+                implementationType,
+                .. implementationType
+                    .GetInterfaces()
+                    .Where(type =>
+                        type.IsGenericType && type.GetGenericTypeDefinition() == genericMarkerType
+                    )
+                    .SelectMany(type => type.GetGenericArguments())
+                    .Select(type => type.IsGenericType ? type.GetGenericTypeDefinition() : type)
+                    .Distinct(),
+            ];
         }
     }
 }

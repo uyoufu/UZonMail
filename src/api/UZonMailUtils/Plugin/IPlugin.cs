@@ -9,7 +9,7 @@ namespace UzonMail.Utils.Plugin
     public interface IPlugin
     {
         /// <summary>
-        /// 优先级
+        /// 配置优先级，数值越小越先执行；插件依赖顺序优先于该值
         /// </summary>
         int Priority { get; }
 
