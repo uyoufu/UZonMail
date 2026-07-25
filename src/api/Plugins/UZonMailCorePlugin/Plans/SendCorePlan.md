@@ -204,3 +204,12 @@ public interface IEmailTransport
 - 动态代理继续由 URL 识别，不新增 `ProxyType` 数据列。
 - Graph 暂不支持代理；配置代理时显式报错，不忽略配置。
 - 允许新增发送项复合索引迁移；除索引外不改变现有业务表字段。
+
+## 12. 冷却与发件箱供给优化
+
+- 工作槽每次只执行一封邮件，完成后重新参加组织、用户和发送组公平调度；冷却、日额度阻塞、失效或没有 ready 邮件的发件箱不会取得工作槽。
+- 发件箱冷却改为记录 `NextEligibleUtc`，由协调器维护一个最早到期唤醒，不再由工作任务执行 `Task.Delay`；同一发件箱仍通过原子运行标记保持最多一个活动发送。
+- 共享发件箱改为按 `(IsValid, Id)` 游标分页读取。默认目录页为 256，可调度候选低于 `SystemHardLimit * 2` 时触发补充，补至 `SystemHardLimit * 4`；冷却和额度阻塞箱不计入 ready 目标。
+- 补页在用户和发送组之间轮转起点并均分当前缺口，目录耗尽或达到 `MaxTrackedOutboxes=100000` 后停止；发送组停止时通过反向组索引解绑，不扫描整个发件箱池。
+- 发件箱日计数增加 UTC 日期，跨日按需归零，不再每天更新整张发件箱表。全部发件箱达到日限额时，发送组进入 `WaitingForQuotaReset`，在下一个 UTC 自然日自动恢复。
+- 新增 `SendCore:OutboxSupply` 配置：`CatalogPageSize`、`ReadyTargetMultiplier`、`ReadyLowWatermarkMultiplier`、`MaxTrackedOutboxes`。

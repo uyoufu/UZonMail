@@ -436,7 +436,8 @@ export default {
     unknown: '未知',
     unsubscribed: '取消订阅',
     unverified: '未验证',
-    valid: '有效'
+    valid: '有效',
+    waitingForQuotaReset: '等待额度重置'
   },
   success: '操作成功',
   template: {

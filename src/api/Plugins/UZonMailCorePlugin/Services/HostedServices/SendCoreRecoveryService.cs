@@ -22,7 +22,13 @@ public sealed class SendCoreRecoveryService(
     {
         var groups = await db
             .SendingGroups.AsNoTracking()
-            .Where(x => x.Status == SendingGroupStatus.Sending)
+            .Where(x =>
+                x.Status == SendingGroupStatus.Sending
+                || (
+                    x.Status == SendingGroupStatus.WaitingForQuotaReset
+                    && x.ResumeAtUtc <= DateTime.UtcNow
+                )
+            )
             .OrderBy(x => x.Id)
             .ToListAsync(stoppingToken);
 

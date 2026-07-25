@@ -8,8 +8,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.Utils
     /// </summary>
     public class Cooler
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(Cooler));
-        private DateTime _startDate = DateTime.UtcNow;
         private Timer? _timer = null;
 
         /// <summary>

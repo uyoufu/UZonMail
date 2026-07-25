@@ -15,6 +15,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails.Models
         public double TotalCount { get; set; }
         public int SentCount { get; set; }
         public int SuccessCount { get; set; }
+        public SendingGroupStatus Status { get; set; }
+        public string? StatusReason { get; set; }
+        public DateTime? ResumeAtUtc { get; set; }
 
         public RunningSendingGroupResult(SendingGroup group)
         {
@@ -23,6 +26,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails.Models
             TotalCount = group.TotalCount;
             SentCount = group.SentCount;
             SuccessCount = group.SuccessCount;
+            Status = group.Status;
+            StatusReason = group.StatusReason;
+            ResumeAtUtc = group.ResumeAtUtc;
             Progress = SentCount * 1.0 / TotalCount;
         }
     }

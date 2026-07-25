@@ -86,7 +86,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         }
 
         /// <summary>
-        ///
+        /// 立即发件
         /// </summary>
         /// <returns></returns>
         [HttpPost("now")]

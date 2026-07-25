@@ -23,7 +23,11 @@
 
     <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        <StatusChip v-if="props.value !== 'Sending'" :status="props.value"></StatusChip>
+        <StatusChip v-if="props.value !== 'Sending'" :status="props.value">
+          <q-tooltip v-if="props.row.status === SendingGroupStatus.WaitingForQuotaReset">
+            {{ props.row.statusReason }}，预计 {{ formatDate(props.row.resumeAtUtc) }} 自动恢复
+          </q-tooltip>
+        </StatusChip>
         <LinearProgress class="full-width" v-else :value="props.row.progress" :width="60"></LinearProgress>
       </q-td>
     </template>
@@ -50,7 +54,7 @@ import type { IRequestPagination, TTableFilterObject } from 'src/compositions/ty
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
 import type { ISendingGroupInfo } from 'src/api/sendingGroup'
-import { getSendingGroupsCount, getEmailTemplatesData, SendingGroupStatus, SendingGroupType } from 'src/api/sendingGroup'
+import { getSendingGroupsCount, getEmailTemplatesData, sendingGroupStatusNames, SendingGroupStatus, SendingGroupType } from 'src/api/sendingGroup'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,7 +154,7 @@ const columns: QTableColumn[] = [
     align: 'center',
     field: 'status',
     sortable: true,
-    format: v => SendingGroupStatus[v] as string
+    format: v => sendingGroupStatusNames[v as keyof typeof sendingGroupStatusNames] ?? 'Unknown'
   }
 ]
 

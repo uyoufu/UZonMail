@@ -95,7 +95,11 @@ namespace UzonMail.CorePlugin.Services.SendCore
 
         public async Task RemoveSendingGroupTask(SendingGroup sendingGroup, string removeReason)
         {
-            if (sendingGroup.Status == SendingGroupStatus.Sending)
+            if (
+                sendingGroup.Status
+                is SendingGroupStatus.Sending
+                    or SendingGroupStatus.WaitingForQuotaReset
+            )
             {
                 var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id, removeReason);
 

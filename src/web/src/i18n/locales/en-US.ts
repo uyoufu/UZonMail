@@ -451,7 +451,8 @@ export default {
     unknown: 'Unknown',
     unsubscribed: 'Unsubscribed',
     unverified: 'Unverified',
-    valid: 'Valid'
+    valid: 'Valid',
+    waitingForQuotaReset: 'Waiting for quota reset'
   },
   success: 'Action was successful',
   template: {

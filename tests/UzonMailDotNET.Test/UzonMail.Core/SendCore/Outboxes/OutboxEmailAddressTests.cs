@@ -12,15 +12,13 @@ public sealed class OutboxEmailAddressTests
     [TestMethod]
     public void Constructor_DecryptsAndNormalizesOutboxSnapshot()
     {
-        var address = SendCoreTestEntityFactory.CreateOutboxAddress(
-            configure: outbox =>
-            {
-                outbox.UserName = string.Empty;
-                outbox.Weight = 0;
-                outbox.ReplyToEmails = "first@test.com;first@test.com;second@test.com";
-                outbox.SentTotalToday = 3;
-            }
-        );
+        var address = SendCoreTestEntityFactory.CreateOutboxAddress(configure: outbox =>
+        {
+            outbox.UserName = string.Empty;
+            outbox.Weight = 0;
+            outbox.ReplyToEmails = "first@test.com;first@test.com;second@test.com";
+            outbox.SentTotalToday = 3;
+        });
 
         Assert.AreEqual("password", address.PlainPassword);
         Assert.AreEqual(address.Email, address.SmtpAuthUserName);
@@ -35,11 +33,12 @@ public sealed class OutboxEmailAddressTests
     [TestMethod]
     public void SpecificTargets_RequireSpecificFlagAndCanBeRemoved()
     {
-        Assert.ThrowsExactly<Exception>(() =>
-            SendCoreTestEntityFactory.CreateOutboxAddress(
-                type: OutboxEmailAddressType.Shared,
-                sendingItemIds: [1]
-            )
+        Assert.ThrowsExactly<Exception>(
+            () =>
+                SendCoreTestEntityFactory.CreateOutboxAddress(
+                    type: OutboxEmailAddressType.Shared,
+                    sendingItemIds: [1]
+                )
         );
         var address = SendCoreTestEntityFactory.CreateOutboxAddress(
             type: OutboxEmailAddressType.Specific,
@@ -104,5 +103,69 @@ public sealed class OutboxEmailAddressTests
         Assert.AreEqual(first.GetHashCode(), equal.GetHashCode());
         Assert.AreNotEqual(first, different);
         Assert.IsFalse(first.Equals("10_20"));
+    }
+
+    [TestMethod]
+    public void Update_KeepsSharedAndSpecificBindingsIsolatedBySendingGroup()
+    {
+        var address = SendCoreTestEntityFactory.CreateOutboxAddress(
+            sendingGroupId: 10,
+            type: OutboxEmailAddressType.Shared
+        );
+        var otherGroupBinding = SendCoreTestEntityFactory.CreateOutboxAddress(
+            sendingGroupId: 20,
+            type: OutboxEmailAddressType.Specific,
+            sendingItemIds: [5]
+        );
+
+        address.Update(otherGroupBinding);
+
+        Assert.AreEqual(OutboxEmailAddressType.Shared, address.GetTypeForSendingGroup(10));
+        Assert.AreEqual(OutboxEmailAddressType.Specific, address.GetTypeForSendingGroup(20));
+        Assert.AreEqual(OutboxEmailAddressType.None, address.GetTypeForSendingGroup(30));
+    }
+
+    [TestMethod]
+    public void CoolingAndQuotaBlockedOutbox_IsNotEligibleUntilBothDeadlinesPass()
+    {
+        var address = SendCoreTestEntityFactory.CreateOutboxAddress();
+        var utcNow = new DateTimeOffset(2026, 7, 25, 10, 0, 0, TimeSpan.Zero);
+
+        address.ScheduleCooldown(TimeSpan.FromSeconds(20), utcNow);
+        address.ScheduleDailyQuotaReset(utcNow);
+
+        Assert.IsFalse(address.IsEligible(utcNow.AddSeconds(20)));
+        Assert.IsTrue(address.IsQuotaBlocked(utcNow.AddHours(1)));
+        Assert.AreEqual(
+            new DateTimeOffset(2026, 7, 26, 0, 0, 0, TimeSpan.Zero),
+            address.NextEligibleUtc
+        );
+        Assert.IsTrue(address.IsEligible(address.NextEligibleUtc));
+    }
+
+    [TestMethod]
+    public void Manager_GroupIndexKeepsOutboxUntilItsLastGroupIsRemoved()
+    {
+        var manager = new OutboxesManager();
+        manager.AddOutbox(
+            SendCoreTestEntityFactory.CreateOutboxAddress(
+                sendingGroupId: 10,
+                type: OutboxEmailAddressType.Shared
+            )
+        );
+        manager.AddOutbox(
+            SendCoreTestEntityFactory.CreateOutboxAddress(
+                sendingGroupId: 20,
+                type: OutboxEmailAddressType.Shared
+            )
+        );
+
+        Assert.IsTrue(manager.ExistValidOutbox(10));
+        Assert.IsTrue(manager.ExistValidOutbox(20));
+        Assert.IsEmpty(manager.RemoveOutbox(10, "group completed"));
+        Assert.IsFalse(manager.ExistValidOutbox(10));
+        Assert.IsTrue(manager.ExistValidOutbox(20));
+        Assert.HasCount(1, manager.RemoveOutbox(20, "group completed"));
+        Assert.AreEqual(0, manager.Count);
     }
 }

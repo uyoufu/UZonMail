@@ -8,32 +8,37 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// <summary>
         /// 新建
         /// </summary>
-        Created,
+        Created = 0,
 
         /// <summary>
         /// 计划发件
         /// </summary>
         [Obsolete("弃用，使用 type 表示计划发件")]
-        Scheduled,
+        Scheduled = 1,
 
         /// <summary>
         /// 发送中
         /// </summary>
-        Sending,
+        Sending = 2,
 
         /// <summary>
         /// 暂停
         /// </summary>
-        Pause,
+        Pause = 3,
 
         /// <summary>
         /// 停止
         /// </summary>
-        Cancel,
+        Cancel = 4,
 
         /// <summary>
         /// 发送完成
         /// </summary>
-        Finish,
+        Finish = 5,
+
+        /// <summary>
+        /// 所有关联发件箱均达到当日额度，等待下一个 UTC 自然日自动恢复。
+        /// </summary>
+        WaitingForQuotaReset = 6,
     }
 }

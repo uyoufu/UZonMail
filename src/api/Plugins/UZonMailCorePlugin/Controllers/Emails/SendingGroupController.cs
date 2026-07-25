@@ -65,6 +65,8 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                     Subjects = x.Subjects,
                     SendingType = x.SendingType,
                     Status = x.Status,
+                    StatusReason = x.StatusReason,
+                    ResumeAtUtc = x.ResumeAtUtc,
                     Templates = x.Templates,
                     Outboxes = x.Outboxes, // 兼容旧数据
                     OutboxesCount = x.OutboxesCount,
@@ -89,7 +91,13 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         {
             var userId = tokenService.GetUserSqlId();
             var results = await db
-                .SendingGroups.Where(x => x.Status == SendingGroupStatus.Sending)
+                .SendingGroups.Where(x =>
+                    x.UserId == userId
+                    && (
+                        x.Status == SendingGroupStatus.Sending
+                        || x.Status == SendingGroupStatus.WaitingForQuotaReset
+                    )
+                )
                 .ToListAsync();
             return results.ConvertAll(x => new RunningSendingGroupResult(x)).ToSuccessResponse();
         }

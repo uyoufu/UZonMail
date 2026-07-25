@@ -40,9 +40,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             if (cooldownMilliseconds <= 0)
                 return HandlerResult.Skiped();
 
+            // 仅记录下一次可调度时间；若在此等待，20 秒冷却会长期占住全局工作槽。
+            outbox.ScheduleCooldown(
+                TimeSpan.FromMilliseconds(cooldownMilliseconds),
+                DateTimeOffset.UtcNow
+            );
             _logger.Info($"发件箱 {outbox.Email} 进入冷却状态，冷却时间 {cooldownMilliseconds} 毫秒");
-            await Task.Delay(cooldownMilliseconds);
-            _logger.Info($"发件箱 {outbox.Email} 冷却结束");
             return HandlerResult.Success();
         }
     }

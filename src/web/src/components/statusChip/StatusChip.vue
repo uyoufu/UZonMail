@@ -16,6 +16,7 @@ const defaultStatusStyles = [
   { status: 'created', label: '新建', color: 'primary', textColor: 'white', icon: '' },
   { status: 'pending', label: '等待中', color: 'accent', textColor: 'white', icon: '' },
   { status: 'sending', label: '发送中', color: 'secondary', textColor: 'white', icon: '' },
+  { status: 'waitingForQuotaReset', label: '等待额度重置', color: 'orange', textColor: 'white', icon: '' },
   { status: 'success', label: '成功', color: 'secondary', textColor: 'white', icon: '' },
   { status: 'failed', label: '失败', color: 'negative', textColor: 'white', icon: '' },
   { status: 'pause', label: '暂停', color: 'orange', textColor: 'white', icon: '' },

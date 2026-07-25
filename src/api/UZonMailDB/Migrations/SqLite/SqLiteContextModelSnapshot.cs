@@ -15,7 +15,7 @@ namespace UzonMailService.Migrations.SqLite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.13");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
 
             modelBuilder.Entity("DepartmentEmailTemplate", b =>
                 {
@@ -255,7 +255,10 @@ namespace UzonMailService.Migrations.SqLite
                     b.Property<int>("OutboxesCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ProxyIds")
+                    b.PrimitiveCollection<string>("ProxyIds")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ResumeAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ScheduleDate")
@@ -279,6 +282,9 @@ namespace UzonMailService.Migrations.SqLite
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("StatusReason")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Subjects")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -293,6 +299,8 @@ namespace UzonMailService.Migrations.SqLite
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Status", "ResumeAtUtc", "Id");
 
                     b.ToTable("SendingGroups");
                 });
@@ -628,6 +636,9 @@ namespace UzonMailService.Migrations.SqLite
                     b.Property<string>("ReplyToEmails")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("SentCountDateUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("SentTotalToday")
                         .HasColumnType("INTEGER");
 
@@ -661,6 +672,8 @@ namespace UzonMailService.Migrations.SqLite
                     b.HasIndex("Email");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "EmailGroupId", "IsValid", "Id");
 
                     b.ToTable("Outboxes");
                 });

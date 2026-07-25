@@ -6,36 +6,27 @@ import type { IRequestPagination } from 'src/compositions/types'
 /**
  * 发送组状态
  */
-export enum SendingGroupStatus {
-  /// <summary>
-  /// 新建
-  /// </summary>
-  Created,
+export const SendingGroupStatus = {
+  Created: 0,
+  Scheduled: 1,
+  Sending: 2,
+  Pause: 3,
+  Cancel: 4,
+  Finish: 5,
+  WaitingForQuotaReset: 6
+} as const
 
-  /// <summary>
-  /// 计划发件
-  /// </summary>
-  Scheduled,
+export type SendingGroupStatus = typeof SendingGroupStatus[keyof typeof SendingGroupStatus]
 
-  /// <summary>
-  /// 发送中
-  /// </summary>
-  Sending,
-
-  /// <summary>
-  /// 暂停
-  /// </summary>
-  Pause,
-
-  /// <summary>
-  /// 停止
-  /// </summary>
-  Cancel,
-
-  /// <summary>
-  /// 发送完成
-  /// </summary>
-  Finish,
+/** 发送组状态对应的稳定显示键。 */
+export const sendingGroupStatusNames: Readonly<Record<SendingGroupStatus, string>> = {
+  [SendingGroupStatus.Created]: 'Created',
+  [SendingGroupStatus.Scheduled]: 'Scheduled',
+  [SendingGroupStatus.Sending]: 'Sending',
+  [SendingGroupStatus.Pause]: 'Pause',
+  [SendingGroupStatus.Cancel]: 'Cancel',
+  [SendingGroupStatus.Finish]: 'Finish',
+  [SendingGroupStatus.WaitingForQuotaReset]: 'WaitingForQuotaReset'
 }
 
 /**
@@ -61,6 +52,8 @@ export interface ISendingGroupInfo {
   totalCount: number, // 总数
   successCount: number, // 成功数
   status: SendingGroupStatus, // 状态
+  statusReason?: string,
+  resumeAtUtc?: string,
   sendStartDate: string, // 发送开始时间
   sendingType?: SendingGroupType, // 发送类型
   scheduleDate?: string, // 计划发送时间

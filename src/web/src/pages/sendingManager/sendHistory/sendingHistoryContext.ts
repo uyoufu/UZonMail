@@ -79,7 +79,7 @@ export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowB
 
   // 暂停发件
   function canPauseSending (data: ISendingGroupHistory): boolean {
-    return data.status === SendingGroupStatus.Sending
+    return data.status === SendingGroupStatus.Sending || data.status === SendingGroupStatus.WaitingForQuotaReset
   }
   async function onPauseSending (data: ISendingGroupHistory) {
     // 进行确认
@@ -156,7 +156,8 @@ export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowB
     const { rows, selectedRows } = getSelectedRows(cursorData)
     // 如果在进行中，则不允许删除
     const inProgressGroups = rows.filter(x => x.status === SendingGroupStatus.Sending
-      || x.status === SendingGroupStatus.Scheduled)
+      || x.status === SendingGroupStatus.Scheduled
+      || x.status === SendingGroupStatus.WaitingForQuotaReset)
     if (inProgressGroups.length > 0) {
       notifyError(`选中项共有 ${inProgressGroups.length} 项正在运行，请取消后再删除`)
       return

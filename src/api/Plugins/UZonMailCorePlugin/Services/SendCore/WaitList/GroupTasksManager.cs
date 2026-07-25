@@ -74,15 +74,15 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 sendingItemIds
             );
 
-            if (!result && groupTasks.IsEmpty)
-                userTasksPools.TryRemove(group.UserId, out _);
-
             if (result)
             {
                 // 更新发件组状态为发送中
                 await sqlContext.SendingGroups.UpdateAsync(
                     x => x.Id == group.Id,
-                    x => x.SetProperty(y => y.Status, SendingGroupStatus.Sending)
+                    x =>
+                        x.SetProperty(y => y.Status, SendingGroupStatus.Sending)
+                            .SetProperty(y => y.StatusReason, (string?)null)
+                            .SetProperty(y => y.ResumeAtUtc, (DateTime?)null)
                 );
             }
 
@@ -142,15 +142,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 return null;
             }
 
-            // 为空时移除
-            if (sendingGroupsPool.IsEmpty)
-            {
-                // 移除自己
-                userTasksPools.TryRemove(userId, out _);
-                return null;
-            }
-
-            return sendingGroupsPool;
+            return sendingGroupsPool.IsEmpty ? null : sendingGroupsPool;
         }
 
         /// <summary>
@@ -170,11 +162,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             if (!userSendingGroupsPool.TryRemove(sendingGroupId, out _))
                 return;
 
-            // 若池中为空，同时移除任务池
-            if (userSendingGroupsPool.IsEmpty)
-            {
-                userTasksPools.TryRemove(userId, out _);
-            }
+            // 空用户槽保持注册。删除与并发激活交错会让新任务落入已从全局移除的旧槽。
         }
     }
 }

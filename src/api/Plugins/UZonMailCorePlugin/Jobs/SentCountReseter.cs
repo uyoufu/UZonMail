@@ -1,7 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using Quartz;
-using UzonMail.CorePlugin.Utils.Database;
-using UzonMail.DB.Extensions;
+using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Jobs
@@ -9,15 +10,25 @@ namespace UzonMail.CorePlugin.Jobs
     /// <summary>
     /// 发送计数重置任务
     /// </summary>
-    public class SentCountReseter(SqlContext db) : IJob, IScopedService
+    public class SentCountReseter(SqlContext db, ISendingGroupCommandService commandService)
+        : IJob,
+            IScopedService
     {
         public async Task Execute(IJobExecutionContext context)
         {
-            // 重置每日已发送计数，不应改动用户配置的每日最大发送数。
-            await db.Outboxes.UpdateAsync(x => true, x => x.SetProperty(y => y.SentTotalToday, 0));
+            // 计数按日期惰性重置，避免每天更新整张发件箱表；这里只恢复额度等待组。
+            var utcNow = DateTime.UtcNow;
+            var waitingGroups = await db
+                .SendingGroups.AsNoTracking()
+                .Where(group =>
+                    group.Status == SendingGroupStatus.WaitingForQuotaReset
+                    && group.ResumeAtUtc <= utcNow
+                )
+                .OrderBy(group => group.Id)
+                .ToListAsync(context.CancellationToken);
 
-            // 发件池在调用时，会自动重置，此处不处理
-            return;
+            foreach (var sendingGroup in waitingGroups)
+                await commandService.SendNow(sendingGroup);
         }
     }
 }

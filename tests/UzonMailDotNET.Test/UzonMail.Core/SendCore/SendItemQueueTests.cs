@@ -46,4 +46,24 @@ public sealed class SendItemQueueTests
         Assert.AreEqual(1, queue.Count);
         Assert.IsTrue(queue.Complete(active));
     }
+
+    [TestMethod]
+    public void ConcurrentRelease_OnlyOneCallerCanRequeueAnActiveDescriptor()
+    {
+        var queue = new SendItemQueue();
+        queue.Add(new SendItemDescriptor(1, 10, 0, 0));
+        var activeDescriptor = queue.AcquireShared()!;
+
+        var releaseResults = Enumerable
+            .Range(0, 32)
+            .AsParallel()
+            .Select(_ => queue.Release(activeDescriptor))
+            .ToList();
+
+        Assert.AreEqual(1, releaseResults.Count(result => result));
+        Assert.AreEqual(1, queue.ReadyCount);
+        Assert.AreEqual(0, queue.ActiveCount);
+        Assert.AreSame(activeDescriptor, queue.AcquireShared());
+        Assert.IsNull(queue.AcquireShared());
+    }
 }

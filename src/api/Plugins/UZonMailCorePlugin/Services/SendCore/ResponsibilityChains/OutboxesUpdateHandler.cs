@@ -1,4 +1,5 @@
 using log4net;
+using Microsoft.EntityFrameworkCore;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
@@ -6,6 +7,7 @@ using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.Extensions;
 using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.EmailSending;
 
 namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 {
@@ -53,7 +55,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 outbox.IncreaseSentCount();
                 await context.SqlContext.Outboxes.UpdateAsync(
                     x => x.Id == outbox.Id,
-                    x => x.SetProperty(y => y.SentTotalToday, outbox.SentTotalToday)
+                    x =>
+                        x.SetProperty(y => y.SentTotalToday, outbox.SentTotalToday)
+                            .SetProperty(y => y.SentCountDateUtc, outbox.SentCountDateUtc)
                 );
 
                 // 从发件箱中移除特定发件项
@@ -65,7 +69,38 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 
             // 检查发件箱发件数量是否超限
             // 若超限，则标记为需要释放
-            await CheckOutboxSentCountLimit(context.SqlContext, outbox);
+            if (await CheckOutboxSentCountLimit(context.SqlContext, outbox))
+            {
+                var utcNow = DateTimeOffset.UtcNow;
+                foreach (var sendingGroupId in outbox.GetSendingGroupIds())
+                {
+                    if (!outboxManager.AreAllOutboxesQuotaBlocked(sendingGroupId, utcNow))
+                        continue;
+                    var hasPendingItems = await context.SqlContext.SendingItems.AnyAsync(item =>
+                        item.SendingGroupId == sendingGroupId
+                        && (
+                            item.Status == SendingItemStatus.Pending
+                            || item.Status == SendingItemStatus.Sending
+                        )
+                    );
+                    if (!hasPendingItems)
+                        continue;
+                    await context.SqlContext.SendingGroups.UpdateAsync(
+                        group => group.Id == sendingGroupId,
+                        setters =>
+                            setters
+                                .SetProperty(
+                                    group => group.Status,
+                                    SendingGroupStatus.WaitingForQuotaReset
+                                )
+                                .SetProperty(group => group.StatusReason, "所有可用发件箱均达到当日发送额度")
+                                .SetProperty(
+                                    group => group.ResumeAtUtc,
+                                    outbox.QuotaBlockedUntilUtc.UtcDateTime
+                                )
+                    );
+                }
+            }
 
             return HandlerResult.Success();
         }
@@ -85,7 +120,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
         /// <summary>
         /// 检查发件箱的发件数量限制
         /// </summary>
-        private async Task CheckOutboxSentCountLimit(
+        private async Task<bool> CheckOutboxSentCountLimit(
             SqlContext sqlContext,
             OutboxEmailAddress outbox
         )
@@ -117,8 +152,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             {
                 var message = $"发件箱 {outbox.Email} 已达当日最大发件量: {outbox.SentTotalToday}";
                 _logger.Warn(message);
-                outbox.MarkShouldDispose(message);
+                outbox.ScheduleDailyQuotaReset(DateTimeOffset.UtcNow);
             }
+            return overflowLimit;
         }
     }
 }

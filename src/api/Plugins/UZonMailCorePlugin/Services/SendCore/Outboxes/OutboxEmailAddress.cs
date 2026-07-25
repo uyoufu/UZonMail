@@ -23,18 +23,45 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// <summary>
         /// 发送目录的 id
         /// </summary>
-        private HashSet<SendingTargetId> _sendingTargetIds = [];
+        private readonly object _stateLock = new();
+        private readonly HashSet<SendingTargetId> _sendingTargetIds = [];
+        private long _cooldownUntilUtcTicks;
 
         /// <summary>
         /// 开始日期
         /// </summary>
-        private DateTime _startDate = DateTime.UtcNow;
+        private DateOnly _sentCountDateUtc;
+        private long _quotaBlockedUntilUtcTicks;
         #endregion
 
         #region 公开属性
         public OutboxType OutboxType => Outbox.Type;
 
         public OutboxEmailAddressType Type { get; private set; } = OutboxEmailAddressType.Specific;
+
+        /// <summary>
+        /// 当前发件箱结束冷却并可再次参与调度的 UTC 时间。
+        /// </summary>
+        public DateTimeOffset CooldownUntilUtc =>
+            new(Interlocked.Read(ref _cooldownUntilUtcTicks), TimeSpan.Zero);
+
+        /// <summary>
+        /// 每日额度重置前不可参与调度的 UTC 时间。
+        /// </summary>
+        public DateTimeOffset QuotaBlockedUntilUtc =>
+            new(Interlocked.Read(ref _quotaBlockedUntilUtcTicks), TimeSpan.Zero);
+
+        /// <summary>
+        /// 当前发送计数所属的 UTC 日期。
+        /// </summary>
+        public DateOnly SentCountDateUtc
+        {
+            get
+            {
+                lock (_stateLock)
+                    return _sentCountDateUtc;
+            }
+        }
 
         /// <summary>
         /// 用户 ID
@@ -105,17 +132,19 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// </summary>
         public void IncreaseSentCount()
         {
-            SentTotal++;
-
-            // 重置每日发件量
-            if (_startDate.Date != DateTime.UtcNow.Date)
+            lock (_stateLock)
             {
-                _startDate = DateTime.UtcNow;
-                SentTotalToday = 0;
-            }
-            else
-            {
-                SentTotalToday++;
+                SentTotal++;
+                var utcToday = DateOnly.FromDateTime(DateTime.UtcNow);
+                if (_sentCountDateUtc != utcToday)
+                {
+                    _sentCountDateUtc = utcToday;
+                    SentTotalToday = 1;
+                }
+                else
+                {
+                    SentTotalToday++;
+                }
             }
         }
 
@@ -146,7 +175,14 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// 工作中
         /// 当没有发送目标后，working 为 false
         /// </summary>
-        public bool IsWorking => _sendingTargetIds.Count > 0;
+        public bool IsWorking
+        {
+            get
+            {
+                lock (_stateLock)
+                    return _sendingTargetIds.Count > 0;
+            }
+        }
 
         /// <summary>
         /// 是否可用
@@ -179,9 +215,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
 
             // 共享发件箱
             if (Type.HasFlag(OutboxEmailAddressType.Shared))
-            {
                 _sendingTargetIds.Add(new SendingTargetId(sendingGroupId));
-            }
 
             // 特定发件箱
             if (sendingItemIds != null)
@@ -202,6 +236,14 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
 
             ReplyToEmails = outbox.ReplyToEmails.SplitBySeparators().Distinct().ToList();
             SentTotalToday = outbox.SentTotalToday;
+            // 旧数据没有计数日期，首次加载时按当天计数，避免升级后意外突破日限额。
+            _sentCountDateUtc = outbox.SentCountDateUtc ?? DateOnly.FromDateTime(DateTime.UtcNow);
+            if (
+                outbox.MaxSendCountPerDay > 0
+                && _sentCountDateUtc == DateOnly.FromDateTime(DateTime.UtcNow)
+                && SentTotalToday >= outbox.MaxSendCountPerDay
+            )
+                ScheduleDailyQuotaReset(DateTimeOffset.UtcNow);
             Weight = outbox.Weight > 0 ? outbox.Weight : 1;
         }
         #endregion
@@ -214,15 +256,14 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// <param name="data"></param>
         public void Update(OutboxEmailAddress data)
         {
-            // 更新类型
-            Type |= data.Type;
-            Weight = data.Weight;
-            ReplyToEmails = data.ReplyToEmails;
-
-            // 更新关联的项
-            foreach (var targetId in data._sendingTargetIds)
+            lock (_stateLock)
             {
-                _sendingTargetIds.Add(targetId);
+                Type |= data.Type;
+                Weight = data.Weight;
+                ReplyToEmails = data.ReplyToEmails;
+
+                foreach (var targetId in data.GetSendingTargetsSnapshot())
+                    _sendingTargetIds.Add(targetId);
             }
         }
         #endregion
@@ -235,7 +276,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// <returns></returns>
         public bool IsLimited()
         {
-            return this.SentTotalToday > this.MaxSendCountPerDay;
+            return MaxSendCountPerDay > 0 && SentTotalToday >= MaxSendCountPerDay;
         }
 
         /// <summary>
@@ -245,7 +286,28 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// <returns></returns>
         public bool ContainsSendingGroup(long sendingGroupId)
         {
-            return _sendingTargetIds.Select(x => x.SendingGroupId).Contains(sendingGroupId);
+            lock (_stateLock)
+                return _sendingTargetIds.Any(x => x.SendingGroupId == sendingGroupId);
+        }
+
+        /// <summary>
+        /// 获取发件箱在指定发送组内的绑定类型，避免其它组的共享绑定污染当前组。
+        /// </summary>
+        public OutboxEmailAddressType GetTypeForSendingGroup(long sendingGroupId)
+        {
+            lock (_stateLock)
+            {
+                var groupTargets = _sendingTargetIds.Where(x => x.SendingGroupId == sendingGroupId);
+                var type = OutboxEmailAddressType.None;
+                foreach (var target in groupTargets)
+                {
+                    type |=
+                        target.SendingItemId > 0
+                            ? OutboxEmailAddressType.Specific
+                            : OutboxEmailAddressType.Shared;
+                }
+                return type;
+            }
         }
 
         /// <summary>
@@ -254,7 +316,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// <returns></returns>
         public List<long> GetSendingGroupIds()
         {
-            return [.. _sendingTargetIds.Select(x => x.SendingGroupId).Distinct()];
+            lock (_stateLock)
+                return [.. _sendingTargetIds.Select(x => x.SendingGroupId).Distinct()];
         }
 
         /// <summary>
@@ -263,10 +326,13 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// <returns></returns>
         public List<long> GetSpecificSendingItemIds()
         {
-            return
-            [
-                .. _sendingTargetIds.Where(x => x.SendingItemId > 0).Select(x => x.SendingItemId)
-            ];
+            lock (_stateLock)
+                return
+                [
+                    .. _sendingTargetIds
+                        .Where(x => x.SendingItemId > 0)
+                        .Select(x => x.SendingItemId),
+                ];
         }
 
         /// <summary>
@@ -274,12 +340,13 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// </summary>
         public List<long> GetSpecificSendingItemIds(long sendingGroupId)
         {
-            return
-            [
-                .. _sendingTargetIds
-                    .Where(x => x.SendingGroupId == sendingGroupId && x.SendingItemId > 0)
-                    .Select(x => x.SendingItemId),
-            ];
+            lock (_stateLock)
+                return
+                [
+                    .. _sendingTargetIds
+                        .Where(x => x.SendingGroupId == sendingGroupId && x.SendingItemId > 0)
+                        .Select(x => x.SendingItemId),
+                ];
         }
 
         /// <summary>
@@ -289,7 +356,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// <param name="sendingItemId"></param>
         public void RemoveSepecificSendingItem(long sendingGroupId, long sendingItemId)
         {
-            _sendingTargetIds.Remove(new SendingTargetId(sendingGroupId, sendingItemId));
+            lock (_stateLock)
+                _sendingTargetIds.Remove(new SendingTargetId(sendingGroupId, sendingItemId));
         }
 
         /// <summary>
@@ -298,9 +366,68 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         /// <param name="sendingGroupId"></param>
         public void RemoveSendingGroup(long sendingGroupId)
         {
-            _sendingTargetIds = _sendingTargetIds
-                .Where(x => x.SendingGroupId != sendingGroupId)
-                .ToHashSet();
+            lock (_stateLock)
+                _sendingTargetIds.RemoveWhere(x => x.SendingGroupId == sendingGroupId);
+        }
+
+        /// <summary>
+        /// 将发件箱置为冷却状态。冷却只记录资格时间，不占用发送工作槽。
+        /// </summary>
+        public void ScheduleCooldown(TimeSpan cooldown, DateTimeOffset utcNow)
+        {
+            if (cooldown <= TimeSpan.Zero)
+                return;
+
+            var newUntilTicks = utcNow.Add(cooldown).UtcTicks;
+            while (true)
+            {
+                var currentTicks = Interlocked.Read(ref _cooldownUntilUtcTicks);
+                if (currentTicks >= newUntilTicks)
+                    return;
+                if (
+                    Interlocked.CompareExchange(
+                        ref _cooldownUntilUtcTicks,
+                        newUntilTicks,
+                        currentTicks
+                    ) == currentTicks
+                )
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// 判断发件箱当前是否具备调度资格。
+        /// </summary>
+        public bool IsEligible(DateTimeOffset utcNow) =>
+            !ShouldDispose
+            && IsWorking
+            && CooldownUntilUtc <= utcNow
+            && QuotaBlockedUntilUtc <= utcNow;
+
+        /// <summary>
+        /// 获取冷却或额度限制结束后的最早调度时间。
+        /// </summary>
+        public DateTimeOffset NextEligibleUtc =>
+            CooldownUntilUtc >= QuotaBlockedUntilUtc ? CooldownUntilUtc : QuotaBlockedUntilUtc;
+
+        /// <summary>
+        /// 将发件箱阻塞到下一个 UTC 自然日，并保留其组绑定供自动恢复。
+        /// </summary>
+        public void ScheduleDailyQuotaReset(DateTimeOffset utcNow)
+        {
+            var nextUtcDay = new DateTimeOffset(utcNow.UtcDateTime.Date.AddDays(1), TimeSpan.Zero);
+            Interlocked.Exchange(ref _quotaBlockedUntilUtcTicks, nextUtcDay.UtcTicks);
+        }
+
+        /// <summary>
+        /// 判断发件箱是否正在等待每日额度重置。
+        /// </summary>
+        public bool IsQuotaBlocked(DateTimeOffset utcNow) => QuotaBlockedUntilUtc > utcNow;
+
+        private IReadOnlyList<SendingTargetId> GetSendingTargetsSnapshot()
+        {
+            lock (_stateLock)
+                return [.. _sendingTargetIds];
         }
 
         /// <summary>
@@ -320,15 +447,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         }
 
         private int _isRunningInTask = 0;
-
-        [Obsolete("Use TryMarkTaskRunning/MarkTaskStopped instead.")]
-        public void SetTaskId(int taskId)
-        {
-            if (taskId > 0)
-                TryMarkTaskRunning();
-            else
-                MarkTaskStopped();
-        }
 
         public bool TryMarkTaskRunning()
         {

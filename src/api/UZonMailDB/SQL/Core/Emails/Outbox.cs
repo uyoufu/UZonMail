@@ -5,6 +5,12 @@ namespace UzonMail.DB.SQL.Core.Emails
     /// <summary>
     /// 发件箱
     /// </summary>
+    [Microsoft.EntityFrameworkCore.Index(
+        nameof(UserId),
+        nameof(EmailGroupId),
+        nameof(IsValid),
+        nameof(Id)
+    )]
     public class Outbox : EmailBox
     {
         /// <summary>
@@ -70,6 +76,11 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// 当前已发送数量
         /// </summary>
         public int SentTotalToday { get; set; }
+
+        /// <summary>
+        /// <see cref="SentTotalToday"/> 所属的 UTC 日期。
+        /// </summary>
+        public DateOnly? SentCountDateUtc { get; set; }
 
         /// <summary>
         /// 回复邮箱

@@ -128,6 +128,16 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         public SendingGroupStatus Status { get; set; }
 
         /// <summary>
+        /// 当前运行状态的业务原因。
+        /// </summary>
+        public string? StatusReason { get; set; }
+
+        /// <summary>
+        /// 等待状态预计恢复的 UTC 时间。
+        /// </summary>
+        public DateTime? ResumeAtUtc { get; set; }
+
+        /// <summary>
         /// 发送开始时间
         /// </summary>
         public DateTime SendStartDate { get; set; }
@@ -214,6 +224,12 @@ namespace UzonMail.DB.SQL.Core.EmailSending
 
         public void Configure(EntityTypeBuilder<SendingGroup> builder)
         {
+            builder.HasIndex(x => new
+            {
+                x.Status,
+                x.ResumeAtUtc,
+                x.Id
+            });
             builder.HasMany(x => x.Templates).WithMany();
             builder.HasMany(x => x.Attachments).WithMany();
             builder.HasMany(x => x.Outboxes).WithMany();

@@ -9,6 +9,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
     public enum OutboxEmailAddressType
     {
         /// <summary>
+        /// 未绑定到当前发送组。
+        /// </summary>
+        None = 0,
+
+        /// <summary>
         /// 指定收件箱
         /// </summary>
         Specific = 1 << 0,

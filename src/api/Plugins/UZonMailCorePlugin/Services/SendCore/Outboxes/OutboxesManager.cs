@@ -7,6 +7,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes;
 public sealed class OutboxesManager : ISingletonService
 {
     private readonly ConcurrentDictionary<OutboxKey, OutboxEmailAddress> _outboxes = [];
+    private readonly ConcurrentDictionary<
+        long,
+        ConcurrentDictionary<OutboxKey, byte>
+    > _groupOutboxes = [];
+    private readonly object _registrationLock = new();
 
     public IReadOnlyCollection<OutboxEmailAddress> Values => [.. _outboxes.Values];
 
@@ -14,44 +19,83 @@ public sealed class OutboxesManager : ISingletonService
 
     public void AddOutbox(OutboxEmailAddress outbox)
     {
-        var key = GetKey(outbox);
-        _outboxes.AddOrUpdate(
-            key,
-            outbox,
-            (_, existing) =>
+        lock (_registrationLock)
+        {
+            var key = GetKey(outbox);
+            var registeredOutbox = _outboxes.AddOrUpdate(
+                key,
+                outbox,
+                (_, existing) =>
+                {
+                    existing.Update(outbox);
+                    return existing;
+                }
+            );
+            foreach (var groupId in registeredOutbox.GetSendingGroupIds())
             {
-                existing.Update(outbox);
-                return existing;
+                _groupOutboxes.GetOrAdd(groupId, static _ => []).TryAdd(key, 0);
             }
-        );
+        }
     }
 
     public bool RemoveOutbox(OutboxEmailAddress outbox, string message)
     {
-        if (!_outboxes.TryRemove(GetKey(outbox), out var removed))
-            return false;
-        removed.MarkShouldDispose(message);
-        return true;
+        lock (_registrationLock)
+        {
+            var key = GetKey(outbox);
+            if (!_outboxes.TryRemove(key, out var removed))
+                return false;
+            foreach (var groupId in removed.GetSendingGroupIds())
+            {
+                if (_groupOutboxes.TryGetValue(groupId, out var groupOutboxes))
+                    groupOutboxes.TryRemove(key, out _);
+            }
+            removed.MarkShouldDispose(message);
+            return true;
+        }
     }
 
     public List<OutboxEmailAddress> RemoveOutbox(long sendingGroupId, string message)
     {
-        List<OutboxEmailAddress> removedResults = [];
-        foreach (var pair in _outboxes.ToArray())
+        lock (_registrationLock)
         {
-            var outbox = pair.Value;
-            outbox.RemoveSendingGroup(sendingGroupId);
-            if (outbox.IsWorking)
-                continue;
-            if (!RemoveOutbox(outbox, message))
-                continue;
-            removedResults.Add(outbox);
+            List<OutboxEmailAddress> removedResults = [];
+            if (!_groupOutboxes.TryRemove(sendingGroupId, out var linkedOutboxes))
+                return removedResults;
+
+            foreach (var key in linkedOutboxes.Keys)
+            {
+                if (!_outboxes.TryGetValue(key, out var outbox))
+                    continue;
+                outbox.RemoveSendingGroup(sendingGroupId);
+                if (outbox.IsWorking || !_outboxes.TryRemove(key, out var removed))
+                    continue;
+                removed.MarkShouldDispose(message);
+                removedResults.Add(removed);
+            }
+            return removedResults;
         }
-        return removedResults;
     }
 
     public bool ExistValidOutbox(long sendingGroupId) =>
-        _outboxes.Values.Any(x => !x.ShouldDispose && x.ContainsSendingGroup(sendingGroupId));
+        _groupOutboxes.TryGetValue(sendingGroupId, out var linkedOutboxes)
+        && linkedOutboxes.Keys.Any(key => ExistValidOutbox(key));
+
+    /// <summary>
+    /// 判断组内所有仍有效的发件箱是否都在等待每日额度重置。
+    /// </summary>
+    public bool AreAllOutboxesQuotaBlocked(long sendingGroupId, DateTimeOffset utcNow)
+    {
+        if (!_groupOutboxes.TryGetValue(sendingGroupId, out var linkedOutboxes))
+            return false;
+
+        var validOutboxes = linkedOutboxes
+            .Keys.Select(key => _outboxes.TryGetValue(key, out var outbox) ? outbox : null)
+            .Where(outbox => outbox is { ShouldDispose: false })
+            .ToList();
+        return validOutboxes.Count > 0
+            && validOutboxes.All(outbox => outbox!.IsQuotaBlocked(utcNow));
+    }
 
     public bool ExistValidOutbox(OutboxKey key) =>
         _outboxes.TryGetValue(key, out var outbox) && !outbox.ShouldDispose;

@@ -17,8 +17,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(UserGroupTasksPool));
         private readonly ConcurrentDictionary<long, GroupTask> _tasks = [];
-        private readonly ConcurrentQueue<long> _taskOrder = [];
+        private readonly ConcurrentDictionary<long, long> _taskOrder = [];
         private readonly SemaphoreSlim _activationLock = new(1, 1);
+        private long _nextTaskOrder;
 
         /// <summary>
         /// 用户 id
@@ -71,14 +72,19 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         public async Task<SendItemExecution?> GetEmailItem(SendingContext context)
         {
             var candidates = _taskOrder
-                .Select((groupId, order) => new { GroupId = groupId, Order = order })
-                .Where(x => _tasks.ContainsKey(x.GroupId))
-                .Select(x => new
-                {
-                    x.GroupId,
-                    x.Order,
-                    Task = _tasks[x.GroupId],
-                })
+                .Select(x => new { GroupId = x.Key, Order = x.Value })
+                .Select(x =>
+                    _tasks.TryGetValue(x.GroupId, out var task)
+                        ? new
+                        {
+                            x.GroupId,
+                            x.Order,
+                            Task = task
+                        }
+                        : null
+                )
+                .Where(x => x is not null)
+                .Select(x => x!)
                 .OrderBy(x => x.Task.ActiveCount >= groupFairShare)
                 .ThenBy(x => x.Task.ActiveCount)
                 .ThenBy(x => x.Order)
@@ -100,7 +106,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 return false;
 
             // 依次获取发件项
-            foreach (var sendingGroupId in _taskOrder)
+            foreach (var sendingGroupId in _taskOrder.OrderBy(x => x.Value).Select(x => x.Key))
             {
                 if (!_tasks.TryGetValue(sendingGroupId, out var groupTask))
                     continue;
@@ -130,7 +136,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             if (!_tasks.TryAdd(key, value))
                 return false;
 
-            _taskOrder.Enqueue(key);
+            _taskOrder[key] = Interlocked.Increment(ref _nextTaskOrder);
             return true;
         }
 
@@ -145,6 +151,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 return false;
 
             value.Close();
+            _taskOrder.TryRemove(key, out _);
 
             return true;
         }

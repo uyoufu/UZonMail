@@ -22,10 +22,13 @@ public sealed class SendItemQueue
     private readonly ConcurrentDictionary<long, ConcurrentQueue<long>> _specificReady = [];
 
     /// <summary>当前可获取的描述符数量。</summary>
-    public int ReadyCount => _items.Values.Count(x => Volatile.Read(ref x.State) == Ready);
+    private int _readyCount;
+    private int _activeCount;
+
+    public int ReadyCount => Volatile.Read(ref _readyCount);
 
     /// <summary>当前已取得、尚未提交的描述符数量。</summary>
-    public int ActiveCount => _items.Values.Count(x => Volatile.Read(ref x.State) == Active);
+    public int ActiveCount => Volatile.Read(ref _activeCount);
 
     /// <summary>队列中的描述符总数。</summary>
     public int Count => _items.Count;
@@ -40,6 +43,7 @@ public sealed class SendItemQueue
         if (!_items.TryAdd(descriptor.Id, entry))
             return false;
 
+        Interlocked.Increment(ref _readyCount);
         Enqueue(descriptor);
         return true;
     }
@@ -63,18 +67,29 @@ public sealed class SendItemQueue
     /// <summary>完成并移除活动描述符。</summary>
     public bool Complete(SendItemDescriptor descriptor)
     {
-        return _items.TryGetValue(descriptor.Id, out var entry)
+        var removed =
+            _items.TryGetValue(descriptor.Id, out var entry)
             && ReferenceEquals(entry.Descriptor, descriptor)
             && Volatile.Read(ref entry.State) == Active
             && _items.TryRemove(new KeyValuePair<long, Entry>(descriptor.Id, entry));
+        if (removed)
+            Interlocked.Decrement(ref _activeCount);
+        return removed;
     }
 
     /// <summary>将活动描述符原样释放回待发队列。</summary>
     public bool Release(SendItemDescriptor descriptor)
     {
-        if (!Complete(descriptor))
+        if (
+            !_items.TryGetValue(descriptor.Id, out var entry)
+            || !ReferenceEquals(entry.Descriptor, descriptor)
+            || Interlocked.CompareExchange(ref entry.State, Ready, Active) != Active
+        )
             return false;
-        return Add(descriptor);
+        Interlocked.Decrement(ref _activeCount);
+        Interlocked.Increment(ref _readyCount);
+        Enqueue(descriptor);
+        return true;
     }
 
     /// <summary>获取当前所有活动描述符快照。</summary>
@@ -92,7 +107,10 @@ public sealed class SendItemQueue
             return true;
         if (Volatile.Read(ref entry.State) != Ready)
             return false;
-        return _items.TryRemove(new KeyValuePair<long, Entry>(sendingItemId, entry));
+        var removed = _items.TryRemove(new KeyValuePair<long, Entry>(sendingItemId, entry));
+        if (removed)
+            Interlocked.Decrement(ref _readyCount);
+        return removed;
     }
 
     /// <summary>判断队列是否包含匹配发件箱类型的描述符。</summary>
@@ -133,6 +151,8 @@ public sealed class SendItemQueue
                 continue;
             if (Interlocked.CompareExchange(ref entry.State, Active, Ready) != Ready)
                 continue;
+            Interlocked.Decrement(ref _readyCount);
+            Interlocked.Increment(ref _activeCount);
             return entry.Descriptor;
         }
         return null;

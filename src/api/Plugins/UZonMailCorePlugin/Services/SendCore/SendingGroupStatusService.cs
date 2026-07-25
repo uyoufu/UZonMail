@@ -32,7 +32,10 @@ namespace UzonMail.CorePlugin.Services.SendCore
 
             await db.SendingGroups.UpdateAsync(
                 x => sendingGroupIds.Contains(x.Id),
-                x => x.SetProperty(y => y.Status, status)
+                x =>
+                    x.SetProperty(y => y.Status, status)
+                        .SetProperty(y => y.StatusReason, updateReason)
+                        .SetProperty(y => y.ResumeAtUtc, (DateTime?)null)
             );
             await db.SendingItems.UpdateAsync(
                 x =>
