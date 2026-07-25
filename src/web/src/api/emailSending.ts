@@ -13,6 +13,7 @@ export interface IEmailCreateInfo {
   inboxGroups: IEmailGroupListItem[], // 收件人邮箱组
   inboxes: IInbox[], // 收件人邮箱
   ccBoxes: IInbox[], // 抄送人邮箱
+  bccBoxes: IInbox[], // 密送人邮箱
   body: string, // 邮件正文
   // 附件必须先上传，此处保存的是附件的Id
   attachments: Record<string, any>[], // 附件
@@ -22,6 +23,31 @@ export interface IEmailCreateInfo {
   // ip 预热作为参数传递给后端
   sendStartDate?: string, // 计划发送时间，UTC时间字符串
   sendEndDate?: string, // 计划发送结束时间，UTC时间字符串
+}
+
+interface IEmailAddressRequest {
+  email: string,
+  name?: string
+}
+
+interface ISendEmailRequest {
+  subjects: string,
+  templateIds: number[],
+  data: Record<string, any>[],
+  outboxGroupIds: number[],
+  outboxIds: number[],
+  inboxGroupIds: number[],
+  inboxes: IEmailAddressRequest[],
+  ccBoxes: IEmailAddressRequest[],
+  bccBoxes: IEmailAddressRequest[],
+  body: string,
+  attachmentIds: number[],
+  sendBatch: boolean,
+  proxyIds: number[]
+}
+
+interface IScheduleEmailRequest extends ISendEmailRequest {
+  scheduleDate: string
 }
 
 export interface ISendingItemPreview {
@@ -53,19 +79,53 @@ export function previewSendingItem (data: ISendingItemPreview) {
  */
 export function sendEmailNow (sendingGroup: IEmailCreateInfo) {
   return httpClient.post<boolean>('/email-sending/now', {
-    data: sendingGroup
+    data: toSendEmailRequest(sendingGroup)
   })
 }
 
 /**
- * 立即发件
+ * 定时发件
  * @param sendingGroup
+ * @param scheduleDate UTC 时间字符串
  * @returns
  */
-export function sendSchedule (sendingGroup: IEmailCreateInfo) {
+export function sendSchedule (sendingGroup: IEmailCreateInfo, scheduleDate: string) {
+  const request: IScheduleEmailRequest = {
+    ...toSendEmailRequest(sendingGroup),
+    scheduleDate
+  }
   return httpClient.post<boolean>('/email-sending/schedule', {
-    data: sendingGroup
+    data: request
   })
+}
+
+/** 将页面发件模型收敛为后端允许的请求字段。 */
+function toSendEmailRequest (sendingGroup: IEmailCreateInfo): ISendEmailRequest {
+  const toIds = (records: { id?: number }[]) => records
+    .map(record => record.id)
+    .filter((id): id is number => typeof id === 'number' && id > 0)
+  const toEmailAddresses = (inboxes: IInbox[]): IEmailAddressRequest[] => inboxes.map(inbox => ({
+    email: inbox.email,
+    name: inbox.name
+  }))
+
+  return {
+    subjects: sendingGroup.subjects,
+    templateIds: toIds(sendingGroup.templates),
+    data: sendingGroup.data,
+    outboxGroupIds: toIds(sendingGroup.outboxGroups),
+    outboxIds: toIds(sendingGroup.outboxes),
+    inboxGroupIds: toIds(sendingGroup.inboxGroups),
+    inboxes: toEmailAddresses(sendingGroup.inboxes),
+    ccBoxes: toEmailAddresses(sendingGroup.ccBoxes),
+    bccBoxes: toEmailAddresses(sendingGroup.bccBoxes),
+    body: sendingGroup.body,
+    attachmentIds: sendingGroup.attachments
+      .map(attachment => Number(attachment.__fileUsageId))
+      .filter(attachmentId => Number.isSafeInteger(attachmentId) && attachmentId > 0),
+    sendBatch: sendingGroup.sendBatch,
+    proxyIds: sendingGroup.proxyIds
+  }
 }
 
 /**

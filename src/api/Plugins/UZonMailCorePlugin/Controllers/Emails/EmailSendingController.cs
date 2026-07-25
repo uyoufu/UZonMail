@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Emails.DTOs;
 using UzonMail.CorePlugin.Controllers.Emails.Models;
 using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.CorePlugin.Services.EmailDecorator;
@@ -88,25 +89,26 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 立即发件
         /// </summary>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("now")]
-        public async Task<ResponseResult<SendingGroup>> SendNow([FromBody] SendingGroup sendingData)
+        public async Task<ResponseResult<SendingGroup>> SendNow([FromBody] SendEmailNowDto request)
         {
-            sendingData.ScheduleDate = DateTime.MinValue;
+            var sendingData = request.ToEntity();
             return await sendingService.StartSending(sendingData);
         }
 
         /// <summary>
         /// 计划发送
         /// </summary>
-        /// <param name="sendingData"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("schedule")]
         public async Task<ResponseResult<SendingGroup>> SendSchedule(
-            [FromBody] SendingGroup sendingData
+            [FromBody] ScheduleEmailDto request
         )
         {
-            // 校验数据
+            var sendingData = request.ToEntity();
             return await sendingService.StartSending(sendingData);
         }
 

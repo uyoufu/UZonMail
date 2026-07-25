@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Emails.DTOs;
 using UzonMail.CorePlugin.Controllers.Users.Model;
 using UzonMail.CorePlugin.Services.Emails;
 using UzonMail.CorePlugin.Services.Settings;
@@ -40,11 +41,12 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 创建邮件组
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost()]
-        public async Task<ResponseResult<EmailGroup>> Create([FromBody] EmailGroup entity)
+        public async Task<ResponseResult<EmailGroup>> Create([FromBody] CreateEmailGroupDto request)
         {
+            var entity = request.ToEntity();
             var userId = tokenService.GetUserSqlId();
             entity.UserId = userId;
 
@@ -71,11 +73,15 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// 更新
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="entity"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPut("{id:long}")]
-        public async Task<ResponseResult<EmailGroup>> Update(long id, [FromBody] EmailGroup entity)
+        public async Task<ResponseResult<EmailGroup>> Update(
+            long id,
+            [FromBody] UpdateEmailGroupDto request
+        )
         {
+            var entity = request.ToEntity();
             // 数据验证
             if (string.IsNullOrEmpty(entity.Name))
                 throw new KnownException("组名不允许为空");

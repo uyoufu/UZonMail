@@ -160,9 +160,7 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
     if (!ok) return
 
     // 将数据传到后台发送
-    await sendSchedule(Object.assign(emailInfo.value, {
-      scheduleDate: formatDateToUTC(scheduleDate) // 转换成带时区的字符串
-    }))
+    await sendSchedule(emailInfo.value, formatDateToUTC(scheduleDate))
 
     notifySuccess(translateSendingTask('scheduledSendingBooked'))
   }

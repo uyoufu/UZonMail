@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Emails.DTOs;
 using UzonMail.CorePlugin.Services.Emails;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.Utils.Validators;
@@ -15,12 +16,12 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 更新 Smtp 历史信息，方便下次更准确地猜测
         /// </summary>
-        /// <param name="smtpInfo"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<ResponseResult<bool>> UpdateSmtpInfo([FromBody] SmtpInfo data)
+        public async Task<ResponseResult<bool>> UpdateSmtpInfo([FromBody] UpdateSmtpInfoDto request)
         {
-            await smtpInfo.UpdateSmtpInfo(data);
+            await smtpInfo.UpdateSmtpInfo(request.ToEntity());
             return true.ToSuccessResponse();
         }
 

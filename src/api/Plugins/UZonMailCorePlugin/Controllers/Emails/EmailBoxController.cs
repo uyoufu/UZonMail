@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Emails.DTOs;
 using UzonMail.CorePlugin.Database.Validators;
 using UzonMail.CorePlugin.Services.Emails;
 using UzonMail.CorePlugin.Services.Encrypt;
@@ -31,11 +32,12 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 创建发件箱
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("outbox")]
-        public async Task<ResponseResult<Outbox>> CreateOutbox([FromBody] Outbox data)
+        public async Task<ResponseResult<Outbox>> CreateOutbox([FromBody] CreateOutboxDto request)
         {
+            var data = request.ToEntity();
             var outboxValidator = new OutboxValidator();
             var vdResult = outboxValidator.Validate(data);
             if (!vdResult.IsValid)
@@ -84,17 +86,19 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 批量新增发件箱
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="requests"></param>
         /// <returns></returns>
         [HttpPost("outboxes")]
         public async Task<ResponseResult<List<Outbox>>> CreateOutboxes(
-            [FromBody] List<Outbox> entities
+            [FromBody] List<CreateOutboxDto>? requests
         )
         {
-            if (entities == null)
+            if (requests == null)
             {
                 return ResponseResult<List<Outbox>>.Fail("未能解析发件箱数据");
             }
+
+            var entities = requests.ConvertAll(x => x.ToEntity());
             var userId = tokenService.GetUserSqlId();
             foreach (var entity in entities)
             {
@@ -160,74 +164,44 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 创建发件箱
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("inbox")]
-        public async Task<ResponseResult<Inbox>> CreateInbox([FromBody] Inbox entity)
-        {
-            var inboxValidator = new InboxValidator();
-            var vdResult = inboxValidator.Validate(entity);
-            if (!vdResult.IsValid)
-                return vdResult.ToErrorResponse<Inbox>();
-
-            var tokenPayloads = tokenService.GetTokenPayloads();
-            var userId = tokenPayloads.UserId;
-            entity.UserId = userId;
-            entity.OrganizationId = tokenPayloads.OrganizationId;
-
-            // 验证发件箱是否存在，若存在，则复用原来的发件箱
-            Inbox? existOne = db
-                .Inboxes.IgnoreQueryFilters()
-                .SingleOrDefault(x => x.UserId == userId && x.Email == entity.Email);
-            if (existOne != null)
-            {
-                existOne.EmailGroupId = entity.EmailGroupId;
-                existOne.Name = entity.Name;
-                existOne.Description = entity.Description;
-                existOne.SetStatusNormal();
-            }
-            else
-            {
-                // 新建一个发件箱
-                db.Inboxes.Add(entity);
-                existOne = entity;
-            }
-            await db.SaveChangesAsync();
-
-            return existOne.ToSuccessResponse();
-        }
+        public Task<ResponseResult<Inbox>> CreateInbox([FromBody] CreateInboxDto request) =>
+            CreateInboxEntity(request.ToEntity());
 
         /// <summary>
         /// 添加未分组收件箱
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         /// <exception cref="KnownException"></exception>
         [HttpPost("inbox/ungrouped")]
-        public async Task<ResponseResult<Inbox>> CreateUngroupedInbox([FromBody] Inbox entity)
+        public async Task<ResponseResult<Inbox>> CreateUngroupedInbox(
+            [FromBody] CreateUngroupedInboxDto request
+        )
         {
             // 获取未分组的组
             var defaultGroup = await emailGroupService.GetDefaultEmailGroup(EmailGroupType.InBox);
-            entity.EmailGroupId = defaultGroup.Id;
-
-            return await CreateInbox(entity);
+            return await CreateInboxEntity(request.ToEntity(defaultGroup.Id));
         }
 
         /// <summary>
         /// 批量新增发件箱
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="requests"></param>
         /// <returns></returns>
         [HttpPost("inboxes")]
         public async Task<ResponseResult<List<Inbox>>> CreateInboxes(
-            [FromBody] List<Inbox> entities
+            [FromBody] List<CreateInboxDto>? requests
         )
         {
-            if (entities == null)
+            if (requests == null)
             {
                 return ResponseResult<List<Inbox>>.Fail("未能解析收件箱数据");
             }
 
+            var entities = requests.ConvertAll(x => x.ToEntity());
             var userId = tokenService.GetUserSqlId();
             foreach (var entity in entities)
             {
@@ -282,14 +256,15 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// 更新发件箱
         /// </summary>
         /// <param name="outboxId"></param>
-        /// <param name="entity"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPut("outbox/{outboxId:long}")]
         public async Task<ResponseResult<bool>> UpdateOutbox(
             long outboxId,
-            [FromBody] Outbox entity
+            [FromBody] UpdateOutboxDto request
         )
         {
+            var entity = request.ToEntity();
             await db.Outboxes.UpdateAsync(
                 x => x.Id == outboxId,
                 x =>
@@ -340,11 +315,15 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// 更新收件箱
         /// </summary>
         /// <param name="inboxId"></param>
-        /// <param name="entity"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPut("inbox/{inboxId:long}")]
-        public async Task<ResponseResult<bool>> UpdateInbox(long inboxId, [FromBody] Inbox entity)
+        public async Task<ResponseResult<bool>> UpdateInbox(
+            long inboxId,
+            [FromBody] UpdateInboxDto request
+        )
         {
+            var entity = request.ToEntity();
             await db.Inboxes.UpdateAsync(
                 x => x.Id == inboxId,
                 x =>
@@ -354,6 +333,39 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                         .SetProperty(y => y.Description, entity.Description)
             );
             return true.ToSuccessResponse();
+        }
+
+        private async Task<ResponseResult<Inbox>> CreateInboxEntity(Inbox entity)
+        {
+            var inboxValidator = new InboxValidator();
+            var vdResult = inboxValidator.Validate(entity);
+            if (!vdResult.IsValid)
+                return vdResult.ToErrorResponse<Inbox>();
+
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var userId = tokenPayloads.UserId;
+            entity.UserId = userId;
+            entity.OrganizationId = tokenPayloads.OrganizationId;
+
+            // 验证收件箱是否存在，若存在，则复用原来的收件箱。
+            Inbox? existOne = db
+                .Inboxes.IgnoreQueryFilters()
+                .SingleOrDefault(x => x.UserId == userId && x.Email == entity.Email);
+            if (existOne != null)
+            {
+                existOne.EmailGroupId = entity.EmailGroupId;
+                existOne.Name = entity.Name;
+                existOne.Description = entity.Description;
+                existOne.SetStatusNormal();
+            }
+            else
+            {
+                db.Inboxes.Add(entity);
+                existOne = entity;
+            }
+            await db.SaveChangesAsync();
+
+            return existOne.ToSuccessResponse();
         }
 
         /// <summary>

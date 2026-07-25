@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Emails.DTOs;
 using UzonMail.CorePlugin.Database.Validators;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Utils.Database;
@@ -64,11 +65,14 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 新增或修改邮件模板
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ResponseResult<EmailTemplate>> Upsert([FromBody] EmailTemplate entity)
+        public async Task<ResponseResult<EmailTemplate>> Upsert(
+            [FromBody] UpsertEmailTemplateDto request
+        )
         {
+            var entity = request.ToEntity();
             // 添加当前用户名
             entity.UserId = tokenService.GetUserSqlId();
 
@@ -85,13 +89,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                 .EmailTemplates.Include(x => x.ShareToUsers)
                 .Include(x => x.ShareToOrganizations)
                 .FirstOrDefaultAsync(x => x.Id == entity.Id && x.UserId == entity.UserId);
-            var affectedUserIds = (existOne?.ShareToUsers ?? [])
-                .Select(x => x.Id)
-                .Concat(entity.ShareToUsers.Select(x => x.Id))
-                .ToHashSet();
+            var affectedUserIds = (existOne?.ShareToUsers ?? []).Select(x => x.Id).ToHashSet();
             var affectedOrganizationIds = (existOne?.ShareToOrganizations ?? [])
                 .Select(x => x.Id)
-                .Concat(entity.ShareToOrganizations.Select(x => x.Id))
                 .ToHashSet();
             // 如果有 Id,则说明是修改
             if (entity.Id > 0)
