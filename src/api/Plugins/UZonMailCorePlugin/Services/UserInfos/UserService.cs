@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Uamazing.Utils.Web.Token;
-using UzonMail.CorePlugin.Config;
+using UzonMail.CorePlugin.Config.SubConfigs;
 using UzonMail.CorePlugin.Controllers.Users.Model;
 using UzonMail.CorePlugin.Services.Config;
 using UzonMail.CorePlugin.Services.Encrypt;
@@ -14,7 +14,6 @@ using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Organization;
 using UzonMail.DB.SQL.Core.Permission;
 using UzonMail.Utils.Extensions;
-using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Exceptions;
 using UzonMail.Utils.Web.PagingQuery;
 using UzonMail.Utils.Web.Service;
@@ -28,7 +27,8 @@ namespace UzonMail.CorePlugin.Services.UserInfos
     public class UserService(
         IServiceProvider serviceProvider,
         SqlContext db,
-        IAppOptions<AppOptions> appConfig,
+        IOptions<TokenParams> tokenOptions,
+        IOptions<UserOptions> userOptions,
         PermissionService permission,
         PluginService pluginService,
         TokenService tokenService,
@@ -401,7 +401,7 @@ namespace UzonMail.CorePlugin.Services.UserInfos
                 claims.AddRange(claimsTemp);
             }
 
-            var tokenParams = appConfig.Value.TokenParams.Clone();
+            var tokenParams = tokenOptions.Value.Clone();
             // 若
             if (expireDate > DateTime.UtcNow)
                 tokenParams.ExpireDate = expireDate;
@@ -450,7 +450,7 @@ namespace UzonMail.CorePlugin.Services.UserInfos
         /// <returns></returns>
         public string GetUserDefaultPassword()
         {
-            return appConfig.Value.User.DefaultPassword;
+            return userOptions.Value.DefaultPassword;
         }
 
         /// <summary>
@@ -467,7 +467,7 @@ namespace UzonMail.CorePlugin.Services.UserInfos
                 ?? throw new KnownException("用户不存在");
             var newSalt = User.NewSalt();
             var newPassword = encryptService.HashPassword(
-                appConfig.Value.User.DefaultPassword.Sha256(),
+                userOptions.Value.DefaultPassword.Sha256(),
                 newSalt
             );
 

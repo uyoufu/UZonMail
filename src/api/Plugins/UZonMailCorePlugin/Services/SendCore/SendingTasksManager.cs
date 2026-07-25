@@ -6,7 +6,6 @@ using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Runtime;
-using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.SendCore;
@@ -41,7 +40,7 @@ public sealed class SendingTasksManager
     public SendingTasksManager(
         IServiceProvider provider,
         OutboxesManager outboxesManager,
-        IAppOptions<SendingQuotaOptions> quotas
+        IOptions<SendingQuotaOptions> quotas
     )
     {
         _provider = provider;

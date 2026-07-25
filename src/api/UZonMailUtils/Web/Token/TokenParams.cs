@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Net.NetworkInformation;
+using UzonMail.Utils.Web.Configs;
 
 namespace UzonMail.Utils.Web.Token
 {
     /// <summary>
     /// 创建 token 的参数
     /// </summary>
-    public class TokenParams
+    public class TokenParams : IAppOptions
     {
         /// <summary>
         /// 过期时间

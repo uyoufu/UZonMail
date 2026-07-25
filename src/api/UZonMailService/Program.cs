@@ -12,6 +12,7 @@ using UzonMail.Utils.Database.Redis;
 using UzonMail.Utils.Log;
 using UzonMail.Utils.Plugin;
 using UzonMail.Utils.Web;
+using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Filters;
 using UzonMail.Utils.Web.Token;
 
@@ -205,6 +206,9 @@ services.AddUtilsServices();
 
 // 加载本机服务
 services.AddServices();
+
+// 自动注册当前已加载程序集中的 Options
+services.AddAllOptions(builder.Configuration);
 
 var app = builder.Build();
 

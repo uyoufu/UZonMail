@@ -3,7 +3,7 @@ using UzonMail.Utils.Web.Configs;
 namespace UzonMail.CorePlugin.Services.SendCore.Reading;
 
 [OptionName("SendCore:Reader")]
-public sealed class SendItemReaderOptions
+public sealed class SendItemReaderOptions : IAppOptions
 {
     public int PageSize { get; set; } = 100;
 

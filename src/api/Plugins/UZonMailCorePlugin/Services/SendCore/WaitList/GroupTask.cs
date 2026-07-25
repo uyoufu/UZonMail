@@ -21,7 +21,6 @@ using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Base;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
-using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.SendCore.WaitList
@@ -40,7 +39,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         ISendPayloadReader payloadReader,
         ISendLeaseStore leaseStore,
         ISendingWorkerCoordinator workerCoordinator,
-        IAppOptions<SendingQuotaOptions> quotaOptions,
+        IOptions<SendingQuotaOptions> quotaOptions,
         TimeProvider timeProvider
     ) : ITransientService
     {

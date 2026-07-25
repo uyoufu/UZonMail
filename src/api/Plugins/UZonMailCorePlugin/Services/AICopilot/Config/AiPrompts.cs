@@ -3,7 +3,7 @@ using UzonMail.Utils.Web.Configs;
 namespace UzonMail.CorePlugin.Services.AICopilot.Config
 {
     [OptionName("AiCopilot.Prompts")]
-    public class AiPrompts
+    public class AiPrompts : IAppOptions
     {
         /// <summary>
         /// 邮件正文生成提示词

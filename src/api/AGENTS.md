@@ -13,4 +13,5 @@
 
 ## 配置调用
 
-- 配置不要使用 `service.Configure<>` 注册，也不要使用 `IOptions<T>` 获取配置实例，使用 `IAppOptions<T> options` 来获取， 然后通过 `options.Value` 获取配置实例
+- 业务配置类型实现 `IAppOptions` 标记接口，由 `AddAllOptions` 自动扫描并注册，不要手动调用 `services.Configure<T>`
+- 使用 `IOptions<T>` 获取固定配置，使用 `IOptionsSnapshot<T>` 或 `IOptionsMonitor<T>` 获取支持热更新的配置

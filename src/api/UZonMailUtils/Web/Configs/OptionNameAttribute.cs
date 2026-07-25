@@ -3,7 +3,7 @@ using System;
 namespace UzonMail.Utils.Web.Configs
 {
     /// <summary>
-    /// 用于拕配置项名称
+    /// 指定 Options 类型对应的配置项名称。
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class OptionNameAttribute(string optionName) : Attribute

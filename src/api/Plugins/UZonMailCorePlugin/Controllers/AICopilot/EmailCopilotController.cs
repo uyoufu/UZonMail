@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
 using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Controllers.AICopilot.DTOs;
 using UzonMail.CorePlugin.Services.AICopilot;
 using UzonMail.CorePlugin.Services.AICopilot.Config;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.DB.SQL;
-using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.ResponseModel;
 
 namespace UzonMail.CorePlugin.Controllers.AICopilot
@@ -22,7 +22,7 @@ namespace UzonMail.CorePlugin.Controllers.AICopilot
         SqlContext db,
         TokenService tokenService,
         AiCopilotService aiCopilot,
-        IAppOptions<AiPrompts> systemPrompts,
+        IOptions<AiPrompts> systemPrompts,
         ILogger<EmailCopilotController> logger
     ) : ControllerBaseV1
     {

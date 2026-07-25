@@ -13,10 +13,6 @@
 		<BaseOutputPath>..\..\UzonMailService\bin\Debug\net10.0\Plugins\UzonMailCore</BaseOutputPath>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
-		<BaseOutputPath>bin\x64\Release\</BaseOutputPath>
-	</PropertyGroup>
-
 	<ItemGroup>
 	  <Compile Remove="bin\**" />
 	  <Compile Remove="Controllers\Organization\**" />

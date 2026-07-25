@@ -1,10 +1,7 @@
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
-using UzonMail.CorePlugin.Config;
 using UzonMail.Utils.Json;
-using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Service;
 using UzonMail.Utils.Web.Token;
 
@@ -14,11 +11,7 @@ namespace UzonMail.CorePlugin.Services.Settings
     /// Token 相关的服务
     /// </summary>
     /// <param name="httpContextAccessor"></param>
-    /// <param name="appConfig"></param>
-    public class TokenService(
-        IHttpContextAccessor httpContextAccessor,
-        IAppOptions<AppOptions> appConfig
-    ) : IScopedService
+    public class TokenService(IHttpContextAccessor httpContextAccessor) : IScopedService
     {
         private HttpRequest Request => httpContextAccessor.HttpContext.Request;
 

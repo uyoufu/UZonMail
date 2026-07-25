@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UzonMail.Utils.Web.Configs;
 
 namespace UzonMail.CorePlugin.Config.SubConfigs
 {
-    public class UserOptions
+    public class UserOptions : IAppOptions
     {
         public string CachePath { get; set; }
 
