@@ -27,12 +27,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             // 若因为发件箱移除，需要同时移除发件组时，还要下发发件组状态变更通知
 
             var outbox = context.OutboxAddress;
-            var emailItem = context.EmailItem;
+            var currentAttempt = context.CurrentAttempt;
 
             if (outbox == null)
                 return HandlerResult.Skiped();
 
-            if (emailItem == null)
+            if (currentAttempt == null)
             {
                 // 没有发件项时，可会存在所有发件正在发送中的情况，因此 outbox 不能立马释放, 需要进行判断
                 if (!MatchEmailItem(outbox))
@@ -47,7 +47,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             }
 
             // 增加发件数量
-            if (emailItem.IsErrorOrSuccess())
+            if (context.SendAttemptDecision is { IsTerminal: true })
             {
                 // 判断是否达到了最大的发件数限制
                 outbox.IncreaseSentCount();
@@ -58,8 +58,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 
                 // 从发件箱中移除特定发件项
                 outbox.RemoveSepecificSendingItem(
-                    emailItem.SendingItem.SendingGroupId,
-                    emailItem.SendingItemId
+                    currentAttempt.Descriptor.SendingGroupId,
+                    currentAttempt.Descriptor.Id
                 );
             }
 

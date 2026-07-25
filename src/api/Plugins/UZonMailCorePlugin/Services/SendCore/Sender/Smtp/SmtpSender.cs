@@ -27,7 +27,7 @@ public sealed class SmtpSender(
         CancellationToken cancellationToken = default
     )
     {
-        var sendItem = context.EmailItem!;
+        var sendItem = context.CurrentAttempt!.PreparedItem;
         var clientManager = context.Provider.GetRequiredService<SmtpClientsManager>();
         TransportResult? lastResult = null;
 
@@ -40,7 +40,7 @@ public sealed class SmtpSender(
                     new OutboxKey(sendItem.Outbox.UserId, sendItem.Outbox.Id),
                     sendItem.Outbox.OutboxType,
                     sendItem.Outbox.Email,
-                    sendItem.ProxyId,
+                    sendItem.EffectiveProxyId,
                     sendItem.AvailableProxyIds
                 ),
                 cancellationToken

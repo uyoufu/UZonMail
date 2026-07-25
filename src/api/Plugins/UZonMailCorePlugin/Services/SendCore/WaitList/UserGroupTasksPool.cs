@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using log4net;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 
 namespace UzonMail.CorePlugin.Services.SendCore.WaitList
@@ -66,7 +67,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// 获取组中可被 outboxId 发送的邮件项
         /// </summary>
         /// <returns></returns>
-        public async Task<SendItemMeta?> GetEmailItem(SendingContext context)
+        public async Task<SendItemExecution?> GetEmailItem(SendingContext context)
         {
             var candidates = _taskOrder
                 .Select((groupId, order) => new { GroupId = groupId, Order = order })

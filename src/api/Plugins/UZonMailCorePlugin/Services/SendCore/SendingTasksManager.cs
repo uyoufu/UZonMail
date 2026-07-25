@@ -183,7 +183,7 @@ public sealed class SendingTasksManager
                 await pipeline.Handle(sendingContext);
                 if (sendingContext.ShouldExitTask())
                     break;
-                if (sendingContext.EmailItem is null)
+                if (sendingContext.CurrentAttempt is null)
                     await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken);
             }
         }

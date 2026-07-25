@@ -1,4 +1,4 @@
-using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
@@ -18,18 +18,28 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator.Interfaces
         SendingItem SendingItem { get; }
 
         /// <summary>
-        /// 发件项在运行中产生的数据
+        /// 邮件变量数据
         /// </summary>
-        SendItemMeta SendItemMeta { get; }
+        SendingItemExcelData? Variables { get; }
 
         /// <summary>
         /// 发件箱
         /// </summary>
-        Outbox Outbox { get; set; }
+        Outbox Outbox { get; }
 
         /// <summary>
         /// 发件箱邮箱
         /// </summary>
-        string OutboxEmail { get; set; }
+        string OutboxEmail { get; }
+
+        IReadOnlyList<EmailAddress> Inboxes { get; }
+
+        IReadOnlyList<EmailAddress> CC { get; }
+
+        IReadOnlyList<EmailAddress> BCC { get; }
+
+        string Subject { get; }
+
+        string HtmlBody { get; }
     }
 }

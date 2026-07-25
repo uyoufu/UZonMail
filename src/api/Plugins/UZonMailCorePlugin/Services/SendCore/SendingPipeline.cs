@@ -16,11 +16,11 @@ namespace UzonMail.CorePlugin.Services.SendCore
         [
             typeof(EmailItemGetter),
             typeof(LocalEmailSendingHandler),
-            typeof(OutboxDisposer),
+            typeof(PermanentOutboxFailureHandler),
             typeof(EmailItemUpdateHandler),
             typeof(GroupTaskUpdateHandler),
             typeof(OutboxesUpdateHandler),
-            typeof(OutboxDisposer),
+            typeof(OutboxRetirementHandler),
             typeof(SmtpClientDisposer),
             typeof(OutboxSendingThrottleHandler)
         ];

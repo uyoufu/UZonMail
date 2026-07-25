@@ -19,29 +19,29 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
         protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
             // 判断是否有发件项，若没有，则直接返回
-            var emailItem = context.EmailItem;
-            if (emailItem == null)
+            var currentAttempt = context.CurrentAttempt;
+            if (currentAttempt == null)
                 return HandlerResult.Skiped();
 
             // 保存组的发送进度及通知前端
-            if (!emailItem.IsErrorOrSuccess())
+            if (context.SendAttemptDecision is not { IsTerminal: true })
                 return HandlerResult.Skiped();
 
             // 向数据库中保存状态
             var sqlContext = context.SqlContext;
             var sendingGroup = await SendingGroupUpdater.UpdateSendingGroupSentInfo(
                 sqlContext,
-                emailItem.SendingItem.SendingGroupId
+                currentAttempt.Descriptor.SendingGroupId
             );
 
             var lastMessage =
-                $"[{context.OutboxAddress!.Email}] -> [{string.Join(",", emailItem.Inboxes.Select(x => x.Email))}]";
+                $"[{context.OutboxAddress!.Email}] -> [{string.Join(",", currentAttempt.PreparedItem.Inboxes.Select(x => x.Email))}]";
             sendingGroup.LastMessage = lastMessage;
             await sqlContext.SaveChangesAsync();
 
             // 向用户推送发送组的进度
             await context
-                .HubClient.GetUserClient(emailItem.UserId)
+                .HubClient.GetUserClient(currentAttempt.PreparedItem.UserId)
                 // 推送发送组进度
                 .SendingGroupProgressChanged(
                     new SendingGroupProgressArg(sendingGroup, context.GroupTaskStartDate)

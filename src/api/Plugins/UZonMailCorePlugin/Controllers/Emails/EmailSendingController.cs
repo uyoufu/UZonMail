@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Controllers.Emails.Models;
+using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.CorePlugin.Services.EmailDecorator;
 using UzonMail.CorePlugin.Services.EmailDecorator.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
-using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.Extensions;
@@ -72,12 +72,13 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                 Inboxes = [inbox]
             };
 
-            var sendItemMeta = new SendItemMeta(0);
-            sendItemMeta.SetSendingItem(sendingItem);
             var decoratorParams = new EmailDecoratorParams(
                 new SendingSetting(),
-                sendItemMeta,
-                outbox
+                sendingItem,
+                new SendingItemExcelData(sendingItem.Data),
+                outbox,
+                data.Subject,
+                data.Body
             );
             data.Subject = await decorateService.ResolveVariables(decoratorParams, data.Subject);
             data.Body = await decorateService.ResolveVariables(decoratorParams, data.Body);

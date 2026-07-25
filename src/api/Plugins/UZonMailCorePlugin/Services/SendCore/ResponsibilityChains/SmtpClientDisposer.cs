@@ -16,7 +16,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
         protected override async Task<IHandlerResult> HandleCore(SendingContext context)
         {
             // 不存在或者发件箱待释放时，直接返回
-            var outbox = context.EmailItem?.Outbox;
+            var outbox = context.CurrentAttempt?.PreparedItem.Outbox;
             if (outbox == null)
                 return HandlerResult.Skiped();
 

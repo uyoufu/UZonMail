@@ -270,6 +270,19 @@ namespace UzonMail.CorePlugin.Services.SendCore.Outboxes
         }
 
         /// <summary>
+        /// 获取指定发送组中绑定当前发件箱的邮件 ID。
+        /// </summary>
+        public List<long> GetSpecificSendingItemIds(long sendingGroupId)
+        {
+            return
+            [
+                .. _sendingTargetIds
+                    .Where(x => x.SendingGroupId == sendingGroupId && x.SendingItemId > 0)
+                    .Select(x => x.SendingItemId),
+            ];
+        }
+
+        /// <summary>
         /// 移除指定的发件项
         /// </summary>
         /// <param name="sendingGroupId"></param>

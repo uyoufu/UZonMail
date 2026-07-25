@@ -1,147 +1,128 @@
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
-using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.SignalRHubs.Extensions;
 using UzonMail.CorePlugin.SignalRHubs.SendEmail;
 using UzonMail.DB.Extensions;
 using UzonMail.DB.SQL.Core.EmailSending;
 
-namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
+namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains;
+
+/// <summary>
+/// 提交发送结果，或将可重试邮件重新放入延迟队列。
+/// </summary>
+public sealed class EmailItemUpdateHandler(TimeProvider timeProvider) : AbstractSendingHandler
 {
-    /// <summary>
-    /// 发件项后处理器
-    /// 1. 判断是否可以重试
-    /// 2. 更新发件状态到数据库
-    /// 3. 发送通知
-    /// </summary>
-    public class EmailItemUpdateHandler(TimeProvider timeProvider) : AbstractSendingHandler
+    protected override async Task<IHandlerResult> HandleCore(SendingContext context)
     {
-        protected override async Task<IHandlerResult> HandleCore(SendingContext context)
+        var currentAttempt = context.CurrentAttempt;
+        var transportResult = context.TransportResult;
+        if (currentAttempt == null || transportResult == null)
+            return HandlerResult.Skiped();
+
+        var decision = SendAttemptDecisionPolicy.Decide(
+            transportResult,
+            currentAttempt.Descriptor.TriedCount,
+            currentAttempt.PreparedItem.MaxRetryCount,
+            context.OutboxRetirement
+        );
+        context.SendAttemptDecision = decision;
+
+        if (decision.Disposition == SendAttemptDisposition.Release)
         {
-            // 发送发件进度
-            if (context.EmailItem == null)
-                return HandlerResult.Skiped();
-
-            // 根据状态发送进度信息
-            var emailItem = context.EmailItem;
-            if (context.OutboxFailureHandled && !context.CanRetryAfterOutboxFailure)
-            {
-                emailItem.SetStatus(
-                    SendItemMetaStatus.Error,
-                    context.TransportResult?.Message ?? "发件箱已失效，无法继续发送"
+            if (context.GroupTask?.ReleaseEmailItem(currentAttempt) != true)
+                throw new InvalidOperationException(
+                    $"发件项 {currentAttempt.Descriptor.Id} 无法释放回待发队列"
                 );
-            }
-
-            // 判断发件项是否需要重试
-            if (!emailItem.IsErrorOrSuccess())
-            {
-                if (emailItem.TriedCount >= emailItem.MaxRetryCount)
-                {
-                    // 说明已经达到了最大重试次数
-                    emailItem.SetStatus(
-                        SendItemMetaStatus.Error,
-                        $"当前邮箱重试已达最大次数 {emailItem.MaxRetryCount}"
-                    );
-                }
-                else
-                {
-                    var retryCount = emailItem.TriedCount + 1;
-                    await context.SqlContext.SendingItems.UpdateAsync(
-                        x => x.Id == emailItem.SendingItemId,
-                        x =>
-                            x.SetProperty(y => y.Status, SendingItemStatus.Pending)
-                                .SetProperty(y => y.TriedCount, retryCount)
-                                .SetProperty(y => y.SendResult, emailItem.Message)
-                    );
-                    var baseSeconds = Math.Min(60, 1 << Math.Min(retryCount, 6));
-                    var jitterMilliseconds = RandomNumberGenerator.GetInt32(
-                        0,
-                        baseSeconds * 250 + 1
-                    );
-                    var retryAt =
-                        timeProvider.GetUtcNow()
-                        + TimeSpan.FromSeconds(baseSeconds)
-                        + TimeSpan.FromMilliseconds(jitterMilliseconds);
-                    if (context.GroupTask?.ScheduleRetryEmailItem(emailItem, retryAt) != true)
-                        throw new InvalidOperationException(
-                            $"发件项 {emailItem.SendingItemId} 无法进入延迟重试队列"
-                        );
-
-                    context.RequestWorkerExit();
-                    return HandlerResult.Skiped();
-                }
-            }
-
-            // 保存结果到数据库
-            var sendingItem = await SaveSendingItemInfos(context);
-            context.GroupTask?.CompleteEmailItem(emailItem);
-
-            // 通知前端发件项状态变化
-            await context
-                .HubClient.GetUserClient(context.OutboxAddress!.UserId)
-                .SendingItemStatusChanged(new SendingItemStatusChangedArg(sendingItem));
-
-            return HandlerResult.Success();
+            context.RequestWorkerExit();
+            return HandlerResult.Skiped(decision.Message);
         }
 
-        /// <summary>
-        /// 保存 SendItem 状态
-        /// </summary>
-        /// <returns></returns>
-        private static async Task<SendingItem> SaveSendingItemInfos(SendingContext sendingContext)
+        if (decision.Disposition == SendAttemptDisposition.Retry)
         {
-            var outbox = sendingContext.OutboxAddress;
-            var emailItem = sendingContext.EmailItem;
+            await ScheduleRetryAsync(context, currentAttempt, decision.Message);
+            context.RequestWorkerExit();
+            return HandlerResult.Skiped(decision.Message);
+        }
 
-            var db = sendingContext.SqlContext;
+        var sendingItem = await SaveSendingItemAsync(context, currentAttempt, decision);
+        context.GroupTask?.CompleteEmailItem(currentAttempt);
+        await context
+            .HubClient.GetUserClient(currentAttempt.PreparedItem.Outbox.UserId)
+            .SendingItemStatusChanged(new SendingItemStatusChangedArg(sendingItem));
+        return HandlerResult.Success(decision.Message);
+    }
 
-            var success = emailItem.Status == SendItemMetaStatus.Success;
-            var message = emailItem.Message;
+    private async Task ScheduleRetryAsync(
+        SendingContext context,
+        SendItemExecution currentAttempt,
+        string message
+    )
+    {
+        var retryCount = currentAttempt.Descriptor.TriedCount + 1;
+        await context.SqlContext.SendingItems.UpdateAsync(
+            x => x.Id == currentAttempt.Descriptor.Id,
+            x =>
+                x.SetProperty(y => y.Status, SendingItemStatus.Pending)
+                    .SetProperty(y => y.TriedCount, retryCount)
+                    .SetProperty(y => y.SendResult, message)
+        );
 
-            // 更新 sendingItems 状态
-            var data = await db.SendingItems.FirstOrDefaultAsync(x =>
-                x.Id == emailItem.SendingItemId
-            );
-            // 更新数据
-            data.FromEmail = outbox.Email;
-            data.Subject = emailItem.Subject;
-            data.Content = emailItem.HtmlBody;
-            // 保存发送状态
-            data.Status = success ? SendingItemStatus.Success : SendingItemStatus.Failed;
-            data.SendResult = message;
-            data.TriedCount = emailItem.TriedCount;
-            data.SendDate = DateTime.UtcNow;
-            // 解析邮件 id
-            data.ReceiptId = new ResultParser(message).GetReceiptId();
+        var baseSeconds = Math.Min(60, 1 << Math.Min(retryCount, 6));
+        var jitterMilliseconds = RandomNumberGenerator.GetInt32(0, baseSeconds * 250 + 1);
+        var retryAt =
+            timeProvider.GetUtcNow()
+            + TimeSpan.FromSeconds(baseSeconds)
+            + TimeSpan.FromMilliseconds(jitterMilliseconds);
+        if (context.GroupTask?.ScheduleRetryEmailItem(currentAttempt, retryAt) != true)
+            throw new InvalidOperationException($"发件项 {currentAttempt.Descriptor.Id} 无法进入延迟重试队列");
+    }
 
-            // 更新 sendingItemInbox 状态
-            await db.SendingItemInboxes.UpdateAsync(
-                x => x.SendingItemId == emailItem.SendingItemId,
-                x =>
-                    x.SetProperty(y => y.FromEmail, outbox.Email)
-                        .SetProperty(y => y.SendDate, DateTime.UtcNow)
-            );
+    private static async Task<SendingItem> SaveSendingItemAsync(
+        SendingContext context,
+        SendItemExecution currentAttempt,
+        SendAttemptDecision decision
+    )
+    {
+        var item = currentAttempt.PreparedItem;
+        var db = context.SqlContext;
+        var sendingItem = await db.SendingItems.FirstAsync(x =>
+            x.Id == currentAttempt.Descriptor.Id
+        );
+        sendingItem.FromEmail = item.Outbox.Email;
+        sendingItem.Subject = item.Subject;
+        sendingItem.Content = item.HtmlBody;
+        sendingItem.Status =
+            decision.Disposition == SendAttemptDisposition.Succeeded
+                ? SendingItemStatus.Success
+                : SendingItemStatus.Failed;
+        sendingItem.SendResult = decision.Message;
+        sendingItem.TriedCount = currentAttempt.Descriptor.TriedCount;
+        sendingItem.SendDate = DateTime.UtcNow;
+        sendingItem.ReceiptId =
+            decision.ReceiptId ?? new ResultParser(decision.Message).GetReceiptId();
 
-            // 更新收件箱的最近收件日期
-            var inboxIds = emailItem.Inboxes.Select(x => x.Id).ToList();
+        await db.SendingItemInboxes.UpdateAsync(
+            x => x.SendingItemId == currentAttempt.Descriptor.Id,
+            x =>
+                x.SetProperty(y => y.FromEmail, item.Outbox.Email)
+                    .SetProperty(y => y.SendDate, DateTime.UtcNow)
+        );
+        var inboxIds = item.Inboxes.Select(x => x.Id).ToList();
+        await db.Inboxes.UpdateAsync(
+            x => inboxIds.Contains(x.Id),
+            x => x.SetProperty(y => y.LastBeDeliveredDate, DateTime.UtcNow)
+        );
+        if (decision.Disposition == SendAttemptDisposition.Succeeded)
+        {
             await db.Inboxes.UpdateAsync(
                 x => inboxIds.Contains(x.Id),
-                x => x.SetProperty(y => y.LastBeDeliveredDate, DateTime.UtcNow)
+                x => x.SetProperty(y => y.LastSuccessDeliveryDate, DateTime.UtcNow)
             );
-
-            if (success)
-            {
-                await db.Inboxes.UpdateAsync(
-                    x => inboxIds.Contains(x.Id),
-                    x => x.SetProperty(y => y.LastSuccessDeliveryDate, DateTime.UtcNow)
-                );
-            }
-
-            await db.SaveChangesAsync();
-
-            return data;
         }
+        await db.SaveChangesAsync();
+        return sendingItem;
     }
 }

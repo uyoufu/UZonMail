@@ -1,150 +1,103 @@
 using log4net;
 using MimeKit;
 using UzonMail.CorePlugin.Services.EmailDecorator;
+using UzonMail.CorePlugin.Services.EmailDecorator.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Sender;
-using UzonMail.CorePlugin.Services.SendCore.WaitList;
 
-namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
+namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains;
+
+/// <summary>
+/// 构造 MIME 消息并调用匹配的邮件 Transport。
+/// </summary>
+public sealed class LocalEmailSendingHandler(
+    EmailSendersManager sendersManager,
+    PreparedSendItemValidator validator
+) : AbstractSendingHandler
 {
-    /// <summary>
-    /// 本机邮件发送器
-    /// </summary>
-    public class LocalEmailSendingHandler(EmailSendersManager sendersManager)
-        : AbstractSendingHandler
+    private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalEmailSendingHandler));
+
+    protected override async Task<IHandlerResult> HandleCore(SendingContext context)
     {
-        private static readonly ILog _logger = LogManager.GetLogger(
-            typeof(LocalEmailSendingHandler)
+        if (context.IsFailed())
+            return HandlerResult.Skiped();
+
+        var currentAttempt = context.CurrentAttempt;
+        if (currentAttempt == null)
+            return HandlerResult.Skiped();
+
+        var validation = validator.Validate(currentAttempt.PreparedItem);
+        if (!validation.IsValid)
+        {
+            Logger.Warn($"数据验证失败: 发件项 {currentAttempt.Descriptor.Id} {validation.Message}");
+            context.TransportResult = TransportResult.Failure(
+                SendFailureKind.LocalData,
+                $"发件项数据验证失败：{validation.Message}"
+            );
+            return HandlerResult.Failed(context.TransportResult.Message);
+        }
+
+        var message = await CreateMimeMessageAsync(context, currentAttempt.PreparedItem);
+        var transport = sendersManager.GetEmailSender(
+            currentAttempt.PreparedItem.Outbox.OutboxType
         );
+        var result = await transport.SendAsync(context, message);
+        context.TransportResult = result;
 
-        protected override async Task<IHandlerResult> HandleCore(SendingContext context)
+        if (result.FailureKind == SendFailureKind.OutboxPermanent)
+            currentAttempt.PreparedItem.Outbox.MarkInvalid(result.Message);
+
+        return result switch
         {
-            _logger.Debug("线程调用本地发件器进行发件");
+            { IsSuccess: true } => HandlerResult.Success(result.Message),
+            { FailureKind: SendFailureKind.Cancelled } => HandlerResult.Skiped(result.Message),
+            _ => HandlerResult.Failed(result.Message),
+        };
+    }
 
-            // 如果前面失败了，跳过
-            if (context.IsFailed())
-                return HandlerResult.Skiped();
+    private static async Task<MimeMessage> CreateMimeMessageAsync(
+        SendingContext context,
+        PreparedSendItem item
+    )
+    {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(item.Outbox.Name, item.Outbox.Email));
+        message.To.AddRange(
+            item.Inboxes.Where(x => !string.IsNullOrEmpty(x.Email))
+                .Select(x => new MailboxAddress(x.Name, x.Email))
+        );
+        message.Cc.AddRange(
+            item.CC.Where(x => !string.IsNullOrEmpty(x.Email))
+                .Select(x => new MailboxAddress(x.Name, x.Email))
+        );
+        message.Bcc.AddRange(
+            item.BCC.Where(x => !string.IsNullOrEmpty(x.Email))
+                .Select(x => new MailboxAddress(x.Name, x.Email))
+        );
+        message.ReplyTo.AddRange(item.ReplyToEmails.Select(x => new MailboxAddress(x, x)));
+        message.Subject = item.Subject;
 
-            var sendItem = context.EmailItem;
-            if (sendItem == null)
-            {
-                return HandlerResult.Skiped();
-            }
-
-            if (!sendItem.Validate(out var status))
-            {
-                // 数据验证失败，需要移除当前发件项，并标记数据验证失败
-                context.TransportResult = TransportResult.Failure(
-                    SendFailureKind.LocalData,
-                    "发件项数据验证失败，取消发件"
-                );
-                sendItem.SetStatus(SendItemMetaStatus.Error, "发件项数据验证失败，取消发件");
-                return HandlerResult.Skiped();
-            }
-
-            var mimeMessage = await CreateMimeMessage(context);
-
-            // 调用发件器进行发件
-            var emailSender = sendersManager.GetEmailSender(sendItem.Outbox.OutboxType);
-            if (emailSender == null)
-            {
-                _logger.Error($"没有找到匹配的邮件发送器，发件箱：{sendItem.Outbox.Email}");
-                sendItem.SetStatus(SendItemMetaStatus.Error, "没有找到匹配的邮件发送器");
-                return HandlerResult.Skiped();
-            }
-
-            var result = await emailSender.SendAsync(context, mimeMessage);
-            context.TransportResult = result;
-            if (result.IsSuccess)
-            {
-                sendItem.SetStatus(SendItemMetaStatus.Success, result.ReceiptId ?? result.Message);
-                return HandlerResult.Success(result.Message);
-            }
-
-            sendItem.SetStatus(SendItemMetaStatus.Pending, result.Message);
-            switch (result.FailureKind)
-            {
-                case SendFailureKind.RecipientPermanent:
-                case SendFailureKind.MessagePermanent:
-                case SendFailureKind.LocalData:
-                    sendItem.SetStatus(SendItemMetaStatus.Error, result.Message);
-                    break;
-                case SendFailureKind.OutboxPermanent:
-                    sendItem.Outbox.MarkInvalid(result.Message);
-                    break;
-                case SendFailureKind.Cancelled:
-                    return HandlerResult.Skiped(result.Message);
-            }
-
-            return HandlerResult.Failed(result.Message);
-        }
-
-        private static async Task<MimeMessage> CreateMimeMessage(SendingContext context)
+        var bodyBuilder = new BodyBuilder { HtmlBody = item.HtmlBody };
+        foreach (var attachment in item.Attachments)
         {
-            var sendItem = context.EmailItem!;
-
-            // 参考：https://github.com/jstedfast/MailKit/tree/master/Documentation/Examples
-            // 本机发件逻辑
-            var message = new MimeMessage();
-            // 发件人
-            message.From.Add(new MailboxAddress(sendItem.Outbox.Name, sendItem.Outbox.Email));
-            // 收件人、抄送、密送
-            foreach (var address in sendItem.Inboxes)
-            {
-                if (string.IsNullOrEmpty(address.Email))
-                    continue;
-                message.To.Add(new MailboxAddress(address.Name, address.Email));
-            }
-            if (sendItem.CC != null)
-                foreach (var address in sendItem.CC)
-                {
-                    if (string.IsNullOrEmpty(address.Email))
-                        continue;
-                    message.Cc.Add(new MailboxAddress(address.Name, address.Email));
-                }
-            if (sendItem.BCC != null)
-                foreach (var address in sendItem.BCC)
-                {
-                    if (string.IsNullOrEmpty(address.Email))
-                        continue;
-                    message.Bcc.Add(new MailboxAddress(address.Name, address.Email));
-                }
-            // 回信人
-            if (sendItem.ReplyToEmails.Count > 0)
-            {
-                message.ReplyTo.AddRange(
-                    sendItem.ReplyToEmails.Select(x =>
-                    {
-                        return new MailboxAddress(x, x);
-                    })
-                );
-            }
-            // 主题
-            message.Subject = sendItem.Subject;
-
-            // 正文
-            var htmlBody = sendItem.HtmlBody;
-            BodyBuilder bodyBuilder = new() { HtmlBody = htmlBody };
-
-            // 附件
-            foreach (var attachment in sendItem.Attachments)
-            {
-                // 添加附件
-                bodyBuilder.Attachments.Add(attachment.Item2.FullName);
-                // 修改文件名
-                var lastOne = bodyBuilder.Attachments.Last();
-                lastOne.ContentType.Name = attachment.Item1;
-                lastOne.ContentDisposition.FileName = attachment.Item1;
-            }
-            message.Body = bodyBuilder.ToMessageBody();
-
-            // 对 message 进行额外的设置
-            var emailDecoratorParams = await sendItem.GetEmailDecoratorParams(context);
-            var mimeMessageDecorator =
-                context.Provider.GetRequiredService<MimeMessageDecorateService>();
-            message = await mimeMessageDecorator.Decorate(emailDecoratorParams, message);
-            return message;
+            bodyBuilder.Attachments.Add(attachment.File.FullName);
+            var mimeAttachment = bodyBuilder.Attachments.Last();
+            mimeAttachment.ContentType.Name = attachment.FileName;
+            mimeAttachment.ContentDisposition.FileName = attachment.FileName;
         }
+        message.Body = bodyBuilder.ToMessageBody();
+
+        var decoratorParams = new EmailDecoratorParams(
+            item.SendingSetting,
+            item.SourceItem,
+            item.Variables,
+            item.Outbox.Outbox,
+            item.Subject,
+            item.HtmlBody
+        );
+        return await context
+            .Provider.GetRequiredService<MimeMessageDecorateService>()
+            .Decorate(decoratorParams, message);
     }
 }

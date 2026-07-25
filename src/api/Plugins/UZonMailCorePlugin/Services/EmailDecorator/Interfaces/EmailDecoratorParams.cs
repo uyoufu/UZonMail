@@ -1,4 +1,4 @@
-using UzonMail.CorePlugin.Services.SendCore.WaitList;
+using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
@@ -7,8 +7,11 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator.Interfaces
 {
     public class EmailDecoratorParams(
         SendingSetting sendingSetting,
-        SendItemMeta sendItemMeta,
-        Outbox outbox
+        SendingItem sendingItem,
+        SendingItemExcelData? variables,
+        Outbox outbox,
+        string subject,
+        string htmlBody
     ) : IContentDecoratorParams
     {
         /// <summary>
@@ -19,18 +22,28 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator.Interfaces
         /// <summary>
         /// 发送项
         /// </summary>
-        public SendingItem SendingItem { get; } = sendItemMeta.SendingItem;
+        public SendingItem SendingItem { get; } = sendingItem;
 
         /// <summary>
-        /// 发件项在运行中产生的数据
+        /// 邮件变量数据
         /// </summary>
-        public SendItemMeta SendItemMeta { get; } = sendItemMeta;
+        public SendingItemExcelData? Variables { get; } = variables;
 
         /// <summary>
         /// 发件箱
         /// </summary>
-        public Outbox Outbox { get; set; } = outbox;
+        public Outbox Outbox { get; } = outbox;
 
-        public string OutboxEmail { get; set; } = outbox.Email;
+        public string OutboxEmail { get; } = outbox.Email;
+
+        public IReadOnlyList<EmailAddress> Inboxes { get; } = sendingItem.Inboxes;
+
+        public IReadOnlyList<EmailAddress> CC { get; } = sendingItem.CC ?? [];
+
+        public IReadOnlyList<EmailAddress> BCC { get; } = sendingItem.BCC ?? [];
+
+        public string Subject { get; } = subject;
+
+        public string HtmlBody { get; } = htmlBody;
     }
 }

@@ -35,18 +35,16 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
 
         public async Task<IProxyHandler?> GetProxyHandler(SendingContext sendingContext)
         {
-            if (sendingContext.EmailItem == null)
+            var currentItem = sendingContext.CurrentAttempt?.PreparedItem;
+            if (currentItem == null)
                 return null;
-
-            var userId = sendingContext.EmailItem.UserId;
-            var outboxEmail = sendingContext.EmailItem.Outbox.Email;
 
             return await GetProxyHandler(
                 sendingContext.Provider,
-                userId,
-                outboxEmail,
-                sendingContext.EmailItem.ProxyId,
-                sendingContext.EmailItem.AvailableProxyIds
+                currentItem.UserId,
+                currentItem.Outbox.Email,
+                currentItem.EffectiveProxyId,
+                [.. currentItem.AvailableProxyIds]
             );
         }
 

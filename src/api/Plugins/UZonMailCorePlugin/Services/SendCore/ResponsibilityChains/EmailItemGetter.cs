@@ -24,22 +24,18 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             _logger.Debug($"发件箱 {outbox.Email} 开始申请发件项");
 
             // 从等待列表中获取一个发送项
-            var emailItem = await groupTasksManager.GetEmailItem(context);
-
-            // 修改状态
-            emailItem?.SetStatus(SendItemMetaStatus.Working);
-            // 保存到 context 中
-            context.EmailItem = emailItem;
+            var currentAttempt = await groupTasksManager.GetEmailItem(context);
+            context.CurrentAttempt = currentAttempt;
 
             // 标记失败
-            if (emailItem == null)
+            if (currentAttempt == null)
             {
                 return HandlerResult.Failed("线程申请发件项失败，可能没有可用的发件项");
             }
             else
             {
                 _logger.Info(
-                    $"线程申请发件项成功，收件箱：{string.Join(",", emailItem.Inboxes.Select(x => x.Email))}"
+                    $"线程申请发件项成功，收件箱：{string.Join(",", currentAttempt.PreparedItem.Inboxes.Select(x => x.Email))}"
                 );
             }
 

@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using log4net;
 using Microsoft.Extensions.Options;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
+using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Runtime;
 using UzonMail.DB.Extensions;
 using UzonMail.DB.SQL;
@@ -98,7 +99,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// 若返回空，会导致发送任务暂停
         /// </summary>
         /// <returns></returns>
-        public async Task<SendItemMeta?> GetEmailItem(SendingContext sendingContext)
+        public async Task<SendItemExecution?> GetEmailItem(SendingContext sendingContext)
         {
             var outbox = sendingContext.OutboxAddress;
             if (outbox == null)

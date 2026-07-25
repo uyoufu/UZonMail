@@ -40,7 +40,7 @@ public sealed class SmtpClientsManager : ISingletonService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        var outbox = context.EmailItem!.Outbox;
+        var outbox = context.CurrentAttempt!.PreparedItem.Outbox;
         var key = new SmtpClientKey(
             new OutboxKey(outbox.UserId, outbox.Id),
             GetProfileFingerprint(outbox),
@@ -116,7 +116,7 @@ public sealed class SmtpClientsManager : ISingletonService, IAsyncDisposable
 
         var setting = await _settingsService.GetSetting<SendingSetting>(
             context.SqlContext,
-            context.EmailItem!.UserId
+            context.CurrentAttempt!.PreparedItem.UserId
         );
         return setting.ChangeIpAfterEmailCount <= 0
             || client.SentCount == 0

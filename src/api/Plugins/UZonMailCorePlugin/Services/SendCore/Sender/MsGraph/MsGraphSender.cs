@@ -22,9 +22,9 @@ public sealed class MsGraphSender(EncryptService encryptService) : IEmailTranspo
         CancellationToken cancellationToken = default
     )
     {
-        var sendItem = context.EmailItem!;
+        var sendItem = context.CurrentAttempt!.PreparedItem;
         var outbox = sendItem.Outbox;
-        if (sendItem.ProxyId > 0 || sendItem.AvailableProxyIds.Count > 0)
+        if (sendItem.EffectiveProxyId > 0 || sendItem.AvailableProxyIds.Count > 0)
             return TransportResult.Failure(SendFailureKind.LocalData, "Outlook Graph 发件不支持代理配置");
 
         try

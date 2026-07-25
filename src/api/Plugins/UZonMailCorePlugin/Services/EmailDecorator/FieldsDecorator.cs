@@ -20,7 +20,7 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator
             if (string.IsNullOrEmpty(originContent))
                 return Task.FromResult(originContent);
 
-            var bodyData = decoratorParams.SendItemMeta.BodyData;
+            var bodyData = decoratorParams.Variables;
             // 替换正文变量
             if (bodyData == null)
                 return Task.FromResult(originContent);
@@ -33,8 +33,8 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator
             Dictionary<string, string> emailItemVariables =
                 new()
                 {
-                    { "inbox", decoratorParams.SendItemMeta.Inboxes.First().Email },
-                    { "inboxName", decoratorParams.SendItemMeta.Inboxes.First().Name ?? "" },
+                    { "inbox", decoratorParams.Inboxes.First().Email },
+                    { "inboxName", decoratorParams.Inboxes.First().Name ?? "" },
                     { "outbox", decoratorParams.Outbox.Email },
                     { "outboxName", decoratorParams.Outbox.Name ?? "" }
                 };

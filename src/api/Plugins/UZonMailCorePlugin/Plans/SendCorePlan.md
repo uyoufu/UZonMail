@@ -148,7 +148,7 @@ public interface IEmailTransport
 - 每个发送周期最多 3 次 Transport 尝试，即首次加 2 次短重试；不得使用递归。
 - 队列级最大重试使用 `SendingSetting.MaxRetryCount`；`0` 表示不重试，缺省值为 3。
 - 队列退避为 `2^retry` 秒加 0-25% 抖动，上限 60 秒；统一使用 `TimeProvider` 便于测试。
-- 永久发件箱失败时先由 `OutboxEmailAddress` 原子标记为不可调度，再由前置 `OutboxDisposer` 阶段依次持久化失效状态、移出运行池、清理指定待发项并更新受影响组；同一上下文中的后续阶段只提交当前邮件一次。
+- 永久发件箱失败时先由 `OutboxEmailAddress` 原子标记为不可调度，再由 `PermanentOutboxFailureHandler` 调用 `OutboxRetirementCoordinator`，依次持久化失效状态、移出运行池、清理指定待发项并生成当前邮件决策；额度耗尽等正常退出则由后置 `OutboxRetirementHandler` 触发相同协调器。
 - 当前共享邮件在还有其他共享发件箱且未耗尽重试时重新入队；指定到失效发件箱的邮件直接失败。
 - 组失去全部可用发件箱时，剩余邮件失败并将组置为 `Pause`；瞬时或未知错误耗尽只隔离本次运行，不持久禁用。
 - 显式 Pipeline 固定执行 `取项 -> 发送 -> 发件箱失效协调 -> 邮件提交/延迟重试 -> 组统计 -> 额度与会话收尾`。运行时条目只允许由 `GroupTask.CompleteEmailItem/ScheduleRetryEmailItem` 转移，数据库写入完成后再转移运行时状态和发送通知。
@@ -160,7 +160,7 @@ public interface IEmailTransport
 - ProPlugin 只实现动态代理供应商和退订策略，不直接操作 Core 运行时容器或数据库状态机。
 - 邮件准备继续通过 `ISendItemPreparer` 隔离模板、变量和装饰器，Reader 与 Transport 不直接依赖渲染实现。
 - Pro 资源接口改为依赖 `ISendRuntimeDiagnostics.GetSnapshot()`，保持现有 JSON 字段和含义。
-- 删除递归 `SetNext` 职责链、反向 `Parent` 回调、回收站、未观察的 `Task.Run` 和不再使用的 Event/Reactive 代码。保留无状态 Pipeline Stage 的兼容类名，但由 `SendingPipeline` 固定排序并按结果显式停止；`SendingItemMetaList` 重写为单条目表加共享/指定 FIFO 索引。
+- 删除递归 `SetNext` 职责链、反向 `Parent` 回调、回收站、未观察的 `Task.Run` 和不再使用的 Event/Reactive 代码。由 `SendingPipeline` 固定排序并按结果显式停止；`SendItemQueue` 仅保存轻量描述符，并以共享/指定 FIFO 索引调度。
 
 ## 9. 实施结果
 

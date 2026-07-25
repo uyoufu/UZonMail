@@ -48,17 +48,21 @@ namespace UzonMail.CorePlugin.Services.SendCore.Contexts
 
         #region 发件列表相关临时参数
         /// <summary>
-        /// 发件项
+        /// 当前已取得租约并完成载荷准备的发送尝试。
         /// </summary>
-        public SendItemMeta? EmailItem { get; set; }
+        public SendItemExecution? CurrentAttempt { get; set; }
 
+        /// <summary>当前发件项所属的组任务。</summary>
         public GroupTask? GroupTask { get; set; }
 
+        /// <summary>传输层返回的原始结果。</summary>
         public TransportResult? TransportResult { get; set; }
 
-        public bool OutboxFailureHandled { get; set; }
+        /// <summary>原始结果经过业务规则分类后的提交决策。</summary>
+        public SendAttemptDecision? SendAttemptDecision { get; set; }
 
-        public bool CanRetryAfterOutboxFailure { get; set; }
+        /// <summary>当前发件箱退出运行池后的处理结果。</summary>
+        public OutboxRetirementResult? OutboxRetirement { get; set; }
 
         private bool ExitWorkerRequested { get; set; }
         #endregion
@@ -91,6 +95,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Contexts
                 || HandleResults.Any(result => result.ChainStatus == ChainStatus.ShouldExitTask);
         }
 
+        /// <summary>要求当前发送 Worker 在本轮管线结束后退出。</summary>
         public void RequestWorkerExit()
         {
             ExitWorkerRequested = true;
