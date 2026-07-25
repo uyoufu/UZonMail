@@ -1,8 +1,9 @@
 import enUS from './locales/en-US'
 import zhCN from './locales/zh-CN'
 
-export type Translation = {
-  [key: string]: string | { [key: string]: string }
+/** 支持按模块和组件递归组织的多语言资源树。 */
+export interface Translation {
+  [key: string]: string | Translation
 }
 
 export interface ITranslation {

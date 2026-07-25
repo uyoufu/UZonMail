@@ -1,122 +1,133 @@
 <template>
-  <q-chip v-bind="$attrs" dense outline square :color="statusStyle.color" :text-color="statusStyle.textColor"
-    :label="statusStyle.label">
-    <slot name="default"></slot>
+  <q-chip
+    v-bind="$attrs"
+    dense
+    outline
+    square
+    :color="statusStyle.color"
+    :text-color="statusStyle.textColor"
+    :icon="statusStyle.icon"
+    :label="statusStyle.label"
+  >
+    <slot />
   </q-chip>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
+import { camelCase } from 'lodash'
+import { t } from 'src/i18n/helpers'
+import type { LangKey } from 'src/i18n/types'
+import { computed } from 'vue'
+import type { IStatusChipItem, StatusChipValue } from './types'
 
-import logger from 'loglevel'
-
-import type { IStatusChipItem } from './types'
-const defaultStatusStyles = [
-  { status: 'created', label: '新建', color: 'primary', textColor: 'white', icon: '' },
-  { status: 'pending', label: '等待中', color: 'accent', textColor: 'white', icon: '' },
-  { status: 'sending', label: '发送中', color: 'secondary', textColor: 'white', icon: '' },
-  { status: 'waitingForQuotaReset', label: '等待额度重置', color: 'orange', textColor: 'white', icon: '' },
-  { status: 'success', label: '成功', color: 'secondary', textColor: 'white', icon: '' },
-  { status: 'failed', label: '失败', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'pause', label: '暂停', color: 'orange', textColor: 'white', icon: '' },
-  { status: 'stopped', label: '已停止', color: 'grey', textColor: 'white', icon: '' },
-  { status: 'finish', label: '完成', color: 'secondary', textColor: 'white', icon: '' },
-  { status: 'cancel', label: '取消', color: 'grey', textColor: 'white', icon: '' },
-  { status: 'true', label: '是', color: 'positive', textColor: 'white', icon: '' },
-  { status: 'false', label: '否', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'independent', label: '独立', color: 'primary', textColor: 'white', icon: '' },
-  { status: 'subUser', label: '子账户', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'normal', label: '正常', color: 'primary', textColor: 'white', icon: '' },
-  { status: 'forbiddenLogin', label: '禁用', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'read', label: '已读', color: 'positive', textColor: 'white', icon: '' },
-  { status: 'instant', label: '即时', color: 'primary', textColor: 'white', icon: '' },
-  { status: 'scheduled', label: '定时', color: 'orange', textColor: 'white', icon: '' },
-  { status: 'invalid', label: '无效', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'valid', label: '有效', color: 'positive', textColor: 'white', icon: '' },
-  { status: 'unsubscribed', label: '未订阅', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'subscribed', label: '已订阅', color: 'positive', textColor: 'white', icon: '' },
-  { status: 'blacklist', label: '黑名单', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'whitelist', label: '白名单', color: 'positive', textColor: 'white', icon: '' },
-  { status: 'unverified', label: '未验证', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'verified', label: '已验证', color: 'positive', textColor: 'white', icon: '' },
-  { status: 'unsubscribed', label: '取消订阅', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'running', label: '运行中', color: 'secondary', textColor: 'white', icon: '' },
-  { status: 'unknown', label: '未知', color: 'negative', textColor: 'white', icon: '' },
-  { status: 'inProgress', label: '进行中', color: 'info', textColor: 'white', icon: '' }
-]
-const props = defineProps({
-  status: {
-    type: [String, Number, Boolean],
-    required: true
-  },
-
-  statusStyles: {
-    type: Array as PropType<IStatusChipItem[]>,
-    default: () => []
-  }
+/** 根据业务状态显示本地化标签和语义颜色。 */
+defineOptions({
+  name: 'StatusChip',
+  inheritAttrs: false
 })
 
-// 将 props.statusStyles 进行格式化
-const colors = ['primary', 'secondary', 'negative', 'info', 'orange', 'positive', 'white', 'grey-3']
+const BUILT_IN_STATUS_STYLES = [
+  { status: 'created', color: 'primary' },
+  { status: 'pending', color: 'accent' },
+  { status: 'sending', color: 'secondary' },
+  { status: 'waitingForQuotaReset', color: 'orange' },
+  { status: 'success', color: 'secondary' },
+  { status: 'failed', color: 'negative' },
+  { status: 'pause', color: 'orange' },
+  { status: 'paused', color: 'orange' },
+  { status: 'stopped', color: 'grey' },
+  { status: 'finish', color: 'secondary' },
+  { status: 'completed', color: 'secondary' },
+  { status: 'cancel', color: 'grey' },
+  { status: 'canceled', color: 'grey' },
+  { status: true, color: 'positive' },
+  { status: false, color: 'negative' },
+  { status: 'independent', color: 'primary' },
+  { status: 'subUser', color: 'negative' },
+  { status: 'normal', color: 'primary' },
+  { status: 'forbiddenLogin', color: 'negative' },
+  { status: 'read', color: 'positive' },
+  { status: 'instant', color: 'primary' },
+  { status: 'scheduled', color: 'orange' },
+  { status: 'invalid', color: 'negative' },
+  { status: 'valid', color: 'positive' },
+  { status: 'unsubscribed', color: 'negative' },
+  { status: 'subscribed', color: 'positive' },
+  { status: 'blacklist', color: 'negative' },
+  { status: 'whitelist', color: 'positive' },
+  { status: 'unverified', color: 'negative' },
+  { status: 'verified', color: 'positive' },
+  { status: 'running', color: 'secondary' },
+  { status: 'unknown', color: 'negative' },
+  { status: 'inProgress', color: 'info' }
+] as const satisfies readonly IStatusChipItem[]
+
+const FALLBACK_COLORS = ['primary', 'secondary', 'accent', 'negative', 'info', 'orange', 'positive', 'grey'] as const
+const STATUS_TRANSLATION_KEY_PREFIX = 'components.statusChip' as const
+const builtInStatusKeys = new Set(BUILT_IN_STATUS_STYLES.map(({ status }) => camelCase(String(status))))
+
+const props = withDefaults(
+  defineProps<{
+    /** 需要展示的原始业务状态。 */
+    status: StatusChipValue
+    /** 覆盖内置状态或定义自定义状态的显示配置。 */
+    statusStyles?: readonly IStatusChipItem[]
+  }>(),
+  {
+    statusStyles: () => []
+  }
+)
+
 const statusStylesMap = computed(() => {
-  const result: Record<string, IStatusChipItem> = {}
-
-  const fullStatusStyles = [...defaultStatusStyles, ...props.statusStyles]
-  for (let i = 0; i < fullStatusStyles.length; i++) {
-    const item = fullStatusStyles[i] as IStatusChipItem
-
-    // 修改颜色
-    if (!item.color) {
-      item.color = colors[i % colors.length]
-    }
-    if (!item.textColor) {
-      item.textColor = 'white'
-    }
-    if (!item.label) item.label = String(item.status)
-    result[String(item.status).toLowerCase()] = item
+  const stylesMap = new Map<string, IStatusChipItem>()
+  for (const builtInStyle of BUILT_IN_STATUS_STYLES) {
+    stylesMap.set(camelCase(String(builtInStyle.status)), builtInStyle)
   }
-  return result
+
+  for (const customStyle of props.statusStyles) {
+    const normalizedStatus = camelCase(String(customStyle.status))
+    const builtInStyle = stylesMap.get(normalizedStatus)
+    stylesMap.set(normalizedStatus, { ...builtInStyle, ...customStyle })
+  }
+
+  return stylesMap
 })
 
-import _ from 'lodash'
 const statusStyle = computed(() => {
-  const statusStr = _.camelCase(String(props.status))
-  const statusLabel = t(`statusChip.${statusStr}`)
+  const normalizedStatus = camelCase(String(props.status))
+  const configuredStyle = statusStylesMap.value.get(normalizedStatus)
 
-  logger.debug('[statusChip] statusStr/statusLabel:', statusStr, statusLabel)
-
-  const statusMap = statusStylesMap.value[statusStr]
-  if (!statusMap) {
-    // 获取随机颜色
-    const labelHash = hashStringToNumber(statusStr)
-    const randomColor = getColorFromHash(labelHash, colors)
-
-    return {
-      status: 'unknown',
-      color: randomColor,
-      label: statusLabel || statusStr.toUpperCase(),
-      textColor: 'white'
-    }
+  return {
+    color: configuredStyle?.color ?? getColorFromHash(hashStringToNumber(normalizedStatus), FALLBACK_COLORS),
+    textColor: configuredStyle?.textColor,
+    icon: configuredStyle?.icon,
+    label: getStatusLabel(normalizedStatus, configuredStyle)
   }
-
-  // 克隆一个新对象，避免修改原对象
-  const result = Object.assign({}, statusMap, { label: statusLabel || statusMap.label })
-  logger.debug('[statusChip] result:', result)
-  return result
 })
 
-function hashStringToNumber (str: string) {
+/** 按公开配置、内置翻译和原始值的优先级解析显示标签。 */
+function getStatusLabel(normalizedStatus: string, configuredStyle?: IStatusChipItem): string {
+  if (configuredStyle?.labelKey) return t(configuredStyle.labelKey)
+  if (configuredStyle?.label !== undefined) return configuredStyle.label
+  if (builtInStatusKeys.has(normalizedStatus)) {
+    return t(`${STATUS_TRANSLATION_KEY_PREFIX}.${normalizedStatus}` as LangKey)
+  }
+
+  return String(props.status)
+}
+
+/** 将状态文本转换为稳定的数值哈希，用于选择未知状态的颜色。 */
+function hashStringToNumber(statusText: string): number {
   let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  for (let index = 0; index < statusText.length; index++) {
+    hash = statusText.charCodeAt(index) + ((hash << 5) - hash)
   }
   return hash
 }
-function getColorFromHash (hash: number, colors: string[]) {
+
+/** 从候选色板中稳定选择一个颜色。 */
+function getColorFromHash(hash: number, colors: readonly string[]): string {
   const index = Math.abs(hash) % colors.length
-  return colors[index]
+  return colors[index] as string
 }
 </script>
-
-<style lang="scss" scoped></style>
