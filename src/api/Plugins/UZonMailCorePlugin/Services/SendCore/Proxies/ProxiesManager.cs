@@ -7,9 +7,28 @@ using UzonMail.Utils.Web.Service;
 namespace UzonMail.CorePlugin.Services.SendCore.Proxies
 {
     /// <summary>
+    /// 管理用户代理并为发送请求选择匹配的代理处理器。
+    /// </summary>
+    public interface IProxiesManager
+    {
+        Task UpdateUserProxies(IServiceProvider serviceProvider, long userId);
+
+        Task<IProxyHandler?> GetProxyHandler(
+            IServiceProvider serviceProvider,
+            long userId,
+            string outboxEmail,
+            long proxyId,
+            List<long>? availableProxyIds = null
+        );
+    }
+
+    /// <summary>
     /// 代理管理器。
     /// </summary>
-    public class ProxiesManager : ISingletonService, IAsyncDisposable
+    public class ProxiesManager
+        : IProxiesManager,
+            ISingletonService<IProxiesManager>,
+            IAsyncDisposable
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ProxiesManager));
         private static readonly TimeSpan MaintainInterval = TimeSpan.FromSeconds(20);

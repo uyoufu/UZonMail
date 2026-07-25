@@ -25,7 +25,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
         ISendingWorkerCoordinator workerCoordinator,
         GroupTasksManager waitList,
         OutboxesManager outboxesManager,
-        SmtpClientsManager clientFactory,
+        ISmtpClientsManager clientFactory,
         IServiceProvider serviceProvider
     ) : ISendingGroupCommandService, IScopedService<ISendingGroupCommandService>
     {

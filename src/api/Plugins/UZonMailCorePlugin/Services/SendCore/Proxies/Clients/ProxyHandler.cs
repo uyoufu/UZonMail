@@ -247,6 +247,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
             if (!ProxyEndpoint.TryCreate(proxy, out var endpoint, out var errorMessage))
             {
                 _logger.Error($"代理 {Id} 解析失败: {errorMessage}");
+                _endpoint = null;
+                lock (_clientLock)
+                {
+                    _proxyClientAdapter = null;
+                }
                 MarkHealthless();
                 return;
             }

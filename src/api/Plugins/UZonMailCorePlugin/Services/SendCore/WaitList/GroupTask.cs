@@ -186,7 +186,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             ProxyIds = sendingGroup.ProxyIds ?? [];
 
             // 更新代理缓存
-            var proxyManager = sendingContext.Provider.GetRequiredService<ProxiesManager>();
+            var proxyManager = sendingContext.Provider.GetRequiredService<IProxiesManager>();
             await proxyManager.UpdateUserProxies(sendingContext.Provider, UserId);
 
             // 获取所有的模板，模板是用户级别的

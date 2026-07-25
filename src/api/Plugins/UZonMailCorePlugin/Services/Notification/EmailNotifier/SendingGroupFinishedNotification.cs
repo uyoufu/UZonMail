@@ -9,6 +9,14 @@ using UzonMail.Utils.Web.Service;
 namespace UzonMail.CorePlugin.Services.Notification.EmailNotifier
 {
     /// <summary>
+    /// 在发送组结束后执行用户配置的通知。
+    /// </summary>
+    public interface ISendingGroupFinishedNotifier
+    {
+        Task Notify(SendingGroup sendingGroup);
+    }
+
+    /// <summary>
     /// 发件组完成通知
     /// </summary>
     /// <param name="userSetting"></param>
@@ -16,7 +24,7 @@ namespace UzonMail.CorePlugin.Services.Notification.EmailNotifier
         SqlContext db,
         UserSettingService userSetting,
         AppSettingsManager settingsManager
-    ) : IScopedService
+    ) : ISendingGroupFinishedNotifier, IScopedService<ISendingGroupFinishedNotifier>
     {
         public static readonly string NotificationTemplateKey =
             "sendingGroupFinishedNotificationTemplate";

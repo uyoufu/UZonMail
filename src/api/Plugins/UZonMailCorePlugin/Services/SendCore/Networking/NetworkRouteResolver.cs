@@ -6,7 +6,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Networking;
 
 public sealed class NetworkRouteResolver(
     IServiceProvider serviceProvider,
-    ProxiesManager proxiesManager
+    IProxiesManager proxiesManager
 ) : INetworkRouteResolver, IScopedService<INetworkRouteResolver>
 {
     public async Task<NetworkRouteResolution> ResolveAsync(

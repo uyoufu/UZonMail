@@ -13,7 +13,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Utils
     public class SendingGroupFinisher(
         SqlContext db,
         IHubContext<UzonMailHub, IUzonMailClient> hubContext,
-        SendingGroupFinishedNotification notification
+        ISendingGroupFinishedNotifier notification
     ) : IScopedService
     {
         public async Task SetSendingGroupStatusAndNotify(

@@ -18,7 +18,7 @@ public sealed record SmtpConnectionProfile(
 public sealed class SmtpConnector : ISingletonService
 {
     public async Task ConnectAndAuthenticateAsync(
-        ThrottlingSmtpClient client,
+        ISmtpSession client,
         SmtpConnectionProfile profile,
         CancellationToken cancellationToken = default
     )

@@ -10,7 +10,10 @@ using UzonMail.DB.SQL.Core.Emails;
 
 namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph;
 
-public sealed class MsGraphSender(EncryptService encryptService) : IEmailTransport
+public sealed class MsGraphSender(
+    EncryptService encryptService,
+    IMsGraphClientFactory clientFactory
+) : IEmailTransport
 {
     private static readonly ILog Logger = LogManager.GetLogger(typeof(MsGraphSender));
 
@@ -30,8 +33,7 @@ public sealed class MsGraphSender(EncryptService encryptService) : IEmailTranspo
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var client = GetClient(
-                context.Provider,
+            var client = clientFactory.GetClient(
                 new OutboxKey(outbox.UserId, outbox.Id),
                 outbox.Email,
                 outbox.OutlookClientId,
@@ -68,8 +70,7 @@ public sealed class MsGraphSender(EncryptService encryptService) : IEmailTranspo
             cancellationToken.ThrowIfCancellationRequested();
             var password = encryptService.DecryptPassword(outbox.Password);
             var username = outbox.UserName ?? string.Empty;
-            var client = GetClient(
-                scopeServiceProvider,
+            var client = clientFactory.GetClient(
                 new OutboxKey(outbox.UserId, outbox.Id),
                 outbox.Email,
                 username,
@@ -84,19 +85,6 @@ public sealed class MsGraphSender(EncryptService encryptService) : IEmailTranspo
             Logger.Warn(exception);
             return Classify(exception);
         }
-    }
-
-    private static MsGraphClient GetClient(
-        IServiceProvider serviceProvider,
-        OutboxKey outbox,
-        string email,
-        string username,
-        string password
-    )
-    {
-        return serviceProvider
-            .GetRequiredService<MsGraphClientFactory>()
-            .GetClient(outbox, email, username, password);
     }
 
     private static TransportResult Classify(Exception exception)

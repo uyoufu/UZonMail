@@ -23,11 +23,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
     public class MsGraphClient(
         EncryptService encryptService,
         IConfiguration configuration,
-        DebugConfig debugConfig
-    ) : IEmailSendingClient
+        DebugConfig debugConfig,
+        HttpClient httpClient
+    ) : IMsGraphClient
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(MsGraphClient));
-        private static readonly HttpClient _httpClient = new();
 
         private bool _isRefreshTokenChanged = false;
         private AuthenticationResult2? _authenticationResult;
@@ -203,7 +203,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
         /// <param name="clientId"></param>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        private static async Task<AuthenticationResult2?> GetAccessByRefreshToken(
+        private async Task<AuthenticationResult2?> GetAccessByRefreshToken(
             string clientId,
             string? clienSecret,
             string refreshToken
@@ -223,7 +223,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 
             var token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
             var fluentHttpRequest = new FluentHttpRequest()
-                .WithHttpClient(_httpClient)
+                .WithHttpClient(httpClient)
                 .WithMethod(HttpMethod.Post)
                 .WithUrl(token_url)
                 .WithFormContent(formContent);
@@ -274,7 +274,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
                 .WithAccessToken(authenticationResult.AccessToken)
                 .WithMimeMessage(mimeMessage)
                 .WithUrl($"https://graph.microsoft.com/v1.0/{apiPath}/sendMail")
-                .WithHttpClient(_httpClient);
+                .WithHttpClient(httpClient);
 
             var response = await request.SendAsync();
             // 根据状态返回发送结果

@@ -13,7 +13,8 @@ public sealed class SmtpSender(
     EncryptService encryptService,
     IPRateLimiter ipRateLimiter,
     ITransportFailureClassifier failureClassifier,
-    SmtpConnector connector
+    SmtpConnector connector,
+    ISmtpClientsManager clientManager
 ) : IEmailTransport
 {
     private const int MaxTransportAttempts = 3;
@@ -28,7 +29,6 @@ public sealed class SmtpSender(
     )
     {
         var sendItem = context.CurrentAttempt!.PreparedItem;
-        var clientManager = context.Provider.GetRequiredService<SmtpClientsManager>();
         TransportResult? lastResult = null;
 
         for (var attempt = 1; attempt <= MaxTransportAttempts; attempt++)
@@ -85,7 +85,7 @@ public sealed class SmtpSender(
                 {
                     try
                     {
-                        var receiptId = await client.SendAsync(message, cancellationToken);
+                        var receiptId = await client.SendMessageAsync(message, cancellationToken);
                         Logger.Info(
                             $"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}"
                         );

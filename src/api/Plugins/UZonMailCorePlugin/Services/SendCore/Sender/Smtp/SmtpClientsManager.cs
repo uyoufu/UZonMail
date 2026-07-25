@@ -1,5 +1,8 @@
 using System.Collections.Concurrent;
 using log4net;
+using MailKit.Net.Proxy;
+using MailKit.Security;
+using MimeKit;
 using UzonMail.CorePlugin.Services.Config;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
@@ -16,25 +19,105 @@ using UzonMail.Utils.Web.Service;
 namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
 
 /// <summary>
+/// 表示可缓存、探活并发送邮件的 SMTP 会话。
+/// </summary>
+public interface ISmtpSession : IDisposable
+{
+    bool IsConnected { get; }
+
+    IProxyClient? ProxyClient { get; set; }
+
+    int SentCount { get; }
+
+    void SetParams(SmtpClientKey clientKey, int cooldownMilliseconds);
+
+    SmtpClientKey GetClientKey();
+
+    Task ConnectAsync(
+        string host,
+        int port,
+        SecureSocketOptions options,
+        CancellationToken cancellationToken = default
+    );
+
+    Task AuthenticateAsync(
+        string userName,
+        string password,
+        CancellationToken cancellationToken = default
+    );
+
+    Task NoOpAsync(CancellationToken cancellationToken = default);
+
+    Task<string> SendMessageAsync(
+        MimeMessage message,
+        CancellationToken cancellationToken = default
+    );
+
+    Task DisconnectAsync(bool quit, CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// 为当前发送作用域创建 SMTP 会话。
+/// </summary>
+public interface ISmtpSessionFactory
+{
+    ISmtpSession Create(IServiceProvider serviceProvider);
+}
+
+/// <summary>
+/// 管理按发件箱、连接配置和网络路由隔离的 SMTP 会话。
+/// </summary>
+public interface ISmtpClientsManager
+{
+    ICollection<SmtpClientKey> SmtpClientKeys { get; }
+
+    Task<Result<ISmtpSession>> GetSmtpClientAsync(
+        SendingContext context,
+        NetworkRoute route,
+        CancellationToken cancellationToken = default
+    );
+
+    Task DisposeSmtpClientAsync(SmtpClientKey key);
+
+    Task DisposeSmtpClientsAsync(OutboxKey outbox);
+}
+
+/// <inheritdoc />
+public sealed class SmtpSessionFactory : ISmtpSessionFactory, ISingletonService<ISmtpSessionFactory>
+{
+    public ISmtpSession Create(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ThrottlingSmtpClient>();
+}
+
+/// <summary>
 /// 按发件箱、协议配置和网络出口缓存 SMTP 会话。
 /// </summary>
-public sealed class SmtpClientsManager : ISingletonService, IAsyncDisposable
+public sealed class SmtpClientsManager
+    : ISmtpClientsManager,
+        ISingletonService<ISmtpClientsManager>,
+        IAsyncDisposable
 {
     private static readonly ILog Logger = LogManager.GetLogger(typeof(SmtpClientsManager));
-    private readonly ConcurrentDictionary<SmtpClientKey, ThrottlingSmtpClient> _clients = [];
+    private readonly ConcurrentDictionary<SmtpClientKey, ISmtpSession> _clients = [];
     private readonly AppSettingsManager _settingsService;
     private readonly SmtpConnector _connector;
+    private readonly ISmtpSessionFactory _sessionFactory;
     private readonly CancellationTokenSource _shutdown = new();
     private readonly Task _maintenanceTask;
 
-    public SmtpClientsManager(AppSettingsManager settingsService, SmtpConnector connector)
+    public SmtpClientsManager(
+        AppSettingsManager settingsService,
+        SmtpConnector connector,
+        ISmtpSessionFactory sessionFactory
+    )
     {
         _settingsService = settingsService;
         _connector = connector;
+        _sessionFactory = sessionFactory;
         _maintenanceTask = MaintainConnectionsAsync(_shutdown.Token);
     }
 
-    public async Task<Result<ThrottlingSmtpClient>> GetSmtpClientAsync(
+    public async Task<Result<ISmtpSession>> GetSmtpClientAsync(
         SendingContext context,
         NetworkRoute route,
         CancellationToken cancellationToken = default
@@ -51,12 +134,12 @@ public sealed class SmtpClientsManager : ISingletonService, IAsyncDisposable
         if (_clients.TryGetValue(key, out var cached))
         {
             if (await IsAvailableAsync(cached, context, cancellationToken))
-                return new Result<ThrottlingSmtpClient> { Data = cached };
+                return new Result<ISmtpSession> { Data = cached };
 
             await DisposeSmtpClientAsync(key);
         }
 
-        var client = context.Provider.GetRequiredService<ThrottlingSmtpClient>();
+        var client = _sessionFactory.Create(context.Provider);
         client.SetParams(key, 0);
         client.ProxyClient = route.ProxyClient;
         try
@@ -76,23 +159,23 @@ public sealed class SmtpClientsManager : ISingletonService, IAsyncDisposable
             );
 
             if (_clients.TryAdd(key, client))
-                return new Result<ThrottlingSmtpClient> { Data = client };
+                return new Result<ISmtpSession> { Data = client };
 
             await DisconnectAndDisposeAsync(client);
             return _clients.TryGetValue(key, out cached)
-                ? new Result<ThrottlingSmtpClient> { Data = cached }
-                : Result<ThrottlingSmtpClient>.Fail("SMTP 会话并发创建失败");
+                ? new Result<ISmtpSession> { Data = cached }
+                : Result<ISmtpSession>.Fail("SMTP 会话并发创建失败");
         }
         catch (Exception exception)
         {
             Logger.Warn(exception);
             await DisconnectAndDisposeAsync(client);
-            return Result<ThrottlingSmtpClient>.Fail(exception.Message);
+            return Result<ISmtpSession>.Fail(exception.Message);
         }
     }
 
     private async Task<bool> IsAvailableAsync(
-        ThrottlingSmtpClient client,
+        ISmtpSession client,
         SendingContext context,
         CancellationToken cancellationToken
     )
@@ -185,7 +268,7 @@ public sealed class SmtpClientsManager : ISingletonService, IAsyncDisposable
         _shutdown.Dispose();
     }
 
-    private static async Task DisconnectAndDisposeAsync(ThrottlingSmtpClient client)
+    private static async Task DisconnectAndDisposeAsync(ISmtpSession client)
     {
         try
         {

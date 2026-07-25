@@ -33,6 +33,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.Utils
 
             if (cooldownMilliseconds <= 0)
             {
+                IsCooling = false;
+                callback();
                 return;
             }
 

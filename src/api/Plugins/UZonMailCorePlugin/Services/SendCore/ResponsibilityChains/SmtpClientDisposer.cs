@@ -9,7 +9,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
     /// SmtpClient 释放
     /// </summary>
     public class SmtpClientDisposer(
-        SmtpClientsManager clientFactory,
+        ISmtpClientsManager clientFactory,
         OutboxesManager outboxesPoolList
     ) : AbstractSendingHandler
     {

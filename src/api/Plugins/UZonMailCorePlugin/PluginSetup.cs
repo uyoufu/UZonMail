@@ -4,6 +4,7 @@ using UzonMail.DB.SQL;
 using UzonMail.DB.SqLite;
 using UzonMail.Utils.Extensions;
 using UzonMail.Utils.Plugin;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace UzonMail.CorePlugin
 {
@@ -14,6 +15,9 @@ namespace UzonMail.CorePlugin
         public void ConfigureServices(IHostApplicationBuilder hostBuilder)
         {
             var services = hostBuilder.Services;
+
+            // SendCore 的租约、重试与限流必须共享同一时间源，测试环境可替换为可控时间。
+            services.TryAddSingleton(TimeProvider.System);
 
             // 添加数据库上下文
             services.AddSqlContext<SqlContext, PostgreSqlContext, SqLiteContext>(

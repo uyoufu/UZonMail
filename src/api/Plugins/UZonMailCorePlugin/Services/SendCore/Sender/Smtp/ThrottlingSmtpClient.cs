@@ -13,7 +13,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
     /// 具有发件速率限制的 smtp 客户端
     /// 代理与客户端是绑定的
     /// </summary>
-    public class ThrottlingSmtpClient(DebugConfig debugConfig) : SmtpClient, IEmailSendingClient
+    public class ThrottlingSmtpClient(DebugConfig debugConfig)
+        : SmtpClient,
+            IEmailSendingClient,
+            ISmtpSession
     {
         private static readonly ILog _logger = LogManager.GetLogger(typeof(ThrottlingSmtpClient));
 
@@ -115,6 +118,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
         {
             return _clientKey;
         }
+
+        /// <inheritdoc />
+        public Task<string> SendMessageAsync(
+            MimeMessage message,
+            CancellationToken cancellationToken = default
+        ) => SendAsync(message, cancellationToken);
 
         /// <summary>
         /// 验证邮箱
