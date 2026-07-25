@@ -58,6 +58,7 @@
     "@types/node": "^22.13.9",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
+    "@vitest/ui": "^3.2.4",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.5.0",
     "@vue/test-utils": "^2.4.6",
@@ -78,11 +79,10 @@
     "typescript": "^5.8.2",
     "unplugin-auto-import": "^19.1.1",
     "unplugin-vue-components": "^28.4.1",
+    "vite-plugin-checker": "^0.14.5",
     "vite-tsconfig-paths": "^5.1.4",
-    "vite-plugin-checker": "^0.9.0",
     "vitest": "^3.2.4",
-    "vue-tsc": "^2.2.8",
-    "@vitest/ui": "^3.2.4"
+    "vue-tsc": "^2.2.8"
   },
   "engines": {
     "node": "^28 || ^26 || ^24 || ^22 || ^20 || ^18",

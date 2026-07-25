@@ -93,7 +93,7 @@ import PasswordInput from '../passwordInput/PasswordInput.vue'
 import type { PropType } from 'vue'
 import type { ICustomPopupButton, ILowCodeField, IOnSetupParams } from './types'
 import { LowCodeFieldType } from './types'
-import { notifyError } from 'src/utils/dialog'
+import { notifyError } from 'src/utils/notification'
 import type { IFunctionResult } from 'src/types'
 
 const props = defineProps({

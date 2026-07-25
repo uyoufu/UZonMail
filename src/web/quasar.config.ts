@@ -13,6 +13,13 @@ import { ElementPlusResolver, QuasarResolver } from 'unplugin-vue-components/res
 // 导入用户配置
 import { useConfig } from 'src/config/index'
 
+const BuildWarning = {
+  invalidAnnotationCode: 'INVALID_ANNOTATION',
+  signalRUtilsPath: '/@microsoft/signalr/dist/esm/Utils.js',
+  pureAnnotation: '/*#__PURE__*/'
+} as const
+const chunkSizeWarningLimitKb = 700
+
 // mock:https://github.com/vbenjs/vite-plugin-mock/blob/main/README.zh_CN.md
 export default defineConfig((ctx) => {
   const userConfig = useConfig(ctx)
@@ -91,8 +98,36 @@ export default defineConfig((ctx) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {
-      // },
+      extendViteConf(viteConf) {
+        const viteBuildConfig = viteConf.build ?? {}
+        const rollupOptions = viteBuildConfig.rollupOptions ?? {}
+        const existingOnWarn = rollupOptions.onwarn
+
+        viteConf.build = {
+          ...viteBuildConfig,
+          // 当前两个大包均已按路由懒加载；超过现有最大值约 666 kB 后仍需重新评估拆包策略。
+          chunkSizeWarningLimit: chunkSizeWarningLimitKb,
+          rollupOptions: {
+            ...rollupOptions,
+            onwarn(warning, defaultHandler) {
+              const normalizedModuleId = warning.id?.replaceAll('\\', '/')
+              const isKnownSignalRAnnotationWarning =
+                warning.code === BuildWarning.invalidAnnotationCode &&
+                normalizedModuleId?.endsWith(BuildWarning.signalRUtilsPath) === true &&
+                warning.message.includes(BuildWarning.pureAnnotation)
+
+              // SignalR 发布产物中的注解位置不被 Rollup 识别，Rollup 会安全移除该注解且不改变运行逻辑。
+              if (isKnownSignalRAnnotationWarning) return
+
+              if (existingOnWarn) {
+                existingOnWarn(warning, defaultHandler)
+                return
+              }
+              defaultHandler(warning)
+            }
+          }
+        }
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
