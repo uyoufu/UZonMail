@@ -22,7 +22,7 @@ namespace UzonMail.Utils.Web.Configs
             services.AddOptions();
 
             var optionTypes = GetCandidateAssemblies()
-                .SelectMany(GetTypes)
+                .SelectMany(x => x.GetTypes())
                 .Where(type =>
                     type.IsClass
                     && !type.IsAbstract
@@ -55,21 +55,6 @@ namespace UzonMail.Utils.Web.Configs
                             AssemblyName.ReferenceMatchesDefinition(reference, markerAssemblyName)
                         )
                 );
-        }
-
-        private static IEnumerable<Type> GetTypes(Assembly assembly)
-        {
-            try
-            {
-                return assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException exception)
-            {
-                throw new InvalidOperationException(
-                    $"无法扫描程序集 {assembly.FullName} 中的 Options 类型。",
-                    exception
-                );
-            }
         }
 
         private static void RegisterOptions(

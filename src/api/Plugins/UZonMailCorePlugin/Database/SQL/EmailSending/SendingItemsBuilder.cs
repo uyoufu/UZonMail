@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.DB.SQL.Core.Files;

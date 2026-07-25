@@ -201,14 +201,11 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = int.MaxValue;
 });
 
-// 添加工具中的服务
-services.AddUtilsServices();
+// 自动注册当前已加载程序集中的 Options
+services.AddAllOptions(builder.Configuration);
 
 // 加载本机服务
 services.AddServices();
-
-// 自动注册当前已加载程序集中的 Options
-services.AddAllOptions(builder.Configuration);
 
 var app = builder.Build();
 

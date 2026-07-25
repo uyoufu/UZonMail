@@ -29,10 +29,17 @@ namespace UzonMail.Utils.Web.Service
         )
         {
             // 批量注入 Services 单例
-            var assembleyTypes = servicesIn.GetTypes();
+            var assembleyTypes = servicesIn
+                .GetTypes()
+                .Where(type =>
+                    type.IsClass
+                    && !type.IsAbstract
+                    && !type.ContainsGenericParameters
+                    && typeof(IService).IsAssignableFrom(type)
+                );
+
             var transientType = typeof(ITransientService);
             // 分多种情况，注册不同的生命周期
-
             // 瞬时类型
             var transientTypes = assembleyTypes
                 .Where(x => !x.IsInterface && !x.IsAbstract)

@@ -1,11 +1,9 @@
-using Microsoft.Extensions.Options;
-using UzonMail.CorePlugin.Config;
-using UzonMail.CorePlugin.Services.SendCore.Reading;
-using UzonMail.CorePlugin.Services.SendCore.Runtime;
 using UzonMail.CorePlugin.SignalRHubs;
+using UzonMail.DB.PostgreSql;
+using UzonMail.DB.SQL;
+using UzonMail.DB.SqLite;
 using UzonMail.Utils.Extensions;
 using UzonMail.Utils.Plugin;
-using UzonMail.Utils.Web;
 
 namespace UzonMail.CorePlugin
 {
@@ -17,8 +15,10 @@ namespace UzonMail.CorePlugin
         {
             var services = hostBuilder.Services;
 
-            // 批量注册服务
-            services.AddServices();
+            // 添加数据库上下文
+            services.AddSqlContext<SqlContext, PostgreSqlContext, SqLiteContext>(
+                hostBuilder.Configuration
+            );
         }
 
         public void ConfigureApp(IApplicationBuilder app)

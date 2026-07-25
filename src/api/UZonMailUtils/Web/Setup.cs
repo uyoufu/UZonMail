@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using UzonMail.Utils.Database.Redis;
+using UzonMail.Utils.Web.Configs;
 using UzonMail.Utils.Web.Convention;
 using UzonMail.Utils.Web.Service;
 
@@ -55,24 +57,30 @@ namespace UzonMail.Utils.Web
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             // 批量注入 Services 单例
-            var callingAssembly = Assembly.GetCallingAssembly();
-            return ServiceUtils.AddServices(services, callingAssembly);
-        }
-
-        /// <summary>
-        /// 添加 Utils 服务
-        /// </summary>
-        /// <param name="services"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddUtilsServices(this IServiceCollection services)
-        {
-            // 批量注入 Services 单例
-            var utilsAssembly = Assembly.GetExecutingAssembly();
-            if (utilsAssembly != null)
+            var callingAssemblies = GetCandidateAssemblies();
+            foreach (var callingAssembly in callingAssemblies)
             {
-                return ServiceUtils.AddServices(services, utilsAssembly);
+                ServiceUtils.AddServices(services, callingAssembly);
             }
             return services;
+        }
+
+        private static IEnumerable<Assembly> GetCandidateAssemblies()
+        {
+            var markerAssembly = typeof(IService).Assembly;
+            var markerAssemblyName = markerAssembly.GetName();
+
+            return AppDomain
+                .CurrentDomain.GetAssemblies()
+                .Where(assembly => !assembly.IsDynamic)
+                .Where(assembly =>
+                    assembly == markerAssembly
+                    || assembly
+                        .GetReferencedAssemblies()
+                        .Any(reference =>
+                            AssemblyName.ReferenceMatchesDefinition(reference, markerAssemblyName)
+                        )
+                );
         }
 
         /// <summary>

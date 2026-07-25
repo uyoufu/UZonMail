@@ -6,8 +6,6 @@ using UzonMail.CorePlugin.Services.Emails;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
-using UzonMail.CorePlugin.Utils.Extensions;
-using UzonMail.DB.Extensions;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
