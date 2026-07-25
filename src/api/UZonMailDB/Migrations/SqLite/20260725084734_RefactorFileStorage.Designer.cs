@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UzonMail.DB.SqLite;
 
 #nullable disable
 
-namespace UzonMailService.Migrations.SqLite
+namespace UzonMail.DB.Migrations.SqLite
 {
     [DbContext(typeof(SqLiteContext))]
-    partial class SqLiteContextModelSnapshot : ModelSnapshot
+    [Migration("20260725084734_RefactorFileStorage")]
+    partial class RefactorFileStorage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.10");

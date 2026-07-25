@@ -1,38 +1,27 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UzonMail.DB.SQL.Base;
 using UzonMail.DB.SQL.Core.Organization;
 
 namespace UzonMail.DB.SQL.Core.Files
 {
     /// <summary>
-    /// 文件使用情况
+    /// 用户可管理和引用的逻辑文件。
     /// </summary>
-    public class FileUsage : SqlId
+    public class FileUsage : SqlId, IEntityTypeConfiguration<FileUsage>
     {
-        /// <summary>
-        /// 为了提取前端上传的附件
-        /// </summary>
         [NotMapped]
         public long __fileUsageId { get; set; }
 
-        /// <summary>
-        /// 拥有者的用户ID
-        /// </summary>
         public long OwnerUserId { get; set; }
         public User OwnerUser { get; set; } = null!;
 
-        /// <summary>
-        /// 唯一名称
-        /// 若有唯一名称，则会替换原来的文件名，减少文件存储
-        /// </summary>
-        public string? UniqueName { get; set; }
+        public long CategoryId { get; set; }
+        public FileCategory Category { get; set; } = null!;
 
         private string _fileName = string.Empty;
 
-        /// <summary>
-        /// 文件名（包含后缀）
-        /// 若 DisplayName 为空，则 DisplayName = FileName
-        /// </summary>
         public string FileName
         {
             get => _fileName;
@@ -40,32 +29,40 @@ namespace UzonMail.DB.SQL.Core.Files
             {
                 _fileName = value;
                 if (string.IsNullOrEmpty(DisplayName))
-                {
                     DisplayName = value;
-                }
             }
         }
 
-        /// <summary>
-        /// 显示名称，给用户展示的名称
-        /// 若要根据名称查找文件，则要求唯一
-        /// </summary>
         public string DisplayName { get; set; } = string.Empty;
 
         /// <summary>
-        /// 文件 id
+        /// 用于 Excel 附件名称匹配的标准化名称，软删除后置空。
         /// </summary>
-        public long FileObjectId { get; set; }
+        public string? DisplayNameKey { get; set; }
 
-        /// <summary>
-        /// 文件对象
-        /// </summary>
+        public long FileObjectId { get; set; }
         public FileObject FileObject { get; set; } = null!;
 
-        /// <summary>
-        /// 是否是公共文件
-        /// 公共文件不需要权限即可访问
-        /// </summary>
         public bool IsPublic { get; set; }
+
+        /// <summary>
+        /// 发送项对该逻辑文件的引用数量。
+        /// </summary>
+        public long ReferenceCount { get; set; }
+
+        /// <summary>
+        /// 配置逻辑文件的唯一性与列表查询索引。
+        /// </summary>
+        public void Configure(EntityTypeBuilder<FileUsage> builder)
+        {
+            builder.HasIndex(x => new { x.OwnerUserId, x.FileObjectId }).IsUnique();
+            builder.HasIndex(x => new { x.OwnerUserId, x.DisplayNameKey }).IsUnique();
+            builder.HasIndex(x => new
+            {
+                x.OwnerUserId,
+                x.CategoryId,
+                x.CreateDate
+            });
+        }
     }
 }

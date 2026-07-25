@@ -28,7 +28,8 @@ const props = defineProps({
   files: {
     type: Array as PropType<File[]>,
     required: true
-  }
+  },
+  categoryId: Number
 })
 import { uploadFileObject } from 'src/api/file'
 import dayjs from 'dayjs'
@@ -126,8 +127,8 @@ onMounted(async () => {
   for (; index < props.files.length; index++) {
     const file = props.files[index] as File
     const sha256 = await fileSha256(file, sha256Callback)
-    const { data: fileId } = await uploadFileObject(sha256, file, onUploadProgress)
-    fileIds.push(fileId)
+    const { data: uploadResult } = await uploadFileObject(sha256, file, props.categoryId, onUploadProgress)
+    fileIds.push(uploadResult.fileUsageId)
   }
 
   // 上传完成后，返回结果

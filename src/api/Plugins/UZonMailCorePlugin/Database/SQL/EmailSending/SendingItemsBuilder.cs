@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using UzonMail.CorePlugin.Services.Files;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.DB.SQL.Core.Files;
 using UzonMail.Utils.Json;
+using UzonMail.Utils.Web.Exceptions;
 
 namespace UzonMail.CorePlugin.Database.SQL.EmailSending
 {
@@ -244,13 +246,13 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             }
 
             // 获取所有的附件
-            var attachFileNames = rowData.Values.SelectMany(x => x.AttachmentNames).ToList();
-            List<FileUsage> fileUsages = [];
-            if (attachFileNames.Count > 0)
-                fileUsages = await db
-                    .FileUsages.Where(x => x.IsPublic || x.OwnerUserId == group.UserId)
-                    .Where(x => attachFileNames.Contains(x.DisplayName))
-                    .ToListAsync();
+            var attachmentNameKeys = rowData
+                .Values.SelectMany(x => x.AttachmentNames)
+                .Select(FileStoreService.NormalizeDisplayName)
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+            var fileUsageByName = await ResolveExcelAttachments(attachmentNameKeys);
 
             List<SendingItem> sendingItems = [];
             foreach (var inbox in inboxes)
@@ -325,10 +327,11 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 // 覆盖正文中的附件
                 if (row.AttachmentNames != null && row.AttachmentNames.Count > 0)
                 {
-                    var fileUsagesTemp = fileUsages.FindAll(x =>
-                        row.AttachmentNames.Contains(x.DisplayName)
-                    );
-                    sendingItem.Attachments = fileUsagesTemp;
+                    sendingItem.Attachments = row
+                        .AttachmentNames.Select(FileStoreService.NormalizeDisplayName)
+                        .Distinct(StringComparer.Ordinal)
+                        .Select(x => fileUsageByName[x])
+                        .ToList();
                 }
 
                 // 保存数据
@@ -336,6 +339,61 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             }
 
             return sendingItems;
+        }
+
+        /// <summary>
+        /// 将 Excel 中的附件名解析为唯一逻辑文件；当前用户文件优先于公开文件。
+        /// </summary>
+        private async Task<Dictionary<string, FileUsage>> ResolveExcelAttachments(
+            IReadOnlyCollection<string> attachmentNameKeys
+        )
+        {
+            if (attachmentNameKeys.Count == 0)
+                return [];
+
+            var candidates = await db
+                .FileUsages.Where(x =>
+                    attachmentNameKeys.Contains(x.DisplayNameKey!)
+                    && (x.OwnerUserId == group.UserId || x.IsPublic)
+                )
+                .ToListAsync();
+            Dictionary<string, FileUsage> resolved = [];
+            List<string> unresolvedNames = [];
+
+            foreach (var attachmentNameKey in attachmentNameKeys)
+            {
+                var ownedCandidates = candidates
+                    .Where(x =>
+                        x.DisplayNameKey == attachmentNameKey && x.OwnerUserId == group.UserId
+                    )
+                    .ToList();
+                var matchingCandidates =
+                    ownedCandidates.Count > 0
+                        ? ownedCandidates
+                        : candidates
+                            .Where(x =>
+                                x.DisplayNameKey == attachmentNameKey
+                                && x.OwnerUserId != group.UserId
+                                && x.IsPublic
+                            )
+                            .ToList();
+                if (matchingCandidates.Count != 1)
+                {
+                    unresolvedNames.Add(attachmentNameKey);
+                    continue;
+                }
+
+                resolved.Add(attachmentNameKey, matchingCandidates[0]);
+            }
+
+            if (unresolvedNames.Count > 0)
+            {
+                throw new KnownException(
+                    $"以下 Excel 附件不存在或名称不唯一: {string.Join(", ", unresolvedNames)}"
+                );
+            }
+
+            return resolved;
         }
     }
 }

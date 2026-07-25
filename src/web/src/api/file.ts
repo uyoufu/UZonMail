@@ -42,28 +42,34 @@ export function getFileUsageId (sha256: string, fileName: string) {
  * @param fileName
  * @returns
  */
-export function uploadFileObject (sha256: string, file: File, onUploadProgress?: (progressEvent: AxiosProgressEvent) => void) {
+export interface IFileUploadResult {
+  fileUsageId: number
+  categoryId: number
+  isExisting: boolean
+}
+
+export function uploadFileObject (sha256: string, file: File, categoryId?: number, onUploadProgress?: (progressEvent: AxiosProgressEvent) => void) {
   const form = new FormData()
   form.append('sha256', sha256)
   form.append('file', file, file.name)
+  if (categoryId) form.append('categoryId', String(categoryId))
 
-  return httpClient.post<number>('/file/upload-file-object', {
+  return httpClient.post<IFileUploadResult>('/file/upload-file-object', {
     data: form,
     onUploadProgress
   })
 }
 
 export interface IFileUsage {
-  id: number,
+  id: number
+  categoryId: number
   fileName: string
-  createDate: string,
-  displayName: string,
-  fileObjectId: number,
-  fileObject: {
-    sha256: string,
-    linkCount: number,
-    size: number
-  }
+  createDate: string
+  displayName: string
+  fileObjectId: number
+  sha256: string
+  referenceCount: number
+  size: number
 }
 
 /**
@@ -71,10 +77,11 @@ export interface IFileUsage {
  * @param filter
  * @returns
  */
-export function getFileUsagesCount (filter?: string) {
+export function getFileUsagesCount (filter?: string, categoryId?: number) {
   return httpClient.get<number>('/file/file-usages/filtered-count', {
     params: {
-      filter
+      filter,
+      categoryId
     }
   })
 }
@@ -85,10 +92,11 @@ export function getFileUsagesCount (filter?: string) {
  * @param pagination
  * @returns
  */
-export function getFileUsagesData (filter: string | undefined, pagination: IRequestPagination) {
+export function getFileUsagesData (filter: string | undefined, pagination: IRequestPagination, categoryId?: number) {
   return httpClient.post<IFileUsage[]>('/file/file-usages/filtered-data', {
     params: {
-      filter
+      filter,
+      categoryId
     },
     data: pagination
   })
@@ -100,7 +108,26 @@ export function getFileUsagesData (filter: string | undefined, pagination: IRequ
  * @returns
  */
 export function deleteFileUsage (fileUsageId: number) {
-  return httpClient.delete<boolean[]>(`/file/file-usages/${fileUsageId}`)
+  return httpClient.delete<IFileUsageDeletionResult>(`/file/file-usages/${fileUsageId}`)
+}
+
+export interface IFileUsageDeletionResult {
+  deletedIds: number[]
+  pendingPhysicalCleanupCount: number
+}
+
+/** 批量删除逻辑文件；任一文件被引用时后端会拒绝整批操作。 */
+export function deleteFileUsages (fileUsageIds: number[]) {
+  return httpClient.delete<IFileUsageDeletionResult>('/file/file-usages/ids/many', {
+    data: { fileUsageIds }
+  })
+}
+
+/** 将多个逻辑文件移动到指定分类。 */
+export function moveFileUsages (fileUsageIds: number[], categoryId: number) {
+  return httpClient.put<boolean>('/file/file-usages/category', {
+    data: { fileUsageIds, categoryId }
+  })
 }
 
 /**
@@ -110,7 +137,7 @@ export function deleteFileUsage (fileUsageId: number) {
  * @returns
  */
 export function updateDisplayName (fileUsageId: number, displayName: string) {
-  return httpClient.put<boolean[]>(`/file/file-usages/${fileUsageId}/display-name`, {
+  return httpClient.put<boolean>(`/file/file-usages/${fileUsageId}/display-name`, {
     params: {
       displayName
     }

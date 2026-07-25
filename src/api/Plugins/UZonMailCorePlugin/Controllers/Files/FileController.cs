@@ -1,229 +1,208 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Files.DTOs;
 using UzonMail.CorePlugin.Services.Config;
 using UzonMail.CorePlugin.Services.Files;
 using UzonMail.CorePlugin.Services.Settings;
-using UzonMail.DB.SQL;
-using UzonMail.DB.SQL.Core.Files;
 using UzonMail.Utils.Web.PagingQuery;
 using UzonMail.Utils.Web.ResponseModel;
 
 namespace UzonMail.CorePlugin.Controllers.Files
 {
     /// <summary>
-    /// 文件控制器
+    /// 用户文件上传、读取和逻辑文件管理接口。
     /// </summary>
-    public class FileController(
-        SqlContext db,
+    public sealed class FileController(
         FileStoreService fileStoreService,
+        FileUsageService fileUsageService,
         TokenService tokenService,
         DebugConfig debugConfig
     ) : ControllerBaseV1
     {
-        /// <summary>
-        /// 获取文件ID
-        /// </summary>
-        /// <returns></returns>
         [HttpGet("file-id")]
-        public async Task<ResponseResult<long>> GetFileId(string sha256, string fileName)
+        public async Task<ResponseResult<long>> GetFileId(
+            string sha256,
+            string fileName,
+            CancellationToken cancellationToken
+        )
         {
-            // 判断是否存在 fileObject
-            FileObject? fileObject = await fileStoreService.GetExistFileObject(sha256);
-            if (fileObject == null)
-                return (-1L).ToSuccessResponse();
-
-            var userId = tokenService.GetUserSqlId();
-
-            // 获取 fileUsageId
-            FileUsage fileUsage = await fileStoreService.GetOrCreateFileUsage(
-                userId,
-                fileName,
-                sha256
+            var fileObject = await fileStoreService.GetExistFileObjectAsync(
+                sha256,
+                cancellationToken
             );
-            return fileUsage.Id.ToSuccessResponse();
+            if (fileObject is null)
+                return (-1L).ToSuccessResponse();
+            var usage = await fileStoreService.GetOrCreateFileUsageAsync(
+                tokenService.GetUserSqlId(),
+                fileName,
+                sha256,
+                cancellationToken
+            );
+            return usage.Id.ToSuccessResponse();
         }
 
-        /// <summary>
-        /// 上传文件对象
-        /// </summary>
-        /// <param name="fileParams"></param>
-        /// <returns></returns>
         [HttpPost("upload-file-object")]
-        public async Task<ResponseResult<long>> UploadFileObject(ObjectFileUploaderBody fileParams)
+        public async Task<ResponseResult<FileUploadResult>> UploadFileObject(
+            ObjectFileUploaderBody fileParams,
+            CancellationToken cancellationToken
+        )
         {
             if (debugConfig.IsDemo)
-            {
-                return 0L.ToFailResponse("演示环境不支持上传文件");
-            }
-            var userId = tokenService.GetUserSqlId();
+                return new FileUploadResult(0, 0, false).ToFailResponse("演示环境不支持上传文件");
             fileParams.File ??= Request.Form.Files.FirstOrDefault();
-            if (fileParams.File is null)
-                return 0L.ToFailResponse("未找到上传文件");
-
-            FileUsage fileUsage = await fileStoreService.UploadFileObject(userId, fileParams);
-            return fileUsage.Id.ToSuccessResponse();
+            var result = await fileStoreService.UploadFileObjectAsync(
+                tokenService.GetUserSqlId(),
+                fileParams,
+                cancellationToken
+            );
+            return result.ToSuccessResponse();
         }
 
-        /// <summary>
-        /// 获取公共的文件流
-        /// 该接口不需要权限即可访问
-        /// </summary>
-        /// <returns></returns>
         [AllowAnonymous]
         [HttpGet("public-file-stream/{fileUsageId:long}")]
-        public async Task<IActionResult> GetPublicFileStream(long fileUsageId)
-        {
-            // 获取文件流
-            string fullPath = await fileStoreService.GetFileFullPath(fileUsageId, true);
-            Stream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
-            var result = new FileStreamResult(stream, "application/octet-stream")
-            {
-                FileDownloadName = Path.GetFileName(fullPath)
-            };
-            return result;
-        }
+        public async Task<IActionResult> GetPublicFileStream(
+            long fileUsageId,
+            CancellationToken cancellationToken
+        ) =>
+            CreateFileStreamResult(
+                await fileStoreService.GetPublicFileFullPathAsync(fileUsageId, cancellationToken)
+            );
 
-        /// <summary>
-        /// 获取文件流
-        /// </summary>
-        /// <param name="fileUsageId"></param>
-        /// <returns></returns>
         [HttpGet("file-stream/{fileUsageId:long}")]
-        public async Task<IActionResult> GetFileStream(long fileUsageId)
-        {
-            // 获取文件流
-            string fullPath = await fileStoreService.GetFileFullPath(fileUsageId, false);
-            Stream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
-            var result = new FileStreamResult(stream, "application/octet-stream")
-            {
-                FileDownloadName = Path.GetFileName(fullPath)
-            };
-            return result;
-        }
+        public async Task<IActionResult> GetFileStream(
+            long fileUsageId,
+            CancellationToken cancellationToken
+        ) =>
+            CreateFileStreamResult(
+                await fileStoreService.GetOwnedFileFullPathAsync(
+                    fileUsageId,
+                    tokenService.GetUserSqlId(),
+                    cancellationToken
+                )
+            );
 
-        /// <summary>
-        /// 上传到静态目录位置
-        /// 目前用于用户头像、缩略图上传
-        /// </summary>
-        /// <param name="fileParams"></param>
-        /// <returns></returns>
         [HttpPost("upload-static-file")]
-        public ResponseResult<string> UploadToStaticFile(StaticFileUploaderBody fileParams)
+        public async Task<ResponseResult<string>> UploadToStaticFile(
+            StaticFileUploaderBody fileParams,
+            CancellationToken cancellationToken
+        )
         {
             var userId = tokenService.GetUserSqlId();
+            var safeFileName = Path.GetFileName(fileParams.File.FileName);
             var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(
                 userId.ToString(),
                 fileParams.SubPath,
-                fileParams.File.FileName
+                safeFileName
             );
-
-            using var stream = new FileStream(fullPath, FileMode.Create);
-            fileParams.File.CopyTo(stream);
+            await using var stream = new FileStream(
+                fullPath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                81920,
+                FileOptions.Asynchronous
+            );
+            await fileParams.File.CopyToAsync(stream, cancellationToken);
             return relativePath.ToSuccessResponse();
         }
 
-        /// <summary>
-        /// 获取文件数量
-        /// </summary>
-        /// <param name="filter"></param>
-        /// <returns></returns>
         [HttpGet("file-usages/filtered-count")]
-        public async Task<ResponseResult<int>> GetFileUsagesCount(string? filter)
-        {
-            var userId = tokenService.GetUserSqlId();
-            // 收件箱
-            var dbSet = db.FileUsages.Where(x => x.OwnerUserId == userId);
-            if (!string.IsNullOrEmpty(filter))
-            {
-                dbSet = dbSet.Where(x =>
-                    x.DisplayName.Contains(filter) || x.FileName.Contains(filter)
-                );
-            }
-            int count = await dbSet.CountAsync();
-            return count.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 获取文件数据
-        /// </summary>
-        /// <param name="filter"></param>
-        /// <param name="pagination"></param>
-        /// <returns></returns>
-        [HttpPost("file-usages/filtered-data")]
-        public async Task<ResponseResult<List<FileUsage>>> GetFileUsagesData(
+        public async Task<ResponseResult<int>> GetFileUsagesCount(
+            long? categoryId,
             string? filter,
-            [FromBody] Pagination pagination
+            CancellationToken cancellationToken
+        ) =>
+            (
+                await fileUsageService.GetCountAsync(
+                    tokenService.GetUserSqlId(),
+                    categoryId,
+                    filter,
+                    cancellationToken
+                )
+            ).ToSuccessResponse();
+
+        [HttpPost("file-usages/filtered-data")]
+        public async Task<ResponseResult<List<FileUsageListItem>>> GetFileUsagesData(
+            long? categoryId,
+            string? filter,
+            [FromBody] Pagination pagination,
+            CancellationToken cancellationToken
+        ) =>
+            (
+                await fileUsageService.GetDataAsync(
+                    tokenService.GetUserSqlId(),
+                    categoryId,
+                    filter,
+                    pagination,
+                    cancellationToken
+                )
+            ).ToSuccessResponse();
+
+        [HttpDelete("file-usages/{fileUsageId:long}")]
+        public async Task<ResponseResult<FileUsageDeletionResult>> DeleteFileUsage(
+            long fileUsageId,
+            CancellationToken cancellationToken
+        ) =>
+            (
+                await fileUsageService.DeleteAsync(
+                    tokenService.GetUserSqlId(),
+                    [fileUsageId],
+                    cancellationToken
+                )
+            ).ToSuccessResponse();
+
+        [HttpDelete("file-usages/ids/many")]
+        public async Task<ResponseResult<FileUsageDeletionResult>> DeleteFileUsages(
+            [FromBody] DeleteFileUsagesDto request,
+            CancellationToken cancellationToken
+        ) =>
+            (
+                await fileUsageService.DeleteAsync(
+                    tokenService.GetUserSqlId(),
+                    request.FileUsageIds,
+                    cancellationToken
+                )
+            ).ToSuccessResponse();
+
+        [HttpPut("file-usages/category")]
+        public async Task<ResponseResult<bool>> MoveFileUsages(
+            [FromBody] MoveFileUsagesDto request,
+            CancellationToken cancellationToken
         )
         {
-            var userId = tokenService.GetUserSqlId();
-            // 收件箱
-            var dbSet = db.FileUsages.Where(x => x.OwnerUserId == userId);
-            if (!string.IsNullOrEmpty(filter))
-            {
-                dbSet = dbSet.Where(x =>
-                    x.DisplayName.Contains(filter) || x.FileName.Contains(filter)
-                );
-            }
-            var results = await dbSet.Include(x => x.FileObject).Page(pagination).ToListAsync();
-            return results.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 删除文件记录
-        /// </summary>
-        /// <param name="fileUsageId"></param>
-        /// <returns></returns>
-        [HttpDelete("file-usages/{fileUsageId:long}")]
-        public async Task<ResponseResult<bool>> DeleteFileUsage(long fileUsageId)
-        {
-            var fileUsage = await db
-                .FileUsages.Where(x => x.Id == fileUsageId)
-                .Include(x => x.FileObject)
-                .FirstOrDefaultAsync();
-            if (fileUsage == null)
-                return true.ToSuccessResponse();
-            db.FileUsages.Remove(fileUsage);
-
-            // 若文件不存在 fileUsage引用，则删除原始文件
-            var otherFileUsagesCount = await db
-                .FileUsages.Where(x =>
-                    x.FileObjectId == fileUsage.FileObjectId && x.Id != fileUsageId
-                )
-                .CountAsync();
-            if (otherFileUsagesCount == 0 && fileUsage.FileObject != null)
-            {
-                await fileStoreService.DeleteFileObject(fileUsage.FileObject.Sha256);
-            }
-
-            await db.SaveChangesAsync();
+            await fileUsageService.MoveToCategoryAsync(
+                tokenService.GetUserSqlId(),
+                request.FileUsageIds,
+                request.CategoryId,
+                cancellationToken
+            );
             return true.ToSuccessResponse();
         }
 
-        /// <summary>
-        /// 更新文件显示名称
-        /// </summary>
-        /// <param name="fileUsageId"></param>
-        /// <param name="displayName"></param>
-        /// <returns></returns>
         [HttpPut("file-usages/{fileUsageId:long}/display-name")]
         public async Task<ResponseResult<bool>> UpdateDisplayName(
             long fileUsageId,
-            [FromQuery] string displayName
+            [FromQuery] string displayName,
+            CancellationToken cancellationToken
         )
         {
-            var fileUsage = await db.FileUsages.FirstOrDefaultAsync(x => x.Id == fileUsageId);
-            if (fileUsage == null)
-                return false.ToFailResponse("文件不存在");
-
-            if (string.IsNullOrWhiteSpace(displayName))
-                fileUsage.DisplayName = fileUsage.FileName;
-            else
-                fileUsage.DisplayName = displayName;
-            await db.SaveChangesAsync();
-
+            await fileUsageService.RenameAsync(
+                tokenService.GetUserSqlId(),
+                fileUsageId,
+                displayName,
+                cancellationToken
+            );
             return true.ToSuccessResponse();
+        }
+
+        private static FileStreamResult CreateFileStreamResult(string fullPath)
+        {
+            var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return new FileStreamResult(stream, "application/octet-stream")
+            {
+                FileDownloadName = Path.GetFileName(fullPath),
+            };
         }
     }
 }

@@ -69,12 +69,20 @@ public sealed class SendAttachmentResolverTests
         {
             Id = id,
             OwnerUser = owner,
+            Category = new FileCategory
+            {
+                Id = 100 + id,
+                OwnerUser = owner,
+                Name = $"Category {id}",
+            },
             FileName = path,
             DisplayName = displayName,
             FileObject = new FileObject
             {
                 Id = id,
                 Path = path,
+                Sha256 = id.ToString().PadLeft(64, '0'),
+                StorageState = FileObjectStorageState.Ready,
                 FileBucket = bucket,
             },
         };

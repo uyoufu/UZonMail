@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.CorePlugin.Services.Emails;
+using UzonMail.CorePlugin.Services.Files;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
@@ -19,7 +20,8 @@ namespace UzonMail.CorePlugin.Services.SendCore
         SqlContext db,
         TokenService tokenService,
         AppSettingsManager settingsService,
-        OutboxValidateService outboxValidateService
+        OutboxValidateService outboxValidateService,
+        FileReferenceService fileReferenceService
     ) : ISendingGroupCreationService, IScopedService<ISendingGroupCreationService>
     {
         private static readonly ILog _logger = LogManager.GetLogger(
@@ -67,7 +69,9 @@ namespace UzonMail.CorePlugin.Services.SendCore
                     sendingGroupData.Attachments =
                         fileUsageIds.Count > 0
                             ? await ctx
-                                .FileUsages.Where(x => fileUsageIds.Contains(x.Id))
+                                .FileUsages.Where(x =>
+                                    fileUsageIds.Contains(x.Id) && x.OwnerUserId == userId
+                                )
                                 .ToListAsync()
                             : [];
                 }
@@ -94,7 +98,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
 
                 sendingGroupData.TotalCount = items.Count;
                 await UpdateOutboxCountFromGroups(sendingGroupData);
-                await IncreaseAttachmentLinkCount(ctx, items);
+                await fileReferenceService.IncreaseReferencesAsync(items);
 
                 return await ctx.SaveChangesAsync();
             });
@@ -263,30 +267,6 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 .Where(x => outboxGroupIds.Contains(x.EmailGroupId))
                 .CountAsync();
             sendingGroupData.OutboxesCount += outboxCount;
-        }
-
-        private static async Task IncreaseAttachmentLinkCount(
-            SqlContext ctx,
-            List<SendingItem> items
-        )
-        {
-            var incInfos = items
-                .Select(x => x.Attachments)
-                .Where(x => x != null)
-                .SelectMany(x => x!)
-                .Select(x => x.FileObjectId)
-                .GroupBy(x => x)
-                .Select(x => new { count = x.Count(), fileObjectId = x.Key })
-                .ToList();
-
-            foreach (var info in incInfos)
-            {
-                await ctx
-                    .FileObjects.Where(x => x.Id == info.fileObjectId)
-                    .ExecuteUpdateAsync(x =>
-                        x.SetProperty(e => e.LinkCount, e => e.LinkCount + info.count)
-                    );
-            }
         }
     }
 }

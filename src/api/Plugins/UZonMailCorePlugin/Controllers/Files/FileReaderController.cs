@@ -3,14 +3,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Services.Files;
+using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Files;
 using UzonMail.Utils.Web.ResponseModel;
 
 namespace UzonMail.CorePlugin.Controllers.Files
 {
-    public class FileReaderController(SqlContext db, FileStoreService fileStoreService)
-        : ControllerBaseV1
+    public class FileReaderController(
+        SqlContext db,
+        FileStoreService fileStoreService,
+        TokenService tokenService
+    ) : ControllerBaseV1
     {
         /// <summary>
         /// 获取文件对象的下载 Id
@@ -20,8 +24,9 @@ namespace UzonMail.CorePlugin.Controllers.Files
         [HttpPost()]
         public async Task<ResponseResult<long>> GetObjectAsync(long fileUsageId)
         {
+            var userId = tokenService.GetUserSqlId();
             FileUsage? fileUsage = await db.FileUsages.FirstOrDefaultAsync(x =>
-                x.Id == fileUsageId
+                x.Id == fileUsageId && x.OwnerUserId == userId
             );
 
             // 判断文件是否存在
@@ -59,7 +64,7 @@ namespace UzonMail.CorePlugin.Controllers.Files
             // 判断是否过期
             if (fileReader.ExpireDate < DateTime.UtcNow)
             {
-                db.FileReaders.Remove(fileReader);
+                fileReader.IsDeleted = true;
                 await db.SaveChangesAsync();
 
                 return NotFound();
@@ -67,6 +72,9 @@ namespace UzonMail.CorePlugin.Controllers.Files
 
             // 获取文件对象
             string fullPath = fileStoreService.GetFileFullPath(fileReader.FileObject);
+            if (!System.IO.File.Exists(fullPath))
+                return NotFound();
+
             Stream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
             var result = new FileStreamResult(stream, "application/octet-stream")
             {

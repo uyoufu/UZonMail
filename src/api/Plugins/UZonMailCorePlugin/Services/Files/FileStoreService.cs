@@ -1,268 +1,463 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Files;
-using UzonMail.Utils.Extensions;
 using UzonMail.Utils.Web.Exceptions;
 using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.Files
 {
     /// <summary>
-    /// 文件存储服务
+    /// 负责文件内容的校验、内容寻址持久化和可恢复磁盘操作。
     /// </summary>
-    public class FileStoreService(SqlContext db, IWebHostEnvironment env) : IScopedService
+    public sealed class FileStoreService(
+        SqlContext db,
+        IWebHostEnvironment env,
+        FileCategoryService categoryService,
+        FileOperationLockService operationLockService
+    ) : IScopedService
     {
-        /// <summary>
-        /// 获取存在的文件对象
-        /// </summary>
-        /// <param name="sha256"></param>
-        /// <returns></returns>
-        public async Task<FileObject?> GetExistFileObject(string sha256)
-        {
-            return await db.FileObjects.FirstOrDefaultAsync(x => x.Sha256 == sha256);
-        }
-
-        private async Task<FileBucket> GetDefaultBucket()
-        {
-            var bucket = await db.FileBuckets.FirstOrDefaultAsync(x => x.IsDefault);
-            if (bucket == null)
-                throw new KnownException("未找到默认的存储位置");
-            return bucket;
-        }
+        private const string StagingDirectoryName = ".staging";
+        private const string TrashDirectoryName = ".trash";
 
         /// <summary>
-        /// 第一个是相对路径，第二个是绝对路径
+        /// 保存上传内容并返回当前用户的逻辑文件。
         /// </summary>
-        /// <param name="fileBucket"></param>
-        /// <param name="prefix"></param>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
-        private static (string, string) GetObjectStorePath(FileBucket fileBucket, string fileName)
-        {
-            // 年/月/日/文件名
-            string relativePath =
-                DateTime.UtcNow.ToString("yyyy/MM/dd")
-                + $"/{DateTime.UtcNow.ToTimestamp()}_{fileName}";
-            string fullPath = Path.Combine(fileBucket.RootDir, relativePath);
-
-            // 创建父目录
-            string baseDir =
-                Path.GetDirectoryName(fullPath)
-                ?? throw new InvalidOperationException("无法确定文件存储目录");
-            Directory.CreateDirectory(baseDir);
-            return (relativePath, fullPath);
-        }
-
-        /// <summary>
-        /// 上传文件对象
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="sha256"></param>
-        /// <param name="isPublic"></param>
-        /// <param name="formFile"></param>
-        /// <param name="lastModifyDate"></param>
-        /// <returns></returns>
-        public async Task<FileUsage> UploadFileObject(
+        public async Task<FileUploadResult> UploadFileObjectAsync(
             long userId,
-            ObjectFileUploaderBody fileParams
+            ObjectFileUploaderBody fileParams,
+            CancellationToken cancellationToken = default
         )
         {
             var uploadedFile = fileParams.File ?? throw new KnownException("未找到上传文件");
+            var expectedSha256 = NormalizeSha256(fileParams.Sha256);
+            var bucket = await GetDefaultBucketAsync(cancellationToken);
+            var stagingPath = GetStagingPath(bucket, Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(Path.GetDirectoryName(stagingPath)!);
 
-            if (!string.IsNullOrEmpty(fileParams.UniqueName))
+            try
             {
-                await DeleteFileObject(fileParams.Sha256);
-            }
-
-            var result = await db.RunTransaction(async ctx =>
-            {
-                // 判断是否存在文件
-                FileObject? fileObject = await GetExistFileObject(fileParams.Sha256);
-                if (fileObject == null)
+                await using (
+                    var output = new FileStream(
+                        stagingPath,
+                        FileMode.CreateNew,
+                        FileAccess.Write,
+                        FileShare.None,
+                        81920,
+                        FileOptions.Asynchronous
+                    )
+                )
                 {
-                    // 获取存储位置
-                    var defaultBucket = await GetDefaultBucket();
-                    // 计算保存位置
-                    var (relativePath, fullPath) = GetObjectStorePath(
-                        defaultBucket,
-                        uploadedFile.FileName
-                    );
-                    // 保存文件
-                    using var stream = new FileStream(fullPath, FileMode.Create);
-                    uploadedFile.CopyTo(stream);
-
-                    // 说明文件不存在
-                    fileObject = new FileObject()
-                    {
-                        FileBucketId = defaultBucket.Id,
-                        Sha256 = fileParams.Sha256,
-                        Path = relativePath,
-                        Size = uploadedFile.Length,
-                        LastModifyDate = fileParams.LastModifyDate,
-                    };
-                    db.FileObjects.Add(fileObject);
-                    await db.SaveChangesAsync();
+                    await uploadedFile.CopyToAsync(output, cancellationToken);
                 }
 
-                // 先保存使用
-                FileUsage fileUsage =
-                    new()
+                var actualSha256 = await ComputeSha256Async(stagingPath, cancellationToken);
+                if (!string.Equals(expectedSha256, actualSha256, StringComparison.Ordinal))
+                    throw new KnownException("上传文件的 SHA-256 校验失败");
+
+                using var operationLock = await operationLockService.AcquireAsync(
+                    $"file-object:{actualSha256}",
+                    cancellationToken
+                );
+                await using var transaction = await db.Database.BeginTransactionAsync(
+                    cancellationToken
+                );
+                string? newlyStoredPath = null;
+                try
+                {
+                    var fileObject = await db
+                        .FileObjects.IgnoreQueryFilters()
+                        .Include(x => x.FileBucket)
+                        .FirstOrDefaultAsync(x => x.Sha256 == actualSha256, cancellationToken);
+                    var isExistingObject =
+                        fileObject is not null
+                        && !fileObject.IsDeleted
+                        && fileObject.StorageState == FileObjectStorageState.Ready
+                        && File.Exists(GetFileFullPath(fileObject));
+
+                    if (fileObject is null)
                     {
-                        OwnerUserId = userId,
-                        FileObjectId = fileObject.Id,
-                        IsPublic = fileParams.IsPublic,
-                        FileName = uploadedFile.FileName,
-                    };
-                db.FileUsages.Add(fileUsage);
+                        fileObject = new FileObject
+                        {
+                            FileBucketId = bucket.Id,
+                            FileBucket = bucket,
+                            Sha256 = actualSha256,
+                            Path = GetObjectRelativePath(actualSha256),
+                            Size = uploadedFile.Length,
+                            LastModifyDate = fileParams.LastModifyDate,
+                            StorageState = FileObjectStorageState.Pending,
+                        };
+                        db.FileObjects.Add(fileObject);
+                        await db.SaveChangesAsync(cancellationToken);
+                    }
 
-                // 引用只有在用户提交时，才增加
-                // fileObject.LinkCount += 1;
+                    if (!isExistingObject)
+                    {
+                        newlyStoredPath = GetFullPath(bucket, GetObjectRelativePath(actualSha256));
+                        Directory.CreateDirectory(Path.GetDirectoryName(newlyStoredPath)!);
+                        if (File.Exists(newlyStoredPath))
+                            File.Delete(newlyStoredPath);
+                        File.Move(stagingPath, newlyStoredPath);
+                        fileObject.FileBucketId = bucket.Id;
+                        fileObject.FileBucket = bucket;
+                        fileObject.Path = GetObjectRelativePath(actualSha256);
+                        fileObject.Size = uploadedFile.Length;
+                        fileObject.LastModifyDate = fileParams.LastModifyDate;
+                        fileObject.StorageState = FileObjectStorageState.Ready;
+                        fileObject.SetStatusNormal();
+                        await db.SaveChangesAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        File.Delete(stagingPath);
+                    }
 
-                await db.SaveChangesAsync();
-
-                return fileUsage;
-            });
-
-            return result;
-        }
-
-        /// <summary>
-        /// 删除文件，该接口仅在文件引用小于等于 maxLinkCount 时有效
-        /// </summary>
-        /// <param name="sha256"></param>
-        /// <param name="maxLinkCount">最大引用数量</param>
-        public async Task DeleteFileObject(string sha256, int maxLinkCount = 1)
-        {
-            // 移除文件
-            FileObject? fileObject = await db
-                .FileObjects.Where(x => x.Sha256 == sha256 && x.LinkCount <= maxLinkCount)
-                .Include(x => x.FileBucket)
-                .FirstOrDefaultAsync();
-            if (fileObject == null)
-                return;
-
-            // 删除文件
-            string fullPath = Path.Combine(fileObject.FileBucket.RootDir, fileObject.Path);
-            if (File.Exists(fullPath))
-            {
-                File.Delete(fullPath);
+                    var (usage, isExistingUsage) = await GetOrCreateFileUsageAsync(
+                        userId,
+                        uploadedFile.FileName,
+                        fileObject,
+                        fileParams.CategoryId,
+                        fileParams.IsPublic,
+                        cancellationToken
+                    );
+                    await transaction.CommitAsync(cancellationToken);
+                    return new FileUploadResult(usage.Id, usage.CategoryId, isExistingUsage);
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    db.ChangeTracker.Clear();
+                    if (newlyStoredPath is not null && File.Exists(newlyStoredPath))
+                        File.Delete(newlyStoredPath);
+                    throw;
+                }
             }
-            db.FileObjects.Remove(fileObject);
+            finally
+            {
+                if (File.Exists(stagingPath))
+                    File.Delete(stagingPath);
+            }
         }
 
         /// <summary>
-        /// 读取文件流
+        /// 按内容哈希获取已有对象。
         /// </summary>
-        /// <param name="fileUsageId"></param>
-        /// <param name="onlyPublic">仅返回public文件</param>
-        /// <returns></returns>
-        /// <exception cref="KnownException"></exception>
-        public async Task<string> GetFileFullPath(long fileUsageId, bool onlyPublic = true)
+        public async Task<FileObject?> GetExistFileObjectAsync(
+            string sha256,
+            CancellationToken cancellationToken = default
+        )
         {
-            FileUsage? fileUsage = await db
-                .FileUsages.Include(x => x.FileObject)
-                .ThenInclude(x => x.FileBucket)
-                .FirstOrDefaultAsync(x => x.Id == fileUsageId);
-            if (fileUsage == null)
-                throw new KnownException("文件不存在");
-
-            // 拼接文件路径
-            if (onlyPublic && !fileUsage.IsPublic)
-                throw new KnownException("无权访问该文件");
-
-            return GetFileFullPath(fileUsage.FileObject);
+            var normalizedSha256 = NormalizeSha256(sha256);
+            return await db.FileObjects.FirstOrDefaultAsync(
+                x => x.Sha256 == normalizedSha256 && x.StorageState == FileObjectStorageState.Ready,
+                cancellationToken
+            );
         }
 
         /// <summary>
-        /// 获取文件全路径
-        /// fileObject 必须要 include FileBucket
+        /// 为已存在的物理对象获取或创建当前用户的逻辑文件。
         /// </summary>
-        /// <param name="fileObject"></param>
-        /// <returns></returns>
+        public async Task<FileUsage> GetOrCreateFileUsageAsync(
+            long userId,
+            string fileName,
+            string sha256,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var fileObject =
+                await GetExistFileObjectAsync(sha256, cancellationToken)
+                ?? throw new FileNotFoundException("文件对象不存在");
+            var (usage, _) = await GetOrCreateFileUsageAsync(
+                userId,
+                fileName,
+                fileObject,
+                null,
+                false,
+                cancellationToken
+            );
+            return usage;
+        }
+
+        /// <summary>
+        /// 获取当前用户可读取的私有文件路径。
+        /// </summary>
+        public async Task<string> GetOwnedFileFullPathAsync(
+            long fileUsageId,
+            long userId,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var usage = await GetReadableUsageAsync(
+                fileUsageId,
+                x => x.OwnerUserId == userId,
+                cancellationToken
+            );
+            return GetExistingFileFullPath(usage.FileObject);
+        }
+
+        /// <summary>
+        /// 获取可匿名读取的公共文件路径。
+        /// </summary>
+        public async Task<string> GetPublicFileFullPathAsync(
+            long fileUsageId,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var usage = await GetReadableUsageAsync(
+                fileUsageId,
+                x => x.IsPublic,
+                cancellationToken
+            );
+            return GetExistingFileFullPath(usage.FileObject);
+        }
+
+        /// <summary>
+        /// 获取已加载存储桶的文件对象绝对路径。
+        /// </summary>
         public string GetFileFullPath(FileObject fileObject)
         {
-            if (fileObject == null)
-                throw new KnownException("FileObject 对象为空");
-            if (fileObject.FileBucket == null)
-                throw new KnownException("fileObject 必须要 include FileBucket");
+            ArgumentNullException.ThrowIfNull(fileObject);
+            if (fileObject.FileBucket is null)
+                throw new KnownException("文件对象缺少存储桶信息");
+            return GetFullPath(fileObject.FileBucket, fileObject.Path);
+        }
 
-            string fullPath = Path.Combine(fileObject.FileBucket.RootDir, fileObject.Path);
+        /// <summary>
+        /// 将待删除文件原子移动到回收暂存区。
+        /// </summary>
+        public StagedFileDeletion? StageFileDeletion(FileObject fileObject)
+        {
+            var originalPath = GetFileFullPath(fileObject);
+            if (!File.Exists(originalPath))
+                return null;
+            var trashPath = GetFullPath(
+                fileObject.FileBucket,
+                Path.Combine(TrashDirectoryName, $"{fileObject.ObjectId}_{fileObject.Sha256}")
+            );
+            Directory.CreateDirectory(Path.GetDirectoryName(trashPath)!);
+            if (File.Exists(trashPath))
+                File.Delete(trashPath);
+            File.Move(originalPath, trashPath);
+            return new StagedFileDeletion(originalPath, trashPath);
+        }
+
+        /// <summary>
+        /// 恢复数据库回滚所对应的磁盘文件。
+        /// </summary>
+        public static void RestoreStagedDeletion(StagedFileDeletion stagedDeletion)
+        {
+            if (!File.Exists(stagedDeletion.TrashPath))
+                return;
+            Directory.CreateDirectory(Path.GetDirectoryName(stagedDeletion.OriginalPath)!);
+            if (File.Exists(stagedDeletion.OriginalPath))
+                File.Delete(stagedDeletion.OriginalPath);
+            File.Move(stagedDeletion.TrashPath, stagedDeletion.OriginalPath);
+        }
+
+        /// <summary>
+        /// 永久删除已经提交的回收暂存文件。
+        /// </summary>
+        public static bool DeleteStagedFile(StagedFileDeletion stagedDeletion)
+        {
+            try
+            {
+                if (File.Exists(stagedDeletion.TrashPath))
+                    File.Delete(stagedDeletion.TrashPath);
+                return true;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 生成受根目录约束的静态文件保存路径。
+        /// </summary>
+        public (string FullPath, string RelativeUrl) GenerateStaticFilePath(params string[] paths)
+        {
+            var staticRoot = Path.GetFullPath(Path.Combine(env.ContentRootPath, "data/public"));
+            var relativePath = Path.Combine(paths);
+            var fullPath = GetContainedPath(staticRoot, relativePath);
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+            return (fullPath, $"data/public/{relativePath}".Replace('\\', '/'));
+        }
+
+        private async Task<(FileUsage Usage, bool IsExisting)> GetOrCreateFileUsageAsync(
+            long userId,
+            string fileName,
+            FileObject fileObject,
+            long? categoryId,
+            bool isPublic,
+            CancellationToken cancellationToken
+        )
+        {
+            using var usageLock = await operationLockService.AcquireAsync(
+                $"file-usage:{userId}:{fileObject.Id}",
+                cancellationToken
+            );
+            var existing = await db
+                .FileUsages.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(
+                    x => x.OwnerUserId == userId && x.FileObjectId == fileObject.Id,
+                    cancellationToken
+                );
+            if (existing is not null && !existing.IsDeleted)
+            {
+                if (categoryId is > 0 && existing.CategoryId != categoryId)
+                {
+                    var targetCategory = await categoryService.GetOwnedCategoryAsync(
+                        userId,
+                        categoryId,
+                        cancellationToken
+                    );
+                    existing.CategoryId = targetCategory.Id;
+                    await db.SaveChangesAsync(cancellationToken);
+                }
+                return (existing, true);
+            }
+
+            var category = await categoryService.GetOwnedCategoryAsync(
+                userId,
+                categoryId,
+                cancellationToken
+            );
+            var displayName = await GetAvailableDisplayNameAsync(
+                userId,
+                Path.GetFileName(fileName),
+                cancellationToken
+            );
+            if (existing is null)
+            {
+                existing = new FileUsage { OwnerUserId = userId, FileObjectId = fileObject.Id, };
+                db.FileUsages.Add(existing);
+            }
+            existing.CategoryId = category.Id;
+            existing.FileName = Path.GetFileName(fileName);
+            existing.DisplayName = displayName;
+            existing.DisplayNameKey = NormalizeDisplayName(displayName);
+            existing.IsPublic = isPublic;
+            existing.ReferenceCount = 0;
+            existing.SetStatusNormal();
+            await db.SaveChangesAsync(cancellationToken);
+            return (existing, false);
+        }
+
+        private async Task<string> GetAvailableDisplayNameAsync(
+            long userId,
+            string requestedName,
+            CancellationToken cancellationToken
+        )
+        {
+            var safeName = string.IsNullOrWhiteSpace(requestedName) ? "file" : requestedName.Trim();
+            var extension = Path.GetExtension(safeName);
+            var baseName = Path.GetFileNameWithoutExtension(safeName);
+            var candidate = safeName;
+            for (var suffix = 2; ; suffix++)
+            {
+                var key = NormalizeDisplayName(candidate);
+                if (
+                    !await db.FileUsages.AnyAsync(
+                        x => x.OwnerUserId == userId && x.DisplayNameKey == key,
+                        cancellationToken
+                    )
+                )
+                    return candidate;
+                candidate = $"{baseName} ({suffix}){extension}";
+            }
+        }
+
+        /// <summary>
+        /// 标准化用户可见文件名，供上传、重命名和 Excel 引用复用。
+        /// </summary>
+        public static string NormalizeDisplayName(string displayName) =>
+            displayName.Trim().ToUpperInvariant();
+
+        private async Task<FileUsage> GetReadableUsageAsync(
+            long fileUsageId,
+            System.Linq.Expressions.Expression<Func<FileUsage, bool>> accessPredicate,
+            CancellationToken cancellationToken
+        )
+        {
+            return await db
+                    .FileUsages.Where(accessPredicate)
+                    .Include(x => x.FileObject)
+                    .ThenInclude(x => x.FileBucket)
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.Id == fileUsageId
+                            && x.FileObject.StorageState == FileObjectStorageState.Ready,
+                        cancellationToken
+                    ) ?? throw new KnownException("文件不存在或无权访问");
+        }
+
+        private string GetExistingFileFullPath(FileObject fileObject)
+        {
+            var fullPath = GetFileFullPath(fileObject);
+            if (!File.Exists(fullPath))
+                throw new KnownException("文件内容不存在");
             return fullPath;
         }
 
-        /// <summary>
-        /// 获取或新建一个文件使用记录
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="fileName"></param>
-        /// <param name="sha256">传入时，必须要保证 sha256 是存在的</param>
-        /// <returns></returns>
-        public async Task<FileUsage> GetOrCreateFileUsage(
-            long userId,
-            string fileName,
-            string sha256
+        private async Task<FileBucket> GetDefaultBucketAsync(CancellationToken cancellationToken)
+        {
+            return await db.FileBuckets.FirstOrDefaultAsync(x => x.IsDefault, cancellationToken)
+                ?? throw new KnownException("未找到默认存储桶");
+        }
+
+        private static async Task<string> ComputeSha256Async(
+            string filePath,
+            CancellationToken cancellationToken
         )
         {
-            // 判断 sha256 是否存在
-            FileObject? fileObject =
-                await GetExistFileObject(sha256) ?? throw new FileNotFoundException();
-
-            // 获取源文件
-            var fileUsage = await db.FileUsages.FirstOrDefaultAsync(x =>
-                x.OwnerUserId == userId && x.FileObjectId == fileObject.Id
+            await using var stream = new FileStream(
+                filePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                81920,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
             );
-            if (fileUsage != null)
-                return fileUsage;
+            var hash = await SHA256.HashDataAsync(stream, cancellationToken);
+            return Convert.ToHexStringLower(hash);
+        }
 
-            // 若不存在，则要新建
-            var result = await db.RunTransaction(async ctx =>
-            {
-                var fileUsageTemp = new FileUsage()
-                {
-                    FileName = fileName,
-                    OwnerUserId = userId,
-                    FileObjectId = fileObject.Id,
-                    IsPublic = false,
-                };
-                ctx.FileUsages.Add(fileUsageTemp);
-
-                // 更新文件引用次数
-                // 只有在使用真实使用时，才增加索引
-                // fileObject.LinkCount += 1;
-                return fileUsageTemp;
-            });
+        private static string NormalizeSha256(string sha256)
+        {
+            var result = sha256.Trim().ToLowerInvariant();
+            if (result.Length != 64 || result.Any(x => !Uri.IsHexDigit(x)))
+                throw new KnownException("SHA-256 格式不正确");
             return result;
         }
 
-        /// <summary>
-        /// 获取静态根目录
-        /// </summary>
-        /// <returns></returns>
-        public (string, string) GetStaticFileDirectory()
+        private static string GetObjectRelativePath(string sha256) =>
+            Path.Combine("objects", sha256[..2], sha256[2..4], sha256);
+
+        private static string GetStagingPath(FileBucket bucket, string operationId) =>
+            GetFullPath(bucket, Path.Combine(StagingDirectoryName, operationId));
+
+        private static string GetFullPath(FileBucket bucket, string relativePath) =>
+            GetContainedPath(Path.GetFullPath(bucket.RootDir), relativePath);
+
+        private static string GetContainedPath(string rootPath, string relativePath)
         {
-            return (Path.Combine(env.ContentRootPath, "data/public"), "public");
-        }
-
-        /// <summary>
-        /// 生成静态文件目录
-        /// 第一个值是绝对路径
-        /// 第二个值是 url 路径
-        /// </summary>
-        /// <param name="paths"></param>
-        /// <returns></returns>
-        public (string, string) GenerateStaticFilePath(params string[] paths)
-        {
-            var root = GetStaticFileDirectory();
-            var relativePath = Path.Combine(paths);
-            var fullPath = Path.Combine(root.Item1, relativePath);
-
-            string baseDir =
-                Path.GetDirectoryName(fullPath)
-                ?? throw new InvalidOperationException("无法确定静态文件目录");
-            if (!Directory.Exists(baseDir))
-                Directory.CreateDirectory(baseDir);
-
-            return (fullPath, $"data/public/{relativePath}".Replace('\\', '/'));
+            if (Path.IsPathRooted(relativePath))
+                throw new KnownException("文件相对路径不合法");
+            var fullPath = Path.GetFullPath(Path.Combine(rootPath, relativePath));
+            var rootWithSeparator =
+                rootPath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            if (!fullPath.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase))
+                throw new KnownException("文件路径超出允许的存储目录");
+            return fullPath;
         }
     }
+
+    /// <summary>
+    /// 已移动到回收暂存区、等待数据库提交的物理文件。
+    /// </summary>
+    public sealed record StagedFileDeletion(string OriginalPath, string TrashPath);
 }

@@ -784,6 +784,53 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.ToTable("FileBuckets");
                 });
 
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileCategory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("_id");
+
+                    b.Property<long>("OwnerUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("ParentId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("Sort")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("OwnerUserId", "ParentId", "Sort");
+
+                    b.ToTable("FileCategories");
+                });
+
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileObject", b =>
                 {
                     b.Property<long>("Id")
@@ -807,9 +854,6 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.Property<DateTime>("LastModifyDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("LinkCount")
-                        .HasColumnType("integer");
-
                     b.Property<string>("ObjectId")
                         .IsRequired()
                         .HasColumnType("text")
@@ -826,9 +870,15 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.Property<long>("Size")
                         .HasColumnType("bigint");
 
+                    b.Property<int>("StorageState")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FileBucketId");
+
+                    b.HasIndex("Sha256")
+                        .IsUnique();
 
                     b.ToTable("FileObjects");
                 });
@@ -895,11 +945,17 @@ namespace UzonMail.DB.Migrations.PostgreSQL
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DisplayNameKey")
                         .HasColumnType("text");
 
                     b.Property<string>("FileName")
@@ -926,14 +982,22 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.Property<long>("OwnerUserId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("UniqueName")
-                        .HasColumnType("text");
+                    b.Property<long>("ReferenceCount")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("FileObjectId");
 
-                    b.HasIndex("OwnerUserId");
+                    b.HasIndex("OwnerUserId", "DisplayNameKey")
+                        .IsUnique();
+
+                    b.HasIndex("OwnerUserId", "FileObjectId")
+                        .IsUnique();
+
+                    b.HasIndex("OwnerUserId", "CategoryId", "CreateDate");
 
                     b.ToTable("FileUsages");
                 });
@@ -1489,6 +1553,24 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileCategory", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.Organization.User", "OwnerUser")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UzonMail.DB.SQL.Core.Files.FileCategory", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("OwnerUser");
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileObject", b =>
                 {
                     b.HasOne("UzonMail.DB.SQL.Core.Files.FileBucket", "FileBucket")
@@ -1513,6 +1595,12 @@ namespace UzonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileUsage", b =>
                 {
+                    b.HasOne("UzonMail.DB.SQL.Core.Files.FileCategory", "Category")
+                        .WithMany("FileUsages")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("UzonMail.DB.SQL.Core.Files.FileObject", "FileObject")
                         .WithMany()
                         .HasForeignKey("FileObjectId")
@@ -1524,6 +1612,8 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                         .HasForeignKey("OwnerUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Category");
 
                     b.Navigation("FileObject");
 
@@ -1544,6 +1634,13 @@ namespace UzonMail.DB.Migrations.PostgreSQL
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
                     b.Navigation("Inboxes");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Files.FileCategory", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("FileUsages");
                 });
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Organization.User", b =>

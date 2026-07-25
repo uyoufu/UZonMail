@@ -151,26 +151,11 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                 .SendingGroups.Where(x => x.UserId == userId && x.ObjectId == sendingGroupObjId)
                 .Include(x => x.Outboxes)
                 .Include(x => x.Templates)
-                .Include(x => x.Attachments)
+                .Include(x => x.Attachments!)
+                .ThenInclude(x => x.FileObject)
                 .FirstOrDefaultAsync();
             if (sendingGroup == null)
                 return ResponseResult<SendingGroup>.Fail("未找到发件组模板");
-
-            // 获取文件
-            if (sendingGroup.Attachments != null && sendingGroup.Attachments.Count > 0)
-            {
-                var fileObjectIds = sendingGroup.Attachments.Select(x => x.Id);
-                var fileObjects = await db
-                    .FileObjects.Where(x => fileObjectIds.Contains(x.Id))
-                    .ToDictionaryAsync(x => x.Id);
-                foreach (var attachment in sendingGroup.Attachments)
-                {
-                    if (!fileObjects.TryGetValue(attachment.Id, out var fileObject))
-                        throw new InvalidOperationException($"附件文件不存在：{attachment.Id}");
-
-                    attachment.FileObject = fileObject;
-                }
-            }
 
             return sendingGroup.ToSuccessResponse();
         }

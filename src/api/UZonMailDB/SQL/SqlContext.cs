@@ -43,6 +43,7 @@ namespace UzonMail.DB.SQL
         public DbSet<UserRoles> UserRole { get; set; }
 
         public DbSet<FileBucket> FileBuckets { get; set; }
+        public DbSet<FileCategory> FileCategories { get; set; }
         public DbSet<FileObject> FileObjects { get; set; }
         public DbSet<FileUsage> FileUsages { get; set; }
         public DbSet<FileReader> FileReaders { get; set; }

@@ -64,11 +64,12 @@
 <script lang="ts" setup>
 import logger from 'loglevel'
 
-defineProps({
+const props = defineProps({
   label: {
     type: String,
     default: ''
-  }
+  },
+  categoryId: Number
 })
 
 import { fileSha256 } from 'src/utils/file'
@@ -124,7 +125,8 @@ function factoryFn(files: readonly IObsUploadedFile[]): Promise<QUploaderFactory
         { name: 'Authorization', value: `Bearer ${token}` }
       ],
       formFields: [
-        { name: 'sha256', value: files[0]!.__sha256 as string }
+        { name: 'sha256', value: files[0]!.__sha256 as string },
+        ...(props.categoryId ? [{ name: 'categoryId', value: String(props.categoryId) }] : [])
       ]
     }
     resolve(result)
@@ -196,7 +198,7 @@ function onFileUploaded({ files, xhr }: { files: readonly IObsUploadedFile[], xh
   }
 
   // 向文件中记录 id
-  file.__fileUsageId = response.data
+  file.__fileUsageId = response.data.fileUsageId
 
   // 更新 v-model 值
   updateModelValue(file)

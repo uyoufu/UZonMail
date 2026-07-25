@@ -1,40 +1,36 @@
-﻿using UzonMail.DB.SQL.Base;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using UzonMail.DB.SQL.Base;
 
 namespace UzonMail.DB.SQL.Core.Files
 {
     /// <summary>
-    /// 文件类
+    /// 经过内容寻址后保存在磁盘中的物理文件。
     /// </summary>
-    public class FileObject : SqlId
+    public class FileObject : SqlId, IEntityTypeConfiguration<FileObject>
     {
         public long FileBucketId { get; set; }
         public FileBucket FileBucket { get; set; } = null!;
 
-        /// <summary>
-        /// 最后修改日期
-        /// </summary>
         public DateTime LastModifyDate { get; set; }
 
-        /// <summary>
-        /// 哈希值
-        /// </summary>
         public string Sha256 { get; set; } = string.Empty;
 
         /// <summary>
-        /// 文件位置
-        /// 相对于桶根目录的路径
+        /// 相对于存储桶根目录的路径。
         /// </summary>
         public string Path { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 引用数量
-        /// 当为负数时，表示可以删除
-        /// </summary>
-        public int LinkCount { get; set; }
+        public long Size { get; set; }
+
+        public FileObjectStorageState StorageState { get; set; }
 
         /// <summary>
-        /// 文件大小
+        /// 配置物理文件的唯一性约束。
         /// </summary>
-        public long Size { get; set; }
+        public void Configure(EntityTypeBuilder<FileObject> builder)
+        {
+            builder.HasIndex(x => x.Sha256).IsUnique();
+        }
     }
 }
