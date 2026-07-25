@@ -33,7 +33,8 @@ namespace UzonMail.CorePlugin.Services.UserInfos
         PluginService pluginService,
         TokenService tokenService,
         DebugConfig debugConfig,
-        EncryptService encryptService
+        EncryptService encryptService,
+        IDBCacheManager cacheManager
     ) : IScopedService
     {
         /// <summary>
@@ -268,8 +269,10 @@ namespace UzonMail.CorePlugin.Services.UserInfos
             }
             await db.SaveChangesAsync();
 
-            // 更新用户的组织设置和和退订设置
-            DBCacheManager.Global.SetCacheDirty<UserInfoCache>(user.Id);
+            await cacheManager.SetSourceAsync(
+                UserInfoCache.GetSourceKey(user.Id),
+                UserInfoSnapshot.FromUser(user)
+            );
 
             return true;
         }

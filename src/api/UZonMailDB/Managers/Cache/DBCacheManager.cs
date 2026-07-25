@@ -1,139 +1,246 @@
-using System.Collections.Concurrent;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using UzonMail.DB.SQL;
+using UzonMail.Utils.Web.Service;
 
-namespace UzonMail.DB.Managers.Cache
+namespace UzonMail.DB.Managers.Cache;
+
+/// <summary>
+/// 维护原始数据快照和依赖这些快照的派生缓存结果。
+/// </summary>
+public sealed class DBCacheManager
+    : IDBCacheManager,
+        ISingletonService<IDBCacheManager>,
+        IDisposable
 {
+    private sealed record SourceCacheEntry(object? Value, long Version, bool IsValid);
+
+    private sealed record ResultCacheEntry(
+        object Value,
+        IReadOnlyDictionary<CacheStorageKey, long> Dependencies
+    );
+
+    private readonly MemoryCache _sourceCache;
+    private readonly MemoryCache _resultCache;
+    private readonly MemoryCacheEntryOptions _sourceEntryOptions;
+    private readonly MemoryCacheEntryOptions _resultEntryOptions;
+    private readonly KeyedAsyncLock<CacheStorageKey> _sourceLocks = new();
+    private readonly KeyedAsyncLock<CacheStorageKey> _resultLocks = new();
+    private long _nextSourceVersion;
+
     /// <summary>
-    /// 数据库缓存管理模块
-    /// 该模块的优点：
-    /// 1. 延迟数据加载
-    /// 2. 自动更新数据
+    /// 使用应用配置创建进程内数据库缓存管理器。
     /// </summary>
-    public class DBCacheManager
+    public DBCacheManager(IOptions<DBCacheOptions> options)
     {
-        private static class CacheContainer<TKey, TResult>
-            where TResult : IDBCache, new()
-            where TKey : notnull
+        var cacheOptions = options.Value;
+        cacheOptions.Validate();
+
+        var memoryCacheOptions = new MemoryCacheOptions
         {
-            // 这里的 Value 直接就是 TResult，不再是 IDBCache 接口
-            public static readonly ConcurrentDictionary<TKey, TResult> Dictionary = [];
-        }
-
-        public static readonly Lazy<DBCacheManager> _instance = new(() => new DBCacheManager());
-
-        /// <summary>
-        /// 全局缓存管理器
-        /// 需要自己处理更新
-        /// </summary>
-        public static DBCacheManager Global => _instance.Value;
-
-        /// <summary>
-        /// 获取完整的 Key
-        /// 完整的 key = 类型名:key
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public DBCacheKey GetDbCacheKey<T, TArg>(TArg arg)
-            where T : IDBCache, new()
-        {
-            return new DBCacheKey(typeof(T), arg?.ToString() ?? "default");
-        }
-
-        public async Task<TResult> GetCache<TResult, TSqlContext, TArg>(TSqlContext db, TArg arg)
-            where TSqlContext : SqlContextBase
-            where TResult : BaseDBCache<TSqlContext, TArg>, new()
-        {
-            var cacheKey = GetDbCacheKey<TResult, TArg>(arg);
-            var value = CacheContainer<DBCacheKey, TResult>.Dictionary.GetOrAdd(
-                cacheKey,
-                (key) =>
-                {
-                    var newValue = new TResult();
-                    newValue.SetParams(arg);
-                    return newValue;
-                }
-            );
-
-            // 调用进行更新
-            // 若不存在，或者数据为 dirty 时，才会触发。
-            await value.TryUpdate(db);
-            return value;
-        }
-
-        /// <summary>
-        /// 获取缓存
-        /// </summary>
-        /// <param name="db"></param>
-        /// <param name="sqlId">建议使用id</param>
-        /// <returns></returns>
-        public async Task<TResult> GetCache<TResult, TSqlContext>(TSqlContext db, long sqlId)
-            where TSqlContext : SqlContextBase
-            where TResult : BaseDBCache<TSqlContext, long>, new()
-        {
-            return await GetCache<TResult, TSqlContext, long>(db, sqlId);
-        }
-
-        #region SqlContext 重载
-
-        /// <summary>
-        /// 获取缓存
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="db"></param>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public async Task<TResult> GetCache<TResult>(SqlContext db, long arg)
-            where TResult : BaseDBCache<SqlContext, long>, new()
-        {
-            return await GetCache<TResult, SqlContext>(db, arg);
-        }
-
-        /// <summary>
-        /// 获取设置缓存
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="db"></param>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public async Task<TResult> GetCache<TResult>(SqlContext db, IAppSettingCacheArg arg)
-            where TResult : BaseDBCache<SqlContext, IAppSettingCacheArg>, new()
-        {
-            return await GetCache<TResult, SqlContext, IAppSettingCacheArg>(db, arg);
-        }
-        #endregion
-
-        #region 标记更新
-        /// <summary>
-        /// 标记需要更新
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="sqlId"></param>
-        /// <returns></returns>
-        public bool SetCacheDirty<TResult>(long sqlId)
-            where TResult : IDBCache, new()
-        {
-            return SetCacheDirty<TResult, long>(sqlId);
-        }
-
-        /// <summary>
-        /// 标记需要更新
-        /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public bool SetCacheDirty<TResult, TArg>(TArg arg)
-            where TResult : IDBCache, new()
-        {
-            var cacheKey = GetDbCacheKey<TResult, TArg>(arg);
-            if (
-                !CacheContainer<DBCacheKey, TResult>.Dictionary.TryGetValue(cacheKey, out var value)
+            ExpirationScanFrequency = TimeSpan.FromMinutes(
+                cacheOptions.ExpirationScanFrequencyMinutes
             )
-                return false;
+        };
+        _sourceCache = new MemoryCache(memoryCacheOptions);
+        _resultCache = new MemoryCache(memoryCacheOptions);
 
-            value.SetDirty();
+        var slidingExpiration = TimeSpan.FromMinutes(cacheOptions.SlidingExpirationMinutes);
+        _sourceEntryOptions = new MemoryCacheEntryOptions { SlidingExpiration = slidingExpiration };
+        _resultEntryOptions = new MemoryCacheEntryOptions { SlidingExpiration = slidingExpiration };
+    }
+
+    /// <inheritdoc />
+    public async Task<TResult> GetCache<TResult, TSqlContext, TArg>(
+        TSqlContext db,
+        TArg arg,
+        CancellationToken cancellationToken = default
+    )
+        where TSqlContext : SqlContextBase
+        where TResult : BaseDBCache<TSqlContext, TArg>, new()
+    {
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(arg);
+
+        var resultKey = new CacheStorageKey(typeof(TResult), typeof(TArg), arg);
+        if (TryGetFreshResult<TResult>(resultKey, out var cachedResult))
+            return cachedResult;
+
+        using (await _resultLocks.AcquireAsync(resultKey, cancellationToken))
+        {
+            if (TryGetFreshResult<TResult>(resultKey, out cachedResult))
+                return cachedResult;
+
+            // 数据源可能在构建过程中变化；只有版本快照稳定的结果才能发布。
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var buildContext = new CacheBuildContext(this);
+                var newResult = new TResult();
+                await newResult.InitializeAsync(buildContext, db, arg, cancellationToken);
+
+                if (buildContext.Dependencies.Count == 0)
+                {
+                    throw new InvalidOperationException(
+                        $"缓存结果 {typeof(TResult).FullName} 未登记任何原始数据依赖。"
+                    );
+                }
+
+                if (!AreDependenciesCurrent(buildContext.Dependencies))
+                    continue;
+
+                var dependencies = new Dictionary<CacheStorageKey, long>(buildContext.Dependencies);
+                _resultCache.Set(
+                    resultKey,
+                    new ResultCacheEntry(newResult, dependencies),
+                    _resultEntryOptions
+                );
+                return newResult;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public Task<TResult> GetCache<TResult, TSqlContext>(
+        TSqlContext db,
+        long sqlId,
+        CancellationToken cancellationToken = default
+    )
+        where TSqlContext : SqlContextBase
+        where TResult : BaseDBCache<TSqlContext, long>, new() =>
+        GetCache<TResult, TSqlContext, long>(db, sqlId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<TResult> GetCache<TResult>(
+        SqlContext db,
+        long sqlId,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : BaseDBCache<SqlContext, long>, new() =>
+        GetCache<TResult, SqlContext, long>(db, sqlId, cancellationToken);
+
+    /// <inheritdoc />
+    public async Task SetSourceAsync<TValue, TIdentity>(
+        CacheSourceKey<TValue, TIdentity> sourceKey,
+        TValue value,
+        CancellationToken cancellationToken = default
+    )
+        where TValue : notnull
+        where TIdentity : notnull
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var storageKey = sourceKey.ToStorageKey();
+        using (await _sourceLocks.AcquireAsync(storageKey, cancellationToken))
+        {
+            SetSourceEntry(storageKey, value, isValid: true);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task InvalidateSourceAsync<TValue, TIdentity>(
+        CacheSourceKey<TValue, TIdentity> sourceKey,
+        CancellationToken cancellationToken = default
+    )
+        where TValue : notnull
+        where TIdentity : notnull
+    {
+        var storageKey = sourceKey.ToStorageKey();
+        using (await _sourceLocks.AcquireAsync(storageKey, cancellationToken))
+        {
+            SetSourceEntry(storageKey, value: null, isValid: false);
+        }
+    }
+
+    internal async Task<SourceRead<TValue>> GetSourceAsync<TValue, TIdentity>(
+        CacheSourceKey<TValue, TIdentity> sourceKey,
+        Func<CancellationToken, Task<TValue>> sourceLoader,
+        CancellationToken cancellationToken
+    )
+        where TValue : notnull
+        where TIdentity : notnull
+    {
+        ArgumentNullException.ThrowIfNull(sourceLoader);
+        var storageKey = sourceKey.ToStorageKey();
+        if (TryGetSource(storageKey, out SourceRead<TValue> sourceRead))
+            return sourceRead;
+
+        using (await _sourceLocks.AcquireAsync(storageKey, cancellationToken))
+        {
+            if (TryGetSource(storageKey, out sourceRead))
+                return sourceRead;
+
+            var loadedValue = await sourceLoader(cancellationToken);
+            ArgumentNullException.ThrowIfNull(loadedValue);
+            var sourceEntry = SetSourceEntry(storageKey, loadedValue, isValid: true);
+            return new SourceRead<TValue>(loadedValue, sourceEntry.Version);
+        }
+    }
+
+    private bool TryGetFreshResult<TResult>(CacheStorageKey resultKey, out TResult result)
+    {
+        if (
+            _resultCache.TryGetValue(resultKey, out ResultCacheEntry? resultEntry)
+            && resultEntry is not null
+            && resultEntry.Value is TResult typedResult
+            && AreDependenciesCurrent(resultEntry.Dependencies)
+        )
+        {
+            result = typedResult;
             return true;
         }
-        #endregion
+
+        result = default!;
+        return false;
+    }
+
+    private bool AreDependenciesCurrent(IReadOnlyDictionary<CacheStorageKey, long> dependencies)
+    {
+        foreach (var dependency in dependencies)
+        {
+            if (
+                !_sourceCache.TryGetValue(dependency.Key, out SourceCacheEntry? currentSource)
+                || currentSource is not { IsValid: true }
+                || currentSource.Version != dependency.Value
+            )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private bool TryGetSource<TValue>(CacheStorageKey storageKey, out SourceRead<TValue> sourceRead)
+        where TValue : notnull
+    {
+        if (
+            _sourceCache.TryGetValue(storageKey, out SourceCacheEntry? sourceEntry)
+            && sourceEntry is { IsValid: true, Value: TValue value }
+        )
+        {
+            sourceRead = new SourceRead<TValue>(value, sourceEntry.Version);
+            return true;
+        }
+
+        sourceRead = default;
+        return false;
+    }
+
+    private SourceCacheEntry SetSourceEntry(CacheStorageKey storageKey, object? value, bool isValid)
+    {
+        var version = Interlocked.Increment(ref _nextSourceVersion);
+        var sourceEntry = new SourceCacheEntry(value, version, isValid);
+        _sourceCache.Set(storageKey, sourceEntry, _sourceEntryOptions);
+        return sourceEntry;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _sourceCache.Dispose();
+        _resultCache.Dispose();
     }
 }
+
+internal readonly record struct SourceRead<TValue>(TValue Value, long Version)
+    where TValue : notnull;

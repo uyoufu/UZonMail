@@ -6,7 +6,7 @@ using UzonMail.DB.SQL.Core.Settings;
 
 namespace UzonMail.DB.Getters
 {
-    public class UserProxyGetter(SqlContext db, long userId)
+    public class UserProxyGetter(SqlContext db, IDBCacheManager cacheManager, long userId)
     {
         /// <summary>
         /// 获取用户可获取的所有代理
@@ -14,7 +14,7 @@ namespace UzonMail.DB.Getters
         /// <returns></returns>
         public async Task<List<Proxy>> GetUserProxies()
         {
-            var userInfo = await DBCacheManager.Global.GetCache<UserInfoCache>(db, userId);
+            var userInfo = await cacheManager.GetCache<UserInfoCache>(db, userId);
             // 按用户缓存代理
             var results = await db
                 .Proxies.AsNoTracking()

@@ -22,7 +22,7 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
                 && !string.IsNullOrEmpty(Model);
         }
 
-        protected override void ReadValuesFromJsons()
+        protected override void ReadValuesFromJson()
         {
             ProviderType = (AIProviderType)GetIntValue(
                 nameof(ProviderType),

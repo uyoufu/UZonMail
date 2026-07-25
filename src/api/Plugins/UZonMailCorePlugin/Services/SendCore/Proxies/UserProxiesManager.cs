@@ -4,6 +4,7 @@ using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.Getters;
+using UzonMail.DB.Managers.Cache;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Settings;
 
@@ -39,7 +40,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
                 Touch();
 
                 var sqlContext = serviceProvider.GetRequiredService<SqlContext>();
-                var proxyGetter = new UserProxyGetter(sqlContext, userId);
+                var cacheManager = serviceProvider.GetRequiredService<IDBCacheManager>();
+                var proxyGetter = new UserProxyGetter(sqlContext, cacheManager, userId);
                 var proxies = await proxyGetter.GetUserProxies();
 
                 var activeProxyKeys = proxies.Select(GetProxyKey).ToHashSet();

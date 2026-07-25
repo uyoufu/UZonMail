@@ -2,11 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Controllers.Settings.Validators;
-using UzonMail.CorePlugin.Services.Permission;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.CorePlugin.Utils.Extensions;
-using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Settings;
 using UzonMail.Utils.Web.ResponseModel;
 
@@ -15,18 +13,10 @@ namespace UzonMail.CorePlugin.Controllers.Settings
     /// <summary>
     /// 程序设置控制器
     /// </summary>
-    /// <param name="db"></param>
     /// <param name="settingService"></param>
     /// <param name="tokenService"></param>
-    /// <param name="permissionService"></param>
-    /// <param name="settingsManager"></param>
-    public class AppSettingController(
-        SqlContext db,
-        AppSettingService settingService,
-        TokenService tokenService,
-        PermissionService permissionService,
-        AppSettingsManager settingsManager
-    ) : ControllerBaseV1
+    public class AppSettingController(AppSettingService settingService, TokenService tokenService)
+        : ControllerBaseV1
     {
         /// <summary>
         /// 更新系统设置
@@ -186,10 +176,7 @@ namespace UzonMail.CorePlugin.Controllers.Settings
             await settingService.CheckUpdatePermission(userId, type);
 
             var key = nameof(SendingSetting);
-            var appSetting = await settingService.UpdateAppSetting(sendingSetting, key, type);
-
-            // 更新缓存
-            await settingsManager.ResetSetting<SendingSetting>(appSetting, db);
+            await settingService.UpdateAppSetting(sendingSetting, key, type);
 
             return true.ToSuccessResponse();
         }

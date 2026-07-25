@@ -85,7 +85,7 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
             return seconds * 1000;
         }
 
-        protected override void ReadValuesFromJsons()
+        protected override void ReadValuesFromJson()
         {
             MaxSendCountPerEmailDay = GetIntValue(nameof(MaxSendCountPerEmailDay), 0);
             MinOutboxCooldownSecond = GetIntValue(nameof(MinOutboxCooldownSecond), 5);

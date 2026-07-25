@@ -26,7 +26,7 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
         /// </summary>
         public bool IsValid { get; set; }
 
-        protected override void ReadValuesFromJsons()
+        protected override void ReadValuesFromJson()
         {
             Email = GetStringValue(nameof(Email));
             SmtpHost = GetStringValue(nameof(SmtpHost));

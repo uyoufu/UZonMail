@@ -5,96 +5,45 @@ using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Settings;
 using UzonMail.Utils.Web.Service;
 
-namespace UzonMail.CorePlugin.Services.Settings
+namespace UzonMail.CorePlugin.Services.Settings;
+
+/// <summary>
+/// 提供继承设置模型的依赖驱动缓存访问。
+/// </summary>
+public sealed class AppSettingsManager(IDBCacheManager cacheManager) : ISingletonService
 {
     /// <summary>
-    /// 设置管理中心
-    /// 为 Singleton 是为了方便在 Singleton 服务中使用
+    /// 获取指定所有者的设置；依赖变化时自动返回重新构建的新实例。
     /// </summary>
-    public class AppSettingsManager : ISingletonService
+    public Task<T> GetSetting<T>(
+        SqlContext sqlContext,
+        long ownerId,
+        AppSettingType appSettingType = AppSettingType.User,
+        CancellationToken cancellationToken = default
+    )
+        where T : BaseSettingModel, new()
     {
-        /// <summary>
-        /// 获取设置
-        /// 若设置未变动，返回原来的设置
-        /// 若设置修改，则返回新的设置
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public async Task<T> GetSetting<T>(
-            SqlContext sqlContext,
-            long ownerId,
-            AppSettingType appSettingType = AppSettingType.User
-        )
-            where T : BaseSettingModel, new()
-        {
-            var cacheKey = CacheKey.GetCacheKey<T>(appSettingType, ownerId);
+        var settingKey = SettingModelCacheKeyFactory.Create<T>(appSettingType, ownerId);
+        return cacheManager.GetCache<T, SqlContext, AppSettingCacheKey>(
+            sqlContext,
+            settingKey,
+            cancellationToken
+        );
+    }
 
-            var _allSettings = SettingModelsCache.Instance.AllSettingModels;
-            // 使用 Lazy<Task<BaseSettingModel>> 确保并发时只有一个初始化任务被执行
-            var lazy = _allSettings.GetOrAdd(
-                cacheKey,
-                _ => new Lazy<Task<BaseSettingModel>>(
-                    () => CreateAndInitAsync<T>(cacheKey, sqlContext)
-                )
-            );
-            try
-            {
-                var result = (T)await lazy.Value;
-                return result;
-            }
-            catch
-            {
-                // 如果初始化失败，移除缓存项以便后续重试（避免保留 faulted task）
-                _allSettings.TryRemove(cacheKey, out _);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// 创建并初始化设置模型
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="cacheKey"></param>
-        /// <param name="sqlContext"></param>
-        /// <returns></returns>
-        private static async Task<BaseSettingModel> CreateAndInitAsync<T>(
-            CacheKey cacheKey,
-            SqlContext sqlContext
-        )
-            where T : BaseSettingModel, new()
-        {
-            var setting = new T();
-            await setting.UpdateModel(cacheKey, sqlContext);
-            return setting;
-        }
-
-        /// <summary>
-        /// 重置设置
-        /// 该方法非线程安全
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="appSettingId">设置对应的数据库id</param>
-        public async Task ResetSetting<T>(AppSetting setting, SqlContext db)
-            where T : BaseSettingModel, new()
-        {
-            // 将设置缓存标记为脏
-            var cacheKey = CacheKey.GetCacheKey<T>(
-                setting.Type,
-                setting.Type == AppSettingType.Organization
-                    ? setting.OrganizationId
-                    : setting.UserId
-            );
-
-            // 在被获取时，会被重新加载
-            DBCacheManager.Global.SetCacheDirty<AppSettingCache, CacheKey>(cacheKey);
-
-            // 更新 T 类型的设置的缓存
-            var _allSettings = SettingModelsCache.Instance.AllSettingModels;
-            // 更新设置模板
-            var lazy = new Lazy<Task<BaseSettingModel>>(() => CreateAndInitAsync<T>(cacheKey, db));
-            _allSettings[cacheKey] = lazy;
-
-            await lazy.Value;
-        }
+    /// <summary>
+    /// 在数据库提交成功后发布最新原始设置快照。
+    /// </summary>
+    public Task SetAppSettingSourceAsync(
+        AppSetting setting,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var settingKey = AppSettingCacheKey.FromSetting(setting);
+        return cacheManager.SetSourceAsync(
+            AppSettingSnapshot.GetSourceKey(settingKey),
+            AppSettingSnapshot.FromSetting(setting),
+            cancellationToken
+        );
     }
 }

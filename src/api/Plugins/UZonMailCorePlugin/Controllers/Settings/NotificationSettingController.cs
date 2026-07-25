@@ -5,7 +5,6 @@ using UzonMail.CorePlugin.Services.Encrypt;
 using UzonMail.CorePlugin.Services.SendCore.Sender;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
-using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.Settings;
 using UzonMail.Utils.Web.ResponseModel;
@@ -15,13 +14,10 @@ namespace UzonMail.CorePlugin.Controllers.Settings
     /// <summary>
     /// 通知设置
     /// </summary>
-    /// <param name="db"></param>
     public class NotificationSettingController(
         IServiceProvider serviceProvider,
-        SqlContext db,
         AppSettingService settingService,
         TokenService tokenService,
-        AppSettingsManager settingsManager,
         EmailSendersManager sendersManager,
         EncryptService encryptService
     ) : ControllerBaseV1
@@ -81,10 +77,7 @@ namespace UzonMail.CorePlugin.Controllers.Settings
                 : AppSettingStatus.Ignored;
 
             // 保存到数据库
-            var newSetting = await settingService.UpdateAppSetting(smtpSettings, type: type);
-
-            // 更新缓存
-            await settingsManager.ResetSetting<SmtpNotificationSetting>(newSetting, db);
+            await settingService.UpdateAppSetting(smtpSettings, type: type);
 
             if (!result.IsSuccess)
                 return false.ToFailResponse(result.Message);

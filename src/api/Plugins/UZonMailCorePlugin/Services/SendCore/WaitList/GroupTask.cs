@@ -17,6 +17,7 @@ using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.CorePlugin.SignalRHubs.Extensions;
 using UzonMail.CorePlugin.SignalRHubs.SendEmail;
 using UzonMail.DB.Extensions;
+using UzonMail.DB.Managers.Cache;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Base;
 using UzonMail.DB.SQL.Core.Emails;
@@ -39,6 +40,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         ISendPayloadReader payloadReader,
         ISendLeaseStore leaseStore,
         ISendingWorkerCoordinator workerCoordinator,
+        IDBCacheManager cacheManager,
         IOptions<SendingQuotaOptions> quotaOptions,
         TimeProvider timeProvider
     ) : ITransientService
@@ -188,7 +190,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             await proxyManager.UpdateUserProxies(sendingContext.Provider, UserId);
 
             // 获取所有的模板，模板是用户级别的
-            _usableTemplates = new UsableTemplateList(UserId);
+            _usableTemplates = new UsableTemplateList(UserId, cacheManager);
             // 添加组的通用模板
             _usableTemplates.AddSendingGroupTemplates(
                 _sendingGroup.Templates!.ConvertAll(x => x.Id)

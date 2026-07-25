@@ -17,7 +17,8 @@ namespace UzonMail.CorePlugin.Services.Settings
     public class AppSettingService(
         SqlContext db,
         TokenService tokenService,
-        PermissionService permissionService
+        PermissionService permissionService,
+        AppSettingsManager appSettingsManager
     ) : IScopedService
     {
         /// <summary>
@@ -97,6 +98,7 @@ namespace UzonMail.CorePlugin.Services.Settings
                 setting.StringValue = value;
             }
             await db.SaveChangesAsync();
+            await appSettingsManager.SetAppSettingSourceAsync(setting);
             return setting;
         }
 
@@ -126,6 +128,7 @@ namespace UzonMail.CorePlugin.Services.Settings
                 setting.Json = value;
             }
             await db.SaveChangesAsync();
+            await appSettingsManager.SetAppSettingSourceAsync(setting);
             return setting;
         }
 
@@ -136,7 +139,7 @@ namespace UzonMail.CorePlugin.Services.Settings
         )
         {
             if (string.IsNullOrEmpty(key))
-                key = CacheKey.GetEntityKey<T>();
+                key = SettingModelCacheKeyFactory.GetSettingKey<T>();
 
             // 更新
             var value = settingModel.ToJToken();
@@ -169,6 +172,7 @@ namespace UzonMail.CorePlugin.Services.Settings
                 setting.BoolValue = value;
             }
             await db.SaveChangesAsync();
+            await appSettingsManager.SetAppSettingSourceAsync(setting);
             return setting;
         }
 
@@ -205,6 +209,7 @@ namespace UzonMail.CorePlugin.Services.Settings
                 setting.LongValue = value;
             }
             await db.SaveChangesAsync();
+            await appSettingsManager.SetAppSettingSourceAsync(setting);
             return setting;
         }
 

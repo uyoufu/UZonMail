@@ -3,16 +3,13 @@ using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Services.Encrypt;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
-using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Settings;
 using UzonMail.Utils.Web.ResponseModel;
 
 namespace UzonMail.CorePlugin.Controllers.Settings
 {
     public class AiSettingController(
-        SqlContext db,
         AppSettingService settingService,
-        AppSettingsManager settingsManager,
         EncryptService encryptService
     ) : ControllerBaseV1
     {
@@ -69,10 +66,7 @@ namespace UzonMail.CorePlugin.Controllers.Settings
             }
 
             // 保存到数据库
-            var newSetting = await settingService.UpdateAppSetting(copilotSetting, type: type);
-
-            // 更新缓存
-            await settingsManager.ResetSetting<AICopilotSetting>(newSetting, db);
+            await settingService.UpdateAppSetting(copilotSetting, type: type);
 
             return true.ToSuccessResponse();
         }
