@@ -145,9 +145,10 @@ export function useReportContextMenu() {
 
 - 总体风格为卡片式、响应式、无边框的视觉设计
 - 优先使用 flex 布局
-- 优先使用 Quasar 工具类，例如 `text-subtitle1`、`text-primary`、`row`、`col`, 若无必要，不使用自定义 scss
+- 优先使用 Quasar 工具类，例如 `text-subtitle1`、`text-primary`、`row`、`col`, 若无必要，不使用自定义 css
 - Tailwind 可用于新增布局、间距、响应式和小范围样式补充，存量页面保持现有 Quasar 优先的风格
 - 添加自定义样式前，先保持与现有视觉语言一致
+- vue 组件中使用 scss 语法, 不使用 plain css
 
 ## Vue 自动引入
 
@@ -193,4 +194,3 @@ export function useReportContextMenu() {
 ## 配置与安全说明
 
 运行时配置示例位于 `public/app.config.json` 和 `src/config/`。不要提交密钥、令牌或特定环境凭据。API 和 SignalR 变更在合并前应与后端契约保持一致。
-

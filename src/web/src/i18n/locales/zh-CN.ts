@@ -139,7 +139,7 @@ export default {
     allFiles: '全部文件',
     batchDelete: '批量删除',
     batchDeleteConfirm: '即将删除所选的 {count} 个文件；若任一文件仍被引用，整个操作将取消。是否继续？',
-    categories: '分类',
+    categories: '文件分类',
     categoryName: '分类名称',
     createCategory: '新建分类',
     createDate: '创建日期',
@@ -232,7 +232,8 @@ export default {
     importCancelled: '导入已取消',
     importFromTxt: 'Txt 导入',
     importFromTxtPlaceholder: '每行一个收件箱',
-    importFromTxtTooltip: '支持格式: 邮箱, 用户名, 最小发件间隔 \n 三者可以任意顺序排列 \n 例如: test{\'@\'}gmail.com, uzonmail, 1 \n 其中最小发件间隔单位为小时',
+    importFromTxtTooltip:
+      "支持格式: 邮箱, 用户名, 最小发件间隔 \n 三者可以任意顺序排列 \n 例如: test{'@'}gmail.com, uzonmail, 1 \n 其中最小发件间隔单位为小时",
     importInbox: '导入收件箱',
     importInboxSuccess: '导入收件箱成功',
     inbox: '收件箱',
@@ -289,7 +290,8 @@ export default {
     deleteInvalid: '删除无效',
     deleteOutbox: '删除发件箱',
     deleteSuccess: '删除成功, 共删除 {count} 项',
-    detectedExchangeEmailStartingOutlookDelegateAuthorization: '检测到个人 Outlook 邮箱，需要进行委托授权，请批准弹出的授权窗口',
+    detectedExchangeEmailStartingOutlookDelegateAuthorization:
+      '检测到个人 Outlook 邮箱，需要进行委托授权，请批准弹出的授权窗口',
     doDeleteAllInvalidOutboxes: '是否删除当前组中所有验证失败的发件箱？',
     downloadOutboxTemplate: '下载发件箱模板',
     editCurrentOutbox: '编辑当前发件箱',
@@ -301,12 +303,12 @@ export default {
     exportColumn_email: '填写发件邮箱(导入时，请删除该行数据)',
     exportColumn_name: '填写发件人名称(可选)',
     exportColumn_password: '填写 smtp 密码',
-    exportColumn_proxy: '格式为：http://username:password{\'@\'}domain:port(可选)',
+    exportColumn_proxy: "格式为：http://username:password{'@'}domain:port(可选)",
     exportColumn_replyToEmails: '回信收件人(多个使用逗号分隔)',
     exportColumn_smtpHost: '填写 smtp 地址',
     exportColumn_type: '填写发件箱类型 (SMTP, MsGraph)',
     exportColumn_userName: '填写 smtp 用户名，若与邮箱一致，则设置不填写',
-    exportFileName: '{groupName}-@:outboxManager.col_email{\'.xlsx\'}',
+    exportFileName: "{groupName}-@:outboxManager.col_email{'.xlsx'}",
     exportOutboxesInThisGroup: '导出当前组中的发件箱',
     failedToGetAuthorizationUrl: '获取委托授权地址失败，请稍后重试',
     ifEmptyProxyUseSystemSettings: '为空时使用系统设置',
@@ -314,7 +316,8 @@ export default {
     importCancelled: '导入已取消',
     importFromExcel: 'Excel导入',
     importFromTxt: 'Txt导入',
-    importFromTxtTooltip: '支持格式:\n1. 邮箱, 密码: test{\'@\'}gmail.com, 1234\n2. 邮箱, 密码, smtp地址, smtp端口: test{\'@\'}gmail.com, 1234, smtp.gmail.com, 465',
+    importFromTxtTooltip:
+      "支持格式:\n1. 邮箱, 密码: test{'@'}gmail.com, 1234\n2. 邮箱, 密码, smtp地址, smtp端口: test{'@'}gmail.com, 1234, smtp.gmail.com, 465",
     importOutbox: '导入发件箱',
     importOutboxForCurrentGroupFromExcel: '从Excel导入发件箱到当前组',
     importOutboxForCurrentGroupFromTxt: '从Txt导入发件箱到当前组',
@@ -333,7 +336,8 @@ export default {
     outboxTemplateFileName: '发件箱模板.xlsx',
     outlookDelegateAuthorization: 'Outlook授权',
     outlookDelegateAuthorizationSkippedEncryptedPassword: '检测到该发件箱的密码为加密状态，跳过委托授权',
-    outlookDelegateAuthorizationSkippedNonExchangeSmtp: ' 检测到 Outlook 邮箱，但 SMTP 地址不是 Exchange 地址，跳过委托授权',
+    outlookDelegateAuthorizationSkippedNonExchangeSmtp:
+      ' 检测到 Outlook 邮箱，但 SMTP 地址不是 Exchange 地址，跳过委托授权',
     outlookDelegateAuthorizationSkippedNonMsGraphType: '检测到该发件箱不是 MsGraph 类型，跳过委托授权',
     pleaseAddGroupFirst: '请先添加组',
     refreshToken: 'RefreshToken',
@@ -488,7 +492,7 @@ export default {
     saveTemplate: '保存模板',
     saveTemplateSuccess: '模板保存成功',
     savingTemplate: '正在保存模板...',
-    templateEditorPlaceholder: '在此处输入模板内容, 变量使用 {\'{{  }}\'} 号包裹, 例如 {\'{{ variableName }}\'}',
+    templateEditorPlaceholder: "在此处输入模板内容, 变量使用 {'{{  }}'} 号包裹, 例如 {'{{ variableName }}'}",
     templateId: '模板ID',
     templateName: '模板名称'
   },
@@ -519,3 +523,4 @@ export default {
     totalItems: '... 等共 {count} {unit}'
   }
 }
+

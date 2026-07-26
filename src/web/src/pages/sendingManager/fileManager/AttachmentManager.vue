@@ -1,43 +1,24 @@
 <template>
-  <div ref="dropZoneRef" class="full-height full-width row no-wrap q-gutter-sm">
-    <FileCategoryTree v-show="!isCollapseCategoryTree" @change="onCategoryChange" />
+  <div ref="dropZoneRef" class="full-height full-width row no-wrap">
+    <FileCategoryTree class="q-mr-sm" v-show="!isCollapseCategoryTree" @change="onCategoryChange" />
 
-    <q-table
-      ref="fileTableRef"
-      class="col full-height"
-      :rows="rows"
-      :columns="columns"
-      row-key="id"
-      selection="multiple"
-      v-model:selected="selectedRows"
-      v-model:pagination="pagination"
-      virtual-scroll
-      dense
-      :loading="loading"
-      :filter="filter"
-      binary-state-sort
-      @request="onTableRequest"
-    >
+    <q-table ref="fileTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id"
+      selection="multiple" v-model:selected="selectedRows" v-model:pagination="pagination" virtual-scroll dense
+      :loading="loading" :filter="filter" binary-state-sort @request="onTableRequest">
       <template #top-left>
         <div class="row q-gutter-sm">
-          <CreateBtn :label="t('fileManager.upload')" icon="upload" :tooltip="t('fileManager.upload')" @click="openFileDialog" />
-          <CommonBtn
-            icon="drive_file_move"
-            :label="t('fileManager.move')"
-            :tooltip="t('fileManager.moveSelected')"
-            :disable="selectedRows.length === 0"
-            @click="onMoveSelected"
-          />
-          <DeleteBtn
-            :label="t('fileManager.batchDelete')"
-            :tooltip="t('fileManager.deleteSelected')"
-            :disable="selectedRows.length === 0"
-            @click="onDeleteSelected"
-          />
+          <CreateBtn :label="t('fileManager.upload')" icon="upload" :tooltip="t('fileManager.upload')"
+            @click="openFileDialog" />
+          <CommonBtn icon="drive_file_move" :label="t('fileManager.move')" :tooltip="t('fileManager.moveSelected')"
+            :disable="selectedRows.length === 0" @click="onMoveSelected" />
+          <DeleteBtn :label="t('fileManager.batchDelete')" :tooltip="t('fileManager.deleteSelected')"
+            :disable="selectedRows.length === 0" @click="onDeleteSelected" />
         </div>
       </template>
 
-      <template #top-right><SearchInput v-model="filter" /></template>
+      <template #top-right>
+        <SearchInput v-model="filter" />
+      </template>
       <template #body-cell-index="props">
         <QTableIndex :props="props" />
         <ContextMenu :items="attachmentContextMenuItems" :value="props.row" />
@@ -103,12 +84,12 @@ const columns = computed<QTableColumn[]>(() => [
   { name: 'createDate', label: t('fileManager.createDate'), align: 'left', field: 'createDate', format: formatDate, sortable: true }
 ])
 
-async function getRowsNumberCount (filterObject: TTableFilterObject) {
+async function getRowsNumberCount(filterObject: TTableFilterObject) {
   const { data } = await getFileUsagesCount(filterObject.filter, selectedCategoryId.value)
   return data
 }
 
-async function onRequest (filterObject: TTableFilterObject, requestPagination: IRequestPagination) {
+async function onRequest(filterObject: TTableFilterObject, requestPagination: IRequestPagination) {
   const { data } = await getFileUsagesData(filterObject.filter, requestPagination, selectedCategoryId.value)
   return data
 }
@@ -118,7 +99,7 @@ const { pagination, rows, filter, onTableRequest, loading, refreshTable, selecte
   onRequest
 })
 
-function onCategoryChange (categoryId?: number) {
+function onCategoryChange(categoryId?: number) {
   selectedCategoryId.value = categoryId
   selectedRows.value = []
   refreshTable()
@@ -129,7 +110,7 @@ onChange(files => {
   if (files) void uploadFiles(Array.from(files))
 })
 
-async function uploadFiles (files: File[]) {
+async function uploadFiles(files: File[]) {
   if (files.length === 0) return
   await showComponentDialog(FilesUploaderPopup, { files, categoryId: selectedCategoryId.value })
   refreshTable()
@@ -142,7 +123,7 @@ useDropZone(dropZoneRef, {
   }
 })
 
-async function onDeleteSelected () {
+async function onDeleteSelected() {
   const confirmed = await confirmOperation(
     t('fileManager.deleteConfirmTitle'),
     t('fileManager.batchDeleteConfirm', { count: selectedRows.value.length })
@@ -154,7 +135,7 @@ async function onDeleteSelected () {
   notifySuccess(t('fileManager.deleteSuccess'))
 }
 
-async function onMoveSelected () {
+async function onMoveSelected() {
   const { data: categories } = await getFileCategories()
   const result = await showDialog({
     title: t('fileManager.moveSelected'),
@@ -185,7 +166,7 @@ const attachmentContextMenuItems = computed<IContextMenuItem<IFileUsage>[]>(() =
   { name: 'delete', label: t('fileManager.delete'), color: 'negative', onClick: onDeleteAttachment }
 ])
 
-async function onDownloadAttachment (row: IFileUsage) {
+async function onDownloadAttachment(row: IFileUsage) {
   const { data: fileReaderId } = await getFileReaderId(row.id)
   const extension = row.displayName.split('.').pop() || ''
   const fileSystemAccess = useFileSystemAccess({
@@ -204,7 +185,7 @@ async function onDownloadAttachment (row: IFileUsage) {
   notifySuccess(t('fileManager.downloadSuccess'))
 }
 
-async function onRenameAttachment (row: IFileUsage) {
+async function onRenameAttachment(row: IFileUsage) {
   const result = await showDialog({
     title: t('fileManager.rename'),
     fields: [{ name: 'displayName', label: t('fileManager.fileName'), type: LowCodeFieldType.text, required: true, value: row.displayName }],
@@ -215,7 +196,7 @@ async function onRenameAttachment (row: IFileUsage) {
   refreshTable()
 }
 
-async function onShareAttachment (row: IFileUsage) {
+async function onShareAttachment(row: IFileUsage) {
   const confirmed = await confirmOperation(t('fileManager.share'), t('fileManager.shareConfirm'))
   if (!confirmed) return
   const { data: objectReaderId } = await createObjectPersistentReader(row.id)
@@ -223,7 +204,7 @@ async function onShareAttachment (row: IFileUsage) {
   notifySuccess(t('fileManager.shareSuccess'))
 }
 
-async function onDeleteAttachment (row: IFileUsage) {
+async function onDeleteAttachment(row: IFileUsage) {
   const confirmed = await confirmOperation(
     t('fileManager.deleteConfirmTitle'),
     t('fileManager.deleteFileConfirm', { name: row.displayName })

@@ -145,7 +145,7 @@ export default {
     allFiles: 'All files',
     batchDelete: 'Delete selected',
     batchDeleteConfirm: 'Delete {count} selected files? The entire operation will be canceled if any file is still referenced.',
-    categories: 'Categories',
+    categories: 'File Categories',
     categoryName: 'Category name',
     createCategory: 'Create category',
     createDate: 'Created',
