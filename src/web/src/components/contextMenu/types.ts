@@ -7,6 +7,12 @@ export interface IActionContext<TValue> {
   clearSelection: () => void
 }
 
+export const ContextMenuWhen = {
+  any: 'any',
+  onlyMulti: 'onlyMulti',
+  onlySingle: 'onlySingle'
+} as const
+
 /** 描述一个作用于指定业务值的右键菜单命令。 */
 export interface IContextMenuItem<T = Record<string, any>> {
   name: string
@@ -14,6 +20,7 @@ export interface IContextMenuItem<T = Record<string, any>> {
   tooltip?: string | string[] | ((params?: T) => Promise<string[]>)
   color?: string
   icon?: string // 图标
+  when?: keyof typeof ContextMenuWhen
   // 当返回 false 时，右键菜单不会退出
   onClick: (value: T, context: IActionContext<T>) => Promise<void | boolean> | void | boolean
   vif?: (value: T) => boolean

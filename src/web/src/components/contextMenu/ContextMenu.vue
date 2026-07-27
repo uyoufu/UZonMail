@@ -19,7 +19,7 @@
 <script lang="ts" setup generic="TContextValue extends object = Record<string, unknown>">
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
-import type { IActionContext, IContextMenuItem } from './types'
+import { ContextMenuWhen, type IActionContext, type IContextMenuItem } from './types'
 
 const props = defineProps<{
   items: IContextMenuItem<TContextValue>[]
@@ -48,7 +48,16 @@ function getTooltip(contextItem: IContextMenuItem<TContextValue>) {
 const colors = ['primary', 'secondary', 'accent']
 const contextItems = computed(() => {
   // 如果有 vif,则执行 vif 判断是否显示
-  const results = props.items.filter(x => !x.vif || x.vif(getContextValue()))
+  const results = props.items
+    .filter(x => {
+      if (!x.when || x.when === ContextMenuWhen.any
+      ) return true
+      if (x.when === ContextMenuWhen.onlyMulti) return selectedValues.value.length > 1
+
+      // 当没有选中时，默认是当前项，因此也当成 1 项
+      return selectedValues.value.length <= 1
+    }) // 按 when 过滤
+    .filter(x => !x.vif || x.vif(getContextValue())) // 按 vif 过滤
   // 对结果赋予颜色
   results.forEach((item, index) => {
     if (item.color) return

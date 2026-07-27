@@ -25,7 +25,7 @@
       @node-click="onNodeClick" @node-drop="onNodeDrop">
       <template #default="{ data }">
         <q-icon :name="data.id === allFilesCategoryId ? 'folder_open' : 'folder'" size="18px" class="q-mr-xs" />
-        <span class="ellipsis">{{ getCategoryDisplayName(data as IFileCategory) }}</span>
+        <span class="ellipsis q-pr-sm">{{ getCategoryDisplayName(data as IFileCategory) }}</span>
       </template>
     </DraggableTree>
   </aside>

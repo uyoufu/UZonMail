@@ -150,6 +150,14 @@ export function useReportContextMenu() {
 - 添加自定义样式前，先保持与现有视觉语言一致
 - vue 组件中使用 scss 语法, 不使用 plain css
 
+## 页面设计
+
+- 页面中的表格布局建议：表头左侧显示没有数据时的必要功能，如新增，上传等; 表头右侧显示搜索; 其它功能通过表格行的右键菜单来实现，对于重复性的操作，要支持多选
+
+## vue 语法补充
+
+- 使用 `defineModel<TContextValue[]>({default: () => []})` 定义 v-model:xxx 双向属性，xxx 为属性名
+
 ## Vue 自动引入
 
 前端在 `quasar.config.ts` 中通过 `unplugin-auto-import/vite` 自动引入 `vue`、`vue-router`、`pinia` 和 `quasar` 的常用 API。在 `.vue` 和 TypeScript 代码中使用这些来源的函数时，不需要再手动添加 import，例如 `ref`、`computed`、`watch`、`onMounted`、`useRouter`、`useRoute`、`defineStore`、`useQuasar` 等。
