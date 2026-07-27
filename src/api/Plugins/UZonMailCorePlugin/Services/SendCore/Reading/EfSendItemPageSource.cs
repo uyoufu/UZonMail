@@ -18,6 +18,7 @@ public sealed class EfSendItemPageSource(SqlContext db)
         var query = db
             .SendingItems.AsNoTracking()
             .Where(x => x.SendingGroupId == request.SendingGroupId)
+            .ExcludeHardBounceItems()
             .Where(x =>
                 x.Status == SendingItemStatus.Created
                 || x.Status == SendingItemStatus.Failed

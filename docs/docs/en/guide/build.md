@@ -17,8 +17,8 @@ Make sure the following tools are available in your command line:
 - Git
 - 7z
 - .NET 10.0 SDK
-- Node, yarn
-- Docker
+- Bun
+- WSL with Docker installed inside the selected WSL distribution (only for Docker images)
 
 ## Build Steps
 
@@ -26,20 +26,24 @@ Make sure the following tools are available in your command line:
 
 2. Clone the repository: `git clone https://github.com/GalensGan/UzonMail` and switch to the `master` branch.
 
-3. Go to the `scripts` directory in the project root and run the commands below to start the build. Build outputs are placed in the `build` directory.
+3. Go to the `scripts` directory and use the unified entry point. Outputs are written to the repository-root `build` directory.
 
-   | Target         | Command                     | Output location                              |
-   | -------------- | --------------------------- | -------------------------------------------- |
-   | desktop        | ./build-desktop.ps1         | build/uzonmail-desktop-win-x64-version.zip   |
-   | windows server | ./build-win-server.ps1      | build/uzonmail-service-win-x64-version.zip   |
-   | linux server   | ./build-linux.ps1           | build/uzonmail-linux-x64-version.zip         |
-   | docker         | Built automatically during linux build | Docker image named `uzon-mail:latest` |
-   | all            | ./build-all.ps1             | Builds all targets above                     |
+   | Target | Command | Output |
+   | --- | --- | --- |
+   | all packages | `./build.ps1` | Desktop, Windows server, and Linux server ZIP files |
+   | desktop | `./build.ps1 -Target Desktop` | `build/uzonmail-desktop-win-x64-version.zip` |
+   | Windows server | `./build.ps1 -Target WindowsServer` | `build/uzonmail-service-win-x64-version.zip` |
+   | Linux server | `./build.ps1 -Target Linux` | `build/uzonmail-service-linux-x64-version.zip` |
+   | Docker from a local Linux build | `./build.ps1 -Target Docker` | Docker image |
+   | all packages and image | `./build.ps1 -Target All,Docker` | All ZIP files and Docker images |
+   | Docker from an existing Linux ZIP | `./build.ps1 -Target Docker -LinuxPackageUrl <URL>` | Docker image |
+
+   Docker images are pushed only with `-PushDockerImage`. ZIP files are uploaded through an installed `od` command only with `-UploadArtifacts`. `-UpdateSource` fast-forwards the current branch only when the working tree is clean; it never switches branches. Use `-WslDistribution <name>` to select a non-default WSL distribution.
 
    Build success screenshot:
 
    ![build screenshot](https://oss.uzoncloud.com:2234/public/files/images/image-20240616124656131.png)
 
 ::: tip
-During manual build the script will detect the environment and prompt to install missing prerequisites if needed.
+The script validates prerequisites for the selected target. Docker images are built inside WSL and do not require Windows Docker.
 :::

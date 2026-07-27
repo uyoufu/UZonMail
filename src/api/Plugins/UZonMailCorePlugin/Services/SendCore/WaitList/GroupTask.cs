@@ -304,6 +304,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                         var descriptors = await sqlContext
                             .SendingItems.AsNoTracking()
                             .Where(x => x.SendingGroupId == SendingGroupId && ids.Contains(x.Id))
+                            .ExcludeHardBounceItems()
                             .Where(x =>
                                 x.Status == SendingItemStatus.Created
                                 || x.Status == SendingItemStatus.Failed

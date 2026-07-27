@@ -1,1 +1,0 @@
-﻿. ./build-core.ps1 -platform win -desktop $true

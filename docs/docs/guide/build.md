@@ -17,8 +17,8 @@ permalink: /guide/build
 - Git
 - 7z
 - DotNET 10.0 SDK
-- Node、yarn
-- Docker
+- Bun
+- WSL 及 WSL 内的 Docker（仅构建 Docker 镜像时需要）
 
 ## 编译步骤
 
@@ -26,20 +26,24 @@ permalink: /guide/build
 
 2. 克隆仓库 `git clone https://github.com/GalensGan/UzonMail`，切换到 `master` 分支
 
-3. 进入到项目根目录下的 `scripts` 目录，执行下面的命令 开始编译，编译结果在 `build` 目录中。
+3. 进入项目根目录下的 `scripts` 目录，使用统一入口执行构建。产物位于仓库根目录的 `build` 目录中。
 
-   | 类型           | 命令                        | 位置                                       |
-   | -------------- | --------------------------- | ------------------------------------------ |
-   | desktop        | ./build-desktop.ps1         | build/uzonmail-desktop-win-x64-version.zip |
-   | windows server | ./build-win-server.ps1      | build/uzonmail-service-win-x64-version.zip |
-   | linux server   | ./build-linux.ps1           | build/uzonmail-linux-x64-version.zip       |
-   | docker         | 在进行 linux 编译时，会自动编译 | docker 镜像，镜像名为 uzon-mail:latest     |
-   | 全部            | ./build-all.ps1 | 一次编译上述所有平台|
+   | 类型 | 命令 | 位置 |
+   | --- | --- | --- |
+   | 全部安装包 | `./build.ps1` | 桌面端、Windows 服务端、Linux 服务端 ZIP |
+   | 桌面端 | `./build.ps1 -Target Desktop` | `build/uzonmail-desktop-win-x64-version.zip` |
+   | Windows 服务端 | `./build.ps1 -Target WindowsServer` | `build/uzonmail-service-win-x64-version.zip` |
+   | Linux 服务端 | `./build.ps1 -Target Linux` | `build/uzonmail-service-linux-x64-version.zip` |
+   | 本地 Linux 构建镜像 | `./build.ps1 -Target Docker` | Docker 镜像 |
+   | 全部安装包和镜像 | `./build.ps1 -Target All,Docker` | 全部 ZIP 和 Docker 镜像 |
+   | 既有 Linux ZIP 构建镜像 | `./build.ps1 -Target Docker -LinuxPackageUrl <URL>` | Docker 镜像 |
+
+   传入 `-PushDockerImage` 才会推送 Docker 镜像，传入 `-UploadArtifacts` 才会通过已安装的 `od` 上传 ZIP。传入 `-UpdateSource` 会在工作区干净时以 fast-forward 方式同步当前分支；脚本不会切换分支。需要指定 WSL 发行版时，添加 `-WslDistribution <名称>`。
 
    编译成功截图：
 
    ![image-20240616124656131](https://oss.uzoncloud.com:2234/public/files/images/image-20240616124656131.png)
 
 ::: tip
-手动编译时，会自动检测环境，若没有相关环境，请根据提示进行安装。
+手动编译时会自动检测当前目标所需环境。Docker 构建会在 WSL 内执行，不依赖 Windows Docker。
 :::

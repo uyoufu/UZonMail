@@ -57,11 +57,32 @@ public sealed class EfSendItemPageSourceTests
         CollectionAssert.AreEqual(new long[] { 3, 4 }, results.Select(x => x.Id).ToArray());
     }
 
+    [TestMethod]
+    public async Task ReadPageAsync_ExcludesHardBounceItemsFromAllCandidateStatuses()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        database.Db.SendingGroups.Add(new SendingGroup { Id = 10, UserId = 1 });
+        database.Db.SendingItems.AddRange(
+            CreateItem(2, 10, 1, SendingItemStatus.Failed),
+            CreateItem(3, 10, 1, SendingItemStatus.Failed, isHardBounce: true),
+            CreateItem(4, 10, 1, SendingItemStatus.Pending, isHardBounce: true)
+        );
+        await database.Db.SaveChangesAsync();
+
+        var results = await new EfSendItemPageSource(database.Db).ReadPageAsync(
+            new SendItemPageRequest(10, SendItemCursor.Start, 10, [2, 3, 4], true),
+            CancellationToken.None
+        );
+
+        CollectionAssert.AreEqual(new long[] { 2 }, results.Select(x => x.Id).ToArray());
+    }
+
     private static SendingItem CreateItem(
         long id,
         long groupId,
         long outboxId,
-        SendingItemStatus status
+        SendingItemStatus status,
+        bool isHardBounce = false
     ) =>
         new()
         {
@@ -70,5 +91,6 @@ public sealed class EfSendItemPageSourceTests
             UserId = 1,
             OutBoxId = outboxId,
             Status = status,
+            IsHardBounce = isHardBounce,
         };
 }
