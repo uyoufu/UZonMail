@@ -55,6 +55,7 @@ public sealed class SmtpTransportFailureClassifier
             _ when PermanentAuthenticationCodes.Contains(statusCode)
                 => SendFailureKind.OutboxPermanent,
             >= 400 and < 500 => SendFailureKind.Transient,
+            _ when IsHardBounce(exception) => SendFailureKind.HardBounce,
             >= 500 when exception.ErrorCode == SmtpErrorCode.RecipientNotAccepted
                 => SendFailureKind.RecipientPermanent,
             >= 500 when exception.ErrorCode == SmtpErrorCode.MessageNotAccepted
@@ -67,7 +68,16 @@ public sealed class SmtpTransportFailureClassifier
             kind,
             exception.Message,
             statusCode,
-            exception.ErrorCode.ToString()
+            exception.ErrorCode.ToString(),
+            exception.Mailbox?.Address
         );
+    }
+
+    private static bool IsHardBounce(SmtpCommandException exception)
+    {
+        if (exception.ErrorCode != SmtpErrorCode.RecipientNotAccepted || exception.Mailbox == null)
+            return false;
+
+        return (int)exception.StatusCode is 550 or 551 or 553;
     }
 }

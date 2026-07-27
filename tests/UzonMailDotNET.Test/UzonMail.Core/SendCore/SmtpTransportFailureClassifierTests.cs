@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using System.Security.Authentication;
 using MailKit.Net.Smtp;
+using MimeKit;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Transport;
 
@@ -51,6 +52,22 @@ public sealed class SmtpTransportFailureClassifierTests
             SendFailureKind.MessagePermanent,
             _classifier.Classify(message).FailureKind
         );
+    }
+
+    [TestMethod]
+    public void RecipientHardBounce_WithRecipientAddress_IsMarkedForInboxCleaning()
+    {
+        var exception = new SmtpCommandException(
+            SmtpErrorCode.RecipientNotAccepted,
+            SmtpStatusCode.MailboxUnavailable,
+            new MailboxAddress("recipient", "missing@example.com"),
+            "recipient rejected"
+        );
+
+        var result = _classifier.Classify(exception);
+
+        Assert.AreEqual(SendFailureKind.HardBounce, result.FailureKind);
+        Assert.AreEqual("missing@example.com", result.RejectedRecipientEmail);
     }
 
     [TestMethod]

@@ -25,4 +25,9 @@
 ## 数据库
 
 - 优先考虑逻辑删除
--删除数据时，禁止使用级联删除，所有删除操作在应用层手动分步删除。
+- 删除数据时，禁止使用级联删除，所有删除操作在应用层手动分步删除
+- 数据库迁移使用类似这样 `dotnet ef migrations add xxx --context MysqlContext --output-dir Migrations/Mysql -v` 的命令进行自动迁移，不要直接编写迁移代码
+
+## 项目依赖
+
+- UzonMailProPlugin 依赖于 UzonMailCorePlugin, 后者不能关联任何前者中的逻辑

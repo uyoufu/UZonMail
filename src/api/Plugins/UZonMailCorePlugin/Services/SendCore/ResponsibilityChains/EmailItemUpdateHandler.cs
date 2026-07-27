@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using UzonMail.CorePlugin.Services.EmailVerification;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
@@ -13,7 +14,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains;
 /// <summary>
 /// 提交发送结果，或将可重试邮件重新放入延迟队列。
 /// </summary>
-public sealed class EmailItemUpdateHandler(TimeProvider timeProvider) : AbstractSendingHandler
+public sealed class EmailItemUpdateHandler(
+    TimeProvider timeProvider,
+    InboxFailureGroupService failureGroupService
+) : AbstractSendingHandler
 {
     protected override async Task<IHandlerResult> HandleCore(SendingContext context)
     {
@@ -47,7 +51,16 @@ public sealed class EmailItemUpdateHandler(TimeProvider timeProvider) : Abstract
             return HandlerResult.Skiped(decision.Message);
         }
 
-        var sendingItem = await SaveSendingItemAsync(context, currentAttempt, decision);
+        var sendingItem = await SaveSendingItemAsync(
+            context,
+            currentAttempt,
+            decision,
+            transportResult
+        );
+        if (transportResult.FailureKind == SendFailureKind.HardBounce)
+        {
+            await MarkHardBounceInboxAsync(context, currentAttempt, transportResult);
+        }
         context.GroupTask?.CompleteEmailItem(currentAttempt);
         await context
             .HubClient.GetUserClient(currentAttempt.PreparedItem.Outbox.UserId)
@@ -83,7 +96,8 @@ public sealed class EmailItemUpdateHandler(TimeProvider timeProvider) : Abstract
     private static async Task<SendingItem> SaveSendingItemAsync(
         SendingContext context,
         SendItemExecution currentAttempt,
-        SendAttemptDecision decision
+        SendAttemptDecision decision,
+        TransportResult transportResult
     )
     {
         var item = currentAttempt.PreparedItem;
@@ -100,6 +114,7 @@ public sealed class EmailItemUpdateHandler(TimeProvider timeProvider) : Abstract
                 : SendingItemStatus.Failed;
         sendingItem.SendResult = decision.Message;
         sendingItem.TriedCount = currentAttempt.Descriptor.TriedCount;
+        sendingItem.IsHardBounce = transportResult.FailureKind == SendFailureKind.HardBounce;
         sendingItem.SendDate = DateTime.UtcNow;
         sendingItem.ReceiptId =
             decision.ReceiptId ?? new ResultParser(decision.Message).GetReceiptId();
@@ -124,5 +139,52 @@ public sealed class EmailItemUpdateHandler(TimeProvider timeProvider) : Abstract
         }
         await db.SaveChangesAsync();
         return sendingItem;
+    }
+
+    private async Task MarkHardBounceInboxAsync(
+        SendingContext context,
+        SendItemExecution currentAttempt,
+        TransportResult transportResult
+    )
+    {
+        var db = context.SqlContext;
+        var sendingItemId = currentAttempt.Descriptor.Id;
+        var inboxLinks = await db
+            .SendingItemInboxes.Where(x => x.SendingItemId == sendingItemId)
+            .ToListAsync();
+        if (inboxLinks.Count == 0)
+            return;
+
+        SendingItemInbox? targetLink = null;
+        if (!string.IsNullOrWhiteSpace(transportResult.RejectedRecipientEmail))
+        {
+            targetLink = inboxLinks.FirstOrDefault(x =>
+                string.Equals(
+                    x.ToEmail,
+                    transportResult.RejectedRecipientEmail,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            );
+        }
+        else if (inboxLinks.Count == 1)
+        {
+            // SMTP 未返回被拒地址时，多个收件人无法安全归因，不能误迁移。
+            targetLink = inboxLinks[0];
+        }
+
+        if (targetLink is null || targetLink.InboxId <= 0)
+            return;
+
+        var inbox = await db.Inboxes.FirstOrDefaultAsync(x =>
+            x.Id == targetLink.InboxId && x.UserId == currentAttempt.PreparedItem.UserId
+        );
+        if (inbox is null)
+            return;
+
+        var reason = transportResult.Message;
+        await failureGroupService.MarkInvalidAsync(
+            inbox.UserId,
+            new Dictionary<long, string?> { [inbox.Id] = reason }
+        );
     }
 }

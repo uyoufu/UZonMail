@@ -1,8 +1,8 @@
-# 项目说明
+# 椤圭洰璇存槑
 
-本目录保存数据库的相关的定义 model,目前采用 sqlLite,服务器可以切换成 mysql,方便进行扩展
+鏈洰褰曚繚瀛樻暟鎹簱鐨勭浉鍏崇殑瀹氫箟 model,鐩墠閲囩敤 sqlLite,鏈嶅姟鍣ㄥ彲浠ュ垏鎹㈡垚 mysql,鏂逛究杩涜鎵╁睍
 
-## 数据迁移说明
+## 鏁版嵁杩佺Щ璇存槑
 
 z uzonmaildb
 
@@ -14,7 +14,7 @@ dotnet ef migrations add addSendingGroupSorceType --context MysqlContext --outpu
 
 dotnet ef migrations add addSendingGroupSorceType --context SqLiteContext --output-dir Migrations/SqLite -v
 
-## 取消数据迁移
+## 鍙栨秷鏁版嵁杩佺Щ
 
 1. Mysql
 

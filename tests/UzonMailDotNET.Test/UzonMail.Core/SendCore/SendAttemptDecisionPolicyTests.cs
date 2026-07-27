@@ -22,6 +22,7 @@ public sealed class SendAttemptDecisionPolicyTests
 
     [TestMethod]
     [DataRow(SendFailureKind.RecipientPermanent)]
+    [DataRow(SendFailureKind.HardBounce)]
     [DataRow(SendFailureKind.MessagePermanent)]
     [DataRow(SendFailureKind.LocalData)]
     public void PermanentItemFailure_FailsWithoutRetry(SendFailureKind failureKind)

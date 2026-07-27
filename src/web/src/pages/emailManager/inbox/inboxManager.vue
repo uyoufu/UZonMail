@@ -1,9 +1,9 @@
 <template>
   <div class="full-height full-width row items-start">
-    <EmailGroupList v-show="!isCollapseGroupList" v-model="emailGroupRef" :groupType="2"
+    <EmailGroupList ref="emailGroupListRef" v-show="!isCollapseGroupList" v-model="emailGroupRef" :groupType="2"
       class="q-card q-mr-sm full-height" style="min-width: 160px" :contextMenuItems="groupCtxMenuItems" />
 
-    <q-table ref="inboxTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
+    <q-table ref="inboxTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll selection="multiple" v-model:selected="selectedInboxes"
       v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
       @request="onTableRequest">
       <template v-slot:top-left>
@@ -31,7 +31,7 @@
         <q-td :props="props">
           {{ props.value }}
         </q-td>
-        <ContextMenu :items="inboxContextMenuItems" :value="props.row" />
+        <ContextMenu :items="inboxContextMenuItems" :value="props.row" v-model:selected-values="selectedInboxes" />
       </template>
     </q-table>
 
@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import { translateInboxManager } from 'src/i18n/helpers'
+import { translateGlobal, translateInboxManager } from 'src/i18n/helpers'
 
 import type { QTableColumn } from 'quasar'
 import { QTable } from 'quasar'
@@ -56,6 +56,7 @@ import ContextMenu from 'components/contextMenu/ContextMenu.vue'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import { getInboxesCount, getInboxesData } from 'src/api/emailBox'
+import type { IInbox } from 'src/api/emailBox'
 import type { IEmailGroupListItem } from '../components/types'
 
 // 左侧分组开关
@@ -72,6 +73,8 @@ const emailGroupRef: Ref<IEmailGroupListItem> = ref({
   order: 0
 })
 const isValidEmailGroup = computed(() => emailGroupRef.value.id)
+const selectedInboxes = ref<IInbox[]>([])
+const emailGroupListRef = ref<{ reloadGroups: () => Promise<void> }>()
 
 const columns: ComputedRef<QTableColumn[]> = computed(() => [
   indexColumn,
@@ -141,8 +144,18 @@ const { inboxContextMenuItems } = useContextMenu(deleteRowById, refreshTable)
 
 // #region 分组的右键菜单
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
-import { notifyError } from 'src/utils/dialog'
-const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
+import { notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
+import { validateInboxGroup } from 'src/api/pro/emailVerify'
+import { usePermission } from 'src/compositions/permission'
+const { isProfession } = usePermission()
+const groupCtxMenuItems: Ref<IContextMenuItem<IEmailGroupListItem>[]> = ref([
+  {
+    name: 'validate',
+    label: translateGlobal('validate'),
+    tooltip: translateInboxManager('validateAllInvalidInboxesInCurrentGroup'),
+    vif: () => isProfession.value,
+    onClick: onValidateInboxGroup
+  },
   {
     name: 'import',
     label: translateInboxManager('ctx_import'),
@@ -157,10 +170,26 @@ const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
   }
 ])
 
+/** 验证当前分类中的全部收件箱。 */
+async function onValidateInboxGroup (group: IEmailGroupListItem) {
+  const groupId = group.id
+  if (groupId === undefined) return
+
+  const result = await notifyUntil(
+    () => validateInboxGroup(groupId),
+    translateInboxManager('validateAllInvalidInboxesInCurrentGroup'),
+    translateGlobal('validate')
+  )
+  if (!result) return
+
+  await emailGroupListRef.value?.reloadGroups()
+  refreshTable()
+  notifySuccess(translateGlobal('updateSuccess'))
+}
+
 // 导出当前组中的所有的收件箱
 import { writeExcel } from 'src/utils/file'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function exportAllInboxesInThisGroup (group: Record<string, any>) {
+async function exportAllInboxesInThisGroup (group: IEmailGroupListItem) {
   // 获取所有的收件箱
   const { data: count } = await getInboxesCount(group.id, '')
   if (!count) {

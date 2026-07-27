@@ -9,6 +9,20 @@
 
 ## api/CorePlugin
 
-1. 
+1. 当发件出现硬退信时，表示邮件不存在，对该邮件项进行标记，并不再重试。同时将收件箱从既有分类中移动到 "验证失败" 分类。
+2. 抽象一个收件箱验证模块，调用时用于验证收件箱是否真实存在, 每个具体的验证并发进行调用，提升验证效率，同时支持批量验证，结果采用 且 进行合并
 
 ## api/ProPlugin
+
+1. 基于 Core 中的收件箱验证接口，实现收件箱清洗模块，功能可以参考 https://pkg.go.dev/github.com/AfterShip/email-verifier?utm_source=godoc , 主要包含：
+
+- 语法与格式校验
+- DNS MX 记录校验, 需要将数据保存到数据库中，可以新建表，在使用时，缓存到内存中，且设置过期时间，过期后，自动从数据库中更新
+- 其它常用验证方式
+
+2. 这部分功能仅 pro 及以上版本提供
+
+## 参考实现
+
+1. https://github.com/truemail-rb/truemail
+2. https://github.com/AfterShip/email-verifier

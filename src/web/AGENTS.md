@@ -182,6 +182,7 @@ export function useReportContextMenu() {
 - `bun run dev`：启动 Quasar 开发服务器。
 - `bun run build`：使用 `quasar build` 构建生产版本。
 - `bun run lint`：对 `.js`、`.ts` 和 `.vue` 文件运行 ESLint。
+- `bun run typecheck`：检查 TypeScript 编译诊断。
 - `bun run test:unit`：以监听模式运行 Vitest。
 - `bun run test:unit:ci`：为 CI 单次运行 Vitest。
 - `bun run test:e2e:ci`：启动应用并运行 Cypress 端到端测试。

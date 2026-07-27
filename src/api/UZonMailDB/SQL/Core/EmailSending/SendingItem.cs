@@ -131,6 +131,11 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         public int TriedCount { get; set; }
 
         /// <summary>
+        /// 是否因目标邮箱硬退信而失败。
+        /// </summary>
+        public bool IsHardBounce { get; set; }
+
+        /// <summary>
         /// Smpt 服务器返回的 Id
         /// 通过这个 id 去获取阅读状态
         /// </summary>

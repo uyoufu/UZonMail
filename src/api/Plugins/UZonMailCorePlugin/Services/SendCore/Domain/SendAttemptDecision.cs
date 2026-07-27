@@ -53,7 +53,8 @@ public static class SendAttemptDecisionPolicy
 
         var isPermanentItemFailure =
             transportResult.FailureKind
-                is SendFailureKind.RecipientPermanent
+                is SendFailureKind.HardBounce
+                    or SendFailureKind.RecipientPermanent
                     or SendFailureKind.MessagePermanent
                     or SendFailureKind.LocalData;
         if (isPermanentItemFailure)

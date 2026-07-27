@@ -233,13 +233,13 @@ const { outboxContextMenuItems } = useContextMenu(deleteRowById, refreshTable)
 // #region 分组的右键菜单
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { notifyError } from 'src/utils/dialog'
-const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
+const groupCtxMenuItems: Ref<IContextMenuItem<IEmailGroupListItem>[]> = ref([
   {
     name: 'importExcel',
     label: translateOutboxManager('importFromExcel'),
     tooltip: translateOutboxManager('importOutboxForCurrentGroupFromExcel'),
     onClick: value => onImportOutboxFromExcelClicked(value.id)
-  } as IContextMenuItem,
+  },
   {
     name: 'importTxt',
     label: translateOutboxManager('importFromTxt'),
@@ -255,8 +255,7 @@ const groupCtxMenuItems: Ref<IContextMenuItem[]> = ref([
 ])
 // 导出当前组中的所有的收件箱
 import { writeExcel } from 'src/utils/file'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function exportAllInboxesInThisGroup (group: Record<string, any>) {
+async function exportAllInboxesInThisGroup (group: IEmailGroupListItem) {
   // 获取所有的收件箱
   const { data: count } = await getOutboxesCount(group.id, '')
   if (!count) {

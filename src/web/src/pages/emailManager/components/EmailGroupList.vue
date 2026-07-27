@@ -100,7 +100,7 @@ const props = defineProps({
 
   // 右键菜单
   contextMenuItems: {
-    type: Array as PropType<IContextMenuItem[]>,
+    type: Array as PropType<IContextMenuItem<IEmailGroupListItem>[]>,
     default: () => []
   }
 })
@@ -139,7 +139,10 @@ import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
-onMounted(async () => {
+onMounted(loadGroups)
+
+/** 重新加载分类，供移动收件箱后的页面刷新调用。 */
+async function loadGroups () {
   const { data: groups } = await getEmailGroups(props.groupType)
   groupItems.value = groups.map(x => {
     // 判断是否有初始值，若有，则恢复选中状态
@@ -155,7 +158,7 @@ onMounted(async () => {
   if (filteredItems.value.length > 0) {
     activeGroup(filteredItems.value[0] as IEmailGroupListItem)
   }
-})
+}
 function activeGroup (group: IEmailGroupListItem) {
   filteredItems.value.forEach(x => { x.active = false })
   group.active = true
@@ -220,7 +223,7 @@ async function onCreateEmailGroup () {
   notifySuccess(translateEmailGroup('newGroupSuccess'))
 }
 // 分类 header 右键
-const headerContextMenuItems: ComputedRef<IContextMenuItem[]> = computed(() => [
+const headerContextMenuItems: ComputedRef<IContextMenuItem<IEmailGroupListItem>[]> = computed(() => [
   {
     name: 'add',
     label: translateGlobal('new'),
@@ -234,29 +237,27 @@ const headerContextMenuItems: ComputedRef<IContextMenuItem[]> = computed(() => [
  */
 
 // 修改分组
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function modifyGroup (emailGroup: Record<string, any>) {
-  const typedEmailGroup = emailGroup as IEmailGroupListItem
+async function modifyGroup (emailGroup: IEmailGroupListItem) {
   const popupParams: IPopupDialogParams = {
     title: translateEmailGroup('modifyEmailGroup'),
     fields: [
       {
         name: 'name',
         label: translateEmailGroup('field_name'),
-        value: typedEmailGroup.label,
+        value: emailGroup.label,
         type: LowCodeFieldType.text,
         required: true
       },
       {
         name: 'description',
         label: translateEmailGroup('field_description'),
-        value: typedEmailGroup.description,
+        value: emailGroup.description,
         type: LowCodeFieldType.textarea
       },
       {
         name: 'order',
         label: translateEmailGroup('field_order'),
-        value: typedEmailGroup.order || typedEmailGroup.side,
+        value: emailGroup.order || emailGroup.side,
         // eslint-disable-next-line @typescript-eslint/require-await
         validate: async (value: number) => {
           const numValue = Number(value)
@@ -279,19 +280,21 @@ async function modifyGroup (emailGroup: Record<string, any>) {
   if (!result.ok) return
 
   // 指定 id
-  result.data.id = typedEmailGroup.id
+  result.data.id = emailGroup.id
   await updateEmailCroup(result.data)
 
   // 更新数据
-  typedEmailGroup.label = result.data.name
-  typedEmailGroup.order = result.data.order
-  typedEmailGroup.side = String(result.data.order)
+  emailGroup.label = result.data.name
+  emailGroup.order = result.data.order
+  emailGroup.side = String(result.data.order)
 
   // 新增组
   notifySuccess(translateEmailGroup('newGroupSuccess'))
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function deleteGroup (emailGroup: Record<string, any>) {
+async function deleteGroup (emailGroup: IEmailGroupListItem) {
+  const groupId = emailGroup.id
+  if (groupId === undefined) return
+
   // 进行确认
   const confirm = await confirmOperation(
     translateGlobal('deleteConfirmation'),
@@ -300,10 +303,10 @@ async function deleteGroup (emailGroup: Record<string, any>) {
   if (!confirm) return
 
   // 向服务器请求删除
-  await deleteEmailGroupById(emailGroup.id)
+  await deleteEmailGroupById(groupId)
 
   // 从当前列表中清除组
-  const groupIndex = groupItems.value.findIndex(x => x.id === emailGroup.id)
+  const groupIndex = groupItems.value.findIndex(x => x.id === groupId)
   groupItems.value.splice(groupIndex, 1)
 
   // 切换到临近的组
@@ -321,7 +324,7 @@ async function deleteGroup (emailGroup: Record<string, any>) {
 
   notifySuccess(translateEmailGroup('deleteGroupSuccess', { groupName: emailGroup.label }))
 }
-const itemContextMenuItems: ComputedRef<IContextMenuItem[]> = computed(() => [
+const itemContextMenuItems: ComputedRef<IContextMenuItem<IEmailGroupListItem>[]> = computed(() => [
   ...props.contextMenuItems,
   ...headerContextMenuItems.value,
   {
@@ -339,6 +342,8 @@ const itemContextMenuItems: ComputedRef<IContextMenuItem[]> = computed(() => [
   }
 ])
 // #endregion
+
+defineExpose({ reloadGroups: loadGroups })
 </script>
 
 <style lang="scss" scoped>

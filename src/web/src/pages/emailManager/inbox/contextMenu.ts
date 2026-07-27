@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IInbox } from 'src/api/emailBox'
 import { deleteInboxById, updateInbox, deleteAllDeliveredInboxesInGroup } from 'src/api/emailBox'
-import { validateAllInvalidInboxes } from 'src/api/pro/emailVerify'
+import { validateInboxes } from 'src/api/pro/emailVerify'
 
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
-import { confirmOperation, notifySuccess } from 'src/utils/dialog'
+import { confirmOperation, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getInboxFields } from './headerFunctions'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 
 import { translateInboxManager, translateGlobal } from 'src/i18n/helpers'
 import type { deleteRowByIdType, refreshTableType } from 'src/compositions/qTableUtils'
+import { usePermission } from 'src/compositions/permission'
 
 export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refreshTable: refreshTableType) {
+  const { isProfession } = usePermission()
   // 更新发件箱
   async function onUpdateInbox (row: Record<string, any>) {
     const inbox = row as IInbox
@@ -65,21 +67,12 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refres
       tooltip: translateInboxManager('editCurrentInbox'),
       onClick: onUpdateInbox
     },
-    // TODO: Not fully implemented, will enable in the future
     {
       name: 'validateSelected',
       label: translateGlobal('validate'),
       tooltip: translateInboxManager('validateCurrentOrSelectedInboxes'),
-      onClick: deleteInbox,
-      vif: () => false
-    },
-    // TODO: Not fully implemented, will enable in the future
-    {
-      name: 'validateAll',
-      label: translateGlobal('validateMultiple'),
-      tooltip: translateInboxManager('validateAllInvalidInboxesInCurrentGroup'),
-      onClick: onValidateAllInvalidInboxes,
-      vif: () => false
+      onClick: onValidateInboxes,
+      vif: () => isProfession.value
     },
     {
       name: 'delete',
@@ -106,12 +99,19 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refres
     },
   ])
 
-  // #region 验证
-  async function onValidateAllInvalidInboxes (row: Record<string, any>) {
-    const inbox = row as IInbox
-    await validateAllInvalidInboxes(inbox.emailGroupId as number)
+  /** 验证当前收件箱或当前选择的收件箱。 */
+  async function onValidateInboxes (_row: IInbox, { targetValues, clearSelection }: IActionContext<IInbox>) {
+    const result = await notifyUntil(
+      () => validateInboxes(targetValues.map(x => x.id as number)),
+      translateInboxManager('validateCurrentOrSelectedInboxes'),
+      translateGlobal('validate')
+    )
+    if (!result) return
+
+    clearSelection()
+    refreshTable()
+    notifySuccess(translateGlobal('updateSuccess'))
   }
-  // #endregion
 
 
   // #region  删除
