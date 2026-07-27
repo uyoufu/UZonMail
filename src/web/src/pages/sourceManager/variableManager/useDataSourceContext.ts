@@ -1,17 +1,18 @@
 import type { IJsVariableSource } from "src/api/pro/jsVariable"
-import type { IContextMenuItem } from "src/components/contextMenu/types"
+import type { IActionContext, IContextMenuItem } from "src/components/contextMenu/types"
 import type { IPopupDialogParams } from "src/components/lowCode/types"
 import { LowCodeFieldType } from "src/components/lowCode/types"
 import { notifySuccess, showDialog } from "src/utils/dialog"
 
 import { upsertJsVariableSource, deleteJsVariableSourcesData } from 'src/api/pro/jsVariable'
-import type { addNewRowType, deleteRowByIdType, getSelectedRowsType } from "src/compositions/qTableUtils"
+import type { addNewRowType, deleteRowByIdType } from "src/compositions/qTableUtils"
 
 import logger from 'loglevel'
 
-export function useDataSourceContext (addNewRow: addNewRowType,
-  getSelectedRows: getSelectedRowsType,
-  deleteRowById: deleteRowByIdType) {
+export function useDataSourceContext (
+  addNewRow: addNewRowType<IJsVariableSource>,
+  deleteRowById: deleteRowByIdType<IJsVariableSource>
+) {
   const dataSourceContextMenuItems: IContextMenuItem<IJsVariableSource>[] = [
     {
       name: 'edit',
@@ -113,15 +114,17 @@ export function useDataSourceContext (addNewRow: addNewRowType,
     return newDoc
   }
 
-  async function onDeleteDataSource (dataSource: IJsVariableSource) {
-    const selectedRows = getSelectedRows(dataSource)
+  async function onDeleteDataSource (
+    _cursorDataSource: IJsVariableSource,
+    { targetValues, clearSelection }: IActionContext<IJsVariableSource>
+  ) {
     // 开始删除
-    await deleteJsVariableSourcesData(selectedRows.selectedRows.value.map(x => x.id))
+    await deleteJsVariableSourcesData(targetValues.map((dataSource) => dataSource.id))
     // 移除已经删除的数据
-    selectedRows.selectedRows.value.forEach(row => {
-      deleteRowById(row.id)
+    targetValues.forEach((dataSource) => {
+      deleteRowById(dataSource.id)
     })
-    selectedRows.selectedRows.value = []
+    clearSelection()
 
     notifySuccess('删除成功')
   }

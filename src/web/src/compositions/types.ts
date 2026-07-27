@@ -20,15 +20,13 @@ export type TTableFilterObject = {
   filter?: string
 } & Record<string, string | object | number>
 
-/**
- * 初始化表格的参数
- */
-export interface IQTableInitParams {
+/** 初始化强类型表格所需的查询参数。 */
+export interface IQTableInitParams<TTableRow extends object> {
   sortBy?: string,
   descending?: boolean,
   filterFactor?: (filter: string) => Promise<TTableFilterObject> | TTableFilterObject, // 过滤因子
   getRowsNumberCount?: (filterObj: TTableFilterObject) => Promise<number> | number, // 请求数据总数
   onRequest?: (filterObj: TTableFilterObject, pagination: IRequestPagination)
-    => Promise<Array<object>> | Array<object>, // 请求数据
+    => Promise<TTableRow[]> | TTableRow[], // 请求数据
   preventRequestWhenMounted?: boolean // 在挂载时请求数据
 }

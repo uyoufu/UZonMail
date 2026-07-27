@@ -12,13 +12,13 @@ import type { IOutbox } from 'src/api/emailBox'
 import { ConnectionSecurity, createOutboxes, OutboxType } from 'src/api/emailBox'
 import { translateOutboxManager } from 'src/i18n/helpers'
 import { enumEntries } from 'src/utils/enum'
+import type { addNewRowType } from 'src/compositions/qTableUtils'
 
 /**
  * 从 txt 文件导入邮件
  * 这种方法，需要智能计算邮件的 smtp 及端口号
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRow: (newRow: Record<string, any>) => void) {
+export function useOutboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType<IOutbox>) {
   const { t } = useI18n()
   // #region 从文本导入
   async function onImportOutboxFromTxt (emailGroupId: number | null = null) {

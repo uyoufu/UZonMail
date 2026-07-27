@@ -82,7 +82,7 @@ export async function showNewInboxDialog (emailGroupLabel: string) {
 }
 
 
-export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType) {
+export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType<IInbox>) {
   // 新建收件箱
   async function onNewInboxClick () {
     // 新增收件箱

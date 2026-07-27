@@ -136,7 +136,7 @@ export interface IUserRole {
  * @returns
  */
 export function upsertUserRole (userRole: IUserRole) {
-  return httpClient.post<IUserRole[]>('/permission/user-role', {
+  return httpClient.post<IUserRole>('/permission/user-role', {
     data: userRole
   })
 }

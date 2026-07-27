@@ -53,7 +53,7 @@ export function checkUserId (userId: string) {
  * @returns
  */
 export function createUser (userId: string, password: string) {
-  return httpClient.post<Record<string, any>>('/user/sign-up', {
+  return httpClient.post<IUserInfo>('/user/sign-up', {
     data: {
       userId,
       password

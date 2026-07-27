@@ -3,16 +3,26 @@ import type { QTableColumn } from 'quasar'
 import type { IQTableInitParams, TTableFilterObject, IQTablePagination } from './types'
 import QTableIndex from 'src/components/tableComponents/TableIndex.vue'
 
-export type addNewRowType<T = Record<string, any>> = (newRow: T, idField?: string) => void
+/** 表格行中可作为定位字段使用的字符串键。 */
+export type TableRowKey<TTableRow extends object> = Extract<keyof TTableRow, string>
 
-export type updateExistOneType<T = Record<string, any>> = (newData: T, idField?: string) => boolean
+/** 新增表格行或按定位字段更新既有行。 */
+export type addNewRowType<TTableRow extends object> = <TKey extends TableRowKey<TTableRow>>(
+  newRow: TTableRow,
+  idField?: TKey
+) => void
 
-export type deleteRowByIdType = (id?: number, idField?: string) => void
+/** 按定位字段更新已经存在的表格行。 */
+export type updateExistOneType<TTableRow extends object> = <TKey extends TableRowKey<TTableRow>>(
+  newData: TTableRow,
+  idField?: TKey
+) => boolean
 
-export type getSelectedRowsType = (cursorData: Record<string, any>) => {
-  rows: Record<string, any>[]
-  selectedRows: Ref<Record<string, any>[]>
-}
+/** 按指定字段值删除表格行。 */
+export type deleteRowByIdType<TTableRow extends object> = <TKey extends TableRowKey<TTableRow>>(
+  id?: TTableRow[TKey],
+  idField?: TKey
+) => void
 
 export type refreshTableType = () => void
 
@@ -63,7 +73,7 @@ export interface ITableRequestProp {
  * @param initParams
  * @returns
  */
-export function useQTable(initParams: IQTableInitParams) {
+export function useQTable<TTableRow extends object>(initParams: IQTableInitParams<TTableRow>) {
   // 分页
   const pagination: Ref<IQTablePagination> = ref({
     sortBy: initParams.sortBy || 'id',
@@ -104,7 +114,7 @@ export function useQTable(initParams: IQTableInitParams) {
 
   // 表格数据请求
   const loading = ref(false)
-  const rows: Ref<Record<string, any>[]> = ref([])
+  const rows: Ref<TTableRow[]> = ref([])
   async function onTableRequest(qTableProps: ITableRequestProp) {
     if (refreshCounter.value < 0) return
     if (!initParams.onRequest) return
@@ -115,7 +125,7 @@ export function useQTable(initParams: IQTableInitParams) {
     try {
       loading.value = true
       const totalCount = await getRowsNumberCount(filter)
-      let data: object[] = []
+      let data: TTableRow[] = []
       if (totalCount > 0) {
         // get all rows if "All" (0) is selected
         const fetchCount = rowsPerPage === 0 ? totalCount : rowsPerPage
@@ -185,7 +195,7 @@ export function useQTable(initParams: IQTableInitParams) {
    * @param idField
    * @returns
    */
-  function addNewRow(newRow: Record<string, any>, idField: string = 'id') {
+  function addNewRow<TKey extends TableRowKey<TTableRow>>(newRow: TTableRow, idField: TKey = 'id' as TKey) {
     // 查找是否存在
     const found = rows.value.find((x) => x[idField] === newRow[idField])
     if (found) {
@@ -204,7 +214,7 @@ export function useQTable(initParams: IQTableInitParams) {
    * @param idField
    * @returns
    */
-  function updateExistOne(newData: Record<string, any>, idField: string = 'id') {
+  function updateExistOne<TKey extends TableRowKey<TTableRow>>(newData: TTableRow, idField: TKey = 'id' as TKey) {
     // 查找是否存在
     const found = rows.value.find((x) => x[idField] === newData[idField])
     if (!found) return false
@@ -215,31 +225,14 @@ export function useQTable(initParams: IQTableInitParams) {
   }
 
   // 删除行
-  function deleteRowById(id?: number, idField: string = 'id') {
-    if (!id) return
+  function deleteRowById<TKey extends TableRowKey<TTableRow>>(id?: TTableRow[TKey], idField: TKey = 'id' as TKey) {
+    if (id === undefined || id === null) return
 
     rows.value = rows.value.filter((x) => x[idField] !== id)
     increaseRowsNumber(-1)
   }
 
-  const selectedRows = ref<Record<string, any>[]>([])
-
-  /**
-   * 获取选中的行
-   * @param cursorData
-   * @returns { rows, selectedRows }, rows 是当前选中的行，selectedRows 是选中的行的容器
-   */
-  function getSelectedRows(cursorData: Record<string, any>): {
-    rows: Record<string, any>[]
-    selectedRows: Ref<Record<string, any>[]>
-  } {
-    let rows = [cursorData]
-    if (selectedRows.value.length > 0) {
-      rows = selectedRows.value
-    }
-
-    return { rows, selectedRows }
-  }
+  const selectedRows: Ref<TTableRow[]> = ref([])
 
   return {
     rows,
@@ -252,8 +245,7 @@ export function useQTable(initParams: IQTableInitParams) {
     refreshTable,
     addNewRow,
     updateExistOne,
-    deleteRowById,
-    getSelectedRows
+    deleteRowById
   }
 }
 

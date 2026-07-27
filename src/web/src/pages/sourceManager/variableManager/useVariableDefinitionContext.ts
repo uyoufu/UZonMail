@@ -1,17 +1,18 @@
-import type { IContextMenuItem } from "src/components/contextMenu/types"
+import type { IActionContext, IContextMenuItem } from "src/components/contextMenu/types"
 import type { IPopupDialogParams } from "src/components/lowCode/types"
 import { LowCodeFieldType } from "src/components/lowCode/types"
 import { notifySuccess, showDialog } from "src/utils/dialog"
 
 import type { IJsFunctionDefinition } from 'src/api/pro/jsFunctionDefinition';
 import { upsertJsFunctionDefinition, deleteJsFunctionDefinitionsData, testJsFunctionDefinitionsData } from 'src/api/pro/jsFunctionDefinition'
-import type { addNewRowType, deleteRowByIdType, getSelectedRowsType } from "src/compositions/qTableUtils"
+import type { addNewRowType, deleteRowByIdType } from "src/compositions/qTableUtils"
 
 import logger from 'loglevel'
 
-export function useVariableDefinitionContext (addNewRow: addNewRowType,
-  getSelectedRows: getSelectedRowsType,
-  deleteRowById: deleteRowByIdType) {
+export function useVariableDefinitionContext (
+  addNewRow: addNewRowType<IJsFunctionDefinition>,
+  deleteRowById: deleteRowByIdType<IJsFunctionDefinition>
+) {
   const dataSourceContextMenuItems: IContextMenuItem<IJsFunctionDefinition>[] = [
     {
       name: 'test',
@@ -103,15 +104,17 @@ export function useVariableDefinitionContext (addNewRow: addNewRowType,
     return newDoc
   }
 
-  async function onDeleteDataSource (dataSource: IJsFunctionDefinition) {
-    const selectedRows = getSelectedRows(dataSource)
+  async function onDeleteDataSource (
+    _cursorDefinition: IJsFunctionDefinition,
+    { targetValues, clearSelection }: IActionContext<IJsFunctionDefinition>
+  ) {
     // 开始删除
-    await deleteJsFunctionDefinitionsData(selectedRows.selectedRows.value.map(x => x.id))
+    await deleteJsFunctionDefinitionsData(targetValues.map((definition) => definition.id))
     // 移除已经删除的数据
-    selectedRows.selectedRows.value.forEach(row => {
-      deleteRowById(row.id)
+    targetValues.forEach((definition) => {
+      deleteRowById(definition.id)
     })
-    selectedRows.selectedRows.value = []
+    clearSelection()
 
     notifySuccess('删除成功')
   }

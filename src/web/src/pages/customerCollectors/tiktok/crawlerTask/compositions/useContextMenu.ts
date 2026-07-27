@@ -15,7 +15,10 @@ import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog }
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { useRouter } from 'vue-router'
 
-export function useContextMenu(addNewRow: addNewRowType<ICrawlerTaskInfo>, deleteRowById: deleteRowByIdType) {
+export function useContextMenu(
+  addNewRow: addNewRowType<ICrawlerTaskInfo>,
+  deleteRowById: deleteRowByIdType<ICrawlerTaskInfo>
+) {
   const contextMenuItems: IContextMenuItem<ICrawlerTaskInfo>[] = [
     {
       name: 'edit',

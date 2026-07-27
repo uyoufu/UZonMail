@@ -11,7 +11,7 @@ import { useI18n } from "vue-i18n"
 /**
  * 注册 SignalR 事件
  */
-export function useSignalR (updateExistOne: updateExistOneType) {
+export function useSignalR (updateExistOne: updateExistOneType<IOutbox>) {
   const { t } = useI18n()
 
   // 注册事件

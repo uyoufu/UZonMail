@@ -34,7 +34,7 @@
         <q-td :props="props">
           {{ props.value }}
         </q-td>
-        <ContextMenu :items="outboxContextMenuItems" :value="props.row" />
+        <ContextMenu v-model:selected-values="selectedRows" :items="outboxContextMenuItems" :value="props.row" />
       </template>
 
       <template v-slot:body-cell-password="props">
@@ -201,7 +201,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 }
 const { pagination, rows, filter, onTableRequest, loading,
   refreshTable, addNewRow, deleteRowById, selectedRows,
-  getSelectedRows, updateExistOne } = useQTable({
+  updateExistOne } = useQTable<IOutbox>({
     getRowsNumberCount,
     onRequest,
     preventRequestWhenMounted: true
@@ -227,7 +227,7 @@ const { onNewOutboxClick, onExportOutboxTemplateClick, onImportOutboxFromExcelCl
 
 // #region 数据右键菜单
 import { useContextMenu } from './contextMenu'
-const { outboxContextMenuItems } = useContextMenu(deleteRowById, getSelectedRows, refreshTable)
+const { outboxContextMenuItems } = useContextMenu(deleteRowById, refreshTable)
 // #endregion
 
 // #region 分组的右键菜单

@@ -6,6 +6,7 @@ import type { ILowCodeField, IPopupDialogParams } from 'src/components/lowCode/t
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
+import type { addNewRowType } from 'src/compositions/qTableUtils'
 
 // TODO: 不支持动态代理提示
 
@@ -95,7 +96,7 @@ export function getCommonProxyFields (): ILowCodeField[] {
  * 顶部功能区
  * @returns
  */
-export function useHeaderFunctions (addNewRow: (newRow: Record<string, any>) => void) {
+export function useHeaderFunctions (addNewRow: addNewRowType<IProxy>) {
   const userInfo = useUserInfoStore()
 
 

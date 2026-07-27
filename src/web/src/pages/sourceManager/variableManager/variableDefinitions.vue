@@ -13,7 +13,7 @@
     <template v-slot:body-cell-index="props">
       <QTableIndex :props="props" />
 
-      <ContextMenu :items="dataSourceContextMenuItems" :value="props.row" />
+      <ContextMenu v-model:selected-values="selectedRows" :items="dataSourceContextMenuItems" :value="props.row" />
     </template>
 
     <template v-slot:body-cell-value="props">
@@ -72,6 +72,7 @@ const columns: QTableColumn[] = [
 ]
 
 import { getJsFunctionDefinitionsCount, getJsFunctionDefinitionsData } from 'src/api/pro/jsFunctionDefinition'
+import type { IJsFunctionDefinition } from 'src/api/pro/jsFunctionDefinition'
 
 
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
@@ -85,7 +86,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 }
 
 const { pagination, rows, filter, onTableRequest, loading, selectedRows,
-  addNewRow, getSelectedRows, deleteRowById } = useQTable({
+  addNewRow, deleteRowById } = useQTable<IJsFunctionDefinition>({
     getRowsNumberCount,
     onRequest
   })
@@ -93,7 +94,7 @@ const { pagination, rows, filter, onTableRequest, loading, selectedRows,
 // #region 右键菜单
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import { useVariableDefinitionContext } from './useVariableDefinitionContext'
-const { dataSourceContextMenuItems, onNewVariableDefinition } = useVariableDefinitionContext(addNewRow, getSelectedRows, deleteRowById)
+const { dataSourceContextMenuItems, onNewVariableDefinition } = useVariableDefinitionContext(addNewRow, deleteRowById)
 // #endregion
 </script>
 

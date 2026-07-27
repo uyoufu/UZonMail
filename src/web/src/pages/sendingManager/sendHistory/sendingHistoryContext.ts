@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
 import type { ISendingGroupHistory } from 'src/api/sendingGroup'
 import { SendingGroupStatus, deleteSendingGroups } from 'src/api/sendingGroup'
 import { pauseSending, restartSending, cancelSending, resendSendingGroup } from 'src/api/emailSending'
@@ -8,57 +7,56 @@ import { useSendDetailVisitor } from './useSendDetailVisitor'
 
 import { useI18n } from 'vue-i18n'
 
-import type { deleteRowByIdType, getSelectedRowsType } from 'src/compositions/qTableUtils'
-import type { ISendingGroupInfo } from 'src/api/sendingGroup'
+import type { deleteRowByIdType } from 'src/compositions/qTableUtils'
 
 /**
  * 添加右键菜单
  */
-export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowById: deleteRowByIdType) {
+export function useContextMenu (deleteRowById: deleteRowByIdType<ISendingGroupHistory>) {
   const router = useRouter()
   const { t } = useI18n()
 
-  const sendingHistoryContextItems: IContextMenuItem<ISendingGroupInfo>[] = [
+  const sendingHistoryContextItems: IContextMenuItem<ISendingGroupHistory>[] = [
     {
       name: 'detail',
       label: '发件明细',
       tooltip: '查看发件明细',
-      onClick: openSendDetailDialog as any
+      onClick: openSendDetailDialog
     },
     {
       name: 'pause',
       label: '暂停发件',
       tooltip: '暂停发件',
-      onClick: onPauseSending as any,
-      vif: canPauseSending as any
+      onClick: onPauseSending,
+      vif: canPauseSending
     },
     {
       name: 'start',
       label: '开始发件',
       tooltip: '开始发件',
-      vif: canRestart as any,
-      onClick: onRestartSending as any
+      vif: canRestart,
+      onClick: onRestartSending
     },
     {
       name: 'startForFailed',
       label: '失败重发',
       tooltip: '对失败项进行重发',
-      vif: canResend as any,
-      onClick: onResendSendingGroup as any
+      vif: canResend,
+      onClick: onResendSendingGroup
     },
     {
       name: 'cancelSchedule',
       label: '取消发件',
       tooltip: '取消当前发件任务',
       color: 'negative',
-      vif: canCancel as any,
-      onClick: onCancelSending as any
+      vif: canCancel,
+      onClick: onCancelSending
     },
     {
       name: 'newSendingTaskWithTemplate',
       label: '复制发件',
       tooltip: '复制该数据作为模板并新建发件',
-      onClick: onNewSendingTaskWithTemplate as any
+      onClick: onNewSendingTaskWithTemplate
     },
     {
       name: 'delete',
@@ -152,8 +150,10 @@ export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowB
     })
   }
 
-  async function onDeleteSendingGroups (cursorData: ISendingGroupInfo) {
-    const { rows, selectedRows } = getSelectedRows(cursorData)
+  async function onDeleteSendingGroups (
+    _cursorSendingGroup: ISendingGroupHistory,
+    { targetValues: rows, clearSelection }: IActionContext<ISendingGroupHistory>
+  ) {
     // 如果在进行中，则不允许删除
     const inProgressGroups = rows.filter(x => x.status === SendingGroupStatus.Sending
       || x.status === SendingGroupStatus.Scheduled
@@ -171,7 +171,7 @@ export function useContextMenu (getSelectedRows: getSelectedRowsType, deleteRowB
     for (const row of rows) {
       deleteRowById(row.id)
     }
-    selectedRows.value = []
+    clearSelection()
 
     notifySuccess(t('deleteSuccess'))
   }

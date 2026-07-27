@@ -6,7 +6,7 @@ import { useSendDetailVisitor } from '../../sendHistory/useSendDetailVisitor'
 import { deleteIpWarmUpPlanByIds, getLatestSendingGroupOfSchedulePlan } from "src/api/pro/ipWarmUp"
 import type { deleteRowByIdType } from "src/compositions/qTableUtils"
 
-export function useIpWarmIpContext (deleteRowById: deleteRowByIdType) {
+export function useIpWarmIpContext (deleteRowById: deleteRowByIdType<IIpWarmUpUpPlan>) {
   const ipWarmUpContextMenuItems: IContextMenuItem<IIpWarmUpUpPlan>[] = [
     {
       name: 'onViewLatestSendingGroupOfPlan',

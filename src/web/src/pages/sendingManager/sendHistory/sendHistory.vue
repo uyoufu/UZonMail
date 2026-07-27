@@ -12,7 +12,7 @@
 
     <template v-slot:body-cell-index="props">
       <QTableIndex :props="props" />
-      <ContextMenu :items="sendingHistoryContextItems" :value="props.row" />
+      <ContextMenu v-model:selected-values="selectedRows" :items="sendingHistoryContextItems" :value="props.row" />
     </template>
 
     <template v-slot:body-cell-subjects="props">
@@ -53,7 +53,7 @@ import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
-import type { ISendingGroupInfo } from 'src/api/sendingGroup'
+import type { ISendingGroupHistory, ISendingGroupInfo } from 'src/api/sendingGroup'
 import { getSendingGroupsCount, getEmailTemplatesData, sendingGroupStatusNames, SendingGroupStatus, SendingGroupType } from 'src/api/sendingGroup'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
@@ -170,8 +170,8 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
 }
 
 const { pagination, rows, filter, onTableRequest, loading,
-  selectedRows, getSelectedRows, deleteRowById
-} = useQTable({
+  selectedRows, deleteRowById
+} = useQTable<ISendingGroupHistory>({
   sortBy: 'id',
   descending: true,
   getRowsNumberCount,
@@ -181,7 +181,7 @@ const { pagination, rows, filter, onTableRequest, loading,
 // 右键菜单
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import { useContextMenu } from './sendingHistoryContext'
-const { openSendDetailDialog, sendingHistoryContextItems } = useContextMenu(getSelectedRows, deleteRowById)
+const { openSendDetailDialog, sendingHistoryContextItems } = useContextMenu(deleteRowById)
 
 /**
  * 进度与状态显示

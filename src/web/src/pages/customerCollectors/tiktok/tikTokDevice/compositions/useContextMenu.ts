@@ -7,7 +7,10 @@ import { getTikTokDeviceInfoFields } from './useHeaderFunctions'
 import { confirmOperation, notifySuccess, showDialog } from 'src/utils/dialog'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
 
-export function useContextMenu (addNewRow: addNewRowType<ITikTokDevice>, deleteRowById: deleteRowByIdType) {
+export function useContextMenu (
+  addNewRow: addNewRowType<ITikTokDevice>,
+  deleteRowById: deleteRowByIdType<ITikTokDevice>
+) {
   const contextMenuItems: IContextMenuItem<ITikTokDevice>[] = [
     {
       name: 'edit',

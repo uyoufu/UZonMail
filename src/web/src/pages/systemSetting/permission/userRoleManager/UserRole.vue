@@ -153,7 +153,7 @@ async function getPopupDialogParams (userRole?: IUserRole) {
 // #endregion
 
 // #region 右键菜单
-const contextItems: IContextMenuItem[] = [
+const contextItems: IContextMenuItem<IUserRole>[] = [
   {
     name: 'edit',
     label: '编辑',
@@ -166,10 +166,7 @@ const contextItems: IContextMenuItem[] = [
     onClick: onDeleteUserRole
   }
 ]
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function onUserRoleClicked (row: Record<string, any>) {
-  const userRole = row as IUserRole
-
+async function onUserRoleClicked (userRole: IUserRole) {
   const dialogParams = await getPopupDialogParams(userRole)
   const result = await showDialog(dialogParams)
   if (!result.ok) return
@@ -177,15 +174,13 @@ async function onUserRoleClicked (row: Record<string, any>) {
   // 添加 id
   result.data.id = userRole.id
   await upsertUserRole(result.data as IUserRole)
-  const newData = Object.assign(row, result.data)
+  const newData = Object.assign(userRole, result.data)
   addNewRow(newData)
 
   notifySuccess('用户角色更新成功')
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function onDeleteUserRole (row: Record<string, any>) {
-  const userRole = row as IUserRole
+async function onDeleteUserRole (userRole: IUserRole) {
   const confirm = await confirmOperation('删除角色', `即将删除 ${userRole.user.userId} 的 ${userRole.roles.map(x => x.name).join()} 角色，是否继续？`)
   if (!confirm) return
 

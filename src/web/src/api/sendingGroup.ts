@@ -50,7 +50,9 @@ export interface ISendingGroupInfo {
   subjects: string, // 主题
   attachments: object[], // 附件
   totalCount: number, // 总数
+  sentCount: number, // 已发送数
   successCount: number, // 成功数
+  progress?: number, // 由实时进度事件更新
   status: SendingGroupStatus, // 状态
   statusReason?: string,
   resumeAtUtc?: string,

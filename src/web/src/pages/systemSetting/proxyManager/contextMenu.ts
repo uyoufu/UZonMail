@@ -11,9 +11,10 @@ import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 
 import { useUserInfoStore } from 'src/stores/user'
+import type { deleteRowByIdType } from 'src/compositions/qTableUtils'
 
-export function useContextMenu (deleteRowById: (id?: number) => void) {
-  const proxyContextMenuItems: IContextMenuItem[] = [
+export function useContextMenu (deleteRowById: deleteRowByIdType<IProxy>) {
+  const proxyContextMenuItems: IContextMenuItem<IProxy>[] = [
     {
       name: 'edit',
       label: '编辑',

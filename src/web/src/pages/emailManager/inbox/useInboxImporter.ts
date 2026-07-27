@@ -9,13 +9,13 @@ import type { IInbox } from 'src/api/emailBox'
 import { createInboxes } from 'src/api/emailBox'
 
 import { translateInboxManager } from 'src/i18n/helpers'
+import type { addNewRowType } from 'src/compositions/qTableUtils'
 
 /**
  * 从 txt 文件导入邮件
  * 这种方法，需要智能计算邮件的 smtp 及端口号
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRow: (newRow: Record<string, any>) => void) {
+export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType<IInbox>) {
   // #region 从文本导入
   async function onImportInboxFromTxt (emailGroupId: number | null = null) {
     if (typeof emailGroupId !== 'number') emailGroupId = emailGroup.value.id as number

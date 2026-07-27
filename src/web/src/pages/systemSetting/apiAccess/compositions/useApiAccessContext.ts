@@ -9,7 +9,10 @@ import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import dayjs from 'dayjs'
 import logger from 'loglevel'
 
-export function useApiAccessContext (addNewRow: addNewRowType, deleteRowById: deleteRowByIdType) {
+export function useApiAccessContext (
+  addNewRow: addNewRowType<IApiApiAccess>,
+  deleteRowById: deleteRowByIdType<IApiApiAccess>
+) {
 
   async function showApiAccessDialog (apiAccess?: IApiApiAccess) {
     const popupParams: IPopupDialogParams = {

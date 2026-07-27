@@ -12,7 +12,7 @@ import { showDialog } from 'src/components/lowCode/PopupDialog'
 import { translateInboxManager, translateGlobal } from 'src/i18n/helpers'
 import type { deleteRowByIdType, refreshTableType } from 'src/compositions/qTableUtils'
 
-export function useContextMenu (deleteRowById: deleteRowByIdType, refreshTable: refreshTableType) {
+export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refreshTable: refreshTableType) {
   // 更新发件箱
   async function onUpdateInbox (row: Record<string, any>) {
     const inbox = row as IInbox

@@ -4,6 +4,7 @@ import type { IRequestPagination } from 'src/compositions/types'
 // #region 变量数据源
 
 export interface IJsVariableSource {
+  id: number,
   name: string,
   value: object,
   description?: string,

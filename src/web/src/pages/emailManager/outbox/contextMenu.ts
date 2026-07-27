@@ -3,14 +3,14 @@ import type { IOutbox } from 'src/api/emailBox'
 import { deleteOutboxByIds, OutboxStatus, updateOutbox, validateOutbox } from 'src/api/emailBox'
 import { deleteAllInvalidOutboxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
 
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getOutboxFields } from './headerFunctions'
 
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 
-import type { getSelectedRowsType } from 'src/compositions/qTableUtils'
+import type { deleteRowByIdType, refreshTableType } from 'src/compositions/qTableUtils'
 
 import { translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
 
@@ -19,7 +19,7 @@ import logger from 'loglevel'
 import { tryOutlookDelegateAuthorization, isMsGraphOutbox } from './headerFunctions'
 
 
-export function useContextMenu (deleteRowById: (id?: number) => void, getSelectedRows: getSelectedRowsType, refreshTable: () => void) {
+export function useContextMenu (deleteRowById: deleteRowByIdType<IOutbox>, refreshTable: refreshTableType) {
   const outboxContextMenuItems: Ref<IContextMenuItem<IOutbox>[]> = computed(() =>
     [
       {
@@ -64,8 +64,10 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     ])
 
   // 删除发件箱
-  async function onDeleteOutbox (row: Record<string, any>) {
-    const { rows, selectedRows } = getSelectedRows(row)
+  async function onDeleteOutbox (
+    _cursorOutbox: IOutbox,
+    { targetValues: rows, clearSelection }: IActionContext<IOutbox>
+  ) {
 
     // 提示是否删除
     if (rows.length === 1) {
@@ -89,7 +91,7 @@ export function useContextMenu (deleteRowById: (id?: number) => void, getSelecte
     rows.forEach(row => {
       deleteRowById(row.id)
     })
-    selectedRows.value = []
+    clearSelection()
     notifySuccess(translateOutboxManager('deleteSuccess', { count: rows.length }))
   }
 

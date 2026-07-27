@@ -26,6 +26,7 @@ import { debounce } from 'lodash'
 
 import logger from 'loglevel'
 import { translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
+import type { addNewRowType } from 'src/compositions/qTableUtils'
 
 
 // 判断是否是 Exchange 邮箱
@@ -328,7 +329,7 @@ export async function tryOutlookDelegateAuthorization (outbox: IOutbox) {
  * @returns
  */
 export function useHeaderFunction (emailGroup: Ref<IEmailGroupListItem>,
-  addNewRow: (newRow: Record<string, any>) => void) {
+  addNewRow: addNewRowType<IOutbox>) {
   // 新建发件箱
   async function onNewOutboxClick () {
     const guessSmtpInfoGetDebounce = debounce(async (email: string, params: IOnSetupParams) => {

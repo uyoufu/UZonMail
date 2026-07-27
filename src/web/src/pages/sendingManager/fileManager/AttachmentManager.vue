@@ -21,7 +21,7 @@
       </template>
       <template #body-cell-index="props">
         <QTableIndex :props="props" />
-        <ContextMenu :items="attachmentContextMenuItems" :value="props.row" />
+        <ContextMenu v-model:selected-values="selectedRows" :items="attachmentContextMenuItems" :value="props.row" />
       </template>
     </q-table>
 
@@ -40,7 +40,7 @@ import CreateBtn from 'src/components/quasarWrapper/buttons/CreateBtn.vue'
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import DeleteBtn from 'src/components/quasarWrapper/buttons/DeleteBtn.vue'
 import FilesUploaderPopup from 'src/components/uploader/FilesUploaderPopup.vue'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
 import { useTableCollapseLeft } from 'src/components/collapseIcon/useCollapseLeft'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
@@ -94,7 +94,7 @@ async function onRequest(filterObject: TTableFilterObject, requestPagination: IR
   return data
 }
 
-const { pagination, rows, filter, onTableRequest, loading, refreshTable, selectedRows } = useQTable({
+const { pagination, rows, filter, onTableRequest, loading, refreshTable, selectedRows } = useQTable<IFileUsage>({
   getRowsNumberCount,
   onRequest
 })
@@ -129,7 +129,7 @@ async function onDeleteSelected() {
     t('fileManager.batchDeleteConfirm', { count: selectedRows.value.length })
   )
   if (!confirmed) return
-  await deleteFileUsages(selectedRows.value.map(row => row.id as number))
+  await deleteFileUsages(selectedRows.value.map(row => row.id))
   selectedRows.value = []
   refreshTable()
   notifySuccess(t('fileManager.deleteSuccess'))
@@ -154,7 +154,7 @@ async function onMoveSelected() {
     oneColumn: true
   })
   if (!result.ok) return
-  await moveFileUsages(selectedRows.value.map(row => row.id as number), Number(result.data.categoryId))
+  await moveFileUsages(selectedRows.value.map(row => row.id), Number(result.data.categoryId))
   selectedRows.value = []
   refreshTable()
 }
@@ -210,6 +210,7 @@ async function onDeleteAttachment(row: IFileUsage) {
     t('fileManager.deleteFileConfirm', { name: row.displayName })
   )
   if (!confirmed) return
+
   await deleteFileUsage(row.id)
   refreshTable()
   notifySuccess(t('fileManager.deleteSuccess'))

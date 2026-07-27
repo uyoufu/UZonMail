@@ -2,7 +2,7 @@
   <q-menu v-model="qMenuModel" context-menu transition-show="scale" transition-hide="rotate" auto-close
     @before-show="beforeContextMenuShow" @before-hide="onMenuBeforeHide">
     <q-list dense style="overflow: hidden;">
-      <q-item v-for="(item, index) in contextItems" :key="item.name" clickable @click="onMenuItemClick($event, item)"
+      <q-item v-for="(item, index) in contextItems" :key="item.name" clickable @click="onMenuItemClick(item)"
         :class="getItemClass(item, index)" dense class="active-item">
         <div class="row justify-start items-center">
           <q-icon v-if="item.icon" :color="item.color" :name="item.icon" class="q-mr-sm"></q-icon>
@@ -10,39 +10,45 @@
             {{ item.label }}
           </q-item-section>
         </div>
-        <AsyncTooltip :tooltip="item.tooltip" :color="item.color" anchor="center right" self="center left" />
+        <AsyncTooltip :tooltip="getTooltip(item)" :color="item.color" anchor="center right" self="center left" />
       </q-item>
     </q-list>
   </q-menu>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts" setup generic="TContextValue extends object = Record<string, unknown>">
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
-import type { IContextMenuItem } from './types'
-const props = defineProps({
-  items: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    type: Array as PropType<IContextMenuItem<any>[]>,
-    required: true
-  },
-  value: {
-    type: Object,
-    default: () => { return {} }
-  },
-  // 目标元素的 class
-  // 只有匹配时，才会显示右键菜单
-  targetClass: {
-    type: String,
-    default: undefined
-  }
+import type { IActionContext, IContextMenuItem } from './types'
+
+const props = defineProps<{
+  items: IContextMenuItem<TContextValue>[]
+  value?: TContextValue
+  targetClass?: string
+}>()
+
+const selectedValues = defineModel<TContextValue[]>({
+  default: () => []
 })
+
+function getContextValue(): TContextValue {
+  if (props.value) return props.value
+  // 表头菜单允许省略 value；空对象用于保持既有的无上下文调用行为。
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return {} as TContextValue
+}
+
+function getTooltip(contextItem: IContextMenuItem<TContextValue>) {
+  const tooltip = contextItem.tooltip
+  if (typeof tooltip !== 'function') return tooltip
+  return () => tooltip(getContextValue())
+}
 
 // 对定义进行处理
 const colors = ['primary', 'secondary', 'accent']
 const contextItems = computed(() => {
   // 如果有 vif,则执行 vif 判断是否显示
-  const results = props.items.filter(x => !x.vif || x.vif(props.value))
+  const results = props.items.filter(x => !x.vif || x.vif(getContextValue()))
   // 对结果赋予颜色
   results.forEach((item, index) => {
     if (item.color) return
@@ -57,7 +63,7 @@ const contextItems = computed(() => {
 })
 
 // 获取菜单项显示样式
-function getItemClass (contextItem: IContextMenuItem, index: number) {
+function getItemClass(contextItem: IContextMenuItem<TContextValue>, index: number) {
   if (contextItem.color) return `text-${contextItem.color}`
   const colors = ['text-primary', 'text-secondary', 'text-accent']
   return colors[index % 3]
@@ -67,12 +73,12 @@ function getItemClass (contextItem: IContextMenuItem, index: number) {
 const qMenuModel = ref(false)
 const targetRowElement = ref<HTMLElement | null>(null)
 // 递归向上查找，判断元素是否包含指定的class
-function hasClass (element: HTMLElement, className: string) {
+function hasClass(element: HTMLElement, className: string) {
   if (element.classList.contains(className)) return true
   if (element.parentElement) return hasClass(element.parentElement, className)
   return false
 }
-function beforeContextMenuShow (evt: Event) {
+function beforeContextMenuShow(evt: Event) {
   const trElement = getTableRowElement(evt.target as HTMLElement)
   if (trElement) {
     trElement.classList.add('table-row__keep-hover')
@@ -86,14 +92,14 @@ function beforeContextMenuShow (evt: Event) {
 }
 
 // 获取表格行元素
-function getTableRowElement (element: HTMLElement | null) {
+function getTableRowElement(element: HTMLElement | null) {
   if (!element) return
   // 判断 element 是否是行
   if (element.tagName.toLowerCase() === 'tr') return element
   return getTableRowElement(element.parentElement)
 }
 
-function onMenuBeforeHide () {
+function onMenuBeforeHide() {
   // 移除样式 .table-row__keep-hover
   if (targetRowElement.value) {
     targetRowElement.value.classList.remove('table-row__keep-hover')
@@ -103,14 +109,19 @@ function onMenuBeforeHide () {
 // #endregion
 
 // #region 执行菜单命令
-async function onMenuItemClick (event: Event, item: IContextMenuItem) {
+async function onMenuItemClick(item: IContextMenuItem<TContextValue>) {
   // 其它菜单设置成不可点击
   // 当前菜单增加执行动画
   try {
-    console.log('执行菜单命令', event, item, props.value)
     // 开始执行
     if (typeof item.onClick === 'function') {
-      const result = await item.onClick(props.value)
+      const contextValue = getContextValue()
+      const targetValues = selectedValues.value.length > 0 ? selectedValues.value : [contextValue]
+      const actionContext: IActionContext<TContextValue> = {
+        targetValues,
+        clearSelection: () => selectedValues.value = []
+      }
+      const result = await item.onClick(contextValue, actionContext)
       if (result === false) return
     }
     onMenuBeforeHide()
@@ -129,6 +140,7 @@ async function onMenuItemClick (event: Event, item: IContextMenuItem) {
 .active-item {
   scale: 1;
   transition: scale 0.3s;
+
   &:hover {
     // 放大
     scale: 1.1;

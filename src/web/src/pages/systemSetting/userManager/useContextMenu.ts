@@ -6,11 +6,13 @@ import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { UserStatus, UserType } from 'src/stores/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { usePermission } from 'src/compositions/permission'
+import type { addNewRowType } from 'src/compositions/qTableUtils'
+import type { IUserInfo } from 'src/stores/types'
 
-export function useContextMenu (addNewRow: (newRow: Record<string, any>) => void) {
+export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
   const { hasEnterpriseAccess } = usePermission()
   // 右键菜单
-  const userManageContextItems: IContextMenuItem[] = [
+  const userManageContextItems: IContextMenuItem<IUserInfo>[] = [
     {
       name: 'addUser',
       label: '新增',
