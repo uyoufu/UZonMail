@@ -4,6 +4,7 @@
     <Project Path="Plugins/UzonMailProPlugin/UZonMailProPlugin.csproj" />
   </Folder>
   <Project Path="../../tests/UzonMailDotNET.Test/UzonMailDotNET.Test.csproj" />
+  <Project Path="../win-desktop/UzonMailDesktop/UzonMailDesktop.csproj" />
   <Project Path="UzonMailDB/UzonMailDB.csproj" />
   <Project Path="UzonMailService/UzonMailService.csproj" />
   <Project Path="UzonMailUtils/UzonMailUtils.csproj" />
