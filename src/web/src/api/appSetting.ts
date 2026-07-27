@@ -111,6 +111,7 @@ export interface ISendingSetting {
   replyToEmails?: string,
   changeIpAfterEmailCount: number,
   maxCountPerIPDomainHour: number,
+  allowDuplicateSending: boolean,
 }
 
 /**

@@ -27,6 +27,9 @@
           </q-tooltip>
         </q-btn>
 
+        <CommonBtn v-if="duplicateRecipients.length > 0" round flat icon="content_copy" color="warning" class="q-ml-sm"
+          :tooltip="translateSendingTask('viewDuplicateRecipients')" @click.stop="onShowDuplicateRecipientsClick" />
+
         <q-btn round dense flat icon="add" class="q-ml-sm" @click.stop="onSelectExcel" color="grey-7">
           <q-tooltip>
             {{ translateSendingTask('selectData') }}
@@ -40,12 +43,13 @@
 <script lang="ts" setup>
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import logger from 'loglevel'
+import { useDuplicateRecipientAnalysis } from './compositions/useDuplicateRecipientAnalysis'
 
 // 模板数据
-const modelValue = defineModel({
-  type: Array,
+const modelValue = defineModel<Record<string, unknown>[]>({
   default: () => []
 })
+const { duplicateRecipients, onShowDuplicateRecipientsClick } = useDuplicateRecipientAnalysis(modelValue)
 
 // 选择模板数据
 import type { IExcelColumnMapper } from 'src/utils/file'

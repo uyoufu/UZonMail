@@ -7,9 +7,9 @@
 - docs : 网站文档
 - docker: Docker 脚本
 - src
-  - api
-  - web
-  - win-desktop
+  - api: API 层
+  - web：前端 web 应用
+  - win-desktop： Windows 端对 web 应用的封装
 
 ## 语言要求
 
@@ -21,7 +21,7 @@
 
 ## 项目规范
 
-- 项目 api、web、win-desktop 各生成了各自的 codegraph, 优先使用
+- 项目 api、web、win-desktop 各自维护了 codegraph, 优先查询
 
 ## 用户安装软件及命令
 

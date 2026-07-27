@@ -5,7 +5,6 @@ using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.DB.SQL.Core.Files;
 using UzonMail.Utils.Json;
-using UzonMail.Utils.Web.Exceptions;
 
 namespace UzonMail.CorePlugin.Database.SQL.EmailSending
 {
@@ -13,14 +12,23 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
     /// 用于生成发送项
     /// 请确保数据经过验证
     /// </summary>
-    /// <param name="group"></param>
-    /// <param name="userSetting"></param>
-    public class SendingItemsBuilder(SqlContext db, SendingGroup group, int maxSendingBatchSize)
+    /// <param name="db">当前事务的数据库上下文。</param>
+    /// <param name="group">正在创建的发件组。</param>
+    /// <param name="maxSendingBatchSize">合并发件的最大收件人数。</param>
+    /// <param name="allowDuplicateSending">是否保留 Excel 中的重复收件行。</param>
+    /// <param name="excelAttachments">已由创建服务校验过的 Excel 附件映射。</param>
+    public class SendingItemsBuilder(
+        SqlContext db,
+        SendingGroup group,
+        int maxSendingBatchSize,
+        bool allowDuplicateSending,
+        IReadOnlyDictionary<string, FileUsage> excelAttachments
+    )
     {
         /// <summary>
         /// 批量发件时的大小
         /// </summary>
-        private int _batchSize = maxSendingBatchSize;
+        private readonly int _batchSize = maxSendingBatchSize;
 
         /// <summary>
         /// 生成并保存
@@ -29,31 +37,33 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
         public async Task<List<SendingItem>> GenerateAndSave()
         {
             // 获取收件箱
-            List<EmailAddress> allInboxes = await GetAllInboxes();
+            List<SendingRecipient> recipients = await GetAllRecipients();
             // 更新发件箱总数
-            group.InboxesCount = allInboxes.Count;
+            group.InboxesCount = recipients.Count;
 
             // allInboxes 有的是从数据中解析得到的，需要获取其 id
-            var inboxesWithoutId = allInboxes.Where(x => x.Id == 0).ToList();
+            var inboxesWithoutId = recipients.Select(x => x.Inbox).Where(x => x.Id == 0).ToList();
             // 获取当前用户下的发件箱
-            var inboxesEmails = inboxesWithoutId.Select(x => x.Email).ToList();
+            var inboxesEmails = inboxesWithoutId.Select(x => x.Email).Distinct().ToList();
             var inboxes = await db
                 .Inboxes.AsNoTracking()
                 .Where(x => x.UserId == group.UserId && inboxesEmails.Contains(x.Email))
                 .ToListAsync();
             inboxesWithoutId.ForEach(x =>
             {
-                var existInbox = inboxes.FirstOrDefault(i => i.Email == x.Email);
+                var existInbox = inboxes.FirstOrDefault(i =>
+                    string.Equals(i.Email, x.Email, StringComparison.OrdinalIgnoreCase)
+                );
                 if (existInbox == null)
                 {
-                    allInboxes.Remove(x);
+                    recipients.RemoveAll(recipient => ReferenceEquals(recipient.Inbox, x));
                     return;
                 }
                 x.Id = existInbox.Id;
             });
 
             // 生成发件项与收件箱对应关系
-            var sendingIitemes = await GenerateSendingItems(allInboxes);
+            var sendingIitemes = await GenerateSendingItems(recipients);
 
             // 保存到数据库中
             db.SendingItems.AddRange(sendingIitemes);
@@ -119,17 +129,11 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
         }
 
         /// <summary>
-        /// 获取收件箱：发件组和邮件数据自带的收件箱
-        /// 数据关键字为: inbox,inboxName
-        /// 会根据 email 去重
+        /// 获取收件人及其对应的 Excel 行数据。
         /// </summary>
         /// <returns></returns>
-        private async Task<List<EmailAddress>> GetAllInboxes()
+        private async Task<List<SendingRecipient>> GetAllRecipients()
         {
-            if (group.Data == null)
-                return group.Inboxes;
-
-            // 从按单个 Inbox 添加
             List<EmailAddress> inboxes = [];
             inboxes.AddRange(group.Inboxes);
 
@@ -154,22 +158,44 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 );
             }
 
-            // 若有数据，从数据中添加
-            foreach (var data in group.Data)
+            var recipients = inboxes
+                .GroupBy(x => x.Email, StringComparer.OrdinalIgnoreCase)
+                .Select(x => new SendingRecipient(x.First()))
+                .ToList();
+            if (group.Data == null)
+                return recipients;
+
+            var recipientByEmail = recipients.ToDictionary(
+                x => x.Inbox.Email,
+                StringComparer.OrdinalIgnoreCase
+            );
+            foreach (var data in group.Data.OfType<JObject>())
             {
-                var inbox = data.SelectTokenOrDefault("inbox", string.Empty);
-                if (string.IsNullOrEmpty(inbox))
-                    continue;
-                // 判断是否重复
-                if (inboxes.Any(x => x.Email == inbox))
+                var row = new SendingItemExcelData(data);
+                if (string.IsNullOrEmpty(row.Inbox))
                     continue;
 
-                // 查找收件箱名称
-                var inboxName = data.SelectTokenOrDefault("inboxName", string.Empty);
-                inboxes.Add(new EmailAddress() { Email = inbox, Name = inboxName });
+                if (recipientByEmail.TryGetValue(row.Inbox, out var existingRecipient))
+                {
+                    if (existingRecipient.ExcelData == null)
+                    {
+                        existingRecipient.ExcelData = row;
+                        continue;
+                    }
+
+                    if (!allowDuplicateSending)
+                        continue;
+                }
+
+                var recipient = new SendingRecipient(
+                    new EmailAddress { Email = row.Inbox, Name = row.InboxName },
+                    row
+                );
+                recipients.Add(recipient);
+                recipientByEmail.TryAdd(row.Inbox, recipient);
             }
 
-            return inboxes.DistinctBy(x => x.Email).ToList();
+            return recipients;
         }
 
         /// <summary>
@@ -181,7 +207,9 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
         /// </summary>
         /// <param name="inboxes"></param>
         /// <returns></returns>
-        private async Task<List<SendingItem>> GenerateSendingItems(List<EmailAddress> inboxes)
+        private async Task<List<SendingItem>> GenerateSendingItems(
+            List<SendingRecipient> recipients
+        )
         {
             // 合并发件的情况
             if (
@@ -207,9 +235,13 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 // 分批发送
                 List<SendingItem> sendingItemsResult = [];
                 int total = 0;
-                while (total < inboxes.Count)
+                while (total < recipients.Count)
                 {
-                    var inboxesTemp = inboxes.Skip(total).Take(actualBatchSize).ToList();
+                    var inboxesTemp = recipients
+                        .Skip(total)
+                        .Take(actualBatchSize)
+                        .Select(x => x.Inbox)
+                        .ToList();
                     total += inboxesTemp.Count;
 
                     var sendingItem = new SendingItem()
@@ -231,38 +263,15 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 return sendingItemsResult;
             }
 
-            // 非合并数据的情况
-            Dictionary<string, SendingItemExcelData> rowData = [];
-            if (group.Data != null)
-            {
-                foreach (var data in group.Data)
-                {
-                    if (data is not JObject jobj)
-                        continue;
-                    var row = new SendingItemExcelData(jobj);
-                    if (!string.IsNullOrEmpty(row.Inbox) && !rowData.ContainsKey(row.Inbox))
-                        rowData.Add(row.Inbox, row);
-                }
-            }
-
-            // 获取所有的附件
-            var attachmentNameKeys = rowData
-                .Values.SelectMany(x => x.AttachmentNames)
-                .Select(FileStoreService.NormalizeDisplayName)
-                .Where(x => !string.IsNullOrEmpty(x))
-                .Distinct(StringComparer.Ordinal)
-                .ToList();
-            var fileUsageByName = await ResolveExcelAttachments(attachmentNameKeys);
-
             List<SendingItem> sendingItems = [];
-            foreach (var inbox in inboxes)
+            foreach (var recipient in recipients)
             {
                 var sendingItem = new SendingItem()
                 {
                     SendingGroupId = group.Id,
                     UserId = group.UserId,
                     // 对于携带变量的情况，仅支持一对一发件
-                    Inboxes = [inbox],
+                    Inboxes = [recipient.Inbox],
                     CC = group.CcBoxes,
                     BCC = group.BccBoxes,
                     // 附件
@@ -272,8 +281,8 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 // 在发送时，才会设置具体的模板
                 sendingItems.Add(sendingItem);
 
-                // 从数据中获取相关数据
-                if (!rowData.TryGetValue(inbox.Email, out var row))
+                var row = recipient.ExcelData;
+                if (row == null)
                     continue;
 
                 // 设置发件箱
@@ -330,7 +339,7 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                     sendingItem.Attachments = row
                         .AttachmentNames.Select(FileStoreService.NormalizeDisplayName)
                         .Distinct(StringComparer.Ordinal)
-                        .Select(x => fileUsageByName[x])
+                        .Select(x => excelAttachments[x])
                         .ToList();
                 }
 
@@ -342,58 +351,16 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
         }
 
         /// <summary>
-        /// 将 Excel 中的附件名解析为唯一逻辑文件；当前用户文件优先于公开文件。
+        /// 收件人及其可能覆盖默认发送内容的 Excel 行。
         /// </summary>
-        private async Task<Dictionary<string, FileUsage>> ResolveExcelAttachments(
-            IReadOnlyCollection<string> attachmentNameKeys
+        private sealed class SendingRecipient(
+            EmailAddress inbox,
+            SendingItemExcelData? excelData = null
         )
         {
-            if (attachmentNameKeys.Count == 0)
-                return [];
+            public EmailAddress Inbox { get; } = inbox;
 
-            var candidates = await db
-                .FileUsages.Where(x =>
-                    attachmentNameKeys.Contains(x.DisplayNameKey!)
-                    && (x.OwnerUserId == group.UserId || x.IsPublic)
-                )
-                .ToListAsync();
-            Dictionary<string, FileUsage> resolved = [];
-            List<string> unresolvedNames = [];
-
-            foreach (var attachmentNameKey in attachmentNameKeys)
-            {
-                var ownedCandidates = candidates
-                    .Where(x =>
-                        x.DisplayNameKey == attachmentNameKey && x.OwnerUserId == group.UserId
-                    )
-                    .ToList();
-                var matchingCandidates =
-                    ownedCandidates.Count > 0
-                        ? ownedCandidates
-                        : candidates
-                            .Where(x =>
-                                x.DisplayNameKey == attachmentNameKey
-                                && x.OwnerUserId != group.UserId
-                                && x.IsPublic
-                            )
-                            .ToList();
-                if (matchingCandidates.Count != 1)
-                {
-                    unresolvedNames.Add(attachmentNameKey);
-                    continue;
-                }
-
-                resolved.Add(attachmentNameKey, matchingCandidates[0]);
-            }
-
-            if (unresolvedNames.Count > 0)
-            {
-                throw new KnownException(
-                    $"以下 Excel 附件不存在或名称不唯一: {string.Join(", ", unresolvedNames)}"
-                );
-            }
-
-            return resolved;
+            public SendingItemExcelData? ExcelData { get; set; } = excelData;
         }
     }
 }

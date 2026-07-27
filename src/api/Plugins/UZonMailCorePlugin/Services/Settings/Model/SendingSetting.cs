@@ -59,6 +59,11 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
         public int MaxCountPerIPDomainHour { get; set; } = 0;
 
         /// <summary>
+        /// 是否允许同一发件任务向同一收件人发送多封邮件
+        /// </summary>
+        public bool AllowDuplicateSending { get; set; }
+
+        /// <summary>
         /// 回复邮件地址列表
         /// </summary>
         [NotMapped]
@@ -97,6 +102,7 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
             MaxRetryCount = maxRetryCount < 0 ? 3 : maxRetryCount;
             ChangeIpAfterEmailCount = GetIntValue(nameof(ChangeIpAfterEmailCount), 0);
             MaxCountPerIPDomainHour = GetIntValue(nameof(MaxCountPerIPDomainHour), 1200);
+            AllowDuplicateSending = GetBoolValue(nameof(AllowDuplicateSending), false);
         }
     }
 }

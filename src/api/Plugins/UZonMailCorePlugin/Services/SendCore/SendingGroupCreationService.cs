@@ -10,6 +10,7 @@ using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL.Core.Files;
 using UzonMail.Utils.Json;
 using UzonMail.Utils.Web.Exceptions;
 using UzonMail.Utils.Web.Service;
@@ -76,23 +77,31 @@ namespace UzonMail.CorePlugin.Services.SendCore
                             : [];
                 }
 
+                var orgSetting = await settingsService.GetSetting<SendingSetting>(ctx, userId);
+                ValidateDuplicateExcelRecipients(
+                    sendingGroupData.Data,
+                    orgSetting.AllowDuplicateSending
+                );
+                var excelAttachments = await ResolveExcelAttachments(
+                    ctx,
+                    sendingGroupData.Data,
+                    userId
+                );
+
                 sendingGroupData.Status = SendingGroupStatus.Created;
                 sendingGroupData.TotalCount = sendingGroupData.Inboxes.Count;
                 sendingGroupData.UserId = userId;
                 ctx.SendingGroups.Add(sendingGroupData);
                 await ctx.SaveChangesAsync();
 
-                var orgSetting = await settingsService.GetSetting<SendingSetting>(
-                    ctx,
-                    sendingGroupData.UserId
-                );
-
                 await SaveInboxes(sendingGroupData.Data, sendingGroupData.UserId);
 
                 var builder = new SendingItemsBuilder(
                     ctx,
                     sendingGroupData,
-                    orgSetting.MaxSendingBatchSize
+                    orgSetting.MaxSendingBatchSize,
+                    orgSetting.AllowDuplicateSending,
+                    excelAttachments
                 );
                 var items = await builder.GenerateAndSave();
 
@@ -137,6 +146,17 @@ namespace UzonMail.CorePlugin.Services.SendCore
             JArray results = [];
             foreach (var token in data)
             {
+                if (token is not JObject)
+                    continue;
+
+                var inboxEmail = (
+                    token.SelectTokenOrDefault("inbox", string.Empty) ?? string.Empty
+                ).Trim();
+                if (!string.IsNullOrEmpty(inboxEmail))
+                {
+                    token["inbox"] = inboxEmail;
+                }
+
                 var outboxEmail = token.SelectTokenOrDefault("outbox", "");
                 if (!string.IsNullOrEmpty(outboxEmail))
                 {
@@ -202,6 +222,96 @@ namespace UzonMail.CorePlugin.Services.SendCore
             }
 
             _logger.Debug("发件箱验证通过");
+        }
+
+        /// <summary>
+        /// 验证 Excel 中是否包含重复收件人。
+        /// </summary>
+        private static void ValidateDuplicateExcelRecipients(
+            JArray? data,
+            bool allowDuplicateSending
+        )
+        {
+            if (allowDuplicateSending || data == null || data.Count == 0)
+                return;
+
+            var duplicateRecipients = data.OfType<JObject>()
+                .Select(x => (x.SelectTokenOrDefault("inbox", string.Empty) ?? string.Empty).Trim())
+                .Where(x => !string.IsNullOrEmpty(x))
+                .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .Select(x => new { Email = x.First(), Count = x.Count() })
+                .Where(x => x.Count > 1)
+                .ToList();
+            if (duplicateRecipients.Count == 0)
+                return;
+
+            var duplicateDetails = string.Join(
+                ", ",
+                duplicateRecipients.Select(x => $"{x.Email} ({x.Count} 次)")
+            );
+            throw new KnownException($"Excel 中存在重复收件人，当前未开启允许重复发件: {duplicateDetails}");
+        }
+
+        /// <summary>
+        /// 解析并验证 Excel 中指定的附件名称。
+        /// </summary>
+        private static async Task<Dictionary<string, FileUsage>> ResolveExcelAttachments(
+            SqlContext context,
+            JArray? data,
+            long userId
+        )
+        {
+            var attachmentNameKeys =
+                data?.OfType<JObject>()
+                    .SelectMany(x => new SendingItemExcelData(x).AttachmentNames)
+                    .Select(FileStoreService.NormalizeDisplayName)
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Distinct(StringComparer.Ordinal)
+                    .ToList() ?? [];
+            if (attachmentNameKeys.Count == 0)
+                return [];
+
+            var candidates = await context
+                .FileUsages.Where(x =>
+                    attachmentNameKeys.Contains(x.DisplayNameKey!)
+                    && (x.OwnerUserId == userId || x.IsPublic)
+                )
+                .ToListAsync();
+            Dictionary<string, FileUsage> resolved = [];
+            List<string> unresolvedNames = [];
+
+            foreach (var attachmentNameKey in attachmentNameKeys)
+            {
+                var ownedCandidates = candidates
+                    .Where(x => x.DisplayNameKey == attachmentNameKey && x.OwnerUserId == userId)
+                    .ToList();
+                var matchingCandidates =
+                    ownedCandidates.Count > 0
+                        ? ownedCandidates
+                        : candidates
+                            .Where(x =>
+                                x.DisplayNameKey == attachmentNameKey
+                                && x.OwnerUserId != userId
+                                && x.IsPublic
+                            )
+                            .ToList();
+                if (matchingCandidates.Count != 1)
+                {
+                    unresolvedNames.Add(attachmentNameKey);
+                    continue;
+                }
+
+                resolved.Add(attachmentNameKey, matchingCandidates[0]);
+            }
+
+            if (unresolvedNames.Count > 0)
+            {
+                throw new KnownException(
+                    $"以下 Excel 附件不存在或名称不唯一: {string.Join(", ", unresolvedNames)}"
+                );
+            }
+
+            return resolved;
         }
 
         private async Task SaveInboxes(JArray? data, long userId)

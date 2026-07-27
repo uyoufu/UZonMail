@@ -43,6 +43,11 @@
         :debounce="500" type="number" label="最大发件数/IP/域名/小时" placeholder="为 0 时表示不限制">
         <AsyncTooltip :tooltip="['每个发件域名在当前IP下的每小时最大发数', '动态IP单独计算', '小于等于 0 时表示不限制']" />
       </q-input>
+
+      <q-checkbox class="col-auto-4" dense keep-color v-model="outboxSettingRef.allowDuplicateSending" color="secondary"
+        :label="translateBasicSettings('allowDuplicateSending')">
+        <AsyncTooltip :tooltip="translateBasicSettings('allowDuplicateSendingTooltip')" />
+      </q-checkbox>
     </div>
   </q-expansion-item>
 </template>
@@ -52,6 +57,7 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { getSendingSetting, updateSendingSetting } from 'src/api/appSetting'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
+import { translateBasicSettings } from 'src/i18n/helpers'
 
 import type { ISendingSetting } from 'src/api/appSetting';
 import { AppSettingType } from 'src/api/appSetting'
@@ -90,12 +96,13 @@ const outboxSettingRef: Ref<ISendingSetting> = ref({
   minInboxCooldownHours: 0,
   replyToEmails: '',
   changeIpAfterEmailCount: 0,
-  maxCountPerIPDomainHour: -1
+  maxCountPerIPDomainHour: -1,
+  allowDuplicateSending: false
 })
 // 获取设置
 let updateSettingSignal = true
 const expanded = ref(false)
-async function onBeforeShow () {
+async function onBeforeShow() {
   logger.debug('[SendingSetting] when onBeforeShow expanded', expanded.value)
   // 获取设置
   const { data: setting } = await getSendingSetting(props.settingType)
@@ -130,7 +137,7 @@ watch(
 )
 
 import { isEmail } from 'src/utils/validator';
-function validateOutboxSetting () {
+function validateOutboxSetting() {
   if (outboxSettingRef.value.minOutboxCooldownSecond > 0
     && outboxSettingRef.value.maxOutboxCooldownSecond < outboxSettingRef.value.minOutboxCooldownSecond) {
     notifyError('单个发件箱最大发件间隔必须大于最小发件间隔')
