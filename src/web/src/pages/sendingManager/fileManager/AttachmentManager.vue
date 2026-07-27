@@ -6,14 +6,8 @@
       selection="multiple" v-model:selected="selectedRows" v-model:pagination="pagination" virtual-scroll dense
       :loading="loading" :filter="filter" binary-state-sort @request="onTableRequest">
       <template #top-left>
-        <div class="row q-gutter-sm">
-          <CreateBtn :label="t('fileManager.upload')" icon="upload" :tooltip="t('fileManager.upload')"
-            @click="openFileDialog" />
-          <CommonBtn icon="drive_file_move" :label="t('fileManager.move')" :tooltip="t('fileManager.moveSelected')"
-            :disable="selectedRows.length === 0" @click="onMoveSelected" />
-          <DeleteBtn :label="t('fileManager.batchDelete')" :tooltip="t('fileManager.deleteSelected')"
-            :disable="selectedRows.length === 0" @click="onDeleteSelected" />
-        </div>
+        <CreateBtn :label="t('fileManager.upload')" icon="upload" :tooltip="t('fileManager.upload')"
+          @click="openFileDialog" />
       </template>
 
       <template #top-right>
@@ -32,38 +26,25 @@
 <script lang="ts" setup>
 import { format, QTable, type QTableColumn } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import { useDropZone, useFileDialog, useFileSystemAccess } from '@vueuse/core'
+import { useDropZone, useFileDialog } from '@vueuse/core'
 import FileCategoryTree from './FileCategoryTree.vue'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import CreateBtn from 'src/components/quasarWrapper/buttons/CreateBtn.vue'
-import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
-import DeleteBtn from 'src/components/quasarWrapper/buttons/DeleteBtn.vue'
 import FilesUploaderPopup from 'src/components/uploader/FilesUploaderPopup.vue'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { useTableCollapseLeft } from 'src/components/collapseIcon/useCollapseLeft'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
-import { LowCodeFieldType } from 'src/components/lowCode/types'
 import {
-  deleteFileUsage,
-  deleteFileUsages,
   getFileUsagesCount,
   getFileUsagesData,
-  moveFileUsages,
-  updateDisplayName,
   type IFileUsage
 } from 'src/api/file'
-import { getFileCategories } from 'src/api/fileCategory'
-import { getFileReaderId, getFileStreamByReaderId } from 'src/api/fileReader'
-import { createObjectPersistentReader } from 'src/api/pro/objectReader'
-import { useConfig } from 'src/config'
 import { formatDate } from 'src/utils/format'
-import { saveFileSmart } from 'src/utils/file'
-import { confirmOperation, notifySuccess, showComponentDialog, showDialog } from 'src/utils/dialog'
+import { showComponentDialog } from 'src/utils/dialog'
+import { useAttachmentContextMenu } from './useAttachmentContextMenu'
 
 const { t } = useI18n()
-const config = useConfig()
 const selectedCategoryId = ref<number>()
 const fileTableRef = ref<InstanceType<typeof QTable>>()
 const { CollapseLeft, collapseStyleRef, isCollapseGroupList: isCollapseCategoryTree } = useTableCollapseLeft(fileTableRef)
@@ -98,6 +79,7 @@ const { pagination, rows, filter, onTableRequest, loading, refreshTable, selecte
   getRowsNumberCount,
   onRequest
 })
+const { attachmentContextMenuItems } = useAttachmentContextMenu(refreshTable)
 
 function onCategoryChange(categoryId?: number) {
   selectedCategoryId.value = categoryId
@@ -122,97 +104,4 @@ useDropZone(dropZoneRef, {
     if (files) void uploadFiles(files)
   }
 })
-
-async function onDeleteSelected() {
-  const confirmed = await confirmOperation(
-    t('fileManager.deleteConfirmTitle'),
-    t('fileManager.batchDeleteConfirm', { count: selectedRows.value.length })
-  )
-  if (!confirmed) return
-  await deleteFileUsages(selectedRows.value.map(row => row.id))
-  selectedRows.value = []
-  refreshTable()
-  notifySuccess(t('fileManager.deleteSuccess'))
-}
-
-async function onMoveSelected() {
-  const { data: categories } = await getFileCategories()
-  const result = await showDialog({
-    title: t('fileManager.moveSelected'),
-    fields: [{
-      name: 'categoryId',
-      label: t('fileManager.targetCategory'),
-      type: LowCodeFieldType.selectOne,
-      options: categories.map(category => ({
-        label: category.isDefault ? t('fileManager.defaultCategory') : category.name,
-        value: category.id
-      })),
-      mapOptions: true,
-      emitValue: true,
-      required: true
-    }],
-    oneColumn: true
-  })
-  if (!result.ok) return
-  await moveFileUsages(selectedRows.value.map(row => row.id), Number(result.data.categoryId))
-  selectedRows.value = []
-  refreshTable()
-}
-
-const attachmentContextMenuItems = computed<IContextMenuItem<IFileUsage>[]>(() => [
-  { name: 'download', label: t('fileManager.download'), onClick: onDownloadAttachment },
-  { name: 'rename', label: t('fileManager.rename'), onClick: onRenameAttachment },
-  { name: 'share', label: t('fileManager.share'), onClick: onShareAttachment },
-  { name: 'delete', label: t('fileManager.delete'), color: 'negative', onClick: onDeleteAttachment }
-])
-
-async function onDownloadAttachment(row: IFileUsage) {
-  const { data: fileReaderId } = await getFileReaderId(row.id)
-  const extension = row.displayName.split('.').pop() || ''
-  const fileSystemAccess = useFileSystemAccess({
-    dataType: ref<'Text' | 'ArrayBuffer' | 'Blob'>('ArrayBuffer'),
-    types: [{ description: row.displayName, accept: { '*/*': extension ? [`.${extension}`] : [] } }],
-    excludeAcceptAllOption: true
-  })
-  if (fileSystemAccess.isSupported.value) {
-    await fileSystemAccess.create({ suggestedName: row.displayName })
-    const { data } = await getFileStreamByReaderId(fileReaderId)
-    fileSystemAccess.data.value = data
-    await fileSystemAccess.save()
-  } else {
-    await saveFileSmart(row.displayName, `${config.baseUrl}${config.api}/file-reader/${fileReaderId}/stream`)
-  }
-  notifySuccess(t('fileManager.downloadSuccess'))
-}
-
-async function onRenameAttachment(row: IFileUsage) {
-  const result = await showDialog({
-    title: t('fileManager.rename'),
-    fields: [{ name: 'displayName', label: t('fileManager.fileName'), type: LowCodeFieldType.text, required: true, value: row.displayName }],
-    oneColumn: true
-  })
-  if (!result.ok) return
-  await updateDisplayName(row.id, String(result.data.displayName))
-  refreshTable()
-}
-
-async function onShareAttachment(row: IFileUsage) {
-  const confirmed = await confirmOperation(t('fileManager.share'), t('fileManager.shareConfirm'))
-  if (!confirmed) return
-  const { data: objectReaderId } = await createObjectPersistentReader(row.id)
-  await navigator.clipboard.writeText(`${config.baseUrl}/api/pro/object-reader/stream/${objectReaderId}`)
-  notifySuccess(t('fileManager.shareSuccess'))
-}
-
-async function onDeleteAttachment(row: IFileUsage) {
-  const confirmed = await confirmOperation(
-    t('fileManager.deleteConfirmTitle'),
-    t('fileManager.deleteFileConfirm', { name: row.displayName })
-  )
-  if (!confirmed) return
-
-  await deleteFileUsage(row.id)
-  refreshTable()
-  notifySuccess(t('fileManager.deleteSuccess'))
-}
 </script>

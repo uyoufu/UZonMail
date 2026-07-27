@@ -16,13 +16,13 @@
  */
 
 import { useDialogPluginComponent, format, throttle } from 'quasar'
-import { PropType } from 'vue'
+import type { PropType } from 'vue'
 defineEmits([
   // 必需；需要指定一些事件
   // （组件将通过useDialogPluginComponent()发出）
   ...useDialogPluginComponent.emits
 ])
-const { dialogRef, onDialogHide, onDialogOK/* onDialogCancel */ } = useDialogPluginComponent()
+const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
 
 const props = defineProps({
   files: {
@@ -32,10 +32,13 @@ const props = defineProps({
   categoryId: Number
 })
 import { uploadFileObject } from 'src/api/file'
+import { HttpClientError } from 'src/api/base/httpClient'
 import dayjs from 'dayjs'
-import { fileSha256, IFileSha256Callback } from 'src/utils/file'
-import { AxiosProgressEvent } from 'axios'
+import { fileSha256, type IFileSha256Callback } from 'src/utils/file'
+import type { AxiosProgressEvent } from 'axios'
 import { translateComponents } from 'src/i18n/helpers'
+import { notifyError } from 'src/utils/dialog'
+import logger from 'loglevel'
 
 interface IProgressInfo {
   virtualFile: boolean
@@ -83,7 +86,7 @@ const labels = computed(() => {
   ]
   return results
 })
-function labelClass (index: number) {
+function labelClass(index: number) {
   const isOdd = index % 2
   return {
     'text-secondary': isOdd,
@@ -104,35 +107,42 @@ const updateProgressInfo = throttle((index: number, message: string, transferred
   }
 
   const info = progressInfos.value[index] as IProgressInfo
+  info.virtualFile = virtualFile
   info.message = message
   info.transferredBytes = transferredBytes
   info.totalBytes = totalBytes
 }, 300)
 onMounted(async () => {
   let index = 0
-  function sha256Callback (callbackData: IFileSha256Callback) {
+  function sha256Callback(callbackData: IFileSha256Callback) {
     updateProgressInfo(index,
       translateComponents('calculatingFileHash', { fileName: callbackData.file.name }),
       callbackData.computed, callbackData.file.size, true)
   }
 
-  function onUploadProgress (progressEvent: AxiosProgressEvent) {
+  function onUploadProgress(progressEvent: AxiosProgressEvent) {
     const file = props.files[index] as File
     updateProgressInfo(index,
       translateComponents('uploadingFile', { fileName: file.name }),
       progressEvent.loaded, progressEvent.total || 1)
   }
 
-  const fileIds: number[] = []
-  for (; index < props.files.length; index++) {
-    const file = props.files[index] as File
-    const sha256 = await fileSha256(file, sha256Callback)
-    const { data: uploadResult } = await uploadFileObject(sha256, file, props.categoryId, onUploadProgress)
-    fileIds.push(uploadResult.fileUsageId)
-  }
+  try {
+    const fileIds: number[] = []
+    for (; index < props.files.length; index++) {
+      const file = props.files[index] as File
+      const sha256 = await fileSha256(file, sha256Callback)
+      const { data: uploadResult } = await uploadFileObject(sha256, file, props.categoryId, onUploadProgress)
+      fileIds.push(uploadResult.fileUsageId)
+    }
 
-  // 上传完成后，返回结果
-  onDialogOK(fileIds)
+    onDialogOK(fileIds)
+  } catch (error) {
+    logger.error('[FilesUploaderPopup] File upload failed:', error)
+    // HttpClient 已经展示后端或网络错误，只有本地哈希等异常需要在此补充提示。
+    if (!(error instanceof HttpClientError)) notifyError(translateComponents('uploadFailed'))
+    onDialogCancel()
+  }
 })
 </script>
 

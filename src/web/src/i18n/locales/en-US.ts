@@ -105,6 +105,7 @@ export default {
       whitelist: 'Whitelist'
     },
     upload: 'Upload',
+    uploadFailed: 'File upload failed',
     uploadingFile: 'Uploading {fileName}',
     waitingForUpload: 'Waiting for upload...'
   },

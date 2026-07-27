@@ -4,6 +4,7 @@ import axios from 'axios'
 import logger from 'loglevel'
 
 import type { IAxiosRequestConfig, IHttpClientOptions, IResponseData } from './types'
+import { HttpClientError, HttpClientErrorCode } from './httpClientError'
 import { useUserInfoStore } from 'src/stores/user'
 import { StatusCode } from 'status-code-enum'
 import { notifyError } from 'src/utils/dialog'
@@ -11,6 +12,11 @@ import { notifyError } from 'src/utils/dialog'
 import { getDataFromCache, setDataToCache } from './httpCache'
 
 import { useConfig } from 'src/config'
+
+export { HttpClientError } from './httpClientError'
+
+const defaultRequestErrorMessage = '请求失败'
+const invalidResponseMessage = '服务器响应格式不正确'
 
 /**
  * HttpClient 封装
@@ -69,65 +75,96 @@ export default class HttpClient {
   private setResponseInterceptors (axiosInstance: AxiosInstance) {
     axiosInstance.interceptors.response.use(async (response) => {
       // 有可能后端返回的是流
-      if (response.headers['content-type'] === 'application/octet-stream') {
-        console.log('response is stream:', response)
-        return response
+      if (this.isBinaryResponse(response)) return response
+
+      if (!this.isResponseData(response.data)) {
+        const invalidResponseError = new HttpClientError(
+          invalidResponseMessage,
+          HttpClientErrorCode.invalidResponse,
+          { axiosResponse: response }
+        )
+        this.notifyRequestError(invalidResponseError, response.config as IAxiosRequestConfig)
+        return Promise.reject(invalidResponseError)
       }
 
-
-      const data = response.data as IResponseData<any>
-      logger.debug('[HttpClient] Response data:', data)
+      const responseData = response.data
+      logger.debug('[HttpClient] Response data:', responseData)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-      if (data.code === StatusCode.SuccessOK)
+      if (responseData.code === StatusCode.SuccessOK)
         return response
 
-      // 非 200 状态码，进行提示
       const config = response.config as IAxiosRequestConfig<any>
-
-      // 处理错误
-      if (this._options.notifyError && !config.stopNotifyError) {
-        // 提示错误
-        notifyError(data.message)
-      }
+      const requestError = new HttpClientError(responseData.message, responseData.code, {
+        responseData,
+        axiosResponse: response
+      })
+      this.notifyRequestError(requestError, config)
 
       // 允许通过错误，返回结果
       if (config.passError)
         return response
 
-      // 返回错误
-      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-      return Promise.reject(data)
-
+      return Promise.reject(requestError)
     },
       // 当 response.status 不是 200 时触发
       async (error) => {
-        logger.error('[HttpClient] Response error:', error)
-        if (!error.response && error.code) {
-          // 当不阻止错误通知时，进行提示
-          if (!error.config.stopNotifyError)
-            notifyError(error.code)
-          return Promise.reject(error as Error)
-        }
-
-        const response = error.response as AxiosResponse
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-        if (response.status === StatusCode.ClientErrorUnauthorized) {
+        const requestError = this.normalizeRequestError(error)
+        logger.error('[HttpClient] Response error:', requestError)
+        const config = axios.isAxiosError(error)
+          ? error.config as IAxiosRequestConfig | undefined
+          : undefined
+        if (requestError.axiosResponse?.status === StatusCode.ClientErrorUnauthorized) {
           // 退出登录
           await this.logout()
-          return Promise.reject(error as Error)
+        } else {
+          this.notifyRequestError(requestError, config)
         }
 
-        if (!error.config.stopNotifyError) {
-          if (!response.data) {
-            // 其它错误，进行提示，后端返回的错误，都会进行消息展示
-            notifyError(response.statusText)
-          } else {
-            notifyError(error.message)
-          }
-        }
-
-        return Promise.reject(error as Error)
+        return Promise.reject(requestError)
       })
+  }
+
+  private isResponseData(value: unknown): value is IResponseData<unknown> {
+    if (!value || typeof value !== 'object') return false
+    const responseData = value as Partial<IResponseData<unknown>>
+    return typeof responseData.code === 'number'
+      && typeof responseData.message === 'string'
+      && typeof responseData.ok === 'boolean'
+      && 'data' in responseData
+  }
+
+  private isBinaryResponse(response: AxiosResponse): boolean {
+    const contentType = response.headers['content-type']
+    return typeof contentType === 'string' && contentType.toLowerCase().includes('application/octet-stream')
+  }
+
+  private normalizeRequestError(error: unknown): HttpClientError {
+    if (error instanceof HttpClientError) return error
+
+    if (axios.isAxiosError(error)) {
+      const axiosResponse = error.response
+      const responseData = this.isResponseData(axiosResponse?.data) ? axiosResponse.data : undefined
+      const message = responseData?.message || error.message || axiosResponse?.statusText || defaultRequestErrorMessage
+      const code = responseData?.code
+        ?? axiosResponse?.status
+        ?? error.code
+        ?? HttpClientErrorCode.unknown
+      return new HttpClientError(message, code, {
+        responseData,
+        axiosResponse,
+        cause: error
+      })
+    }
+
+    const message = error instanceof Error && error.message
+      ? error.message
+      : defaultRequestErrorMessage
+    return new HttpClientError(message, HttpClientErrorCode.unknown, { cause: error })
+  }
+
+  private notifyRequestError(error: HttpClientError, config?: IAxiosRequestConfig): void {
+    if (!this._options.notifyError || config?.stopNotifyError) return
+    notifyError(error.message)
   }
 
   // 退出登录
@@ -149,9 +186,8 @@ export default class HttpClient {
   // #region 对请求返回值的data进行解构，方便前端使用
   private destructureAxiosResponse<R> (response: AxiosResponse<IResponseData<R>>): IResponseData<R> {
     let data = response.data
-    // console.log('destructureAxiosResponse:', response)
     // 如果是流，要单独处理
-    if (response.headers['content-type'] === 'application/octet-stream') {
+    if (this.isBinaryResponse(response)) {
       data = {
         data: response.data as unknown as R,
         code: StatusCode.SuccessOK,
@@ -159,9 +195,7 @@ export default class HttpClient {
         ok: true
       }
     }
-    data.axiosResponse = response
-
-    return data
+    return { ...data, axiosResponse: response }
   }
 
   /**

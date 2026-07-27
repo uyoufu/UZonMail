@@ -100,6 +100,7 @@ export default {
       whitelist: '白名单'
     },
     upload: '上传',
+    uploadFailed: '上传文件失败',
     uploadingFile: '正在上传 {fileName}',
     waitingForUpload: '等待上传中...'
   },
@@ -523,4 +524,3 @@ export default {
     totalItems: '... 等共 {count} {unit}'
   }
 }
-

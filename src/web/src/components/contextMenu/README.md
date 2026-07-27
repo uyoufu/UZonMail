@@ -48,7 +48,7 @@ const tagContextItems: IContextMenuItem<TagItem>[] = [
   <q-table v-model:selected="selectedRows" :rows="rows" :columns="columns" selection="multiple">
     <template #body-cell-actions="props">
       <q-td :props="props">
-        <ContextMenu :items="rowContextItems" :value="props.row" v-model="selectedRows" />
+        <ContextMenu :items="rowContextItems" :value="props.row" v-model:selected-values="selectedRows" />
       </q-td>
     </template>
   </q-table>

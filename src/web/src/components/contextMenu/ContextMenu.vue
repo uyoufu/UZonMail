@@ -27,7 +27,7 @@ const props = defineProps<{
   targetClass?: string
 }>()
 
-const selectedValues = defineModel<TContextValue[]>({
+const selectedValues = defineModel<TContextValue[]>('selectedValues', {
   default: () => []
 })
 
