@@ -32,14 +32,15 @@ import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
 
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'name',
     required: true,
-    label: '变量名',
+    label: t('variables.name'),
     align: 'left',
     field: 'name',
     sortable: true
@@ -47,7 +48,7 @@ const columns: QTableColumn[] = [
   {
     name: 'description',
     required: true,
-    label: '描述',
+    label: t('global.description'),
     align: 'left',
     field: 'description',
     sortable: true
@@ -55,7 +56,7 @@ const columns: QTableColumn[] = [
   {
     name: 'functionBody',
     required: true,
-    label: '表达式',
+    label: t('global.expression'),
     align: 'left',
     field: 'functionBody',
     sortable: true
@@ -63,13 +64,13 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '创建日期',
+    label: t('global.createDate'),
     align: 'left',
     field: 'createDate',
     format: formatDate, // format 需要的 value 是 string
     sortable: true
   }
-]
+])
 
 import { getJsFunctionDefinitionsCount, getJsFunctionDefinitionsData } from 'src/api/pro/jsFunctionDefinition'
 import type { IJsFunctionDefinition } from 'src/api/pro/jsFunctionDefinition'

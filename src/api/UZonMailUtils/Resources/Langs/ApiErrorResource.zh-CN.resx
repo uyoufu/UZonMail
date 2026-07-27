@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="RequestFailed" xml:space="preserve"><value>请求失败</value></data>
+  <data name="InvalidRequest" xml:space="preserve"><value>请求参数无效</value></data>
+  <data name="Unauthorized" xml:space="preserve"><value>未授权访问</value></data>
+  <data name="TokenExpired" xml:space="preserve"><value>登录已过期，请重新登录</value></data>
+  <data name="UserNotFound" xml:space="preserve"><value>用户不存在</value></data>
+  <data name="InvalidCredentials" xml:space="preserve"><value>用户名或密码错误</value></data>
+  <data name="ResourceNotFound" xml:space="preserve"><value>未找到所请求的资源</value></data>
+  <data name="ValidationFailed" xml:space="preserve"><value>数据校验失败</value></data>
+  <data name="OperationNotAllowed" xml:space="preserve"><value>当前操作不被允许</value></data>
+</root>

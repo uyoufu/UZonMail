@@ -3,7 +3,7 @@
     <q-card class='column justify-start q-pa-sm'>
       <div class="text-subtitle1 q-mb-md text-primary row items-center">
         <div>
-          {{ title }}
+          {{ displayTitle }}
         </div>
         <q-circular-progress v-if="existSendingGroupId" class="q-ml-sm" rounded indeterminate size="16px"
           :thickness="0.3" color="primary" track-color="secondary" center-color="white">
@@ -16,14 +16,15 @@
         <q-circular-progress rounded indeterminate size="40px" :thickness="0.3" color="primary" track-color="secondary"
           center-color="white" class="q-mb-md">
         </q-circular-progress>
-        <div>正在处理发件数据, 请稍候...</div>
+        <div>{{ t('sendingProgress.processing') }}</div>
       </div>
 
       <div v-if="existSendingGroupId" class="row justify-end q-mt-md q-gutter-sm">
-        <CancelBtn :loading="isSendingCanceling" @click="OnCancelSending" tooltip="取消发件" />
+        <CancelBtn :loading="isSendingCanceling" @click="OnCancelSending" :tooltip="t('sendingProgress.cancel')" />
         <CommonBtn :loading="isSendingToggling" @click="onToggleTaskSending" :label="toggleLabel"
           :tooltip="toggleTooltip" />
-        <OkBtn @click="onSendBackGround" label="后台" tooltip="在后台发件" />
+        <OkBtn @click="onSendBackGround" :label="t('sendingProgress.background')"
+          :tooltip="t('sendingProgress.backgroundTooltip')" />
       </div>
 
     </q-card>
@@ -49,6 +50,7 @@ import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
+import { t } from 'src/i18n/helpers'
 
 import logger from 'loglevel'
 
@@ -68,9 +70,10 @@ const props = defineProps({
 
   title: {
     type: String,
-    default: () => '正在发件'
+    default: ''
   }
 })
+const displayTitle = computed(() => props.title || t('sendingProgress.defaultTitle'))
 
 const sendingGroupIdRef = ref(props.sendingGroupId)
 onMounted(async () => {
@@ -135,7 +138,7 @@ subscribeOne(UzonMailClientMethods.sendingGroupProgressChanged, onEmailGroupSend
 import { cancelSending, pauseSending, restartSending } from 'src/api/emailSending'
 const isSendingCanceling = ref(false)
 async function OnCancelSending () {
-  const confirm = await confirmOperation('取消发件', '确定取消发件吗？')
+  const confirm = await confirmOperation(t('sendingProgress.cancel'), t('sendingProgress.cancelConfirm'))
   if (!confirm) return
 
   isSendingCanceling.value = true
@@ -143,17 +146,17 @@ async function OnCancelSending () {
   await cancelSending(sendingGroupIdRef.value as number)
   isSendingCanceling.value = false
 
-  notifySuccess('取消成功')
+  notifySuccess(t('sendingProgress.cancelled'))
   // 关闭窗体
   onDialogCancel()
 }
 
 const isSendingPause = ref(false)
 const toggleLabel = computed(() => {
-  return isSendingPause.value ? '继续' : '暂停'
+  return isSendingPause.value ? t('sendingProgress.resume') : t('sendingProgress.pause')
 })
 const toggleTooltip = computed(() => {
-  return isSendingPause.value ? '继续发件' : '暂停发件'
+  return isSendingPause.value ? t('sendingProgress.resumeTooltip') : t('sendingProgress.pauseTooltip')
 })
 
 const isSendingToggling = ref(false)

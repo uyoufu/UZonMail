@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="RequestFailed" xml:space="preserve"><value>Request failed.</value></data>
+  <data name="InvalidRequest" xml:space="preserve"><value>The request is invalid.</value></data>
+  <data name="Unauthorized" xml:space="preserve"><value>Unauthorized.</value></data>
+  <data name="TokenExpired" xml:space="preserve"><value>Your session has expired. Please sign in again.</value></data>
+  <data name="UserNotFound" xml:space="preserve"><value>User not found.</value></data>
+  <data name="InvalidCredentials" xml:space="preserve"><value>The user name or password is incorrect.</value></data>
+  <data name="ResourceNotFound" xml:space="preserve"><value>The requested resource was not found.</value></data>
+  <data name="ValidationFailed" xml:space="preserve"><value>Validation failed.</value></data>
+  <data name="OperationNotAllowed" xml:space="preserve"><value>This operation is not allowed.</value></data>
+</root>

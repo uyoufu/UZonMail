@@ -6,18 +6,18 @@
     </div>
 
     <div v-if="createDate" class="row justify-start items-center">
-      <span>注册日期：</span>
+      <span>{{ t('profile.registrationDate') }}</span>
       <span class="text-secondary">{{ createDate }}</span>
     </div>
 
     <div v-if="userRole" class="row justify-start items-center">
-      <span>账户角色：</span>
+      <span>{{ t('profile.accountRole') }}</span>
       <span class="text-secondary">{{ userRole }}</span>
     </div>
 
     <div class="row justify-end items-center q-mt-lg">
-      <CommonBtn label="修改头像" color="secondary" class="q-mr-md" @click="onChangeUserAvatar" />
-      <CommonBtn label="修改密码" @click="onChangeUserPassword" />
+      <CommonBtn :label="t('profile.changeAvatar')" color="secondary" class="q-mr-md" @click="onChangeUserAvatar" />
+      <CommonBtn :label="t('profile.changePassword')" @click="onChangeUserPassword" />
     </div>
   </q-card>
 </template>
@@ -28,6 +28,7 @@ import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import dayjs from 'dayjs'
 
 import { useUserInfoStore } from 'src/stores/user'
+import { t } from 'src/i18n/helpers'
 const userInfoStore = useUserInfoStore()
 
 import { getUserInfo, changeUserPassword, updateUserAvatar } from 'src/api/user'
@@ -47,8 +48,8 @@ const createDate = computed(() => {
 
 // 当前角色
 const userRole = computed(() => {
-  if (userInfo.value.isSuperAdmin) return '超级管理员'
-  return '普通用户'
+  if (userInfo.value.isSuperAdmin) return t('profile.superAdmin')
+  return t('profile.normalUser')
 })
 
 /**
@@ -59,20 +60,20 @@ import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { notifySuccess } from 'src/utils/dialog'
 async function onChangeUserPassword () {
   const result = await showDialog({
-    title: '修改密码',
+    title: t('profile.changePassword'),
     fields: [
       {
         name: 'oldPassword',
-        label: '旧密码',
+        label: t('profile.oldPassword'),
         type: LowCodeFieldType.text,
-        placeholder: '请输入旧密码',
+        placeholder: t('profile.enterOldPassword'),
         value: ''
       },
       {
         name: 'newPassword',
-        label: '新密码',
+        label: t('profile.newPassword'),
         type: LowCodeFieldType.password,
-        placeholder: '请输入新密码',
+        placeholder: t('profile.enterNewPassword'),
         value: ''
       }
     ],
@@ -84,7 +85,7 @@ async function onChangeUserPassword () {
 
   if (!result.ok) return
 
-  notifySuccess(`密码修改成功! 新密码为：${result.data.newPassword}`)
+  notifySuccess(t('profile.passwordChanged', { password: result.data.newPassword }))
 }
 
 /**

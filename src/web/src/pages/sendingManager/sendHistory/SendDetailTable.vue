@@ -6,7 +6,7 @@
       <div class="row justify-start items-center q-gutter-sm">
         <q-btn dense icon="west" class="q-mr-sm" flat size="sm" @click="goBackToSendHistory">
           <q-tooltip>
-            返回到历史发件
+            {{ t('sendDetail.back') }}
           </q-tooltip>
         </q-btn>
 
@@ -17,7 +17,7 @@
         </q-tabs>
 
         <!-- <div class="text-subtitle1">发件明细</div> -->
-        <ExportBtn flat tooltip="导出当前数据" @click="onExportCurrentSendingItems"></ExportBtn>
+        <ExportBtn flat :tooltip="t('sendDetail.export')" @click="onExportCurrentSendingItems"></ExportBtn>
       </div>
     </template>
 
@@ -48,6 +48,7 @@
 
 <script lang="ts" setup>
 import { getSendingItemsCount, getSendingItemsData, SendingItemStatus } from 'src/api/sendingItem'
+import { t } from 'src/i18n/helpers'
 
 // 定义 props
 const vueProps = defineProps({
@@ -57,13 +58,13 @@ const vueProps = defineProps({
   }
 })
 const statusTab = ref(-1)
-const statusTabOptions = [
-  { label: '全部', value: -1 },
-  { label: '发送中', value: SendingItemStatus.Pending },
-  { label: '未发送', value: SendingItemStatus.Created },
-  { label: '成功', value: SendingItemStatus.Success },
-  { label: '失败', value: SendingItemStatus.Failed }
-]
+const statusTabOptions = computed(() => [
+  { label: t('sendDetail.all'), value: -1 },
+  { label: t('sendDetail.sending'), value: SendingItemStatus.Pending },
+  { label: t('sendDetail.notSent'), value: SendingItemStatus.Created },
+  { label: t('sendDetail.success'), value: SendingItemStatus.Success },
+  { label: t('sendDetail.failed'), value: SendingItemStatus.Failed }
+])
 watch(statusTab, () => {
   refreshTable()
 })
@@ -78,12 +79,12 @@ import type { IRequestPagination, TTableFilterObject } from 'src/compositions/ty
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'subject',
     required: true,
-    label: '主题',
+    label: t('sendDetail.subject'),
     align: 'left',
     field: 'subject',
     sortable: true
@@ -91,7 +92,7 @@ const columns: QTableColumn[] = [
   {
     name: 'fromEmail',
     required: true,
-    label: '发件箱',
+    label: t('sendDetail.outbox'),
     align: 'left',
     field: 'fromEmail',
     sortable: true
@@ -99,7 +100,7 @@ const columns: QTableColumn[] = [
   {
     name: 'inboxes',
     required: true,
-    label: '收件箱',
+    label: t('sendDetail.inbox'),
     align: 'left',
     field: 'inboxes',
     sortable: true,
@@ -110,7 +111,7 @@ const columns: QTableColumn[] = [
   {
     name: 'status',
     required: true,
-    label: '状态',
+    label: t('global.status'),
     align: 'left',
     field: 'status',
     sortable: true,
@@ -119,13 +120,13 @@ const columns: QTableColumn[] = [
   {
     name: 'sendDate',
     required: false,
-    label: '发送日期',
+    label: t('sendDetail.sendDate'),
     align: 'left',
     field: 'sendDate',
     format: v => formatDate(v),
     sortable: true
   }
-]
+])
 
 
 async function getRowsNumberCount(filterObj: TTableFilterObject) {
@@ -215,7 +216,7 @@ const { sendDetailContextItems, ContextMenu } = useContextMenu()
 // 导出
 async function onExportCurrentSendingItems() {
   if (rows.value.length === 0) {
-    notifyError('数据为空')
+    notifyError(t('sendDetail.emptyData'))
     return
   }
 
@@ -226,7 +227,7 @@ async function onExportCurrentSendingItems() {
     limit: pagination.value.rowsNumber
   })
   // 生成 headerMaps
-  const headerMaps: IExcelColumnMapper[] = columns.map(x => {
+  const headerMaps: IExcelColumnMapper[] = columns.value.map(x => {
     return {
       headerName: x.label,
       fieldName: x.field as string,
@@ -235,13 +236,13 @@ async function onExportCurrentSendingItems() {
     }
   })
   headerMaps.push({
-    headerName: '发送结果',
+    headerName: t('sendDetail.result'),
     fieldName: 'sendResult'
   })
-  const statusLabel = statusTabOptions.find(x => x.value === statusTab.value)?.label
+  const statusLabel = statusTabOptions.value.find(x => x.value === statusTab.value)?.label
   const writerParams: IExcelWriterParams = {
     mappers: headerMaps,
-    fileName: `${sendingGroupId.value}-发送明细-${statusLabel}.xlsx`,
+    fileName: t('sendDetail.exportFile', { id: sendingGroupId.value, status: statusLabel }),
     strict: true
   }
   await writeExcel(allRows, writerParams)

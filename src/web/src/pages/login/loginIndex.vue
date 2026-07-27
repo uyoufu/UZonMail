@@ -38,7 +38,7 @@
     <div class="row justify-center items-center q-mb-lg text-secondary">
       <div class="text-primary">{{ translateLoginPage('version') }}:&nbsp;&nbsp;</div>
       <div>{{ translateLoginPage('client') }} - {{ clientVersion }},&nbsp;&nbsp;</div>
-      <div :class="serverVersionClass">{{ translateLoginPage('server') }} - {{ serverVersion }}</div>
+      <div :class="serverVersionClass">{{ translateLoginPage('server') }} - {{ isServerVersionLoading ? translateLoginPage('connecting') : serverVersion }}</div>
     </div>
   </div>
 </template>
@@ -115,14 +115,16 @@ import { useConfig } from 'src/config'
 import { getServerVersion } from 'src/api/system'
 const config = useConfig()
 const clientVersion = ref(config.version)
-const serverVersion = ref('connecting...')
+const serverVersion = ref('')
+const isServerVersionLoading = ref(true)
 onMounted(async () => {
   const { data: version } = await getServerVersion()
   serverVersion.value = version
+  isServerVersionLoading.value = false
 })
 const serverVersionClass = computed(() => {
   return {
-    'text-negative': serverVersion.value === 'connecting...'
+    'text-negative': isServerVersionLoading.value
   }
 })
 // #endregion

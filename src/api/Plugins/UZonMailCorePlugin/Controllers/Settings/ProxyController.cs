@@ -8,6 +8,7 @@ using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.Settings;
 using UzonMail.Utils.Web.PagingQuery;
 using UzonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Resources.Langs;
 
 namespace UzonMail.CorePlugin.Controllers.Settings
 {
@@ -32,7 +33,7 @@ namespace UzonMail.CorePlugin.Controllers.Settings
             var isExist = await proxyService.ValidateProxyName(name);
             if (isExist)
             {
-                return ResponseResult<bool>.Fail(isExist.Message);
+                return ResponseResult<bool>.Fail(new LocalizedApiError(ApiErrorKey.OperationNotAllowed));
             }
             return true.ToSuccessResponse();
         }
@@ -48,13 +49,13 @@ namespace UzonMail.CorePlugin.Controllers.Settings
             var isExist = await proxyService.ValidateProxyName(userProxy.Name);
             if (isExist)
             {
-                return ResponseResult<Proxy>.Fail(isExist.Message);
+                return ResponseResult<Proxy>.Fail(new LocalizedApiError(ApiErrorKey.OperationNotAllowed));
             }
 
             // 验证代理设置是否合法
             if (!ProxyInfo.CanParse(userProxy.Url))
             {
-                return ResponseResult<Proxy>.Fail("代理格式不正确");
+                return ResponseResult<Proxy>.Fail(new LocalizedApiError(ApiErrorKey.InvalidRequest));
             }
 
             var proxy = await proxyService.CreateProxy(userProxy);

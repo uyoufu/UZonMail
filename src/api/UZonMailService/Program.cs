@@ -48,7 +48,7 @@ var services = builder.Services;
 Console.WriteLine($"Current Environment：{builder.Environment.EnvironmentName}");
 
 // 多语言
-services.AddI18N(["zh-CN", "en"]);
+services.AddI18N(["zh-CN", "en-US"]);
 
 // 保证只有一个实例
 // services.UseSingleApp();
@@ -86,8 +86,9 @@ var mvcBuilder = services
     .AddControllers(option =>
     {
         // 添加全局异常处理
-        option.Filters.Add(new KnownExceptionFilter());
-        option.Filters.Add(new TokenExpiredFilter());
+        option.Filters.AddService<KnownExceptionFilter>();
+        option.Filters.AddService<TokenExpiredFilter>();
+        option.Filters.AddService<LocalizedResponseFilter>();
     })
     .AddNewtonsoftJson(x =>
     {

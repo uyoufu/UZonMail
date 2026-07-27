@@ -2,6 +2,7 @@
 import type { QTableColumn } from 'quasar'
 import type { IQTableInitParams, TTableFilterObject, IQTablePagination } from './types'
 import QTableIndex from 'src/components/tableComponents/TableIndex.vue'
+import { t } from 'src/i18n/helpers'
 
 /** 表格行中可作为定位字段使用的字符串键。 */
 export type TableRowKey<TTableRow extends object> = Extract<keyof TTableRow, string>
@@ -253,7 +254,9 @@ export function useQTableIndex() {
   // 序号
   const indexColumn: QTableColumn = {
     name: 'index',
-    label: '序号',
+    get label () {
+      return t('global.index')
+    },
     align: 'left',
     field: (v) => v
   }

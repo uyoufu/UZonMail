@@ -1,13 +1,15 @@
 <template>
   <div class="column unsubscribe-page_container">
     <div v-html="unsubscribeHtml" :inert="true"></div>
-    <CommonBtn class="q-mt-xl self-center" :label="btnLabel" @click="onUnsubscribeClicked" size="md" />
+    <CommonBtn class="q-mt-xl self-center" :label="btnLabel" :disable="diableUnsubscribeBtn"
+      @click="onUnsubscribeClicked" size="md" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import { useI18n } from 'vue-i18n'
+import { getCurrentLocale } from 'src/i18n/helpers'
 const { t } = useI18n()
 
 const props = defineProps({
@@ -28,7 +30,7 @@ import { isUnsubscribed, unsubscribe } from 'src/api/pro/unsubscribe'
 
 const route = useRoute()
 const $q = useQuasar()
-onMounted(async () => {
+async function loadUnsubscribePage () {
   // 若有传递 unsubscribeId, 则请求 unsubscribeId 对应的 html
   if (props.htmlContent) {
     unsubscribeHtml.value = props.htmlContent
@@ -47,16 +49,23 @@ onMounted(async () => {
     const { data: isUnsubscribedResult } = await isUnsubscribed(token.value)
     if (isUnsubscribedResult) {
       diableUnsubscribeBtn.value = true
-      btnLabel.value = t('unsubscribePage.unsubscribed')
     }
   }
+}
+
+onMounted(loadUnsubscribePage)
+
+watch(getCurrentLocale(), async () => {
+  if (!props.htmlContent)
+    await loadUnsubscribePage()
 })
 
 const unsubscribeHtml = ref('<div>empty</div>')
-const btnLabel = ref(t('unsubscribePage.unsubscribe'))
+const btnLabel = computed(() => diableUnsubscribeBtn.value
+  ? t('unsubscribePage.unsubscribed')
+  : t('unsubscribePage.unsubscribe'))
 const diableUnsubscribeBtn = ref(false)
 async function onUnsubscribeClicked () {
-  btnLabel.value = t('unsubscribePage.unsubscribed')
   diableUnsubscribeBtn.value = true
   if (!token.value) {
     return

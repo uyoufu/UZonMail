@@ -24,14 +24,15 @@ import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'email',
     required: true,
-    label: '退订邮箱',
+    label: t('statisticsReport.unsubscribeEmail'),
     align: 'left',
     field: 'email',
     sortable: true
@@ -39,7 +40,7 @@ const columns: QTableColumn[] = [
   {
     name: 'host',
     required: false,
-    label: '退订时所在 IP',
+    label: t('statisticsReport.unsubscribeIp'),
     align: 'left',
     field: 'host',
     sortable: true
@@ -47,13 +48,13 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: true,
-    label: '日期',
+    label: t('statisticsReport.date'),
     align: 'left',
     field: 'createDate',
     sortable: true,
     format: v => formatDate(v)
   }
-]
+])
 
 import { getUnsubscribesCount, getUnsubscribesData } from 'src/api/pro/unsubscribe'
 

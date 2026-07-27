@@ -35,24 +35,25 @@ import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'name',
     required: true,
-    label: '名称',
+    label: t('global.name'),
     align: 'left',
     field: 'name',
     sortable: true
   },
   {
     name: 'description',
-    label: '描述',
+    label: t('global.description'),
     align: 'left',
     field: 'description',
     sortable: true
@@ -60,7 +61,7 @@ const columns: QTableColumn[] = [
   {
     name: 'expireDate',
     required: false,
-    label: '有效期',
+    label: t('global.expireDate'),
     align: 'left',
     field: 'expireDate',
     format: formatDate, // format 需要的 value 是 string
@@ -68,12 +69,12 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'enable',
-    label: '状态',
+    label: t('global.status'),
     align: 'left',
     field: 'enable',
     sortable: true
   },
-]
+])
 
 import { getApiAccessCount, getApiAccessData } from 'src/api/pro/apiAccess'
 

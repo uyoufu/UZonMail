@@ -113,6 +113,23 @@ export default {
   },
   confirm: 'Confirm',
   confirmOperation: 'Confirm operation',
+  crawlerResult: {
+    acquireDate: 'Acquired at',
+    email: 'Email',
+    nickname: 'Nickname'
+  },
+  crawlerTask: {
+    created: 'Crawler task created successfully',
+    deadline: 'Deadline',
+    delete: 'Delete',
+    device: 'Device',
+    edit: 'Edit',
+    newTask: 'New crawler task',
+    proxy: 'Proxy',
+    start: 'Start',
+    stop: 'Stop',
+    view: 'View'
+  },
   dashboardPage: {
     count: 'Count',
     emailCount: 'Email Count',
@@ -142,6 +159,10 @@ export default {
     outboxGroup: 'Outbox Group',
     willDeleteGroupAndInboxes: 'Will delete group and all its inboxes',
     youCanRightClickToAddNewGroup: 'You can right click to add a new group'
+  },
+  errorNotFound: {
+    goHome: 'Go Home',
+    message: 'Oops. Nothing here...'
   },
   failed: 'Action failed',
   fileManager: {
@@ -182,29 +203,47 @@ export default {
     appName: 'UzonMail',
     cancel: 'Cancel',
     cancelOperation: 'Cancel operation',
+    close: 'Close',
     confirm: 'Confirm',
     confirmOperation: 'Confirm operation',
+    createDate: 'Created at',
+    createdSuccess: 'Created successfully',
     delete: 'Delete',
     deleteConfirmation: 'Delete confirmation',
+    deletedSuccess: 'Deleted successfully',
     deleteSuccess: 'Deletion successful',
+    description: 'Description',
+    disable: 'Disable',
     edit: 'Edit',
-    empty: 'Empty',
+    empty: 'None',
+    enable: 'Enable',
+    expireDate: 'Expires at',
     export: 'Export',
     exporting: 'Exporting',
+    expression: 'Expression',
     failed: 'Action failed',
     htmlContentRequired: 'HTML content is required',
     import: 'Import',
     importing: 'Importing',
+    index: 'No.',
     languageRequired: 'Language is required',
     modify: 'Modify',
+    name: 'Name',
     new: 'New',
     no: 'No',
     notice: 'Notice',
     order: 'Order',
     pleaseInputNumber: 'Please input number',
+    preview: 'Preview',
     save: 'Save',
+    saveSuccess: 'Saved successfully',
+    search: 'Search',
+    select: 'Select',
+    status: 'Status',
     success: 'Action was successful',
     unsubscribePageHasAreadyExist: 'Unsubscribe page for this language already exists',
+    updateDate: 'Updated at',
+    updatedSuccess: 'Updated successfully',
     updateSuccess: 'Update successful',
     validate: 'Validate',
     validateMultiple: 'Batch Validate',
@@ -212,6 +251,10 @@ export default {
     yes: 'Yes'
   },
   htmlContentRequired: 'HTML content is required',
+  http: {
+    invalidResponse: 'The server returned an invalid response',
+    requestFailed: 'Request failed'
+  },
   inboxManager: {
     addGroupFirst: 'Please add group first',
     availableImportDataNotFound: 'No importable data found',
@@ -261,6 +304,7 @@ export default {
   languageRequired: 'Language is required',
   loginPage: {
     client: 'Client',
+    connecting: 'Connecting...',
     password: 'Password',
     pleaseInputPassword: 'Please enter password',
     pleaseInputUserName: 'Please enter username',
@@ -371,6 +415,19 @@ export default {
     success: 'Success',
     unknown: 'Unknown status'
   },
+  profile: {
+    accountRole: 'Account role:',
+    changeAvatar: 'Change avatar',
+    changePassword: 'Change password',
+    enterNewPassword: 'Enter your new password',
+    enterOldPassword: 'Enter your current password',
+    newPassword: 'New password',
+    normalUser: 'Standard user',
+    oldPassword: 'Current password',
+    passwordChanged: 'Password changed. Your new password is: {password}',
+    registrationDate: 'Registration date:',
+    superAdmin: 'Super administrator'
+  },
   proxy: {
     proxyId: 'Proxy ID'
   },
@@ -429,10 +486,49 @@ export default {
     variableManagement: 'Variable Management'
   },
   sendDetail: {
+    all: 'All',
+    back: 'Back to sending history',
     delete: 'Delete',
-    resend: 'Resend'
+    emptyData: 'There is no data to export',
+    export: 'Export current data',
+    exportFile: '{id}-sending-details-{status}.xlsx',
+    failed: 'Failed',
+    inbox: 'Inbox',
+    notSent: 'Not sent',
+    outbox: 'Outbox',
+    resend: 'Resend',
+    result: 'Send result',
+    sendDate: 'Sent at',
+    sending: 'Sending',
+    subject: 'Subject',
+    success: 'Succeeded'
+  },
+  sendHistory: {
+    inboxCount: 'Total inboxes',
+    outboxCount: 'Outbox count',
+    quotaResetHint: '{reason}. Expected to resume automatically at {date}.',
+    sentCount: 'Sent',
+    startDate: 'Start date',
+    subject: 'Subject',
+    successCount: 'Succeeded',
+    successRate: 'Success rate',
+    templateCount: 'Template count',
+    title: 'Sending history',
+    type: 'Type',
+    unknown: 'Unknown'
   },
   sendingProgress: {
+    background: 'Background',
+    backgroundTooltip: 'Continue sending in the background',
+    cancel: 'Cancel sending',
+    cancelConfirm: 'Cancel this sending task?',
+    cancelled: 'Cancelled successfully',
+    defaultTitle: 'Sending',
+    pause: 'Pause',
+    pauseTooltip: 'Pause sending',
+    processing: 'Preparing sending data. Please wait...',
+    resume: 'Resume',
+    resumeTooltip: 'Resume sending',
     title: 'Sending Progress'
   },
   sendingTask: {
@@ -503,6 +599,16 @@ export default {
     templateUnit: 'templates',
     viewDuplicateRecipients: 'View duplicate recipients'
   },
+  statisticsReport: {
+    date: 'Date',
+    firstRead: 'First opened',
+    inbox: 'Inbox',
+    lastRead: 'Last opened',
+    openCount: 'Open count',
+    outbox: 'Outbox',
+    unsubscribeEmail: 'Unsubscribed email',
+    unsubscribeIp: 'IP at unsubscribe'
+  },
   success: 'Action was successful',
   template: {
     backToTemplateManager: 'Back to Template Manager',
@@ -516,7 +622,12 @@ export default {
     templateId: 'Template ID',
     templateName: 'Template Name'
   },
+  tikTokDevice: {
+    adId: 'Ad ID',
+    deviceId: 'Device ID'
+  },
   unsubscribePage: {
+    previewTitle: 'Unsubscribe page preview',
     unsubscribe: 'Unsubscribe',
     unsubscribed: 'Unsubscribed'
   },
@@ -541,5 +652,8 @@ export default {
     file_specifyWorksheet: 'Specify Worksheet',
     item: 'item',
     totalItems: '... and a total of {count} {unit}'
+  },
+  variables: {
+    name: 'Variable name'
   }
 }

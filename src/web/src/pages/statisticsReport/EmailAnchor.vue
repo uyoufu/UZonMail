@@ -24,14 +24,15 @@ import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'outboxEmail',
     required: true,
-    label: '发件箱',
+    label: t('statisticsReport.outbox'),
     align: 'left',
     field: 'outboxEmail',
     sortable: true
@@ -39,7 +40,7 @@ const columns: QTableColumn[] = [
   {
     name: 'inboxEmails',
     required: true,
-    label: '收件箱',
+    label: t('statisticsReport.inbox'),
     align: 'left',
     field: 'inboxEmails',
     sortable: true
@@ -47,7 +48,7 @@ const columns: QTableColumn[] = [
   {
     name: 'visitedCount',
     required: true,
-    label: '打开次数',
+    label: t('statisticsReport.openCount'),
     align: 'left',
     field: 'visitedCount',
     sortable: true
@@ -55,7 +56,7 @@ const columns: QTableColumn[] = [
   {
     name: 'firstVisitDate',
     required: true,
-    label: '首次阅读',
+    label: t('statisticsReport.firstRead'),
     align: 'left',
     field: 'firstVisitDate',
     sortable: true,
@@ -64,13 +65,13 @@ const columns: QTableColumn[] = [
   {
     name: 'lastVisitDate',
     required: true,
-    label: '最近阅读',
+    label: t('statisticsReport.lastRead'),
     align: 'left',
     field: 'lastVisitDate',
     sortable: true,
     format: v => formatDate(v)
   }
-]
+])
 
 import { getEmailAnchorsCount, getEmailAnchorsData } from 'src/api/pro/emailTracker'
 

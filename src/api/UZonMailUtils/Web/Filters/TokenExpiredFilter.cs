@@ -3,12 +3,16 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using UzonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Resources.Langs;
+using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.Utils.Web.Filters
 {
-    public class TokenExpiredFilter : IAsyncExceptionFilter
+    public class TokenExpiredFilter(IStringLocalizer<ApiErrorResource> localizer)
+        : IAsyncExceptionFilter, IScopedService
     {
         private static readonly JsonSerializerOptions _jsonSerializerOptions =
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -25,7 +29,7 @@ namespace UzonMail.Utils.Web.Filters
                 var result = new ResponseResult<string>
                 {
                     Code = StatusCodes.Status401Unauthorized,
-                    Message = expiredTokenException.Message
+                    Message = localizer[ApiErrorKey.TokenExpired.ToString()]
                 };
                 context.Result = new ContentResult
                 {

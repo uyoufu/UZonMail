@@ -28,16 +28,17 @@ import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
+import { t } from 'src/i18n/helpers'
 
 import { getUserTikTokDevicesCount, getUserTikTokDevicesData } from 'src/api/pro/tikTokDevice'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'name',
     required: true,
-    label: '名称',
+    label: t('global.name'),
     align: 'left',
     field: 'name',
     sortable: true
@@ -45,7 +46,7 @@ const columns: QTableColumn[] = [
   {
     name: 'description',
     required: true,
-    label: '描述',
+    label: t('global.description'),
     align: 'left',
     field: 'description',
     sortable: true
@@ -53,7 +54,7 @@ const columns: QTableColumn[] = [
   {
     name: 'deviceId',
     required: false,
-    label: '设备ID (device_id)',
+    label: t('tikTokDevice.deviceId'),
     align: 'left',
     field: 'deviceId',
     sortable: true
@@ -61,12 +62,12 @@ const columns: QTableColumn[] = [
   {
     name: 'odinId',
     required: false,
-    label: '广告ID (odinId)',
+    label: t('tikTokDevice.adId'),
     align: 'left',
     field: 'odinId',
     sortable: true
   }
-]
+])
 
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getUserTikTokDevicesCount(filterObj.filter)

@@ -3,15 +3,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Localization;
 using UzonMail.Utils.Web.Exceptions;
 using UzonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Resources.Langs;
+using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.Utils.Web.Filters
 {
     /// <summary>
     /// 对 KnownException 异常进行处理
     /// </summary>
-    public class KnownExceptionFilter : IAsyncExceptionFilter
+    public class KnownExceptionFilter(IStringLocalizer<ApiErrorResource> localizer)
+        : IAsyncExceptionFilter, IScopedService
     {
         private static readonly JsonSerializerOptions _jsonSerializerOptions =
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -33,7 +37,9 @@ namespace UzonMail.Utils.Web.Filters
                 var result = new ResponseResult<string>
                 {
                     Code = knownException.Code,
-                    Message = knownException.Message
+                    Message = knownException.LocalizedError is { } localizedError
+                        ? localizer[localizedError.Key.ToString(), localizedError.Arguments]
+                        : knownException.Message
                 };
                 context.Result = new ContentResult
                 {

@@ -29,13 +29,14 @@ import type { IRequestPagination, TTableFilterObject } from 'src/compositions/ty
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'nickname',
-    label: '昵称',
+    label: t('crawlerResult.nickname'),
     align: 'left',
     field: 'nickname',
     sortable: true
@@ -43,7 +44,7 @@ const columns: QTableColumn[] = [
   {
     name: 'email',
     required: true,
-    label: '邮箱',
+    label: t('crawlerResult.email'),
     align: 'left',
     field: 'email',
     sortable: true
@@ -51,13 +52,13 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '获取日期',
+    label: t('crawlerResult.acquireDate'),
     align: 'left',
     field: 'createDate',
     format: formatDate,
     sortable: true
   }
-]
+])
 
 import { useRoute } from 'vue-router'
 import { getCrawlerTaskResultsCount, getCrawlerTaskResultsData } from 'src/api/pro/crawlerTask'

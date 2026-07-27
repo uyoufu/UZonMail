@@ -108,6 +108,23 @@ export default {
   },
   confirm: '确认',
   confirmOperation: '操作确认',
+  crawlerResult: {
+    acquireDate: '获取日期',
+    email: '邮箱',
+    nickname: '昵称'
+  },
+  crawlerTask: {
+    created: '新增爬虫任务成功',
+    deadline: '截止日期',
+    delete: '删除',
+    device: '设备',
+    edit: '编辑',
+    newTask: '新增爬虫任务',
+    proxy: '代理',
+    start: '开始',
+    stop: '停止',
+    view: '查看'
+  },
   dashboardPage: {
     count: '数量',
     emailCount: '邮箱数量',
@@ -136,6 +153,10 @@ export default {
     newGroupSuccess: '新建组成功',
     outboxGroup: '发件箱组',
     youCanRightClickToAddNewGroup: '可单击右键添加新组'
+  },
+  errorNotFound: {
+    goHome: '返回首页',
+    message: '糟糕，页面不存在。'
   },
   failed: '操作失败',
   fileManager: {
@@ -172,33 +193,51 @@ export default {
     upload: '上传'
   },
   global: {
-    add: '添加',
+    add: '新增',
     appName: '宇正群邮',
     cancel: '取消',
     cancelOperation: '取消操作',
+    close: '关闭',
     confirm: '确认',
     confirmOperation: '操作确认',
+    createDate: '创建日期',
+    createdSuccess: '创建成功',
     delete: '删除',
     deleteConfirmation: '删除确认',
+    deletedSuccess: '删除成功',
     deleteSuccess: '删除成功',
+    description: '描述',
+    disable: '禁用',
     edit: '编辑',
     empty: '无',
+    enable: '启用',
+    expireDate: '有效期',
     export: '导出',
     exporting: '导出中',
+    expression: '表达式',
     failed: '失败',
     htmlContentRequired: 'Html 内容是必填项',
     import: '导入',
     importing: '导入中',
+    index: '序号',
     languageRequired: '语言是必填项',
     modify: '修改',
+    name: '名称',
     new: '新增',
     no: '否',
     notice: '注意',
     order: '序号',
     pleaseInputNumber: '请输入数字',
+    preview: '预览',
     save: '保存',
+    saveSuccess: '保存成功',
+    search: '搜索',
+    select: '选择',
+    status: '状态',
     success: '操作成功',
     unsubscribePageHasAreadyExist: '该语言的取消订阅页面已存在',
+    updateDate: '更新日期',
+    updatedSuccess: '更新成功',
     updateSuccess: '更新成功',
     validate: '验证',
     validateMultiple: '批量验证',
@@ -206,6 +245,10 @@ export default {
     yes: '是'
   },
   htmlContentRequired: 'Html 内容是必填项',
+  http: {
+    invalidResponse: '服务器响应格式不正确',
+    requestFailed: '请求失败'
+  },
   inboxManager: {
     addGroupFirst: '请先添加分组',
     availableImportDataNotFound: '未找到可导入的数据',
@@ -255,6 +298,7 @@ export default {
   languageRequired: '语言是必填项',
   loginPage: {
     client: '客户端',
+    connecting: '连接中...',
     password: '密码',
     pleaseInputPassword: '请输入密码',
     pleaseInputUserName: '请输入用户名',
@@ -356,6 +400,19 @@ export default {
     validationFailedWithMessage: '验证失败: {message}',
     validationSuccessful: '验证成功'
   },
+  profile: {
+    accountRole: '账户角色：',
+    changeAvatar: '修改头像',
+    changePassword: '修改密码',
+    enterNewPassword: '请输入新密码',
+    enterOldPassword: '请输入旧密码',
+    newPassword: '新密码',
+    normalUser: '普通用户',
+    oldPassword: '旧密码',
+    passwordChanged: '密码修改成功！新密码为：{password}',
+    registrationDate: '注册日期：',
+    superAdmin: '超级管理员'
+  },
   proxy: {
     proxyId: '代理ID'
   },
@@ -414,10 +471,49 @@ export default {
     variableManagement: '变量管理'
   },
   sendDetail: {
+    all: '全部',
+    back: '返回到历史发件',
     delete: '删除',
-    resend: '重新发送'
+    emptyData: '数据为空',
+    export: '导出当前数据',
+    exportFile: '{id}-发送明细-{status}.xlsx',
+    failed: '失败',
+    inbox: '收件箱',
+    notSent: '未发送',
+    outbox: '发件箱',
+    resend: '重新发送',
+    result: '发送结果',
+    sendDate: '发送日期',
+    sending: '发送中',
+    subject: '主题',
+    success: '成功'
+  },
+  sendHistory: {
+    inboxCount: '收件箱总数',
+    outboxCount: '发件箱数',
+    quotaResetHint: '{reason}，预计 {date} 自动恢复',
+    sentCount: '已发送',
+    startDate: '开始日期',
+    subject: '主题',
+    successCount: '已成功',
+    successRate: '成功率',
+    templateCount: '模板数',
+    title: '历史发件',
+    type: '类型',
+    unknown: '未知'
   },
   sendingProgress: {
+    background: '后台',
+    backgroundTooltip: '在后台发件',
+    cancel: '取消发件',
+    cancelConfirm: '确定取消发件吗？',
+    cancelled: '取消成功',
+    defaultTitle: '正在发件',
+    pause: '暂停',
+    pauseTooltip: '暂停发件',
+    processing: '正在处理发件数据，请稍候...',
+    resume: '继续',
+    resumeTooltip: '继续发件',
     title: '发送进度'
   },
   sendingTask: {
@@ -488,6 +584,16 @@ export default {
     templateUnit: '个模板',
     viewDuplicateRecipients: '查看重复收件人'
   },
+  statisticsReport: {
+    date: '日期',
+    firstRead: '首次阅读',
+    inbox: '收件箱',
+    lastRead: '最近阅读',
+    openCount: '打开次数',
+    outbox: '发件箱',
+    unsubscribeEmail: '退订邮箱',
+    unsubscribeIp: '退订时所在 IP'
+  },
   success: '操作成功',
   template: {
     backToTemplateManager: '返回模板管理',
@@ -501,7 +607,12 @@ export default {
     templateId: '模板ID',
     templateName: '模板名称'
   },
+  tikTokDevice: {
+    adId: '广告 ID',
+    deviceId: '设备 ID'
+  },
   unsubscribePage: {
+    previewTitle: '退订页预览',
     unsubscribe: '取消订阅',
     unsubscribed: '已取消订阅'
   },
@@ -526,5 +637,8 @@ export default {
     file_specifyWorksheet: '指定 WorkSheet',
     item: '项',
     totalItems: '... 等共 {count} {unit}'
+  },
+  variables: {
+    name: '变量名'
   }
 }

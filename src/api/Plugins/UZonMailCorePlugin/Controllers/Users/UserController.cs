@@ -16,6 +16,7 @@ using UzonMail.Utils.Extensions;
 using UzonMail.Utils.Web.Exceptions;
 using UzonMail.Utils.Web.PagingQuery;
 using UzonMail.Utils.Web.ResponseModel;
+using UzonMail.Utils.Resources.Langs;
 
 namespace UzonMail.CorePlugin.Controllers.Users
 {
@@ -41,10 +42,10 @@ namespace UzonMail.CorePlugin.Controllers.Users
         public async Task<ResponseResult<bool>> IsUserIdInUse([FromQuery] string userId)
         {
             if (string.IsNullOrEmpty(userId))
-                throw new KnownException("用户 ID 不能为空");
+                throw new KnownException(new LocalizedApiError(ApiErrorKey.InvalidRequest));
             var existUser = await userService.ExistUser(userId);
             if (existUser)
-                throw new KnownException($"用户 ID: {userId} 已经存在");
+                throw new KnownException(new LocalizedApiError(ApiErrorKey.OperationNotAllowed));
             return true.ToSuccessResponse();
         }
 
@@ -64,7 +65,7 @@ namespace UzonMail.CorePlugin.Controllers.Users
             // 用户名重复检查
             var existUser = await userService.ExistUser(user.UserId);
             if (existUser)
-                throw new KnownException($"用户 {user.UserId} 已经存在");
+                throw new KnownException(new LocalizedApiError(ApiErrorKey.OperationNotAllowed));
 
             // 返回新建用户
             var newUser = await userService.CreateUser(user.UserId, user.Password);
@@ -103,7 +104,7 @@ namespace UzonMail.CorePlugin.Controllers.Users
             var userId = tokenService.GetUserSqlId();
             var user =
                 await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId)
-                ?? throw new KnownException("用户不存在");
+                ?? throw new KnownException(new LocalizedApiError(ApiErrorKey.UserNotFound));
             var loginResult = await userService.CreateSignSuccessResult(user);
             return loginResult.ToSuccessResponse();
         }
@@ -226,7 +227,7 @@ namespace UzonMail.CorePlugin.Controllers.Users
         public async Task<ResponseResult<string>> UpdateUserAvatar(IFormFile file)
         {
             if (file == null)
-                throw new KnownException("文件不能为空");
+                throw new KnownException(new LocalizedApiError(ApiErrorKey.InvalidRequest));
 
             var userId = tokenService.GetUserSqlId();
             var (fullPath, relativePath) = fileStoreService.GenerateStaticFilePath(
@@ -236,7 +237,8 @@ namespace UzonMail.CorePlugin.Controllers.Users
             );
 
             // 清除原来的头像文件
-            string baseDir = Path.GetDirectoryName(fullPath) ?? throw new KnownException("文件路径错误");
+            string baseDir = Path.GetDirectoryName(fullPath)
+                ?? throw new KnownException(new LocalizedApiError(ApiErrorKey.InvalidRequest));
             // 删除 baseDir 下的所有文件
             foreach (var filePath in Directory.GetFiles(baseDir))
             {

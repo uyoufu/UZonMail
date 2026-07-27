@@ -12,11 +12,12 @@ import { notifyError } from 'src/utils/dialog'
 import { getDataFromCache, setDataToCache } from './httpCache'
 
 import { useConfig } from 'src/config'
+import { getCurrentLocale, t } from 'src/i18n/helpers'
 
 export { HttpClientError } from './httpClientError'
 
-const defaultRequestErrorMessage = '请求失败'
-const invalidResponseMessage = '服务器响应格式不正确'
+const defaultRequestErrorMessage = () => t('http.requestFailed')
+const invalidResponseMessage = () => t('http.invalidResponse')
 
 /**
  * HttpClient 封装
@@ -64,6 +65,7 @@ export default class HttpClient {
       const store = useUserInfoStore()
       // 自动添加 token
       config.headers.Authorization = 'Bearer ' + store.token
+      config.headers['Accept-Language'] = getCurrentLocale().value
       return config
     },
       (error) => {
@@ -79,7 +81,7 @@ export default class HttpClient {
 
       if (!this.isResponseData(response.data)) {
         const invalidResponseError = new HttpClientError(
-          invalidResponseMessage,
+          invalidResponseMessage(),
           HttpClientErrorCode.invalidResponse,
           { axiosResponse: response }
         )
@@ -144,7 +146,7 @@ export default class HttpClient {
     if (axios.isAxiosError(error)) {
       const axiosResponse = error.response
       const responseData = this.isResponseData(axiosResponse?.data) ? axiosResponse.data : undefined
-      const message = responseData?.message || error.message || axiosResponse?.statusText || defaultRequestErrorMessage
+      const message = responseData?.message || error.message || axiosResponse?.statusText || defaultRequestErrorMessage()
       const code = responseData?.code
         ?? axiosResponse?.status
         ?? error.code
@@ -158,7 +160,7 @@ export default class HttpClient {
 
     const message = error instanceof Error && error.message
       ? error.message
-      : defaultRequestErrorMessage
+      : defaultRequestErrorMessage()
     return new HttpClientError(message, HttpClientErrorCode.unknown, { cause: error })
   }
 

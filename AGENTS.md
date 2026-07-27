@@ -21,7 +21,7 @@
 
 ## 项目规范
 
-- 项目 api、web、win-desktop 各自维护了 codegraph, 优先查询
+- 项目 src/api、src/web、src/win-desktop 各自维护了 codegraph, 优先在这些目录中查询
 
 ## 用户安装软件及命令
 

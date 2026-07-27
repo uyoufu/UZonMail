@@ -1,7 +1,7 @@
 <template>
   <q-dialog ref='dialogRef' @hide="onDialogHide">
     <q-card class='column items-start q-pa-sm'>
-      <div class="text-subtitle1 text-primary">退订页面预览</div>
+      <div class="text-subtitle1 text-primary">{{ t('unsubscribePage.previewTitle') }}</div>
       <q-separator class="full-width" />
       <UnsubscribePage class="q-mt-sm" :html-content="htmlContent" />
     </q-card>
@@ -30,6 +30,7 @@ defineProps({
 
 // #region 显示内容
 import UnsubscribePage from './UnsubscribePage.vue'
+import { t } from 'src/i18n/helpers'
 // #endregion
 </script>
 

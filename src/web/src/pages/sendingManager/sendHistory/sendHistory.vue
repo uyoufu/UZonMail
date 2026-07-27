@@ -3,7 +3,7 @@
     v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort selection="multiple"
     v-model:selected="selectedRows" @request="onTableRequest">
     <template v-slot:top-left>
-      <div class="text-subtile1 text-primary">历史发件</div>
+      <div class="text-subtile1 text-primary">{{ t('sendHistory.title') }}</div>
     </template>
 
     <template v-slot:top-right>
@@ -25,7 +25,7 @@
       <q-td :props="props">
         <StatusChip v-if="props.value !== 'Sending'" :status="props.value">
           <q-tooltip v-if="props.row.status === SendingGroupStatus.WaitingForQuotaReset">
-            {{ props.row.statusReason }}，预计 {{ formatDate(props.row.resumeAtUtc) }} 自动恢复
+            {{ t('sendHistory.quotaResetHint', { reason: props.row.statusReason, date: formatDate(props.row.resumeAtUtc) }) }}
           </q-tooltip>
         </StatusChip>
         <LinearProgress class="full-width" v-else :value="props.row.progress" :width="60"></LinearProgress>
@@ -47,6 +47,7 @@ import StatusChip from 'src/components/statusChip/StatusChip.vue'
 import ClickableText from 'src/components/clickableText/ClickableText.vue'
 
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
@@ -62,7 +63,7 @@ function formatSuccessPercent (success: number, row: Record<string, any>) {
   if (!row.totalCount) return '0%'
   return ((success / row.totalCount) * 100).toFixed(0) + '%'
 }
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'id',
@@ -74,7 +75,7 @@ const columns: QTableColumn[] = [
   {
     name: 'subjects',
     required: true,
-    label: '主题',
+    label: t('sendHistory.subject'),
     align: 'left',
     field: 'subjects',
     sortable: true,
@@ -83,7 +84,7 @@ const columns: QTableColumn[] = [
   {
     name: 'sendingType',
     required: true,
-    label: '类型',
+    label: t('sendHistory.type'),
     align: 'left',
     field: 'sendingType',
     sortable: true,
@@ -92,21 +93,21 @@ const columns: QTableColumn[] = [
   {
     name: 'templatesCount',
     required: true,
-    label: '模板数',
+    label: t('sendHistory.templateCount'),
     align: 'left',
     field: 'templatesCount'
   },
   {
     name: 'outboxesCount',
     required: true,
-    label: '发件箱数',
+    label: t('sendHistory.outboxCount'),
     align: 'left',
     field: 'outboxesCount'
   },
   {
     name: 'totalCount',
     required: true,
-    label: '收件箱总数',
+    label: t('sendHistory.inboxCount'),
     align: 'left',
     field: 'totalCount',
     sortable: true
@@ -114,7 +115,7 @@ const columns: QTableColumn[] = [
   {
     name: 'sentCount',
     required: true,
-    label: '已发送',
+    label: t('sendHistory.sentCount'),
     align: 'left',
     field: 'sentCount',
     sortable: true
@@ -122,7 +123,7 @@ const columns: QTableColumn[] = [
   {
     name: 'successCount',
     required: true,
-    label: '已成功',
+    label: t('sendHistory.successCount'),
     align: 'left',
     field: 'successCount',
     sortable: true
@@ -130,7 +131,7 @@ const columns: QTableColumn[] = [
   {
     name: 'successPercent',
     required: true,
-    label: '成功率',
+    label: t('sendHistory.successRate'),
     align: 'left',
     field: 'successCount',
     sortable: false,
@@ -139,7 +140,7 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '开始日期',
+    label: t('sendHistory.startDate'),
     align: 'left',
     field: v => v,
     format: (value: ISendingGroupInfo) => {
@@ -150,13 +151,13 @@ const columns: QTableColumn[] = [
   }, {
     name: 'status',
     required: true,
-    label: '状态',
+    label: t('global.status'),
     align: 'center',
     field: 'status',
     sortable: true,
-    format: v => sendingGroupStatusNames[v as keyof typeof sendingGroupStatusNames] ?? 'Unknown'
+    format: v => sendingGroupStatusNames[v as keyof typeof sendingGroupStatusNames] ?? t('sendHistory.unknown')
   }
-]
+])
 
 
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
