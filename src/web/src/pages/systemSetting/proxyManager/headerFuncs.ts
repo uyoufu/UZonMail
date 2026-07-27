@@ -7,6 +7,7 @@ import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifySuccess } from 'src/utils/dialog'
 import type { addNewRowType } from 'src/compositions/qTableUtils'
+import { t } from 'src/i18n/helpers'
 
 // TODO: 不支持动态代理提示
 
@@ -30,17 +31,17 @@ export function getCommonProxyFields (): ILowCodeField[] {
     {
       name: 'name',
       type: LowCodeFieldType.text,
-      label: '名称',
-      placeholder: '代理的唯一标识，需要保证唯一',
+      label: t('global.name'),
+      placeholder: t('pages.proxy.namePlaceholder'),
       value: '',
       required: true
     },
     {
       name: 'url',
       type: LowCodeFieldType.text,
-      label: '代理地址',
-      placeholder: '格式：schema://username:password@host',
-      tooltip: ['代理格式:', 'schema://username:password@host', '支持的协议: http, https, socks5, socks4'],
+      label: t('pages.proxy.url'),
+      placeholder: t('pages.proxy.urlPlaceholder'),
+      tooltip: [t('pages.proxy.formatTitle'), 'schema://username:password@host', t('pages.proxy.supportedProtocols')],
       value: '',
       required: true,
       // eslint-disable-next-line @typescript-eslint/require-await
@@ -48,7 +49,7 @@ export function getCommonProxyFields (): ILowCodeField[] {
         if (!value) {
           return {
             ok: false,
-            message: '代理地址不能为空'
+            message: t('pages.proxy.urlRequired')
           }
         }
 
@@ -56,14 +57,14 @@ export function getCommonProxyFields (): ILowCodeField[] {
         if (!value.includes('://')) {
           return {
             ok: false,
-            message: '代理地址缺失协议,格式为：schema://username:password@host 或 host'
+            message: t('pages.proxy.protocolMissing')
           }
         }
 
         if (!URL.canParse(value)) {
           return {
             ok: false,
-            message: '代理地址格式不正确,格式为：schema://username:password@host 或 schema://host'
+            message: t('pages.proxy.urlInvalid')
           }
         }
         return {
@@ -73,21 +74,21 @@ export function getCommonProxyFields (): ILowCodeField[] {
     },
     {
       name: 'matchRegex',
-      label: '匹配规则',
+      label: t('pages.proxy.matchRule'),
       type: LowCodeFieldType.text,
-      placeholder: '使用正则表达式进行匹配',
+      placeholder: t('pages.proxy.matchPlaceholder'),
       value: '.*'
     },
     {
       name: 'priority',
-      label: '优先级',
+      label: t('pages.proxy.priority'),
       type: LowCodeFieldType.number,
-      placeholder: '数字越大优先级越高',
+      placeholder: t('pages.proxy.priorityPlaceholder'),
       value: 0
     },
     {
       name: 'description',
-      label: '描述'
+      label: t('global.description')
     }
   ]
 }
@@ -111,8 +112,8 @@ export function useHeaderFunctions (addNewRow: addNewRowType<IProxy>) {
       fields.push({
         name: 'isShared',
         type: LowCodeFieldType.boolean,
-        label: '是否共享',
-        tooltip: '共享后,其它用户可以使用该代理',
+        label: t('pages.proxy.isShared'),
+        tooltip: t('pages.proxy.sharedHint'),
         value: false
       })
     }
@@ -120,7 +121,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<IProxy>) {
     // 打开弹窗
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
-      title: '新增代理',
+      title: t('pages.proxy.createTitle'),
       fields,
       validate: validateProxyInfo
     }
@@ -133,7 +134,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<IProxy>) {
     const { data: newRowData } = await createProxy(data)
     addNewRow(newRowData)
     // 向服务器请求数据
-    notifySuccess('创建成功')
+    notifySuccess(t('pages.apiAccess.created'))
   }
 
   // 开关代理共享

@@ -14,54 +14,55 @@ import { getCrawlerTaskFields } from './useHeaderFunctions'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { useRouter } from 'vue-router'
+import { t } from 'src/i18n/helpers'
 
 export function useContextMenu(
   addNewRow: addNewRowType<ICrawlerTaskInfo>,
   deleteRowById: deleteRowByIdType<ICrawlerTaskInfo>
 ) {
-  const contextMenuItems: IContextMenuItem<ICrawlerTaskInfo>[] = [
+  const contextMenuItems = computed<IContextMenuItem<ICrawlerTaskInfo>[]>(() => [
     {
       name: 'edit',
-      label: '编辑',
-      tooltip: '编辑当前爬虫任务',
+      label: t('pages.crawlerTask.edit'),
+      tooltip: t('pages.crawlerTask.editCurrent'),
       vif: isNotRunning,
       onClick: onUpdateCrawler
     },
     {
       name: 'delete',
-      label: '删除',
-      tooltip: '删除当前爬虫任务',
+      label: t('pages.crawlerTask.delete'),
+      tooltip: t('pages.crawlerTask.deleteCurrent'),
       color: 'negative',
       vif: (value) => value.status === CrawlerStatus.stopped,
       onClick: onDeleteCrawler
     },
     {
       name: 'stop',
-      label: '停止',
-      tooltip: '停止当前爬虫任务',
+      label: t('pages.crawlerTask.stop'),
+      tooltip: t('pages.crawlerTask.stopCurrent'),
       vif: (value) => !isNotRunning(value),
       onClick: onStopCrawler
     },
     {
       name: 'start',
-      label: '开始',
+      label: t('pages.crawlerTask.start'),
       vif: isNotRunning,
-      tooltip: '启动当前爬虫任务',
+      tooltip: t('pages.crawlerTask.startCurrent'),
       onClick: onStartCrawler
     },
     {
       name: 'viewResult',
-      label: '查看',
-      tooltip: '查看当前爬虫任务结果',
+      label: t('pages.crawlerTask.view'),
+      tooltip: t('pages.crawlerTask.viewResult'),
       onClick: onViewCrawlerResult
     },
     {
       name: 'saveAsInbox',
-      label: '另存为',
-      tooltip: '另存为收件箱',
+      label: t('pages.crawlerTask.saveAsInbox'),
+      tooltip: t('pages.crawlerTask.saveAsInboxTooltip'),
       onClick: onSaveAsInbox
     }
-  ]
+  ])
 
   function isNotRunning(value: Record<string, any>) {
     return value.status !== CrawlerStatus.running
@@ -79,7 +80,7 @@ export function useContextMenu(
 
     // 打开弹窗
     const popupParams: IPopupDialogParams = {
-      title: '修改爬虫任务',
+      title: t('pages.crawlerTask.editTitle'),
       fields,
       oneColumn: true
     }
@@ -92,11 +93,14 @@ export function useContextMenu(
     // 保存到 rows 中
     addNewRow(Object.assign(crawlerTaskInfo, data))
 
-    notifySuccess('修改爬虫任务成功')
+    notifySuccess(t('pages.crawlerTask.updateSuccess'))
   }
 
   async function onDeleteCrawler(crawlerTaskInfo: ICrawlerTaskInfo) {
-    const confirm = await confirmOperation('删除爬虫任务', `是否删除爬虫任务: [${crawlerTaskInfo.name}]？`)
+    const confirm = await confirmOperation(
+      t('pages.crawlerTask.deleteTitle'),
+      t('pages.crawlerTask.deleteConfirm', { name: crawlerTaskInfo.name })
+    )
     if (!confirm) return
 
     // 开始删除
@@ -105,7 +109,7 @@ export function useContextMenu(
     // 删除本机数据
     deleteRowById(crawlerTaskInfo.id)
 
-    notifySuccess('删除爬虫任务成功')
+    notifySuccess(t('pages.crawlerTask.deleteSuccess'))
   }
 
   async function onStopCrawler(crawlerTaskInfo: ICrawlerTaskInfo) {
@@ -139,24 +143,30 @@ export function useContextMenu(
 
   async function onSaveAsInbox(crawlerTaskInfo: ICrawlerTaskInfo) {
     // 进行确认
-    const confirm = await confirmOperation('另存为收件箱', `是否将爬虫任务 [${crawlerTaskInfo.name}] 另存为收件箱？`)
+    const confirm = await confirmOperation(
+      t('pages.crawlerTask.saveAsInboxTooltip'),
+      t('pages.crawlerTask.saveAsInboxConfirm', { name: crawlerTaskInfo.name })
+    )
     if (!confirm) return
 
     // 开始另存为
     const inboxGroupId = await notifyUntil(async () => {
       const { data } = await saveCrawlerResultsAsInbox(crawlerTaskInfo.id as number)
       return data
-    }, '正在另存为收件箱')
+    }, t('pages.crawlerTask.savingAsInbox'))
 
     if (!inboxGroupId) {
-      notifyError('另存为收件箱失败')
+      notifyError(t('pages.crawlerTask.saveAsInboxFailed'))
       return
     }
 
     // 提示跳转
-    notifySuccess('另存为收件箱成功')
+    notifySuccess(t('pages.crawlerTask.saveAsInboxSuccess'))
 
-    const confirm2InboxDetail = await confirmOperation('另存为收件箱成功', '是否跳转到收件箱详情页面？')
+    const confirm2InboxDetail = await confirmOperation(
+      t('pages.crawlerTask.saveAsInboxSuccess'),
+      t('pages.crawlerTask.goToInboxDetail')
+    )
     if (!confirm2InboxDetail) return
 
     // 开始跳转

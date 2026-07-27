@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IProxy } from 'src/api/proxy'
 import { useUserInfoStore } from 'src/stores/user'
+import { t } from 'src/i18n/helpers'
 
 export function useShareToggle () {
   const userInfo = useUserInfoStore()
@@ -20,14 +21,14 @@ export function useShareToggle () {
   function getProxyShareTooltip (proxyInfo: Record<string, any>) {
     const proxy = proxyInfo as IProxy
     if (!proxy.isShared) {
-      return '未共享'
+      return t('pages.proxy.unshared')
     }
 
     if (isOwner(proxyInfo)) {
-      return '共享中'
+      return t('pages.proxy.sharing')
     }
 
-    return '由其他用户共享'
+    return t('pages.proxy.sharedByOther')
   }
 
   return {

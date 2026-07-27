@@ -2,8 +2,8 @@
   <q-table class="full-height" :rows="rows" row-key="id" virtual-scroll v-model:pagination="pagination" dense
     hide-header grid :loading="loading" :filter="filter" binary-state-sort @request="onTableRequest">
     <template v-slot:top-left>
-      <CreateBtn @click="onNewEmailTemplate" tooltip="新增邮件模板" />
-      <ImportBtn class="q-ml-sm" @click="onImportTemplateFromHtml" :tooltip="['导入模板', '文件名为模板名']" />
+      <CreateBtn @click="onNewEmailTemplate" :tooltip="t('pages.templateManager.newTemplate')" />
+      <ImportBtn class="q-ml-sm" @click="onImportTemplateFromHtml" :tooltip="[t('pages.templateManager.importTemplate'), t('pages.templateManager.importTemplateHint')]" />
     </template>
 
     <template v-slot:top-right>
@@ -24,7 +24,7 @@
             <div class="absolute-bottom row items-center justify-center">
               <div class="text-h6 q-mr-sm hover-underline" @click.self.stop="onEditTemplateClick(props.row)">
                 {{ props.row.name }}
-                <AsyncTooltip tooltip="单击编辑模板" />
+                <AsyncTooltip :tooltip="t('pages.templateManager.clickToEdit')" />
               </div>
               <div class="text-secondary">ID:{{ props.row.id }}</div>
             </div>
@@ -34,7 +34,7 @@
           <div class="absolute-bottom row items-center justify-center">
             <div class="text-h6 q-mr-sm hover-underline" @click.self.stop="onEditTemplateClick(props.row)">
               {{ props.row.name }}
-              <AsyncTooltip tooltip="单击编辑模板" />
+              <AsyncTooltip :tooltip="t('pages.templateManager.clickToEdit')" />
             </div>
             <div class="text-secondary">ID:{{ props.row.id }}</div>
           </div>
@@ -57,6 +57,7 @@ import type { IEmailTemplate } from 'src/api/emailTemplate'
 import { deleteEmailTemplate, upsertEmailTemplate } from 'src/api/emailTemplate'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
+import { t } from 'src/i18n/helpers'
 
 // 模板接口
 import { useEmailTemplateTable } from './compositions'
@@ -76,32 +77,35 @@ async function onImportTemplateFromHtml () {
   const { ok, data: buffer, files } = await selectFile()
   if (!ok) return
 
-  notifySuccess('请保证文件格式为 utf-8 编码的文本文件')
+  notifySuccess(t('pages.templateManager.importEncodingHint'))
 
   // 获取第一个文件
   const file = files?.item(0)
-  const templateName = file?.name.substring(0, file.name.lastIndexOf('.')) || '未命名'
+  const templateName = file?.name.substring(0, file.name.lastIndexOf('.')) || t('pages.templateManager.untitled')
   const templateContent = (new TextDecoder('utf8')).decode(buffer as ArrayBuffer)
 
   // 向服务器请求新建模板
   const data = {
     name: templateName,
     content: templateContent,
-    description: '从文件导入'
+    description: t('pages.templateManager.importedFromFile')
   }
   const { data: newTemplate } = await upsertEmailTemplate(data)
 
   // 新增数据
   addNewRow(newTemplate)
 
-  notifySuccess('导入成功')
+  notifySuccess(t('pages.templateManager.importSuccess'))
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onDeleteEmailTemplate (templateItem: Record<string, any>) {
   const templateData = templateItem as IEmailTemplate
   // 提示
-  const confirm = await confirmOperation('删除确认', `确认删除模板: ${templateData.name} 吗？`)
+  const confirm = await confirmOperation(
+    t('pages.templateManager.deleteConfirmation'),
+    t('pages.templateManager.deleteTemplateConfirm', { name: templateData.name })
+  )
   if (!confirm) return
 
   // 向服务器请求删除模板
@@ -110,7 +114,7 @@ async function onDeleteEmailTemplate (templateItem: Record<string, any>) {
   // 更新删除
   deleteRowById(templateData.id)
 
-  notifySuccess('删除成功')
+  notifySuccess(t('pages.variableManager.deleteSuccess'))
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onEditTemplateClick (value: Record<string, any>) {
@@ -128,11 +132,11 @@ async function onExportTemplateClick (value: Record<string, any>) {
   await saveFileSmart(value.name + '.html', value.content)
 }
 // 右键菜单
-const templateContextMenuItems = ref<IContextMenuItem[]>([
+const templateContextMenuItems = computed<IContextMenuItem[]>(() => [
   {
     name: 'preview',
-    label: '预览',
-    tooltip: '查看预览图',
+    label: t('pages.templateManager.preview'),
+    tooltip: t('pages.templateManager.viewPreview'),
     onClick: async () => {
       await router.push({
         name: 'TemplateEditor'
@@ -141,20 +145,20 @@ const templateContextMenuItems = ref<IContextMenuItem[]>([
   },
   {
     name: 'edit',
-    label: '编辑',
-    tooltip: '编辑当前模板',
+    label: t('pages.variableManager.edit'),
+    tooltip: t('pages.templateManager.editCurrentTemplate'),
     onClick: onEditTemplateClick
   },
   {
     name: 'export',
-    label: '导出',
-    tooltip: '导出当前模板',
+    label: t('pages.templateManager.export'),
+    tooltip: t('pages.templateManager.exportCurrentTemplate'),
     onClick: onExportTemplateClick
   },
   {
     name: 'delete',
-    label: '删除',
-    tooltip: '删除当前模板',
+    label: t('pages.variableManager.delete'),
+    tooltip: t('pages.templateManager.deleteCurrentTemplate'),
     color: 'negative',
     onClick: onDeleteEmailTemplate
   }

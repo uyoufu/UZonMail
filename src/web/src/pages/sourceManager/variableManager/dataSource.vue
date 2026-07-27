@@ -32,14 +32,15 @@ import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
 
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'name',
     required: true,
-    label: '数据名',
+    label: t('pages.variableManager.dataName'),
     align: 'left',
     field: 'name',
     sortable: true
@@ -47,7 +48,7 @@ const columns: QTableColumn[] = [
   {
     name: 'description',
     required: true,
-    label: '描述',
+    label: t('pages.variableManager.description'),
     align: 'left',
     field: 'description',
     sortable: true
@@ -55,7 +56,7 @@ const columns: QTableColumn[] = [
   {
     name: 'value',
     required: true,
-    label: '数据值',
+    label: t('pages.variableManager.dataValue'),
     align: 'left',
     field: 'value',
     format: (val) => JSON.stringify(val, null, 2) || '',
@@ -64,13 +65,13 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '创建日期',
+    label: t('pages.variableManager.createDate'),
     align: 'left',
     field: 'createDate',
     format: formatDate, // format 需要的 value 是 string
     sortable: true
   }
-]
+])
 
 import { getJsVariableSourcesCount, getJsVariableSourcesData } from 'src/api/pro/jsVariable'
 import type { IJsVariableSource } from 'src/api/pro/jsVariable'

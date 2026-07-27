@@ -5,19 +5,20 @@ import { useSendDetailVisitor } from '../../sendHistory/useSendDetailVisitor'
 
 import { deleteIpWarmUpPlanByIds, getLatestSendingGroupOfSchedulePlan } from "src/api/pro/ipWarmUp"
 import type { deleteRowByIdType } from "src/compositions/qTableUtils"
+import { t } from 'src/i18n/helpers'
 
 export function useIpWarmIpContext (deleteRowById: deleteRowByIdType<IIpWarmUpUpPlan>) {
   const ipWarmUpContextMenuItems: IContextMenuItem<IIpWarmUpUpPlan>[] = [
     {
       name: 'onViewLatestSendingGroupOfPlan',
-      label: '查看任务',
-      tooltip: '查看当前预热计划的最新发送任务',
+      label: t('pages.ipWarmUp.viewTask'),
+      tooltip: t('pages.ipWarmUp.viewLatestTask'),
       onClick: onViewLatestSendingGroupOfPlan
     },
     {
       name: 'deleteWarmUpPlan',
-      label: '删除',
-      tooltip: '删除当前预热计划',
+      label: t('pages.ipWarmUp.delete'),
+      tooltip: t('pages.ipWarmUp.deleteWarmUpPlan'),
       color: 'negative',
       onClick: onDeleteWarmUpPlan
     }
@@ -29,7 +30,7 @@ export function useIpWarmIpContext (deleteRowById: deleteRowByIdType<IIpWarmUpUp
     // 获取最新的发送任务组 id
     const { data: sendingGroupId } = await getLatestSendingGroupOfSchedulePlan(data.objectId)
     if (!sendingGroupId) {
-      notifyError('当前预热计划没有关联到对应的发送任务组，请检查计划是否已开始！')
+      notifyError(t('pages.ipWarmUp.noAssociatedTask'))
       return
     }
 
@@ -38,7 +39,7 @@ export function useIpWarmIpContext (deleteRowById: deleteRowByIdType<IIpWarmUpUp
   }
 
   async function onDeleteWarmUpPlan (data: IIpWarmUpUpPlan) {
-    const confirm = await confirmOperation('删除预热计划', `确定要删除预热计划 "${data.name}" 吗？`)
+    const confirm = await confirmOperation(t('pages.ipWarmUp.deleteWarmUpPlan'), t('pages.ipWarmUp.deleteWarmUpPlanConfirmation', { name: data.name }))
     if (!confirm)
       return
 

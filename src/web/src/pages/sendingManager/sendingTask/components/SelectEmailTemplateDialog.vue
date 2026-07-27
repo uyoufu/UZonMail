@@ -1,7 +1,7 @@
 <template>
   <q-dialog ref='dialogRef' @hide="onDialogHide" :persistent="true">
     <div class="column card-like">
-      <q-table class="col" :rows="rows" row-key="id" virtual-scroll v-model:pagination="pagination" dense title="选择发件模板"
+      <q-table class="col" :rows="rows" row-key="id" virtual-scroll v-model:pagination="pagination" dense :title="t('pages.sendingTask.selectSendingTemplate')"
         hide-header grid :loading="loading" :filter="filter" binary-state-sort @request="onTableRequest"
         selection="multiple" v-model:selected="selected">
         <template v-slot:top-right>
@@ -48,7 +48,7 @@
 
       <div class="row justify-end q-ma-sm">
         <CancelBtn class="q-mr-sm" @click="onDialogCancel" />
-        <OkBtn tooltip="确认选择" @click="onOkBtnClick" />
+        <OkBtn :tooltip="t('pages.sendingTask.confirmSelection')" @click="onOkBtnClick" />
       </div>
     </div>
   </q-dialog>
@@ -60,6 +60,7 @@
  * 参考：http://www.quasarchs.com/quasar-plugins/dialog#composition-api-variant
  */
 import { IEmailTemplate } from 'src/api/emailTemplate'
+import { t } from 'src/i18n/helpers'
 const props = defineProps({
   initTemplates: {
     type: Array as PropType<IEmailTemplate[]>,

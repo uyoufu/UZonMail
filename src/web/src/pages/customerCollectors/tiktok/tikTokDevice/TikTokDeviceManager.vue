@@ -92,7 +92,7 @@ const { onCreateTikTokDevice } = useHeaderFunctions(addNewRow)
 import { useContextMenu } from './compositions/useContextMenu'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { contextMenuItems } = useContextMenu(addNewRow, deleteRowById) as { contextMenuItems: IContextMenuItem<Record<string, any>>[] }
+const { contextMenuItems } = useContextMenu(addNewRow, deleteRowById) as { contextMenuItems: ComputedRef<IContextMenuItem<Record<string, any>>[]> }
 // #endregion
 </script>
 

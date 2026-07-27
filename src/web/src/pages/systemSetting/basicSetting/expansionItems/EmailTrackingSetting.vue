@@ -3,8 +3,8 @@
     header-class="text-primary card-like-borderless" @before-show="onBeforeShow" group="settings1">
     <div class="row justify-start items-center q-pa-md">
       <q-checkbox class="col-auto-4" dense toggle-indeterminate v-model="emailTrackingSettingRef.enableEmailTracker"
-        label="启用邮件跟踪" color="secondary" keep-color>
-        <AsyncTooltip tooltip="开启后，将跟踪邮件的查阅状态"></AsyncTooltip>
+        :label="t('pages.basicSettings.enableEmailTracking')" color="secondary" keep-color>
+        <AsyncTooltip :tooltip="t('pages.basicSettings.emailTrackingTooltip')"></AsyncTooltip>
       </q-checkbox>
     </div>
   </q-expansion-item>
@@ -13,6 +13,7 @@
 <script lang="ts" setup>
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { notifySuccess } from 'src/utils/dialog'
+import { t } from 'src/i18n/helpers'
 
 import { getEmailTrackingSetting, updateEmailTrackingSetting } from 'src/api/pro/emailTracker'
 import type { IEmailTrackingSetting } from 'src/api/pro/emailTracker'
@@ -24,11 +25,11 @@ import type { PropType } from 'vue'
 const props = defineProps({
   label: {
     type: String,
-    default: '邮件跟踪'
+    default: undefined
   },
   caption: {
     type: String,
-    default: '邮件跟踪相关设置'
+    default: undefined
   },
 
   icon: {
@@ -42,6 +43,9 @@ const props = defineProps({
     default: AppSettingType.System
   }
 })
+
+const label = computed(() => props.label ?? t('pages.basicSettings.emailTracking'))
+const caption = computed(() => props.caption ?? t('pages.basicSettings.emailTrackingCaption'))
 
 const emailTrackingSettingRef: Ref<IEmailTrackingSetting> = ref({
   enableEmailTracker: false,
@@ -74,7 +78,7 @@ watch(
 
     await updateEmailTrackingSetting(emailTrackingSettingRef.value, props.settingType)
 
-    notifySuccess('设置更改已生效')
+    notifySuccess(t('pages.basicSettings.settingsEffective'))
   },
   { deep: true }
 )

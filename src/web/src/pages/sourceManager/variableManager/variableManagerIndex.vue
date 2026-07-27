@@ -16,22 +16,23 @@
 
 <script lang="ts" setup>
 import UTabs from 'src/components/quasarWrapper/UTabs.vue'
+import { t } from 'src/i18n/helpers'
 
 // #region 菜单切换
-const tabOptions = [
+const tabOptions = computed(() => [
   {
     name: 'source',
     icon: 'dataset',
-    label: '数据源',
-    tooltip: '设置数据源'
+    label: t('pages.variableManager.dataSource'),
+    tooltip: t('pages.variableManager.dataSourceTooltip')
   },
   {
     name: 'function',
     icon: 'code',
-    label: '变量定义',
-    tooltip: '使用数据源定义函数变量'
+    label: t('pages.variableManager.variableDefinition'),
+    tooltip: t('pages.variableManager.variableDefinitionTooltip')
   }
-]
+])
 const tab = ref('source')
 // #endregion
 

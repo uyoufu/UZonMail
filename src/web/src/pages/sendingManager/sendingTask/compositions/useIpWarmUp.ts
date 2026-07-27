@@ -9,6 +9,7 @@ import { createIpWarmUpPlan } from 'src/api/pro/ipWarmUp'
 import { getInboxesCountInGroups } from 'src/api/emailBox'
 
 import type { IEmailCreateInfo } from 'src/api/emailSending'
+import { t } from 'src/i18n/helpers'
 
 export function useIpWarmUp (validateSendingTaskParams: () => boolean, emailInfo: Ref<IEmailCreateInfo>) {
   // #region 权限
@@ -54,7 +55,7 @@ export function useIpWarmUp (validateSendingTaskParams: () => boolean, emailInfo
 
     await createIpWarmUpPlan(warmUpData)
 
-    notifySuccess('IP预热计划创建成功！')
+    notifySuccess(t('pages.sendingTask.warmUpPlanCreated'))
   }
 
   return { onIpWarmUpClick, enableIpWarmUpBtn }

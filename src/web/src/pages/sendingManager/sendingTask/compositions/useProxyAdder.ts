@@ -1,6 +1,7 @@
 import type { IEmailCreateInfo } from "src/api/emailSending"
 import { showComponentDialog } from "src/utils/dialog"
 import SelectProxyDialog from "../components/SelectProxyDialog.vue"
+import { t } from 'src/i18n/helpers'
 
 export function useProxyAdder (emailInfo: Ref<IEmailCreateInfo>) {
   const existProxy = computed(() => {
@@ -14,9 +15,9 @@ export function useProxyAdder (emailInfo: Ref<IEmailCreateInfo>) {
 
   const proxyBtnTooltip = computed(() => {
     const proxyCount = emailInfo.value.proxyIds.length
-    if (proxyCount === 0) return ['单击添加代理']
+    if (proxyCount === 0) return [t('pages.sendingTask.addProxy')]
 
-    return ['单击添加代理', `已添加 ${proxyCount} 个代理`]
+    return [t('pages.sendingTask.addProxy'), t('pages.sendingTask.addedProxyCount', { count: proxyCount })]
   })
 
   async function onProxyBtnClick () {

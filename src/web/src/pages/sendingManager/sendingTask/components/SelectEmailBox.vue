@@ -14,7 +14,7 @@
       <div class="row justify-end">
         <q-btn round dense flat icon="add" class="q-ml-sm" @click.stop="onSelectOutboxes" color="grey-7">
           <q-tooltip>
-            选择邮箱
+            {{ t('pages.sendingTask.selectMailbox') }}
           </q-tooltip>
         </q-btn>
       </div>
@@ -24,6 +24,7 @@
 
 <script lang="ts" setup>
 import logger from 'loglevel'
+import { t } from 'src/i18n/helpers'
 
 const props = defineProps({
   icon: {
@@ -108,11 +109,11 @@ async function onSelectOutboxes() {
 
 // #region 格式化显示
 function formatFieldLabel() {
-  let unitLabel = '个邮箱'
+  let unitLabel = t('pages.sendingTask.mailboxUnit')
   if (selectedGroupsModelValue.value.length > 0) {
-    unitLabel = '个分组和邮箱'
+    unitLabel = t('pages.sendingTask.groupAndMailboxUnit')
   }
-  const labels = selectedGroupsModelValue.value.map(x => `组-${x.name}`)
+  const labels = selectedGroupsModelValue.value.map(x => t('pages.sendingTask.groupLabel', { name: x.name }))
   if (modelValue.value.length > 0) {
     labels.push(...modelValue.value.map(x => x.email))
   }

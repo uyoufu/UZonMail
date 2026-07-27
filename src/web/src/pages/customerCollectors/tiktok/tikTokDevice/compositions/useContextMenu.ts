@@ -6,26 +6,27 @@ import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUt
 import { getTikTokDeviceInfoFields } from './useHeaderFunctions'
 import { confirmOperation, notifySuccess, showDialog } from 'src/utils/dialog'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
+import { t } from 'src/i18n/helpers'
 
 export function useContextMenu (
   addNewRow: addNewRowType<ITikTokDevice>,
   deleteRowById: deleteRowByIdType<ITikTokDevice>
 ) {
-  const contextMenuItems: IContextMenuItem<ITikTokDevice>[] = [
+  const contextMenuItems = computed<IContextMenuItem<ITikTokDevice>[]>(() => [
     {
       name: 'edit',
-      label: '编辑',
-      tooltip: '编辑当前TikTok设备',
+      label: t('pages.variableManager.edit'),
+      tooltip: t('pages.tikTokDevice.editCurrent'),
       onClick: onUpdateCrawler
     },
     {
       name: 'delete',
-      label: '删除',
-      tooltip: '删除当前TikTok设备',
+      label: t('pages.variableManager.delete'),
+      tooltip: t('pages.tikTokDevice.deleteCurrent'),
       color: 'negative',
       onClick: onDeleteCrawler
     }
-  ]
+  ])
 
   async function onUpdateCrawler (tikTokDeviceInfo: Record<string, any>) {
     const fields = getTikTokDeviceInfoFields()
@@ -39,7 +40,7 @@ export function useContextMenu (
 
     // 打开弹窗
     const popupParams: IPopupDialogParams = {
-      title: '修改TikTok设备',
+      title: t('pages.tikTokDevice.editTitle'),
       fields,
       oneColumn: true
     }
@@ -52,11 +53,14 @@ export function useContextMenu (
     // 保存到 rows 中
     addNewRow(Object.assign(tikTokDeviceInfo, data))
 
-    notifySuccess('修改TikTok设备成功')
+    notifySuccess(t('pages.tikTokDevice.updateSuccess'))
   }
 
   async function onDeleteCrawler (tikTokDeviceInfo: ITikTokDevice) {
-    const confirm = await confirmOperation('删除确认', `是否TikTok设备: [${tikTokDeviceInfo.name}]？`)
+    const confirm = await confirmOperation(
+      t('pages.templateManager.deleteConfirmation'),
+      t('pages.tikTokDevice.deleteConfirm', { name: tikTokDeviceInfo.name })
+    )
     if (!confirm) return
 
     // 开始删除
@@ -65,7 +69,7 @@ export function useContextMenu (
     // 删除本机数据
     deleteRowById(tikTokDeviceInfo.id)
 
-    notifySuccess('删除爬虫任务成功')
+    notifySuccess(t('pages.tikTokDevice.deleteSuccess'))
   }
 
   return { contextMenuItems }

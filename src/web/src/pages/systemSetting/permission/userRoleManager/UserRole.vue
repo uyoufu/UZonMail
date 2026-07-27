@@ -43,14 +43,15 @@ import type { IUserInfo } from 'src/stores/types'
 
 import { confirmOperation, notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'userId',
     required: true,
-    label: '用户名',
+    label: t('pages.permissionManager.userName'),
     align: 'left',
     field: v => v.user.userName,
     sortable: true
@@ -58,7 +59,7 @@ const columns: QTableColumn[] = [
   {
     name: 'roles',
     required: true,
-    label: '角色',
+    label: t('pages.permissionManager.role'),
     align: 'left',
     field: 'roles',
     format: roles => roles.map((x: IRole) => x.name).join(),
@@ -67,13 +68,13 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '创建日期',
+    label: t('pages.permissionManager.createdAt'),
     align: 'left',
     field: 'createDate',
     format: formatDate,
     sortable: true
   }
-]
+])
 
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getUserRolesCount(filterObj.filter)
@@ -101,7 +102,7 @@ async function onCreateUserRole () {
   const { data } = await upsertUserRole(result.data as IUserRole)
   addNewRow(data)
 
-  notifySuccess('添加成功')
+  notifySuccess(t('pages.permissionManager.addSuccess'))
 }
 
 const users: Ref<IUserInfo[]> = ref([])
@@ -115,18 +116,18 @@ async function getPopupDialogParams (userRole?: IUserRole) {
   if (!roles.value.length) {
     const { data } = await getAllRoles()
     if (data.length === 0) {
-      notifyError('请先添加角色')
-      throw new Error('请先添加角色')
+      notifyError(t('pages.permissionManager.addRoleFirst'))
+      throw new Error(t('pages.permissionManager.addRoleFirst'))
     }
     roles.value = data
   }
 
   const dialogParams: IPopupDialogParams = {
-    title: userRole ? `编辑用户角色: ${userRole.userId}` : '新增用户角色',
+    title: userRole ? t('pages.permissionManager.editUserRole', { userId: userRole.userId }) : t('pages.permissionManager.createUserRole'),
     oneColumn: true,
     fields: [{
       name: 'userId',
-      label: '用户名',
+      label: t('pages.permissionManager.userName'),
       type: LowCodeFieldType.selectOne,
       required: true,
       value: userRole?.userId || '',
@@ -138,7 +139,7 @@ async function getPopupDialogParams (userRole?: IUserRole) {
       disable: !!userRole
     }, {
       name: 'roles',
-      label: '角色',
+      label: t('pages.permissionManager.role'),
       type: LowCodeFieldType.selectMany,
       required: true,
       options: roles.value,
@@ -153,19 +154,19 @@ async function getPopupDialogParams (userRole?: IUserRole) {
 // #endregion
 
 // #region 右键菜单
-const contextItems: IContextMenuItem<IUserRole>[] = [
+const contextItems = computed<IContextMenuItem<IUserRole>[]>(() => [
   {
     name: 'edit',
-    label: '编辑',
+    label: t('pages.variableManager.edit'),
     onClick: onUserRoleClicked
   },
   {
     name: 'delete',
-    label: '删除',
+    label: t('pages.variableManager.delete'),
     color: 'negative',
     onClick: onDeleteUserRole
   }
-]
+])
 async function onUserRoleClicked (userRole: IUserRole) {
   const dialogParams = await getPopupDialogParams(userRole)
   const result = await showDialog(dialogParams)
@@ -177,17 +178,23 @@ async function onUserRoleClicked (userRole: IUserRole) {
   const newData = Object.assign(userRole, result.data)
   addNewRow(newData)
 
-  notifySuccess('用户角色更新成功')
+  notifySuccess(t('pages.permissionManager.userRoleUpdated'))
 }
 
 async function onDeleteUserRole (userRole: IUserRole) {
-  const confirm = await confirmOperation('删除角色', `即将删除 ${userRole.user.userId} 的 ${userRole.roles.map(x => x.name).join()} 角色，是否继续？`)
+  const confirm = await confirmOperation(
+    t('pages.permissionManager.deleteRole'),
+    t('pages.permissionManager.deleteRoleAssignment', {
+      userId: userRole.user.userId,
+      roles: userRole.roles.map(x => x.name).join()
+    })
+  )
   if (!confirm) return
 
   await deleteUserRoles(userRole.id)
 
   deleteRowById(userRole.id)
-  notifySuccess('删除成功')
+  notifySuccess(t('pages.variableManager.deleteSuccess'))
 }
 // #endregion
 </script>

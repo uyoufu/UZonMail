@@ -9,13 +9,14 @@ import { CrawlerType, createCrawlerTaskInfo } from 'src/api/pro/crawlerTask'
 import { getAllUserTikTokDevices } from 'src/api/pro/tikTokDevice'
 import { notifySuccess, showDialog } from 'src/utils/dialog'
 import type { addNewRowType } from 'src/compositions/qTableUtils'
+import { t } from 'src/i18n/helpers'
 
 export async function getCrawlerTaskFields (): Promise<ILowCodeField[]> {
   // 获取用户的代理
   const { data: proxies } = await getUsableProxies()
   proxies.unshift({
     id: 0,
-    name: '无',
+    name: t('pages.crawlerTask.none'),
     isActive: true,
     url: '',
     isShared: true,
@@ -30,14 +31,14 @@ export async function getCrawlerTaskFields (): Promise<ILowCodeField[]> {
     {
       name: 'name',
       type: LowCodeFieldType.text,
-      label: '任务名称',
+      label: t('pages.crawlerTask.taskName'),
       value: '',
       required: true
     },
     {
       name: 'type',
       type: LowCodeFieldType.selectOne,
-      label: '爬虫类型',
+      label: t('pages.crawlerTask.type'),
       value: 0,
       options: [
         {
@@ -53,7 +54,7 @@ export async function getCrawlerTaskFields (): Promise<ILowCodeField[]> {
     {
       name: 'tikTokDeviceId',
       type: LowCodeFieldType.selectOne,
-      label: '设备',
+      label: t('pages.crawlerTask.device'),
       value: 0,
       options: allDevices,
       optionLabel: 'name',
@@ -64,12 +65,12 @@ export async function getCrawlerTaskFields (): Promise<ILowCodeField[]> {
     },
     {
       name: 'description',
-      label: '描述'
+      label: t('pages.crawlerTask.description')
     },
     {
       name: 'proxyId',
       type: LowCodeFieldType.selectOne,
-      label: '代理',
+      label: t('pages.crawlerTask.proxy'),
       value: 0,
       options: proxies,
       optionLabel: 'name',
@@ -81,7 +82,7 @@ export async function getCrawlerTaskFields (): Promise<ILowCodeField[]> {
     {
       name: 'deadline',
       type: LowCodeFieldType.date,
-      label: '截止日期',
+      label: t('pages.crawlerTask.deadline'),
       value: dayjs().add(1, 'day').format('YYYY-MM-DD HH:mm:ss')
     }
   ]
@@ -96,7 +97,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<ICrawlerTaskInfo>) 
     const fields = await getCrawlerTaskFields()
 
     const popupParams: IPopupDialogParams = {
-      title: '新增爬虫任务',
+      title: t('pages.crawlerTask.createTitle'),
       fields,
       oneColumn: true
     }
@@ -109,7 +110,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<ICrawlerTaskInfo>) 
     // 保存到 rows 中
     addNewRow(crawlerTaskInfo)
 
-    notifySuccess('新增爬虫任务成功')
+    notifySuccess(t('pages.crawlerTask.createSuccess'))
   }
 
   return {

@@ -4,34 +4,34 @@
     <div class="q-pa-md column no-wrap">
       <div v-if="isSuperAdmin" class="column no-wrap">
         <div class="row justify-start items-center q-mb-sm">
-          <q-input outlined class="col-auto-4" standout dense v-model="settings.email" :debounce="500" label="系统通知发件邮箱"
-            placeholder="当发件完成后,可使用该邮箱发送完成通知">
-            <AsyncTooltip tooltip="当发件完成后,可使用该邮箱发送完成通知" />
+          <q-input outlined class="col-auto-4" standout dense v-model="settings.email" :debounce="500" :label="t('pages.basicSettings.systemNotificationEmail')"
+            :placeholder="t('pages.basicSettings.systemNotificationEmailPlaceholder')">
+            <AsyncTooltip :tooltip="t('pages.basicSettings.systemNotificationEmailPlaceholder')" />
           </q-input>
           <q-input outlined class="col-auto-4" standout dense v-model="settings.smtpHost" :debounce="500"
-            label="通知邮箱Smtp服务器" placeholder="通知邮箱对应的smtp服务器地址">
-            <AsyncTooltip tooltip="通知邮箱对应的smtp服务器地址" />
+            :label="t('pages.basicSettings.notificationSmtpHost')" :placeholder="t('pages.basicSettings.notificationSmtpHostPlaceholder')">
+            <AsyncTooltip :tooltip="t('pages.basicSettings.notificationSmtpHostPlaceholder')" />
           </q-input>
-          <q-input outlined class="col-auto-4" standout dense v-model="settings.smtpPort" :debounce="500" label="通知邮箱端口"
-            placeholder="通知邮箱对应的smtp服务器端口">
-            <AsyncTooltip tooltip="通知邮箱对应的smtp服务器端口" />
+          <q-input outlined class="col-auto-4" standout dense v-model="settings.smtpPort" :debounce="500" :label="t('pages.basicSettings.notificationSmtpPort')"
+            :placeholder="t('pages.basicSettings.notificationSmtpPortPlaceholder')">
+            <AsyncTooltip :tooltip="t('pages.basicSettings.notificationSmtpPortPlaceholder')" />
           </q-input>
           <PasswordInput outlined class="col-auto-4" standout noIcon dense v-model="settings.password" :debounce="500"
-            label="通知邮箱密码" placeholder="通知邮箱的密码">
-            <AsyncTooltip tooltip="通知邮箱的密码" />
+            :label="t('pages.basicSettings.notificationPassword')" :placeholder="t('pages.basicSettings.notificationPasswordPlaceholder')">
+            <AsyncTooltip :tooltip="t('pages.basicSettings.notificationPasswordPlaceholder')" />
           </PasswordInput>
         </div>
 
         <div class="q-pa-xs q-mb-sm">
-          <CommonBtn label="保存设置" @click="onValidateNotificationEmail" tooltip="验证邮箱并保存" :loading="isValidating" />
+          <CommonBtn :label="t('pages.basicSettings.saveSettings')" @click="onValidateNotificationEmail" :tooltip="t('pages.basicSettings.validateEmailAndSave')" :loading="isValidating" />
         </div>
       </div>
 
       <q-separator v-if="showNormalUserSetting" class="q-mb-sm" />
       <div v-if="showNormalUserSetting" class="row justify-start items-center q-mb-sm">
         <q-input outlined class="col-auto-4" standout dense v-model="userNotificationClientEmail" :debounce="500"
-          label="通知接收邮箱" placeholder="当发件完成后, 可通过该邮箱接收完成通知">
-          <AsyncTooltip tooltip="当发件完成后, 可通过该邮箱接收完成通知" />
+          :label="t('pages.basicSettings.notificationRecipientEmail')" :placeholder="t('pages.basicSettings.notificationRecipientEmailPlaceholder')">
+          <AsyncTooltip :tooltip="t('pages.basicSettings.notificationRecipientEmailPlaceholder')" />
         </q-input>
       </div>
     </div>
@@ -46,15 +46,16 @@ import PasswordInput from 'src/components/passwordInput/PasswordInput.vue'
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 
 import { AppSettingType } from 'src/api/appSetting'
+import { t } from 'src/i18n/helpers'
 
 const props = defineProps({
   label: {
     type: String,
-    default: '通知设置'
+    default: undefined
   },
   caption: {
     type: String,
-    default: '整个系统的发件通知相关设置'
+    default: undefined
   },
   icon: {
     type: String,
@@ -66,6 +67,9 @@ const props = defineProps({
     default: AppSettingType.System
   }
 })
+
+const label = computed(() => props.label ?? t('pages.basicSettings.notificationSettings'))
+const caption = computed(() => props.caption ?? t('pages.basicSettings.notificationSettingsCaption'))
 
 import { useSettingsAutoSaver } from '../compositions/useSettingsAutoSaver'
 import type { INotificationSettings } from 'src/api/notificationSetting'
@@ -106,9 +110,9 @@ async function onValidateNotificationEmail () {
       return
     }
     settings.value.isValid = true
-  }, "通知设置保存", '正在验证邮箱...')
+  }, t('pages.basicSettings.notificationSettingsSave'), t('pages.basicSettings.validatingEmail'))
 
-  notifySuccess('保存成功')
+  notifySuccess(t('pages.basicSettings.saveSuccess'))
 }
 // #endregion
 

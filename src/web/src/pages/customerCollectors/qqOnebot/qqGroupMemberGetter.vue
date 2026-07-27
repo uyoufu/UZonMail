@@ -47,12 +47,12 @@ import type { IGroupInfo, IUserInfo } from 'src/api/oneBot/group'
 import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'user_id',
     required: true,
-    label: 'QQ',
+    label: t('pages.qqGetter.qqNumber'),
     align: 'left',
     field: 'user_id',
     sortable: true
@@ -60,12 +60,12 @@ const columns: QTableColumn[] = [
   {
     name: 'nickname',
     required: true,
-    label: '昵称',
+    label: t('pages.qqGetter.nickname'),
     align: 'left',
     field: 'nickname',
     sortable: true
   },
-]
+])
 
 
 function filterRowsLocal (filter?: string) {
@@ -97,7 +97,7 @@ const { pagination, rows, filter, onTableRequest, loading, refreshTable } = useQ
 const groupInfos: Ref<IGroupInfo[]> = ref([])
 const selectedGroup: Ref<IGroupInfo> = ref({
   group_id: 0,
-  group_name: '无',
+  group_name: t('pages.qqGetter.none'),
   member_count: 0,
 })
 const groupInfoOptions: Ref<IGroupInfo[]> = ref([])

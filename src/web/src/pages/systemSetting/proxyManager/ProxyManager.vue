@@ -17,7 +17,7 @@
 
     <template v-slot:body-cell-name="props">
       <q-td :props="props">
-        <ClickableText :text="props.value" tooltip="单击编辑" @click="onModifyProxy(props.row)" />
+        <ClickableText :text="props.value" :tooltip="t('pages.proxy.clickToEdit')" @click="onModifyProxy(props.row)" />
       </q-td>
     </template>
 
@@ -47,61 +47,65 @@ import type { IRequestPagination, TTableFilterObject } from 'src/compositions/ty
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import ClickableText from 'src/components/clickableText/ClickableText.vue'
 import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
+import { t } from 'src/i18n/helpers'
+import { useUserInfoStore } from 'src/stores/user'
 
 // #region 表格定义
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const userInfoStore = useUserInfoStore()
+const columns = computed<QTableColumn[]>(() => {
+  const columns: QTableColumn[] = [
   indexColumn,
   {
     name: 'name',
     required: true,
-    label: '名称',
+    label: t('global.name'),
     align: 'left',
     field: 'name',
     sortable: true
   },
   {
     name: 'url',
-    label: '代理',
+    label: t('pages.sendingTask.proxy'),
     align: 'left',
     field: 'url',
     sortable: true
   },
   {
     name: 'matchRegex',
-    label: '匹配规则',
+    label: t('pages.proxy.matchRule'),
     align: 'left',
     field: 'matchRegex',
     sortable: true
   },
   {
     name: 'priority',
-    label: '优先级',
+    label: t('pages.proxy.priority'),
     align: 'left',
     field: 'priority',
     sortable: true
   },
   {
     name: 'isActive',
-    label: '启用',
+    label: t('pages.proxy.enabled'),
     align: 'left',
     field: 'isActive',
     sortable: true,
-    format: v => v ? '是' : '否'
+    format: v => v ? t('pages.proxy.yes') : t('pages.proxy.no')
   }
-]
+  ]
 
-import { useUserInfoStore } from 'src/stores/user'
-const userInfoStore = useUserInfoStore()
-if (userInfoStore.isAdmin) {
-  columns.push({
+  if (userInfoStore.isAdmin) {
+    columns.push({
     name: 'isShared',
-    label: '共享',
+      label: t('pages.proxy.shared'),
     align: 'left',
     field: 'isShared',
     sortable: true
-  })
-}
+    })
+  }
+  return columns
+})
 
 import { getProxiesCount, getProxiesData } from 'src/api/proxy'
 

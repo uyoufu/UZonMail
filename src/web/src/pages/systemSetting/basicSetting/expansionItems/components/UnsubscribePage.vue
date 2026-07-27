@@ -3,7 +3,7 @@
     v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort grid
     @request="onTableRequest">
     <template v-slot:top-left>
-      <CreateBtn label="新增退订页" :tooltip="['按语言新增退订页面', '程序会根据用户当前语言展示对应的退订页']" @click="onNewUnsubscribePage" />
+      <CreateBtn :label="t('pages.basicSettings.addUnsubscribePage')" :tooltip="[t('pages.basicSettings.addUnsubscribePageTooltip'), t('pages.basicSettings.unsubscribePageLanguageTip')]" @click="onNewUnsubscribePage" />
     </template>
 
     <template v-slot:top-right>
@@ -19,8 +19,8 @@
 
           <div class="hoverable-focus">
             <div class="row full-height items-center justify-center q-gutter-sm">
-              <CommonBtn icon="edit" color="secondary" tooltip="修改" @click="onModifyUnsubscribePage(props.row)" />
-              <CommonBtn icon="preview" tooltip="预览" @click="onPreviewUnsubscribePage(props.row.id as number)" />
+              <CommonBtn icon="edit" color="secondary" :tooltip="t('pages.basicSettings.edit')" @click="onModifyUnsubscribePage(props.row)" />
+              <CommonBtn icon="preview" :tooltip="t('pages.basicSettings.preview')" @click="onPreviewUnsubscribePage(props.row.id as number)" />
             </div>
           </div>
         </q-card>
@@ -35,6 +35,7 @@ import { useQTable } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
+import { t } from 'src/i18n/helpers'
 
 import type { IUnsubscribePage
 } from 'src/api/pro/unsubscribePage';
@@ -43,11 +44,11 @@ import {
   getUnsubscribePagesCount, getUnsubscribePagesData
 } from 'src/api/pro/unsubscribePage'
 
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   {
     name: 'language',
     required: true,
-    label: '语言',
+    label: t('pages.basicSettings.language'),
     align: 'left',
     field: 'language',
     sortable: true
@@ -55,12 +56,12 @@ const columns: QTableColumn[] = [
   {
     name: 'htmlContent',
     required: false,
-    label: '预览',
+    label: t('pages.basicSettings.preview'),
     align: 'left',
     field: 'htmlContent',
     sortable: true
   }
-]
+])
 
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getUnsubscribePagesCount(filterObj.filter)
@@ -89,12 +90,12 @@ import UnsubscribePageDialog from 'src/pages/unsubscribe/UnsubscribePageDialog.v
 function getPopupParams (data: IUnsubscribePage | null = null) {
   // 获取所有的语言
   const dialogParams: IPopupDialogParams = {
-    title: data ? '编辑退定页面' : '新增退订页面',
+    title: data ? t('pages.basicSettings.editUnsubscribePage') : t('pages.basicSettings.addUnsubscribePage'),
     oneColumn: true,
     fields: [
       {
         name: 'language',
-        label: '语言',
+        label: t('pages.basicSettings.language'),
         type: LowCodeFieldType.selectOne,
         options: translations.map(x => ({ label: x.label, value: x.locale })),
         required: true,
@@ -104,7 +105,7 @@ function getPopupParams (data: IUnsubscribePage | null = null) {
       },
       {
         name: 'htmlContent',
-        label: 'HTML内容',
+        label: t('pages.basicSettings.htmlContent'),
         type: LowCodeFieldType.editor,
         required: true,
         value: data?.htmlContent
@@ -112,7 +113,7 @@ function getPopupParams (data: IUnsubscribePage | null = null) {
     ],
     customBtns: [
       {
-        label: '预览',
+        label: t('pages.basicSettings.preview'),
         color: 'secondary',
         onClick: previewUnsubscribePage
       }
@@ -138,7 +139,7 @@ async function onNewUnsubscribePage () {
   const { data: newPage } = await createUnsubscribePage(result.data as IUnsubscribePage)
   addNewRow(newPage)
 
-  notifySuccess('新增成功')
+  notifySuccess(t('pages.basicSettings.addSuccess'))
 }
 // #endregion
 
@@ -155,7 +156,7 @@ async function onModifyUnsubscribePage (unsubscribePage: Record<string, any>) {
   await updateUnsubscribePage(pageData.id, result.data.htmlContent)
   pageData.htmlContent = result.data.htmlContent
 
-  notifySuccess('更新成功')
+  notifySuccess(t('pages.basicSettings.updateSuccess'))
 }
 
 function onPreviewUnsubscribePage (unsubscribePageId: number) {

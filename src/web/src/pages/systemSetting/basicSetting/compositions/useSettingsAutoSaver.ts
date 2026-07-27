@@ -1,5 +1,6 @@
 import { debounce } from 'quasar'
 import { notifySuccess } from 'src/utils/dialog'
+import { t } from 'src/i18n/helpers'
 import { watch } from 'vue'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -28,7 +29,7 @@ export function useSettingsAutoSaver<T = Record<string, any>> (settings: Ref<T>,
       if (isStopWatching.value) return
 
       updateSettingsDebounce()
-      notifySuccess('设置更改已生效')
+      notifySuccess(t('pages.basicSettings.settingsEffective'))
     },
     { deep: true }
   )

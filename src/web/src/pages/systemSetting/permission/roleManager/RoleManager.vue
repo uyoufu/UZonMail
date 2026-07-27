@@ -23,9 +23,10 @@ import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import dayjs from 'dayjs'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   // {
   //   name: 'icon',
@@ -38,7 +39,7 @@ const columns: QTableColumn[] = [
   {
     name: 'name',
     required: true,
-    label: '名称',
+    label: t('global.name'),
     align: 'left',
     field: 'name',
     sortable: true
@@ -46,14 +47,14 @@ const columns: QTableColumn[] = [
   {
     name: 'description',
     required: true,
-    label: '描述',
+    label: t('global.description'),
     align: 'left',
     field: 'description',
     sortable: true
   },
   {
     name: 'functionsCount',
-    label: '功能数',
+    label: t('pages.permissionManager.functionCount'),
     align: 'left',
     field: 'permissionCodeIds',
     format: v => v ? v.length : 0
@@ -61,7 +62,7 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '创建日期',
+    label: t('pages.permissionManager.createdAt'),
     align: 'left',
     field: 'createDate',
     format: (val: string) => {
@@ -69,7 +70,7 @@ const columns: QTableColumn[] = [
     },
     sortable: true
   }
-]
+])
 
 // function formatColValue (col: any, row: any) {
 //   if (typeof col.format === 'function') {
@@ -111,7 +112,7 @@ async function onCreateRole () {
 
   const { data } = await upsertRole(result.data as IRole)
   addNewRow(data)
-  notifySuccess('添加角色成功')
+  notifySuccess(t('pages.permissionManager.roleCreated'))
 }
 
 const permissionCodes: Ref<IPermissionCode[]> = ref([])
@@ -123,12 +124,12 @@ async function getPopupDialogParams (roleData?: IRole) {
   }
 
   const dialogParams: IPopupDialogParams = {
-    title: roleData ? `修改角色 ${roleData.name}` : '新增角色',
+    title: roleData ? t('pages.permissionManager.editRoleTitle', { name: roleData.name }) : t('pages.permissionManager.createRole'),
     oneColumn: true,
     fields: [
       {
         name: 'name',
-        label: '名称',
+        label: t('global.name'),
         required: true,
         value: roleData ? roleData.name : ''
       },
@@ -142,14 +143,14 @@ async function getPopupDialogParams (roleData?: IRole) {
       // },
       {
         name: 'description',
-        label: '描述',
+        label: t('global.description'),
         type: LowCodeFieldType.textarea,
         required: false,
         value: roleData ? roleData.description : ''
       },
       {
         name: 'permissionCodeIds',
-        label: '权限码',
+        label: t('pages.permissionManager.permissionCodes'),
         type: LowCodeFieldType.selectMany,
         options: permissionCodes.value,
         optionLabel: 'code',
@@ -170,21 +171,21 @@ async function getPopupDialogParams (roleData?: IRole) {
 // #region 右键菜单
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
-const contextItems: IContextMenuItem[] = [
+const contextItems = computed<IContextMenuItem[]>(() => [
   {
     name: 'edit',
-    label: '编辑',
-    tooltip: '编辑角色',
+    label: t('pages.variableManager.edit'),
+    tooltip: t('pages.permissionManager.editRole'),
     onClick: onEditRole
   },
   {
     name: 'delete',
-    label: '删除',
-    tooltip: '删除角色',
+    label: t('pages.variableManager.delete'),
+    tooltip: t('pages.permissionManager.deleteRole'),
     onClick: onDeleteRole,
     color: 'negative'
   }
-]
+])
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onEditRole (data: Record<string, any>) {
   const roleData = data as IRole
@@ -196,19 +197,22 @@ async function onEditRole (data: Record<string, any>) {
   result.data.id = data.id
   const { data: newRole } = await upsertRole(result.data as IRole)
   addNewRow(newRole)
-  notifySuccess('修改角色成功')
+  notifySuccess(t('pages.permissionManager.roleUpdated'))
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function onDeleteRole (data: Record<string, any>) {
-  const confirm = await confirmOperation('删除确认', `确认删除角色: ${data.name} 吗？`)
+  const confirm = await confirmOperation(
+    t('pages.templateManager.deleteConfirmation'),
+    t('pages.permissionManager.deleteRoleConfirm', { name: String(data.name) })
+  )
   if (!confirm) return
 
   // 删除角色
   await deleteRole(data.id)
   deleteRowById(data.id)
 
-  notifySuccess(`角色 ${data.name} 删除成功`)
+  notifySuccess(t('pages.permissionManager.roleDeleted', { name: String(data.name) }))
 }
 // #endregion
 </script>

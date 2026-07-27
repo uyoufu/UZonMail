@@ -8,27 +8,28 @@ import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { usePermission } from 'src/compositions/permission'
 import type { addNewRowType } from 'src/compositions/qTableUtils'
 import type { IUserInfo } from 'src/stores/types'
+import { t } from 'src/i18n/helpers'
 
 export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
   const { hasEnterpriseAccess } = usePermission()
   // 右键菜单
-  const userManageContextItems: IContextMenuItem<IUserInfo>[] = [
+  const userManageContextItems = computed<IContextMenuItem<IUserInfo>[]>(() => [
     {
       name: 'addUser',
-      label: '新增',
-      tooltip: '新增用户',
+      label: t('pages.userManager.newUser'),
+      tooltip: t('pages.userManager.createUserTooltip'),
       onClick: onNewUserClick
     },
     {
       name: 'resetPassword',
-      label: '重置密码',
-      tooltip: '重置用户密码',
+      label: t('pages.userManager.resetPassword'),
+      tooltip: t('pages.userManager.resetUserPassword'),
       onClick: onResetUserPassword
     },
     {
       name: 'forbidden',
-      label: '禁用',
-      tooltip: '禁用后, 用户将无法登录',
+      label: t('pages.userManager.disable'),
+      tooltip: t('pages.userManager.disableHint'),
       color: 'negative',
       vif: v => {
         console.log('forbidden', v, v.status, UserStatus.forbiddenLogin, v.status !== UserStatus.forbiddenLogin)
@@ -38,8 +39,8 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
     },
     {
       name: 'cancelForbidden',
-      label: '启用',
-      tooltip: '取消用户的禁用状态',
+      label: t('pages.userManager.enable'),
+      tooltip: t('pages.userManager.enableHint'),
       color: 'negative',
       vif: v => v.status === UserStatus.forbiddenLogin,
       onClick: onCancelForbidden
@@ -58,41 +59,50 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
       vif: v => v.type === UserType.subUser,
       onClick: onSetAsIndependentUser
     }
-  ]
+  ])
 
   async function onResetUserPassword (userInfo: Record<string, any>) {
     // 获取默认密码
     const { data: defaultPassword } = await getDefaultPassword()
 
-    const confirm = await confirmOperation('重置密码', `密码即将重置为 ${defaultPassword}, 是否继续?`)
+    const confirm = await confirmOperation(
+      t('pages.userManager.resetPassword'),
+      t('pages.userManager.resetConfirmation', { password: defaultPassword })
+    )
     if (!confirm) return false
 
     // 开始重置
     await resetUserPassword(userInfo.userId)
 
-    notifySuccess('重置密码成功')
+    notifySuccess(t('pages.userManager.resetSuccess'))
   }
 
   async function onForbiddenLogin (userInfo: Record<string, any>) {
-    const confirm = await confirmOperation('禁用用户', `是否禁用用户 ${userInfo.userId} ? 禁用后，该用户将无法登录，但现有发件任务不会中断`)
+    const confirm = await confirmOperation(
+      t('pages.userManager.disableUser'),
+      t('pages.userManager.disableConfirmation', { userId: userInfo.userId })
+    )
     if (!confirm) return false
 
     await setUserStatus(userInfo.id, UserStatus.forbiddenLogin)
 
     // 更新用户的状态
     userInfo.status = UserStatus.forbiddenLogin
-    notifySuccess('禁用成功')
+    notifySuccess(t('pages.userManager.disableSuccess'))
   }
 
   async function onCancelForbidden (userInfo: Record<string, any>) {
-    const confirm = await confirmOperation('启用用户', `是否启用用户 ${userInfo.userId} ? 启用后，该用户将可以正常登录`)
+    const confirm = await confirmOperation(
+      t('pages.userManager.enableUser'),
+      t('pages.userManager.enableConfirmation', { userId: userInfo.userId })
+    )
     if (!confirm) return false
 
     await setUserStatus(userInfo.id, UserStatus.normal)
 
     // 更新用户的状态
     userInfo.status = UserStatus.normal
-    notifySuccess('启用成功')
+    notifySuccess(t('pages.userManager.enableSuccess'))
   }
 
   async function onSetAsSubUser (userInfo: Record<string, any>) {
@@ -120,33 +130,33 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
   // 新增用户
   async function onNewUserClick () {
     const dialogResult = await showDialog({
-      title: '新增用户',
+      title: t('pages.userManager.newUser'),
       fields: [
         {
           name: 'userId',
-          label: '用户名',
+          label: t('pages.userManager.userName'),
           type: LowCodeFieldType.text,
           required: true,
-          placeholder: '请输入用户名,请仅用英文字母',
+          placeholder: t('pages.userManager.enterUserName'),
           // eslint-disable-next-line @typescript-eslint/require-await
           validate: async (value) => {
             return {
               ok: value && value.length >= 3,
-              message: '用户名必须大小等于 3 个字符'
+              message: t('pages.userManager.userNameLength')
             }
           }
         },
         {
           name: 'password',
-          label: '初始密码',
+          label: t('pages.userManager.initialPassword'),
           type: LowCodeFieldType.text,
           required: true,
-          placeholder: '请输入初始密码',
+          placeholder: t('pages.userManager.enterInitialPassword'),
           // eslint-disable-next-line @typescript-eslint/require-await
           validate: async (value) => {
             return {
               ok: value && value.length >= 6,
-              message: '密码必须大小等于 6 个字符'
+              message: t('pages.userManager.passwordLength')
             }
           }
         }
@@ -157,7 +167,7 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
         const { data } = await checkUserId(fieldsModel.userId)
         return {
           ok: data,
-          message: `用户名：${fieldsModel.userId}已存在`
+          message: t('pages.userManager.userNameExists', { userId: String(fieldsModel.userId) })
         }
       }
     })
@@ -167,7 +177,7 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
     // 新增用户
     const { data: modelValue } = dialogResult
     const { data: newUser } = await createUser(modelValue.userId as string, modelValue.password as string)
-    notifySuccess('新增用户成功')
+    notifySuccess(t('pages.userManager.createSuccess'))
     addNewRow(newUser)
   }
 

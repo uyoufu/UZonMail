@@ -34,21 +34,22 @@ import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
 
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
 const { formatProxyId, formatCrawlerType, formatCrawlerStatus, formatDeviceId: formatTikTokDeviceId } = useColumnsFormater()
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'name',
-    label: '名称',
+    label: t('pages.crawlerTask.name'),
     align: 'left',
     field: 'name',
     sortable: true
   },
   {
     name: 'description',
-    label: '描述',
+    label: t('pages.crawlerTask.description'),
     align: 'left',
     field: 'description',
     sortable: true
@@ -56,7 +57,7 @@ const columns: QTableColumn[] = [
   {
     name: 'type',
     required: true,
-    label: '爬虫类型',
+    label: t('pages.crawlerTask.type'),
     align: 'left',
     field: 'type',
     format: formatCrawlerType,
@@ -65,7 +66,7 @@ const columns: QTableColumn[] = [
   {
     name: 'tikTokDeviceId',
     required: true,
-    label: '设备',
+    label: t('pages.crawlerTask.device'),
     align: 'left',
     field: 'tikTokDeviceId',
     format: formatTikTokDeviceId,
@@ -73,7 +74,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'proxyId',
-    label: '代理',
+    label: t('pages.crawlerTask.proxy'),
     align: 'left',
     field: 'proxyId',
     format: formatProxyId,
@@ -82,7 +83,7 @@ const columns: QTableColumn[] = [
   {
     name: 'deadline',
     required: false,
-    label: '截止日期',
+    label: t('pages.crawlerTask.deadline'),
     align: 'left',
     field: 'deadline',
     format: formatDate,
@@ -91,7 +92,7 @@ const columns: QTableColumn[] = [
   {
     name: 'status',
     required: true,
-    label: '状态',
+    label: t('pages.crawlerTask.status'),
     align: 'left',
     field: 'status',
     format: formatCrawlerStatus,
@@ -100,7 +101,7 @@ const columns: QTableColumn[] = [
   {
     name: 'count',
     required: true,
-    label: '数量',
+    label: t('pages.crawlerTask.count'),
     align: 'left',
     field: 'count',
     sortable: true
@@ -108,7 +109,7 @@ const columns: QTableColumn[] = [
   {
     name: 'startDate',
     required: false,
-    label: '开始日期',
+    label: t('pages.crawlerTask.startDate'),
     align: 'left',
     field: 'startDate',
     format: formatDate,
@@ -117,7 +118,7 @@ const columns: QTableColumn[] = [
   {
     name: 'endDate',
     required: false,
-    label: '结束日期',
+    label: t('pages.crawlerTask.endDate'),
     align: 'left',
     field: 'endDate',
     format: formatDate,
@@ -126,13 +127,13 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '创建日期',
+    label: t('pages.crawlerTask.createDate'),
     align: 'left',
     field: 'createDate',
     format: formatDate,
     sortable: true
   }
-]
+])
 
 import { getCrawlerTaskInfosCount, getCrawlerTaskInfosData } from 'src/api/pro/crawlerTask'
 
@@ -162,7 +163,7 @@ const { onCreateCrawlerTask } = useHeaderFunctions(addNewRow)
 import { useContextMenu } from './compositions/useContextMenu'
 import type { IContextMenuItem } from 'src/components/contextMenu/types'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { contextMenuItems } = useContextMenu(addNewRow, deleteRowById) as { contextMenuItems: IContextMenuItem<Record<string, any>>[] }
+const { contextMenuItems } = useContextMenu(addNewRow, deleteRowById) as { contextMenuItems: ComputedRef<IContextMenuItem<Record<string, any>>[]> }
 // #endregion
 
 // #region 自动更新正在运行任务的数量

@@ -2,19 +2,19 @@
   <div class="column items-center justify-center full-height">
     <div class="column justify-start">
       <div>
-        <span>授权类型:</span>
+        <span>{{ t('pages.license.licenseType') }}:</span>
         <span class="text-primary text-subtitle1 text-bold q-ml-sm">
           {{ formatLicenseType(activeInfo.licenseType) }}
         </span>
       </div>
 
       <div>
-        <span>激活时间:</span>
+        <span>{{ t('pages.license.activationTime') }}:</span>
         <span class="q-ml-sm">{{ formatDate(activeInfo.activeDate) }}</span>
       </div>
 
       <div>
-        <span>到期时间:</span>
+        <span>{{ t('pages.license.expirationTime') }}:</span>
         <span class="q-ml-sm">{{ formatDate(activeInfo.expireDate) }}</span>
       </div>
     </div>
@@ -28,7 +28,7 @@
         </q-icon>
 
         <q-icon v-if="showLicenseRemoveIcon" class="q-ml-sm" name="logout" color="negative" @click="onRemoveLicense">
-          <AsyncTooltip tooltip="退出激活状态" :cache="false"></AsyncTooltip>
+          <AsyncTooltip :tooltip="t('pages.license.deactivate')" :cache="false"></AsyncTooltip>
         </q-icon>
       </template>
     </q-input>
@@ -43,6 +43,7 @@ import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/u
 import dayjs from 'dayjs'
 import type { ILicenseInfo } from 'src/api/pro/license'
 import { LicenseType, updateLicenseInfo, getLicenseInfo, updateExistingLicenseInfo, removeLicense } from 'src/api/pro/license'
+import { t } from 'src/i18n/helpers'
 
 const license = ref<string>('')
 
@@ -50,7 +51,7 @@ const showActiveIcon = ref(false)
 const licenseLabel: Ref<undefined | string> = ref('')
 function onFocus () {
   showActiveIcon.value = true
-  licenseLabel.value = '请输入授权码'
+  licenseLabel.value = t('pages.license.enterLicenseCode')
 }
 function onBlur () {
   showActiveIcon.value = false
@@ -65,7 +66,7 @@ const activeIconColor = computed(() => {
   return isLicenseValid.value ? 'positive' : 'white'
 })
 function getActiveIconTooltip () {
-  return isLicenseValid.value ? '单击激活' : '激活码长度不满足要求'
+  return isLicenseValid.value ? t('pages.license.clickToActivate') : t('pages.license.invalidLicenseCodeLength')
 }
 
 // 激活激活码
@@ -79,24 +80,24 @@ const routeStore = useRoutesStore()
 async function onActiveLicense () {
   // 验证授权码是否合法
   if (!isLicenseValid.value) {
-    notifyError('激活码长度应为 24 位')
+    notifyError(t('pages.license.licenseCodeLengthRequirement'))
     return
   }
 
-  const confirm = await confirmOperation('升级确认', '即将进行升级, 是否继续?')
+  const confirm = await confirmOperation(t('pages.license.upgradeConfirmation'), t('pages.license.upgradeConfirmationMessage'))
   if (!confirm) return
 
   await notifyUntil(async () => {
     // 调用升级接口
     const { data: licenseInfo } = await updateLicenseInfo(license.value)
     activeInfo.value = licenseInfo
-  }, "版本授权", '升级中...')
+  }, t('pages.license.versionLicense'), t('pages.license.upgrading'))
 
   // 更新用户权限
   await updateUserAccess()
 
   // 更新路由
-  notifySuccess('升级成功!')
+  notifySuccess(t('pages.license.upgradeSuccess'))
   window.location.reload()
 }
 
@@ -133,7 +134,7 @@ const { isSuperAdmin } = usePermission()
 onMounted(async () => {
   // 判断是否包含 pro 插件
   if (!userInfoStore.hasProPlugin) {
-    notifyError('当前为免费版本, 请先安装 pro 版本插件')
+    notifyError(t('pages.license.proPluginRequired'))
     return
   }
 
@@ -154,7 +155,7 @@ const showLicenseRemoveIcon = computed(() => {
   return activeInfo.value.licenseType !== LicenseType.Community && isSuperAdmin
 })
 async function onRemoveLicense () {
-  const confirm = await confirmOperation('退出激活状态', '退出激活后，该系统下所有用户的高级功能将不可用，是否继续?')
+  const confirm = await confirmOperation(t('pages.license.deactivate'), t('pages.license.deactivateConfirmation'))
   if (!confirm) return
 
   // 调用退出激活接口
@@ -164,7 +165,7 @@ async function onRemoveLicense () {
   // 更新用户权限
   await updateUserAccess()
 
-  notifySuccess('已退出激活状态')
+  notifySuccess(t('pages.license.deactivated'))
 
   // 刷新页面
   window.location.reload()

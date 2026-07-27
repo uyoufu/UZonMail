@@ -3,45 +3,45 @@
     header-class="text-primary card-like-borderless" @before-show="onBeforeShow" group="settings1">
     <div class="row justify-start items-center q-pa-md">
       <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.maxSendCountPerEmailDay"
-        :debounce="500" type="number" label="单个发件箱每日最大发件量" placeholder="为 0 时表示不限制">
-        <AsyncTooltip :tooltip="['设置发件箱单日最大发件量', '为 0 表示不限制']" />
+        :debounce="500" type="number" :label="t('pages.basicSettings.maxDailySendPerOutbox')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+        <AsyncTooltip :tooltip="[t('pages.basicSettings.maxDailySendTooltip'), t('pages.basicSettings.zeroMeansUnlimited')]" />
       </q-input>
 
       <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.maxSendingBatchSize"
-        :debounce="500" type="number" label="合并发件最大数量" placeholder="为 0 时表示不合并">
+        :debounce="500" type="number" :label="t('pages.basicSettings.maxMergedRecipients')" :placeholder="t('pages.basicSettings.zeroMeansNoMerge')">
         <AsyncTooltip :tooltip="[
-          '设置多个收件人合并在一起的发件数量',
-          '为 0 表示不限制',
-          '该值不宜过大, 一般 20 左右, 太大会导致发送失败'
+          t('pages.basicSettings.mergedRecipientsTooltip'),
+          t('pages.basicSettings.zeroMeansUnlimited'),
+          t('pages.basicSettings.mergedRecipientsRecommendation')
         ]" />
       </q-input>
 
       <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.minOutboxCooldownSecond"
-        type="number" :debounce="500" label="单个发件箱最小发件间隔 (单位: 秒)" placeholder="为 0 时表示不限制">
+        type="number" :debounce="500" :label="t('pages.basicSettings.minOutboxCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
       </q-input>
 
       <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.maxOutboxCooldownSecond"
-        type="number" :debounce="500" label="单个发件箱最大发件间隔 (单位: 秒)" placeholder="为 0 时表示不限制">
+        type="number" :debounce="500" :label="t('pages.basicSettings.maxOutboxCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
       </q-input>
 
       <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.minInboxCooldownHours"
-        type="number" :debounce="500" label="最短收件间隔 (单位: h)" placeholder="为 0 时表示不限制">
-        <AsyncTooltip tooltip="设置同一个收件箱收件间隔，为 0 表示不限制" />
+        type="number" :debounce="500" :label="t('pages.basicSettings.minInboxCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+        <AsyncTooltip :tooltip="t('pages.basicSettings.minInboxCooldownTooltip')" />
       </q-input>
 
       <q-input outlined class="col-auto-4" standout dense v-model="outboxSettingRef.replyToEmails" :debounce="500"
-        label="回信收件人" placeholder="收件箱回信后的收信邮箱,若有多个使用逗号分隔">
-        <AsyncTooltip :tooltip="['设置回信时收信人地址', '为空时表示不设置', '有多个收信地址时,使用英文逗号分隔']" />
+        :label="t('pages.basicSettings.replyRecipients')" :placeholder="t('pages.basicSettings.replyRecipientsPlaceholder')">
+        <AsyncTooltip :tooltip="[t('pages.basicSettings.replyRecipientsTooltip'), t('pages.basicSettings.emptyMeansNotSet'), t('pages.basicSettings.separateEmailsWithComma')]" />
       </q-input>
 
       <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.changeIpAfterEmailCount"
-        :debounce="500" type="number" label="最大发件数/代理/发件箱" placeholder="为 0 时表示不限制">
-        <AsyncTooltip :tooltip="['某个邮箱使用某个代理的最大发件总数', '小于等于 0 时表示不限制']" />
+        :debounce="500" type="number" :label="t('pages.basicSettings.maxSendPerProxyOutbox')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+        <AsyncTooltip :tooltip="[t('pages.basicSettings.maxSendPerProxyOutboxTooltip'), t('pages.basicSettings.nonPositiveMeansUnlimited')]" />
       </q-input>
 
       <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.maxCountPerIPDomainHour"
-        :debounce="500" type="number" label="最大发件数/IP/域名/小时" placeholder="为 0 时表示不限制">
-        <AsyncTooltip :tooltip="['每个发件域名在当前IP下的每小时最大发数', '动态IP单独计算', '小于等于 0 时表示不限制']" />
+        :debounce="500" type="number" :label="t('pages.basicSettings.maxSendPerIpDomainHour')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+        <AsyncTooltip :tooltip="[t('pages.basicSettings.maxSendPerIpDomainHourTooltip'), t('pages.basicSettings.dynamicIpCalculatedSeparately'), t('pages.basicSettings.nonPositiveMeansUnlimited')]" />
       </q-input>
 
       <q-checkbox class="col-auto-4" dense keep-color v-model="outboxSettingRef.allowDuplicateSending" color="secondary"
@@ -57,7 +57,7 @@ import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import { getSendingSetting, updateSendingSetting } from 'src/api/appSetting'
 import { useUserInfoStore } from 'src/stores/user'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
-import { translateBasicSettings } from 'src/i18n/helpers'
+import { t, translateBasicSettings } from 'src/i18n/helpers'
 
 import type { ISendingSetting } from 'src/api/appSetting';
 import { AppSettingType } from 'src/api/appSetting'
@@ -67,11 +67,11 @@ import logger from 'loglevel'
 const props = defineProps({
   label: {
     type: String,
-    default: '发件设置'
+    default: undefined
   },
   caption: {
     type: String,
-    default: '设置发件间隔、最大发件量等'
+    default: undefined
   },
 
   icon: {
@@ -85,6 +85,9 @@ const props = defineProps({
     default: AppSettingType.System
   }
 })
+
+const label = computed(() => props.label ?? t('pages.basicSettings.sendSettings'))
+const caption = computed(() => props.caption ?? t('pages.basicSettings.sendSettingsCaption'))
 
 const userInfoStore = useUserInfoStore()
 const outboxSettingRef: Ref<ISendingSetting> = ref({
@@ -131,7 +134,7 @@ watch(
 
     await updateSendingSetting(outboxSettingRef.value, props.settingType)
 
-    notifySuccess('设置更改已生效')
+    notifySuccess(t('pages.basicSettings.settingsEffective'))
   },
   { deep: true }
 )
@@ -140,14 +143,14 @@ import { isEmail } from 'src/utils/validator';
 function validateOutboxSetting() {
   if (outboxSettingRef.value.minOutboxCooldownSecond > 0
     && outboxSettingRef.value.maxOutboxCooldownSecond < outboxSettingRef.value.minOutboxCooldownSecond) {
-    notifyError('单个发件箱最大发件间隔必须大于最小发件间隔')
+    notifyError(t('pages.basicSettings.invalidOutboxCooldown'))
     return false
   }
 
   if (outboxSettingRef.value.replyToEmails) {
     const emails = outboxSettingRef.value.replyToEmails.split(',')
     if (emails.some(email => !isEmail(email.trim()))) {
-      notifyError('回信收件人格式不正确, 多个邮箱请使用英文逗号分隔')
+      notifyError(t('pages.basicSettings.invalidReplyRecipients'))
       return false
     }
   }

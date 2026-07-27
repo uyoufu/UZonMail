@@ -8,6 +8,7 @@ import type { IContextMenuItem } from 'src/components/contextMenu/types'
 
 import dayjs from 'dayjs'
 import logger from 'loglevel'
+import { t } from 'src/i18n/helpers'
 
 export function useApiAccessContext (
   addNewRow: addNewRowType<IApiApiAccess>,
@@ -16,24 +17,24 @@ export function useApiAccessContext (
 
   async function showApiAccessDialog (apiAccess?: IApiApiAccess) {
     const popupParams: IPopupDialogParams = {
-      title: apiAccess ? '修改 API 访问令牌' : '添加 API 访问令牌',
+      title: apiAccess ? t('pages.apiAccess.editTitle') : t('pages.apiAccess.createTitle'),
       oneColumn: true,
       fields: [
         {
           name: 'name',
-          label: '名称',
+          label: t('global.name'),
           required: true,
           value: apiAccess?.name || '',
         },
         {
           name: 'description',
-          label: '描述',
+          label: t('global.description'),
           required: true,
           value: apiAccess?.description || '',
         },
         {
           name: 'expireDate',
-          label: '过期时间',
+          label: t('pages.apiAccess.expiry'),
           type: LowCodeFieldType.datetimeLocal,
           required: true,
           value: apiAccess?.expireDate || '',
@@ -43,7 +44,7 @@ export function useApiAccessContext (
             if (!valueDate.isValid()) {
               return {
                 ok: false,
-                message: '无效的日期时间格式'
+                message: t('pages.apiAccess.invalidDateTime')
               }
             }
 
@@ -51,7 +52,7 @@ export function useApiAccessContext (
             if (valueDate.isBefore(nowDate)) {
               return {
                 ok: false,
-                message: '过期时间必须在当前时间之后'
+                message: t('pages.apiAccess.futureExpiryRequired')
               }
             }
 
@@ -62,7 +63,7 @@ export function useApiAccessContext (
         },
         {
           name: 'enable',
-          label: '启用',
+          label: t('pages.apiAccess.enabled'),
           type: LowCodeFieldType.boolean,
           value: apiAccess?.enable || true,
         }
@@ -82,12 +83,12 @@ export function useApiAccessContext (
     addNewRow(data)
 
     // 提示复制 token 结果
-    notifySuccess('创建成功')
+    notifySuccess(t('pages.apiAccess.created'))
     logger.info('API 访问令牌创建成功', data.token)
 
     // 进行提示
-    const tokenMessage = `访问令牌已创建成功：\n\n${data.token}\n\n请妥善保存此令牌，后续将无法再次查看。`
-    await showHtmlDialog("访问令牌", tokenMessage)
+    const tokenMessage = `${t('pages.apiAccess.tokenCreatedPrefix')}\n\n${data.token}\n\n${t('pages.apiAccess.tokenCreatedSuffix')}`
+    await showHtmlDialog(t('pages.apiAccess.tokenTitle'), tokenMessage)
   }
 
   async function onEditApiAccess (apiAccess?: IApiApiAccess) {
@@ -100,29 +101,32 @@ export function useApiAccessContext (
     addNewRow(data)
   }
 
-  const contextMenuItems: IContextMenuItem<IApiApiAccess>[] = [
+  const contextMenuItems = computed<IContextMenuItem<IApiApiAccess>[]>(() => [
     {
       name: 'modify',
-      label: '修改',
+      label: t('pages.apiAccess.modify'),
       onClick: (apiAccess) => onEditApiAccess(apiAccess),
     },
     {
       name: 'delete',
-      label: '删除',
+      label: t('pages.variableManager.delete'),
       color: 'negative',
       onClick: onDeleteApiAccess,
     }
-  ]
+  ])
 
   async function onDeleteApiAccess (apiAccess: IApiApiAccess) {
-    const confirm = await confirmOperation('删除确认', `您确定要删除 API 访问令牌 "${apiAccess.name}" 吗？`)
+    const confirm = await confirmOperation(
+      t('pages.templateManager.deleteConfirmation'),
+      t('pages.apiAccess.deleteConfirm', { name: apiAccess.name })
+    )
     if (!confirm) return
 
     // 这里可以添加确认对话框
     await deleteApiAccessData(apiAccess.objectId)
     deleteRowById(apiAccess.id)
 
-    notifySuccess('删除成功')
+    notifySuccess(t('pages.variableManager.deleteSuccess'))
   }
 
   return {

@@ -2,12 +2,12 @@
   <q-dialog ref='dialogRef' @hide="onDialogHide" :persistent='true'>
     <q-card class='send-schedule-container column items-center q-pa-md no-wrap'>
       <div class="text-subtitle q-mb-sm row items-center no-wrap">
-        <span>定时发送: </span>
+        <span>{{ t('pages.sendingTask.scheduleSending') }}</span>
         <span v-if="isDesktop" class="text-primary">{{ modelValue }}</span>
         <div v-else>
           <q-btn flat dense color="primary" :label="dateStr" @click="onShowDateSelector" />
           <q-btn flat dense color="primary" :label="timeStr" @click="onShowTimeSelector" />
-          <span class="text-caption">单击切换</span>
+          <span class="text-caption">{{ t('pages.sendingTask.clickToSwitch') }}</span>
         </div>
       </div>
 
@@ -44,10 +44,11 @@ const modelValue = ref(dayjs().format('YYYY-MM-DD HH:mm'))
 import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
 import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 import { notifyError } from 'src/utils/dialog'
+import { t } from 'src/i18n/helpers'
 function onOkClick () {
   // 验证日期是否大于当前日期
   if (dayjs(modelValue.value).isBefore(dayjs().add(1, 'minute'))) {
-    notifyError('指定发送时间至少推迟 1分钟')
+    notifyError(t('pages.sendingTask.scheduleMinimumDelay'))
     return
   }
 

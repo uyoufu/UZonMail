@@ -4,7 +4,7 @@
       <SelectProxyDialogTable v-model:selected="selected" />
 
       <div class="row justify-end q-mb-sm full-width q-pr-sm">
-        <OkBtn @click="onOkBtnClicked" tooltip="确认选择" />
+        <OkBtn @click="onOkBtnClicked" :tooltip="t('pages.sendingTask.confirmSelection')" />
       </div>
     </q-card>
   </q-dialog>
@@ -17,6 +17,7 @@
  */
 
 import { useDialogPluginComponent } from 'quasar'
+import { t } from 'src/i18n/helpers'
 defineEmits([
   // 必需；需要指定一些事件
   // （组件将通过useDialogPluginComponent()发出）

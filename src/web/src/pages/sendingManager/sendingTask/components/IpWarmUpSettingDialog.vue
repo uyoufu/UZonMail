@@ -1,12 +1,12 @@
 <template>
   <q-dialog ref='dialogRef' @hide="onDialogHide" :persistent='true'>
     <q-card class='column items-center items-start q-pa-sm warm-up-settings'>
-      <div class='full-width text-primary text-h6'>预热设置</div>
+      <div class='full-width text-primary text-h6'>{{ t('pages.sendingTask.warmUpSettings') }}</div>
 
-      <q-input outlined standout dense v-model="planName" label="计划名称" placeholder="输入计划名称" class="full-width q-mt-sm">
+      <q-input outlined standout dense v-model="planName" :label="t('pages.sendingTask.planName')" :placeholder="t('pages.sendingTask.enterPlanName')" class="full-width q-mt-sm">
       </q-input>
 
-      <q-field outlined v-model="dateRangeContent" label="日期范围" dense class="full-width q-mt-sm">
+      <q-field outlined v-model="dateRangeContent" :label="t('pages.sendingTask.dateRange')" dense class="full-width q-mt-sm">
         <template v-slot:control>
           <div>{{ dateRangeContent }}</div>
         </template>
@@ -20,7 +20,7 @@
         </template>
       </q-field>
 
-      <q-field outlined v-model="dateRangeContent" label="最大发件量" dense class="full-width q-mt-sm">
+      <q-field outlined v-model="dateRangeContent" :label="t('pages.sendingTask.maximumSendCount')" dense class="full-width q-mt-sm">
         <template v-slot:control>
           <div>{{ totalCount }}</div>
         </template>
@@ -43,6 +43,7 @@
  */
 
 import { useDialogPluginComponent } from 'quasar'
+import { t } from 'src/i18n/helpers'
 defineEmits([
   // 必需；需要指定一些事件
   // （组件将通过useDialogPluginComponent()发出）
@@ -66,7 +67,11 @@ const dateRangeModelValue = ref<{ from: string, to: string }>({
 })
 function formatDateRange () {
   const totalDays = dayjs(dateRangeModelValue.value.to).diff(dayjs(dateRangeModelValue.value.from), 'day') + 1
-  return `${dateRangeModelValue.value.from} ~ ${dateRangeModelValue.value.to}, 共 ${totalDays} 天`
+  return t('pages.sendingTask.dateRangeSummary', {
+    from: dateRangeModelValue.value.from,
+    to: dateRangeModelValue.value.to,
+    days: totalDays
+  })
 }
 const dateRangeContent = ref(formatDateRange())
 watch(dateRangeModelValue, () => {

@@ -12,27 +12,28 @@ import { showDialog } from 'src/components/lowCode/PopupDialog'
 
 import { useUserInfoStore } from 'src/stores/user'
 import type { deleteRowByIdType } from 'src/compositions/qTableUtils'
+import { t } from 'src/i18n/helpers'
 
 export function useContextMenu (deleteRowById: deleteRowByIdType<IProxy>) {
-  const proxyContextMenuItems: IContextMenuItem<IProxy>[] = [
+  const proxyContextMenuItems = computed<IContextMenuItem<IProxy>[]>(() => [
     {
       name: 'edit',
-      label: '编辑',
-      tooltip: '编辑代理',
+      label: t('pages.variableManager.edit'),
+      tooltip: t('pages.proxy.editProxy'),
       icon: 'edit',
       vif: isOwner,
       onClick: onModifyProxy
     },
     {
       name: 'delete',
-      label: '删除',
-      tooltip: '删除代理',
+      label: t('pages.variableManager.delete'),
+      tooltip: t('pages.proxy.deleteProxy'),
       color: 'negative',
       icon: 'delete',
       vif: isOwner,
       onClick: onDeleteProxy
     }
-  ]
+  ])
 
   const userInfo = useUserInfoStore()
   /**
@@ -65,8 +66,8 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IProxy>) {
     fields.push({
       name: 'isActive',
       type: LowCodeFieldType.boolean,
-      label: '是否启用',
-      tooltip: '启用后代理开始生效',
+      label: t('pages.proxy.isEnabled'),
+      tooltip: t('pages.proxy.enableHint'),
       value: false
     })
 
@@ -78,7 +79,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IProxy>) {
     // 打开弹窗
     // 新增发件箱
     const popupParams: IPopupDialogParams = {
-      title: `修改代理: ${proxyData.name}`,
+      title: t('pages.proxy.editTitle', { name: proxyData.name }),
       fields,
       validate: validateProxyInfo
     }
@@ -93,7 +94,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IProxy>) {
 
     // 修改本机数据
     Object.assign(proxyData, data)
-    notifySuccess('修改成功')
+    notifySuccess(t('pages.proxy.updateSuccess'))
   }
 
   // 删除代理操作
@@ -102,7 +103,10 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IProxy>) {
     if (!proxyData.id) return
 
     // 进行提示
-    const confirm = await confirmOperation('删除代理', `确定删除代理【${proxyData.name}】吗？`)
+    const confirm = await confirmOperation(
+      t('pages.proxy.deleteProxy'),
+      t('pages.proxy.deleteConfirm', { name: proxyData.name })
+    )
     if (!confirm) return
 
     // 向服务器请求删除

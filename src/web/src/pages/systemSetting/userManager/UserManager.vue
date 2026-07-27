@@ -47,12 +47,15 @@ import { getFilteredUsersCount, getFilteredUsersData } from 'src/api/user'
 
 import { UserStatus, UserType } from 'src/stores/types'
 import { formatDate } from 'src/utils/format'
+import { t } from 'src/i18n/helpers'
 
-const columns: QTableColumn[] = [
+const { hasEnterpriseAccess } = usePermission()
+const columns = computed<QTableColumn[]>(() => {
+  const columns: QTableColumn[] = [
   {
     name: 'userId',
     required: true,
-    label: '用户名',
+    label: t('pages.userManager.userName'),
     align: 'left',
     field: 'userId',
     sortable: true
@@ -60,7 +63,7 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '注册日期',
+    label: t('pages.userManager.registrationDate'),
     align: 'left',
     field: 'createDate',
     format: formatDate,
@@ -69,25 +72,26 @@ const columns: QTableColumn[] = [
   {
     name: 'status',
     required: true,
-    label: '状态',
+    label: t('global.status'),
     align: 'left',
     field: 'status',
     format: v => UserStatus[v] as string,
     sortable: true
   }
-]
-const { hasEnterpriseAccess } = usePermission()
-if (hasEnterpriseAccess()) {
-  columns.push({
+  ]
+  if (hasEnterpriseAccess()) {
+    columns.push({
     name: 'type',
     required: true,
-    label: '用户类型',
+      label: t('pages.userManager.userType'),
     align: 'left',
     field: 'type',
     format: v => UserType[v] as string,
     sortable: true
-  })
-}
+    })
+  }
+  return columns
+})
 
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
   const { data } = await getFilteredUsersCount(filterObj.filter)

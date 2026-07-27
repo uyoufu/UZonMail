@@ -3,7 +3,7 @@
     v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
     @request="onTableRequest">
     <template v-slot:top-left>
-      <CommonBtn label="预热" icon="autorenew" tooltip="新增 IP 预热计划" @click="onIpWarmUpClick" />
+      <CommonBtn :label="t('pages.ipWarmUp.warmUp')" icon="autorenew" :tooltip="t('pages.ipWarmUp.addWarmUpPlan')" @click="onIpWarmUpClick" />
     </template>
 
     <template v-slot:top-right>
@@ -33,6 +33,7 @@ import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
 import StatusChip from 'src/components/statusChip/StatusChip.vue'
 import { formatDate } from 'src/utils/format'
 import { IpWarmUpUpStatus } from 'src/api/pro/ipWarmUp'
+import { t } from 'src/i18n/helpers'
 
 // 不进行缓存
 defineOptions({
@@ -40,12 +41,12 @@ defineOptions({
 })
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'name',
     required: true,
-    label: '名称',
+    label: t('pages.ipWarmUp.name'),
     align: 'left',
     field: 'name',
     sortable: true
@@ -53,7 +54,7 @@ const columns: QTableColumn[] = [
   {
     name: 'subjects',
     required: true,
-    label: '主题数',
+    label: t('pages.ipWarmUp.subjectCount'),
     align: 'left',
     field: 'subjects',
     format: (val: string[]) => String(val.length),
@@ -62,7 +63,7 @@ const columns: QTableColumn[] = [
   {
     name: 'templateIds',
     required: true,
-    label: '模板数',
+    label: t('pages.ipWarmUp.templateCount'),
     align: 'left',
     field: 'templateIds',
     format: (val: number[]) => String(val.length),
@@ -71,7 +72,7 @@ const columns: QTableColumn[] = [
   {
     name: 'outboxIds',
     required: true,
-    label: '发件箱数',
+    label: t('pages.ipWarmUp.outboxCount'),
     align: 'left',
     field: 'outboxIds',
     format: (val: number[]) => String(val.length),
@@ -80,7 +81,7 @@ const columns: QTableColumn[] = [
   {
     name: 'inboxIds',
     required: true,
-    label: '收件箱数',
+    label: t('pages.ipWarmUp.inboxCount'),
     align: 'left',
     field: 'inboxIds',
     format: (val: number[]) => String(val.length),
@@ -89,7 +90,7 @@ const columns: QTableColumn[] = [
   {
     name: 'startDate',
     required: false,
-    label: '开始日期',
+    label: t('pages.ipWarmUp.startDate'),
     align: 'left',
     field: 'startDate',
     format: formatDate, // format 需要的 value 是 string
@@ -98,7 +99,7 @@ const columns: QTableColumn[] = [
   {
     name: 'endDate',
     required: false,
-    label: '截止日期',
+    label: t('pages.ipWarmUp.endDate'),
     align: 'left',
     field: 'endDate',
     format: formatDate, // format 需要的 value 是 string
@@ -107,7 +108,7 @@ const columns: QTableColumn[] = [
   {
     name: 'tasksCount',
     required: false,
-    label: '发件总轮数',
+    label: t('pages.ipWarmUp.totalSendRounds'),
     align: 'left',
     field: 'tasksCount',
     sortable: true
@@ -115,7 +116,7 @@ const columns: QTableColumn[] = [
   {
     name: 'status',
     required: false,
-    label: '状态',
+    label: t('pages.ipWarmUp.status'),
     align: 'left',
     field: 'status',
     format: v => IpWarmUpUpStatus[v] as string,
@@ -124,13 +125,13 @@ const columns: QTableColumn[] = [
   {
     name: 'createDate',
     required: false,
-    label: '创建日期',
+    label: t('pages.ipWarmUp.createdAt'),
     align: 'left',
     field: 'createDate',
     format: formatDate, // format 需要的 value 是 string
     sortable: true
   }
-]
+])
 import { getIpWarmUpPlanCount, getIpWarmUpPlanData } from 'src/api/pro/ipWarmUp'
 
 async function getRowsNumberCount (filterObj: TTableFilterObject) {
@@ -155,7 +156,7 @@ async function onIpWarmUpClick () {
   await router.push({
     name: 'SendingTask', query: {
       type: 'ipWarmUp',
-      tagName: 'IP预热'
+      tagName: t('pages.ipWarmUp.warmUp')
     }
   })
 }

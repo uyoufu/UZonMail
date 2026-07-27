@@ -10,7 +10,7 @@
           @request="onTableRequest" selection="multiple" v-model:selected="selectedEmails">
           <template v-slot:top-left>
             <div class="row justify-start q-gutter-sm">
-              <CreateBtn v-if="showNewTempInboxBtn" tooltip="新增临时收件箱" @click="onNewTempInboxClick" />
+              <CreateBtn v-if="showNewTempInboxBtn" :tooltip="t('pages.sendingTask.newTemporaryInbox')" @click="onNewTempInboxClick" />
             </div>
           </template>
 
@@ -37,6 +37,7 @@
 <script lang='ts' setup>
 import { IInbox, getInboxesCount, getInboxesData, getOutboxesCount, getOutboxesData, createUngroupedInbox } from 'src/api/emailBox'
 import { IEmailGroupListItem } from 'src/pages/emailManager/components/types'
+import { t } from 'src/i18n/helpers'
 // props 定义
 const props = defineProps({
   emailBoxType: {
@@ -77,7 +78,7 @@ import EmailGroupList from 'pages/emailManager/components/EmailGroupList.vue'
 const emailGroupRef: Ref<IEmailGroupListItem> = ref({
   name: 'selected',
   order: 0,
-  label: '已选中'
+  label: t('pages.sendingTask.selected')
 })
 const showNewTempInboxBtn = computed(() => {
   return emailBoxType.value === 1 && emailGroupRef.value.name === 'selected'
@@ -87,7 +88,7 @@ const categoryTopItems: Ref<IEmailGroupListItem[]> = ref([
     name: 'selected',
     order: -1,
     icon: 'task_alt',
-    label: '已选邮箱',
+    label: t('pages.sendingTask.selectedMailboxes'),
     selectable: false
   }
 ])
@@ -95,12 +96,12 @@ const categoryTopItems: Ref<IEmailGroupListItem[]> = ref([
 // 表格定义与数据请求
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'email',
     required: true,
-    label: '邮箱',
+    label: t('pages.sendingTask.mailbox'),
     align: 'left',
     field: 'email',
     sortable: true
@@ -108,12 +109,12 @@ const columns: QTableColumn[] = [
   {
     name: 'description',
     required: true,
-    label: '描述',
+    label: t('global.description'),
     align: 'left',
     field: 'description',
     sortable: true
   }
-]
+])
 import { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 // 选择结果
 const selectedEmails: Ref<IInbox[]> = ref([])
@@ -173,12 +174,12 @@ import { notifyError } from 'src/utils/dialog'
 
 async function onNewTempInboxClick () {
   // 打开输入框
-  const { ok, data } = await showNewInboxDialog('临时收件')
+  const { ok, data } = await showNewInboxDialog(t('pages.sendingTask.temporaryInbox'))
   if (!ok) return
 
   // 若在选择集中，提示错误
   if (selectedEmails.value.some(x => x.email === data.email)) {
-    notifyError('已存在相同邮箱')
+    notifyError(t('pages.sendingTask.duplicateMailbox'))
     return
   }
 

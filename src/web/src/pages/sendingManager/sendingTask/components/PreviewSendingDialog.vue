@@ -2,11 +2,11 @@
   <q-dialog ref='dialogRef' @hide="onDialogHide">
     <q-card class='column justify-start q-pa-sm width-800 height-500'>
       <div class="text-subtitle1 text-primary">
-        主题：{{ emailSubject }}
+        {{ t('pages.sendingTask.subject') }}: {{ emailSubject }}
       </div>
 
       <div class="text-secondary">
-        收件人: {{ currentInbox }}
+        {{ t('pages.sendingTask.recipient') }}: {{ currentInbox }}
       </div>
 
       <q-separator class="q-mb-sm" />
@@ -28,6 +28,7 @@
  * 参考：http://www.quasarchs.com/quasar-plugins/dialog#composition-api-variant
  */
 import logger from 'loglevel'
+import { t } from 'src/i18n/helpers'
 
 import { useDialogPluginComponent } from 'quasar'
 defineEmits([
@@ -152,7 +153,7 @@ async function getEmailBody(inbox: string, inboxIndex: number) {
     templateContent = data.content
   }
 
-  return applyVariablesToTemplate(userData, templateContent) || '正文为空'
+  return applyVariablesToTemplate(userData, templateContent) || t('pages.sendingTask.emptyBody')
 }
 
 const currentInbox = ref('')

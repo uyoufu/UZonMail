@@ -3,7 +3,7 @@
     v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
     @request="onTableRequest">
     <template #top-left>
-      <ImportBtn v-if="isSuperAdmin && false" label="更新" icon="fingerprint" tooltip="更新路由权限码"
+      <ImportBtn v-if="isSuperAdmin && false" :label="t('pages.permissionManager.update')" icon="fingerprint" :tooltip="t('pages.permissionManager.updateRoutePermissionCodes')"
         @click="onImportRoutePermissionCode"></ImportBtn>
     </template>
 
@@ -29,14 +29,15 @@ import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 import ImportBtn from 'src/components/quasarWrapper/buttons/ImportBtn.vue'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'code',
     required: true,
-    label: '功能码',
+    label: t('pages.permissionManager.permissionCode'),
     align: 'left',
     field: 'code',
     sortable: true
@@ -44,12 +45,12 @@ const columns: QTableColumn[] = [
   {
     name: 'description',
     required: false,
-    label: '描述',
+    label: t('global.description'),
     align: 'left',
     field: 'description',
     sortable: true
   }
-]
+])
 
 import type { IPermissionCode} from 'src/api/permission';
 import { getPermissionCodesCount, getPermissionCodesData, updateRoutePermissionCodes } from 'src/api/permission'
@@ -90,11 +91,11 @@ async function onImportRoutePermissionCode () {
   })
 
   if (newPermissionCodes.length === 0) {
-    notifySuccess('所有路由权限码已经是最新')
+    notifySuccess(t('pages.permissionManager.allRouteCodesLatest'))
     return
   }
 
-  notifySuccess('路由权限码更新成功')
+  notifySuccess(t('pages.permissionManager.routeCodesUpdated'))
 }
 // 遍历所有的路由，获取所有的权限码
 function getRoutePermissionCode (routes: ExtendedRouteRecordRaw[], parentRoute: string = 'route') {

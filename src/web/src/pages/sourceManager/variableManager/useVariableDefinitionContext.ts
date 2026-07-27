@@ -8,38 +8,39 @@ import { upsertJsFunctionDefinition, deleteJsFunctionDefinitionsData, testJsFunc
 import type { addNewRowType, deleteRowByIdType } from "src/compositions/qTableUtils"
 
 import logger from 'loglevel'
+import { t } from 'src/i18n/helpers'
 
 export function useVariableDefinitionContext (
   addNewRow: addNewRowType<IJsFunctionDefinition>,
   deleteRowById: deleteRowByIdType<IJsFunctionDefinition>
 ) {
-  const dataSourceContextMenuItems: IContextMenuItem<IJsFunctionDefinition>[] = [
+  const dataSourceContextMenuItems = computed<IContextMenuItem<IJsFunctionDefinition>[]>(() => [
     {
       name: 'test',
-      label: '测试',
-      tooltip: '测试变量定义结果',
+      label: t('pages.variableManager.test'),
+      tooltip: t('pages.variableManager.testVariableDefinition'),
       onClick: onTestVariableDefinition
     },
     {
       name: 'edit',
-      label: '编辑',
-      tooltip: '编辑变量定义',
+      label: t('pages.variableManager.edit'),
+      tooltip: t('pages.variableManager.editVariableDefinition'),
       onClick: onUpdateVariableDefinition
     },
     {
       name: 'delete',
-      label: '删除',
-      tooltip: '删除当前或选中项的变量定义',
+      label: t('pages.variableManager.delete'),
+      tooltip: t('pages.variableManager.deleteVariableDefinitions'),
       color: 'negative',
       onClick: onDeleteDataSource,
     }
-  ]
+  ])
 
   async function onTestVariableDefinition (data: IJsFunctionDefinition) {
     const { data: result } = await testJsFunctionDefinitionsData(data.id)
     logger.debug('[useVariableDefinitionContext] 测试变量定义结果:', JSON.stringify(result, null, 2))
 
-    notifySuccess(`${data.name} 测试结果: ${result}`)
+    notifySuccess(t('pages.variableManager.testResult', { name: data.name, result: String(result) }))
   }
 
   async function onNewVariableDefinition () {
@@ -56,18 +57,18 @@ export function useVariableDefinitionContext (
 
     addNewRow(newDoc)
 
-    notifySuccess('更新成功')
+    notifySuccess(t('pages.variableManager.updateSuccess'))
   }
 
   async function onUpsertJsVariableDefinition (data?: IJsFunctionDefinition) {
     const popupParams: IPopupDialogParams = {
-      title: data ? `编辑变量 / ${data.name}` : '新增变量',
+      title: data ? t('pages.variableManager.editVariableTitle', { name: data.name }) : t('pages.variableManager.createVariable'),
       oneColumn: true,
       fields: [
         {
           name: 'name',
-          label: '变量名',
-          tooltip: '变量名称',
+          label: t('pages.variableManager.variableName'),
+          tooltip: t('pages.variableManager.variableNameTooltip'),
           value: data?.name || '',
           required: true,
           validate: (val: string) => {
@@ -75,20 +76,20 @@ export function useVariableDefinitionContext (
             const regex = /^[a-zA-Z_][a-zA-Z0-9_]*$/
             return {
               ok: regex.test(val),
-              message: '变量名只能包含字母、数字和下划线，且不能以数字开头'
+              message: t('pages.variableManager.variableNameInvalid')
             }
           },
         },
         {
           name: 'description',
-          label: '描述',
-          tooltip: '变量描述',
+          label: t('pages.variableManager.description'),
+          tooltip: t('pages.variableManager.variableDescription'),
           value: data?.description || '',
         },
         {
           name: 'functionBody',
-          label: '表达式',
-          tooltip: ['表达式为 JavaScript 代码块', '系统数据通过 uzonData 变量访问'],
+          label: t('pages.variableManager.expression'),
+          tooltip: [t('pages.variableManager.expressionTooltip'), t('pages.variableManager.expressionDataAccess')],
           type: LowCodeFieldType.textarea,
           value: data?.functionBody || '',
           required: true
@@ -116,7 +117,7 @@ export function useVariableDefinitionContext (
     })
     clearSelection()
 
-    notifySuccess('删除成功')
+    notifySuccess(t('pages.variableManager.deleteSuccess'))
   }
 
   return {

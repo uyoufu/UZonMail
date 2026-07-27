@@ -35,6 +35,7 @@ echarts.use([TitleComponent,
 // #endregion
 
 import logger from 'loglevel'
+import { t } from 'src/i18n/helpers'
 
 // 发送量预热曲线图
 export function useWarmUpCountChart (
@@ -112,7 +113,7 @@ export function useWarmUpCountChart (
 
     const options: EChartsOption = {
       title: {
-        text: '发送量预热曲线',
+        text: t('pages.ipWarmUp.sendCountWarmUpCurve'),
         left: 'left',
         textStyle: {
           fontSize: 14,
@@ -124,7 +125,10 @@ export function useWarmUpCountChart (
       tooltip: {
         triggerOn: 'none',
         formatter: function (params: any) {
-          return `第 ${Math.round(params.data[0])} 天<br/>发送 ${Math.round(params.data[1])} 封`
+          return t('pages.ipWarmUp.sendCountWarmUpTooltip', {
+            day: Math.round(params.data[0]),
+            count: Math.round(params.data[1])
+          })
         }
       },
       xAxis: {

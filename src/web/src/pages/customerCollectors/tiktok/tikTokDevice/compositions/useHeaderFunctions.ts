@@ -6,27 +6,28 @@ import { notifySuccess, showDialog } from 'src/utils/dialog'
 import type { addNewRowType } from 'src/compositions/qTableUtils'
 import type { ITikTokDevice } from 'src/api/pro/tikTokDevice';
 import { createTikTokDevice } from 'src/api/pro/tikTokDevice'
+import { t } from 'src/i18n/helpers'
 
 export function getTikTokDeviceInfoFields (): ILowCodeField[] {
   return [
     {
       name: 'name',
-      label: '名称',
+      label: t('global.name'),
       required: true
     },
     {
       name: 'description',
-      label: '描述'
+      label: t('global.description')
     },
     {
       name: 'deviceId',
       type: LowCodeFieldType.text,
-      label: '设备ID (device_id)'
+      label: t('pages.tikTokDevice.deviceId')
     },
     {
       name: 'odinId',
       type: LowCodeFieldType.text,
-      label: 'TikTok广告ID (odinId)'
+      label: t('pages.tikTokDevice.adId')
     }
   ]
 }
@@ -40,7 +41,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<ITikTokDevice>) {
     const fields = getTikTokDeviceInfoFields()
 
     const popupParams: IPopupDialogParams = {
-      title: '新增TikTok设备',
+      title: t('pages.tikTokDevice.createTitle'),
       fields,
       oneColumn: true
     }
@@ -52,7 +53,7 @@ export function useHeaderFunctions (addNewRow: addNewRowType<ITikTokDevice>) {
     const { data: crawlerTaskInfo } = await createTikTokDevice(data)
     // 保存到 rows 中
     addNewRow(crawlerTaskInfo)
-    notifySuccess('新增TikTok设备成功')
+    notifySuccess(t('pages.tikTokDevice.createSuccess'))
   }
 
   return {

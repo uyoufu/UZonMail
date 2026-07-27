@@ -8,26 +8,27 @@ import { upsertJsVariableSource, deleteJsVariableSourcesData } from 'src/api/pro
 import type { addNewRowType, deleteRowByIdType } from "src/compositions/qTableUtils"
 
 import logger from 'loglevel'
+import { t } from 'src/i18n/helpers'
 
 export function useDataSourceContext (
   addNewRow: addNewRowType<IJsVariableSource>,
   deleteRowById: deleteRowByIdType<IJsVariableSource>
 ) {
-  const dataSourceContextMenuItems: IContextMenuItem<IJsVariableSource>[] = [
+  const dataSourceContextMenuItems = computed<IContextMenuItem<IJsVariableSource>[]>(() => [
     {
       name: 'edit',
-      label: '编辑',
-      tooltip: '编辑数据源',
+      label: t('pages.variableManager.edit'),
+      tooltip: t('pages.variableManager.editDataSource'),
       onClick: onUpdateDataSource
     },
     {
       name: 'delete',
-      label: '删除',
-      tooltip: '删除当前数据项或选中的数据源',
+      label: t('pages.variableManager.delete'),
+      tooltip: t('pages.variableManager.deleteDataSources'),
       color: 'negative',
       onClick: onDeleteDataSource,
     }
-  ]
+  ])
 
   async function onNewDataSource () {
     const newDoc = await onUpsertDataSource()
@@ -44,32 +45,32 @@ export function useDataSourceContext (
 
     addNewRow(newDoc)
 
-    notifySuccess('更新成功')
+    notifySuccess(t('pages.variableManager.updateSuccess'))
   }
 
 
   async function onUpsertDataSource (dataSource?: IJsVariableSource) {
     const popupParams: IPopupDialogParams = {
-      title: dataSource ? `编辑数据源 / ${dataSource.name}` : '新增数据源',
+      title: dataSource ? t('pages.variableManager.editDataSourceTitle', { name: dataSource.name }) : t('pages.variableManager.createDataSource'),
       oneColumn: true,
       fields: [
         {
           name: 'name',
-          label: '名称',
-          tooltip: '数据源名称',
+          label: t('pages.variableManager.name'),
+          tooltip: t('pages.variableManager.dataSourceName'),
           value: dataSource?.name || '',
           required: true,
         },
         {
           name: 'description',
-          label: '描述',
-          tooltip: '数据源描述',
+          label: t('pages.variableManager.description'),
+          tooltip: t('pages.variableManager.dataSourceDescription'),
           value: dataSource?.description || '',
         },
         {
           name: 'value',
-          label: '数据源',
-          tooltip: ['格式:', '1. 可以是单个值', '2. 可以是数组, 以 [ 开头, 以 ] 结尾', '3. 可以是对象, 以 { 开头, 以 } 结尾'],
+          label: t('pages.variableManager.dataSourceValue'),
+          tooltip: [t('pages.variableManager.dataSourceFormat'), t('pages.variableManager.dataSourceFormatSingle'), t('pages.variableManager.dataSourceFormatArray'), t('pages.variableManager.dataSourceFormatObject')],
           type: LowCodeFieldType.textarea,
           value: dataSource ? JSON.stringify(dataSource.value, null, 2) : '',
           required: true,
@@ -85,7 +86,7 @@ export function useDataSourceContext (
             if (typeof value === 'string' && value.trim() === '') {
               return {
                 ok: false,
-                message: '数据源不能为空'
+                message: t('pages.variableManager.dataSourceRequired')
               }
             }
 
@@ -95,7 +96,7 @@ export function useDataSourceContext (
               logger.error('数据源格式错误:', e)
               return {
                 ok: false,
-                message: '数据源格式不正确，请输入有效的 JSON 格式数据'
+                message: t('pages.variableManager.dataSourceInvalid')
               }
             }
             return {
@@ -126,7 +127,7 @@ export function useDataSourceContext (
     })
     clearSelection()
 
-    notifySuccess('删除成功')
+    notifySuccess(t('pages.variableManager.deleteSuccess'))
   }
 
   return {

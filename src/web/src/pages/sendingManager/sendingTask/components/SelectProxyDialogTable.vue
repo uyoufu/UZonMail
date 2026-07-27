@@ -3,7 +3,7 @@
     v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort selection="multiple"
     @request="onTableRequest">
     <template v-slot:top-left>
-      <div class="text-primary text-subtitle1">选择代理</div>
+      <div class="text-primary text-subtitle1">{{ t('pages.sendingTask.selectProxy') }}</div>
     </template>
 
     <template v-slot:top-right>
@@ -35,40 +35,41 @@ import type { IRequestPagination, TTableFilterObject } from 'src/compositions/ty
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
 
 import EllipsisContent from 'src/components/ellipsisContent/EllipsisContent.vue'
+import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
     name: 'name',
     required: true,
-    label: '名称',
+    label: t('global.name'),
     align: 'left',
     field: 'name',
     sortable: true
   },
   {
     name: 'url',
-    label: '代理',
+    label: t('pages.sendingTask.proxy'),
     align: 'left',
     field: 'url',
     sortable: true
   },
   {
     name: 'matchRegex',
-    label: '匹配规则',
+    label: t('pages.sendingTask.matchRule'),
     align: 'left',
     field: 'matchRegex',
     sortable: true
   },
   {
     name: 'priority',
-    label: '优先级',
+    label: t('pages.sendingTask.priority'),
     align: 'left',
     field: 'priority',
     sortable: true
   }
-]
+])
 
 import { getEnabledProxiesCount, getEnabledProxiesData } from 'src/api/proxy'
 
