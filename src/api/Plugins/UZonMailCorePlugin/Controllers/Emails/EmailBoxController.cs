@@ -697,18 +697,19 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 批量删除多个收件箱
         /// </summary>
-        /// <param name="inboxIds"></param>
+        /// <param name="inboxObjectIds"></param>
         /// <returns></returns>
         [HttpDelete("inboxes/ids")]
-        public async Task<ResponseResult<bool>> DeleteInboxByIds([FromBody] List<string> inboxIds)
+        public async Task<ResponseResult<bool>> DeleteInboxByIds(
+            [FromBody] List<string> inboxObjectIds
+        )
         {
             var userId = tokenService.GetUserSqlId();
 
-            var emailBox = db.Inboxes.Where(x =>
-                x.UserId == userId && inboxIds.Contains(x.ObjectId)
-            );
-            db.Inboxes.RemoveRange(emailBox);
-            await db.SaveChangesAsync();
+            // 保持与单条删除一致，避免多选删除绕过收件箱的软删除和追溯能力
+            await db
+                .Inboxes.Where(x => x.UserId == userId && inboxObjectIds.Contains(x.ObjectId))
+                .ExecuteUpdateAsync(x => x.SetProperty(inbox => inbox.IsDeleted, true));
 
             return true.ToSuccessResponse();
         }

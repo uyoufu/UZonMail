@@ -33,6 +33,14 @@
         </q-td>
         <ContextMenu :items="inboxContextMenuItems" :value="props.row" v-model:selected-values="selectedInboxes" />
       </template>
+
+      <template v-slot:body-cell-status="props">
+        <q-td :props="props">
+          <StatusChip :status="props.value">
+            <AsyncTooltip :cache="false" :tooltip="props.row.validFailReason" />
+          </StatusChip>
+        </q-td>
+      </template>
     </q-table>
 
     <CollapseLeft v-model="isCollapseGroupList" :style="collapseStyleRef" />
@@ -52,10 +60,12 @@ import ImportBtn from 'src/components/quasarWrapper/buttons/ImportBtn.vue'
 import ExportBtn from 'src/components/quasarWrapper/buttons/ExportBtn.vue'
 import EmailGroupList from '../components/EmailGroupList.vue'
 import ContextMenu from 'components/contextMenu/ContextMenu.vue'
+import StatusChip from 'src/components/statusChip/StatusChip.vue'
+import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
-import { getInboxesCount, getInboxesData } from 'src/api/emailBox'
+import { getInboxesCount, getInboxesData, InboxStatus } from 'src/api/emailBox'
 import type { IInbox } from 'src/api/emailBox'
 import type { IEmailGroupListItem } from '../components/types'
 
@@ -75,6 +85,12 @@ const emailGroupRef: Ref<IEmailGroupListItem> = ref({
 const isValidEmailGroup = computed(() => emailGroupRef.value.id)
 const selectedInboxes = ref<IInbox[]>([])
 const emailGroupListRef = ref<{ reloadGroups: () => Promise<void> }>()
+const inboxStatusChipValues = {
+  [InboxStatus.Unverified]: 'unverified',
+  [InboxStatus.Invalid]: 'invalid',
+  [InboxStatus.Unknown]: 'unknown',
+  [InboxStatus.Valid]: 'valid'
+} as const satisfies Record<InboxStatus, string>
 
 const columns: ComputedRef<QTableColumn[]> = computed(() => [
   indexColumn,
@@ -111,7 +127,15 @@ const columns: ComputedRef<QTableColumn[]> = computed(() => [
     label: translateInboxManager('col_lastSuccessDeliveryDate'),
     align: 'left',
     field: 'lastSuccessDeliveryDate',
-    format: (v) => formatDate(v),
+    format: (v: string | undefined) => formatDate(v),
+    sortable: true
+  },
+  {
+    name: 'status',
+    label: translateInboxManager('col_status'),
+    align: 'left',
+    field: (inbox: IInbox) => inbox.status ?? InboxStatus.Unverified,
+    format: (status: InboxStatus) => inboxStatusChipValues[status],
     sortable: true
   }
 ])
@@ -123,7 +147,7 @@ async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPag
   const { data } = await getInboxesData(emailGroupRef.value.id, filterObj.filter, pagination)
   return data
 }
-const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById } = useQTable({
+const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById } = useQTable<IInbox>({
   getRowsNumberCount,
   onRequest
 })

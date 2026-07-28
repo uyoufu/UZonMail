@@ -17,7 +17,7 @@
 
 - 使用 .NET 10 / C# 14 语法
 - 严格遵循 异步编程 (async/await) 规范
-- 使用 `dotnet-csharpier .` 格式化C#代码
+- 使用 `dotnet-csharpier path/to/file.cs` 格式化C#代码
 
 ## 项目规范
 

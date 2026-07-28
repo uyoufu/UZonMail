@@ -6,13 +6,26 @@ import type { IRequestPagination } from 'src/compositions/types'
  */
 export interface IInbox {
   id?: number,
+  objectId?: string,
   emailGroupId?: number,
   userId?: number,
   email: string,
   name?: string,
   minInboxCooldownHours?: number,
   description?: string,
+  status?: InboxStatus,
+  validFailReason?: string
 }
+
+/** 收件箱验证状态 */
+export const InboxStatus = {
+  Unverified: 0,
+  Invalid: 1,
+  Unknown: 2,
+  Valid: 200
+} as const
+
+export type InboxStatus = typeof InboxStatus[keyof typeof InboxStatus]
 
 export enum OutboxStatus {
   /// <summary>
@@ -54,7 +67,6 @@ export enum OutboxType {
  * 发件箱
  */
 export interface IOutbox extends IInbox {
-  objectId?: string,
   type: OutboxType,
   smtpHost: string,
   smtpPort?: number,
@@ -262,12 +274,14 @@ export function deleteInboxById (emailBoxId: number) {
 }
 
 /**
- * delete all delivered inboxes in specific group
- * @param emailGroupId
+ * 批量删除收件箱
+ * @param inboxObjectIds 收件箱对象 ID
  * @returns
  */
-export function deleteAllDeliveredInboxesInGroup (emailGroupId: number) {
-  return httpClient.delete<boolean>(`/email-box/inboxes/groups/${emailGroupId}/delivered`)
+export function deleteInboxByIds (inboxObjectIds: string[]) {
+  return httpClient.delete<boolean>('/email-box/inboxes/ids', {
+    data: inboxObjectIds
+  })
 }
 
 /**

@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IInbox } from 'src/api/emailBox'
-import { deleteInboxById, updateInbox, deleteAllDeliveredInboxesInGroup } from 'src/api/emailBox'
+import { deleteInboxByIds, updateInbox } from 'src/api/emailBox'
 import { validateInboxes } from 'src/api/pro/emailVerify'
 
 import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
@@ -13,12 +12,11 @@ import { translateInboxManager, translateGlobal } from 'src/i18n/helpers'
 import type { deleteRowByIdType, refreshTableType } from 'src/compositions/qTableUtils'
 import { usePermission } from 'src/compositions/permission'
 
+/** 创建收件箱列表的右键菜单及其操作。 */
 export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refreshTable: refreshTableType) {
   const { isProfession } = usePermission()
   // 更新发件箱
-  async function onUpdateInbox (row: Record<string, any>) {
-    const inbox = row as IInbox
-
+  async function onUpdateInbox (inbox: IInbox) {
     const fields = getInboxFields()
     // 修改默认值
     fields.forEach(field => {
@@ -79,24 +77,8 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refres
       label: translateGlobal('delete'),
       tooltip: translateInboxManager('deleteCurrentInbox'),
       color: 'negative',
-      onClick: deleteInbox
-    },
-    {
-      name: 'deleteAllDelivered',
-      label: translateInboxManager('ctx_deleteDelivered'),
-      tooltip: translateInboxManager('ctx_deleteDeliveredInboxesInCurrentGroup'),
-      color: 'negative',
-      onClick: onDeleteAllDeliveredInboxes
-    },
-    // TODO: Not fully implemented, will enable in the future
-    {
-      name: 'deleteInvalid',
-      label: translateInboxManager('ctx_deleteInvalid'),
-      tooltip: translateInboxManager('deleteAllInvalidInboxesInCurrentGroup'),
-      color: 'negative',
-      onClick: deleteInbox,
-      vif: () => false
-    },
+      onClick: onDeleteInbox
+    }
   ])
 
   /** 验证当前收件箱或当前选择的收件箱。 */
@@ -114,42 +96,36 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refres
   }
 
 
-  // #region  删除
-  // 删除发件箱
-  async function deleteInbox (row: Record<string, any>) {
-    const inbox = row as IInbox
-    // 提示是否删除
+  /** 删除当前收件箱或已选择的全部收件箱。 */
+  async function onDeleteInbox (
+    _cursorInbox: IInbox,
+    { targetValues, clearSelection }: IActionContext<IInbox>
+  ) {
+    const inboxes = targetValues.filter(isPersistedInbox)
+    if (inboxes.length !== targetValues.length) return false
+
+    const confirmationMessage = inboxes.length === 1
+      ? translateInboxManager('isDeleteEmailOf', { email: inboxes[0]!.email })
+      : translateInboxManager('isDeleteSelectedInboxes', { count: inboxes.length })
     const confirm = await confirmOperation(
       translateGlobal('deleteConfirmation'),
-      translateInboxManager('isDeleteEmailOf', { email: inbox.email })
+      confirmationMessage
     )
     if (!confirm) return
 
-    await deleteInboxById(inbox.id as number)
+    await deleteInboxByIds(inboxes.map(inbox => inbox.objectId))
 
-    // 开始删除
-    deleteRowById(inbox.id)
+    inboxes.forEach(inbox => {
+      deleteRowById(inbox.id)
+    })
+    clearSelection()
 
     notifySuccess(translateGlobal('deleteSuccess'))
   }
 
-  // delete all delivered inboxes in current group
-  async function onDeleteAllDeliveredInboxes (row: IInbox) {
-    const confirm = await confirmOperation(
-      translateGlobal('deleteConfirmation'),
-      translateInboxManager('isDeleteAllDeliveredInboxesInCurrentGroup')
-    )
-    if (!confirm) return
-
-    // start deleting
-    await deleteAllDeliveredInboxesInGroup(row.emailGroupId as number)
-
-    // 刷新当前显示
-    refreshTable()
-
-    notifySuccess(translateGlobal('deleteSuccess'))
+  function isPersistedInbox (inbox: IInbox): inbox is IInbox & { id: number, objectId: string } {
+    return inbox.id !== undefined && inbox.objectId !== undefined
   }
-  // #endregion
 
   return { inboxContextMenuItems }
 }
