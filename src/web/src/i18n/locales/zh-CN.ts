@@ -131,6 +131,8 @@ export default {
     inboxStatsTitle: '收件箱统计',
     monthlySendingStatsTitle: '每月发件统计',
     newVersionAvailable: '发现新版本',
+    newVersionPrompt: '发现新版本 {version}，是否立即更新？',
+    newVersionUpdateStartFailed: '无法启动桌面端更新器，请稍后重试',
     outboxCount: '发件箱数量',
     outboxStatsTitle: '发件箱统计'
   },

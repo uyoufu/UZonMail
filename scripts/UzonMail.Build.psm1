@@ -129,10 +129,12 @@ function Resolve-BuildContext {
         WebRoot                 = Join-Path -Path $repositoryRoot -ChildPath 'src/web'
         ApiRoot                 = Join-Path -Path $repositoryRoot -ChildPath 'src/api'
         DesktopRoot             = Join-Path -Path $repositoryRoot -ChildPath 'src/win-desktop'
+        UpdaterRoot             = Join-Path -Path $repositoryRoot -ChildPath 'src/updater'
         ServiceProject          = Join-Path -Path $repositoryRoot -ChildPath 'src/api/UZonMailService/UzonMailService.csproj'
         CorePluginProject       = Join-Path -Path $repositoryRoot -ChildPath 'src/api/Plugins/UzonMailCorePlugin/UzonMailCorePlugin.csproj'
         ProPluginProject        = Join-Path -Path $repositoryRoot -ChildPath 'src/api/Plugins/UzonMailProPlugin/UZonMailProPlugin.csproj'
         DesktopProject          = Join-Path -Path $repositoryRoot -ChildPath 'src/win-desktop/UzonMailDesktop/UzonMailDesktop.csproj'
+        UpdaterProject          = Join-Path -Path $repositoryRoot -ChildPath 'src/updater/UzonMailUpdater/UzonMailUpdater.csproj'
         WindowsServiceRoot      = Join-Path -Path $repositoryRoot -ChildPath 'src/api/WindowsService'
         LinuxServiceRoot        = Join-Path -Path $repositoryRoot -ChildPath 'src/api/LinuxService'
         QuartzDatabase          = Join-Path -Path $repositoryRoot -ChildPath 'src/api/UZonMailService/Quartz/quartz-sqlite.sqlite3'
@@ -146,10 +148,12 @@ function Resolve-BuildContext {
         $context.WebRoot,
         $context.ApiRoot,
         $context.DesktopRoot,
+        $context.UpdaterRoot,
         $context.ServiceProject,
         $context.CorePluginProject,
         $context.ProPluginProject,
         $context.DesktopProject,
+        $context.UpdaterProject,
         $context.WindowsServiceRoot,
         $context.LinuxServiceRoot,
         $context.QuartzDatabase,

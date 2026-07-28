@@ -136,6 +136,8 @@ export default {
     inboxStatsTitle: 'Inbox Stats',
     monthlySendingStatsTitle: 'Monthly Sending Stats',
     newVersionAvailable: 'New Version Available',
+    newVersionPrompt: 'Version {version} is available. Update now?',
+    newVersionUpdateStartFailed: 'Unable to start the desktop updater. Please try again later.',
     outboxCount: 'Outbox Count',
     outboxStatsTitle: 'Outbox Stats'
   },

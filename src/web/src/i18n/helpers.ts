@@ -65,8 +65,8 @@ export function translateLoginPage (key: LoginPageLangKey): string {
   return translateSub<LoginPageLangKey>(key, 'loginPage')
 }
 
-export function translateDashboardPage (key: DashboardPageLangKey): string {
-  return translateSub<DashboardPageLangKey>(key, 'dashboardPage')
+export function translateDashboardPage (key: DashboardPageLangKey, named?: NamedValue): string {
+  return translateSub<DashboardPageLangKey>(key, 'dashboardPage', named)
 }
 
 export function translateInboxManager (key: InboxManagerLangKey, named?: NamedValue): string {

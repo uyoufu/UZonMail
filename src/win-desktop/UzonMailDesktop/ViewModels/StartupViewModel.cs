@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Options;
 using UzonMailDesktop.Configuration;
 using UzonMailDesktop.Services;
+using UzonMailDesktop.WebMessage.HostObjects;
 using Application = System.Windows.Application;
 
 namespace UzonMailDesktop.ViewModels;
@@ -17,6 +18,7 @@ public sealed partial class StartupViewModel : ObservableObject
     private readonly INavigationService _navigation;
     private readonly BackendOptions _backendOptions;
     private readonly PrerequisiteOptions _prerequisiteOptions;
+    private readonly IHostObjectRegistry _hostObjectRegistry;
 
     [ObservableProperty]
     private string statusMessage = "正在检测运行环境...";
@@ -39,6 +41,7 @@ public sealed partial class StartupViewModel : ObservableObject
         IPrerequisiteService prerequisites,
         IBackendProcessManager backend,
         INavigationService navigation,
+        IHostObjectRegistry hostObjectRegistry,
         IOptions<BackendOptions> backendOptions,
         IOptions<PrerequisiteOptions> prerequisiteOptions
     )
@@ -46,6 +49,7 @@ public sealed partial class StartupViewModel : ObservableObject
         _prerequisites = prerequisites;
         _backend = backend;
         _navigation = navigation;
+        _hostObjectRegistry = hostObjectRegistry;
         _backendOptions = backendOptions.Value;
         _prerequisiteOptions = prerequisiteOptions.Value;
     }
@@ -137,7 +141,9 @@ public sealed partial class StartupViewModel : ObservableObject
         StatusMessage = "环境检查通过，正在启动后端服务...";
         ProgressValue = 100;
         await _backend.StartOrReuseAsync();
-        _navigation.Navigate(new BrowserViewModel(new Uri(_backendOptions.WebUrl)));
+        _navigation.Navigate(
+            new BrowserViewModel(new Uri(_backendOptions.WebUrl), _hostObjectRegistry)
+        );
     }
 
     private bool CanInstall() => !IsBusy && HasMissingPrerequisites;

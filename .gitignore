@@ -1,3 +1,5 @@
 build/*
 .fake
 my-docs/*
+bin/
+obj/

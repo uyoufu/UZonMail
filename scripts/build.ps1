@@ -15,6 +15,8 @@ param(
 
     [switch]$UploadArtifacts,
 
+    [string]$UpdateManifestOutputDirectory,
+
     [string]$WslDistribution
 )
 
@@ -262,6 +264,35 @@ function Publish-DesktopArchive {
     Copy-Item -Path (Join-Path -Path $WindowsServicePackage.Directory -ChildPath '*') -Destination $desktopServiceDirectory -Recurse -Force
 
     $desktopVersion = Get-BuildFileVersion -FilePath (Join-Path -Path $desktopDirectory -ChildPath 'UzonMailDesktop.exe')
+    if ($desktopVersion -ne $WindowsServicePackage.Version) {
+        throw "桌面端与服务端版本必须一致：$desktopVersion / $($WindowsServicePackage.Version)"
+    }
+
+    $updaterDirectory = Join-Path -Path $desktopDirectory -ChildPath 'UpdaterTmp'
+    Write-BuildMessage -Message '发布桌面端更新器'
+    Invoke-BuildNativeCommand -Command dotnet -Arguments @(
+        'publish', $Context.UpdaterProject, '-c', 'Release', '-o', $updaterDirectory,
+        '-r', 'win-x64', '--self-contained', 'true', '-p:PublishAot=true'
+    ) -WorkingDirectory $Context.UpdaterRoot
+
+    $manifestDirectory = if ($UpdateManifestOutputDirectory) {
+        [System.IO.Path]::GetFullPath($UpdateManifestOutputDirectory)
+    }
+    else {
+        Join-Path -Path $Context.ArtifactRoot -ChildPath 'updates'
+    }
+    New-Item -ItemType Directory -Path $manifestDirectory -Force | Out-Null
+    $latestManifest = Join-Path -Path $manifestDirectory -ChildPath 'latest.json'
+    $versionManifest = Join-Path -Path $manifestDirectory -ChildPath "$desktopVersion.json"
+    Write-BuildMessage -Message '生成桌面端更新清单'
+    Invoke-BuildNativeCommand -Command dotnet -Arguments @(
+        'run', '--project', $Context.UpdaterProject, '-c', 'Release', '--', 'package',
+        '--project-directory', $desktopDirectory,
+        '--out', (Join-Path -Path $desktopDirectory -ChildPath 'appPackage.json'),
+        '--out', $latestManifest,
+        '--out', $versionManifest
+    ) -WorkingDirectory $Context.UpdaterRoot
+
     $archivePath = Join-Path -Path $Context.ArtifactRoot -ChildPath "uzonmail-desktop-win-x64-$desktopVersion.zip"
     if (Test-Path -LiteralPath $archivePath) {
         Remove-Item -LiteralPath $archivePath -Force

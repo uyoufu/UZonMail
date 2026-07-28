@@ -22,10 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\updater\UzonMailUpdater\UzonMailUpdater.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resource\uzon-mail.ico" />
-    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest"
-      CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Update="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest"
-      CopyToPublishDirectory="Never" ExcludeFromSingleFile="true" />
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Update="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" ExcludeFromSingleFile="true" />
   </ItemGroup>
 </Project>

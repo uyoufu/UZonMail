@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using UzonMailDesktop.Configuration;
 using UzonMailDesktop.Services;
 using UzonMailDesktop.ViewModels;
+using UzonMailDesktop.WebMessage.HostObjects;
+using UzonMailUpdater.Launcher;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 
@@ -20,6 +22,20 @@ public partial class App : Application
 
         try
         {
+            try
+            {
+                UpdaterBootstrapService.InstallPendingUpdater(AppContext.BaseDirectory);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(
+                    $"更新器更新失败，将在下次启动时重试：{exception.Message}",
+                    "更新器提示",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
+            }
+
             _host = BuildHost(e.Args);
             await _host.StartAsync();
 
@@ -132,6 +148,8 @@ public partial class App : Application
         builder.Services.AddSingleton<IBackendProcessManager, BackendProcessManager>();
         builder.Services.AddSingleton<ITrayIconService, TrayIconService>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
+        builder.Services.AddSingleton<IUpdateLauncher, UpdateLauncher>();
+        builder.Services.AddSingleton<IHostObjectRegistry, HostObjectRegistry>();
 
         return builder.Build();
     }
