@@ -707,6 +707,9 @@ export default {
       updateSuccess: '修改TikTok设备成功'
     },
     userManager: {
+      cancelSubUser: '取消子账户',
+      cancelSubUserConfirmation: '是否取消用户 {userId} 的子账户身份？',
+      cancelSubUserHint: '取消后，用户将变为独立账户，不受主账户管理',
       createSuccess: '新增用户成功',
       createUserTooltip: '新增用户',
       disable: '禁用',
@@ -730,6 +733,10 @@ export default {
       resetPassword: '重置密码',
       resetSuccess: '重置密码成功',
       resetUserPassword: '重置用户密码',
+      setAsSubUser: '设为子账户',
+      setAsSubUserConfirmation: '是否将用户 {userId} 设为子账户？',
+      setAsSubUserHint: '设为子账户后，可以统一管理其设置和查看部分发送数据',
+      setUserTypeSuccess: '设置成功',
       userName: '用户名',
       userNameExists: '用户名：{userId}已存在',
       userNameLength: '用户名必须大小等于 3 个字符',

@@ -10,6 +10,9 @@ import type { addNewRowType } from 'src/compositions/qTableUtils'
 import type { IUserInfo } from 'src/stores/types'
 import { t } from 'src/i18n/helpers'
 
+/**
+ * 创建用户管理页面的右键菜单及其操作
+ */
 export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
   const { hasEnterpriseAccess } = usePermission()
   // 右键菜单
@@ -51,16 +54,16 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
     },
     {
       name: 'setAsSubUser',
-      label: '设为子账户',
-      tooltip: '设为子账户后，可以统一管理子账户的设置和查看账户的一些发送数据',
+      label: t('pages.userManager.setAsSubUser'),
+      tooltip: t('pages.userManager.setAsSubUserHint'),
       icon: ContextMenuIcon.groupAdd,
       vif: v => v.type !== UserType.subUser && hasEnterpriseAccess(),
       onClick: onSetAsSubUser
     },
     {
       name: 'setAsNormalUser',
-      label: '取消子账户',
-      tooltip: '取消子账户，用户将变成独立账户，不受主账户管理',
+      label: t('pages.userManager.cancelSubUser'),
+      tooltip: t('pages.userManager.cancelSubUserHint'),
       icon: ContextMenuIcon.groupRemove,
       vif: v => v.type === UserType.subUser,
       onClick: onSetAsIndependentUser
@@ -112,25 +115,31 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
   }
 
   async function onSetAsSubUser (userInfo: Record<string, any>) {
-    const confirm = await confirmOperation('操作确认', `是否将用户 ${userInfo.userId} 设为子账户? `)
+    const confirm = await confirmOperation(
+      t('pages.userManager.operationConfirmation'),
+      t('pages.userManager.setAsSubUserConfirmation', { userId: userInfo.userId })
+    )
     if (!confirm) return false
 
     await setUserType(userInfo.id, UserType.subUser)
 
     // 更新用户的状态
     userInfo.type = UserType.subUser
-    notifySuccess('设置成功')
+    notifySuccess(t('pages.userManager.setUserTypeSuccess'))
   }
 
   async function onSetAsIndependentUser (userInfo: Record<string, any>) {
-    const confirm = await confirmOperation('操作确认', `是否取消子账户 ${userInfo.userId}? `)
+    const confirm = await confirmOperation(
+      t('pages.userManager.operationConfirmation'),
+      t('pages.userManager.cancelSubUserConfirmation', { userId: userInfo.userId })
+    )
     if (!confirm) return false
 
     await setUserType(userInfo.id, UserType.independent)
 
     // 更新用户的状态
     userInfo.type = UserType.independent
-    notifySuccess('设置成功')
+    notifySuccess(t('pages.userManager.setUserTypeSuccess'))
   }
 
   // 新增用户

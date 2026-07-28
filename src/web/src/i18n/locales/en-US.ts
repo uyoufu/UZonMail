@@ -722,6 +722,9 @@ export default {
       updateSuccess: 'TikTok device updated successfully'
     },
     userManager: {
+      cancelSubUser: 'Remove sub-account status',
+      cancelSubUserConfirmation: 'Remove sub-account status for user {userId}?',
+      cancelSubUserHint: 'The user will become an independent account and will no longer be managed by the primary account',
       createSuccess: 'User created successfully',
       createUserTooltip: 'Create user',
       disable: 'Disable',
@@ -745,6 +748,10 @@ export default {
       resetPassword: 'Reset Password',
       resetSuccess: 'Password reset successfully',
       resetUserPassword: 'Reset this user\'s password',
+      setAsSubUser: 'Set as sub-account',
+      setAsSubUserConfirmation: 'Set user {userId} as a sub-account?',
+      setAsSubUserHint: 'Manage the sub-account settings centrally and view some sending data',
+      setUserTypeSuccess: 'Settings updated successfully',
       userName: 'Username',
       userNameExists: 'Username {userId} already exists',
       userNameLength: 'Username must be at least 3 characters',
