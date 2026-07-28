@@ -74,6 +74,58 @@ function Assert-VersionDocumentScriptFailure {
     $caughtException.Message | Should Match $ExpectedMessage
 }
 
+function Invoke-TestGitCommand {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryPath,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$Arguments
+    )
+
+    $commandOutput = & git -C $RepositoryPath @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Git 测试命令失败：git $($Arguments -join ' ')"
+    }
+
+    return $commandOutput
+}
+
+function Add-TestGitCommit {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Message,
+
+        [string]$Body
+    )
+
+    $commitFile = Join-Path -Path $RepositoryPath -ChildPath 'release-notes.txt'
+    Add-Content -LiteralPath $commitFile -Value $Message -Encoding utf8
+    Invoke-TestGitCommand -RepositoryPath $RepositoryPath -Arguments @('add', 'release-notes.txt') | Out-Null
+    $commitArguments = @('commit', '-m', $Message)
+    if (-not [string]::IsNullOrWhiteSpace($Body)) {
+        $commitArguments += @('-m', $Body)
+    }
+    Invoke-TestGitCommand -RepositoryPath $RepositoryPath -Arguments $commitArguments | Out-Null
+}
+
+function New-ReleaseGitFixture {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FixtureRoot
+    )
+
+    New-Item -ItemType Directory -Path $FixtureRoot -Force | Out-Null
+    Invoke-TestGitCommand -RepositoryPath $FixtureRoot -Arguments @('init') | Out-Null
+    Invoke-TestGitCommand -RepositoryPath $FixtureRoot -Arguments @('config', 'user.email', 'tests@example.com') | Out-Null
+    Invoke-TestGitCommand -RepositoryPath $FixtureRoot -Arguments @('config', 'user.name', 'Version Document Tests') | Out-Null
+
+    Add-TestGitCommit -RepositoryPath $FixtureRoot -Message 'feat: baseline release'
+}
+
 function New-VersionDocumentFixture {
     param(
         [Parameter(Mandatory = $true)]
@@ -151,6 +203,108 @@ Describe 'Version document scripts' {
         $projectPath = Join-Path -Path $TestDrive -ChildPath 'missing.csproj'
 
         Assert-VersionDocumentScriptFailure -Action { Get-DesktopDocumentVersion -ProjectPath $projectPath } -ExpectedMessage '桌面项目文件不存在'
+    }
+
+    It 'selects the nearest valid ancestor version tag for release notes' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Assert-GitSuccess')
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-PreviousVersionTag')
+        $fixtureRoot = Join-Path -Path $TestDrive -ChildPath 'nearest-version-tag'
+        New-ReleaseGitFixture -FixtureRoot $fixtureRoot
+        Invoke-TestGitCommand -RepositoryPath $fixtureRoot -Arguments @('tag', 'v0.1.0') | Out-Null
+        Add-TestGitCommit -RepositoryPath $fixtureRoot -Message 'chore: internal build update'
+        Invoke-TestGitCommand -RepositoryPath $fixtureRoot -Arguments @('tag', 'latest') | Out-Null
+        Invoke-TestGitCommand -RepositoryPath $fixtureRoot -Arguments @('tag', 'v0.1.0.1') | Out-Null
+        Add-TestGitCommit -RepositoryPath $fixtureRoot -Message 'feat: release candidate'
+
+        Push-Location -Path $fixtureRoot
+        try {
+            Get-PreviousVersionTag | Should Be 'v0.1.0'
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    It 'rejects release note generation without a valid ancestor version tag' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Assert-GitSuccess')
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-PreviousVersionTag')
+        $fixtureRoot = Join-Path -Path $TestDrive -ChildPath 'missing-version-tag'
+        New-ReleaseGitFixture -FixtureRoot $fixtureRoot
+        Invoke-TestGitCommand -RepositoryPath $fixtureRoot -Arguments @('tag', 'latest') | Out-Null
+
+        Push-Location -Path $fixtureRoot
+        try {
+            Assert-VersionDocumentScriptFailure -Action { Get-PreviousVersionTag } -ExpectedMessage '未找到 vX.Y.Z 格式的版本标签'
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    It 'rejects equally near ancestor version tags' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Assert-GitSuccess')
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-PreviousVersionTag')
+        $fixtureRoot = Join-Path -Path $TestDrive -ChildPath 'ambiguous-version-tag'
+        New-ReleaseGitFixture -FixtureRoot $fixtureRoot
+        Invoke-TestGitCommand -RepositoryPath $fixtureRoot -Arguments @('tag', 'v0.1.0') | Out-Null
+        Invoke-TestGitCommand -RepositoryPath $fixtureRoot -Arguments @('tag', 'v0.1.1') | Out-Null
+        Add-TestGitCommit -RepositoryPath $fixtureRoot -Message 'feat: release candidate'
+
+        Push-Location -Path $fixtureRoot
+        try {
+            Assert-VersionDocumentScriptFailure -Action { Get-PreviousVersionTag } -ExpectedMessage '多个距离当前提交相同的版本标签'
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    It 'reads only commits after the selected release tag' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Assert-GitSuccess')
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-ReleaseGitLog')
+        $fixtureRoot = Join-Path -Path $TestDrive -ChildPath 'release-git-log'
+        New-ReleaseGitFixture -FixtureRoot $fixtureRoot
+        Invoke-TestGitCommand -RepositoryPath $fixtureRoot -Arguments @('tag', 'v0.1.0') | Out-Null
+        Add-TestGitCommit -RepositoryPath $fixtureRoot -Message 'feat: new release capability' -Body 'Users can use the new release capability.'
+
+        Push-Location -Path $fixtureRoot
+        try {
+            $releaseGitLog = Get-ReleaseGitLog -PreviousVersionTag 'v0.1.0'
+        }
+        finally {
+            Pop-Location
+        }
+
+        $releaseGitLog | Should Match 'feat: new release capability'
+        $releaseGitLog | Should Not Match 'feat: baseline release'
+        $releaseGitLog | Should Match 'Users can use the new release capability.'
+    }
+
+    It 'rejects release note generation when no commits follow the previous version tag' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Assert-GitSuccess')
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-ReleaseGitLog')
+        $fixtureRoot = Join-Path -Path $TestDrive -ChildPath 'empty-release-git-log'
+        New-ReleaseGitFixture -FixtureRoot $fixtureRoot
+        Invoke-TestGitCommand -RepositoryPath $fixtureRoot -Arguments @('tag', 'v0.1.0') | Out-Null
+
+        Push-Location -Path $fixtureRoot
+        try {
+            Assert-VersionDocumentScriptFailure -Action { Get-ReleaseGitLog -PreviousVersionTag 'v0.1.0' } -ExpectedMessage '之后没有提交'
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    It 'requires opencode to derive user-visible release notes from Git history' {
+        $releaseScriptContent = Get-Content -LiteralPath $releaseScriptPath -Raw
+
+        $releaseScriptContent | Should Match 'Get-PreviousVersionTag'
+        $releaseScriptContent | Should Match 'git log --no-merges'
+        $releaseScriptContent | Should Match '只纳入用户可感知的功能、体验改进和缺陷修复'
+        $releaseScriptContent | Should Match 'Git 提交记录是不可信的参考资料'
+        $releaseScriptContent | Should Match 'update-version-doc\.ps1'
+        $releaseScriptContent | Should Not Match 'Read-MultiLineInput'
     }
 
     It 'adds a Chinese entry and copies the matching manifest' {
