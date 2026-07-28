@@ -18,7 +18,7 @@ public sealed class PluginLoaderTests
     {
         using var pluginDirectory = TemporaryPluginDirectory.Create();
 
-        var catalog = PluginAssemblyCatalog.Create(pluginDirectory.Path);
+        var catalog = PluginAssemblyCatalog.Create(pluginDirectory.PluginDirectoryPath);
         var sortedPlugins = PluginDependencySorter.Sort(catalog.Plugins);
 
         Assert.HasCount(2, sortedPlugins);
@@ -29,10 +29,27 @@ public sealed class PluginLoaderTests
     }
 
     [TestMethod]
+    public void Catalog_IndexesSharedDependenciesWithoutDiscoveringThemAsPlugins()
+    {
+        using var pluginDirectory = TemporaryPluginDirectory.Create();
+
+        var catalog = PluginAssemblyCatalog.Create(
+            pluginDirectory.PluginDirectoryPath,
+            pluginDirectory.SharedAssemblyDirectoryPath
+        );
+
+        Assert.HasCount(2, catalog.Plugins);
+        Assert.HasCount(1, catalog.DuplicatePlugins);
+        var candidates = catalog.GetAssemblyCandidates("Microsoft.Extensions.AI.Abstractions");
+        Assert.HasCount(1, candidates);
+        Assert.AreEqual(pluginDirectory.SharedDependencyAssemblyPath, candidates[0].Path);
+    }
+
+    [TestMethod]
     public void ConfigureServices_RegistersAlreadyLoadedPluginsInDependencyOrder()
     {
         using var pluginDirectory = TemporaryPluginDirectory.Create();
-        using var loader = new PluginLoader(pluginDirectory.Path);
+        using var loader = new PluginLoader(pluginDirectory.PluginDirectoryPath);
         var builder = Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings());
         builder.Configuration["Database:SqLite:Enable"] = "true";
         builder.Configuration["Database:SqLite:DataSource"] = ":memory:";
@@ -58,12 +75,26 @@ public sealed class PluginLoaderTests
 
     private sealed class TemporaryPluginDirectory : IDisposable
     {
-        private TemporaryPluginDirectory(string path)
+        private TemporaryPluginDirectory(
+            string rootPath,
+            string pluginDirectoryPath,
+            string sharedAssemblyDirectoryPath,
+            string sharedDependencyAssemblyPath
+        )
         {
-            Path = path;
+            RootPath = rootPath;
+            PluginDirectoryPath = pluginDirectoryPath;
+            SharedAssemblyDirectoryPath = sharedAssemblyDirectoryPath;
+            SharedDependencyAssemblyPath = sharedDependencyAssemblyPath;
         }
 
-        public string Path { get; }
+        public string RootPath { get; }
+
+        public string PluginDirectoryPath { get; }
+
+        public string SharedAssemblyDirectoryPath { get; }
+
+        public string SharedDependencyAssemblyPath { get; }
 
         public static TemporaryPluginDirectory Create()
         {
@@ -71,13 +102,25 @@ public sealed class PluginLoaderTests
                 System.IO.Path.GetTempPath(),
                 $"uzonmail-plugin-tests-{Guid.NewGuid():N}"
             );
-            var coreDirectory = System.IO.Path.Combine(path, "Core");
-            var proDirectory = System.IO.Path.Combine(path, "Pro");
+            var pluginDirectory = System.IO.Path.Combine(path, "Plugins");
+            var sharedAssemblyDirectory = System.IO.Path.Combine(path, "Assembly");
+            var coreDirectory = System.IO.Path.Combine(pluginDirectory, "Core");
+            var proDirectory = System.IO.Path.Combine(pluginDirectory, "Pro");
             Directory.CreateDirectory(coreDirectory);
             Directory.CreateDirectory(proDirectory);
+            Directory.CreateDirectory(sharedAssemblyDirectory);
 
             var corePluginPath = typeof(global::UzonMail.CorePlugin.PluginSetup).Assembly.Location;
             var proPluginPath = typeof(global::UzonMail.ProPlugin.PluginSetup).Assembly.Location;
+            var corePluginDirectory = System.IO.Path.GetDirectoryName(corePluginPath)!;
+            var aiAbstractionsAssemblyPath = System.IO.Path.Combine(
+                corePluginDirectory,
+                "Microsoft.Extensions.AI.Abstractions.dll"
+            );
+            var sharedDependencyAssemblyPath = System.IO.Path.Combine(
+                sharedAssemblyDirectory,
+                System.IO.Path.GetFileName(aiAbstractionsAssemblyPath)
+            );
             File.Copy(
                 corePluginPath,
                 System.IO.Path.Combine(coreDirectory, System.IO.Path.GetFileName(corePluginPath))
@@ -90,12 +133,25 @@ public sealed class PluginLoaderTests
                 proPluginPath,
                 System.IO.Path.Combine(proDirectory, System.IO.Path.GetFileName(proPluginPath))
             );
-            return new TemporaryPluginDirectory(path);
+            File.Copy(
+                corePluginPath,
+                System.IO.Path.Combine(
+                    sharedAssemblyDirectory,
+                    System.IO.Path.GetFileName(corePluginPath)
+                )
+            );
+            File.Copy(aiAbstractionsAssemblyPath, sharedDependencyAssemblyPath);
+            return new TemporaryPluginDirectory(
+                path,
+                pluginDirectory,
+                sharedAssemblyDirectory,
+                sharedDependencyAssemblyPath
+            );
         }
 
         public void Dispose()
         {
-            Directory.Delete(Path, true);
+            Directory.Delete(RootPath, true);
         }
     }
 }

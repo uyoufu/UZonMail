@@ -16,6 +16,7 @@ namespace UzonMail.Utils.Plugin
     /// </summary>
     public sealed class PluginLoader : IPlugin, IDisposable
     {
+        private const string SharedPluginAssemblyDirectoryName = "Assembly";
         private static readonly ILog _logger = LogManager.GetLogger(typeof(PluginLoader));
         private readonly object _syncRoot = new();
         private readonly PluginAssemblyCatalog _catalog;
@@ -40,7 +41,16 @@ namespace UzonMail.Utils.Plugin
                 return;
             }
 
-            _catalog = PluginAssemblyCatalog.Create(absolutePluginDirectory);
+            var sharedAssemblyDirectory = Directory.GetParent(absolutePluginDirectory)?.FullName;
+            _catalog = PluginAssemblyCatalog.Create(
+                absolutePluginDirectory,
+                sharedAssemblyDirectory is null
+                    ? null
+                    : System.IO.Path.Combine(
+                        sharedAssemblyDirectory,
+                        SharedPluginAssemblyDirectoryName
+                    )
+            );
             foreach (var duplicatePlugin in _catalog.DuplicatePlugins)
             {
                 _logger.Info(

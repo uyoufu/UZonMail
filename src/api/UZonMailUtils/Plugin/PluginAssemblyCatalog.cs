@@ -59,12 +59,37 @@ namespace UzonMail.Utils.Plugin
             );
         }
 
-        public static PluginAssemblyCatalog Create(string pluginDirectory)
+        public static PluginAssemblyCatalog Create(
+            string pluginDirectory,
+            string? sharedAssemblyDirectory = null
+        )
         {
-            var managedAssemblies = Directory
-                .EnumerateFiles(pluginDirectory, "*.dll", SearchOption.AllDirectories)
-                .Select(TryReadMetadata)
-                .OfType<ManagedAssemblyMetadata>()
+            var absolutePluginDirectory = System.IO.Path.GetFullPath(pluginDirectory);
+            var pluginAssemblies = GetManagedAssemblies(absolutePluginDirectory);
+            var managedAssemblies = pluginAssemblies;
+            if (!string.IsNullOrWhiteSpace(sharedAssemblyDirectory))
+            {
+                var absoluteSharedAssemblyDirectory = System.IO.Path.GetFullPath(
+                    sharedAssemblyDirectory
+                );
+                if (
+                    Directory.Exists(absoluteSharedAssemblyDirectory)
+                    && !string.Equals(
+                        absolutePluginDirectory,
+                        absoluteSharedAssemblyDirectory,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
+                {
+                    managedAssemblies =
+                    [
+                        .. pluginAssemblies,
+                        .. GetManagedAssemblies(absoluteSharedAssemblyDirectory),
+                    ];
+                }
+            }
+
+            managedAssemblies = managedAssemblies
                 .OrderBy(metadata => metadata.Path, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
@@ -81,7 +106,7 @@ namespace UzonMail.Utils.Plugin
             );
             var duplicatePlugins = new List<DuplicatePluginAssembly>();
             foreach (
-                var pluginGroup in managedAssemblies
+                var pluginGroup in pluginAssemblies
                     .Where(metadata =>
                         System
                             .IO.Path.GetFileNameWithoutExtension(metadata.Path)
@@ -171,6 +196,15 @@ namespace UzonMail.Utils.Plugin
             {
                 return null;
             }
+        }
+
+        private static List<ManagedAssemblyMetadata> GetManagedAssemblies(string directory)
+        {
+            return Directory
+                .EnumerateFiles(directory, "*.dll", SearchOption.AllDirectories)
+                .Select(TryReadMetadata)
+                .OfType<ManagedAssemblyMetadata>()
+                .ToList();
         }
 
         private static InvalidOperationException CreatePluginConflictException(
