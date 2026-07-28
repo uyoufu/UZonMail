@@ -35,10 +35,10 @@ permalink: /guide/build
    | Windows 服务端 | `./build.ps1 -Target WindowsServer` | `build/uzonmail-service-win-x64-version.zip` |
    | Linux 服务端 | `./build.ps1 -Target Linux` | `build/uzonmail-service-linux-x64-version.zip` |
    | 本地 Linux 构建镜像 | `./build.ps1 -Target Docker` | Docker 镜像 |
-   | 全部安装包和镜像 | `./build.ps1 -Target All,Docker` | 全部 ZIP 和 Docker 镜像 |
+   | 全部安装包和镜像 | `./build.ps1 -Target All` | 全部 ZIP 和 Docker 镜像 |
    | 既有 Linux ZIP 构建镜像 | `./build.ps1 -Target Docker -LinuxPackageUrl <URL>` | Docker 镜像 |
 
-   传入 `-PushDockerImage` 才会推送 Docker 镜像，传入 `-UploadArtifacts` 才会通过已安装的 `od` 上传 ZIP。传入 `-UpdateSource` 会在工作区干净时以 fast-forward 方式同步当前分支；脚本不会切换分支。需要指定 WSL 发行版时，添加 `-WslDistribution <名称>`。
+   传入 `-PushDockerImage` 才会推送 Docker 镜像，`./build.ps1 -Target All -PushDockerImage` 会构建全部安装包并推送 Docker 镜像。传入 `-UploadArtifacts` 才会通过已安装的 `od` 上传 ZIP。传入 `-UpdateSource` 会在工作区干净时以 fast-forward 方式同步当前分支；脚本不会切换分支。需要指定 WSL 发行版时，添加 `-WslDistribution <名称>`。
 
    编译成功截图：
 

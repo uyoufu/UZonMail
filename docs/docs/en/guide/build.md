@@ -35,10 +35,10 @@ Make sure the following tools are available in your command line:
    | Windows server | `./build.ps1 -Target WindowsServer` | `build/uzonmail-service-win-x64-version.zip` |
    | Linux server | `./build.ps1 -Target Linux` | `build/uzonmail-service-linux-x64-version.zip` |
    | Docker from a local Linux build | `./build.ps1 -Target Docker` | Docker image |
-   | all packages and image | `./build.ps1 -Target All,Docker` | All ZIP files and Docker images |
+   | all packages and image | `./build.ps1 -Target All` | All ZIP files and Docker images |
    | Docker from an existing Linux ZIP | `./build.ps1 -Target Docker -LinuxPackageUrl <URL>` | Docker image |
 
-   Docker images are pushed only with `-PushDockerImage`. ZIP files are uploaded through an installed `od` command only with `-UploadArtifacts`. `-UpdateSource` fast-forwards the current branch only when the working tree is clean; it never switches branches. Use `-WslDistribution <name>` to select a non-default WSL distribution.
+   Docker images are pushed only with `-PushDockerImage`; `./build.ps1 -Target All -PushDockerImage` builds all packages and pushes the Docker images. ZIP files are uploaded through an installed `od` command only with `-UploadArtifacts`. `-UpdateSource` fast-forwards the current branch only when the working tree is clean; it never switches branches. Use `-WslDistribution <name>` to select a non-default WSL distribution.
 
    Build success screenshot:
 

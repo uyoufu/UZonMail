@@ -5,6 +5,33 @@ $buildScriptPath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/build.ps1
 
 Import-Module $buildModulePath -Force
 
+function Import-BuildScriptFunction {
+    <#
+    .SYNOPSIS
+    从构建入口脚本提取指定函数供隔离测试使用
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FunctionName
+    )
+
+    $parseErrors = $null
+    $buildScriptAst = [System.Management.Automation.Language.Parser]::ParseFile($buildScriptPath, [ref]$null, [ref]$parseErrors)
+    if ($parseErrors.Count -gt 0) {
+        throw "无法解析构建脚本：$($parseErrors[0].Message)"
+    }
+
+    $functionDefinition = $buildScriptAst.Find({
+            param($ast)
+            $ast -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $ast.Name -eq $FunctionName
+        }, $true) | Select-Object -First 1
+    if ($null -eq $functionDefinition) {
+        throw "构建脚本中未找到函数：$FunctionName"
+    }
+
+    return [scriptblock]::Create($functionDefinition.Extent.Text)
+}
+
 Describe 'UzonMail unified build script' {
     It 'parses the shared module' {
         $parseErrors = $null
@@ -73,9 +100,56 @@ Describe 'UzonMail unified build script' {
 
         $buildSources | Should Not Match 'CorePluginProject|ProPluginProject'
     }
+
+    It 'resolves All to include Docker' {
+        . (Import-BuildScriptFunction -FunctionName 'Resolve-BuildTargets')
+
+        $resolvedTargets = @(Resolve-BuildTargets -RequestedTargets @('All') -HasRemoteLinuxPackage $false)
+
+        ($resolvedTargets -contains 'Desktop') | Should Be $true
+        ($resolvedTargets -contains 'WindowsServer') | Should Be $true
+        ($resolvedTargets -contains 'Linux') | Should Be $true
+        ($resolvedTargets -contains 'Docker') | Should Be $true
+    }
+
+    It 'keeps All,Docker compatible' {
+        . (Import-BuildScriptFunction -FunctionName 'Resolve-BuildTargets')
+
+        $resolvedTargets = @(Resolve-BuildTargets -RequestedTargets @('All', 'Docker') -HasRemoteLinuxPackage $false)
+
+        ($resolvedTargets -contains 'Docker') | Should Be $true
+    }
 }
 
 InModuleScope UzonMail.Build {
+    Describe 'WSL path conversion' {
+        It 'runs wslpath through Bash with a quoted Windows path' {
+            Mock Invoke-WslBuildCommand { '/mnt/d/Develop/Personal/UzonMail/build/service-linux-x64' }
+
+            $wslPath = ConvertTo-WslPath -WindowsPath 'D:\Develop\Personal\UzonMail\build\service-linux-x64' -Distribution 'Ubuntu'
+
+            $wslPath | Should Be '/mnt/d/Develop/Personal/UzonMail/build/service-linux-x64'
+            Assert-MockCalled Invoke-WslBuildCommand -Times 1 -Exactly -ParameterFilter {
+                $Distribution -eq 'Ubuntu' -and $BashCommand -eq "wslpath -u -- 'D:\Develop\Personal\UzonMail\build\service-linux-x64'"
+            }
+        }
+
+        It 'includes the WSL command failure when path conversion fails' {
+            Mock Invoke-WslBuildCommand { throw 'WSL 命令执行失败（退出码 1）：wslpath -u' }
+
+            $conversionException = $null
+            try {
+                ConvertTo-WslPath -WindowsPath 'D:\invalid-path' -Distribution 'Ubuntu'
+            }
+            catch {
+                $conversionException = $_.Exception
+            }
+
+            $conversionException.Message | Should Match '无法转换 WSL 路径：D:\\invalid-path'
+            $conversionException.Message | Should Match 'WSL 命令执行失败'
+        }
+    }
+
     Describe 'Docker build environment resolution' {
         It 'uses local Docker before checking WSL' {
             Mock Test-LocalDockerEnvironment { [pscustomobject]@{ IsAvailable = $true; FailureReason = $null } }

@@ -125,7 +125,7 @@ function Resolve-BuildTargets {
 
     $resolvedTargets = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     if ($includesAll) {
-        @('Desktop', 'WindowsServer', 'Linux') | ForEach-Object { [void]$resolvedTargets.Add($_) }
+        @('Desktop', 'WindowsServer', 'Linux', 'Docker') | ForEach-Object { [void]$resolvedTargets.Add($_) }
     }
     else {
         foreach ($requestedTarget in $uniqueTargets) {

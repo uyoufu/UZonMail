@@ -305,15 +305,17 @@ function ConvertTo-WslPath {
         [string]$Distribution
     )
 
-    $wslArguments = @()
-    if (-not [string]::IsNullOrWhiteSpace($Distribution)) {
-        $wslArguments += @('--distribution', $Distribution)
+    # 路径必须在 Bash 中保持字面量，避免 wsl.exe 直接传参时错误解析 Windows 反斜杠
+    $quotedWindowsPath = ConvertTo-BashSingleQuotedValue -Value $WindowsPath
+    try {
+        $wslPath = (Invoke-WslBuildCommand -Distribution $Distribution -BashCommand "wslpath -u -- $quotedWindowsPath" | Out-String).Trim()
     }
-    $wslArguments += @('--', 'wslpath', '-u', $WindowsPath)
+    catch {
+        throw "无法转换 WSL 路径：$WindowsPath。$($_.Exception.Message)"
+    }
 
-    $wslPath = (& wsl @wslArguments | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($wslPath)) {
-        throw "无法转换 WSL 路径：$WindowsPath"
+    if ([string]::IsNullOrWhiteSpace($wslPath)) {
+        throw "无法转换 WSL 路径：$WindowsPath。wslpath 未返回有效结果"
     }
 
     return $wslPath
