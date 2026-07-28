@@ -3,6 +3,10 @@
     <Project Path="Plugins/UzonMailCorePlugin/UzonMailCorePlugin.csproj" />
     <Project Path="Plugins/UzonMailProPlugin/UZonMailProPlugin.csproj" />
   </Folder>
+  <Folder Name="/Updater/">
+    <Project Path="../updater/UzonMailUpdater/UzonMailUpdater.csproj" Id="64e35e41-8b32-467d-8f1a-6ea75c8d853c" />
+    <Project Path="../updater/UzonMailUpdateLauncher/UzonMailUpdateLauncher.csproj" Id="3cfaa81f-3164-4fc8-a382-41f94fdf1183" />
+  </Folder>
   <Project Path="../../tests/UzonMailDotNET.Test/UzonMailDotNET.Test.csproj" />
   <Project Path="../win-desktop/UzonMailDesktop/UzonMailDesktop.csproj" />
   <Project Path="UzonMailDB/UzonMailDB.csproj" />
