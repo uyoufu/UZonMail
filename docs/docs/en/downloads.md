@@ -9,31 +9,29 @@ permalink: /en/downloads
 
 > Release Date: 2026-07-28
 
-New Features
+### New Features
 
-1. Add batch move email boxes to target group functionality for inboxes and outboxes
-2. Add batch soft-delete for selected inboxes, replacing hard delete with validation status display
-3. Add desktop application auto-updater with WebView2 integration for update checking and installation
-4. Add hard bounce detection and inbox verification system - SMTP codes 550/551/553 automatically mark inboxes as invalid
-5. Add "Allow Duplicate Sending" option for email tasks with duplicate recipient detection
-6. Add DraggableTree component with drag-and-drop support for hierarchical data
-7. Add WYSIWYG editor support in lowCode forms with new editor field type
-8. Migrate desktop application to new location with MVVM architecture
+1. Desktop application auto-updater: New UzonMailUpdater CLI tool with package/update commands for version checking, ZIP download, file hash validation, and rollback support. Desktop app integrates WebView2 update entry, superadmins can check and apply updates from dashboard.
+2. Batch move email boxes to target group: Support batch selecting and moving inboxes/outboxes to specified groups from management pages.
+3. Batch soft-delete for selected inboxes: Support batch soft-deleting selected inboxes with validation status displayed in table.
+4. Hard bounce detection and inbox verification: Auto-detect SMTP 550/551/553 as hard bounces during sending, mark target inbox as invalid and move to "validation failed" group. Support verifying individual inbox or entire group.
+5. Allow duplicate sending option: New sending task setting to allow sending to same recipient multiple times, with warning dialog showing duplicates when detected.
+6. API localization infrastructure: New key-based API error localization system with localized error messages for Chinese and English.
 
-Improvements
+### Improvements
 
-1. Fix email verification order and add SPF and unknown state support
-2. Context menu visibility conditions based on selection count - show/hide menu items dynamically
-3. Move StatusChip translations to i18n system for better multilingual consistency
-4. Improve proxy handling and health check mechanisms
-5. Optimize SendCore scheduling with non-blocking cooldown and lazy daily quota reset
-6. Unify build scripts with Docker builds now executing in WSL environment
-7. Exclude hard bounce items from sending queries to prevent redelivery
+1. Full UI internationalization: Added and improved translations for crawlerTask, sendDetail, sendHistory, sendingProgress, statisticsReport, profile and other pages.
+2. SendCore scheduling optimization: Non-blocking cooldown with lazy daily quota reset to avoid blocking worker slots. Cursor-based pagination for outbox loading with adaptive catalog replenishment.
+3. DraggableTree component: New reusable component supporting hierarchical data with drag-and-drop and context menus.
+4. Context menu visibility conditions: Control menu item visibility based on selection count (any/onlyMulti/onlySingle).
+5. Strengthened TypeScript typing: useQTable and ContextMenu with generic type parameters and multi-select v-model for better type safety and batch operations.
+6. File storage redesign: Introduced file categories with tree structure, content-addressable storage, and reference counting for safe cleanup.
+7. Plugin loading optimization: Support loading shared dependencies from parent-level Assembly directory, sort plugins by dependency order.
 
-Bug Fixes
+### Bug Fixes
 
-1. Fix property name typo from disableAutogrow to disableAutoGrow for consistency
-2. Fix multiple SendCore bugs and improve async lifecycle handling
+1. Fix WSL path conversion with proper Bash quoting for Windows paths with backslashes.
+2. Rename disableAutogrow to disableAutoGrow for consistency across LowCodeForm property naming.
 
 ### Downloads
 
