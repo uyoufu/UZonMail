@@ -26,7 +26,8 @@
 
 - 优先考虑逻辑删除
 - 删除数据时，禁止使用级联删除，所有删除操作在应用层手动分步删除
-- 数据库迁移使用类似这样 `dotnet ef migrations add xxx --context MysqlContext --output-dir Migrations/Mysql -v` 的命令进行自动迁移，不要直接编写迁移代码
+- 数据库迁移使用类似这样 `dotnet ef migrations add xxx --context MysqlContext --output-dir Migrations/Mysql -v` 的命令进行自动迁移，禁止只手写 `Up/Down`，否则运行时 `Database.Migrate()` 会因 `PendingModelChangesWarning` 失败
+- 修改实体模型或生成迁移后，分别对受影响的 Context 执行 `dotnet ef migrations has-pending-model-changes --context <ContextName>` 验证；不得通过忽略或抑制该警告绕过模型快照不一致
 
 ## 项目依赖
 

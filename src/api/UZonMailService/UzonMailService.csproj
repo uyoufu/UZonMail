@@ -29,7 +29,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ConfValidation" Version="1.0.1" />
 		<PackageReference Include="IGeekFan.AspNetCore.Knife4jUI" Version="0.0.16" />
 		<PackageReference Include="LiteDB" Version="5.0.21" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.10" />
@@ -37,9 +36,9 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="10.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="Quartz" Version="3.18.2" />
-		<PackageReference Include="Quartz.AspNetCore" Version="3.18.2" />
-		<PackageReference Include="Quartz.Serialization.Json" Version="3.18.2" />
+		<PackageReference Include="Quartz" Version="3.19.1" />
+		<PackageReference Include="Quartz.AspNetCore" Version="3.19.1" />
+		<PackageReference Include="Quartz.Serialization.Json" Version="3.19.1" />
 		<PackageReference Include="StackExchange.Redis" Version="3.0.17" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
 	</ItemGroup>

@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using UzonMail.DB.SQL;
-using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.HostedServices
 {

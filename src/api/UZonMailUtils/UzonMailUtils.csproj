@@ -27,13 +27,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="LiteDB" Version="5.0.21" />
-		<PackageReference Include="log4net" Version="3.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
-		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.16.0" />
-		<PackageReference Include="MimeKit" Version="4.15.1" />
+		<PackageReference Include="log4net" Version="3.3.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.21.0" />
+		<PackageReference Include="MimeKit" Version="4.17.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="StackExchange.Redis" Version="2.12.4" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
+		<PackageReference Include="StackExchange.Redis" Version="3.0.17" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.21.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -355,6 +355,9 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsHardBounce")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsHidden")
                         .HasColumnType("boolean");
 
