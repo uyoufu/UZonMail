@@ -1,5 +1,13 @@
 import { httpClient } from 'src/api//base/httpClient'
 
+/** 邮箱分组类型 */
+export const EmailGroupType = {
+  Outbox: 1,
+  Inbox: 2
+} as const
+
+export type EmailGroupType = typeof EmailGroupType[keyof typeof EmailGroupType]
+
 export interface IEmailGroup {
   id?: number,
   objectId?: string,
@@ -7,7 +15,7 @@ export interface IEmailGroup {
   icon?: string,
   description?: string,
   order: number,
-  type?: 1 | 2,
+  type?: EmailGroupType,
   selectable?: boolean,
   selected?: boolean
 }
@@ -18,7 +26,7 @@ export interface IEmailGroup {
  * @param type
  * @returns
  */
-export function getEmailGroups (type: 1 | 2) {
+export function getEmailGroups (type: EmailGroupType) {
   return httpClient.get<IEmailGroup[]>('/email-group/all', {
     params: {
       type

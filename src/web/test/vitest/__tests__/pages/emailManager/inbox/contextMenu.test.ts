@@ -25,6 +25,7 @@ vi.mock('src/utils/dialog', () => ({
 }))
 vi.mock('src/i18n/helpers', () => ({
   translateGlobal: (key: string) => `global.${key}`,
+  translateEmailGroup: (key: string) => `emailGroup.${key}`,
   translateInboxManager: (key: string, params?: Record<string, unknown>) =>
     params ? `inbox.${key}:${JSON.stringify(params)}` : `inbox.${key}`
 }))
@@ -63,6 +64,7 @@ describe('useContextMenu', () => {
 
     expect(inboxContextMenuItems.value.map(menuItem => menuItem.name)).toEqual([
       'edit',
+      'moveToGroup',
       'validateSelected',
       'delete'
     ])

@@ -335,6 +335,58 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             return true.ToSuccessResponse();
         }
 
+        /// <summary>
+        /// 批量移动发件箱到指定分组
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("outboxes/group")]
+        public Task<ResponseResult<bool>> MoveOutboxesToGroup(
+            [FromBody] MoveEmailBoxesDto request
+        ) => MoveEmailBoxesToGroup(db.Outboxes, request, EmailGroupType.OutBox);
+
+        /// <summary>
+        /// 批量移动收件箱到指定分组
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("inboxes/group")]
+        public Task<ResponseResult<bool>> MoveInboxesToGroup(
+            [FromBody] MoveEmailBoxesDto request
+        ) => MoveEmailBoxesToGroup(db.Inboxes, request, EmailGroupType.InBox);
+
+        /// <summary>
+        /// 将当前用户指定类型的邮箱批量迁移到其可访问的目标分组
+        /// </summary>
+        private async Task<ResponseResult<bool>> MoveEmailBoxesToGroup<TEmailBox>(
+            IQueryable<TEmailBox> emailBoxes,
+            MoveEmailBoxesDto request,
+            EmailGroupType targetGroupType
+        )
+            where TEmailBox : EmailBox
+        {
+            var emailBoxIds = request.EmailBoxIds.Where(id => id > 0).Distinct().ToArray();
+            if (emailBoxIds.Length == 0)
+                throw new KnownException("请至少选择一个邮箱");
+
+            var userId = tokenService.GetUserSqlId();
+            var hasTargetGroupAccess = await db.EmailGroups.AnyAsync(group =>
+                group.Id == request.TargetGroupId
+                && group.UserId == userId
+                && group.Type == targetGroupType
+            );
+            if (!hasTargetGroupAccess)
+                throw new KnownException("目标邮箱分组不存在或无权访问");
+
+            await emailBoxes
+                .Where(emailBox => emailBox.UserId == userId && emailBoxIds.Contains(emailBox.Id))
+                .ExecuteUpdateAsync(update =>
+                    update.SetProperty(emailBox => emailBox.EmailGroupId, request.TargetGroupId)
+                );
+
+            return true.ToSuccessResponse();
+        }
+
         private async Task<ResponseResult<Inbox>> CreateInboxEntity(Inbox entity)
         {
             var inboxValidator = new InboxValidator();

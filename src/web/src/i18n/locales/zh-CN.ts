@@ -150,10 +150,16 @@ export default {
     inboxGroup: '收件箱组',
     modifyCurrentGroup: '修改当前组',
     modifyEmailGroup: '修改邮箱组',
+    moveEmailBoxes: '移动到分组',
+    moveEmailBoxesSuccess: '已移动 {count} 个邮箱',
+    moveEmailBoxesToTargetGroup: '将当前或选中的邮箱移动到另一分组',
+    movingEmailBoxes: '正在移动邮箱',
     newEmailGroup: '新建邮箱组',
     newGroup: '新建组',
     newGroupSuccess: '新建组成功',
+    noAvailableTargetGroup: '没有可移动的目标分组，请先创建其他分组',
     outboxGroup: '发件箱组',
+    selectTargetGroup: '目标分组',
     youCanRightClickToAddNewGroup: '可单击右键添加新组'
   },
   errorNotFound: {

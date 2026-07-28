@@ -17,6 +17,12 @@ export interface IInbox {
   validFailReason?: string
 }
 
+/** 批量移动邮箱到目标分组的请求 */
+export interface IMoveEmailBoxesRequest {
+  emailBoxIds: number[],
+  targetGroupId: number
+}
+
 /** 收件箱验证状态 */
 export const InboxStatus = {
   Unverified: 0,
@@ -117,6 +123,11 @@ export function updateOutbox (outboxId: number, outbox: IOutbox) {
   return httpClient.put<IOutbox[]>(`/email-box/outbox/${outboxId}`, {
     data: outbox
   })
+}
+
+/** 批量移动发件箱到目标分组 */
+export function moveOutboxesToGroup (request: IMoveEmailBoxesRequest) {
+  return httpClient.put<boolean>('/email-box/outboxes/group', { data: request })
 }
 
 // #region outlook 个人用户委托授权
@@ -327,4 +338,9 @@ export function updateInbox (inboxId: number, inbox: IInbox) {
   return httpClient.put<IInbox[]>(`/email-box/inbox/${inboxId}`, {
     data: inbox
   })
+}
+
+/** 批量移动收件箱到目标分组 */
+export function moveInboxesToGroup (request: IMoveEmailBoxesRequest) {
+  return httpClient.put<boolean>('/email-box/inboxes/group', { data: request })
 }

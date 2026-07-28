@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IOutbox } from 'src/api/emailBox'
 import { deleteOutboxByIds, OutboxStatus, updateOutbox, validateOutbox } from 'src/api/emailBox'
-import { deleteAllInvalidOutboxesInGroup, validateAllInvalidOutboxes } from 'src/api/emailGroup'
+import { deleteAllInvalidOutboxesInGroup, EmailGroupType, validateAllInvalidOutboxes } from 'src/api/emailGroup'
 
 import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
@@ -12,14 +12,16 @@ import { showDialog } from 'src/components/lowCode/PopupDialog'
 
 import type { deleteRowByIdType, refreshTableType } from 'src/compositions/qTableUtils'
 
-import { translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
+import { translateEmailGroup, translateGlobal, translateOutboxManager } from 'src/i18n/helpers'
 
 import logger from 'loglevel'
 
 import { tryOutlookDelegateAuthorization, isMsGraphOutbox } from './headerFunctions'
+import { useEmailBoxGroupMove } from '../components/useEmailBoxGroupMove'
 
 
 export function useContextMenu (deleteRowById: deleteRowByIdType<IOutbox>, refreshTable: refreshTableType) {
+  const { onMoveEmailBoxes } = useEmailBoxGroupMove<IOutbox>(EmailGroupType.Outbox, refreshTable)
   const outboxContextMenuItems: Ref<IContextMenuItem<IOutbox>[]> = computed(() =>
     [
       {
@@ -27,6 +29,13 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IOutbox>, refre
         label: translateGlobal('edit'),
         tooltip: translateOutboxManager('editCurrentOutbox'),
         onClick: onUpdateOutbox
+      },
+      {
+        name: 'moveToGroup',
+        label: translateEmailGroup('moveEmailBoxes'),
+        tooltip: translateEmailGroup('moveEmailBoxesToTargetGroup'),
+        icon: 'drive_file_move',
+        onClick: onMoveEmailBoxes
       },
       {
         name: 'delete',

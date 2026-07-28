@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using UzonMail.DB.SQL.Core.Emails;
 
 namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
@@ -76,5 +77,17 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
         public string? Name { get; set; }
         public string? Description { get; set; }
         public long MinInboxCooldownHours { get; set; } = -1;
+    }
+
+    /// <summary>
+    /// 批量移动邮箱到目标分组的请求
+    /// </summary>
+    public class MoveEmailBoxesDto
+    {
+        [MinLength(1)]
+        public List<long> EmailBoxIds { get; set; } = [];
+
+        [Range(1, long.MaxValue)]
+        public long TargetGroupId { get; set; }
     }
 }

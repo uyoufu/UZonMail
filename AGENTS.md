@@ -23,6 +23,14 @@
 
 - 项目 src/api、src/web、src/win-desktop 各自维护了 codegraph, 优先在这些目录中查询
 
+## 项目测试
+
+在仓库根目录执行以下命令运行所有测试：
+
+```powershell
+dotnet test --project tests/UzonMailDotNET.Test/UzonMailDotNET.Test.csproj
+```
+
 ## 用户安装软件及命令
 
 - ripgrep : rg

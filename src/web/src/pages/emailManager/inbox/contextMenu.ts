@@ -1,5 +1,6 @@
 import type { IInbox } from 'src/api/emailBox'
 import { deleteInboxByIds, updateInbox } from 'src/api/emailBox'
+import { EmailGroupType } from 'src/api/emailGroup'
 import { validateInboxes } from 'src/api/pro/emailVerify'
 
 import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
@@ -8,13 +9,15 @@ import { confirmOperation, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getInboxFields } from './headerFunctions'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 
-import { translateInboxManager, translateGlobal } from 'src/i18n/helpers'
+import { translateEmailGroup, translateInboxManager, translateGlobal } from 'src/i18n/helpers'
 import type { deleteRowByIdType, refreshTableType } from 'src/compositions/qTableUtils'
 import { usePermission } from 'src/compositions/permission'
+import { useEmailBoxGroupMove } from '../components/useEmailBoxGroupMove'
 
 /** 创建收件箱列表的右键菜单及其操作。 */
 export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refreshTable: refreshTableType) {
   const { isProfession } = usePermission()
+  const { onMoveEmailBoxes } = useEmailBoxGroupMove<IInbox>(EmailGroupType.Inbox, refreshTable)
   // 更新发件箱
   async function onUpdateInbox (inbox: IInbox) {
     const fields = getInboxFields()
@@ -64,6 +67,13 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refres
       label: translateGlobal('edit'),
       tooltip: translateInboxManager('editCurrentInbox'),
       onClick: onUpdateInbox
+    },
+    {
+      name: 'moveToGroup',
+      label: translateEmailGroup('moveEmailBoxes'),
+      tooltip: translateEmailGroup('moveEmailBoxesToTargetGroup'),
+      icon: 'drive_file_move',
+      onClick: onMoveEmailBoxes
     },
     {
       name: 'validateSelected',
