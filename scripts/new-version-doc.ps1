@@ -73,6 +73,40 @@ function Get-NormalizedVersion {
     return $versionMatch.Groups[1].Value
 }
 
+function Get-DesktopDocumentVersion {
+    <#
+    .SYNOPSIS
+    从桌面项目文件读取用于发布文档的三段版本号
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectPath
+    )
+
+    if (-not (Test-Path -LiteralPath $ProjectPath -PathType Leaf)) {
+        throw "桌面项目文件不存在：$ProjectPath"
+    }
+
+    try {
+        [xml]$project = Get-Content -LiteralPath $ProjectPath -Raw -Encoding utf8
+    }
+    catch {
+        throw "无法解析桌面项目文件 $ProjectPath：$($_.Exception.Message)"
+    }
+
+    $fileVersionNode = $project.SelectSingleNode('/Project/PropertyGroup/FileVersion')
+    if ($null -eq $fileVersionNode -or [string]::IsNullOrWhiteSpace($fileVersionNode.InnerText)) {
+        throw "桌面项目文件未配置 FileVersion：$ProjectPath"
+    }
+
+    $versionMatch = [regex]::Match($fileVersionNode.InnerText.Trim(), '^(\d+\.\d+\.\d+)\.\d+$')
+    if (-not $versionMatch.Success) {
+        throw "桌面项目 FileVersion 必须为 x.y.z.build 格式：$($fileVersionNode.InnerText.Trim())"
+    }
+
+    return $versionMatch.Groups[1].Value
+}
+
 Assert-CommandExists -CommandName 'git'
 Assert-CommandExists -CommandName 'opencode'
 
@@ -102,12 +136,16 @@ try {
     }
 
     if ([string]::IsNullOrWhiteSpace($Version)) {
-        $versionInput = Read-Host '请输入本次版本号（x.y.z，可带 v 前缀）'
+        $desktopProjectPath = Join-Path -Path $repositoryRoot -ChildPath 'src/win-desktop/UzonMailDesktop/UzonMailDesktop.csproj'
+        $defaultVersion = Get-DesktopDocumentVersion -ProjectPath $desktopProjectPath
+        $versionInput = Read-Host "请输入本次版本号（x.y.z，可带 v 前缀，直接回车使用 $defaultVersion）"
         if ([string]::IsNullOrWhiteSpace($versionInput)) {
-            throw '版本号不能为空'
+            $version = $defaultVersion
+            Write-Host "使用桌面项目默认版本号: $version" -ForegroundColor Green
         }
-
-        $version = Get-NormalizedVersion -InputVersion $versionInput
+        else {
+            $version = Get-NormalizedVersion -InputVersion $versionInput
+        }
     }
     else {
         $version = Get-NormalizedVersion -InputVersion $Version

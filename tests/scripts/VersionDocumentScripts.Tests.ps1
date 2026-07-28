@@ -3,6 +3,77 @@ $repositoryRoot = Split-Path -Path $repositoryRoot -Parent
 $updateScriptPath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/update-version-doc.ps1'
 $releaseScriptPath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/new-version-doc.ps1'
 
+function Import-VersionDocumentScriptFunction {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FunctionName
+    )
+
+    $parseErrors = $null
+    $releaseScriptAst = [System.Management.Automation.Language.Parser]::ParseFile($releaseScriptPath, [ref]$null, [ref]$parseErrors)
+    if ($parseErrors.Count -gt 0) {
+        throw "无法解析版本文档脚本：$($parseErrors[0].Message)"
+    }
+
+    $functionDefinition = $releaseScriptAst.Find({
+            param($ast)
+            $ast -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $ast.Name -eq $FunctionName
+        }, $true) | Select-Object -First 1
+    if ($null -eq $functionDefinition) {
+        throw "版本文档脚本中未找到函数：$FunctionName"
+    }
+
+    return [scriptblock]::Create($functionDefinition.Extent.Text)
+}
+
+function New-DesktopProjectFixture {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FixtureRoot,
+
+        [string]$FileVersion
+    )
+
+    $projectPath = Join-Path -Path $FixtureRoot -ChildPath 'UzonMailDesktop.csproj'
+    $fileVersionElement = if ($PSBoundParameters.ContainsKey('FileVersion')) {
+        "    <FileVersion>$FileVersion</FileVersion>"
+    }
+    else {
+        ''
+    }
+    $projectContent = @"
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+$fileVersionElement
+  </PropertyGroup>
+</Project>
+"@
+    [System.IO.File]::WriteAllText($projectPath, $projectContent, [System.Text.UTF8Encoding]::new($false))
+
+    return $projectPath
+}
+
+function Assert-VersionDocumentScriptFailure {
+    param(
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$Action,
+
+        [Parameter(Mandatory = $true)]
+        [string]$ExpectedMessage
+    )
+
+    $caughtException = $null
+    try {
+        & $Action
+    }
+    catch {
+        $caughtException = $_.Exception
+    }
+
+    $caughtException | Should Not Be $null
+    $caughtException.Message | Should Match $ExpectedMessage
+}
+
 function New-VersionDocumentFixture {
     param(
         [Parameter(Mandatory = $true)]
@@ -52,6 +123,34 @@ Describe 'Version document scripts' {
 
             $parseErrors.Count | Should Be 0
         }
+    }
+
+    It 'converts the desktop FileVersion to a document version' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-DesktopDocumentVersion')
+        $projectPath = New-DesktopProjectFixture -FixtureRoot $TestDrive -FileVersion '1.2.3.4'
+
+        Get-DesktopDocumentVersion -ProjectPath $projectPath | Should Be '1.2.3'
+    }
+
+    It 'rejects a desktop project without FileVersion' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-DesktopDocumentVersion')
+        $projectPath = New-DesktopProjectFixture -FixtureRoot $TestDrive
+
+        Assert-VersionDocumentScriptFailure -Action { Get-DesktopDocumentVersion -ProjectPath $projectPath } -ExpectedMessage '未配置 FileVersion'
+    }
+
+    It 'rejects a desktop FileVersion without a build number' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-DesktopDocumentVersion')
+        $projectPath = New-DesktopProjectFixture -FixtureRoot $TestDrive -FileVersion '1.2.3'
+
+        Assert-VersionDocumentScriptFailure -Action { Get-DesktopDocumentVersion -ProjectPath $projectPath } -ExpectedMessage 'x.y.z.build'
+    }
+
+    It 'rejects a missing desktop project file' {
+        . (Import-VersionDocumentScriptFunction -FunctionName 'Get-DesktopDocumentVersion')
+        $projectPath = Join-Path -Path $TestDrive -ChildPath 'missing.csproj'
+
+        Assert-VersionDocumentScriptFailure -Action { Get-DesktopDocumentVersion -ProjectPath $projectPath } -ExpectedMessage '桌面项目文件不存在'
     }
 
     It 'adds a Chinese entry and copies the matching manifest' {
