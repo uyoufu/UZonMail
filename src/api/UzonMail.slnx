@@ -3,6 +3,9 @@
     <Project Path="Plugins/UzonMailCorePlugin/UzonMailCorePlugin.csproj" />
     <Project Path="Plugins/UzonMailProPlugin/UZonMailProPlugin.csproj" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
   <Folder Name="/Updater/">
     <Project Path="../updater/UzonMailUpdater/UzonMailUpdater.csproj" Id="64e35e41-8b32-467d-8f1a-6ea75c8d853c" />
   </Folder>

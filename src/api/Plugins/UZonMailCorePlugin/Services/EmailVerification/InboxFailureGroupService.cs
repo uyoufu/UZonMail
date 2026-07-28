@@ -72,10 +72,11 @@ public sealed class InboxFailureGroupService(SqlContext db) : IScopedService
             Name = ValidationFailedGroupName,
             Description = "验证未通过的收件箱",
             Icon = "error",
-            Order = long.MaxValue,
+            Order = 0,
         };
         db.EmailGroups.Add(failureGroup);
         await db.SaveChangesAsync(cancellationToken);
         return failureGroup;
     }
 }
+

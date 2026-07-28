@@ -1,3 +1,4 @@
+using MailKit.Net.Smtp;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -79,5 +80,82 @@ public sealed class ProInboxVerificationEvidenceTests
             new[] { nameof(InboxVerificationSnapshot.NormalizedEmail) },
             uniqueIndex.Properties.Select(x => x.Name).ToArray()
         );
+    }
+
+    /// <summary>
+    /// SPF 在 MAIL FROM 阶段被拒绝时不能推断收件人不存在
+    /// </summary>
+    [TestMethod]
+    public void SmtpProbe_MailFromSpfFailure_IsUnknown()
+    {
+        var evidence = SmtpVerificationEvidenceClassifier.Classify(
+            new SmtpProbeResult(
+                SmtpProbeStage.MailFrom,
+                new SmtpResponse(
+                    SmtpStatusCode.MailboxUnavailable,
+                    "SPF check failed. IP: 111.172.50.184"
+                )
+            )
+        );
+
+        Assert.AreEqual(InboxVerificationState.Unknown, evidence.State);
+        Assert.IsTrue(evidence.CanConnectSmtp);
+        Assert.IsFalse(evidence.IsDisabled);
+    }
+
+    /// <summary>
+    /// 只有收件人阶段的永久拒绝才标记地址无效
+    /// </summary>
+    [TestMethod]
+    public void SmtpProbe_RecipientPermanentRejection_IsInvalid()
+    {
+        var evidence = SmtpVerificationEvidenceClassifier.Classify(
+            new SmtpProbeResult(
+                SmtpProbeStage.Recipient,
+                new SmtpResponse(SmtpStatusCode.MailboxUnavailable, "邮箱不存在")
+            )
+        );
+
+        Assert.AreEqual(InboxVerificationState.Invalid, evidence.State);
+        Assert.IsTrue(evidence.IsDisabled);
+    }
+
+    /// <summary>
+    /// SPF 误判产生的旧快照应立即重新验证
+    /// </summary>
+    [TestMethod]
+    public void SnapshotPolicy_DoesNotReuseLegacySpfFailure()
+    {
+        var snapshot = new InboxVerificationSnapshot
+        {
+            State = InboxVerificationState.Invalid,
+            FailureReason = "SPF check failed. IP: 111.172.50.184",
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(30),
+        };
+
+        Assert.IsFalse(InboxVerificationSnapshotPolicy.CanReuse(snapshot, DateTime.UtcNow));
+    }
+
+    /// <summary>
+    /// 未知状态必须使用短期快照，避免策略拦截长期固化
+    /// </summary>
+    [TestMethod]
+    public void SnapshotPolicy_UnknownStateUsesShortLifetime()
+    {
+        var utcNow = DateTime.UtcNow;
+        var options = new InboxVerificationOptions
+        {
+            UnknownSnapshotLifetime = TimeSpan.FromHours(12),
+            LongLivedDomainSnapshotLifetime = TimeSpan.FromDays(365),
+        };
+
+        var expiresAtUtc = InboxVerificationSnapshotPolicy.GetExpiresAtUtc(
+            "qq.com",
+            InboxVerificationState.Unknown,
+            options,
+            utcNow
+        );
+
+        Assert.AreEqual(utcNow.AddHours(12), expiresAtUtc);
     }
 }

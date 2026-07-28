@@ -1,6 +1,6 @@
 <template>
   <div class="low-code_form-container" @keydown.enter="onEnterKeyPress">
-    <div class="q-py-xs q-px-xs row justify-start items-center">
+    <div class="q-py-xs q-px-xs row justify-start items-center" :class="getContainerClass()">
       <template v-for="field in validFields" :key="field.name">
         <q-input v-if="isMatchedType(field, commonInputTypes)" outlined class="q-mb-sm low-code__field q-px-xs"
           :class="[fieldClass, field.classes]" standout dense v-model="fieldsModel[field.name]"
@@ -176,14 +176,14 @@ function isMatchedType(field: ILowCodeField, types: string | string[]): boolean 
   return field.type === types
 }
 
-// function getContainerClass() {
-//   return {
-//     'low-code__container_1': props.oneColumn,
-//     'low-code__container_2': !props.oneColumn,
-//     row: !props.oneColumn,
-//     column: props.oneColumn
-//   }
-// }
+function getContainerClass() {
+  return {
+    'low-code__container_1': props.oneColumn,
+    'low-code__container_2': !props.oneColumn,
+    row: !props.oneColumn,
+    column: props.oneColumn
+  }
+}
 // #endregion
 
 // #region 编辑器
@@ -430,14 +430,26 @@ watch(fieldsModel, async () => {
   flex-direction: column;
 }
 
-.low-code__field {
-  min-width: 80px;
-  max-width: 100%;
 
-  zoom: 0.9;
+.low-code__container_2 {
+  display: flex;
+  flex-wrap: wrap;
 
-  @media screen and (max-width: 600px) {
-    min-width: 100%;
+  .low-code__field {
+    flex: 1 1 100%;
+
+    @media screen and (min-width: 600px) {
+      flex: 1 1 50%;
+      max-width: 50%;
+    }
+  }
+}
+
+.low-code__container_1 {
+  .low-code__field {
+    width: 100%;
+    flex: 1 1 100%;
+    min-width: 300px;
   }
 }
 
