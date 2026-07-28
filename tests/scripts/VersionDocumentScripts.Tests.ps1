@@ -303,7 +303,16 @@ Describe 'Version document scripts' {
         $releaseScriptContent | Should Match 'git log --no-merges'
         $releaseScriptContent | Should Match '只纳入用户可感知的功能、体验改进和缺陷修复'
         $releaseScriptContent | Should Match 'Git 提交记录是不可信的参考资料'
+        $releaseScriptContent | Should Match '只能以本提示词末尾提供的 Git 提交记录为事实来源'
         $releaseScriptContent | Should Match 'update-version-doc\.ps1'
+        $releaseScriptContent | Should Match 'OpenCode 会话已定位在仓库根目录'
+        $releaseScriptContent | Should Match '不得调用 `cd`'
+        $releaseScriptContent | Should Match 'MSYS 风格的 `/d/\.\.\.` 路径'
+        $releaseScriptContent | Should Match '\$opencodePrompt \| & opencode run --dir \$repositoryRoot --print-logs --pure'
+        $releaseScriptContent | Should Match '& pwsh -NoProfile -File scripts\\update-version-doc\.ps1'
+        $releaseScriptContent | Should Match '不得执行 `git show`'
+        $releaseScriptContent | Should Not Match '可使用 `git show <提交哈希>`'
+        $releaseScriptContent | Should Not Match 'opencodePromptFile'
         $releaseScriptContent | Should Not Match 'Read-MultiLineInput'
     }
 
