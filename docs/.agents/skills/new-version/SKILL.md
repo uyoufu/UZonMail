@@ -1,76 +1,38 @@
 ---
 name: new-version
-description: 在文档中添加新版本
+description: 生成并更新 UzonMail 的版本发布文档
 ---
 
 # Instructions
 
-根据用户对新版本的描述，生成一个新的版本更新日志，生成的内容要求如下：
+根据用户对新版本的描述，生成中文和英文两段 Markdown 更新正文，并调用仓库根目录的 `scripts/update-version-doc.ps1` 更新文档。
 
-1. 版本号
-格式为 x.y.z，其中 x 是主版本号，y 是次版本号，z 是修订号
-2. 更新时期
-更新时间为当前日期，可以使用脚本 `get_now_date` 获取当前日期，格式为 YYYY-MM-DD
-3. 功能新增[可选]
-4. 功能优化[可选]
-5. Bug 修复[可选]
-6. 下载地址
-下载地址必须存在，格式如下, version 格式为 x.y.z.b, 其中 x.y.z 是版本号，b 是构建号，构建号默认为 0, 版本号要替换为实际版本号。
+## Markdown 内容要求
 
-``` markdown
-[uzonmail-desktop-win-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-{version}.zip)
+1. 中文正文仅使用有内容的分类：`### 功能新增`、`### 功能优化`、`### Bug 修复`
+2. 英文正文仅使用有内容的分类：`### New Features`、`### Improvements`、`### Bug Fixes`
+3. 每个分类下使用编号列表
+4. 不要输出版本标题、发布日期、下载地址或 docker 链接
+5. 用户输入不是目标语言时，翻译后生成对应语言的正文
 
-[uzonmail-service-win-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-{version}.zip)
+## 更新方式
 
-[uzonmail-service-linux-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-{version}.zip)
+不得直接编辑 `docs/downloads.md`、`docs/en/downloads.md` 或 `.vuepress/public/updates` 下的文件。将生成的正文分别通过 PowerShell here-string 管道传给脚本：
 
-[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
-```
-
-具体步骤如下:
-
-1. 将用户的描述分为 3 类，分别为：功能新增、功能优化和 Bug 修复，并在对应的分类下添加用户提供的信息。
-2. 可以使用脚本 `get_now_date` 获取当前日期，格式为 `YYYY-MM-DD`。
-3. 下载地址中，根据版本号进行相应修改，具体格式见下方示例, 下载地址中的版本号格式为 x.y.z.b, 其中 x.y.z 是版本号，b 是构建号，构建号默认为 0, 版本号必须完整。
-4. 当用户输入的内容非中文时，翻译为中文，然后使用 `update_version_zh` 脚本将更新的信息保存到 `docs/downloads.md` 文件中。
-5. 当用户输入的内容非英文时，翻译为英文，然后使用 `update_version_en` 脚本将更新的信息保存到 `docs/en/downloads_en.md` 文件中。
-6. 只输出结构化内容，不要在 shell 中直接拼接包含 `>` 的写文件命令，也不要自行创建或修改文件；文件写入必须交给外部脚本完成。
-6. 只输出结构化内容，不要在 shell 中直接拼接包含 `>` 的写文件命令，也不要自行创建或修改文件；文件写入必须交给外部脚本完成。
-
-# update_version_x 使用方式
-
-```bash
-# 使用示例
-printf '## 0.20.1\n> 更新时期：...\n' | node update_version_zh.js
-```
-
-# Warning
-
-一定不要读取 `docs/downloads.md` 和 `docs/en/downloads_en.md` 文件中的内容，该文件非常大，使用脚本进行更新
-不要直接执行会写文件的 shell 命令；如果需要生成内容，请输出 JSON 或纯 Markdown，由外部脚本负责落盘。
-
-# Example
-
-```markdown
-## 0.20.6
-
-> 更新时期：2026-01-27
-
+```powershell
+$chineseMarkdown = @'
 ### 功能优化
 
-1. 更改 UzonMail 图标
+1. 示例更新内容
+'@
+$chineseMarkdown | & pwsh -NoProfile -File ..\scripts\update-version-doc.ps1 -Version '0.23.0' -UpdatePath 'docs/docs/downloads.md'
 
-### Bug 修复
+$englishMarkdown = @'
+### Improvements
 
-1. 修复自定义域名的 Outlook 无法被正确识别问题
-
-### 下载地址
-
-[uzonmail-desktop-win-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.20.6.0.zip)
-
-[uzonmail-service-win-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.20.6.0.zip)
-
-[uzonmail-service-linux-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.20.6.0.zip)
-
-[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+1. Example release note
+'@
+$englishMarkdown | & pwsh -NoProfile -File ..\scripts\update-version-doc.ps1 -Version '0.23.0' -UpdatePath 'docs/docs/en/downloads.md'
 ```
+
+脚本会根据更新路径确定语言，并自动生成版本号、日期、下载地址和更新清单。若任一次脚本调用失败，停止执行并报告错误。

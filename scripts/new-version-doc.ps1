@@ -1,287 +1,202 @@
+<#
+.SYNOPSIS
+生成版本更新内容并发布文档分支
+#>
+[CmdletBinding()]
 param(
-  [string]$Version,
-  [string]$TargetBranch = "docs"
+    [string]$Version,
+
+    [string]$TargetBranch = 'docs'
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
-
-# 全局设置输出编码为 UTF-8，避免外部命令中文乱码
-$OutputEncoding = [Text.Encoding]::UTF8
-[Console]::OutputEncoding = [Text.Encoding]::UTF8
-[Console]::InputEncoding = [Text.Encoding]::UTF8
-
-function Assert-Linux {
-  if (-not $IsLinux) {
-    Write-Host "此脚本仅支持 Linux 执行。" -ForegroundColor Red
-    exit 1
-  }
-}
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
 
 function Assert-CommandExists {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$CommandName
-  )
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$CommandName
+    )
 
-  if (-not (Get-Command $CommandName -ErrorAction SilentlyContinue)) {
-    Write-Host "未检测到 $CommandName，请先安装后再执行。" -ForegroundColor Red
-    exit 1
-  }
-}
-
-function Read-MultiLineInput {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$Prompt
-  )
-
-  Write-Host $Prompt -ForegroundColor Yellow
-  Write-Host "输入空行结束。" -ForegroundColor DarkGray
-
-  $lines = @()
-  while ($true) {
-    $line = Read-Host
-    if ([string]::IsNullOrWhiteSpace($line)) {
-      break
+    if (-not (Get-Command $CommandName -ErrorAction SilentlyContinue)) {
+        throw "未检测到 $CommandName，请先安装后再执行"
     }
-
-    $lines += $line
-  }
-
-  return ($lines -join "`n").Trim()
-}
-
-function Get-NormalizedVersion {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$Version
-  )
-
-  $normalized = $Version.Trim()
-  if ($normalized.StartsWith("v")) {
-    $normalized = $normalized.Substring(1)
-  }
-
-  if ($normalized -notmatch '^\d+\.\d+\.\d+$') {
-    Write-Host "版本号格式不正确，请输入 x.y.z，例如 0.22.1。" -ForegroundColor Red
-    exit 1
-  }
-
-  return $normalized
 }
 
 function Assert-GitSuccess {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$Step
-  )
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Step
+    )
 
-  if ($LASTEXITCODE -ne 0) {
-    Write-Host "$Step 失败，已中止。" -ForegroundColor Red
-    exit $LASTEXITCODE
-  }
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Step 失败，已中止"
+    }
 }
 
-# 不强制要求在 Linux 环境执行
-# Assert-Linux
+function Read-MultiLineInput {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Prompt
+    )
 
-Assert-CommandExists -CommandName "git"
-Assert-CommandExists -CommandName "opencode"
+    Write-Host $Prompt -ForegroundColor Yellow
+    Write-Host '输入空行结束。' -ForegroundColor DarkGray
 
-$repoRoot = & git rev-parse --show-toplevel
-Assert-GitSuccess -Step "获取仓库根目录"
+    $inputLines = [System.Collections.Generic.List[string]]::new()
+    while ($true) {
+        $inputLine = Read-Host
+        if ([string]::IsNullOrWhiteSpace($inputLine)) {
+            break
+        }
 
-Push-Location -Path $repoRoot
+        [void]$inputLines.Add($inputLine)
+    }
 
-$currentBranch = & git branch --show-current
-Assert-GitSuccess -Step "获取当前分支"
-
-if ($currentBranch -ne "master") {
-  Write-Host "切换到 master 分支..." -ForegroundColor Yellow
-  & git switch master
-  Assert-GitSuccess -Step "切换到 master 分支"
+    return ($inputLines -join [Environment]::NewLine).Trim()
 }
 
-Write-Host "拉取 master 最新更新..." -ForegroundColor Yellow
-& git pull --ff-only origin master
-Assert-GitSuccess -Step "拉取 master 最新更新"
+function Get-NormalizedVersion {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$InputVersion
+    )
 
-$docsDir = Join-Path -Path $repoRoot -ChildPath "docs"
-$docsDirty = & git status --porcelain -- docs
-Assert-GitSuccess -Step "检查 docs 目录状态"
+    $versionMatch = [regex]::Match($InputVersion.Trim(), '^v?(\d+\.\d+\.\d+)$')
+    if (-not $versionMatch.Success) {
+        throw '版本号格式不正确，请输入 x.y.z，例如 0.22.1'
+    }
 
-if ($docsDirty) {
-  Write-Host "docs 目录已有未提交变更，请先处理后再运行此脚本。" -ForegroundColor Red
-  exit 1
+    return $versionMatch.Groups[1].Value
 }
 
-if ([string]::IsNullOrWhiteSpace($Version)) {
-  $versionInput = Read-Host "请输入本次版本号（x.y.z，可带 v 前缀）"
-  if ([string]::IsNullOrWhiteSpace($versionInput)) {
-    Write-Host "版本号不能为空。" -ForegroundColor Red
-    exit 1
-  }
+Assert-CommandExists -CommandName 'git'
+Assert-CommandExists -CommandName 'opencode'
 
-  $version = Get-NormalizedVersion -Version $versionInput
-}
-else {
-  $version = Get-NormalizedVersion -Version $Version
-  Write-Host "使用外部传入版本号: $version" -ForegroundColor Green
-}
+$repositoryRoot = & git rev-parse --show-toplevel
+Assert-GitSuccess -Step '获取仓库根目录'
 
-$updateContent = Read-MultiLineInput -Prompt "请输入本次更新内容"
-if ([string]::IsNullOrWhiteSpace($updateContent)) {
-  Write-Host "更新内容不能为空。" -ForegroundColor Red
-  exit 1
-}
+Push-Location -Path $repositoryRoot
+try {
+    $currentBranch = & git branch --show-current
+    Assert-GitSuccess -Step '获取当前分支'
 
-$opencodePrompt = @"
-请只输出 JSON，不要输出任何解释、命令、代码块或文件操作。
+    if ($currentBranch -ne 'master') {
+        Write-Host '切换到 master 分支...' -ForegroundColor Yellow
+        & git switch master
+        Assert-GitSuccess -Step '切换到 master 分支'
+    }
 
-JSON 结构：
-{
-  "zhMarkdown": "## x.y.z\n> 更新时期：YYYY-MM-DD\n...\n### 下载地址\n...",
-  "enMarkdown": "## x.y.z\n> Release Date: YYYY-MM-DD\n...\n### Downloads\n..."
-}
+    Write-Host '拉取 master 最新更新...' -ForegroundColor Yellow
+    & git pull --ff-only origin master
+    Assert-GitSuccess -Step '拉取 master 最新更新'
 
-要求：
-1. 把内容整理到 功能新增、功能优化、Bug 修复 三类中。
-2. 版本号：$version
-3. 日期：$(Get-Date -Format "yyyy-MM-dd")
-5. 下载地址必须存在，格式如下, version 格式为 x.y.z.b, 其中 x.y.z 是版本号，b 是构建号，构建号默认为 0, 版本号要替换为实际版本号。
+    $docsDirectory = Join-Path -Path $repositoryRoot -ChildPath 'docs'
+    $docsDirty = & git status --porcelain -- docs
+    Assert-GitSuccess -Step '检查 docs 目录状态'
+    if ($docsDirty) {
+        throw 'docs 目录已有未提交变更，请先处理后再运行此脚本'
+    }
 
-``` markdown
-[uzonmail-desktop-win-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-{version}.zip)
+    if ([string]::IsNullOrWhiteSpace($Version)) {
+        $versionInput = Read-Host '请输入本次版本号（x.y.z，可带 v 前缀）'
+        if ([string]::IsNullOrWhiteSpace($versionInput)) {
+            throw '版本号不能为空'
+        }
 
-[uzonmail-service-win-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-{version}.zip)
+        $version = Get-NormalizedVersion -InputVersion $versionInput
+    }
+    else {
+        $version = Get-NormalizedVersion -InputVersion $Version
+        Write-Host "使用外部传入版本号: $version" -ForegroundColor Green
+    }
 
-[uzonmail-service-linux-x64-{version}.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-{version}.zip)
+    $updateDescription = Read-MultiLineInput -Prompt '请输入本次更新内容'
+    if ([string]::IsNullOrWhiteSpace($updateDescription)) {
+        throw '更新内容不能为空'
+    }
 
-[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
-```
-6. 如果用户输入偏中文，zhMarkdown 和 enMarkdown 都要给出；如果偏英文，也要给出。
-7. 单个 markdown 中完整的内容示例为：
+    $opencodePrompt = @"
+你正在发布 UzonMail $version 版本。请根据用户输入生成中文和英文的版本更新 Markdown 正文，并在当前 docs 目录中实际执行下面两次命令更新文档。
 
-```markdown
-## 0.20.6
+严格要求：
+1. 每段正文只包含有内容的分类标题和编号列表。中文分类只能使用“功能新增”“功能优化”“Bug 修复”；英文分类只能使用“New Features”“Improvements”“Bug Fixes”。
+2. 不要生成版本标题、发布日期、下载地址或 docker 链接；这些内容由脚本生成。
+3. 先将每种语言的 Markdown 正文保存到 PowerShell here-string 变量，再通过管道调用脚本。不得直接编辑 docs/downloads.md、docs/en/downloads.md 或 updates 目录中的任何文件。
+4. 必须依次调用以下命令，两个命令均成功后才完成任务：
 
-> 更新时期：2026-01-27
+`$chineseMarkdown = @'
+<中文 Markdown 正文>
+'@
+`$chineseMarkdown | & pwsh -NoProfile -File ..\scripts\update-version-doc.ps1 -Version '$version' -UpdatePath 'docs/docs/downloads.md'`
 
-### 功能优化
+`$englishMarkdown = @'
+<English Markdown body>
+'@
+`$englishMarkdown | & pwsh -NoProfile -File ..\scripts\update-version-doc.ps1 -Version '$version' -UpdatePath 'docs/docs/en/downloads.md'`
 
-1. 更改 UzonMail 图标
-
-### Bug 修复
-
-1. 修复自定义域名的 Outlook 无法被正确识别问题
-
-### 下载地址
-
-[uzonmail-desktop-win-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.20.6.0.zip)
-
-[uzonmail-service-win-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.20.6.0.zip)
-
-[uzonmail-service-linux-x64-0.20.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.20.6.0.zip)
-
-[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
-```
-
-8. 不要执行任何文件写入操作。
-
+5. 若脚本返回错误，停止执行并如实报告错误。完成后只简要报告已更新的文件。
 
 用户输入：
-$updateContent
+$updateDescription
 "@
 
-Write-Host "在 docs 目录中调用 opencode 生成结构化内容..." -ForegroundColor Yellow
-Push-Location -Path $docsDir
-try {
-  $opencodeOutput = & opencode run -m "zai-coding-plan/glm-4.7" $opencodePrompt
-  Assert-GitSuccess -Step "opencode 生成结构化内容"
+    Write-Host '调用 opencode 生成内容并更新文档...' -ForegroundColor Yellow
+    Push-Location -Path $docsDirectory
+    try {
+        & opencode run -m 'zai-coding-plan/glm-4.7' $opencodePrompt
+        Assert-GitSuccess -Step 'opencode 更新版本文档'
+    }
+    finally {
+        Pop-Location
+    }
+
+    $allowedDocsPaths = [System.Collections.Generic.List[string]]::new()
+    [void]$allowedDocsPaths.Add('docs/docs/downloads.md')
+    [void]$allowedDocsPaths.Add('docs/docs/en/downloads.md')
+    $publicUpdatesDirectory = Join-Path -Path $repositoryRoot -ChildPath 'docs/docs/.vuepress/public/updates'
+    if (Test-Path -LiteralPath $publicUpdatesDirectory -PathType Container) {
+        [void]$allowedDocsPaths.Add('docs/docs/.vuepress/public/updates')
+    }
+
+    Write-Host '提交生成的文档变更...' -ForegroundColor Yellow
+    & git add -- @($allowedDocsPaths)
+    Assert-GitSuccess -Step '暂存文档变更'
+
+    & git diff --cached --quiet -- @($allowedDocsPaths)
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host '版本文档内容未变化，无需提交、合并或推送。' -ForegroundColor Yellow
+        return
+    }
+
+    if ($LASTEXITCODE -ne 1) {
+        throw '检查暂存文档变更失败，已中止'
+    }
+
+    & git commit -m "docs: update version $version documentation"
+    Assert-GitSuccess -Step '提交文档变更'
+
+    $branchAfterCommit = & git branch --show-current
+    Assert-GitSuccess -Step '获取提交后的当前分支'
+    if ($branchAfterCommit -ne $TargetBranch) {
+        Write-Host "切换到 $TargetBranch 分支..." -ForegroundColor Yellow
+        & git switch $TargetBranch
+        Assert-GitSuccess -Step "切换到 $TargetBranch 分支"
+    }
+
+    Write-Host "将 master 合并到 $TargetBranch..." -ForegroundColor Yellow
+    & git merge --no-ff master -m "Merge master into $TargetBranch"
+    Assert-GitSuccess -Step "合并 master 到 $TargetBranch"
+
+    Write-Host "推送 $TargetBranch 分支..." -ForegroundColor Yellow
+    & git push origin $TargetBranch
+    Assert-GitSuccess -Step "推送 $TargetBranch 分支"
+
+    Write-Host '版本文档生成、合并和推送已完成。' -ForegroundColor Green
 }
 finally {
-  Pop-Location
+    Pop-Location
 }
-
-$opencodeText = ($opencodeOutput | Out-String).Trim()
-if ([string]::IsNullOrWhiteSpace($opencodeText)) {
-  Write-Host "未从 opencode 获取到输出。" -ForegroundColor Red
-  exit 1
-}
-write-Host "opencode 输出已获取，正在解析..."
-Write-Host $opencodeText -ForegroundColor DarkGray
-
-$jsonStart = $opencodeText.IndexOf('{')
-$jsonEnd = $opencodeText.LastIndexOf('}')
-if ($jsonStart -lt 0 -or $jsonEnd -le $jsonStart) {
-  Write-Host "opencode 输出不是有效 JSON。" -ForegroundColor Red
-  Write-Host $opencodeText
-  exit 1
-}
-
-$jsonText = $opencodeText.Substring($jsonStart, $jsonEnd - $jsonStart + 1)
-try {
-  $payload = $jsonText | ConvertFrom-Json
-}
-catch {
-  Write-Host "解析 opencode JSON 失败。" -ForegroundColor Red
-  Write-Host $jsonText
-  exit 1
-}
-
-if (-not $payload.zhMarkdown -or -not $payload.enMarkdown) {
-  Write-Host "opencode 输出缺少 zhMarkdown 或 enMarkdown。" -ForegroundColor Red
-  exit 1
-}
-
-function Convert-ToBase64Utf8 {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$Text
-  )
-
-  return [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Text))
-}
-
-$scriptDir = Join-Path -Path $docsDir -ChildPath ".agents/skills/new-version/scripts"
-$zhPayload = Convert-ToBase64Utf8 -Text $payload.zhMarkdown
-$enPayload = Convert-ToBase64Utf8 -Text $payload.enMarkdown
-
-Write-Host "更新中文版本文档..." -ForegroundColor Yellow
-& node (Join-Path $scriptDir "update_version_zh.js") --base64 $zhPayload
-Assert-GitSuccess -Step "更新中文版本文档"
-
-Write-Host "更新英文版本文档..." -ForegroundColor Yellow
-& node (Join-Path $scriptDir "update_version_en.js") --base64 $enPayload
-Assert-GitSuccess -Step "更新英文版本文档"
-
-Write-Host "提交生成的文档变更..." -ForegroundColor Yellow
-$allowedDocsFiles = @(
-  "docs/docs/downloads.md",
-  "docs/docs/en/downloads.md"
-)
-& git add -- @allowedDocsFiles
-Assert-GitSuccess -Step "暂存文档变更"
-
-& git commit -m "docs: update version $Version documentation"
-Assert-GitSuccess -Step "提交文档变更"
-
-$branchAfterCommit = & git branch --show-current
-Assert-GitSuccess -Step "获取提交后的当前分支"
-if ($branchAfterCommit -ne $TargetBranch) {
-  Write-Host "切换到 $TargetBranch 分支..." -ForegroundColor Yellow
-  & git switch $TargetBranch
-  Assert-GitSuccess -Step "切换到 $TargetBranch 分支"
-}
-
-Write-Host "将 master 合并到 $TargetBranch..." -ForegroundColor Yellow
-& git merge --no-ff master -m "Merge master into $TargetBranch"
-Assert-GitSuccess -Step "合并 master 到 $TargetBranch"
-
-Write-Host "推送 $TargetBranch 分支..." -ForegroundColor Yellow
-& git push origin $TargetBranch
-Assert-GitSuccess -Step "推送 $TargetBranch 分支"
-
-Write-Host "版本文档生成、合并和推送已完成。" -ForegroundColor Green
-Pop-Location
