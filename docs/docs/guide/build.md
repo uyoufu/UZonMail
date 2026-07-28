@@ -18,7 +18,7 @@ permalink: /guide/build
 - 7z
 - DotNET 10.0 SDK
 - Bun
-- WSL 及 WSL 内的 Docker（仅构建 Docker 镜像时需要）
+- Docker Desktop 或 WSL 内的 Docker（仅构建 Docker 镜像时需要）
 
 ## 编译步骤
 
@@ -30,7 +30,7 @@ permalink: /guide/build
 
    | 类型 | 命令 | 位置 |
    | --- | --- | --- |
-   | 全部安装包 | `./build.ps1` | 桌面端、Windows 服务端、Linux 服务端 ZIP |
+   | 交互选择构建目标 | `./build.ps1` | 使用上下箭头移动、空格选择、Enter 确认 |
    | 桌面端 | `./build.ps1 -Target Desktop` | `build/uzonmail-desktop-win-x64-version.zip` |
    | Windows 服务端 | `./build.ps1 -Target WindowsServer` | `build/uzonmail-service-win-x64-version.zip` |
    | Linux 服务端 | `./build.ps1 -Target Linux` | `build/uzonmail-service-linux-x64-version.zip` |
@@ -45,5 +45,5 @@ permalink: /guide/build
    ![image-20240616124656131](https://oss.uzoncloud.com:2234/public/files/images/image-20240616124656131.png)
 
 ::: tip
-手动编译时会自动检测当前目标所需环境。Docker 构建会在 WSL 内执行，不依赖 Windows Docker。
+手动编译时会自动检测当前目标所需环境。Docker 构建优先使用本机 Docker，未检测到可用环境时自动回退至 WSL Docker。新增插件放在 `src/api/Plugins` 的直属目录并包含唯一项目文件后，会随服务端自动发布。
 :::

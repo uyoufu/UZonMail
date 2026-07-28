@@ -5,7 +5,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet('All', 'Desktop', 'WindowsServer', 'Linux', 'Docker')]
-    [string[]]$Target = @('All'),
+    [string[]]$Target,
 
     [switch]$UpdateSource,
 
@@ -26,6 +26,76 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'UzonMail.Build.psm1') -Force
+
+$BuildTargetOptions = @('All', 'Desktop', 'WindowsServer', 'Linux', 'Docker')
+$ServicePublishDirectories = @('public', 'wwwroot', 'Plugins', 'Assembly', 'data/db')
+$PluginDirectoryName = 'Plugins'
+$PluginAssemblyDirectoryName = 'Assembly'
+$PluginPublishStagingDirectoryName = '.plugin-publish'
+
+function Show-BuildTargetMenu {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$SelectedTargets,
+
+        [Parameter(Mandatory = $true)]
+        [int]$SelectedIndex
+    )
+
+    Clear-Host
+    Write-Host '请选择构建目标（上下箭头移动，空格切换，Enter 确认，Esc 取消）' -ForegroundColor Cyan
+    for ($optionIndex = 0; $optionIndex -lt $BuildTargetOptions.Count; $optionIndex++) {
+        $targetOption = $BuildTargetOptions[$optionIndex]
+        $cursor = if ($optionIndex -eq $SelectedIndex) { '>' } else { ' ' }
+        $selection = if ($SelectedTargets -contains $targetOption) { '[x]' } else { '[ ]' }
+        Write-Host "$cursor $selection $targetOption"
+    }
+}
+
+function Select-BuildTargets {
+    if ([Console]::IsInputRedirected -or [Console]::IsOutputRedirected) {
+        throw '未传入 -Target 时需要交互式终端，请显式指定构建目标'
+    }
+
+    $selectedTargetSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    [void]$selectedTargetSet.Add('All')
+    $selectedIndex = 0
+
+    while ($true) {
+        Show-BuildTargetMenu -SelectedTargets @($selectedTargetSet) -SelectedIndex $selectedIndex
+        $pressedKey = [Console]::ReadKey($true).Key
+
+        switch ($pressedKey) {
+            ([ConsoleKey]::UpArrow) {
+                $selectedIndex = ($selectedIndex + $BuildTargetOptions.Count - 1) % $BuildTargetOptions.Count
+            }
+            ([ConsoleKey]::DownArrow) {
+                $selectedIndex = ($selectedIndex + 1) % $BuildTargetOptions.Count
+            }
+            ([ConsoleKey]::Spacebar) {
+                $selectedTarget = $BuildTargetOptions[$selectedIndex]
+                if ($selectedTarget -eq 'All') {
+                    $selectedTargetSet.Clear()
+                    [void]$selectedTargetSet.Add('All')
+                }
+                else {
+                    [void]$selectedTargetSet.Remove('All')
+                    if (-not $selectedTargetSet.Add($selectedTarget)) {
+                        [void]$selectedTargetSet.Remove($selectedTarget)
+                    }
+                }
+            }
+            ([ConsoleKey]::Enter) {
+                if ($selectedTargetSet.Count -gt 0) {
+                    return @($BuildTargetOptions | Where-Object { $selectedTargetSet.Contains($_) })
+                }
+            }
+            ([ConsoleKey]::Escape) {
+                throw '已取消构建目标选择'
+            }
+        }
+    }
+}
 
 function Resolve-BuildTargets {
     param(
@@ -113,24 +183,17 @@ function Publish-PluginProject {
         [string]$RuntimeIdentifier,
 
         [Parameter(Mandatory = $true)]
-        [string]$ProjectName,
-
-        [Parameter(Mandatory = $true)]
-        [string]$ProjectPath,
-
-        [Parameter(Mandatory = $true)]
-        [string]$AssemblyName,
-
-        [string[]]$AssetDirectories = @()
+        [pscustomobject]$PluginProject
     )
 
-    $pluginPublishDirectory = Join-Path -Path $ServiceDirectory -ChildPath $ProjectName
-    $pluginDirectory = Join-Path -Path $ServiceDirectory -ChildPath "Plugins/$ProjectName"
+    $pluginPublishRoot = Join-Path -Path $ServiceDirectory -ChildPath $PluginPublishStagingDirectoryName
+    $pluginPublishDirectory = Join-Path -Path $pluginPublishRoot -ChildPath $PluginProject.DirectoryName
+    $pluginDirectory = Join-Path -Path (Join-Path -Path $ServiceDirectory -ChildPath $PluginDirectoryName) -ChildPath $PluginProject.DirectoryName
     New-Item -ItemType Directory -Path $pluginDirectory -Force | Out-Null
 
-    Write-BuildMessage -Message "发布插件 $ProjectName"
+    Write-BuildMessage -Message "发布插件 $($PluginProject.DirectoryName)"
     Invoke-BuildNativeCommand -Command dotnet -Arguments @(
-        'publish', $ProjectPath, '-c', 'Release', '-o', $pluginPublishDirectory,
+        'publish', $PluginProject.ProjectPath, '-c', 'Release', '-o', $pluginPublishDirectory,
         '-r', $RuntimeIdentifier, '--self-contained', 'false'
     ) -WorkingDirectory $Context.ApiRoot
 
@@ -140,22 +203,29 @@ function Publish-PluginProject {
     }
 
     Get-ChildItem -LiteralPath $pluginPublishDirectory -File -Filter '*.dll' |
-        Where-Object { -not $serviceAssemblyNames.Contains($_.Name) -and $_.Name -notlike "$AssemblyName.*" } |
+        Where-Object { -not $serviceAssemblyNames.Contains($_.Name) -and $_.Name -ne "$($PluginProject.AssemblyName).dll" } |
         ForEach-Object {
-            Copy-Item -LiteralPath $_.FullName -Destination (Join-Path -Path $ServiceDirectory -ChildPath 'Assembly') -Force
+            Copy-Item -LiteralPath $_.FullName -Destination (Join-Path -Path $ServiceDirectory -ChildPath $PluginAssemblyDirectoryName) -Force
         }
 
-    Get-ChildItem -Path (Join-Path -Path $pluginPublishDirectory -ChildPath "$AssemblyName.*") -File |
-        ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $pluginDirectory -Force }
-
-    foreach ($assetDirectory in $AssetDirectories) {
-        $assetSource = Join-Path -Path $pluginPublishDirectory -ChildPath $assetDirectory
-        if (Test-Path -LiteralPath $assetSource -PathType Container) {
-            Copy-Item -LiteralPath $assetSource -Destination $pluginDirectory -Recurse -Force
-        }
+    $pluginAssembly = Join-Path -Path $pluginPublishDirectory -ChildPath "$($PluginProject.AssemblyName).dll"
+    if (-not (Test-Path -LiteralPath $pluginAssembly -PathType Leaf)) {
+        throw "插件发布结果中未找到主程序集：$pluginAssembly"
     }
+    Copy-Item -LiteralPath $pluginAssembly -Destination $pluginDirectory -Force
 
-    Remove-Item -LiteralPath $pluginPublishDirectory -Recurse -Force
+    Get-ChildItem -LiteralPath $pluginPublishDirectory -Recurse -File |
+        Where-Object { $_.Extension -ne '.dll' } |
+        ForEach-Object {
+            $relativePath = [System.IO.Path]::GetRelativePath($pluginPublishDirectory, $_.FullName)
+            $destinationPath = Join-Path -Path $pluginDirectory -ChildPath $relativePath
+            New-Item -ItemType Directory -Path (Split-Path -Path $destinationPath -Parent) -Force | Out-Null
+            Copy-Item -LiteralPath $_.FullName -Destination $destinationPath -Force
+        }
+
+    if (Test-Path -LiteralPath $pluginPublishRoot -PathType Container) {
+        Remove-Item -LiteralPath $pluginPublishRoot -Recurse -Force
+    }
 }
 
 function Publish-ServicePackage {
@@ -168,7 +238,10 @@ function Publish-ServicePackage {
         [string]$RuntimeIdentifier,
 
         [Parameter(Mandatory = $true)]
-        [string]$FrontendOutputDirectory
+        [string]$FrontendOutputDirectory,
+
+        [Parameter(Mandatory = $true)]
+        [pscustomobject[]]$PluginProjects
     )
 
     $serviceDirectory = Join-Path -Path $Context.ArtifactRoot -ChildPath "service-$RuntimeIdentifier"
@@ -183,7 +256,7 @@ function Publish-ServicePackage {
         '-r', $RuntimeIdentifier, '--self-contained', 'false'
     ) -WorkingDirectory $Context.ApiRoot
 
-    @('public', 'wwwroot', 'Plugins', 'Assembly', 'data/db') | ForEach-Object {
+    $ServicePublishDirectories | ForEach-Object {
         New-Item -ItemType Directory -Path (Join-Path -Path $serviceDirectory -ChildPath $_) -Force | Out-Null
     }
     Copy-Item -LiteralPath $Context.QuartzDatabase -Destination (Join-Path -Path $serviceDirectory -ChildPath 'data/db/quartz-sqlite.sqlite3') -Force
@@ -194,10 +267,9 @@ function Publish-ServicePackage {
         Copy-Item -Path (Join-Path -Path $Context.WindowsServiceRoot -ChildPath '*') -Destination $serviceDirectory -Recurse -Force
     }
 
-    Publish-PluginProject -Context $Context -ServiceDirectory $serviceDirectory -RuntimeIdentifier $RuntimeIdentifier `
-        -ProjectName 'UzonMailCorePlugin' -ProjectPath $Context.CorePluginProject -AssemblyName 'UzonMail.CorePlugin' -AssetDirectories @('data')
-    Publish-PluginProject -Context $Context -ServiceDirectory $serviceDirectory -RuntimeIdentifier $RuntimeIdentifier `
-        -ProjectName 'UzonMailProPlugin' -ProjectPath $Context.ProPluginProject -AssemblyName 'UzonMail.ProPlugin' -AssetDirectories @('Scripts')
+    foreach ($pluginProject in $PluginProjects) {
+        Publish-PluginProject -Context $Context -ServiceDirectory $serviceDirectory -RuntimeIdentifier $RuntimeIdentifier -PluginProject $pluginProject
+    }
 
     Copy-Item -Path (Join-Path -Path $FrontendOutputDirectory -ChildPath '*') -Destination (Join-Path -Path $serviceDirectory -ChildPath 'wwwroot') -Recurse -Force
 
@@ -388,6 +460,56 @@ function Build-DockerImageInWsl {
     return @($versionedImage, $latestImage)
 }
 
+function Build-DockerImageLocally {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ServiceDirectory,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Version,
+
+        [switch]$PushImage
+    )
+
+    $imageVersion = $Version -replace '\.0$', ''
+    $imageName = Get-BuildImageName
+    $versionedImage = "$imageName`:$imageVersion"
+    $latestImage = "$imageName`:latest"
+
+    Invoke-BuildNativeCommand -Command docker -Arguments @('build', '-t', $versionedImage, '-f', 'Dockerfile', '.') -WorkingDirectory $ServiceDirectory
+    Invoke-BuildNativeCommand -Command docker -Arguments @('tag', $versionedImage, $latestImage)
+
+    if ($PushImage) {
+        Write-BuildMessage -Message "登录 Docker Registry 并推送 $versionedImage"
+        Invoke-BuildNativeCommand -Command docker -Arguments @('login')
+        Invoke-BuildNativeCommand -Command docker -Arguments @('push', $versionedImage)
+        Invoke-BuildNativeCommand -Command docker -Arguments @('push', $latestImage)
+    }
+
+    return @($versionedImage, $latestImage)
+}
+
+function Build-DockerImage {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ServiceDirectory,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Version,
+
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$DockerEnvironment,
+
+        [switch]$PushImage
+    )
+
+    if ($DockerEnvironment.UseWsl) {
+        return Build-DockerImageInWsl -ServiceDirectory $ServiceDirectory -Version $Version -Distribution $DockerEnvironment.Distribution -PushImage:$PushImage
+    }
+
+    return Build-DockerImageLocally -ServiceDirectory $ServiceDirectory -Version $Version -PushImage:$PushImage
+}
+
 function Upload-BuildArtifacts {
     param(
         [Parameter(Mandatory = $true)]
@@ -407,10 +529,16 @@ function Upload-BuildArtifacts {
 
 try {
     Assert-BuildCommand -CommandName git
+    if (-not $Target -or $Target.Count -eq 0) {
+        $Target = Select-BuildTargets
+    }
+
     $buildContext = Resolve-BuildContext
     $resolvedTargets = Resolve-BuildTargets -RequestedTargets $Target -HasRemoteLinuxPackage (-not [string]::IsNullOrWhiteSpace($LinuxPackageUrl))
     $includesDocker = $resolvedTargets -contains 'Docker'
     $hasLocalPublishTarget = @('Desktop', 'WindowsServer', 'Linux') | Where-Object { $resolvedTargets -contains $_ }
+    $pluginProjects = if ($hasLocalPublishTarget) { Get-BuildPluginProjects -PluginsRoot $buildContext.PluginsRoot } else { @() }
+    $dockerBuildEnvironment = $null
 
     if ($PushDockerImage -and -not $includesDocker) {
         throw '-PushDockerImage 必须与 Docker 目标组合使用'
@@ -454,7 +582,7 @@ try {
         @('bun', 'dotnet', '7z.exe') | ForEach-Object { Assert-BuildCommand -CommandName $_ }
     }
     if ($includesDocker) {
-        Assert-WslDockerEnvironment -Distribution $WslDistribution
+        $dockerBuildEnvironment = Resolve-DockerBuildEnvironment -WslDistribution $WslDistribution
     }
     Complete-BuildStage -Stopwatch $stage -Title '检测构建环境'
 
@@ -476,7 +604,7 @@ try {
         $stageIndex++
         $stage = Start-BuildStage -Index $stageIndex -Total $stageTotal -Title '发布应用与安装包'
         if ($resolvedTargets -contains 'Desktop' -or $resolvedTargets -contains 'WindowsServer') {
-            $servicePackages['win-x64'] = Publish-ServicePackage -Context $buildContext -RuntimeIdentifier 'win-x64' -FrontendOutputDirectory $frontendOutputDirectory
+            $servicePackages['win-x64'] = Publish-ServicePackage -Context $buildContext -RuntimeIdentifier 'win-x64' -FrontendOutputDirectory $frontendOutputDirectory -PluginProjects $pluginProjects
         }
         if ($resolvedTargets -contains 'Desktop') {
             $archivePaths.Add((Publish-DesktopArchive -Context $buildContext -WindowsServicePackage $servicePackages['win-x64']))
@@ -485,7 +613,7 @@ try {
             $archivePaths.Add((New-ServiceArchive -Context $buildContext -ServicePackage $servicePackages['win-x64']))
         }
         if ($resolvedTargets -contains 'Linux') {
-            $servicePackages['linux-x64'] = Publish-ServicePackage -Context $buildContext -RuntimeIdentifier 'linux-x64' -FrontendOutputDirectory $frontendOutputDirectory
+            $servicePackages['linux-x64'] = Publish-ServicePackage -Context $buildContext -RuntimeIdentifier 'linux-x64' -FrontendOutputDirectory $frontendOutputDirectory -PluginProjects $pluginProjects
             $archivePaths.Add((New-ServiceArchive -Context $buildContext -ServicePackage $servicePackages['linux-x64']))
         }
         Complete-BuildStage -Stopwatch $stage -Title '发布应用与安装包'
@@ -496,16 +624,16 @@ try {
     try {
         if ($includesDocker) {
             $stageIndex++
-            $dockerStage = Start-BuildStage -Index $stageIndex -Total $stageTotal -Title '在 WSL 中构建 Docker 镜像'
+            $dockerStage = Start-BuildStage -Index $stageIndex -Total $stageTotal -Title '构建 Docker 镜像'
             if ($LinuxPackageUrl) {
                 $remoteLinuxPackage = Get-RemoteLinuxPackage -DownloadUrl $LinuxPackageUrl
-                $dockerImages = Build-DockerImageInWsl -ServiceDirectory $remoteLinuxPackage.ServiceDirectory -Version $remoteLinuxPackage.Version -Distribution $WslDistribution -PushImage:$PushDockerImage
+                $dockerImages = Build-DockerImage -ServiceDirectory $remoteLinuxPackage.ServiceDirectory -Version $remoteLinuxPackage.Version -DockerEnvironment $dockerBuildEnvironment -PushImage:$PushDockerImage
             }
             else {
                 $linuxServicePackage = $servicePackages['linux-x64']
-                $dockerImages = Build-DockerImageInWsl -ServiceDirectory $linuxServicePackage.Directory -Version $linuxServicePackage.Version -Distribution $WslDistribution -PushImage:$PushDockerImage
+                $dockerImages = Build-DockerImage -ServiceDirectory $linuxServicePackage.Directory -Version $linuxServicePackage.Version -DockerEnvironment $dockerBuildEnvironment -PushImage:$PushDockerImage
             }
-            Complete-BuildStage -Stopwatch $dockerStage -Title '在 WSL 中构建 Docker 镜像'
+            Complete-BuildStage -Stopwatch $dockerStage -Title '构建 Docker 镜像'
         }
     }
     finally {

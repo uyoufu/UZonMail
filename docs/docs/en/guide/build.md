@@ -18,7 +18,7 @@ Make sure the following tools are available in your command line:
 - 7z
 - .NET 10.0 SDK
 - Bun
-- WSL with Docker installed inside the selected WSL distribution (only for Docker images)
+- Docker Desktop or Docker installed inside WSL (only for Docker images)
 
 ## Build Steps
 
@@ -30,7 +30,7 @@ Make sure the following tools are available in your command line:
 
    | Target | Command | Output |
    | --- | --- | --- |
-   | all packages | `./build.ps1` | Desktop, Windows server, and Linux server ZIP files |
+   | choose targets interactively | `./build.ps1` | Use arrow keys to move, Space to select, and Enter to confirm |
    | desktop | `./build.ps1 -Target Desktop` | `build/uzonmail-desktop-win-x64-version.zip` |
    | Windows server | `./build.ps1 -Target WindowsServer` | `build/uzonmail-service-win-x64-version.zip` |
    | Linux server | `./build.ps1 -Target Linux` | `build/uzonmail-service-linux-x64-version.zip` |
@@ -45,5 +45,5 @@ Make sure the following tools are available in your command line:
    ![build screenshot](https://oss.uzoncloud.com:2234/public/files/images/image-20240616124656131.png)
 
 ::: tip
-The script validates prerequisites for the selected target. Docker images are built inside WSL and do not require Windows Docker.
+The script validates prerequisites for the selected target. Docker builds prefer a local Docker daemon and fall back to Docker in WSL. A plugin is published automatically when its direct child directory under `src/api/Plugins` contains one project file.
 :::

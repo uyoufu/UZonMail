@@ -1,6 +1,7 @@
 ﻿Set-StrictMode -Version Latest
 
 $script:BuildImageName = 'gmxgalens/uzon-mail'
+$script:PluginProjectSearchPattern = '*.csproj'
 
 function Write-BuildMessage {
     <#
@@ -131,8 +132,7 @@ function Resolve-BuildContext {
         DesktopRoot             = Join-Path -Path $repositoryRoot -ChildPath 'src/win-desktop'
         UpdaterRoot             = Join-Path -Path $repositoryRoot -ChildPath 'src/updater'
         ServiceProject          = Join-Path -Path $repositoryRoot -ChildPath 'src/api/UZonMailService/UzonMailService.csproj'
-        CorePluginProject       = Join-Path -Path $repositoryRoot -ChildPath 'src/api/Plugins/UzonMailCorePlugin/UzonMailCorePlugin.csproj'
-        ProPluginProject        = Join-Path -Path $repositoryRoot -ChildPath 'src/api/Plugins/UzonMailProPlugin/UZonMailProPlugin.csproj'
+        PluginsRoot             = Join-Path -Path $repositoryRoot -ChildPath 'src/api/Plugins'
         DesktopProject          = Join-Path -Path $repositoryRoot -ChildPath 'src/win-desktop/UzonMailDesktop/UzonMailDesktop.csproj'
         UpdaterProject          = Join-Path -Path $repositoryRoot -ChildPath 'src/updater/UzonMailUpdater/UzonMailUpdater.csproj'
         WindowsServiceRoot      = Join-Path -Path $repositoryRoot -ChildPath 'src/api/WindowsService'
@@ -150,8 +150,7 @@ function Resolve-BuildContext {
         $context.DesktopRoot,
         $context.UpdaterRoot,
         $context.ServiceProject,
-        $context.CorePluginProject,
-        $context.ProPluginProject,
+        $context.PluginsRoot,
         $context.DesktopProject,
         $context.UpdaterProject,
         $context.WindowsServiceRoot,
@@ -170,6 +169,45 @@ function Resolve-BuildContext {
     }
 
     return $context
+}
+
+function Get-BuildPluginProjects {
+    <#
+    .SYNOPSIS
+    获取所有需要随服务端发布的插件项目
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$PluginsRoot
+    )
+
+    $pluginProjects = foreach ($pluginDirectory in Get-ChildItem -LiteralPath $PluginsRoot -Directory | Sort-Object Name) {
+        $projectFiles = @(Get-ChildItem -LiteralPath $pluginDirectory.FullName -File -Filter $script:PluginProjectSearchPattern)
+        if ($projectFiles.Count -ne 1) {
+            throw "插件目录必须包含且仅包含一个项目文件：$($pluginDirectory.FullName)"
+        }
+
+        [xml]$projectXml = Get-Content -LiteralPath $projectFiles[0].FullName -Raw
+        $assemblyNameNode = $projectXml.SelectSingleNode("//*[local-name()='AssemblyName']")
+        $assemblyName = if ($assemblyNameNode -and -not [string]::IsNullOrWhiteSpace($assemblyNameNode.InnerText)) {
+            $assemblyNameNode.InnerText.Trim()
+        }
+        else {
+            [System.IO.Path]::GetFileNameWithoutExtension($projectFiles[0].Name)
+        }
+
+        [pscustomobject]@{
+            DirectoryName = $pluginDirectory.Name
+            ProjectPath   = $projectFiles[0].FullName
+            AssemblyName  = $assemblyName
+        }
+    }
+
+    if ($pluginProjects.Count -eq 0) {
+        throw "未在插件目录中发现项目文件：$PluginsRoot"
+    }
+
+    return @($pluginProjects)
 }
 
 function Update-BuildSource {
@@ -281,18 +319,72 @@ function ConvertTo-WslPath {
     return $wslPath
 }
 
-function Assert-WslDockerEnvironment {
+function Test-LocalDockerEnvironment {
     <#
     .SYNOPSIS
-    验证 WSL 发行版内可使用 Docker
+    检测 Windows Docker CLI 与守护进程是否可用
+    #>
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        return [pscustomobject]@{ IsAvailable = $false; FailureReason = '未检测到 docker 命令' }
+    }
+
+    & docker info *> $null
+    if ($LASTEXITCODE -ne 0) {
+        return [pscustomobject]@{ IsAvailable = $false; FailureReason = "docker info 失败（退出码 $LASTEXITCODE）" }
+    }
+
+    return [pscustomobject]@{ IsAvailable = $true; FailureReason = $null }
+}
+
+function Test-WslDockerEnvironment {
+    <#
+    .SYNOPSIS
+    检测指定 WSL 发行版中的 Docker 是否可用
     #>
     param(
         [string]$Distribution
     )
 
-    Assert-BuildCommand -CommandName wsl
-    Invoke-WslBuildCommand -Distribution $Distribution -BashCommand 'command -v docker >/dev/null && docker info >/dev/null'
-    Write-BuildMessage -Level Success -Message 'WSL Docker 环境检测通过'
+    if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
+        return [pscustomobject]@{ IsAvailable = $false; FailureReason = '未检测到 wsl 命令' }
+    }
+
+    $wslArguments = @()
+    if (-not [string]::IsNullOrWhiteSpace($Distribution)) {
+        $wslArguments += @('--distribution', $Distribution)
+    }
+    $wslArguments += @('--', 'bash', '-lc', 'command -v docker >/dev/null && docker info >/dev/null')
+
+    & wsl @wslArguments *> $null
+    if ($LASTEXITCODE -ne 0) {
+        return [pscustomobject]@{ IsAvailable = $false; FailureReason = "WSL Docker 检测失败（退出码 $LASTEXITCODE）" }
+    }
+
+    return [pscustomobject]@{ IsAvailable = $true; FailureReason = $null }
+}
+
+function Resolve-DockerBuildEnvironment {
+    <#
+    .SYNOPSIS
+    优先解析本机 Docker，失败时回退至 WSL Docker
+    #>
+    param(
+        [string]$WslDistribution
+    )
+
+    $localDockerEnvironment = Test-LocalDockerEnvironment
+    if ($localDockerEnvironment.IsAvailable) {
+        Write-BuildMessage -Level Success -Message '本机 Docker 环境检测通过'
+        return [pscustomobject]@{ UseWsl = $false; Distribution = $null }
+    }
+
+    $wslDockerEnvironment = Test-WslDockerEnvironment -Distribution $WslDistribution
+    if ($wslDockerEnvironment.IsAvailable) {
+        Write-BuildMessage -Level Success -Message 'WSL Docker 环境检测通过'
+        return [pscustomobject]@{ UseWsl = $true; Distribution = $WslDistribution }
+    }
+
+    throw "未找到可用的 Docker 构建环境。本机 Docker：$($localDockerEnvironment.FailureReason)；WSL Docker：$($wslDockerEnvironment.FailureReason)"
 }
 
 function Get-BuildImageName {
@@ -310,11 +402,12 @@ Export-ModuleMember -Function @(
     'Assert-BuildCommand',
     'Invoke-BuildNativeCommand',
     'Resolve-BuildContext',
+    'Get-BuildPluginProjects',
     'Update-BuildSource',
     'Get-BuildFileVersion',
     'ConvertTo-BashSingleQuotedValue',
     'Invoke-WslBuildCommand',
     'ConvertTo-WslPath',
-    'Assert-WslDockerEnvironment',
+    'Resolve-DockerBuildEnvironment',
     'Get-BuildImageName'
 )
