@@ -5,6 +5,46 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 permalink: /downloads
 ---
 
+## 0.23.0
+
+> 更新时期: 2026-07-28
+
+功能新增
+
+1. 新增批量移动邮箱到目标分组功能，收件箱和发件箱支持批量移动到指定分组
+2. 新增批量软删除选中收件箱功能，软删除替代硬删除，表格显示验证状态
+3. 新增桌面应用程序自动更新器，集成WebView2，支持检查更新和自动升级
+4. 新增硬退回检测和收件箱验证系统，SMTP状态码550/551/553自动标记无效并移至验证失败分组
+5. 新增允许重复发送选项，任务设置中可允许向同一收件人发送多封邮件
+6. 新增可拖拽树形组件（DraggableTree），支持层级数据的拖拽排序
+7. 低代码表单支持富文本编辑器（WYSIWYG），新增编辑器字段类型
+8. 桌面应用迁移至新位置，采用MVVM架构
+
+功能优化
+
+1. 修复邮件验证顺序，添加SPF和unknown状态支持
+2. 上下文菜单根据选择数量动态显示或隐藏菜单项
+3. 状态芯片翻译移至i18n系统，提升多语言一致性
+4. 优化代理处理和健康检查机制
+5. 优化SendCore调度，采用非阻塞冷却和延迟配额重置策略
+6. 统一构建脚本，Docker构建移至WSL环境执行
+7. 发送查询排除硬退回项目，防止重新投递
+
+Bug 修复
+
+1. 修复属性名disableAutogrow拼写错误，统一为disableAutoGrow
+2. 修复发送核心多个bug，改善异步生命周期处理
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.23.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.0.0.zip)
+
+[uzonmail-service-win-x64-0.23.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.0.0.zip)
+
+[uzonmail-service-linux-x64-0.23.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.0.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.22.1
 
 > 更新时期：2026-06-03

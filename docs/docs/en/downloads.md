@@ -5,6 +5,46 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.23.0
+
+> Release Date: 2026-07-28
+
+New Features
+
+1. Add batch move email boxes to target group functionality for inboxes and outboxes
+2. Add batch soft-delete for selected inboxes, replacing hard delete with validation status display
+3. Add desktop application auto-updater with WebView2 integration for update checking and installation
+4. Add hard bounce detection and inbox verification system - SMTP codes 550/551/553 automatically mark inboxes as invalid
+5. Add "Allow Duplicate Sending" option for email tasks with duplicate recipient detection
+6. Add DraggableTree component with drag-and-drop support for hierarchical data
+7. Add WYSIWYG editor support in lowCode forms with new editor field type
+8. Migrate desktop application to new location with MVVM architecture
+
+Improvements
+
+1. Fix email verification order and add SPF and unknown state support
+2. Context menu visibility conditions based on selection count - show/hide menu items dynamically
+3. Move StatusChip translations to i18n system for better multilingual consistency
+4. Improve proxy handling and health check mechanisms
+5. Optimize SendCore scheduling with non-blocking cooldown and lazy daily quota reset
+6. Unify build scripts with Docker builds now executing in WSL environment
+7. Exclude hard bounce items from sending queries to prevent redelivery
+
+Bug Fixes
+
+1. Fix property name typo from disableAutogrow to disableAutoGrow for consistency
+2. Fix multiple SendCore bugs and improve async lifecycle handling
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.23.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.0.0.zip)
+
+[uzonmail-service-win-x64-0.23.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.0.0.zip)
+
+[uzonmail-service-linux-x64-0.23.0.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.0.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.22.1
 
 > Release Date: 2026-06-03
