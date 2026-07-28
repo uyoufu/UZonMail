@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import { resendSendingItem } from 'src/api/emailSending'
 import type { ISendingItem } from 'src/api/sendingItem'
 import { SendingItemStatus, getSendingItemBody } from 'src/api/sendingItem'
@@ -17,6 +17,7 @@ export function useContextMenu () {
       name: 'resent',
       label: t('sendDetail.resend'),
       tooltip: '重新发送当前邮件',
+      icon: ContextMenuIcon.send,
       vif: (email: Record<string, any>) => email.status === SendingItemStatus.Failed,
       onClick: resentEmail
     },
@@ -24,6 +25,7 @@ export function useContextMenu () {
       name: 'viewBody',
       label: '查看正文',
       tooltip: '查看当前发件的正文',
+      icon: ContextMenuIcon.visibility,
       vif: (email: Record<string, any>) => email.status >= SendingItemStatus.Success,
       onClick: showEmailBody
     }

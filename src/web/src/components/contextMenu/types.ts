@@ -13,6 +13,39 @@ export const ContextMenuWhen = {
   onlySingle: 'onlySingle'
 } as const
 
+/** 右键菜单通用动作对应的 Material 图标名称 */
+export const ContextMenuIcon = {
+  add: 'add',
+  adminPanelSettings: 'admin_panel_settings',
+  block: 'block',
+  cancel: 'cancel',
+  checkCircle: 'check_circle',
+  contentCopy: 'content_copy',
+  createNewFolder: 'create_new_folder',
+  delete: 'delete',
+  deleteSweep: 'delete_sweep',
+  download: 'download',
+  driveFileMove: 'drive_file_move',
+  edit: 'edit',
+  factCheck: 'fact_check',
+  groupAdd: 'group_add',
+  groupRemove: 'group_remove',
+  link: 'link',
+  lockReset: 'lock_reset',
+  pause: 'pause',
+  personAdd: 'person_add',
+  playArrow: 'play_arrow',
+  receiptLong: 'receipt_long',
+  replay: 'replay',
+  save: 'save',
+  science: 'science',
+  send: 'send',
+  stop: 'stop',
+  uploadFile: 'upload_file',
+  verified: 'verified',
+  visibility: 'visibility'
+} as const
+
 /** 描述一个作用于指定业务值的右键菜单命令。 */
 export interface IContextMenuItem<T = Record<string, any>> {
   name: string

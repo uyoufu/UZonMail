@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ITikTokDevice } from 'src/api/pro/tikTokDevice';
 import { deleteTikTokDevice, updateTikTokDevice } from 'src/api/pro/tikTokDevice'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 import { getTikTokDeviceInfoFields } from './useHeaderFunctions'
 import { confirmOperation, notifySuccess, showDialog } from 'src/utils/dialog'
@@ -17,6 +17,7 @@ export function useContextMenu (
       name: 'edit',
       label: t('pages.variableManager.edit'),
       tooltip: t('pages.tikTokDevice.editCurrent'),
+      icon: ContextMenuIcon.edit,
       onClick: onUpdateCrawler
     },
     {
@@ -24,6 +25,7 @@ export function useContextMenu (
       label: t('pages.variableManager.delete'),
       tooltip: t('pages.tikTokDevice.deleteCurrent'),
       color: 'negative',
+      icon: ContextMenuIcon.delete,
       onClick: onDeleteCrawler
     }
   ])

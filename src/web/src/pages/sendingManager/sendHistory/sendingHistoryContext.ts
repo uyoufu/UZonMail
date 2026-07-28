@@ -1,4 +1,4 @@
-import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IActionContext, type IContextMenuItem } from 'src/components/contextMenu/types'
 import type { ISendingGroupHistory } from 'src/api/sendingGroup'
 import { SendingGroupStatus, deleteSendingGroups } from 'src/api/sendingGroup'
 import { pauseSending, restartSending, cancelSending, resendSendingGroup } from 'src/api/emailSending'
@@ -21,12 +21,14 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<ISendingGroupHi
       name: 'detail',
       label: '发件明细',
       tooltip: '查看发件明细',
+      icon: ContextMenuIcon.receiptLong,
       onClick: openSendDetailDialog
     },
     {
       name: 'pause',
       label: '暂停发件',
       tooltip: '暂停发件',
+      icon: ContextMenuIcon.pause,
       onClick: onPauseSending,
       vif: canPauseSending
     },
@@ -34,6 +36,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<ISendingGroupHi
       name: 'start',
       label: '开始发件',
       tooltip: '开始发件',
+      icon: ContextMenuIcon.playArrow,
       vif: canRestart,
       onClick: onRestartSending
     },
@@ -41,6 +44,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<ISendingGroupHi
       name: 'startForFailed',
       label: '失败重发',
       tooltip: '对失败项进行重发',
+      icon: ContextMenuIcon.replay,
       vif: canResend,
       onClick: onResendSendingGroup
     },
@@ -49,6 +53,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<ISendingGroupHi
       label: '取消发件',
       tooltip: '取消当前发件任务',
       color: 'negative',
+      icon: ContextMenuIcon.cancel,
       vif: canCancel,
       onClick: onCancelSending
     },
@@ -56,6 +61,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<ISendingGroupHi
       name: 'newSendingTaskWithTemplate',
       label: '复制发件',
       tooltip: '复制该数据作为模板并新建发件',
+      icon: ContextMenuIcon.contentCopy,
       onClick: onNewSendingTaskWithTemplate
     },
     {
@@ -63,6 +69,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<ISendingGroupHi
       label: t('sendDetail.delete'),
       color: 'negative',
       tooltip: '删除当前或者选中的发件历史',
+      icon: ContextMenuIcon.delete,
       onClick: onDeleteSendingGroups
     }
   ]

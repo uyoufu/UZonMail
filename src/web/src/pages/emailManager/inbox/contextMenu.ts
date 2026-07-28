@@ -3,7 +3,7 @@ import { deleteInboxByIds, updateInbox } from 'src/api/emailBox'
 import { EmailGroupType } from 'src/api/emailGroup'
 import { validateInboxes } from 'src/api/pro/emailVerify'
 
-import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IActionContext, type IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { confirmOperation, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getInboxFields } from './headerFunctions'
@@ -66,19 +66,21 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refres
       name: 'edit',
       label: translateGlobal('edit'),
       tooltip: translateInboxManager('editCurrentInbox'),
+      icon: ContextMenuIcon.edit,
       onClick: onUpdateInbox
     },
     {
       name: 'moveToGroup',
       label: translateEmailGroup('moveEmailBoxes'),
       tooltip: translateEmailGroup('moveEmailBoxesToTargetGroup'),
-      icon: 'drive_file_move',
+      icon: ContextMenuIcon.driveFileMove,
       onClick: onMoveEmailBoxes
     },
     {
       name: 'validateSelected',
       label: translateGlobal('validate'),
       tooltip: translateInboxManager('validateCurrentOrSelectedInboxes'),
+      icon: ContextMenuIcon.verified,
       onClick: onValidateInboxes,
       vif: () => isProfession.value
     },
@@ -87,6 +89,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IInbox>, refres
       label: translateGlobal('delete'),
       tooltip: translateInboxManager('deleteCurrentInbox'),
       color: 'negative',
+      icon: ContextMenuIcon.delete,
       onClick: onDeleteInbox
     }
   ])

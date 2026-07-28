@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { checkUserId, createUser, getDefaultPassword, resetUserPassword, setUserType, setUserStatus } from 'src/api/user'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { UserStatus, UserType } from 'src/stores/types'
@@ -18,12 +18,14 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
       name: 'addUser',
       label: t('pages.userManager.newUser'),
       tooltip: t('pages.userManager.createUserTooltip'),
+      icon: ContextMenuIcon.personAdd,
       onClick: onNewUserClick
     },
     {
       name: 'resetPassword',
       label: t('pages.userManager.resetPassword'),
       tooltip: t('pages.userManager.resetUserPassword'),
+      icon: ContextMenuIcon.lockReset,
       onClick: onResetUserPassword
     },
     {
@@ -31,6 +33,7 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
       label: t('pages.userManager.disable'),
       tooltip: t('pages.userManager.disableHint'),
       color: 'negative',
+      icon: ContextMenuIcon.block,
       vif: v => {
         console.log('forbidden', v, v.status, UserStatus.forbiddenLogin, v.status !== UserStatus.forbiddenLogin)
         return v.status !== UserStatus.forbiddenLogin
@@ -42,6 +45,7 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
       label: t('pages.userManager.enable'),
       tooltip: t('pages.userManager.enableHint'),
       color: 'negative',
+      icon: ContextMenuIcon.checkCircle,
       vif: v => v.status === UserStatus.forbiddenLogin,
       onClick: onCancelForbidden
     },
@@ -49,6 +53,7 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
       name: 'setAsSubUser',
       label: '设为子账户',
       tooltip: '设为子账户后，可以统一管理子账户的设置和查看账户的一些发送数据',
+      icon: ContextMenuIcon.groupAdd,
       vif: v => v.type !== UserType.subUser && hasEnterpriseAccess(),
       onClick: onSetAsSubUser
     },
@@ -56,6 +61,7 @@ export function useContextMenu (addNewRow: addNewRowType<IUserInfo>) {
       name: 'setAsNormalUser',
       label: '取消子账户',
       tooltip: '取消子账户，用户将变成独立账户，不受主账户管理',
+      icon: ContextMenuIcon.groupRemove,
       vif: v => v.type === UserType.subUser,
       onClick: onSetAsIndependentUser
     }

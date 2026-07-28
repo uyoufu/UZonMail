@@ -35,7 +35,7 @@
 import { useI18n } from 'vue-i18n'
 import DraggableTree from 'src/components/draggableTree/DraggableTree.vue'
 import type { DraggableTreeContextValue, TreeDropType } from 'src/components/draggableTree/types'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import type { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { confirmOperation, showDialog } from 'src/utils/dialog'
@@ -68,12 +68,14 @@ const contextMenuItems: IContextMenuItem<DraggableTreeContextValue>[] = [
   {
     name: 'create',
     label: t('fileManager.createSubcategory'),
+    icon: ContextMenuIcon.createNewFolder,
     vif: value => value.data.id !== allFilesCategoryId && !value.data.isDefault,
     onClick: value => onCreateCategory(value.data as IFileCategory)
   },
   {
     name: 'rename',
     label: t('fileManager.rename'),
+    icon: ContextMenuIcon.edit,
     vif: value => value.data.id !== allFilesCategoryId && !value.data.isDefault,
     onClick: value => onRenameCategory(value.data as IFileCategory)
   },
@@ -81,6 +83,7 @@ const contextMenuItems: IContextMenuItem<DraggableTreeContextValue>[] = [
     name: 'delete',
     label: t('fileManager.delete'),
     color: 'negative',
+    icon: ContextMenuIcon.delete,
     vif: value => value.data.id !== allFilesCategoryId && !value.data.isDefault,
     onClick: value => onDeleteCategory(value.data as IFileCategory)
   }

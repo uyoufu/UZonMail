@@ -9,7 +9,7 @@ import {
 } from 'src/api/file'
 import { getFileCategories } from 'src/api/fileCategory'
 import { getFileReaderId, getFileStreamByReaderId } from 'src/api/fileReader'
-import { ContextMenuWhen, type IActionContext, type IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, ContextMenuWhen, type IActionContext, type IContextMenuItem } from 'src/components/contextMenu/types'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import type { refreshTableType } from 'src/compositions/qTableUtils'
 import { useConfig } from 'src/config'
@@ -25,34 +25,34 @@ export function useAttachmentContextMenu(refreshTable: refreshTableType) {
     {
       name: 'download',
       label: t('fileManager.download'),
-      icon: 'download',
+      icon: ContextMenuIcon.download,
       when: ContextMenuWhen.onlySingle,
       onClick: onDownloadAttachment
     },
     {
       name: 'rename',
       label: t('fileManager.rename'),
-      icon: 'edit',
+      icon: ContextMenuIcon.edit,
       when: ContextMenuWhen.onlySingle,
       onClick: onRenameAttachment
     },
     {
       name: 'share',
       label: t('fileManager.share'),
-      icon: 'link',
+      icon: ContextMenuIcon.link,
       when: ContextMenuWhen.onlySingle,
       onClick: onShareAttachment
     },
     {
       name: 'move',
       label: t('fileManager.move'),
-      icon: 'drive_file_move',
+      icon: ContextMenuIcon.driveFileMove,
       onClick: onMoveAttachments
     },
     {
       name: 'delete',
       label: t('fileManager.delete'),
-      icon: 'delete',
+      icon: ContextMenuIcon.delete,
       color: 'negative',
       onClick: onDeleteAttachments
     }

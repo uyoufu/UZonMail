@@ -1,5 +1,5 @@
 import type { IJsVariableSource } from "src/api/pro/jsVariable"
-import type { IActionContext, IContextMenuItem } from "src/components/contextMenu/types"
+import { ContextMenuIcon, type IActionContext, type IContextMenuItem } from "src/components/contextMenu/types"
 import type { IPopupDialogParams } from "src/components/lowCode/types"
 import { LowCodeFieldType } from "src/components/lowCode/types"
 import { notifySuccess, showDialog } from "src/utils/dialog"
@@ -19,6 +19,7 @@ export function useDataSourceContext (
       name: 'edit',
       label: t('pages.variableManager.edit'),
       tooltip: t('pages.variableManager.editDataSource'),
+      icon: ContextMenuIcon.edit,
       onClick: onUpdateDataSource
     },
     {
@@ -26,6 +27,7 @@ export function useDataSourceContext (
       label: t('pages.variableManager.delete'),
       tooltip: t('pages.variableManager.deleteDataSources'),
       color: 'negative',
+      icon: ContextMenuIcon.delete,
       onClick: onDeleteDataSource,
     }
   ])

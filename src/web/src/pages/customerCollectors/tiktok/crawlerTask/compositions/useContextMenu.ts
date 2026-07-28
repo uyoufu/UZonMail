@@ -8,7 +8,7 @@ import {
   updateCrawlerTaskInfo,
   saveCrawlerResultsAsInbox
 } from 'src/api/pro/crawlerTask'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 import { getCrawlerTaskFields } from './useHeaderFunctions'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
@@ -25,6 +25,7 @@ export function useContextMenu(
       name: 'edit',
       label: t('pages.crawlerTask.edit'),
       tooltip: t('pages.crawlerTask.editCurrent'),
+      icon: ContextMenuIcon.edit,
       vif: isNotRunning,
       onClick: onUpdateCrawler
     },
@@ -33,6 +34,7 @@ export function useContextMenu(
       label: t('pages.crawlerTask.delete'),
       tooltip: t('pages.crawlerTask.deleteCurrent'),
       color: 'negative',
+      icon: ContextMenuIcon.delete,
       vif: (value) => value.status === CrawlerStatus.stopped,
       onClick: onDeleteCrawler
     },
@@ -40,6 +42,7 @@ export function useContextMenu(
       name: 'stop',
       label: t('pages.crawlerTask.stop'),
       tooltip: t('pages.crawlerTask.stopCurrent'),
+      icon: ContextMenuIcon.stop,
       vif: (value) => !isNotRunning(value),
       onClick: onStopCrawler
     },
@@ -48,18 +51,21 @@ export function useContextMenu(
       label: t('pages.crawlerTask.start'),
       vif: isNotRunning,
       tooltip: t('pages.crawlerTask.startCurrent'),
+      icon: ContextMenuIcon.playArrow,
       onClick: onStartCrawler
     },
     {
       name: 'viewResult',
       label: t('pages.crawlerTask.view'),
       tooltip: t('pages.crawlerTask.viewResult'),
+      icon: ContextMenuIcon.visibility,
       onClick: onViewCrawlerResult
     },
     {
       name: 'saveAsInbox',
       label: t('pages.crawlerTask.saveAsInbox'),
       tooltip: t('pages.crawlerTask.saveAsInboxTooltip'),
+      icon: ContextMenuIcon.save,
       onClick: onSaveAsInbox
     }
   ])

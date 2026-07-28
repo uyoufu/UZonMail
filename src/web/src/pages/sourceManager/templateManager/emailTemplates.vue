@@ -55,7 +55,7 @@ import ImportBtn from 'src/components/quasarWrapper/buttons/ImportBtn.vue'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import type { IEmailTemplate } from 'src/api/emailTemplate'
 import { deleteEmailTemplate, upsertEmailTemplate } from 'src/api/emailTemplate'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { t } from 'src/i18n/helpers'
 
@@ -137,6 +137,7 @@ const templateContextMenuItems = computed<IContextMenuItem[]>(() => [
     name: 'preview',
     label: t('pages.templateManager.preview'),
     tooltip: t('pages.templateManager.viewPreview'),
+    icon: ContextMenuIcon.visibility,
     onClick: async () => {
       await router.push({
         name: 'TemplateEditor'
@@ -147,12 +148,14 @@ const templateContextMenuItems = computed<IContextMenuItem[]>(() => [
     name: 'edit',
     label: t('pages.variableManager.edit'),
     tooltip: t('pages.templateManager.editCurrentTemplate'),
+    icon: ContextMenuIcon.edit,
     onClick: onEditTemplateClick
   },
   {
     name: 'export',
     label: t('pages.templateManager.export'),
     tooltip: t('pages.templateManager.exportCurrentTemplate'),
+    icon: ContextMenuIcon.download,
     onClick: onExportTemplateClick
   },
   {
@@ -160,6 +163,7 @@ const templateContextMenuItems = computed<IContextMenuItem[]>(() => [
     label: t('pages.variableManager.delete'),
     tooltip: t('pages.templateManager.deleteCurrentTemplate'),
     color: 'negative',
+    icon: ContextMenuIcon.delete,
     onClick: onDeleteEmailTemplate
   }
 ])

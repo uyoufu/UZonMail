@@ -4,7 +4,7 @@ import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { confirmOperation, notifySuccess, showDialog, showHtmlDialog } from 'src/utils/dialog'
 import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 
 import dayjs from 'dayjs'
 import logger from 'loglevel'
@@ -105,12 +105,14 @@ export function useApiAccessContext (
     {
       name: 'modify',
       label: t('pages.apiAccess.modify'),
+      icon: ContextMenuIcon.edit,
       onClick: (apiAccess) => onEditApiAccess(apiAccess),
     },
     {
       name: 'delete',
       label: t('pages.variableManager.delete'),
       color: 'negative',
+      icon: ContextMenuIcon.delete,
       onClick: onDeleteApiAccess,
     }
   ])

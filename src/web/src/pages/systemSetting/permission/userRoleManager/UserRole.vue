@@ -36,7 +36,7 @@ import { LowCodeFieldType } from 'src/components/lowCode/types'
 import type { IRole, IUserRole} from 'src/api/permission';
 import { getAllRoles, getUserRolesCount, getUserRolesData, upsertUserRole, deleteUserRoles } from 'src/api/permission'
 import { getAllUsers } from 'src/api/user'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 
 import type { IUserInfo } from 'src/stores/types'
@@ -158,12 +158,14 @@ const contextItems = computed<IContextMenuItem<IUserRole>[]>(() => [
   {
     name: 'edit',
     label: t('pages.variableManager.edit'),
+    icon: ContextMenuIcon.edit,
     onClick: onUserRoleClicked
   },
   {
     name: 'delete',
     label: t('pages.variableManager.delete'),
     color: 'negative',
+    icon: ContextMenuIcon.delete,
     onClick: onDeleteUserRole
   }
 ])

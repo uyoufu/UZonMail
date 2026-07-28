@@ -55,7 +55,7 @@ import type { IEmailGroupListItem, IFlatHeader } from './types'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 
 const modelValue = defineModel<IEmailGroupListItem>()
 const selectedValues = defineModel<IEmailGroupListItem[]>('selected', {
@@ -228,6 +228,7 @@ const headerContextMenuItems: ComputedRef<IContextMenuItem<IEmailGroupListItem>[
     name: 'add',
     label: translateGlobal('new'),
     tooltip: translateEmailGroup('newEmailGroup'),
+    icon: ContextMenuIcon.add,
     onClick: onCreateEmailGroup
   }
 ])
@@ -331,6 +332,7 @@ const itemContextMenuItems: ComputedRef<IContextMenuItem<IEmailGroupListItem>[]>
     name: 'modify',
     label: translateGlobal('modify'),
     tooltip: translateEmailGroup('modifyCurrentGroup'),
+    icon: ContextMenuIcon.edit,
     onClick: modifyGroup
   },
   {
@@ -338,6 +340,7 @@ const itemContextMenuItems: ComputedRef<IContextMenuItem<IEmailGroupListItem>[]>
     label: translateGlobal('delete'),
     color: 'negative',
     tooltip: translateEmailGroup('deleteCurrentGroup'),
+    icon: ContextMenuIcon.delete,
     onClick: deleteGroup
   }
 ])

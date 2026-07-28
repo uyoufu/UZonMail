@@ -1,5 +1,5 @@
 import type { IIpWarmUpUpPlan } from "src/api/pro/ipWarmUp"
-import type { IContextMenuItem } from "src/components/contextMenu/types"
+import { ContextMenuIcon, type IContextMenuItem } from "src/components/contextMenu/types"
 import { confirmOperation, notifyError } from "src/utils/dialog"
 import { useSendDetailVisitor } from '../../sendHistory/useSendDetailVisitor'
 
@@ -13,6 +13,7 @@ export function useIpWarmIpContext (deleteRowById: deleteRowByIdType<IIpWarmUpUp
       name: 'onViewLatestSendingGroupOfPlan',
       label: t('pages.ipWarmUp.viewTask'),
       tooltip: t('pages.ipWarmUp.viewLatestTask'),
+      icon: ContextMenuIcon.visibility,
       onClick: onViewLatestSendingGroupOfPlan
     },
     {
@@ -20,6 +21,7 @@ export function useIpWarmIpContext (deleteRowById: deleteRowByIdType<IIpWarmUpUp
       label: t('pages.ipWarmUp.delete'),
       tooltip: t('pages.ipWarmUp.deleteWarmUpPlan'),
       color: 'negative',
+      icon: ContextMenuIcon.delete,
       onClick: onDeleteWarmUpPlan
     }
   ]

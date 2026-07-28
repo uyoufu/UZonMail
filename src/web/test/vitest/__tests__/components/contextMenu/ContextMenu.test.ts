@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { computed, defineComponent, h, ref } from 'vue'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
-import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IActionContext, type IContextMenuItem } from 'src/components/contextMenu/types'
 
 interface TestContextValue {
   id: number
@@ -12,6 +12,18 @@ interface TestContextValue {
 const SlotStub = defineComponent({
   setup(_, { slots }) {
     return () => h('div', slots.default?.())
+  }
+})
+
+const IconStub = defineComponent({
+  props: {
+    name: {
+      type: String,
+      required: true
+    }
+  },
+  setup(props) {
+    return () => h('i', { 'data-icon': props.name })
   }
 })
 
@@ -29,7 +41,7 @@ function mountContextMenu(
         QMenu: SlotStub,
         QList: SlotStub,
         QItem: SlotStub,
-        QIcon: true,
+        QIcon: IconStub,
         QItemSection: SlotStub,
         AsyncTooltip: true
       }
@@ -97,5 +109,14 @@ describe('ContextMenu', () => {
     await flushPromises()
 
     expect(onClick).toHaveBeenCalledWith(currentValue, expect.any(Object))
+  })
+
+  it('renders the configured menu icon', () => {
+    const currentValue = { id: 1, name: 'current' }
+    const wrapper = mountContextMenu([
+      { name: 'edit', label: 'Edit', icon: ContextMenuIcon.edit, onClick: vi.fn() }
+    ], currentValue)
+
+    expect(wrapper.get('[data-icon]').attributes('data-icon')).toBe(ContextMenuIcon.edit)
   })
 })

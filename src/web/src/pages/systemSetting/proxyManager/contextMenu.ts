@@ -3,7 +3,7 @@ import logger from 'loglevel'
 
 import type { IProxy } from 'src/api/proxy';
 import { deleteProxy, updateProxy, validateProxyName } from 'src/api/proxy'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { getCommonProxyFields } from './headerFuncs'
 import type { IPopupDialogParams } from 'src/components/lowCode/types';
@@ -20,7 +20,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IProxy>) {
       name: 'edit',
       label: t('pages.variableManager.edit'),
       tooltip: t('pages.proxy.editProxy'),
-      icon: 'edit',
+      icon: ContextMenuIcon.edit,
       vif: isOwner,
       onClick: onModifyProxy
     },
@@ -29,7 +29,7 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IProxy>) {
       label: t('pages.variableManager.delete'),
       tooltip: t('pages.proxy.deleteProxy'),
       color: 'negative',
-      icon: 'delete',
+      icon: ContextMenuIcon.delete,
       vif: isOwner,
       onClick: onDeleteProxy
     }

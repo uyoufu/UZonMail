@@ -3,7 +3,7 @@ import type { IOutbox } from 'src/api/emailBox'
 import { deleteOutboxByIds, OutboxStatus, updateOutbox, validateOutbox } from 'src/api/emailBox'
 import { deleteAllInvalidOutboxesInGroup, EmailGroupType, validateAllInvalidOutboxes } from 'src/api/emailGroup'
 
-import type { IActionContext, IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IActionContext, type IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { getOutboxFields } from './headerFunctions'
@@ -28,13 +28,14 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IOutbox>, refre
         name: 'edit',
         label: translateGlobal('edit'),
         tooltip: translateOutboxManager('editCurrentOutbox'),
+        icon: ContextMenuIcon.edit,
         onClick: onUpdateOutbox
       },
       {
         name: 'moveToGroup',
         label: translateEmailGroup('moveEmailBoxes'),
         tooltip: translateEmailGroup('moveEmailBoxesToTargetGroup'),
-        icon: 'drive_file_move',
+        icon: ContextMenuIcon.driveFileMove,
         onClick: onMoveEmailBoxes
       },
       {
@@ -42,18 +43,21 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IOutbox>, refre
         label: translateGlobal('delete'),
         tooltip: translateOutboxManager('deleteCurrentOrSelection'),
         color: 'negative',
+        icon: ContextMenuIcon.delete,
         onClick: onDeleteOutbox
       },
       {
         name: 'validate',
         label: translateGlobal('validate'),
         tooltip: translateOutboxManager('sendTestToMe'),
+        icon: ContextMenuIcon.verified,
         onClick: onValidateOutbox
       },
       {
         name: 'validateBatch',
         label: translateOutboxManager('validateBatch'),
         tooltip: translateOutboxManager('validateAllUnverifiedInGroup'),
+        icon: ContextMenuIcon.factCheck,
         onClick: onValidateOutboxBatch
       },
       {
@@ -61,12 +65,14 @@ export function useContextMenu (deleteRowById: deleteRowByIdType<IOutbox>, refre
         label: translateOutboxManager('deleteInvalid'),
         tooltip: translateOutboxManager('deleteCurrentGroupInvalidOutboxes'),
         color: 'negative',
+        icon: ContextMenuIcon.deleteSweep,
         onClick: onDeleteInvalidOutboxes
       },
       {
         name: 'outlookDelegateAuthorization',
         label: translateOutboxManager('outlookDelegateAuthorization'),
         tooltip: translateOutboxManager('outlookDelegateAuthorization'),
+        icon: ContextMenuIcon.adminPanelSettings,
         onClick: onRequestOutlookDelegateAuthorization,
         vif: row => isMsGraphOutbox(row)
       },

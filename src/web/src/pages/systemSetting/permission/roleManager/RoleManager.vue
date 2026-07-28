@@ -170,12 +170,13 @@ async function getPopupDialogParams (roleData?: IRole) {
 
 // #region 右键菜单
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 const contextItems = computed<IContextMenuItem[]>(() => [
   {
     name: 'edit',
     label: t('pages.variableManager.edit'),
     tooltip: t('pages.permissionManager.editRole'),
+    icon: ContextMenuIcon.edit,
     onClick: onEditRole
   },
   {
@@ -183,7 +184,8 @@ const contextItems = computed<IContextMenuItem[]>(() => [
     label: t('pages.variableManager.delete'),
     tooltip: t('pages.permissionManager.deleteRole'),
     onClick: onDeleteRole,
-    color: 'negative'
+    color: 'negative',
+    icon: ContextMenuIcon.delete
   }
 ])
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

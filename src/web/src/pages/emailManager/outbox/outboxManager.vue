@@ -231,25 +231,28 @@ const { outboxContextMenuItems } = useContextMenu(deleteRowById, refreshTable)
 // #endregion
 
 // #region 分组的右键菜单
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import { notifyError } from 'src/utils/dialog'
 const groupCtxMenuItems: Ref<IContextMenuItem<IEmailGroupListItem>[]> = ref([
   {
     name: 'importExcel',
     label: translateOutboxManager('importFromExcel'),
     tooltip: translateOutboxManager('importOutboxForCurrentGroupFromExcel'),
+    icon: ContextMenuIcon.uploadFile,
     onClick: value => onImportOutboxFromExcelClicked(value.id)
   },
   {
     name: 'importTxt',
     label: translateOutboxManager('importFromTxt'),
     tooltip: translateOutboxManager('importOutboxForCurrentGroupFromTxt'),
+    icon: ContextMenuIcon.uploadFile,
     onClick: value => onImportOutboxFromTxt(value.id)
   },
   {
     name: 'export',
     label: translateGlobal('export'),
     tooltip: translateOutboxManager('exportOutboxesInThisGroup'),
+    icon: ContextMenuIcon.download,
     onClick: exportAllInboxesInThisGroup
   }
 ])

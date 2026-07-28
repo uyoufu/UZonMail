@@ -167,7 +167,7 @@ const { inboxContextMenuItems } = useContextMenu(deleteRowById, refreshTable)
 // #endregion
 
 // #region 分组的右键菜单
-import type { IContextMenuItem } from 'src/components/contextMenu/types'
+import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import { notifyError, notifySuccess, notifyUntil } from 'src/utils/dialog'
 import { validateInboxGroup } from 'src/api/pro/emailVerify'
 import { usePermission } from 'src/compositions/permission'
@@ -177,6 +177,7 @@ const groupCtxMenuItems: Ref<IContextMenuItem<IEmailGroupListItem>[]> = ref([
     name: 'validate',
     label: translateGlobal('validate'),
     tooltip: translateInboxManager('validateAllInvalidInboxesInCurrentGroup'),
+    icon: ContextMenuIcon.verified,
     vif: () => isProfession.value,
     onClick: onValidateInboxGroup
   },
@@ -184,12 +185,14 @@ const groupCtxMenuItems: Ref<IContextMenuItem<IEmailGroupListItem>[]> = ref([
     name: 'import',
     label: translateInboxManager('ctx_import'),
     tooltip: translateInboxManager('ctx_importInboxToCurrentGroup'),
+    icon: ContextMenuIcon.uploadFile,
     onClick: (value) => onImportInboxClick(value.id)
   },
   {
     name: 'export',
     label: translateInboxManager('ctx_export'),
     tooltip: translateInboxManager('ctx_exportInboxToCurrentGroup'),
+    icon: ContextMenuIcon.download,
     onClick: exportAllInboxesInThisGroup
   }
 ])

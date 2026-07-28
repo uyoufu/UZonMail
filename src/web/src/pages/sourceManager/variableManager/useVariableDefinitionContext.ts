@@ -1,4 +1,4 @@
-import type { IActionContext, IContextMenuItem } from "src/components/contextMenu/types"
+import { ContextMenuIcon, type IActionContext, type IContextMenuItem } from "src/components/contextMenu/types"
 import type { IPopupDialogParams } from "src/components/lowCode/types"
 import { LowCodeFieldType } from "src/components/lowCode/types"
 import { notifySuccess, showDialog } from "src/utils/dialog"
@@ -19,12 +19,14 @@ export function useVariableDefinitionContext (
       name: 'test',
       label: t('pages.variableManager.test'),
       tooltip: t('pages.variableManager.testVariableDefinition'),
+      icon: ContextMenuIcon.science,
       onClick: onTestVariableDefinition
     },
     {
       name: 'edit',
       label: t('pages.variableManager.edit'),
       tooltip: t('pages.variableManager.editVariableDefinition'),
+      icon: ContextMenuIcon.edit,
       onClick: onUpdateVariableDefinition
     },
     {
@@ -32,6 +34,7 @@ export function useVariableDefinitionContext (
       label: t('pages.variableManager.delete'),
       tooltip: t('pages.variableManager.deleteVariableDefinitions'),
       color: 'negative',
+      icon: ContextMenuIcon.delete,
       onClick: onDeleteDataSource,
     }
   ])
