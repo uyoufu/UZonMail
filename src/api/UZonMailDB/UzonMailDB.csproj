@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="Innofactor.EfCoreJsonValueConverter" Version="6.0.0" />
     <PackageReference Include="Innofactor.EfCoreJsonValueConverter.Attributes" Version="2.0.1" />
     <PackageReference Include="log4net" Version="3.3.2" />
