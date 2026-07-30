@@ -1,67 +1,24 @@
 <template>
   <div class="full-height full-width row items-start">
-    <EmailGroupList
-      ref="emailGroupListRef"
-      v-show="!isCollapseGroupList"
-      v-model="emailGroupRef"
-      :groupType="2"
-      class="q-card q-mr-sm full-height"
-      style="min-width: 160px"
-      :contextMenuItems="groupCtxMenuItems"
-    />
+    <EmailGroupList ref="emailGroupListRef" v-show="!isCollapseGroupList" v-model="emailGroupRef" :groupType="2"
+      class="q-card q-mr-sm full-height" style="min-width: 160px" :contextMenuItems="groupCtxMenuItems" />
 
-    <q-table
-      ref="inboxTableRef"
-      class="col full-height"
-      :rows="rows"
-      :columns="columns"
-      row-key="id"
-      virtual-scroll
-      selection="multiple"
-      v-model:selected="selectedInboxes"
-      v-model:pagination="pagination"
-      dense
-      :loading="loading"
-      :filter="filter"
-      binary-state-sort
-      @request="onTableRequest"
-    >
+    <q-table ref="inboxTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
+      selection="multiple" v-model:selected="selectedInboxes" v-model:pagination="pagination" dense :loading="loading"
+      :filter="filter" binary-state-sort @request="onTableRequest">
       <template v-slot:top-left>
         <div class="row justify-start q-gutter-sm">
-          <CreateBtn
-            :tooltip="translateInboxManager('newInbox')"
-            @click="onNewInboxClick"
-            :disable="!isValidEmailGroup"
-            :tooltip-when-disabled="translateInboxManager('addGroupFirst')"
-          />
-          <ExportBtn
-            label=""
-            :tooltip="translateInboxManager('exportInboxTemplate')"
-            @click="onExportInboxTemplateClick"
-          />
-          <ImportBtn
-            label=""
-            :tooltip="translateInboxManager('importInbox')"
-            @click="onImportInboxClick()"
-            :disable="!isValidEmailGroup"
-            :tooltip-when-disabled="translateInboxManager('addGroupFirst')"
-          />
-          <ImportBtn
-            label=""
-            icon="description"
-            :tooltip="importFromTxtTooltip"
-            @click="onImportInboxFromTxt()"
-            :disable="!isValidEmailGroup"
-            :tooltip-when-disabled="translateInboxManager('addGroupFirst')"
-          />
-          <ImportBtn
-            label=""
-            icon="block"
-            :tooltip="translateInboxManager('importInvalidInboxes')"
-            @click="onImportInvalidInboxes"
-            :disable="!isValidEmailGroup"
-            :tooltip-when-disabled="translateInboxManager('addGroupFirst')"
-          />
+          <CreateBtn :tooltip="translateInboxManager('newInbox')" @click="onNewInboxClick" :disable="!isValidEmailGroup"
+            :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
+          <ExportBtn label="" :tooltip="translateInboxManager('exportInboxTemplate')"
+            @click="onExportInboxTemplateClick" />
+          <ImportBtn label="" :tooltip="translateInboxManager('importInbox')" @click="onImportInboxClick()"
+            :disable="!isValidEmailGroup" :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
+          <ImportBtn label="" icon="description" :tooltip="importFromTxtTooltip" @click="onImportInboxFromTxt()"
+            :disable="!isValidEmailGroup" :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
+          <ImportBtn label="" icon="block" color="negative" :tooltip="translateInboxManager('importInvalidInboxes')"
+            @click="onImportInvalidInboxes" :disable="!isValidEmailGroup"
+            :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
         </div>
       </template>
 
