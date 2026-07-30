@@ -5,6 +5,53 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 permalink: /downloads
 ---
 
+## 0.23.1
+
+> 更新时期: 2026-07-30
+
+### 功能新增
+
+1. 运行时主题切换：支持在默认主题与樱花浪漫主题之间切换
+2. 桌面应用本地化：Windows 桌面应用完整本地化基础设施，支持中英文双向同步
+3. 组织级邮箱有效性管理：支持批量标记邮箱为有效或无效状态
+4. 批量移动邮箱：支持将收件箱和发件箱批量移动到目标组
+5. 批量软删除选中邮箱：支持多选软删除并在表格中显示验证状态
+6. 桌面应用自动更新：集成 CLI 工具和 WebView2 的自动更新功能
+7. 硬退回检测与邮箱验证系统：SMTP 状态码 550/551/553 自动识别为硬退回并标记邮箱
+8. API 错误本地化：基于键的 API 错误本地化系统
+9. 允许重复发送：支持单次任务中向同一收件人发送多封邮件并检测重复收件人
+10. 可拖拽树组件：支持层级数据的拖拽排序、上下文菜单和受控状态
+11. 文件存储重构：分类管理、内容寻址存储和引用计数
+12. 桌面应用重构：迁移至新目录结构并采用 CommunityToolkit.Mvvm 框架
+
+### 功能优化
+
+1. 主题重命名 Fairy Pink 为 Cherry Blossom Romance
+2. 收件箱管理界面格式化优化，无效导入按钮添加红色视觉提示
+3. 插件加载支持共享程序集目录
+4. 构建脚本统一，发送查询排除硬退回项目
+5. i18n 国际化扩展至所有 UI 页面和组件
+6. 上下文菜单根据选择数量动态显示
+7. 低代码表单支持富文本编辑器
+8. 状态标签通过 i18n 系统解析
+
+### Bug 修复
+
+1. 修复 WSL 路径转换的 Bash 引号问题
+2. 修复邮件验证顺序和 SPF/未知状态测试
+3. 修复 disableAutogrow 属性名正为 disableAutoGrow
+4. 修复 SendCore 核心 bug 并改进异步生命周期处理
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.23.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.1.0.zip)
+
+[uzonmail-service-win-x64-0.23.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.1.0.zip)
+
+[uzonmail-service-linux-x64-0.23.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.1.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.0
 
 > 更新时期: 2026-07-28
