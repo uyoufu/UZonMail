@@ -1,11 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { getDesktopLocale, persistDesktopLocale, resolveSupportedLocale } from 'src/i18n/desktopLocale'
 
-type WebViewHostObjects = NonNullable<
-  NonNullable<NonNullable<Window['chrome']>['webview']>['hostObjects']
->
+type WebViewHostObjects = NonNullable<NonNullable<NonNullable<Window['chrome']>['webview']>['hostObjects']>
 
-function setDesktopHostObject (hostObjects: WebViewHostObjects) {
+function setDesktopHostObject(hostObjects: WebViewHostObjects) {
   Object.defineProperty(window, 'chrome', {
     configurable: true,
     value: { webview: { hostObjects } }
@@ -21,7 +19,7 @@ describe('desktop locale bridge', () => {
     setDesktopHostObject({
       sync: {
         uzonMailLocale: {
-          getCurrentLocale: () => 'en-US'
+          GetCurrentLocale: () => 'en-US'
         }
       }
     })
@@ -33,7 +31,7 @@ describe('desktop locale bridge', () => {
     setDesktopHostObject({
       sync: {
         uzonMailLocale: {
-          getCurrentLocale: () => 'de-DE'
+          GetCurrentLocale: () => 'de-DE'
         }
       }
     })
@@ -50,7 +48,7 @@ describe('desktop locale bridge', () => {
   it('persists a language choice through the asynchronous desktop host object', async () => {
     const setCurrentLocale = vi.fn().mockResolvedValue(true)
     setDesktopHostObject({
-      uzonMailLocale: { setCurrentLocale }
+      uzonMailLocale: { SetCurrentLocale: setCurrentLocale }
     })
 
     await expect(persistDesktopLocale('en-US')).resolves.toBe(true)
@@ -60,7 +58,7 @@ describe('desktop locale bridge', () => {
   it('returns false when the desktop host object rejects the update', async () => {
     setDesktopHostObject({
       uzonMailLocale: {
-        setCurrentLocale: () => Promise.reject(new Error('write failed'))
+        SetCurrentLocale: () => Promise.reject(new Error('write failed'))
       }
     })
 

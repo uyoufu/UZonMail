@@ -98,24 +98,24 @@ async function goToRoute () {
 
 <style lang="scss">
 .menu-item__active {
-  color: $secondary;
+  color: var(--q-secondary);
 }
 
 .menu-item__default {
-  color: $accent;
+  color: var(--q-accent);
 }
 
 .slash-right {
-  border-right: 2px solid $primary;
+  border-right: 2px solid var(--q-primary);
 }
 
 // 悬停高亮
 .menu-item__icon_hover:hover {
-  color: $primary;
+  color: var(--q-primary);
 }
 
 :deep(.q-expansion-item__toggle-icon,
   .q-expansion-item__toggle-icon--rotated) {
-  color: $secondary
+  color: var(--q-secondary)
 }
 </style>

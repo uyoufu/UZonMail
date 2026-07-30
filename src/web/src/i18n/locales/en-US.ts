@@ -68,6 +68,8 @@ export default {
     abortUpload: 'Abort upload',
     calculatingFileHash: 'Calculating hash for {fileName}',
     clear: 'Clear',
+    defaultTheme: 'Default theme',
+    fairyPinkTheme: 'Fairy pink theme',
     remain: 'Remain',
     removeUploadedFile: 'Remove uploaded file',
     selectFile: 'Select file',

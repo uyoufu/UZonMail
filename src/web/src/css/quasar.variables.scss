@@ -33,3 +33,10 @@ $positive: #42b883;
 $negative: #ff7a7a;
 $info: #65a0bb;
 $warning: #f5d000;
+
+// 仙子粉主题通过运行时 CSS 变量覆盖 Quasar 品牌色，保留默认 SCSS 色值作为回退
+:root {
+  --uzon-fairy-pink-primary: #e873a0;
+  --uzon-fairy-pink-secondary: #f7c4d7;
+  --uzon-fairy-pink-accent: #5b3143;
+}

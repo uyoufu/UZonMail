@@ -65,7 +65,7 @@ const tooltipText = computed(() => {
 
   &:hover::before,
   &:hover::after {
-    background-color: $primary;
+    background-color: var(--q-primary);
   }
 
   &:hover::before {
@@ -109,7 +109,7 @@ const tooltipText = computed(() => {
 
   &:hover::before,
   &:hover::after {
-    background-color: $primary;
+    background-color: var(--q-primary);
   }
 }
 </style>

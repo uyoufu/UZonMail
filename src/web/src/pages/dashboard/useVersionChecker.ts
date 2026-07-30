@@ -36,7 +36,7 @@ function compareVersions (left: string, right: string): number {
 async function startDesktopUpdate (): Promise<boolean> {
   const updater = window.chrome?.webview?.hostObjects?.uzonMailUpdater
   if (!updater) return false
-  return await updater.beginUpdate()
+  return await updater.BeginUpdate()
 }
 
 /** 在首页加载时为超级管理员检查最新发布版本 */

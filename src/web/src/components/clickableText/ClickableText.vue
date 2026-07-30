@@ -88,6 +88,6 @@ const tooltips = computed(() => {
 
 <style lang="scss" scoped>
 .clickable-text {
-  color: $primary;
+  color: var(--q-primary);
 }
 </style>

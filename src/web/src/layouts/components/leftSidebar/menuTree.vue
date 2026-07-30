@@ -1,5 +1,5 @@
 <template>
-  <q-list class="col text-accent hover-scroll full-height">
+  <q-list class="menu-tree col text-accent hover-scroll">
     <LogoItem />
     <q-separator />
     <MenuItem v-for="route in menuRoutes" :key="route.name" :routeRaw="route">
@@ -19,4 +19,8 @@ const routeStore = useRoutesStore()
 const menuRoutes = routeStore.loadedRoutes.map(x => getMenuRoute(x)) as ExtendedRouteRecordRaw[]
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.menu-tree {
+  min-height: 0;
+}
+</style>
