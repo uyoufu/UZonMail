@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using UzonMailDesktop.Configuration;
+using UzonMailDesktop.Localization;
 
 namespace UzonMailDesktop.Services;
 
@@ -8,12 +9,18 @@ internal sealed record RequiredFramework(string Name, Version Version);
 
 internal static class RuntimeConfigReader
 {
-    public static IReadOnlyList<RequiredFramework> Read(BackendOptions backend)
+    public static IReadOnlyList<RequiredFramework> Read(
+        BackendOptions backend,
+        IDesktopLocalizationService localization
+    )
     {
         var executablePath = BackendProcessManager.ResolvePath(backend.ExecutablePath);
         var runtimeConfigPath = Path.ChangeExtension(executablePath, ".runtimeconfig.json");
         if (!File.Exists(runtimeConfigPath))
-            throw new FileNotFoundException("无法读取后端运行时要求，runtimeconfig 文件不存在。", runtimeConfigPath);
+            throw new FileNotFoundException(
+                localization.GetText(DesktopTextKey.RuntimeConfigNotFound),
+                runtimeConfigPath
+            );
 
         using var document = JsonDocument.Parse(File.ReadAllText(runtimeConfigPath));
         var runtimeOptions = document.RootElement.GetProperty("runtimeOptions");

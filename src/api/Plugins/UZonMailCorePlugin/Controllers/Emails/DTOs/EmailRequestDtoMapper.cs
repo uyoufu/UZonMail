@@ -56,6 +56,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
                 Description = request.Description,
                 Remark = request.Remark,
                 MinInboxCooldownHours = request.MinInboxCooldownHours,
+                Status = request.Status,
             };
 
         internal static Inbox ToEntity(this CreateUngroupedInboxDto request, long emailGroupId) =>

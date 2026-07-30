@@ -3,9 +3,9 @@
     <EmailGroupList ref="emailGroupListRef" v-show="!isCollapseGroupList" v-model="emailGroupRef" :groupType="2"
       class="q-card q-mr-sm full-height" style="min-width: 160px" :contextMenuItems="groupCtxMenuItems" />
 
-    <q-table ref="inboxTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll selection="multiple" v-model:selected="selectedInboxes"
-      v-model:pagination="pagination" dense :loading="loading" :filter="filter" binary-state-sort
-      @request="onTableRequest">
+    <q-table ref="inboxTableRef" class="col full-height" :rows="rows" :columns="columns" row-key="id" virtual-scroll
+      selection="multiple" v-model:selected="selectedInboxes" v-model:pagination="pagination" dense :loading="loading"
+      :filter="filter" binary-state-sort @request="onTableRequest">
       <template v-slot:top-left>
         <div class="row justify-start q-gutter-sm">
           <CreateBtn :tooltip="translateInboxManager('newInbox')" @click="onNewInboxClick" :disable="!isValidEmailGroup"
@@ -16,6 +16,9 @@
             :disable="!isValidEmailGroup" :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
           <ImportBtn label="" icon="description" :tooltip="importFromTxtTooltip" @click="onImportInboxFromTxt()"
             :disable="!isValidEmailGroup" :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
+          <ImportBtn label="" icon="block" color="negative" :tooltip="translateInboxManager('importInvalidInboxes')"
+            @click="onImportInvalidInboxes" :disable="!isValidEmailGroup"
+            :tooltip-when-disabled="translateInboxManager('addGroupFirst')" />
         </div>
       </template>
 
@@ -139,18 +142,20 @@ const columns: ComputedRef<QTableColumn[]> = computed(() => [
     sortable: true
   }
 ])
-async function getRowsNumberCount (filterObj: TTableFilterObject) {
+async function getRowsNumberCount(filterObj: TTableFilterObject) {
   const { data } = await getInboxesCount(emailGroupRef.value.id, filterObj.filter)
   return data
 }
-async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
+async function onRequest(filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getInboxesData(emailGroupRef.value.id, filterObj.filter, pagination)
   return data
 }
-const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById } = useQTable<IInbox>({
-  getRowsNumberCount,
-  onRequest
-})
+const { pagination, rows, filter, onTableRequest, loading, refreshTable, addNewRow, deleteRowById } = useQTable<IInbox>(
+  {
+    getRowsNumberCount,
+    onRequest
+  }
+)
 watch(emailGroupRef, () => {
   // 组切换时，触发更新
   refreshTable()
@@ -163,7 +168,7 @@ const { onNewInboxClick, onExportInboxTemplateClick, onImportInboxClick } = useH
 
 // #region 数据右键菜单
 import { useContextMenu } from './contextMenu'
-const { inboxContextMenuItems } = useContextMenu(deleteRowById, refreshTable)
+const { inboxContextMenuItems } = useContextMenu(deleteRowById, refreshTable, selectedInboxes)
 // #endregion
 
 // #region 分组的右键菜单
@@ -198,7 +203,7 @@ const groupCtxMenuItems: Ref<IContextMenuItem<IEmailGroupListItem>[]> = ref([
 ])
 
 /** 验证当前分类中的全部收件箱。 */
-async function onValidateInboxGroup (group: IEmailGroupListItem) {
+async function onValidateInboxGroup(group: IEmailGroupListItem) {
   const groupId = group.id
   if (groupId === undefined) return
 
@@ -216,7 +221,7 @@ async function onValidateInboxGroup (group: IEmailGroupListItem) {
 
 // 导出当前组中的所有的收件箱
 import { writeExcel } from 'src/utils/file'
-async function exportAllInboxesInThisGroup (group: IEmailGroupListItem) {
+async function exportAllInboxesInThisGroup(group: IEmailGroupListItem) {
   // 获取所有的收件箱
   const { data: count } = await getInboxesCount(group.id, '')
   if (!count) {
@@ -241,7 +246,10 @@ async function exportAllInboxesInThisGroup (group: IEmailGroupListItem) {
 // #region 从文本导入邮箱
 import { useInboxImporter } from './useInboxImporter'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { onImportInboxFromTxt, importFromTxtLable, importFromTxtTooltip } = useInboxImporter(emailGroupRef, addNewRow)
+const { onImportInboxFromTxt, onImportInvalidInboxes, importFromTxtLable, importFromTxtTooltip } = useInboxImporter(
+  emailGroupRef,
+  addNewRow
+)
 // #endregion
 </script>
 

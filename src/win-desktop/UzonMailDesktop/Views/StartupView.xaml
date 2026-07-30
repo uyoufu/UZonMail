@@ -5,31 +5,195 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:UzonMailDesktop.ViewModels"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance vm:StartupViewModel}">
-    <Grid Background="#F5F6F8">
-        <Border Width="560" Padding="28" Background="White" BorderBrush="#D9DDE3" BorderThickness="1" CornerRadius="6"
-                HorizontalAlignment="Center" VerticalAlignment="Center">
-            <StackPanel>
-                <TextBlock Text="启动检查" FontSize="22" FontWeight="SemiBold" Foreground="#20242A" />
-                <TextBlock Text="{Binding StatusMessage}" Margin="0,10,0,16" TextWrapping="Wrap" Foreground="#555D68" />
-                <ItemsControl ItemsSource="{Binding MissingPrerequisites}" Margin="0,0,0,14">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <DockPanel Margin="0,4">
-                                <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" Foreground="#C2413B" Margin="0,0,8,0" />
-                                <TextBlock Text="{Binding Name}" Foreground="#30353B" />
-                            </DockPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <ProgressBar Height="6" Minimum="0" Maximum="100" Value="{Binding ProgressValue}" Margin="0,0,0,18" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="重新检测" Command="{Binding RetryCommand}" Margin="0,0,8,0" MinWidth="88" />
-                    <Button Content="打开下载页" Command="{Binding OpenDownloadPageCommand}" Margin="0,0,8,0" MinWidth="96" />
-                    <Button Content="安装并继续" Command="{Binding InstallCommand}" Margin="0,0,8,0" MinWidth="104" />
-                    <Button Content="退出" Command="{Binding ExitCommand}" MinWidth="72" />
-                </StackPanel>
-            </StackPanel>
-        </Border>
+             d:DataContext="{d:DesignInstance vm:StartupViewModel}"
+             Loaded="OnLoaded">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="StartupCanvasBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="StartupSurfaceBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="StartupCardBorderBrush" Color="#E0E0E0" />
+        <Color x:Key="StartupCardShadowColor">#222F3E</Color>
+        <SolidColorBrush x:Key="StartupPrimaryBrush" Color="#7367F0" />
+        <SolidColorBrush x:Key="StartupOnPrimaryBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="StartupSecondaryTextBrush" Color="#3F3D56" />
+        <SolidColorBrush x:Key="StartupSecondaryBorderBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="StartupButtonHoverOverlayBrush" Color="#3F3D56" />
+        <SolidColorBrush x:Key="StartupDisabledBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="StartupDisabledTextBrush" Color="#8F8D9A" />
+        <SolidColorBrush x:Key="StartupIconSurfaceBrush" Color="#E8F8F0" />
+        <SolidColorBrush x:Key="StartupTitleBrush" Color="#222F3E" />
+        <SolidColorBrush x:Key="StartupSubtitleBrush" Color="#3F3D56" />
+        <SolidColorBrush x:Key="StartupStatusBrush" Color="#3F3D56" />
+        <SolidColorBrush x:Key="StartupProgressTrackBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="StartupWarningBrush" Color="#F5D000" />
+        <SolidColorBrush x:Key="StartupListTextBrush" Color="#3F3D56" />
+
+        <Style x:Key="SecondaryActionButton" TargetType="Button">
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="Foreground" Value="{StaticResource StartupSecondaryTextBrush}" />
+            <Setter Property="Background" Value="{StaticResource StartupSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource StartupSecondaryBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <Grid>
+                                <Border x:Name="HoverOverlay"
+                                        Background="{StaticResource StartupButtonHoverOverlayBrush}"
+                                        CornerRadius="5"
+                                        IsHitTestVisible="False"
+                                        Opacity="0" />
+                                <ContentPresenter Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.08" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.16" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource StartupDisabledTextBrush}" />
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource StartupDisabledBrush}" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource StartupCardBorderBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PrimaryActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="Foreground" Value="{StaticResource StartupOnPrimaryBrush}" />
+            <Setter Property="Background" Value="{StaticResource StartupPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource StartupPrimaryBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Storyboard x:Key="EntranceAnimation">
+            <DoubleAnimation Storyboard.TargetName="StartupCard"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0"
+                             To="1"
+                             Duration="0:0:0.32" />
+            <DoubleAnimation Storyboard.TargetName="StartupCard"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                             From="20"
+                             To="0"
+                             Duration="0:0:0.36">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource StartupCanvasBrush}">
+        <Grid Margin="32">
+            <Border x:Name="StartupCard"
+                    MaxWidth="680"
+                    Padding="40"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{StaticResource StartupSurfaceBrush}"
+                    BorderBrush="{StaticResource StartupCardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Opacity="0"
+                    RenderTransformOrigin="0.5,0.5">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" Direction="270" Opacity="0.08" ShadowDepth="6" Color="{StaticResource StartupCardShadowColor}" />
+                </Border.Effect>
+                <Border.RenderTransform>
+                    <TranslateTransform />
+                </Border.RenderTransform>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="44" Height="44" Background="{StaticResource StartupIconSurfaceBrush}" CornerRadius="8">
+                            <Image Source="/Resource/uzon-mail.ico" Stretch="Uniform" Margin="8" />
+                        </Border>
+                        <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StartupTitle}"
+                                       FontSize="26"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource StartupTitleBrush}" />
+                            <TextBlock Text="{Binding StartupSubtitle}"
+                                       Margin="0,5,0,0"
+                                       FontSize="14"
+                                       Foreground="{StaticResource StartupSubtitleBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,30,0,0">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   FontSize="15"
+                                   Foreground="{StaticResource StartupStatusBrush}"
+                                   TextWrapping="Wrap" />
+                        <Border Margin="0,14,0,0"
+                                Height="8"
+                                Background="{StaticResource StartupProgressTrackBrush}"
+                                CornerRadius="4"
+                                ClipToBounds="True">
+                            <ProgressBar Minimum="0"
+                                         Maximum="100"
+                                         Value="{Binding ProgressValue}"
+                                         IsIndeterminate="{Binding IsProgressIndeterminate}"
+                                         Foreground="{StaticResource StartupPrimaryBrush}"
+                                         Background="Transparent"
+                                         BorderThickness="0" />
+                        </Border>
+                    </StackPanel>
+
+                    <ItemsControl Grid.Row="2"
+                                  Margin="0,20,0,0"
+                                  ItemsSource="{Binding MissingPrerequisites}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,3">
+                                    <TextBlock Text="&#xE711;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               Foreground="{StaticResource StartupWarningBrush}"
+                                               Margin="0,0,8,0" />
+                                    <TextBlock Text="{Binding Name}" Foreground="{StaticResource StartupListTextBrush}" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel Grid.Row="3"
+                                Margin="0,30,0,0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                        <Button Content="{Binding RetryButtonText}"
+                                Command="{Binding RetryCommand}"
+                                Style="{StaticResource SecondaryActionButton}" />
+                        <Button Content="{Binding OpenDownloadPageButtonText}"
+                                Command="{Binding OpenDownloadPageCommand}"
+                                Visibility="{Binding HasMissingPrerequisites, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                Style="{StaticResource SecondaryActionButton}" />
+                        <Button Content="{Binding InstallAndContinueButtonText}"
+                                Command="{Binding InstallCommand}"
+                                Visibility="{Binding HasMissingPrerequisites, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                Style="{StaticResource PrimaryActionButton}" />
+                        <Button Content="{Binding ExitButtonText}"
+                                Command="{Binding ExitCommand}"
+                                Style="{StaticResource SecondaryActionButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

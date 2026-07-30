@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using UzonMail.CorePlugin.Services.Files;
 using UzonMail.DB.SQL;
+using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.DB.SQL.Core.Files;
 using UzonMail.Utils.Json;
@@ -17,12 +18,14 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
     /// <param name="maxSendingBatchSize">合并发件的最大收件人数。</param>
     /// <param name="allowDuplicateSending">是否保留 Excel 中的重复收件行。</param>
     /// <param name="excelAttachments">已由创建服务校验过的 Excel 附件映射。</param>
+    /// <param name="organizationId">当前发件用户所属组织，用于过滤组织内无效收件箱。</param>
     public class SendingItemsBuilder(
         SqlContext db,
         SendingGroup group,
         int maxSendingBatchSize,
         bool allowDuplicateSending,
-        IReadOnlyDictionary<string, FileUsage> excelAttachments
+        IReadOnlyDictionary<string, FileUsage> excelAttachments,
+        long organizationId
     )
     {
         /// <summary>
@@ -141,9 +144,17 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             if (group.InboxGroups?.Count > 0)
             {
                 var groupIds = group.InboxGroups.Select(x => x.Id).ToList();
+                var invalidInboxEmails = db
+                    .Inboxes.IgnoreQueryFilters()
+                    .Where(x =>
+                        x.OrganizationId == organizationId && x.Status == InboxStatus.Invalid
+                    )
+                    .Select(x => x.Email);
                 var temps = await db
                     .Inboxes.AsNoTracking()
-                    .Where(x => groupIds.Contains(x.EmailGroupId))
+                    .Where(x =>
+                        groupIds.Contains(x.EmailGroupId) && !invalidInboxEmails.Contains(x.Email)
+                    )
                     .ToListAsync();
                 inboxes.AddRange(
                     temps.ConvertAll(x =>

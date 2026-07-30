@@ -7,6 +7,7 @@ import { useSessionStorage } from '@vueuse/core'
  * at once using the import syntax
  */
 import { messages } from 'src/i18n'
+import { getDesktopLocale, resolveSupportedLocale } from 'src/i18n/desktopLocale'
 
 export type MessageLanguages = keyof typeof messages
 // Type-define 'en-US' as the master schema for the resource
@@ -26,14 +27,20 @@ declare module 'vue-i18n' {
 }
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 
-function getDefaultLocale (): string {
-  // 判断 session 中是否有 locale，若有，则使用 session 中的 locale
-  const browserLang = useSessionStorage('locale', '').value
-  if (!browserLang) return 'zh-CN'
+export function getDefaultLocale (): string {
+  const storedLocale = useSessionStorage('locale', '')
+  const desktopLocale = getDesktopLocale()
+  if (desktopLocale) {
+    // 桌面端配置需要同时成为本次 WebView 会话的单一语言来源
+    storedLocale.value = desktopLocale
+    return desktopLocale
+  }
 
-  const messagesKeys = Object.keys(messages)
-  const browserLangKey = messagesKeys.find(key => key.startsWith(browserLang))
-  return browserLangKey || 'zh-CN'
+  const browserLocale = resolveSupportedLocale(storedLocale.value)
+    ?? (storedLocale.value
+      ? Object.keys(messages).find(key => key.startsWith(storedLocale.value))
+      : undefined)
+  return browserLocale || 'zh-CN'
 }
 
 export const i18n = createI18n({

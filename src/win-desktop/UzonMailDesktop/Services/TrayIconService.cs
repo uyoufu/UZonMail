@@ -2,16 +2,22 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
+using UzonMailDesktop.Localization;
 using Application = System.Windows.Application;
 using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
 
 namespace UzonMailDesktop.Services;
 
-internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconService> logger)
-    : ITrayIconService
+internal sealed class TrayIconService(
+    IDialogService dialogs,
+    ILogger<TrayIconService> logger,
+    IDesktopLocalizationService localization
+) : ITrayIconService
 {
     private NotifyIcon? _notifyIcon;
     private Window? _window;
+    private ToolStripMenuItem? _openMenuItem;
+    private ToolStripMenuItem? _exitMenuItem;
     private bool _exiting;
 
     public void Start(Window window)
@@ -23,13 +29,23 @@ internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconSe
         _window.Closing += OnWindowClosing;
 
         var menu = new ContextMenuStrip();
-        menu.Items.Add("打开", null, (_, _) => ShowWindow());
-        menu.Items.Add("退出", null, (_, _) => Exit());
+        _openMenuItem =
+            menu.Items.Add(
+                localization.GetText(DesktopTextKey.TrayOpen),
+                null,
+                (_, _) => ShowWindow()
+            ) as ToolStripMenuItem;
+        _exitMenuItem =
+            menu.Items.Add(localization.GetText(DesktopTextKey.TrayExit), null, (_, _) => Exit())
+            as ToolStripMenuItem;
 
         using var iconStream =
             Application
                 .GetResourceStream(new Uri("pack://application:,,,/Resource/uzon-mail.ico"))
-                ?.Stream ?? throw new InvalidOperationException("托盘图标资源缺失。");
+                ?.Stream
+            ?? throw new InvalidOperationException(
+                localization.GetText(DesktopTextKey.TrayIconResourceMissing)
+            );
         using var sourceIcon = new Icon(iconStream);
 
         _notifyIcon = new NotifyIcon
@@ -40,6 +56,7 @@ internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconSe
             ContextMenuStrip = menu
         };
         _notifyIcon.MouseClick += OnMouseClick;
+        localization.LocaleChanged += OnLocaleChanged;
         logger.LogInformation("System tray icon started");
     }
 
@@ -82,7 +99,12 @@ internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconSe
 
     private void Exit()
     {
-        if (!dialogs.Confirm("即将退出宇正群邮，是否继续？", "温馨提醒"))
+        if (
+            !dialogs.Confirm(
+                localization.GetText(DesktopTextKey.TrayExitConfirmationMessage),
+                localization.GetText(DesktopTextKey.TrayExitConfirmationTitle)
+            )
+        )
             return;
 
         _exiting = true;
@@ -92,6 +114,7 @@ internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconSe
 
     public void Dispose()
     {
+        localization.LocaleChanged -= OnLocaleChanged;
         if (_window is not null)
             _window.Closing -= OnWindowClosing;
 
@@ -106,6 +129,23 @@ internal sealed class TrayIconService(IDialogService dialogs, ILogger<TrayIconSe
 
         _notifyIcon = null;
         _window = null;
+        _openMenuItem = null;
+        _exitMenuItem = null;
+    }
+
+    private void OnLocaleChanged(object? sender, EventArgs e)
+    {
+        Application.Current.Dispatcher.BeginInvoke(
+            new Action(() =>
+            {
+                if (_openMenuItem is not null)
+                    _openMenuItem.Text = localization.GetText(DesktopTextKey.TrayOpen);
+                if (_exitMenuItem is not null)
+                    _exitMenuItem.Text = localization.GetText(DesktopTextKey.TrayExit);
+                if (_notifyIcon is not null && _window is not null)
+                    _notifyIcon.Text = Truncate(_window.Title, 63);
+            })
+        );
     }
 
     private static string Truncate(string value, int maximumLength) =>

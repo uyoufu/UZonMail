@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Web.WebView2.Core;
 using UzonMailDesktop.Configuration;
+using UzonMailDesktop.Localization;
 
 namespace UzonMailDesktop.Services;
 
@@ -22,24 +23,27 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
     private readonly BackendOptions _backend;
     private readonly PrerequisiteOptions _options;
     private readonly ILogger<PrerequisiteService> _logger;
+    private readonly IDesktopLocalizationService _localization;
     private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(10) };
 
     public PrerequisiteService(
         IOptions<BackendOptions> backend,
         IOptions<PrerequisiteOptions> options,
-        ILogger<PrerequisiteService> logger
+        ILogger<PrerequisiteService> logger,
+        IDesktopLocalizationService localization
     )
     {
         _backend = backend.Value;
         _options = options.Value;
         _logger = logger;
+        _localization = localization;
     }
 
     public async Task<IReadOnlyList<PrerequisiteItem>> DetectAsync(
         CancellationToken cancellationToken = default
     )
     {
-        var requiredFrameworks = RuntimeConfigReader.Read(_backend);
+        var requiredFrameworks = RuntimeConfigReader.Read(_backend, _localization);
         var installedFrameworks = await ReadInstalledFrameworksAsync(cancellationToken);
         var results = new List<PrerequisiteItem>();
 
@@ -110,16 +114,16 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
                         p =>
                             progress?.Report(
                                 new InstallProgress(
-                                    "正在下载 WebView2...",
+                                    _localization.GetText(DesktopTextKey.StartupDownloadWebView),
                                     basePercentage + p * stepPercentage
                                 )
                             ),
                         cancellationToken
                     );
-                    ValidateMicrosoftSignature(webViewInstallerPath);
+                    ValidateMicrosoftSignature(webViewInstallerPath, _localization);
                     progress?.Report(
                         new InstallProgress(
-                            "正在安装 WebView2...",
+                            _localization.GetText(DesktopTextKey.StartupInstallWebView),
                             basePercentage + stepPercentage * 0.95
                         )
                     );
@@ -134,7 +138,9 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
 
                 var requiredVersion =
                     item.RequiredVersion
-                    ?? throw new InvalidOperationException($"{item.Name} 未声明所需版本。");
+                    ?? throw new InvalidOperationException(
+                        _localization.GetText(DesktopTextKey.PrerequisiteVersionMissing, item.Name)
+                    );
                 var channel = $"{requiredVersion.Major}.{requiredVersion.Minor}";
                 if (!metadataCache.TryGetValue(channel, out var metadata))
                 {
@@ -148,7 +154,7 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
                     metadataCache[channel] = metadata;
                 }
 
-                var package = SelectInstaller(metadata.RootElement, item.Id);
+                var package = SelectInstaller(metadata.RootElement, item.Id, _localization);
                 var installerPath = Path.Combine(temporaryDirectory, package.FileName);
                 await DownloadAsync(
                     package.Url,
@@ -156,16 +162,22 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
                     p =>
                         progress?.Report(
                             new InstallProgress(
-                                $"正在下载 {item.Name}...",
+                                _localization.GetText(
+                                    DesktopTextKey.StartupDownloadingPrerequisite,
+                                    item.Name
+                                ),
                                 basePercentage + p * stepPercentage
                             )
                         ),
                     cancellationToken
                 );
-                ValidateSha512(installerPath, package.Hash);
+                ValidateSha512(installerPath, package.Hash, _localization);
                 progress?.Report(
                     new InstallProgress(
-                        $"正在安装 {item.Name}...",
+                        _localization.GetText(
+                            DesktopTextKey.StartupInstallingPrerequisite,
+                            item.Name
+                        ),
                         basePercentage + stepPercentage * 0.95
                     )
                 );
@@ -178,7 +190,12 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
                 );
             }
 
-            progress?.Report(new InstallProgress("依赖安装完成，正在重新检测...", 100));
+            progress?.Report(
+                new InstallProgress(
+                    _localization.GetText(DesktopTextKey.StartupPrerequisitesInstalled),
+                    100
+                )
+            );
         }
         finally
         {
@@ -263,7 +280,11 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         }
     }
 
-    internal static InstallerPackage SelectInstaller(JsonElement root, string prerequisiteId)
+    internal static InstallerPackage SelectInstaller(
+        JsonElement root,
+        string prerequisiteId,
+        IDesktopLocalizationService localization
+    )
     {
         var releases = root.GetProperty("releases")
             .EnumerateArray()
@@ -294,7 +315,9 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
             }
         }
 
-        throw new InvalidOperationException($"未在微软发布元数据中找到 {componentName} 的 win-x64 安装器。");
+        throw new InvalidOperationException(
+            localization.GetText(DesktopTextKey.PrerequisiteInstallerNotFound, componentName)
+        );
     }
 
     private async Task DownloadAsync(
@@ -334,18 +357,32 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         }
     }
 
-    private static void ValidateSha512(string filePath, string expectedHash)
+    private static void ValidateSha512(
+        string filePath,
+        string expectedHash,
+        IDesktopLocalizationService localization
+    )
     {
         using var stream = File.OpenRead(filePath);
         var actualHash = Convert.ToHexString(SHA512.HashData(stream));
         if (!actualHash.Equals(expectedHash, StringComparison.OrdinalIgnoreCase))
-            throw new CryptographicException($"安装器校验失败：{Path.GetFileName(filePath)}");
+            throw new CryptographicException(
+                localization.GetText(
+                    DesktopTextKey.PrerequisiteInstallerValidationFailed,
+                    Path.GetFileName(filePath)
+                )
+            );
     }
 
-    private static void ValidateMicrosoftSignature(string filePath)
+    private static void ValidateMicrosoftSignature(
+        string filePath,
+        IDesktopLocalizationService localization
+    )
     {
         if (!AuthenticodeVerifier.IsTrusted(filePath))
-            throw new CryptographicException("WebView2 安装器的 Authenticode 签名无效。");
+            throw new CryptographicException(
+                localization.GetText(DesktopTextKey.PrerequisiteInstallerSignatureInvalid)
+            );
 
 #pragma warning disable SYSLIB0057
         var certificate = X509Certificate.CreateFromSignedFile(filePath);
@@ -357,10 +394,12 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
                 StringComparison.OrdinalIgnoreCase
             )
         )
-            throw new CryptographicException("WebView2 安装器不是由 Microsoft Corporation 签名的。");
+            throw new CryptographicException(
+                localization.GetText(DesktopTextKey.PrerequisiteInstallerPublisherInvalid)
+            );
     }
 
-    private static async Task RunInstallerAsync(
+    private async Task RunInstallerAsync(
         string filePath,
         CancellationToken cancellationToken,
         params string[] arguments
@@ -379,14 +418,26 @@ internal sealed class PrerequisiteService : IPrerequisiteService, IDisposable
         try
         {
             using var process =
-                Process.Start(startInfo) ?? throw new InvalidOperationException("安装器未能启动。");
+                Process.Start(startInfo)
+                ?? throw new InvalidOperationException(
+                    _localization.GetText(DesktopTextKey.PrerequisiteInstallerStartFailed)
+                );
             await process.WaitForExitAsync(cancellationToken);
             if (process.ExitCode is not 0 and not 3010)
-                throw new InvalidOperationException($"安装器返回错误代码 {process.ExitCode}。");
+                throw new InvalidOperationException(
+                    _localization.GetText(
+                        DesktopTextKey.PrerequisiteInstallerExitCode,
+                        process.ExitCode
+                    )
+                );
         }
         catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
         {
-            throw new OperationCanceledException("用户取消了管理员授权。", exception, cancellationToken);
+            throw new OperationCanceledException(
+                _localization.GetText(DesktopTextKey.PrerequisiteAdministratorCanceled),
+                exception,
+                cancellationToken
+            );
         }
     }
 

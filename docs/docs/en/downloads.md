@@ -5,6 +5,53 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.23.1
+
+> Release Date: 2026-07-30
+
+### New Features
+
+1. Runtime theme switching: support switching between default theme and Cherry Blossom Romance theme
+2. Desktop application localization: complete localization infrastructure for Windows desktop app with bidirectional Chinese/English sync
+3. Organization-level inbox validity management: batch mark inboxes as valid or invalid across organization users
+4. Batch move email boxes: support batch moving inboxes and outboxes to target groups
+5. Batch soft-delete selected inboxes: multi-select soft delete with validation status display in table
+6. Desktop application auto-updater: CLI tooling and WebView2 integrated automatic update capability
+7. Hard bounce detection and inbox verification system: SMTP status codes 550/551/553 automatically identified as hard bounces
+8. API error localization: key-based API error localization system
+9. Allow duplicate sending: support sending multiple emails to same recipient in single task with duplicate detection
+10. DraggableTree component: hierarchical data with drag-and-drop, context menus, and controlled tree state
+11. File storage redesign: categories, content-addressable storage, and reference counting
+12. Desktop app refactoring: migrated to new location with CommunityToolkit.Mvvm framework
+
+### Improvements
+
+1. Theme renamed from Fairy Pink to Cherry Blossom Romance
+2. Inbox manager template formatting cleanup, invalid import button added red visual indicator
+3. Plugin loading supports shared assembly directory
+4. Unified build scripts, exclude hard bounce items from sending queries
+5. i18n extended to all UI pages and components
+6. Context menu visibility conditions based on selection count
+7. WYSIWYG editor support for lowCode forms
+8. Status labels resolved through i18n system
+
+### Bug Fixes
+
+1. Fix WSL path conversion with proper Bash quoting
+2. Fix email verification order and add SPF/unknown-state tests
+3. Fix property name disableAutogrow to disableAutoGrow
+4. Fix SendCore bugs and improve async lifecycle handling
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.23.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.1.0.zip)
+
+[uzonmail-service-win-x64-0.23.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.1.0.zip)
+
+[uzonmail-service-linux-x64-0.23.1.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.1.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.0
 
 > Release Date: 2026-07-28

@@ -40,6 +40,12 @@ namespace UzonMail.CorePlugin.Services.SendCore
             }
 
             sendingGroupData.Data = await FormatExcelData(sendingGroupData.Data, userId);
+            var organizationId = await db
+                .Users.AsNoTracking()
+                .Where(x => x.Id == userId)
+                .Select(x => x.OrganizationId)
+                .SingleAsync();
+            await FilterInvalidInboxes(sendingGroupData, organizationId);
             await ValidateOutboxes(userId, sendingGroupData);
 
             await db.RunTransaction(async ctx =>
@@ -94,16 +100,19 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 ctx.SendingGroups.Add(sendingGroupData);
                 await ctx.SaveChangesAsync();
 
-                await SaveInboxes(sendingGroupData.Data, sendingGroupData.UserId);
+                await SaveInboxes(sendingGroupData.Data, sendingGroupData.UserId, organizationId);
 
                 var builder = new SendingItemsBuilder(
                     ctx,
                     sendingGroupData,
                     orgSetting.MaxSendingBatchSize,
                     orgSetting.AllowDuplicateSending,
-                    excelAttachments
+                    excelAttachments,
+                    organizationId
                 );
                 var items = await builder.GenerateAndSave();
+                if (items.Count == 0)
+                    throw new KnownException("没有可发送的有效收件箱");
 
                 sendingGroupData.TotalCount = items.Count;
                 await UpdateOutboxCountFromGroups(sendingGroupData);
@@ -183,6 +192,51 @@ namespace UzonMail.CorePlugin.Services.SendCore
             }
 
             return results;
+        }
+
+        /// <summary>
+        /// 移除直选和 Excel 中已被当前组织标记为无效的收件箱
+        /// 收件组在生成发送项时展开，因此由生成器使用同一组织条件过滤
+        /// </summary>
+        private async Task FilterInvalidInboxes(SendingGroup sendingGroupData, long organizationId)
+        {
+            var inboxEmails = sendingGroupData
+                .Inboxes.Select(x => x.Email)
+                .Concat(
+                    sendingGroupData
+                        .Data?.OfType<JObject>()
+                        .Select(x => x.SelectTokenOrDefault("inbox", string.Empty) ?? string.Empty)
+                        ?? []
+                )
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (inboxEmails.Count == 0)
+                return;
+
+            var invalidEmails = (
+                await db
+                    .Inboxes.AsNoTracking()
+                    .IgnoreQueryFilters()
+                    .Where(x =>
+                        x.OrganizationId == organizationId
+                        && x.Status == InboxStatus.Invalid
+                        && inboxEmails.Contains(x.Email)
+                    )
+                    .Select(x => x.Email)
+                    .ToListAsync()
+            ).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (invalidEmails.Count == 0)
+                return;
+
+            sendingGroupData.Inboxes.RemoveAll(x => invalidEmails.Contains(x.Email));
+            foreach (var data in sendingGroupData.Data?.OfType<JObject>().ToList() ?? [])
+            {
+                var inboxEmail = data.SelectTokenOrDefault("inbox", string.Empty) ?? string.Empty;
+                if (invalidEmails.Contains(inboxEmail.Trim()))
+                    data.Remove();
+            }
         }
 
         private async Task ValidateOutboxes(long userId, SendingGroup sendingGroupData)
@@ -314,7 +368,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
             return resolved;
         }
 
-        private async Task SaveInboxes(JArray? data, long userId)
+        private async Task SaveInboxes(JArray? data, long userId, long organizationId)
         {
             if (data == null)
                 return;
@@ -357,6 +411,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 {
                     Email = email,
                     UserId = userId,
+                    OrganizationId = organizationId,
                     EmailGroupId = defaultInboxGroup.Id
                 };
                 inbox.SetStatusNormal();

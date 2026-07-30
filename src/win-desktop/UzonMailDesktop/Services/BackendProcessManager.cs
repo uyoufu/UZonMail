@@ -4,6 +4,7 @@ using System.Net.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UzonMailDesktop.Configuration;
+using UzonMailDesktop.Localization;
 
 namespace UzonMailDesktop.Services;
 
@@ -11,16 +12,19 @@ internal sealed class BackendProcessManager : IBackendProcessManager
 {
     private readonly BackendOptions _options;
     private readonly ILogger<BackendProcessManager> _logger;
+    private readonly IDesktopLocalizationService _localization;
     private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(3) };
     private Process? _process;
 
     public BackendProcessManager(
         IOptions<BackendOptions> options,
-        ILogger<BackendProcessManager> logger
+        ILogger<BackendProcessManager> logger,
+        IDesktopLocalizationService localization
     )
     {
         _options = options.Value;
         _logger = logger;
+        _localization = localization;
     }
 
     public bool OwnsProcess => _process is { HasExited: false };
@@ -37,13 +41,21 @@ internal sealed class BackendProcessManager : IBackendProcessManager
 
         var executablePath = ResolvePath(_options.ExecutablePath);
         if (!File.Exists(executablePath))
-            throw new FileNotFoundException("配置的后端程序不存在。", executablePath);
+            throw new FileNotFoundException(
+                _localization.GetText(DesktopTextKey.BackendExecutableNotFound),
+                executablePath
+            );
 
         var workingDirectory = string.IsNullOrWhiteSpace(_options.WorkingDirectory)
             ? Path.GetDirectoryName(executablePath)!
             : ResolvePath(_options.WorkingDirectory);
         if (!Directory.Exists(workingDirectory))
-            throw new DirectoryNotFoundException($"配置的后端工作目录不存在：{workingDirectory}");
+            throw new DirectoryNotFoundException(
+                _localization.GetText(
+                    DesktopTextKey.BackendWorkingDirectoryNotFound,
+                    workingDirectory
+                )
+            );
 
         var startInfo = new ProcessStartInfo
         {
@@ -72,7 +84,9 @@ internal sealed class BackendProcessManager : IBackendProcessManager
         };
 
         if (!_process.Start())
-            throw new InvalidOperationException("后端程序未能启动。");
+            throw new InvalidOperationException(
+                _localization.GetText(DesktopTextKey.BackendProcessStartFailed)
+            );
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
 
@@ -82,14 +96,18 @@ internal sealed class BackendProcessManager : IBackendProcessManager
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (_process.HasExited)
-                throw new InvalidOperationException($"后端程序已退出，退出码：{_process.ExitCode}。");
+                throw new InvalidOperationException(
+                    _localization.GetText(DesktopTextKey.BackendProcessExited, _process.ExitCode)
+                );
             if (await IsReadyAsync(cancellationToken))
                 return;
             await Task.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
         }
 
         await StopOwnedProcessAsync();
-        throw new TimeoutException($"后端在 {timeout.TotalSeconds:0} 秒内未就绪。");
+        throw new TimeoutException(
+            _localization.GetText(DesktopTextKey.BackendStartupTimedOut, timeout.TotalSeconds)
+        );
     }
 
     public async Task StopAsync()

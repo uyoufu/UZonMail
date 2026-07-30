@@ -2,8 +2,16 @@ interface Window {
   chrome?: {
     webview?: {
       hostObjects?: {
+        sync?: {
+          uzonMailLocale?: {
+            GetCurrentLocale: () => string
+          }
+        }
         uzonMailUpdater?: {
-          beginUpdate: () => Promise<boolean>
+          BeginUpdate: () => Promise<boolean>
+        }
+        uzonMailLocale?: {
+          SetCurrentLocale: (locale: string) => Promise<boolean>
         }
       }
     }

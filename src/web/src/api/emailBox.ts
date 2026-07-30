@@ -5,22 +5,28 @@ import type { IRequestPagination } from 'src/compositions/types'
  * 收件箱
  */
 export interface IInbox {
-  id?: number,
-  objectId?: string,
-  emailGroupId?: number,
-  userId?: number,
-  email: string,
-  name?: string,
-  minInboxCooldownHours?: number,
-  description?: string,
-  status?: InboxStatus,
+  id?: number
+  objectId?: string
+  emailGroupId?: number
+  userId?: number
+  email: string
+  name?: string
+  minInboxCooldownHours?: number
+  description?: string
+  status?: InboxStatus
   validFailReason?: string
 }
 
 /** 批量移动邮箱到目标分组的请求 */
 export interface IMoveEmailBoxesRequest {
-  emailBoxIds: number[],
+  emailBoxIds: number[]
   targetGroupId: number
+}
+
+/** 批量更新收件箱状态的请求 */
+export interface IUpdateInboxesStatusRequest {
+  inboxIds: number[]
+  status: InboxStatus
 }
 
 /** 收件箱验证状态 */
@@ -31,7 +37,7 @@ export const InboxStatus = {
   Valid: 200
 } as const
 
-export type InboxStatus = typeof InboxStatus[keyof typeof InboxStatus]
+export type InboxStatus = (typeof InboxStatus)[keyof typeof InboxStatus]
 
 export enum OutboxStatus {
   /// <summary>
@@ -47,7 +53,7 @@ export enum OutboxStatus {
   /// <summary>
   /// 不可用
   /// </summary>
-  Invalid,
+  Invalid
 }
 
 export enum ConnectionSecurity {
@@ -66,27 +72,27 @@ export enum OutboxType {
   /// <summary>
   /// MsGraph OAuth 认证
   /// </summary>
-  MsGraph,
+  MsGraph
 }
 
 /**
  * 发件箱
  */
 export interface IOutbox extends IInbox {
-  type: OutboxType,
-  smtpHost: string,
-  smtpPort?: number,
-  userName?: string,
-  password: string,
-  proxyId?: number,
+  type: OutboxType
+  smtpHost: string
+  smtpPort?: number
+  userName?: string
+  password: string
+  proxyId?: number
   // 是否显示密码
-  showPassword?: boolean,
+  showPassword?: boolean
   // 密码已解密
-  decryptedPassword?: boolean,
-  replyToEmails?: string,
+  decryptedPassword?: boolean
+  replyToEmails?: string
   // enableSSL: boolean, // 是否使用 ssl
-  connectionSecurity: ConnectionSecurity, // 安全套接字选项
-  isValid?: boolean,
+  connectionSecurity: ConnectionSecurity // 安全套接字选项
+  isValid?: boolean
   status?: OutboxStatus
   validFailReason?: string
 }
@@ -97,7 +103,7 @@ export interface IOutbox extends IInbox {
  * @param secretKey 用于加密 smtp 的密码
  * @returns
  */
-export function createOutbox (outbox: IOutbox) {
+export function createOutbox(outbox: IOutbox) {
   return httpClient.post<IOutbox>('/email-box/outbox', {
     data: outbox
   })
@@ -108,7 +114,7 @@ export function createOutbox (outbox: IOutbox) {
  * @param outboxes
  * @returns
  */
-export function createOutboxes (outboxes: IOutbox[]) {
+export function createOutboxes(outboxes: IOutbox[]) {
   return httpClient.post<IOutbox[]>('/email-box/outboxes', {
     data: outboxes
   })
@@ -119,19 +125,19 @@ export function createOutboxes (outboxes: IOutbox[]) {
  * @param outbox
  * @returns
  */
-export function updateOutbox (outboxId: number, outbox: IOutbox) {
+export function updateOutbox(outboxId: number, outbox: IOutbox) {
   return httpClient.put<IOutbox[]>(`/email-box/outbox/${outboxId}`, {
     data: outbox
   })
 }
 
 /** 批量移动发件箱到目标分组 */
-export function moveOutboxesToGroup (request: IMoveEmailBoxesRequest) {
+export function moveOutboxesToGroup(request: IMoveEmailBoxesRequest) {
   return httpClient.put<boolean>('/email-box/outboxes/group', { data: request })
 }
 
 // #region outlook 个人用户委托授权
-export function startOutlookDelegateAuthorization (outboxId: number) {
+export function startOutlookDelegateAuthorization(outboxId: number) {
   return httpClient.post<string>(`/outlook-authorization/${outboxId}`)
 }
 // #endregion
@@ -142,17 +148,16 @@ export function startOutlookDelegateAuthorization (outboxId: number) {
  * @param outbox
  * @returns
  */
-export function validateOutbox (outboxId: number) {
+export function validateOutbox(outboxId: number) {
   return httpClient.put<boolean>(`/email-box/outbox/${outboxId}/validation`)
 }
-
 
 /**
  * 获取发件邮箱数量
  * @param groupId
  * @param filter
  */
-export function getOutboxesCount (groupId: number | undefined, filter?: string) {
+export function getOutboxesCount(groupId: number | undefined, filter?: string) {
   return httpClient.get<number>('/email-box/outbox/filtered-count', {
     params: {
       groupId,
@@ -168,7 +173,11 @@ export function getOutboxesCount (groupId: number | undefined, filter?: string) 
  * @param pagination
  * @returns
  */
-export function getOutboxesData (groupId: number | undefined, filter: string | undefined, pagination: IRequestPagination) {
+export function getOutboxesData(
+  groupId: number | undefined,
+  filter: string | undefined,
+  pagination: IRequestPagination
+) {
   return httpClient.post<IOutbox[]>('/email-box/outbox/filtered-data', {
     params: {
       groupId,
@@ -183,7 +192,7 @@ export function getOutboxesData (groupId: number | undefined, filter: string | u
  * @param outboxId
  * @returns
  */
-export function getOutboxInfo (outboxId: number) {
+export function getOutboxInfo(outboxId: number) {
   return httpClient.get<IOutbox>(`/email-box/outboxes/${outboxId}`)
 }
 
@@ -192,7 +201,7 @@ export function getOutboxInfo (outboxId: number) {
  * @param emailBoxId
  * @returns
  */
-export function deleteOutboxById (emailBoxId: number) {
+export function deleteOutboxById(emailBoxId: number) {
   return httpClient.delete<boolean>(`/email-box/outboxes/${emailBoxId}`)
 }
 
@@ -201,7 +210,7 @@ export function deleteOutboxById (emailBoxId: number) {
  * @param emailBoxIds 字符串 _id
  * @returns
  */
-export function deleteOutboxByIds (emailBoxIds: string[]) {
+export function deleteOutboxByIds(emailBoxIds: string[]) {
   return httpClient.delete<boolean>('/email-box/outboxes/ids', {
     data: emailBoxIds
   })
@@ -212,7 +221,7 @@ export function deleteOutboxByIds (emailBoxIds: string[]) {
  * @param groupId
  * @param filter
  */
-export function getInboxesCount (groupId: number | undefined, filter?: string) {
+export function getInboxesCount(groupId: number | undefined, filter?: string) {
   return httpClient.get<number>('/email-box/inbox/filtered-count', {
     params: {
       groupId,
@@ -225,7 +234,7 @@ export function getInboxesCount (groupId: number | undefined, filter?: string) {
  * 获取当前用户组内的收件箱数量
  * @param groupIds
  */
-export function getInboxesCountInGroups (groupIds: number[]) {
+export function getInboxesCountInGroups(groupIds: number[]) {
   return httpClient.get<number>(`/email-box/inboxes/count?groupIds=${groupIds.join(',')}`)
 }
 
@@ -236,7 +245,11 @@ export function getInboxesCountInGroups (groupIds: number[]) {
  * @param pagination
  * @returns
  */
-export function getInboxesData (groupId: number | undefined, filter: string | undefined, pagination: IRequestPagination) {
+export function getInboxesData(
+  groupId: number | undefined,
+  filter: string | undefined,
+  pagination: IRequestPagination
+) {
   return httpClient.post<IInbox[]>('/email-box/inbox/filtered-data', {
     params: {
       groupId,
@@ -251,7 +264,7 @@ export function getInboxesData (groupId: number | undefined, filter: string | un
  * @param groupIds
  * @returns
  */
-export function getGroupsInboxes (groupIds: number[]) {
+export function getGroupsInboxes(groupIds: number[]) {
   return httpClient.get<IInbox[]>('/email-box/inbox/groups-data', {
     params: {
       groupIds: groupIds.join(',') // ?groupIds=1,2,3
@@ -259,14 +272,13 @@ export function getGroupsInboxes (groupIds: number[]) {
   })
 }
 
-
 /**
  * 获取组内的发件箱
  * 但是密码不会下发
  * @param groupIds
  * @returns
  */
-export function getGroupsOutboxes (groupIds: number[]) {
+export function getGroupsOutboxes(groupIds: number[]) {
   return httpClient.get<IOutbox[]>('/email-box/outbox/groups-data', {
     params: {
       groupIds: groupIds.join(',') // ?groupIds=1,2,3
@@ -274,13 +286,12 @@ export function getGroupsOutboxes (groupIds: number[]) {
   })
 }
 
-
 /**
  * 通过 id 删除邮箱
  * @param emailBoxId
  * @returns
  */
-export function deleteInboxById (emailBoxId: number) {
+export function deleteInboxById(emailBoxId: number) {
   return httpClient.delete<boolean>(`/email-box/inboxes/${emailBoxId}`)
 }
 
@@ -289,7 +300,7 @@ export function deleteInboxById (emailBoxId: number) {
  * @param inboxObjectIds 收件箱对象 ID
  * @returns
  */
-export function deleteInboxByIds (inboxObjectIds: string[]) {
+export function deleteInboxByIds(inboxObjectIds: string[]) {
   return httpClient.delete<boolean>('/email-box/inboxes/ids', {
     data: inboxObjectIds
   })
@@ -300,7 +311,7 @@ export function deleteInboxByIds (inboxObjectIds: string[]) {
  * @param outbox
  * @returns
  */
-export function createInbox (outbox: IInbox) {
+export function createInbox(outbox: IInbox) {
   return httpClient.post<IInbox>('/email-box/inbox', {
     data: outbox
   })
@@ -311,7 +322,7 @@ export function createInbox (outbox: IInbox) {
  * @param outbox
  * @returns
  */
-export function createUngroupedInbox (outbox: IInbox) {
+export function createUngroupedInbox(outbox: IInbox) {
   return httpClient.post<IInbox>('/email-box/inbox/ungrouped', {
     data: outbox
   })
@@ -322,7 +333,7 @@ export function createUngroupedInbox (outbox: IInbox) {
  * @param outboxes
  * @returns
  */
-export function createInboxes (outboxes: IInbox[]) {
+export function createInboxes(outboxes: IInbox[]) {
   return httpClient.post<IInbox[]>('/email-box/inboxes', {
     data: outboxes
   })
@@ -334,13 +345,20 @@ export function createInboxes (outboxes: IInbox[]) {
  * @param inbox
  * @returns
  */
-export function updateInbox (inboxId: number, inbox: IInbox) {
+export function updateInbox(inboxId: number, inbox: IInbox) {
   return httpClient.put<IInbox[]>(`/email-box/inbox/${inboxId}`, {
     data: inbox
   })
 }
 
+/** 批量更新收件箱状态 */
+export function updateInboxesStatus(request: IUpdateInboxesStatusRequest) {
+  return httpClient.put<boolean>('/email-box/inboxes/status', {
+    data: request
+  })
+}
+
 /** 批量移动收件箱到目标分组 */
-export function moveInboxesToGroup (request: IMoveEmailBoxesRequest) {
+export function moveInboxesToGroup(request: IMoveEmailBoxesRequest) {
   return httpClient.put<boolean>('/email-box/inboxes/group', { data: request })
 }

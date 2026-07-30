@@ -15,6 +15,7 @@
     <ProjectReference Include="..\..\src\api\UzonMailService\UzonMailService.csproj" />
     <ProjectReference Include="..\..\src\api\UzonMailUtils\UzonMailUtils.csproj" />
     <ProjectReference Include="..\..\src\updater\UzonMailUpdater\UzonMailUpdater.csproj" />
+    <ProjectReference Include="..\..\src\win-desktop\UzonMailDesktop\UzonMailDesktop.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

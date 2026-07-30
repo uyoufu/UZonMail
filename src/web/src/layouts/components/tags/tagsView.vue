@@ -102,7 +102,7 @@ const drag = ref(false)
 <style lang="scss" scoped>
 .route-tag {
   &:hover {
-    background-color: $primary;
+    background-color: var(--q-primary);
   }
 }
 </style>

@@ -26,7 +26,7 @@
     "hash值": "文件路径"
   },
   // 根据这个地址去请求最新版本的更新包信息
-  "endpoint": "https://uzonmail.uzoncalc.com/updates/latest.json",
+  "endpoint": "https://uzonmail.uzoncloud.com/updates/latest.json",
   // 文件来源
   "sourceType": "static",
   "zipUrl": "压缩包下载地址",
