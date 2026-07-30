@@ -69,7 +69,7 @@ export default {
     calculatingFileHash: 'Calculating hash for {fileName}',
     clear: 'Clear',
     defaultTheme: 'Default theme',
-    fairyPinkTheme: 'Fairy pink theme',
+    cherryBlossomRomanceTheme: 'Cherry Blossom Romance',
     remain: 'Remain',
     removeUploadedFile: 'Remove uploaded file',
     selectFile: 'Select file',

@@ -64,7 +64,7 @@ export default {
     calculatingFileHash: '正在计算 {fileName} 哈希值',
     clear: '清空',
     defaultTheme: '默认',
-    fairyPinkTheme: '仙女粉',
+    cherryBlossomRomanceTheme: '樱花浪漫',
     remain: '剩余',
     removeUploadedFile: '移除已上传文件',
     selectFile: '选择文件',
@@ -1039,4 +1039,3 @@ export default {
     name: '变量名'
   }
 }
-

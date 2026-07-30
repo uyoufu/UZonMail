@@ -38,7 +38,7 @@ const themeOptions = [
   },
   {
     name: ColorThemeName.fairyPink,
-    label: translateComponents('fairyPinkTheme'),
+    label: translateComponents('cherryBlossomRomanceTheme'),
     primaryColor: COLOR_THEME_DEFINITIONS[ColorThemeName.fairyPink].primary
   }
 ] as const
