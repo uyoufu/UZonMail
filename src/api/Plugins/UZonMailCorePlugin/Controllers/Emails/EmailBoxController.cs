@@ -202,11 +202,14 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             }
 
             var entities = requests.ConvertAll(x => x.ToEntity());
-            var userId = tokenService.GetUserSqlId();
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var userId = tokenPayloads.UserId;
             foreach (var entity in entities)
             {
+                ValidateInitialInboxStatus(entity.Status);
                 // 设置用户
                 entity.UserId = userId;
+                entity.OrganizationId = tokenPayloads.OrganizationId;
                 var inboxValidator = new InboxValidator();
                 var vdResult = inboxValidator.Validate(entity);
                 if (!vdResult.IsValid)
@@ -214,6 +217,15 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             }
 
             List<string> emails = entities.Select(x => x.Email).ToList();
+            var invalidEmails = await GetInvalidInboxEmailsInOrganization(
+                tokenPayloads.OrganizationId,
+                emails
+            );
+            foreach (var entity in entities.Where(x => invalidEmails.Contains(x.Email)))
+            {
+                entity.Status = InboxStatus.Invalid;
+            }
+
             List<Inbox> existEmails = await db
                 .Inboxes.IgnoreQueryFilters()
                 .Where(x => x.UserId == userId && emails.Contains(x.Email))
@@ -242,10 +254,21 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                     entity.EmailGroupId = newEntity.EmailGroupId;
                     entity.Name = newEntity.Name;
                     entity.Description = newEntity.Description;
+                    entity.Status = newEntity.Status ?? entity.Status;
                     entity.SetStatusNormal();
                 }
             }
             await db.SaveChangesAsync();
+
+            var invalidInboxEmails = entities
+                .Where(x => x.Status == InboxStatus.Invalid)
+                .Select(x => x.Email)
+                .ToList();
+            await UpdateInboxStatusesInOrganization(
+                tokenPayloads.OrganizationId,
+                invalidInboxEmails,
+                InboxStatus.Invalid
+            );
 
             // 返回所有的结果
             List<Inbox> results = [.. existEmails, .. newEntities];
@@ -336,6 +359,39 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         }
 
         /// <summary>
+        /// 批量标记当前用户选择的收件箱状态
+        /// 同组织同地址的收件箱需要保持一致，避免不同用户对同一地址出现冲突结论
+        /// </summary>
+        /// <param name="request">待更新的收件箱与目标状态</param>
+        /// <returns>更新是否完成</returns>
+        [HttpPut("inboxes/status")]
+        public async Task<ResponseResult<bool>> UpdateInboxesStatus(
+            [FromBody] UpdateInboxesStatusDto request
+        )
+        {
+            if (request.Status is not (InboxStatus.Invalid or InboxStatus.Valid))
+                throw new KnownException("收件箱状态仅支持标记为有效或无效");
+
+            var inboxIds = request.InboxIds.Where(id => id > 0).Distinct().ToList();
+            if (inboxIds.Count == 0)
+                throw new KnownException("请至少选择一个收件箱");
+
+            var tokenPayloads = tokenService.GetTokenPayloads();
+            var inboxEmails = await db
+                .Inboxes.AsNoTracking()
+                .Where(x => x.UserId == tokenPayloads.UserId && inboxIds.Contains(x.Id))
+                .Select(x => x.Email)
+                .ToListAsync();
+            await UpdateInboxStatusesInOrganization(
+                tokenPayloads.OrganizationId,
+                inboxEmails,
+                request.Status
+            );
+
+            return true.ToSuccessResponse();
+        }
+
+        /// <summary>
         /// 批量移动发件箱到指定分组
         /// </summary>
         /// <param name="request"></param>
@@ -389,6 +445,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
 
         private async Task<ResponseResult<Inbox>> CreateInboxEntity(Inbox entity)
         {
+            ValidateInitialInboxStatus(entity.Status);
             var inboxValidator = new InboxValidator();
             var vdResult = inboxValidator.Validate(entity);
             if (!vdResult.IsValid)
@@ -398,6 +455,13 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             var userId = tokenPayloads.UserId;
             entity.UserId = userId;
             entity.OrganizationId = tokenPayloads.OrganizationId;
+            if (
+                entity.Status == InboxStatus.Invalid
+                || await IsInboxInvalidInOrganization(tokenPayloads.OrganizationId, entity.Email)
+            )
+            {
+                entity.Status = InboxStatus.Invalid;
+            }
 
             // 验证收件箱是否存在，若存在，则复用原来的收件箱。
             Inbox? existOne = db
@@ -408,6 +472,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                 existOne.EmailGroupId = entity.EmailGroupId;
                 existOne.Name = entity.Name;
                 existOne.Description = entity.Description;
+                existOne.Status = entity.Status ?? existOne.Status;
                 existOne.SetStatusNormal();
             }
             else
@@ -417,7 +482,71 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             }
             await db.SaveChangesAsync();
 
+            if (existOne.Status == InboxStatus.Invalid)
+            {
+                await UpdateInboxStatusesInOrganization(
+                    tokenPayloads.OrganizationId,
+                    [existOne.Email],
+                    InboxStatus.Invalid
+                );
+            }
+
             return existOne.ToSuccessResponse();
+        }
+
+        private static void ValidateInitialInboxStatus(InboxStatus? status)
+        {
+            if (status is not null && status != InboxStatus.Invalid)
+                throw new KnownException("新增收件箱仅支持指定无效状态");
+        }
+
+        private Task<bool> IsInboxInvalidInOrganization(long organizationId, string email) =>
+            db
+                .Inboxes.IgnoreQueryFilters()
+                .AnyAsync(x =>
+                    x.OrganizationId == organizationId
+                    && x.Email == email
+                    && x.Status == InboxStatus.Invalid
+                );
+
+        private async Task<HashSet<string>> GetInvalidInboxEmailsInOrganization(
+            long organizationId,
+            List<string> emails
+        )
+        {
+            if (emails.Count == 0)
+                return [];
+
+            var invalidEmails = await db
+                .Inboxes.IgnoreQueryFilters()
+                .Where(x =>
+                    x.OrganizationId == organizationId
+                    && x.Status == InboxStatus.Invalid
+                    && emails.Contains(x.Email)
+                )
+                .Select(x => x.Email)
+                .ToListAsync();
+            return invalidEmails.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+
+        private async Task UpdateInboxStatusesInOrganization(
+            long organizationId,
+            List<string> emails,
+            InboxStatus status
+        )
+        {
+            var distinctEmails = emails.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (distinctEmails.Count == 0)
+                return;
+
+            await db
+                .Inboxes.IgnoreQueryFilters()
+                .Where(x => x.OrganizationId == organizationId && distinctEmails.Contains(x.Email))
+                .ExecuteUpdateAsync(update =>
+                    update
+                        .SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.ValidFailReason, (string?)null)
+                );
         }
 
         /// <summary>

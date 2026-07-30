@@ -1,23 +1,24 @@
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
-import { notifyError, notifySuccess, showDialog } from 'src/utils/dialog'
+import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
 import type { IEmailGroupListItem } from '../components/types'
 
 import logger from 'loglevel'
 import { splitString } from 'src/utils/stringHelper'
-import type { IInbox } from 'src/api/emailBox'
+import { InboxStatus, type IInbox } from 'src/api/emailBox'
 import { createInboxes } from 'src/api/emailBox'
+import { isEmail } from 'src/utils/validator'
 
-import { translateInboxManager } from 'src/i18n/helpers'
+import { translateGlobal, translateInboxManager } from 'src/i18n/helpers'
 import type { addNewRowType } from 'src/compositions/qTableUtils'
 
 /**
  * 从 txt 文件导入邮件
  * 这种方法，需要智能计算邮件的 smtp 及端口号
  */
-export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType<IInbox>) {
+export function useInboxImporter(emailGroup: Ref<IEmailGroupListItem>, addNewRow: addNewRowType<IInbox>) {
   // #region 从文本导入
-  async function onImportInboxFromTxt (emailGroupId: number | null = null) {
+  async function onImportInboxFromTxt(emailGroupId: number | null = null) {
     if (typeof emailGroupId !== 'number') emailGroupId = emailGroup.value.id as number
 
     // 新建弹窗
@@ -41,7 +42,8 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
     if (!result.ok) return
 
     // 开始解析导入的内容
-    const inboxTexts: string[][] = result.data.text.split('\n')
+    const inboxTexts: string[][] = result.data.text
+      .split('\n')
       .map((x: string) => x.trim())
       .filter((x: string) => x.length > 0)
       .map((x: string) => {
@@ -67,7 +69,7 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
     const { data: outboxes } = await createInboxes(newData)
 
     if (emailGroupId === emailGroup.value.id) {
-      outboxes.forEach(x => {
+      outboxes.forEach((x) => {
         addNewRow(x)
       })
     }
@@ -75,7 +77,7 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
     notifySuccess(translateInboxManager('importInboxSuccess'))
   }
 
-  function __getNewInboxData (emailGroupId: number, outboxTexts: string[]): IInbox | null {
+  function __getNewInboxData(emailGroupId: number, outboxTexts: string[]): IInbox | null {
     const inbox: IInbox = {
       emailGroupId,
       email: '',
@@ -84,16 +86,16 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
     }
 
     // 获取邮箱
-    const email = outboxTexts.find(x => x.includes('@'))
+    const email = outboxTexts.find((x) => x.includes('@'))
     if (!email) return null
     inbox.email = email
 
     // 解析最小冷却时间
-    const minInboxCooldownHours = outboxTexts.find(x => !isNaN(Number(x)))
+    const minInboxCooldownHours = outboxTexts.find((x) => !isNaN(Number(x)))
     inbox.minInboxCooldownHours = Number(minInboxCooldownHours) || 0
 
     // 获取名称
-    const name = outboxTexts.find(x => !x.includes('@') && isNaN(Number(x)))
+    const name = outboxTexts.find((x) => !x.includes('@') && isNaN(Number(x)))
     inbox.name = name || ''
 
     return inbox
@@ -103,8 +105,72 @@ export function useInboxImporter (emailGroup: Ref<IEmailGroupListItem>, addNewRo
   const importFromTxtTooltip = computed(() => translateInboxManager('importFromTxtTooltip').split('\n'))
   // #endregion
 
+  /** 将当前分组中粘贴的邮箱批量导入为无效收件箱。 */
+  async function onImportInvalidInboxes() {
+    const emailGroupId = emailGroup.value.id as number
+    const result = await showDialog<{ emails: string }>({
+      title: translateInboxManager('importInvalidInboxes'),
+      oneColumn: true,
+      fields: [
+        {
+          name: 'emails',
+          label: translateInboxManager('invalidInboxText'),
+          type: LowCodeFieldType.textarea,
+          placeholder: translateInboxManager('importInvalidInboxesPlaceholder'),
+          value: '',
+          required: true,
+          disableAutoGrow: true
+        }
+      ]
+    })
+    if (!result.ok) return
+
+    const uniqueEmailsByNormalizedValue = new Map<string, string>()
+    splitString(result.data.emails).forEach((email) => {
+      const trimmedEmail = email.trim()
+      if (!trimmedEmail) return
+      uniqueEmailsByNormalizedValue.set(trimmedEmail.toLocaleLowerCase(), trimmedEmail)
+    })
+
+    const importEmails = [...uniqueEmailsByNormalizedValue.values()]
+    const validEmails = importEmails.filter(isEmail)
+    if (validEmails.length === 0) {
+      notifyError(translateInboxManager('noValidImportData'))
+      return
+    }
+    if (validEmails.length < importEmails.length) {
+      const shouldContinue = await confirmOperation(
+        translateGlobal('warning'),
+        translateInboxManager('confirmImportWithErrors')
+      )
+      if (!shouldContinue) return
+    }
+
+    await notifyUntil(
+      async (update) => {
+        for (let start = 0; start < validEmails.length; start += 100) {
+          update(`${translateGlobal('importing')}... [${start}/${validEmails.length}]`)
+          const inboxesToImport = validEmails.slice(start, start + 100).map((email) => ({
+            emailGroupId,
+            email,
+            status: InboxStatus.Invalid
+          }))
+          const { data: inboxes } = await createInboxes(inboxesToImport)
+          inboxes.forEach((inbox) => {
+            addNewRow(inbox, 'email')
+          })
+        }
+      },
+      translateInboxManager('importInvalidInboxes'),
+      translateGlobal('importing')
+    )
+
+    notifySuccess(translateInboxManager('importInboxSuccess'))
+  }
+
   return {
     onImportInboxFromTxt,
+    onImportInvalidInboxes,
     importFromTxtLable,
     importFromTxtTooltip
   }

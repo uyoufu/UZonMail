@@ -7,12 +7,20 @@ import { useContextMenu } from 'src/pages/emailManager/inbox/contextMenu'
 const mocks = vi.hoisted(() => ({
   confirmOperation: vi.fn(),
   deleteInboxByIds: vi.fn(),
+  updateInboxesStatus: vi.fn(),
   notifySuccess: vi.fn()
 }))
 
 vi.mock('src/api/emailBox', () => ({
+  InboxStatus: {
+    Unverified: 0,
+    Invalid: 1,
+    Unknown: 2,
+    Valid: 200
+  },
   deleteInboxByIds: mocks.deleteInboxByIds,
-  updateInbox: vi.fn()
+  updateInbox: vi.fn(),
+  updateInboxesStatus: mocks.updateInboxesStatus
 }))
 vi.mock('src/api/pro/emailVerify', () => ({ validateInboxes: vi.fn() }))
 vi.mock('src/components/lowCode/PopupDialog', () => ({ showDialog: vi.fn() }))
@@ -60,22 +68,64 @@ describe('useContextMenu', () => {
   })
 
   it('only exposes supported inbox actions', () => {
-    const { inboxContextMenuItems } = useContextMenu(vi.fn(), vi.fn())
+    const { inboxContextMenuItems } = useContextMenu(vi.fn(), vi.fn(), ref([]))
 
-    expect(inboxContextMenuItems.value.map(menuItem => menuItem.name)).toEqual([
+    expect(inboxContextMenuItems.value.map((menuItem) => menuItem.name)).toEqual([
       'edit',
       'moveToGroup',
       'validateSelected',
+      'markInvalid',
+      'markNormal',
       'delete'
     ])
   })
 
+  it('shows each status action when any selected inbox needs that transition', () => {
+    const invalidInbox: IInbox = { ...createInbox(1), status: 1 }
+    const validInbox: IInbox = { ...createInbox(2), status: 200 }
+    const selectedInboxes = ref([invalidInbox, validInbox])
+    const { inboxContextMenuItems } = useContextMenu(vi.fn(), vi.fn(), selectedInboxes)
+    const markInvalidAction = inboxContextMenuItems.value.find((menuItem) => menuItem.name === 'markInvalid')!
+    const markNormalAction = inboxContextMenuItems.value.find((menuItem) => menuItem.name === 'markNormal')!
+
+    expect(markInvalidAction.vif?.(invalidInbox)).toBe(true)
+    expect(markNormalAction.vif?.(validInbox)).toBe(true)
+
+    selectedInboxes.value = [invalidInbox]
+    expect(markInvalidAction.vif?.(invalidInbox)).toBe(false)
+    expect(markNormalAction.vif?.(invalidInbox)).toBe(true)
+  })
+
+  it('updates only the selected inboxes whose status needs to change', async () => {
+    const invalidInbox: IInbox = { ...createInbox(1), status: 1 }
+    const validInbox: IInbox = { ...createInbox(2), status: 200, validFailReason: 'old reason' }
+    const unverifiedInbox = createInbox(3)
+    const inboxes = [invalidInbox, validInbox, unverifiedInbox]
+    const actionContext = createActionContext(inboxes)
+    const { inboxContextMenuItems } = useContextMenu(vi.fn(), vi.fn(), ref(inboxes))
+    const markInvalidAction = inboxContextMenuItems.value.find((menuItem) => menuItem.name === 'markInvalid')!
+    mocks.updateInboxesStatus.mockResolvedValue({ data: true })
+
+    await markInvalidAction.onClick(invalidInbox, actionContext)
+
+    expect(mocks.updateInboxesStatus).toHaveBeenCalledWith({
+      inboxIds: [2, 3],
+      status: 1
+    })
+    expect(invalidInbox.status).toBe(1)
+    expect(validInbox.status).toBe(1)
+    expect(validInbox.validFailReason).toBeUndefined()
+    expect(unverifiedInbox.status).toBe(1)
+    expect(actionContext.clearSelection).toHaveBeenCalledOnce()
+    expect(mocks.notifySuccess).toHaveBeenCalledWith('global.updateSuccess')
+  })
+
   it('deletes every selected inbox with one batch request', async () => {
     const deleteRowById = vi.fn()
-    const { inboxContextMenuItems } = useContextMenu(deleteRowById, vi.fn())
+    const { inboxContextMenuItems } = useContextMenu(deleteRowById, vi.fn(), ref([]))
     const inboxes = [createInbox(1), createInbox(2)]
     const actionContext = createActionContext(inboxes)
-    const deleteAction = inboxContextMenuItems.value.find(menuItem => menuItem.name === 'delete')!
+    const deleteAction = inboxContextMenuItems.value.find((menuItem) => menuItem.name === 'delete')!
     mocks.confirmOperation.mockResolvedValue(true)
     mocks.deleteInboxByIds.mockResolvedValue({ data: true })
 
@@ -93,10 +143,10 @@ describe('useContextMenu', () => {
   })
 
   it('uses the inbox email in the single-delete confirmation', async () => {
-    const { inboxContextMenuItems } = useContextMenu(vi.fn(), vi.fn())
+    const { inboxContextMenuItems } = useContextMenu(vi.fn(), vi.fn(), ref([]))
     const inbox = createInbox(1)
     const actionContext = createActionContext([inbox])
-    const deleteAction = inboxContextMenuItems.value.find(menuItem => menuItem.name === 'delete')!
+    const deleteAction = inboxContextMenuItems.value.find((menuItem) => menuItem.name === 'delete')!
     mocks.confirmOperation.mockResolvedValue(true)
     mocks.deleteInboxByIds.mockResolvedValue({ data: true })
 
@@ -111,10 +161,10 @@ describe('useContextMenu', () => {
 
   it('does not change local state when deletion is cancelled', async () => {
     const deleteRowById = vi.fn()
-    const { inboxContextMenuItems } = useContextMenu(deleteRowById, vi.fn())
+    const { inboxContextMenuItems } = useContextMenu(deleteRowById, vi.fn(), ref([]))
     const inbox = createInbox(1)
     const actionContext = createActionContext([inbox])
-    const deleteAction = inboxContextMenuItems.value.find(menuItem => menuItem.name === 'delete')!
+    const deleteAction = inboxContextMenuItems.value.find((menuItem) => menuItem.name === 'delete')!
     mocks.confirmOperation.mockResolvedValue(false)
 
     await deleteAction.onClick(inbox, actionContext)
@@ -126,10 +176,10 @@ describe('useContextMenu', () => {
 
   it('keeps local rows and selection when the batch request fails', async () => {
     const deleteRowById = vi.fn()
-    const { inboxContextMenuItems } = useContextMenu(deleteRowById, vi.fn())
+    const { inboxContextMenuItems } = useContextMenu(deleteRowById, vi.fn(), ref([]))
     const inboxes = [createInbox(1), createInbox(2)]
     const actionContext = createActionContext(inboxes)
-    const deleteAction = inboxContextMenuItems.value.find(menuItem => menuItem.name === 'delete')!
+    const deleteAction = inboxContextMenuItems.value.find((menuItem) => menuItem.name === 'delete')!
     mocks.confirmOperation.mockResolvedValue(true)
     mocks.deleteInboxByIds.mockRejectedValue(new Error('delete failed'))
 

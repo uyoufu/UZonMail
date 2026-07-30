@@ -54,6 +54,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
         public string? Description { get; set; }
         public string? Remark { get; set; }
         public long MinInboxCooldownHours { get; set; } = -1;
+        public InboxStatus? Status { get; set; }
     }
 
     /// <summary>
@@ -77,6 +78,18 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
         public string? Name { get; set; }
         public string? Description { get; set; }
         public long MinInboxCooldownHours { get; set; } = -1;
+    }
+
+    /// <summary>
+    /// 批量更新收件箱状态的请求
+    /// </summary>
+    public class UpdateInboxesStatusDto
+    {
+        [MinLength(1)]
+        public List<long> InboxIds { get; set; } = [];
+
+        [EnumDataType(typeof(InboxStatus))]
+        public InboxStatus Status { get; set; }
     }
 
     /// <summary>
