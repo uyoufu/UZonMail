@@ -4,7 +4,7 @@ import { confirmOperation, notifyError, showHtmlDialog } from 'src/utils/dialog'
 import logger from 'loglevel'
 import { translateDashboardPage } from 'src/i18n/helpers'
 
-const latestPackageEndpoint = 'https://uzonmail.uzoncalc.com/updates/latest.json'
+const latestPackageEndpoint = 'https://uzonmail.uzoncloud.com/updates/latest.json'
 const allowVersionChecking = ref(true)
 
 interface ILatestPackage {

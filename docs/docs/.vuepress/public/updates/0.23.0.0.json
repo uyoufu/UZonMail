@@ -464,7 +464,7 @@
     "service/wwwroot/tinymce/plugins/help/js/i18n/keynav/zh_CN.js": "ec179663f0abc9370e5150ed01d84e99813fca4ec090335a2234fb11535fd6e7",
     "service/wwwroot/tinymce/plugins/help/js/i18n/keynav/zh_TW.js": "fd1451cdb0aca3b4f534c7af2f16aafd8d4eb7b2cee8e3418fa8f03ae0974221"
   },
-  "endpoint": "https://uzonmail.uzoncalc.com/updates/latest.json",
+  "endpoint": "https://uzonmail.uzoncloud.com/updates/latest.json",
   "zipUrl": "https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.0.0.zip",
   "ignores": [
     "Updater/**",

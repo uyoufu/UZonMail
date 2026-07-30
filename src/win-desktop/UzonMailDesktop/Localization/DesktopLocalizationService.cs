@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO;
 using System.Resources;
+using System.Text.Json;
 
 namespace UzonMailDesktop.Localization;
 
@@ -8,21 +9,19 @@ internal sealed class DesktopLocalizationService : IDesktopLocalizationService
 {
     private const string ResourceBaseName = "UzonMailDesktop.Localization.DesktopStrings";
     private readonly object _localeLock = new();
-    private readonly DesktopUserSettingsStore _settingsStore;
+    private readonly DesktopLocalizationSettingsStore _settingsStore;
     private readonly ResourceManager _resourceManager =
         new(ResourceBaseName, typeof(DesktopLocalizationService).Assembly);
     private DesktopLocale _currentLocale;
 
-    public DesktopLocalizationService()
-        : this(new DesktopUserSettingsStore(), CultureInfo.CurrentUICulture) { }
-
     internal DesktopLocalizationService(
-        DesktopUserSettingsStore settingsStore,
-        CultureInfo systemUiCulture
+        DesktopLocalizationSettingsStore settingsStore,
+        CultureInfo systemUiCulture,
+        string? configuredLocale
     )
     {
         _settingsStore = settingsStore;
-        _currentLocale = DesktopLocales.Resolve(systemUiCulture, settingsStore.ReadLocale());
+        _currentLocale = DesktopLocales.Resolve(systemUiCulture, configuredLocale);
         ApplyDefaultCulture(_currentLocale);
     }
 
@@ -58,6 +57,10 @@ internal sealed class DesktopLocalizationService : IDesktopLocalizationService
             return false;
         }
         catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+        catch (JsonException)
         {
             return false;
         }

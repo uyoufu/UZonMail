@@ -21,7 +21,7 @@ public interface IDesktopLocalizationService
     string GetText(DesktopTextKey key, params object?[] formatArguments);
 
     /// <summary>
-    /// 验证并持久化来自前端的语言代码
+    /// 验证并将来自前端的语言代码持久化到生产配置
     /// </summary>
     bool TrySetLocale(string locale);
 }

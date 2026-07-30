@@ -45,10 +45,10 @@ internal static class DesktopLocales
         return false;
     }
 
-    public static DesktopLocale Resolve(CultureInfo systemUiCulture, string? persistedLocale)
+    public static DesktopLocale Resolve(CultureInfo systemUiCulture, string? configuredLocale)
     {
-        if (TryParse(persistedLocale, out var persisted))
-            return persisted;
+        if (TryParse(configuredLocale, out var configured))
+            return configured;
 
         if (TryParse(systemUiCulture.Name, out var exactMatch))
             return exactMatch;

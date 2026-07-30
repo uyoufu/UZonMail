@@ -12,7 +12,7 @@ namespace UzonMailUpdater.Services;
 public sealed class AppPackageService
 {
     public const string ManifestFileName = "appPackage.json";
-    public const string DefaultEndpoint = "https://uzonmail.uzoncalc.com/updates/latest.json";
+    public const string DefaultEndpoint = "https://uzonmail.uzoncloud.com/updates/latest.json";
     private const string DefaultZipUrlPrefix =
         "https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-";
     private static readonly string[] DefaultIgnores =

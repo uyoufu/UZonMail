@@ -11,7 +11,7 @@ UzonMailUpdater.exe package --project-directory D:\UzonMail `
   --out D:\updates\0.23.0.0.json
 ```
 
-`--out` 可重复指定；所有输出内容相同。未指定时会写入项目目录的 `appPackage.json`。默认请求地址为 `https://uzonmail.uzoncalc.com/updates/latest.json`，ZIP 地址按桌面端文件版本生成。
+`--out` 可重复指定；所有输出内容相同。未指定时会写入项目目录的 `appPackage.json`。默认请求地址为 `https://uzonmail.uzoncloud.com/updates/latest.json`，ZIP 地址按桌面端文件版本生成。
 
 清单中的 `dependencies` 使用相对文件路径到 SHA-256 的映射。默认不更新 `Updater/**`、`appsettings*.json` 和 `service/data/**`，以保护本地更新器、配置和用户数据。
 

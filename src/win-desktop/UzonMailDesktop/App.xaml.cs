@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -122,7 +123,15 @@ public partial class App : Application
             .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: false)
             .AddEnvironmentVariables("UZONMAIL_DESKTOP_");
 
-        var localization = new DesktopLocalizationService();
+        var configuredLocale = builder
+            .Configuration.GetSection(DesktopLocalizationOptions.SectionName)
+            .Get<DesktopLocalizationOptions>()
+            ?.Locale;
+        var localization = new DesktopLocalizationService(
+            new DesktopLocalizationSettingsStore(),
+            CultureInfo.CurrentUICulture,
+            configuredLocale
+        );
         builder.Services.AddSingleton<IDesktopLocalizationService>(localization);
 
         builder
