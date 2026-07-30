@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using UzonMailDesktop.Localization;
 
 namespace UzonMailDesktop.Services;
 
@@ -14,7 +15,10 @@ internal static class UpdaterBootstrapService
     /// <summary>
     /// 将临时更新器复制到正式目录，成功后移除临时文件
     /// </summary>
-    public static void InstallPendingUpdater(string applicationDirectory)
+    public static void InstallPendingUpdater(
+        string applicationDirectory,
+        IDesktopLocalizationService localization
+    )
     {
         var sourceDirectory = Path.Combine(applicationDirectory, TemporaryUpdaterDirectoryName);
         if (
@@ -37,7 +41,9 @@ internal static class UpdaterBootstrapService
                 Path.IsPathRooted(relativePath)
                 || relativePath.StartsWith("..", StringComparison.Ordinal)
             )
-                throw new InvalidOperationException($"更新器包含非法文件路径：{relativePath}");
+                throw new InvalidOperationException(
+                    localization.GetText(DesktopTextKey.UpdaterInvalidPath, relativePath)
+                );
 
             var targetFile = Path.Combine(targetDirectory, relativePath);
             Directory.CreateDirectory(Path.GetDirectoryName(targetFile)!);

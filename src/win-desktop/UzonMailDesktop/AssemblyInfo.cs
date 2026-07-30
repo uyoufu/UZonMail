@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Windows;
 
-[assembly: InternalsVisibleTo("UzonMailDesktop.Tests")]
+[assembly: InternalsVisibleTo("UzonMailDotNET.Test")]
 
 [assembly: ThemeInfo(
     ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located

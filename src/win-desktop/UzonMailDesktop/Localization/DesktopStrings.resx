@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ApplicationTitle" xml:space="preserve"><value>宇正群邮 - {0}</value></data>
+  <data name="StartupTitle" xml:space="preserve"><value>欢迎使用 UzonMail</value></data>
+  <data name="StartupSubtitle" xml:space="preserve"><value>正在准备邮件群发工作台</value></data>
+  <data name="StartupCheckingEnvironment" xml:space="preserve"><value>正在检测运行环境...</value></data>
+  <data name="StartupMissingPrerequisites" xml:space="preserve"><value>检测到缺失环境。确认后将从微软下载并安装以下组件。</value></data>
+  <data name="StartupStartingBackend" xml:space="preserve"><value>环境检查通过，正在启动后端服务...</value></data>
+  <data name="StartupInstallFailed" xml:space="preserve"><value>安装失败：{0}</value></data>
+  <data name="StartupCheckFailed" xml:space="preserve"><value>启动检查失败：{0}</value></data>
+  <data name="StartupDownloadWebView" xml:space="preserve"><value>正在下载 WebView2...</value></data>
+  <data name="StartupInstallWebView" xml:space="preserve"><value>正在安装 WebView2...</value></data>
+  <data name="StartupDownloadingPrerequisite" xml:space="preserve"><value>正在下载 {0}...</value></data>
+  <data name="StartupInstallingPrerequisite" xml:space="preserve"><value>正在安装 {0}...</value></data>
+  <data name="StartupPrerequisitesInstalled" xml:space="preserve"><value>依赖安装完成，正在重新检测...</value></data>
+  <data name="ButtonRetry" xml:space="preserve"><value>重新检测</value></data>
+  <data name="ButtonOpenDownloadPage" xml:space="preserve"><value>打开下载页</value></data>
+  <data name="ButtonInstallAndContinue" xml:space="preserve"><value>安装并继续</value></data>
+  <data name="ButtonExit" xml:space="preserve"><value>退出</value></data>
+  <data name="DialogUpdaterTitle" xml:space="preserve"><value>更新器提示</value></data>
+  <data name="DialogUpdaterInstallFailed" xml:space="preserve"><value>更新器更新失败，将在下次启动时重试：{0}</value></data>
+  <data name="DialogSingleInstanceTitle" xml:space="preserve"><value>温馨提示</value></data>
+  <data name="DialogSingleInstanceMessage" xml:space="preserve"><value>不能重复运行</value></data>
+  <data name="DialogStartupFailedTitle" xml:space="preserve"><value>启动失败</value></data>
+  <data name="WebViewInitializationFailed" xml:space="preserve"><value>WebView2 初始化失败：{0}</value></data>
+  <data name="HostObjectInitializationFailed" xml:space="preserve"><value>桌面端通信初始化失败：{0}</value></data>
+  <data name="BackendExecutableNotFound" xml:space="preserve"><value>配置的后端程序不存在。</value></data>
+  <data name="BackendWorkingDirectoryNotFound" xml:space="preserve"><value>配置的后端工作目录不存在：{0}</value></data>
+  <data name="BackendProcessStartFailed" xml:space="preserve"><value>后端程序未能启动。</value></data>
+  <data name="BackendProcessExited" xml:space="preserve"><value>后端程序已退出，退出码：{0}。</value></data>
+  <data name="BackendStartupTimedOut" xml:space="preserve"><value>后端在 {0:0} 秒内未就绪。</value></data>
+  <data name="RuntimeConfigNotFound" xml:space="preserve"><value>无法读取后端运行时要求，runtimeconfig 文件不存在。</value></data>
+  <data name="PrerequisiteVersionMissing" xml:space="preserve"><value>{0} 未声明所需版本。</value></data>
+  <data name="PrerequisiteInstallerNotFound" xml:space="preserve"><value>未在微软发布元数据中找到 {0} 的 win-x64 安装器。</value></data>
+  <data name="PrerequisiteInstallerValidationFailed" xml:space="preserve"><value>安装器校验失败：{0}</value></data>
+  <data name="PrerequisiteInstallerSignatureInvalid" xml:space="preserve"><value>WebView2 安装器的 Authenticode 签名无效。</value></data>
+  <data name="PrerequisiteInstallerPublisherInvalid" xml:space="preserve"><value>WebView2 安装器不是由 Microsoft Corporation 签名的。</value></data>
+  <data name="PrerequisiteInstallerStartFailed" xml:space="preserve"><value>安装器未能启动。</value></data>
+  <data name="PrerequisiteInstallerExitCode" xml:space="preserve"><value>安装器返回错误代码 {0}。</value></data>
+  <data name="PrerequisiteAdministratorCanceled" xml:space="preserve"><value>用户取消了管理员授权。</value></data>
+  <data name="TrayOpen" xml:space="preserve"><value>打开</value></data>
+  <data name="TrayExit" xml:space="preserve"><value>退出</value></data>
+  <data name="TrayExitConfirmationMessage" xml:space="preserve"><value>即将退出宇正群邮，是否继续？</value></data>
+  <data name="TrayExitConfirmationTitle" xml:space="preserve"><value>温馨提醒</value></data>
+  <data name="TrayIconResourceMissing" xml:space="preserve"><value>托盘图标资源缺失。</value></data>
+  <data name="BackendExecutablePathInvalid" xml:space="preserve"><value>Backend:ExecutablePath 不能为空。</value></data>
+  <data name="BackendWebUrlInvalid" xml:space="preserve"><value>Backend:WebUrl 必须是绝对 URL。</value></data>
+  <data name="BackendReadinessUrlInvalid" xml:space="preserve"><value>Backend:ReadinessUrl 必须是绝对 URL。</value></data>
+  <data name="BackendStartupTimeoutInvalid" xml:space="preserve"><value>Backend:StartupTimeoutSeconds 必须介于 1 和 600 之间。</value></data>
+  <data name="PrerequisiteMetadataUrlInvalid" xml:space="preserve"><value>Prerequisites:DotNetReleaseMetadataBaseUrl 必须是绝对 URL。</value></data>
+  <data name="PrerequisiteWebViewUrlInvalid" xml:space="preserve"><value>Prerequisites:WebView2BootstrapperUrl 必须是绝对 URL。</value></data>
+  <data name="UpdaterInvalidPath" xml:space="preserve"><value>更新器包含非法文件路径：{0}</value></data>
+</root>

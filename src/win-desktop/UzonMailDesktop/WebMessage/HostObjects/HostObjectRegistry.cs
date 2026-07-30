@@ -1,4 +1,5 @@
 using Microsoft.Web.WebView2.Core;
+using UzonMailDesktop.Localization;
 using UzonMailUpdater.Launcher;
 
 namespace UzonMailDesktop.WebMessage.HostObjects;
@@ -14,15 +15,23 @@ public interface IHostObjectRegistry
 /// <summary>
 /// 管理全部宿主对象的注册名称和实例生命周期
 /// </summary>
-internal sealed class HostObjectRegistry(IUpdateLauncher updateLauncher) : IHostObjectRegistry
+internal sealed class HostObjectRegistry(
+    IUpdateLauncher updateLauncher,
+    IDesktopLocalizationService localization
+) : IHostObjectRegistry
 {
     public const string DesktopUpdaterObjectName = "uzonMailUpdater";
+    public const string DesktopLocaleObjectName = "uzonMailLocale";
 
     public void Register(CoreWebView2 webView)
     {
         webView.AddHostObjectToScript(
             DesktopUpdaterObjectName,
             new DesktopUpdateHostObject(updateLauncher)
+        );
+        webView.AddHostObjectToScript(
+            DesktopLocaleObjectName,
+            new DesktopLocaleHostObject(localization)
         );
     }
 }

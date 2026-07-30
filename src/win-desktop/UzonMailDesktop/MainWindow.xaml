@@ -7,8 +7,8 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance vm:MainWindowViewModel}"
         Title="{Binding Title}"
-        Height="600"
-        Width="1080"
+        Height="700"
+        Width="1245"
         MinHeight="480"
         MinWidth="800"
         WindowStartupLocation="CenterScreen">

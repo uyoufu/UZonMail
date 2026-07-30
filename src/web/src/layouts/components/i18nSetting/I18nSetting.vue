@@ -16,8 +16,11 @@
 
 <script lang="ts" setup>
 import HoverableTip from 'src/components/hoverableTip/HoverableTip.vue'
+import { persistDesktopLocale } from 'src/i18n/desktopLocale'
+import { t } from 'src/i18n/helpers'
 import { translations } from 'src/i18n/index'
 import { useUserInfoStore } from 'src/stores/user'
+import { notifyError } from 'src/utils/notification'
 
 const store = useUserInfoStore()
 const sortedTranslations = computed(() => {
@@ -31,9 +34,14 @@ const { locale } = useI18n()
 // 预加载所有可能的语言文件
 const modules = import.meta.glob('/node_modules/quasar/lang/*.js')
 
-import type { QuasarLanguage} from 'quasar';
+import type { QuasarLanguage } from 'quasar';
 import { Lang } from 'quasar'
-async function onSwitchLocale (value: string) {
+async function onSwitchLocale(value: string) {
+  if (!await persistDesktopLocale(value)) {
+    notifyError(t('global.desktopLanguageSyncFailed'))
+    return
+  }
+
   store.setLocale(value)
   locale.value = value
 

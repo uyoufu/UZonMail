@@ -220,6 +220,7 @@ export default {
     deleteConfirmation: 'Delete confirmation',
     deletedSuccess: 'Deleted successfully',
     deleteSuccess: 'Deletion successful',
+    desktopLanguageSyncFailed: 'Unable to save the desktop language setting',
     description: 'Description',
     disable: 'Disable',
     edit: 'Edit',

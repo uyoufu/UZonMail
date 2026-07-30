@@ -214,6 +214,7 @@ export default {
     deleteConfirmation: '删除确认',
     deletedSuccess: '删除成功',
     deleteSuccess: '删除成功',
+    desktopLanguageSyncFailed: '无法保存桌面端语言设置',
     description: '描述',
     disable: '禁用',
     edit: '编辑',

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using UzonMailDesktop.Configuration;
+using UzonMailDesktop.Localization;
 using UzonMailDesktop.Services;
 using UzonMailDesktop.ViewModels;
 using UzonMailDesktop.WebMessage.HostObjects;
@@ -20,29 +21,43 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        IDesktopLocalizationService? localization = null;
         try
         {
+            _host = BuildHost(e.Args);
+            localization = _host.Services.GetRequiredService<IDesktopLocalizationService>();
+
             try
             {
-                UpdaterBootstrapService.InstallPendingUpdater(AppContext.BaseDirectory);
+                UpdaterBootstrapService.InstallPendingUpdater(
+                    AppContext.BaseDirectory,
+                    localization
+                );
             }
             catch (Exception exception)
             {
                 MessageBox.Show(
-                    $"更新器更新失败，将在下次启动时重试：{exception.Message}",
-                    "更新器提示",
+                    localization.GetText(
+                        DesktopTextKey.DialogUpdaterInstallFailed,
+                        exception.Message
+                    ),
+                    localization.GetText(DesktopTextKey.DialogUpdaterTitle),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning
                 );
             }
 
-            _host = BuildHost(e.Args);
             await _host.StartAsync();
 
             var singleInstance = _host.Services.GetRequiredService<ISingleInstanceService>();
             if (!singleInstance.TryAcquire())
             {
-                MessageBox.Show("不能重复运行", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    localization.GetText(DesktopTextKey.DialogSingleInstanceMessage),
+                    localization.GetText(DesktopTextKey.DialogSingleInstanceTitle),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
                 Shutdown();
                 return;
             }
@@ -65,7 +80,9 @@ public partial class App : Application
         }
         catch (Exception exception)
         {
-            MessageBox.Show(exception.Message, "启动失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            var title =
+                localization?.GetText(DesktopTextKey.DialogStartupFailedTitle) ?? "Startup failed";
+            MessageBox.Show(exception.Message, title, MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }
     }
@@ -105,24 +122,27 @@ public partial class App : Application
             .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: false)
             .AddEnvironmentVariables("UZONMAIL_DESKTOP_");
 
+        var localization = new DesktopLocalizationService();
+        builder.Services.AddSingleton<IDesktopLocalizationService>(localization);
+
         builder
             .Services.AddOptions<BackendOptions>()
             .Bind(builder.Configuration.GetSection(BackendOptions.SectionName))
             .Validate(
                 x => !string.IsNullOrWhiteSpace(x.ExecutablePath),
-                "Backend:ExecutablePath 不能为空。"
+                localization.GetText(DesktopTextKey.BackendExecutablePathInvalid)
             )
             .Validate(
                 x => Uri.TryCreate(x.WebUrl, UriKind.Absolute, out _),
-                "Backend:WebUrl 必须是绝对 URL。"
+                localization.GetText(DesktopTextKey.BackendWebUrlInvalid)
             )
             .Validate(
                 x => Uri.TryCreate(x.ReadinessUrl, UriKind.Absolute, out _),
-                "Backend:ReadinessUrl 必须是绝对 URL。"
+                localization.GetText(DesktopTextKey.BackendReadinessUrlInvalid)
             )
             .Validate(
                 x => x.StartupTimeoutSeconds is >= 1 and <= 600,
-                "Backend:StartupTimeoutSeconds 必须介于 1 和 600 之间。"
+                localization.GetText(DesktopTextKey.BackendStartupTimeoutInvalid)
             )
             .ValidateOnStart();
         builder
@@ -130,11 +150,11 @@ public partial class App : Application
             .Bind(builder.Configuration.GetSection(PrerequisiteOptions.SectionName))
             .Validate(
                 x => Uri.TryCreate(x.DotNetReleaseMetadataBaseUrl, UriKind.Absolute, out _),
-                "Prerequisites:DotNetReleaseMetadataBaseUrl 必须是绝对 URL。"
+                localization.GetText(DesktopTextKey.PrerequisiteMetadataUrlInvalid)
             )
             .Validate(
                 x => Uri.TryCreate(x.WebView2BootstrapperUrl, UriKind.Absolute, out _),
-                "Prerequisites:WebView2BootstrapperUrl 必须是绝对 URL。"
+                localization.GetText(DesktopTextKey.PrerequisiteWebViewUrlInvalid)
             )
             .ValidateOnStart();
 

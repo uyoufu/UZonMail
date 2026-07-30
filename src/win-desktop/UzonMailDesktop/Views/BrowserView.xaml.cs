@@ -1,37 +1,40 @@
-using Microsoft.Web.WebView2.Core;
 using UzonMailDesktop.ViewModels;
 
 namespace UzonMailDesktop.Views;
 
 public partial class BrowserView : System.Windows.Controls.UserControl
 {
+    private bool _hasNavigated;
+
     public BrowserView()
     {
         InitializeComponent();
     }
 
-    private void OnInitializationCompleted(
-        object? sender,
-        CoreWebView2InitializationCompletedEventArgs e
-    )
+    private async void OnBrowserLoaded(object sender, System.Windows.RoutedEventArgs e)
     {
-        if (!e.IsSuccess && DataContext is BrowserViewModel viewModel)
-            viewModel.ErrorMessage = $"WebView2 初始化失败：{e.InitializationException?.Message}";
-        else if (
-            e.IsSuccess
-            && sender is Microsoft.Web.WebView2.Wpf.WebView2 webView
-            && webView.CoreWebView2 is { } coreWebView
-            && DataContext is BrowserViewModel initializedViewModel
-        )
+        if (_hasNavigated || DataContext is not BrowserViewModel viewModel)
+            return;
+
+        try
         {
-            try
-            {
-                initializedViewModel.RegisterHostObjects(coreWebView);
-            }
-            catch (Exception exception)
-            {
-                initializedViewModel.ErrorMessage = $"桌面端通信初始化失败：{exception.Message}";
-            }
+            await Browser.EnsureCoreWebView2Async();
+        }
+        catch (Exception exception)
+        {
+            viewModel.SetWebViewInitializationError(exception);
+            return;
+        }
+
+        try
+        {
+            viewModel.RegisterHostObjects(Browser.CoreWebView2);
+            _hasNavigated = true;
+            Browser.CoreWebView2.Navigate(viewModel.Url.AbsoluteUri);
+        }
+        catch (Exception exception)
+        {
+            viewModel.SetHostObjectInitializationError(exception);
         }
     }
 }
