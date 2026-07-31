@@ -13,7 +13,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
     /// 2. 若发件失败，添加失败项
     /// 3. 发送消息通知
     /// </summary>
-    public class GroupTaskUpdateHandler(UserGroupTasksPools userGroupTasksPools)
+    public class GroupTaskUpdateHandler(GroupTasksManager groupTasksManager)
         : AbstractSendingHandler
     {
         protected override async Task<IHandlerResult> HandleCore(SendingContext context)
@@ -56,10 +56,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 return HandlerResult.Skiped();
 
             // 若是最后一封邮件，要标记办结
-            if (!userGroupTasksPools.TryGetValue(outbox.UserId, out var groupTasks))
-                return HandlerResult.Skiped();
-
-            if (groupTasks.TryRemove(sendingGroup.Id, out _))
+            if (await groupTasksManager.RemoveSendingGroupTaskAsync(outbox.UserId, sendingGroup.Id))
             {
                 var finisher = context.Provider.GetRequiredService<SendingGroupFinisher>();
                 await finisher.SetSendingGroupStatusAndNotify(

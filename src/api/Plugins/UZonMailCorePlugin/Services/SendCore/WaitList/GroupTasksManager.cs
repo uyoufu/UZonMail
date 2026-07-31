@@ -152,17 +152,19 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// <param name="userId"></param>
         /// <param name="sendingGroupId"></param>
         /// <returns></returns>
-        public void RemoveSendingGroupTask(long userId, long sendingGroupId)
+        public async Task<bool> RemoveSendingGroupTaskAsync(long userId, long sendingGroupId)
         {
             // 获取用户的发件任务池
             if (!userTasksPools.TryGetValue(userId, out var userSendingGroupsPool))
-                return;
+                return false;
 
             // 从池中移除发件组任务
-            if (!userSendingGroupsPool.TryRemove(sendingGroupId, out _))
-                return;
+            var removed = await userSendingGroupsPool.TryRemoveAsync(sendingGroupId);
+            if (!removed)
+                return false;
 
             // 空用户槽保持注册。删除与并发激活交错会让新任务落入已从全局移除的旧槽。
+            return true;
         }
     }
 }

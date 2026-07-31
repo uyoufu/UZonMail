@@ -69,7 +69,7 @@
             <td align="center"
                 style="padding:0; margin:0; font-size:0; line-height:0;">
               <img
-                src="https://youjian-1258728248.cos.ap-guangzhou.myqcloud.com/ga.jpg"
+                src="https://ap-guangzhou.uzoncloud.com/ga.jpg"
                 width="600"
                 alt=""
                 border="0"
@@ -90,11 +90,11 @@
 
 ## 修复需求
 
-1. 修复上述 MPART_ALT_DIFF 异常问题
+1. 修复上述 MPART_ALT_DIFF 异常问题, 从 html 中提取 plain text 内容，作为邮件的 plain text 部分。
 
 ## 重构需求
 
-1. D:\Develop\Personal\UzonMail\src\api\Plugins\UzonMailCorePlugin\Services\SendCore\WaitList\UsableTemplateList.cs 中，分析模板缓存逻辑，是否存在可以优化的地方，模板使用完成后，有没有及时释放，模板是否可以增量缓存
+1. D:\Develop\Personal\UzonMail\src\api\Plugins\UzonMailCorePlugin\Services\SendCore\WaitList\UsableTemplateList.cs 中，分析模板缓存逻辑，是否存在可以优化的地方，模板使用完成后，有没有及时释放，模板是否在进程中全局缓存，增量缓存，为模板增加基于任务的引用计数，当任务结束时，减少计数，计数为 0 时，移除缓存的模板，清理内容；当计数不为0，但是长期未被访问时，也进行清除。
 
 ## 相关文件
 

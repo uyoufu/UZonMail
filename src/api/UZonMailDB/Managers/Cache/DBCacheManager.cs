@@ -120,6 +120,44 @@ public sealed class DBCacheManager
         GetCache<TResult, SqlContext, long>(db, sqlId, cancellationToken);
 
     /// <inheritdoc />
+    public async Task<bool> RemoveCacheAsync<TResult, TSqlContext, TArg>(
+        TArg arg,
+        CancellationToken cancellationToken = default
+    )
+        where TSqlContext : SqlContextBase
+        where TResult : BaseDBCache<TSqlContext, TArg>, new()
+    {
+        ArgumentNullException.ThrowIfNull(arg);
+
+        var resultKey = new CacheStorageKey(typeof(TResult), typeof(TArg), arg);
+        using (await _resultLocks.AcquireAsync(resultKey, cancellationToken))
+        {
+            if (!_resultCache.TryGetValue(resultKey, out _))
+                return false;
+
+            _resultCache.Remove(resultKey);
+            return true;
+        }
+    }
+
+    /// <inheritdoc />
+    public Task<bool> RemoveCacheAsync<TResult, TSqlContext>(
+        long sqlId,
+        CancellationToken cancellationToken = default
+    )
+        where TSqlContext : SqlContextBase
+        where TResult : BaseDBCache<TSqlContext, long>, new() =>
+        RemoveCacheAsync<TResult, TSqlContext, long>(sqlId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<bool> RemoveCacheAsync<TResult>(
+        long sqlId,
+        CancellationToken cancellationToken = default
+    )
+        where TResult : BaseDBCache<SqlContext, long>, new() =>
+        RemoveCacheAsync<TResult, SqlContext, long>(sqlId, cancellationToken);
+
+    /// <inheritdoc />
     public async Task SetSourceAsync<TValue, TIdentity>(
         CacheSourceKey<TValue, TIdentity> sourceKey,
         TValue value,

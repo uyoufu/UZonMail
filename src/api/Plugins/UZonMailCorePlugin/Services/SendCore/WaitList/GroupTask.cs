@@ -6,7 +6,6 @@ using UzonMail.CorePlugin.Services.Encrypt;
 using UzonMail.CorePlugin.Services.Encrypt.Models;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
-using UzonMail.CorePlugin.Services.SendCore.EmailWaitList;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Proxies;
@@ -17,7 +16,6 @@ using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.CorePlugin.SignalRHubs.Extensions;
 using UzonMail.CorePlugin.SignalRHubs.SendEmail;
 using UzonMail.DB.Extensions;
-using UzonMail.DB.Managers.Cache;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Base;
 using UzonMail.DB.SQL.Core.Emails;
@@ -40,7 +38,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         ISendPayloadReader payloadReader,
         ISendLeaseStore leaseStore,
         ISendingWorkerCoordinator workerCoordinator,
-        IDBCacheManager cacheManager,
+        EmailTemplateCacheLeaseManager templateCacheLeaseManager,
         IOptions<SendingQuotaOptions> quotaOptions,
         IOptions<OutboxSupplyOptions> outboxSupplyOptions,
         TimeProvider timeProvider
@@ -76,10 +74,20 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             var groupTask = ctx.Provider.GetRequiredService<GroupTask>();
             // 初始化基本参数
             groupTask.SetSendingGroupId(sendingGroupId);
-            // 初始化组
-            if (!await groupTask.InitSendingGroup(ctx))
+            try
+            {
+                // 初始化组
+                if (await groupTask.InitSendingGroup(ctx))
+                    return groupTask;
+
+                await groupTask.CloseAsync();
                 return null;
-            return groupTask;
+            }
+            catch
+            {
+                await groupTask.CloseAsync();
+                throw;
+            }
         }
 
         #region 属性
@@ -116,9 +124,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         private List<long> ProxyIds { get; set; } = [];
 
         /// <summary>
-        /// 可用的模板
+        /// 发件组模板解析器
         /// </summary>
-        private UsableTemplateList _usableTemplates = null!;
+        private SendingGroupTemplateResolver? _templateResolver;
 
         /// <summary>
         /// 是否应该释放
@@ -190,10 +198,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             var proxyManager = sendingContext.Provider.GetRequiredService<IProxiesManager>();
             await proxyManager.UpdateUserProxies(sendingContext.Provider, UserId);
 
-            // 获取所有的模板，模板是用户级别的
-            _usableTemplates = new UsableTemplateList(UserId, cacheManager);
+            // 模板内容由全局缓存管理，当前任务只保存选择规则和租约。
+            _templateResolver = new SendingGroupTemplateResolver(UserId, templateCacheLeaseManager);
             // 添加组的通用模板
-            _usableTemplates.AddSendingGroupTemplates(
+            _templateResolver.AddSendingGroupTemplates(
                 _sendingGroup.Templates!.ConvertAll(x => x.Id)
             );
 
@@ -571,7 +579,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 return null;
             }
 
-            _usableTemplates.AddSendingItemTemplate(sendingItem.Id, sendingItem.EmailTemplateId);
+            _templateResolver?.AddSendingItemTemplate(sendingItem.Id, sendingItem.EmailTemplateId);
 
             var filters = sendingContext.Provider.GetServices<ISendingItemFilter>();
             foreach (var filter in filters)
@@ -597,7 +605,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 sendingItem,
                 outbox,
                 _sendingGroup,
-                _usableTemplates,
+                _templateResolver ?? throw new InvalidOperationException("发件组模板解析器尚未初始化"),
                 ProxyIds
             );
 
@@ -702,12 +710,18 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             return _sendItemQueue.Release(execution.Descriptor);
         }
 
-        /// <summary>关闭组任务并撤销所有尚未提交的活动租约。</summary>
-        public void Close()
+        /// <summary>
+        /// 关闭组任务并释放模板与发件项租约。
+        /// 所有终止路径共用此入口，避免发件组移除后仍保留模板缓存引用。
+        /// </summary>
+        public async Task CloseAsync()
         {
             if (Interlocked.Exchange(ref _closed, 1) != 0)
                 return;
+
             _lifetime.Cancel();
+            if (_templateResolver != null)
+                await _templateResolver.DisposeAsync();
             foreach (var lease in _activeLeases.Values)
             {
                 leaseStore.TryRevoke(lease.LeaseId, timeProvider.GetUtcNow(), out _);

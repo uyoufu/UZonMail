@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Controllers.Emails.DTOs;
 using UzonMail.CorePlugin.Database.Validators;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Utils.Database;
 using UzonMail.CorePlugin.Utils.Extensions;
 using UzonMail.DB.Extensions;
-using UzonMail.DB.Managers.Cache;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Templates;
 using UzonMail.Utils.Extensions;
@@ -23,7 +23,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
     public class EmailTemplateController(
         SqlContext db,
         TokenService tokenService,
-        IDBCacheManager cacheManager
+        EmailTemplateCacheLeaseManager templateCacheLeaseManager
     ) : ControllerBaseV1
     {
         /// <summary>
@@ -85,14 +85,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             }
 
             // 判断是否存在同名的模板
-            var existOne = await db
-                .EmailTemplates.Include(x => x.ShareToUsers)
-                .Include(x => x.ShareToOrganizations)
-                .FirstOrDefaultAsync(x => x.Id == entity.Id && x.UserId == entity.UserId);
-            var affectedUserIds = (existOne?.ShareToUsers ?? []).Select(x => x.Id).ToHashSet();
-            var affectedOrganizationIds = (existOne?.ShareToOrganizations ?? [])
-                .Select(x => x.Id)
-                .ToHashSet();
+            var existOne = await db.EmailTemplates.FirstOrDefaultAsync(x =>
+                x.Id == entity.Id && x.UserId == entity.UserId
+            );
             // 如果有 Id,则说明是修改
             if (entity.Id > 0)
             {
@@ -137,12 +132,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                 await db.SaveChangesAsync();
             }
 
-            await UserTemplatesCache.InvalidateTemplateScopesAsync(
-                cacheManager,
-                entity.UserId,
-                affectedUserIds,
-                affectedOrganizationIds
-            );
+            await templateCacheLeaseManager.MarkDirtyAsync(entity.Id);
 
             return entity.ToSuccessResponse();
         }
@@ -158,19 +148,11 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             // 通过条件删除
             var userId = tokenService.GetUserSqlId();
             var email =
-                await db
-                    .EmailTemplates.Include(x => x.ShareToUsers)
-                    .Include(x => x.ShareToOrganizations)
-                    .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId)
+                await db.EmailTemplates.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId)
                 ?? throw new KnownException("模板不存在");
             db.Remove(email);
             await db.SaveChangesAsync();
-            await UserTemplatesCache.InvalidateTemplateScopesAsync(
-                cacheManager,
-                email.UserId,
-                email.ShareToUsers.Select(x => x.Id),
-                email.ShareToOrganizations.Select(x => x.Id)
-            );
+            await templateCacheLeaseManager.MarkDirtyAsync(email.Id);
             return true.ToSuccessResponse();
         }
 

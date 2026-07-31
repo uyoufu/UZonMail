@@ -1,3 +1,4 @@
+using AngleSharp.Html.Parser;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
@@ -121,9 +122,8 @@ namespace UzonMail.CorePlugin.Controllers.AICopilot
             string pureText;
             try
             {
-                var htmlDoc = new HtmlAgilityPack.HtmlDocument();
-                htmlDoc.LoadHtml(emailBody);
-                pureText = htmlDoc.DocumentNode.InnerText;
+                var htmlDocument = new HtmlParser().ParseDocument(emailBody);
+                pureText = htmlDocument.DocumentElement?.TextContent ?? string.Empty;
             }
             catch (Exception ex)
             {

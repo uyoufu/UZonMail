@@ -51,7 +51,7 @@ public sealed class OutboxLinkedGroupCleanupService(
                 continue;
             }
 
-            groupTasksManager.RemoveSendingGroupTask(outbox.UserId, sendingGroupId);
+            await groupTasksManager.RemoveSendingGroupTaskAsync(outbox.UserId, sendingGroupId);
             await FailAllPendingItemsAsync(sendingGroupId, outbox.ErroredMessage);
             var removedSendingGroup = await SendingGroupUpdater.UpdateSendingGroupSentInfo(
                 db,

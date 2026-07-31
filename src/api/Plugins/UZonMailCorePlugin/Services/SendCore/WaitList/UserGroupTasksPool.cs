@@ -54,7 +54,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 var success = await newTask.InitSendingItems(scopeServices, sendingItemIds);
                 if (!success || !TryAdd(sendingGroupId, newTask))
                 {
-                    newTask.Close();
+                    await newTask.CloseAsync();
                     return false;
                 }
                 return true;
@@ -145,14 +145,16 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             return _tasks.TryGetValue(key, out value);
         }
 
-        public bool TryRemove(long key, [MaybeNullWhen(false)] out GroupTask value)
+        /// <summary>
+        /// 从任务池移除发件组，并等待其异步资源释放完成。
+        /// </summary>
+        public async Task<bool> TryRemoveAsync(long key)
         {
-            if (!_tasks.TryRemove(key, out value))
+            if (!_tasks.TryRemove(key, out var groupTask))
                 return false;
 
-            value.Close();
+            await groupTask.CloseAsync();
             _taskOrder.TryRemove(key, out _);
-
             return true;
         }
         #endregion

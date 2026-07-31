@@ -110,7 +110,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
                     );
                 }
 
-                waitList.RemoveSendingGroupTask(sendingGroup.UserId, sendingGroup.Id);
+                await waitList.RemoveSendingGroupTaskAsync(sendingGroup.UserId, sendingGroup.Id);
             }
 
             if (sendingGroup.SendingType == SendingGroupType.Scheduled)
