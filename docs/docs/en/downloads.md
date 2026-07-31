@@ -5,6 +5,28 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.23.2
+
+> Release Date: 2026-07-31
+
+### Improvements
+
+1. Add HTML-to-plaintext conversion for emails, generating a plain-text alternative alongside the HTML body to prevent MPART_ALT_DIFF mismatches in email clients
+
+### Bug Fixes
+
+1. Optimize email template caching with a per-template lease-based approach, improving reliability and timely resource release
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.23.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.2.0.zip)
+
+[uzonmail-service-win-x64-0.23.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.2.0.zip)
+
+[uzonmail-service-linux-x64-0.23.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.2.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.1
 
 > Release Date: 2026-07-30
