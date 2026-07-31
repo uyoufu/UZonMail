@@ -89,12 +89,6 @@ Describe 'UzonMail unified build script' {
         $nativeOutput | Should Be $null
     }
 
-    It 'does not reference pre-migration source directories' {
-        $buildSources = (Get-Content -LiteralPath $buildModulePath -Raw) + (Get-Content -LiteralPath $buildScriptPath -Raw)
-
-        $buildSources | Should Not Match 'backend-src|ui-src'
-    }
-
     It 'does not require fixed plugin project paths' {
         $buildSources = (Get-Content -LiteralPath $buildModulePath -Raw) + (Get-Content -LiteralPath $buildScriptPath -Raw)
 

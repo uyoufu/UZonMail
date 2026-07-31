@@ -270,11 +270,11 @@ $releaseGitLog
 "@
 
     Write-Host '调用 OpenCode 生成双语发布说明...' -ForegroundColor Yellow
-    $opencodeOutput = @($opencodePrompt | & opencode run --dir $repositoryRoot --pure --print-logs)
+    $opencodeOutput = @($opencodePrompt | & opencode run --dir $repositoryRoot --pure)
     Assert-GitSuccess -Step 'OpenCode 生成版本文档'
     $releaseNotes = ConvertFrom-OpenCodeReleaseNotes -OutputLines $opencodeOutput
 
-    $updateScriptPath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/update-version-doc.ps1'
+    $updateScriptPath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/internal/update-version-doc.ps1'
     Write-Host '更新中文版本文档...' -ForegroundColor Yellow
     & $updateScriptPath -Version $version -UpdatePath 'docs/docs/downloads.md' -MarkdownContent $releaseNotes.zhMarkdown
 
