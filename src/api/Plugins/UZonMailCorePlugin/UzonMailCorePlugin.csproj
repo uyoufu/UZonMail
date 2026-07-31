@@ -68,14 +68,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AngleSharp" Version="1.6.0" />
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
 		<PackageReference Include="Microsoft.Extensions.AI" Version="10.8.3" />
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.8.3" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.87.0" />
 		<PackageReference Include="Quartz" Version="3.19.1" />
-		<PackageReference Include="StackExchange.Redis" Version="3.0.17" />
+		<PackageReference Include="StackExchange.Redis" Version="3.0.25" />
 	</ItemGroup>
 
 	<ItemGroup>

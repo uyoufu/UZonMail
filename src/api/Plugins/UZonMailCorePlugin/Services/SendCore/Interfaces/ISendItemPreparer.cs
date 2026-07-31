@@ -1,8 +1,8 @@
 using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
-using UzonMail.CorePlugin.Services.SendCore.EmailWaitList;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
 
@@ -18,7 +18,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Interfaces
             SendingItem sendingItem,
             OutboxEmailAddress outbox,
             SendingGroup sendingGroup,
-            UsableTemplateList usableTemplates,
+            SendingGroupTemplateResolver templateResolver,
             IReadOnlyList<long> proxyIds
         );
     }

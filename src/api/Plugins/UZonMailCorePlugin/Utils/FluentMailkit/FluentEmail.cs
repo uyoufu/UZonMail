@@ -76,8 +76,7 @@ namespace UzonMail.CorePlugin.Utils.FluentMailkit
             _bodyBuilder.Attachments.Add(filePath);
             var lastOne = _bodyBuilder.Attachments.Last();
             lastOne.ContentType.Name = fileName;
-            if (lastOne.ContentDisposition is not null)
-                lastOne.ContentDisposition.FileName = fileName;
+            lastOne.ContentDisposition?.FileName = fileName;
             return this;
         }
 

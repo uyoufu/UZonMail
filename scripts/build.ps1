@@ -663,5 +663,5 @@ try {
 catch {
     Write-Host ''
     Write-BuildMessage -Level Error -Message $_.Exception.Message
-    exit 1
+    throw
 }

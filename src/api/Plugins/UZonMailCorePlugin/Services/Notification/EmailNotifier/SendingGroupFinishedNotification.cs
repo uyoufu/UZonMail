@@ -85,3 +85,4 @@ namespace UzonMail.CorePlugin.Services.Notification.EmailNotifier
         }
     }
 }
+

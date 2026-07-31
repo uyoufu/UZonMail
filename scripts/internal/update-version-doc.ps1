@@ -257,7 +257,7 @@ end {
 
     $normalizedVersion = Get-NormalizedReleaseVersion -InputVersion $Version
     $resolvedRepositoryRoot = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
-        Split-Path -Path $PSScriptRoot -Parent
+        Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
     }
     else {
         [System.IO.Path]::GetFullPath($RepositoryRoot)

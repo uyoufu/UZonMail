@@ -1,3 +1,7 @@
+using System.Text;
+using System.Text.RegularExpressions;
+using AngleSharp.Dom;
+using AngleSharp.Html.Parser;
 using log4net;
 using MimeKit;
 using UzonMail.CorePlugin.Services.EmailDecorator;
@@ -17,6 +21,27 @@ public sealed class LocalEmailSendingHandler(
 ) : AbstractSendingHandler
 {
     private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalEmailSendingHandler));
+    private static readonly Regex WhitespacePattern = new(@"\s+", RegexOptions.Compiled);
+    private static readonly HashSet<string> IgnoredElementTagNames =
+        new(StringComparer.OrdinalIgnoreCase) { "head", "script", "style", "noscript" };
+    private static readonly HashSet<string> BlockElementTagNames =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "address",
+            "article",
+            "blockquote",
+            "div",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "li",
+            "p",
+            "table",
+            "tr",
+        };
 
     protected override async Task<IHandlerResult> HandleCore(SendingContext context)
     {
@@ -78,16 +103,7 @@ public sealed class LocalEmailSendingHandler(
         message.ReplyTo.AddRange(item.ReplyToEmails.Select(x => new MailboxAddress(x, x)));
         message.Subject = item.Subject;
 
-        var bodyBuilder = new BodyBuilder { HtmlBody = item.HtmlBody };
-        foreach (var attachment in item.Attachments)
-        {
-            bodyBuilder.Attachments.Add(attachment.File.FullName);
-            var mimeAttachment = bodyBuilder.Attachments.Last();
-            mimeAttachment.ContentType.Name = attachment.FileName;
-            if (mimeAttachment.ContentDisposition is not null)
-                mimeAttachment.ContentDisposition.FileName = attachment.FileName;
-        }
-        message.Body = bodyBuilder.ToMessageBody();
+        message.Body = CreateMessageBody(item.HtmlBody, item.Attachments);
 
         var decoratorParams = new EmailDecoratorParams(
             item.SendingSetting,
@@ -100,5 +116,93 @@ public sealed class LocalEmailSendingHandler(
         return await context
             .Provider.GetRequiredService<MimeMessageDecorateService>()
             .Decorate(decoratorParams, message);
+    }
+
+    /// <summary>
+    /// 根据最终 HTML 和附件构造规范 MIME 正文。
+    /// 有可见文本时同时提供纯文本替代部分，避免接收方将 HTML 邮件识别为替代正文不一致。
+    /// </summary>
+    internal static MimeEntity CreateMessageBody(
+        string htmlBody,
+        IReadOnlyList<PreparedSendAttachment> attachments
+    )
+    {
+        ArgumentNullException.ThrowIfNull(htmlBody);
+        ArgumentNullException.ThrowIfNull(attachments);
+
+        var bodyBuilder = new BodyBuilder { HtmlBody = htmlBody };
+        var plainTextBody = CreatePlainTextAlternative(htmlBody);
+        if (!string.IsNullOrWhiteSpace(plainTextBody))
+            bodyBuilder.TextBody = plainTextBody;
+
+        foreach (var attachment in attachments)
+        {
+            bodyBuilder.Attachments.Add(attachment.File.FullName);
+            var mimeAttachment = bodyBuilder.Attachments.Last();
+            mimeAttachment.ContentType.Name = attachment.FileName;
+            mimeAttachment.ContentDisposition?.FileName = attachment.FileName;
+        }
+
+        return bodyBuilder.ToMessageBody();
+    }
+
+    private static string CreatePlainTextAlternative(string htmlBody)
+    {
+        var htmlDocument = new HtmlParser().ParseDocument(htmlBody);
+        var contentElement = htmlDocument.Body ?? htmlDocument.DocumentElement;
+        if (contentElement is null)
+            return string.Empty;
+
+        var plainTextBuilder = new StringBuilder();
+        AppendPlainText(contentElement, plainTextBuilder);
+
+        var normalizedText = plainTextBuilder.ToString().Replace("\r\n", "\n").Replace('\r', '\n');
+        return string.Join(
+            Environment.NewLine,
+            normalizedText
+                .Split('\n')
+                .Select(line => WhitespacePattern.Replace(line, " ").Trim())
+                .Where(line => !string.IsNullOrEmpty(line))
+        );
+    }
+
+    /// <summary>
+    /// 按 HTML 文档顺序收集可读文本，使纯文本部分与 HTML 正文保持语义一致。
+    /// </summary>
+    private static void AppendPlainText(INode node, StringBuilder plainTextBuilder)
+    {
+        if (node is IText textNode)
+        {
+            plainTextBuilder.Append(textNode.TextContent);
+            return;
+        }
+
+        if (node is not IElement element)
+            return;
+
+        if (IgnoredElementTagNames.Contains(element.LocalName))
+            return;
+
+        if (element.LocalName.Equals("br", StringComparison.OrdinalIgnoreCase))
+        {
+            plainTextBuilder.Append('\n');
+            return;
+        }
+
+        if (element.LocalName.Equals("img", StringComparison.OrdinalIgnoreCase))
+        {
+            plainTextBuilder.Append(element.GetAttribute("alt")?.Trim());
+            return;
+        }
+
+        var isBlockElement = BlockElementTagNames.Contains(element.LocalName);
+        if (isBlockElement)
+            plainTextBuilder.Append('\n');
+
+        foreach (var childNode in element.ChildNodes)
+            AppendPlainText(childNode, plainTextBuilder);
+
+        if (isBlockElement)
+            plainTextBuilder.Append('\n');
     }
 }

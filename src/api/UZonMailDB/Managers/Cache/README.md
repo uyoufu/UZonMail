@@ -153,15 +153,16 @@ await cacheManager.SetSourceAsync(
 ```csharp
 await db.SaveChangesAsync(cancellationToken);
 
-await cacheManager.InvalidateSourceAsync(
-    UserTemplatesCache.GetOwnedSourceKey(userId),
+await EmailTemplateCache.InvalidateAsync(
+    cacheManager,
+    templateId,
     cancellationToken
 );
 ```
 
 失效操作不会立即遍历或重建所有派生结果。下一次读取相关结果时，加载委托会重新获取原始数据，然后只重建实际被访问的结果。
 
-对于一个变更影响多个范围的场景，应精确失效全部受影响的源键。例如模板共享关系变化时，应同时处理所有者、直接共享用户和共享组织范围，可复用 `UserTemplatesCache.InvalidateTemplateScopesAsync`。
+对于缓存了关联访问元数据的单实体，应使用同一修订源统一失效正文与授权信息。例如模板共享关系变化时，调用 `EmailTemplateCache.InvalidateAsync` 即可令所有用户后续读取重新执行权限判断。
 
 ## 仅表示集合变化的修订源
 
@@ -218,4 +219,4 @@ await cacheManager.InvalidateSourceAsync(revisionKey, cancellationToken);
 - 始终传递调用链上的 `CancellationToken`。
 - 不要捕获并吞掉刷新异常，否则调用方无法识别当前结果未成功构建。
 
-现有实现可参考 `UserInfoCache`、`UserTemplatesCache` 和 `AppSettingSnapshot`。
+现有实现可参考 `UserInfoCache`、`EmailTemplateCache` 和 `AppSettingSnapshot`。

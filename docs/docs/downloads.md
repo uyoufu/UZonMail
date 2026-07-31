@@ -5,6 +5,28 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 permalink: /downloads
 ---
 
+## 0.23.2
+
+> 更新时期: 2026-07-31
+
+### 功能优化
+
+1. 添加邮件 HTML 内容转纯文本功能，生成与 HTML 正文对应的纯文本版本，避免部分邮件客户端出现 MPART_ALT_DIFF 不匹配问题
+
+### Bug 修复
+
+1. 优化邮件模板缓存机制，改为基于租约的 per-template 缓存方案，提升模板管理的可靠性和资源释放及时性
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.23.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.2.0.zip)
+
+[uzonmail-service-win-x64-0.23.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.2.0.zip)
+
+[uzonmail-service-linux-x64-0.23.2.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.2.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.1
 
 > 更新时期: 2026-07-30

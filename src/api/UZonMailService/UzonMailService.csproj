@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
@@ -8,8 +8,8 @@
 		<UserSecretsId>f2aa302e-c8fb-40d2-9a58-a6348ffd6c03</UserSecretsId>
 		<ServerGarbageCollection>false</ServerGarbageCollection>
 		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
-		<FileVersion>0.23.1.0</FileVersion> 
-		<AssemblyVersion>0.23.1.0</AssemblyVersion>
+		<FileVersion>0.23.2.0</FileVersion> 
+		<AssemblyVersion>0.23.2.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -39,7 +39,7 @@
 		<PackageReference Include="Quartz" Version="3.19.1" />
 		<PackageReference Include="Quartz.AspNetCore" Version="3.19.1" />
 		<PackageReference Include="Quartz.Serialization.Json" Version="3.19.1" />
-		<PackageReference Include="StackExchange.Redis" Version="3.0.17" />
+		<PackageReference Include="StackExchange.Redis" Version="3.0.25" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
 	</ItemGroup>
 
@@ -69,14 +69,8 @@
 		</None>
 	</ItemGroup>
 
-	<Target
-		Name="RemoveLegacyPluginDebugOutputs"
-		BeforeTargets="PrepareForBuild"
-		Condition="'$(Configuration)' == 'Debug'"
-	>
+	<Target Name="RemoveLegacyPluginDebugOutputs" BeforeTargets="PrepareForBuild" Condition="'$(Configuration)' == 'Debug'">
 		<!-- 历史插件输出未正确分隔配置目录，遗留副本会被递归扫描并与当前构建产物冲突 -->
-		<RemoveDir
-			Directories="$(OutputPath)Plugins\UzonMailCoredebug;$(OutputPath)Plugins\UzonMailProdebug"
-		/>
+		<RemoveDir Directories="$(OutputPath)Plugins\UzonMailCoredebug;$(OutputPath)Plugins\UzonMailProdebug" />
 	</Target>
 </Project>

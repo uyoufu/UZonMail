@@ -3,9 +3,9 @@ using UzonMail.CorePlugin.Services.EmailDecorator;
 using UzonMail.CorePlugin.Services.EmailDecorator.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
-using UzonMail.CorePlugin.Services.SendCore.EmailWaitList;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL;
@@ -29,7 +29,7 @@ public sealed class SendItemPreparer(
         SendingItem sendingItem,
         OutboxEmailAddress outbox,
         SendingGroup sendingGroup,
-        UsableTemplateList usableTemplates,
+        SendingGroupTemplateResolver templateResolver,
         IReadOnlyList<long> proxyIds
     )
     {
@@ -40,7 +40,7 @@ public sealed class SendItemPreparer(
         var originBody = await GetOriginBodyAsync(
             db,
             sendingGroup,
-            usableTemplates,
+            templateResolver,
             sendingItem,
             variables
         );
@@ -83,7 +83,7 @@ public sealed class SendItemPreparer(
     private static async Task<string> GetOriginBodyAsync(
         SqlContext db,
         SendingGroup sendingGroup,
-        UsableTemplateList usableTemplates,
+        SendingGroupTemplateResolver templateResolver,
         SendingItem sendingItem,
         SendingItemExcelData? variables
     )
@@ -92,7 +92,8 @@ public sealed class SendItemPreparer(
         {
             if (!string.IsNullOrEmpty(sendingGroup.Body))
                 return sendingGroup.Body;
-            return (await usableTemplates.GetTemplate(db, sendingItem.Id))?.Content ?? string.Empty;
+            return (await templateResolver.GetTemplate(db, sendingItem.Id))?.Content
+                ?? string.Empty;
         }
 
         if (variables != null)
@@ -101,13 +102,13 @@ public sealed class SendItemPreparer(
                 return variables.Body;
             if (variables.TemplateId > 0)
             {
-                var template = await usableTemplates.GetTemplateById(db, variables.TemplateId);
+                var template = await templateResolver.GetTemplateById(db, variables.TemplateId);
                 if (template != null)
                     return template.Content;
             }
             if (!string.IsNullOrEmpty(variables.TemplateName))
             {
-                var template = await usableTemplates.GetTemplateByName(db, variables.TemplateName);
+                var template = await templateResolver.GetTemplateByName(db, variables.TemplateName);
                 if (template != null)
                     return template.Content;
             }
@@ -115,7 +116,7 @@ public sealed class SendItemPreparer(
 
         if (!string.IsNullOrEmpty(sendingGroup.Body))
             return sendingGroup.Body;
-        return (await usableTemplates.GetTemplate(db, sendingItem.Id))?.Content ?? string.Empty;
+        return (await templateResolver.GetTemplate(db, sendingItem.Id))?.Content ?? string.Empty;
     }
 
     private static string GetSubject(SendingGroup sendingGroup, SendingItemExcelData? variables) =>

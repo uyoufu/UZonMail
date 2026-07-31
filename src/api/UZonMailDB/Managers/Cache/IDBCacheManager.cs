@@ -40,6 +40,33 @@ public interface IDBCacheManager
         where TResult : BaseDBCache<SqlContext, long>, new();
 
     /// <summary>
+    /// 移除指定派生缓存结果。
+    /// 调用方必须确保不会影响仍在使用该结果的业务生命周期。
+    /// </summary>
+    Task<bool> RemoveCacheAsync<TResult, TSqlContext, TArg>(
+        TArg arg,
+        CancellationToken cancellationToken = default
+    )
+        where TSqlContext : SqlContextBase
+        where TResult : BaseDBCache<TSqlContext, TArg>, new();
+
+    /// <summary>
+    /// 移除使用 long 业务标识的指定数据库上下文缓存结果。
+    /// </summary>
+    Task<bool> RemoveCacheAsync<TResult, TSqlContext>(
+        long sqlId,
+        CancellationToken cancellationToken = default
+    )
+        where TSqlContext : SqlContextBase
+        where TResult : BaseDBCache<TSqlContext, long>, new();
+
+    /// <summary>
+    /// 移除主数据库上下文中使用 long 业务标识的缓存结果。
+    /// </summary>
+    Task<bool> RemoveCacheAsync<TResult>(long sqlId, CancellationToken cancellationToken = default)
+        where TResult : BaseDBCache<SqlContext, long>, new();
+
+    /// <summary>
     /// 发布新的原始数据快照并提升源版本。
     /// </summary>
     Task SetSourceAsync<TValue, TIdentity>(
