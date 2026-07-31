@@ -47,20 +47,20 @@ namespace UzonMail.CorePlugin.Services.SendCore.EmailWaitList
             // 为空时直接返回空
             if (_sendingItemTemplateIds.IsEmpty && _sendingGroupTemplateIds.Count == 0)
                 return null;
-
+    
             // 获取所有的模板
             var allTemplates = await cacheManager.GetCache<UserTemplatesCache>(sqlContext, userId);
 
             if (_sendingItemTemplateIds.TryGetValue(sendingItemId, out var templateId))
             {
-                return allTemplates.Where(x => x.Id == templateId).FirstOrDefault();
+                return allTemplates.FirstOrDefault(x => x.Id == templateId);
             }
 
             // 随机获取一个模板
             var index = RandomNumberGenerator.GetInt32(0, _sendingGroupTemplateIds.Count);
-            var template = allTemplates
-                .Where(x => x.Id == _sendingGroupTemplateIds[index])
-                .FirstOrDefault();
+            var template = allTemplates.FirstOrDefault(x =>
+                x.Id == _sendingGroupTemplateIds[index]
+            );
             return template;
         }
 
@@ -68,7 +68,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.EmailWaitList
         {
             // 从自己可使用的所有模板中获取
             var allTemplates = await cacheManager.GetCache<UserTemplatesCache>(sqlContext, userId);
-            return allTemplates.Where(x => x.Id == templateId).FirstOrDefault();
+            return allTemplates.FirstOrDefault(x => x.Id == templateId);
         }
 
         public async Task<EmailTemplate?> GetTemplateByName(
@@ -78,7 +78,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.EmailWaitList
         {
             // 从自己可使用的所有模板中获取
             var allTemplates = await cacheManager.GetCache<UserTemplatesCache>(sqlContext, userId);
-            return allTemplates.Where(x => x.Name == templateName).FirstOrDefault();
+            return allTemplates.FirstOrDefault(x => x.Name == templateName);
         }
     }
 }
+

@@ -28,13 +28,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.Utils
 
             var successCount = statusCount
                 .Where(x => x.Status >= SendingItemStatus.Success)
-                .Select(x => x.Count)
-                .Sum();
+                .Sum(x => x.Count);
             var sentCount =
                 statusCount
                     .Where(x => x.Status <= SendingItemStatus.Cancel)
-                    .Select(x => x.Count)
-                    .Sum() + successCount;
+                    .Sum(x => x.Count) + successCount;
 
             var sendingGroup = await sqlContext.SendingGroups.FirstAsync(x =>
                 x.Id == sendingGroupId

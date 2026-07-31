@@ -84,8 +84,7 @@ public sealed class LocalEmailSendingHandler(
             bodyBuilder.Attachments.Add(attachment.File.FullName);
             var mimeAttachment = bodyBuilder.Attachments.Last();
             mimeAttachment.ContentType.Name = attachment.FileName;
-            if (mimeAttachment.ContentDisposition is not null)
-                mimeAttachment.ContentDisposition.FileName = attachment.FileName;
+            mimeAttachment.ContentDisposition?.FileName = attachment.FileName;
         }
         message.Body = bodyBuilder.ToMessageBody();
 
@@ -102,3 +101,4 @@ public sealed class LocalEmailSendingHandler(
             .Decorate(decoratorParams, message);
     }
 }
+

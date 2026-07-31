@@ -130,10 +130,9 @@ namespace UzonMail.CorePlugin.Services.UserInfos
 
             // 获取超管角色
             var orgRole = adminUserRole
-                .Roles.Where(x =>
+                .Roles.FirstOrDefault(x =>
                     x.PermissionCodes.Any(y => y.Code == PermissionCode.OrganizationPermissionCode)
-                )
-                .FirstOrDefault();
+                );
             if (orgRole == null)
                 return;
 

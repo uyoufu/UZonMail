@@ -74,10 +74,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies.Clients
 
             return _handlers
                 .Values.Where(x => x.IsMatch(email) && x.IsEnable())
-                .Where(x =>
+                .FirstOrDefault(x =>
                     !ipRateLimiter.IsLimited(domain, x.Host, sendingSetting.MaxCountPerIPDomainHour)
-                )
-                .FirstOrDefault();
+                );
         }
 
         private async Task UpdateProxyHandlers(IServiceProvider serviceProvider)
