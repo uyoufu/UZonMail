@@ -75,7 +75,7 @@
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.8.3" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.87.0" />
 		<PackageReference Include="Quartz" Version="3.19.1" />
-		<PackageReference Include="StackExchange.Redis" Version="3.0.17" />
+		<PackageReference Include="StackExchange.Redis" Version="3.0.25" />
 	</ItemGroup>
 
 	<ItemGroup>
