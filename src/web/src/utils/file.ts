@@ -537,18 +537,18 @@ export function fileSha256(
 // #endregion
 
 // #region 文件保存相关操作
-export async function saveFileSmart(fileName: string, contentOrString: string) {
+export async function saveFileSmart(fileName: string, contentOrUrl: string) {
   // 若不是 url，则转换成 objectUrl
-  if (!validUrl(contentOrString)) {
-    const blob = new Blob([contentOrString], { type: 'text/plain' })
+  if (!validUrl(contentOrUrl)) {
+    const blob = new Blob([contentOrUrl], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
-    contentOrString = url
+    contentOrUrl = url
   }
 
   if (window.showSaveFilePicker) {
-    return saveByFileSystemAccess(fileName, contentOrString)
+    return saveByFileSystemAccess(fileName, contentOrUrl)
   } else {
-    return saveByUrl(fileName, contentOrString)
+    return saveByUrl(fileName, contentOrUrl)
   }
 }
 
