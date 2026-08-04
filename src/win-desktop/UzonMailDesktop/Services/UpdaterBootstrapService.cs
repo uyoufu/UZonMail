@@ -11,11 +11,17 @@ internal static class UpdaterBootstrapService
 {
     private const string TemporaryUpdaterDirectoryName = "UpdaterTmp";
     private const string UpdaterDirectoryName = "Updater";
+    private const int MaximumFileReplacementRetryCount = 8;
+    private static readonly TimeSpan InitialFileReplacementRetryDelay = TimeSpan.FromMilliseconds(
+        100
+    );
+    private static readonly TimeSpan MaximumFileReplacementRetryDelay = TimeSpan.FromSeconds(2);
 
     /// <summary>
-    /// 将临时更新器复制到正式目录，成功后移除临时文件
+    /// 将临时更新器复制到正式目录，成功后移除临时文件。
+    /// 更新器启动桌面端后会短暂持有自身的可执行文件，因此此处等待其退出后再替换。
     /// </summary>
-    public static void InstallPendingUpdater(
+    public static async Task InstallPendingUpdaterAsync(
         string applicationDirectory,
         IDesktopLocalizationService localization
     )
@@ -46,20 +52,43 @@ internal static class UpdaterBootstrapService
                 );
 
             var targetFile = Path.Combine(targetDirectory, relativePath);
-            Directory.CreateDirectory(Path.GetDirectoryName(targetFile)!);
+            await ReplaceFileAsync(sourceFile, targetFile);
+        }
+
+        Directory.Delete(sourceDirectory, recursive: true);
+    }
+
+    private static async Task ReplaceFileAsync(string sourceFile, string targetFile)
+    {
+        for (var retryCount = 0; ; retryCount++)
+        {
             var temporaryFile = $"{targetFile}.{Guid.NewGuid():N}.tmp";
             try
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(targetFile)!);
                 File.Copy(sourceFile, temporaryFile, overwrite: true);
                 File.Move(temporaryFile, targetFile, overwrite: true);
+                return;
             }
+            catch (IOException) when (retryCount < MaximumFileReplacementRetryCount) { }
+            catch (UnauthorizedAccessException) when (retryCount < MaximumFileReplacementRetryCount)
+            { }
             finally
             {
                 if (File.Exists(temporaryFile))
                     File.Delete(temporaryFile);
             }
-        }
 
-        Directory.Delete(sourceDirectory, recursive: true);
+            await Task.Delay(GetRetryDelay(retryCount));
+        }
+    }
+
+    private static TimeSpan GetRetryDelay(int retryCount)
+    {
+        var delayMilliseconds =
+            InitialFileReplacementRetryDelay.TotalMilliseconds * Math.Pow(2, retryCount);
+        return TimeSpan.FromMilliseconds(
+            Math.Min(delayMilliseconds, MaximumFileReplacementRetryDelay.TotalMilliseconds)
+        );
     }
 }

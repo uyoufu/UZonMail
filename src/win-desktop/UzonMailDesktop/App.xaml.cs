@@ -30,7 +30,7 @@ public partial class App : Application
 
             try
             {
-                UpdaterBootstrapService.InstallPendingUpdater(
+                await UpdaterBootstrapService.InstallPendingUpdaterAsync(
                     AppContext.BaseDirectory,
                     localization
                 );
