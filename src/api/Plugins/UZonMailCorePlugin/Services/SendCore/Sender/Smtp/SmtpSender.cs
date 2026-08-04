@@ -53,7 +53,7 @@ public sealed class SmtpSender(
                 continue;
             }
 
-            var clientResult = await clientManager.GetSmtpClientAsync(
+            var clientResult = await clientManager.AcquireSmtpSessionAsync(
                 context,
                 routeResult.Route,
                 cancellationToken
@@ -69,23 +69,26 @@ public sealed class SmtpSender(
             }
             else
             {
-                var client = clientResult.Data;
+                await using var clientLease = clientResult.Data;
                 await ipRateLimiter.WaitForReleaseAsync(
                     context,
                     sendItem.Outbox.Email,
-                    client.ProxyClient?.ProxyHost
+                    clientLease.ProxyClient?.ProxyHost
                 );
 
-                if (client.ProxyClient is ProxyClientAdapter adapter && !adapter.IsEnable)
+                if (clientLease.ProxyClient is ProxyClientAdapter adapter && !adapter.IsEnable)
                 {
                     lastResult = TransportResult.Failure(SendFailureKind.Proxy, "代理在发送前已失效");
-                    await clientManager.DisposeSmtpClientAsync(client.GetClientKey());
+                    clientLease.Invalidate();
                 }
                 else
                 {
                     try
                     {
-                        var receiptId = await client.SendMessageAsync(message, cancellationToken);
+                        var receiptId = await clientLease.SendMessageAsync(
+                            message,
+                            cancellationToken
+                        );
                         Logger.Info(
                             $"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}"
                         );
@@ -98,10 +101,10 @@ public sealed class SmtpSender(
                             lastResult.FailureKind
                                 is SendFailureKind.Network
                                     or SendFailureKind.Proxy
-                            && client.ProxyClient is ProxyClientAdapter failedProxy
+                            && clientLease.ProxyClient is ProxyClientAdapter failedProxy
                         )
                             failedProxy.MarkHealthless();
-                        await clientManager.DisposeSmtpClientAsync(client.GetClientKey());
+                        clientLease.Invalidate();
                     }
                 }
             }
