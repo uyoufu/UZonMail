@@ -5,6 +5,29 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 permalink: /downloads
 ---
 
+## 0.23.3
+
+> 更新时期: 2026-08-04
+
+### 功能新增
+
+1. 全新版本更新通知：支持查看更新历史、忽略版本、立即更新等交互操作
+2. 新增版本历史对话框：展示官方更新说明及安全下载链接
+
+### 功能优化
+
+1. 邮箱地址验证升级：采用 MIME 标准严格模式，增强发件箱、收件人、抄送、密送、回复地址的校验能力
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.23.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.3.0.zip)
+
+[uzonmail-service-win-x64-0.23.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.3.0.zip)
+
+[uzonmail-service-linux-x64-0.23.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.3.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.2
 
 > 更新时期: 2026-07-31

@@ -9,6 +9,11 @@ public enum SendItemValidationFailure
     MissingOutbox,
     MissingRecipients,
     MissingBody,
+
+    /// <summary>
+    /// 发件信息中的地址不符合 MIME 邮件地址格式。
+    /// </summary>
+    InvalidEmailAddress,
 }
 
 /// <summary>

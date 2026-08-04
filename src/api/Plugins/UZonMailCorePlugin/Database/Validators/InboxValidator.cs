@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using UzonMail.DB.SQL.Core.Emails;
 
 namespace UzonMail.CorePlugin.Database.Validators
@@ -12,11 +11,10 @@ namespace UzonMail.CorePlugin.Database.Validators
     {
         public InboxValidator()
         {
-            var pattern = @"^[a-zA-Z0-9_%+-]+(\.[a-zA-Z0-9_%+-]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$";
             // 验证是否为邮箱格式
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .Must(x => Regex.IsMatch(x, pattern))
+                .EmailAddress()
                 .WithMessage(x => $"{x.Email} 不是有效的邮箱格式");
         }
     }

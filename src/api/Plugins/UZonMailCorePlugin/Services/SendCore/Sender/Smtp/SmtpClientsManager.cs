@@ -19,7 +19,7 @@ using UzonMail.Utils.Web.Service;
 namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
 
 /// <summary>
-/// 表示可缓存、探活并发送邮件的 SMTP 会话。
+/// Represents a cached SMTP connection that can be safely managed by the SMTP session manager.
 /// </summary>
 public interface ISmtpSession : IDisposable
 {
@@ -30,8 +30,6 @@ public interface ISmtpSession : IDisposable
     int SentCount { get; }
 
     void SetParams(SmtpClientKey clientKey, int cooldownMilliseconds);
-
-    SmtpClientKey GetClientKey();
 
     Task ConnectAsync(
         string host,
@@ -57,21 +55,21 @@ public interface ISmtpSession : IDisposable
 }
 
 /// <summary>
-/// 为当前发送作用域创建 SMTP 会话。
+/// Creates SMTP sessions without binding a cached session to an individual request scope.
 /// </summary>
 public interface ISmtpSessionFactory
 {
-    ISmtpSession Create(IServiceProvider serviceProvider);
+    ISmtpSession Create();
 }
 
 /// <summary>
-/// 管理按发件箱、连接配置和网络路由隔离的 SMTP 会话。
+/// Manages SMTP sessions isolated by outbox, protocol profile, and network route.
 /// </summary>
 public interface ISmtpClientsManager
 {
-    ICollection<SmtpClientKey> SmtpClientKeys { get; }
+    IReadOnlyCollection<SmtpClientKey> SmtpClientKeys { get; }
 
-    Task<Result<ISmtpSession>> GetSmtpClientAsync(
+    Task<Result<ISmtpSessionLease>> AcquireSmtpSessionAsync(
         SendingContext context,
         NetworkRoute route,
         CancellationToken cancellationToken = default
@@ -83,14 +81,15 @@ public interface ISmtpClientsManager
 }
 
 /// <inheritdoc />
-public sealed class SmtpSessionFactory : ISmtpSessionFactory, ISingletonService<ISmtpSessionFactory>
+public sealed class SmtpSessionFactory(DebugConfig debugConfig)
+    : ISmtpSessionFactory,
+        ISingletonService<ISmtpSessionFactory>
 {
-    public ISmtpSession Create(IServiceProvider serviceProvider) =>
-        serviceProvider.GetRequiredService<ThrottlingSmtpClient>();
+    public ISmtpSession Create() => new ThrottlingSmtpClient(debugConfig);
 }
 
 /// <summary>
-/// 按发件箱、协议配置和网络出口缓存 SMTP 会话。
+/// Caches SMTP sessions and coordinates their use, probing, retirement, and disposal.
 /// </summary>
 public sealed class SmtpClientsManager
     : ISmtpClientsManager,
@@ -98,7 +97,15 @@ public sealed class SmtpClientsManager
         IAsyncDisposable
 {
     private static readonly ILog Logger = LogManager.GetLogger(typeof(SmtpClientsManager));
-    private readonly ConcurrentDictionary<SmtpClientKey, ISmtpSession> _clients = [];
+    private static readonly TimeSpan MaintenanceInterval = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan IdleKeepAliveThreshold = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan IdleSessionTimeout = TimeSpan.FromMinutes(5);
+
+    private readonly ConcurrentDictionary<SmtpClientKey, SmtpSessionEntry> _clients = [];
+    private readonly ConcurrentDictionary<
+        SmtpClientKey,
+        Lazy<Task<SmtpSessionEntry>>
+    > _creatingClients = [];
     private readonly AppSettingsManager _settingsService;
     private readonly SmtpConnector _connector;
     private readonly ISmtpSessionFactory _sessionFactory;
@@ -117,12 +124,17 @@ public sealed class SmtpClientsManager
         _maintenanceTask = MaintainConnectionsAsync(_shutdown.Token);
     }
 
-    public async Task<Result<ISmtpSession>> GetSmtpClientAsync(
+    public IReadOnlyCollection<SmtpClientKey> SmtpClientKeys => _clients.Keys.ToArray();
+
+    public async Task<Result<ISmtpSessionLease>> AcquireSmtpSessionAsync(
         SendingContext context,
         NetworkRoute route,
         CancellationToken cancellationToken = default
     )
     {
+        if (_shutdown.IsCancellationRequested)
+            return Result<ISmtpSessionLease>.Fail("SMTP 会话管理器正在停止");
+
         var outbox = context.CurrentAttempt!.PreparedItem.Outbox;
         var key = new SmtpClientKey(
             new OutboxKey(outbox.UserId, outbox.Id),
@@ -130,128 +142,86 @@ public sealed class SmtpClientsManager
             route.Identity,
             outbox.Email
         );
-
-        if (_clients.TryGetValue(key, out var cached))
-        {
-            if (await IsAvailableAsync(cached, context, cancellationToken))
-                return new Result<ISmtpSession> { Data = cached };
-
-            await DisposeSmtpClientAsync(key);
-        }
-
-        var client = _sessionFactory.Create(context.Provider);
-        client.SetParams(key, 0);
-        client.ProxyClient = route.ProxyClient;
-        try
-        {
-            var debugConfig = context.Provider.GetRequiredService<DebugConfig>();
-            await _connector.ConnectAndAuthenticateAsync(
-                client,
-                new SmtpConnectionProfile(
-                    outbox.SmtpHost,
-                    outbox.SmtpPort,
-                    outbox.ConnectionSecurity.ToMailKitSecureSocketOptions(),
-                    outbox.SmtpAuthUserName ?? outbox.Email,
-                    outbox.PlainPassword ?? string.Empty,
-                    debugConfig.IsDemo
-                ),
-                cancellationToken
-            );
-
-            if (_clients.TryAdd(key, client))
-                return new Result<ISmtpSession> { Data = client };
-
-            await DisconnectAndDisposeAsync(client);
-            return _clients.TryGetValue(key, out cached)
-                ? new Result<ISmtpSession> { Data = cached }
-                : Result<ISmtpSession>.Fail("SMTP 会话并发创建失败");
-        }
-        catch (Exception exception)
-        {
-            Logger.Warn(exception);
-            await DisconnectAndDisposeAsync(client);
-            return Result<ISmtpSession>.Fail(exception.Message);
-        }
-    }
-
-    private async Task<bool> IsAvailableAsync(
-        ISmtpSession client,
-        SendingContext context,
-        CancellationToken cancellationToken
-    )
-    {
-        try
-        {
-            await client.NoOpAsync(cancellationToken);
-        }
-        catch (Exception exception)
-        {
-            Logger.Debug($"SMTP 会话 {client.GetClientKey()} 已失效", exception);
-            return false;
-        }
-
-        if (!client.IsConnected)
-            return false;
-        if (!client.GetClientKey().HasProxy)
-            return true;
-        if (client.ProxyClient is not ProxyClientAdapter proxy || !proxy.IsEnable)
-            return false;
-
-        var setting = await _settingsService.GetSetting<SendingSetting>(
-            context.SqlContext,
-            context.CurrentAttempt!.PreparedItem.UserId
+        var profile = new SmtpConnectionProfile(
+            outbox.SmtpHost,
+            outbox.SmtpPort,
+            outbox.ConnectionSecurity.ToMailKitSecureSocketOptions(),
+            outbox.SmtpAuthUserName ?? outbox.Email,
+            outbox.PlainPassword ?? string.Empty,
+            context.Provider.GetRequiredService<DebugConfig>().IsDemo
         );
-        return setting.ChangeIpAfterEmailCount <= 0
-            || client.SentCount == 0
-            || client.SentCount % setting.ChangeIpAfterEmailCount != 0;
-    }
 
-    private async Task MaintainConnectionsAsync(CancellationToken cancellationToken)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
         try
         {
-            while (await timer.WaitForNextTickAsync(cancellationToken))
+            while (true)
             {
-                foreach (var entry in _clients.ToArray())
+                cancellationToken.ThrowIfCancellationRequested();
+                if (_clients.TryGetValue(key, out var cached))
                 {
-                    try
-                    {
-                        await entry.Value.NoOpAsync(cancellationToken);
-                    }
-                    catch (Exception exception)
-                    {
-                        Logger.Warn($"SMTP 会话 {entry.Key} 保活失败", exception);
-                        await DisposeSmtpClientAsync(entry.Key);
-                    }
+                    var cachedLease = await TryAcquireReusableLeaseAsync(
+                        cached,
+                        context,
+                        cancellationToken
+                    );
+                    if (cachedLease is not null)
+                        return new Result<ISmtpSessionLease> { Data = cachedLease };
+
+                    continue;
                 }
+
+                var created = await GetOrCreateSessionEntryAsync(
+                    key,
+                    profile,
+                    route.ProxyClient,
+                    cancellationToken
+                );
+                if (_shutdown.IsCancellationRequested)
+                {
+                    await RetireEntryAsync(
+                        key,
+                        created,
+                        SmtpSessionRetirementReason.ManagerShutdown
+                    );
+                    return Result<ISmtpSessionLease>.Fail("SMTP 会话管理器正在停止");
+                }
+
+                if (
+                    !_clients.TryGetValue(key, out var current)
+                    || !ReferenceEquals(current, created)
+                )
+                    continue;
+
+                var createdLease = created.TryAcquireLease(InvalidateEntry);
+                if (createdLease is not null)
+                    return new Result<ISmtpSessionLease> { Data = createdLease };
             }
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            Logger.Warn($"创建 SMTP 会话 {key} 失败", exception);
+            return Result<ISmtpSessionLease>.Fail(exception.Message);
+        }
     }
-
-    public ICollection<SmtpClientKey> SmtpClientKeys => _clients.Keys;
 
     public async Task DisposeSmtpClientAsync(SmtpClientKey key)
     {
-        if (_clients.TryRemove(key, out var client))
-            await DisconnectAndDisposeAsync(client);
+        if (_clients.TryGetValue(key, out var client))
+            await RetireEntryAsync(key, client, SmtpSessionRetirementReason.ExplicitDisposal);
     }
 
     public async Task DisposeSmtpClientsAsync(OutboxKey outbox)
     {
-        foreach (var key in _clients.Keys.Where(x => x.Outbox == outbox).ToList())
-            await DisposeSmtpClientAsync(key);
-    }
-
-    [Obsolete("Use DisposeSmtpClientAsync instead.")]
-    public void DisposeSmtpClient(SmtpClientKey key) => _ = DisposeSmtpClientAsync(key);
-
-    [Obsolete("Use DisposeSmtpClientsAsync instead.")]
-    public void DisposeSmtpClients(string email)
-    {
-        foreach (var key in _clients.Keys.Where(x => x.Email == email).ToList())
-            _ = DisposeSmtpClientAsync(key);
+        var entries = _clients.Where(entry => entry.Key.Outbox == outbox).ToArray();
+        foreach (var entry in entries)
+            await RetireEntryAsync(
+                entry.Key,
+                entry.Value,
+                SmtpSessionRetirementReason.OutboxDisposal
+            );
     }
 
     public async ValueTask DisposeAsync()
@@ -263,17 +233,210 @@ public sealed class SmtpClientsManager
         }
         catch (OperationCanceledException) { }
 
-        foreach (var key in _clients.Keys.ToList())
-            await DisposeSmtpClientAsync(key);
+        var entries = _clients.ToArray();
+        foreach (var entry in entries)
+            TryRemoveCurrentEntry(entry.Key, entry.Value);
+        foreach (var entry in entries)
+            LogRetirement(entry.Value, SmtpSessionRetirementReason.ManagerShutdown);
+        await Task.WhenAll(entries.Select(entry => entry.Value.RetireAsync()));
         _shutdown.Dispose();
     }
+
+    private async Task<ISmtpSessionLease?> TryAcquireReusableLeaseAsync(
+        SmtpSessionEntry entry,
+        SendingContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        var lease = entry.TryAcquireLease(InvalidateEntry);
+        if (lease is null)
+            return null;
+
+        try
+        {
+            if (!await IsReusableForContextAsync(lease, context, cancellationToken))
+            {
+                lease.Invalidate();
+                await lease.DisposeAsync();
+                return null;
+            }
+
+            return lease;
+        }
+        catch
+        {
+            lease.Invalidate();
+            await lease.DisposeAsync();
+            throw;
+        }
+    }
+
+    private async Task<bool> IsReusableForContextAsync(
+        ISmtpSessionLease lease,
+        SendingContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!lease.ClientKey.HasProxy)
+            return true;
+        if (lease.ProxyClient is not ProxyClientAdapter proxy || !proxy.IsEnable)
+            return false;
+
+        var setting = await _settingsService.GetSetting<SendingSetting>(
+            context.SqlContext,
+            context.CurrentAttempt!.PreparedItem.UserId
+        );
+        var sentCount = await lease.GetSentCountAsync(cancellationToken);
+        return setting.ChangeIpAfterEmailCount <= 0
+            || sentCount == 0
+            || sentCount % setting.ChangeIpAfterEmailCount != 0;
+    }
+
+    private async Task<SmtpSessionEntry> GetOrCreateSessionEntryAsync(
+        SmtpClientKey key,
+        SmtpConnectionProfile profile,
+        IProxyClient? proxyClient,
+        CancellationToken cancellationToken
+    )
+    {
+        var newCreation = new Lazy<Task<SmtpSessionEntry>>(
+            () => CreateSessionEntryAsync(key, profile, proxyClient),
+            LazyThreadSafetyMode.ExecutionAndPublication
+        );
+        var pendingCreation = _creatingClients.GetOrAdd(key, newCreation);
+        var creationTask = pendingCreation.Value;
+        _ = creationTask.ContinueWith(
+            _ => TryRemovePendingCreation(key, pendingCreation),
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default
+        );
+        return await creationTask.WaitAsync(cancellationToken);
+    }
+
+    private async Task<SmtpSessionEntry> CreateSessionEntryAsync(
+        SmtpClientKey key,
+        SmtpConnectionProfile profile,
+        IProxyClient? proxyClient
+    )
+    {
+        var client = _sessionFactory.Create();
+        SmtpSessionEntry? createdEntry = null;
+        client.SetParams(key, 0);
+        client.ProxyClient = proxyClient;
+        try
+        {
+            await _connector.ConnectAndAuthenticateAsync(client, profile, _shutdown.Token);
+            _shutdown.Token.ThrowIfCancellationRequested();
+
+            createdEntry = new SmtpSessionEntry(key, client, DisconnectAndDisposeAsync);
+            if (_clients.TryAdd(key, createdEntry))
+                return createdEntry;
+
+            await createdEntry.RetireAsync();
+            if (_clients.TryGetValue(key, out var current))
+                return current;
+
+            throw new InvalidOperationException("SMTP 会话创建结果未能发布到缓存。");
+        }
+        catch
+        {
+            if (createdEntry is null)
+                await DisconnectAndDisposeAsync(client);
+            throw;
+        }
+    }
+
+    private async Task MaintainConnectionsAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(MaintenanceInterval);
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                var utcNow = DateTimeOffset.UtcNow;
+                foreach (var entry in _clients.ToArray())
+                {
+                    if (entry.Value.IsIdleExpired(utcNow, IdleSessionTimeout))
+                    {
+                        await RetireEntryAsync(
+                            entry.Key,
+                            entry.Value,
+                            SmtpSessionRetirementReason.IdleTimeout
+                        );
+                        continue;
+                    }
+
+                    try
+                    {
+                        await entry.Value.TryKeepAliveAsync(
+                            utcNow,
+                            IdleKeepAliveThreshold,
+                            cancellationToken
+                        );
+                    }
+                    catch (OperationCanceledException)
+                        when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception exception)
+                    {
+                        Logger.Warn($"SMTP 会话 {entry.Key} 保活失败", exception);
+                        await RetireEntryAsync(
+                            entry.Key,
+                            entry.Value,
+                            SmtpSessionRetirementReason.KeepAliveFailure
+                        );
+                    }
+                }
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+    }
+
+    private void InvalidateEntry(SmtpSessionEntry entry)
+    {
+        if (TryRemoveCurrentEntry(entry.ClientKey, entry))
+            LogRetirement(entry, SmtpSessionRetirementReason.SessionInvalidated);
+        _ = entry.RetireAsync();
+    }
+
+    private async Task RetireEntryAsync(
+        SmtpClientKey key,
+        SmtpSessionEntry entry,
+        SmtpSessionRetirementReason reason
+    )
+    {
+        if (TryRemoveCurrentEntry(key, entry))
+            LogRetirement(entry, reason);
+        await entry.RetireAsync();
+    }
+
+    private static void LogRetirement(SmtpSessionEntry entry, SmtpSessionRetirementReason reason) =>
+        Logger.Debug($"SMTP 会话 {entry.ClientKey} 实例 {entry.InstanceId} 开始退役，原因：{reason}");
+
+    private bool TryRemoveCurrentEntry(SmtpClientKey key, SmtpSessionEntry expectedEntry) =>
+        ((ICollection<KeyValuePair<SmtpClientKey, SmtpSessionEntry>>)_clients).Remove(
+            new KeyValuePair<SmtpClientKey, SmtpSessionEntry>(key, expectedEntry)
+        );
+
+    private void TryRemovePendingCreation(
+        SmtpClientKey key,
+        Lazy<Task<SmtpSessionEntry>> expectedCreation
+    ) =>
+        (
+            (ICollection<KeyValuePair<SmtpClientKey, Lazy<Task<SmtpSessionEntry>>>>)_creatingClients
+        ).Remove(
+            new KeyValuePair<SmtpClientKey, Lazy<Task<SmtpSessionEntry>>>(key, expectedCreation)
+        );
 
     private static async Task DisconnectAndDisposeAsync(ISmtpSession client)
     {
         try
         {
             if (client.IsConnected)
-                await client.DisconnectAsync(true);
+                await client.DisconnectAsync(true, CancellationToken.None);
         }
         catch (Exception exception)
         {
@@ -281,10 +444,27 @@ public sealed class SmtpClientsManager
         }
         finally
         {
-            client.Dispose();
+            try
+            {
+                client.Dispose();
+            }
+            catch (Exception exception)
+            {
+                Logger.Debug("释放 SMTP 会话资源失败", exception);
+            }
         }
     }
 
     private static string GetProfileFingerprint(OutboxEmailAddress outbox) =>
         $"{outbox.SmtpHost}\n{outbox.SmtpPort}\n{outbox.SmtpAuthUserName}\n{outbox.PlainPassword}\n{outbox.ConnectionSecurity}".MD5();
+
+    private enum SmtpSessionRetirementReason
+    {
+        ExplicitDisposal,
+        IdleTimeout,
+        KeepAliveFailure,
+        ManagerShutdown,
+        OutboxDisposal,
+        SessionInvalidated,
+    }
 }

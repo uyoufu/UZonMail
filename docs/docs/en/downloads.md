@@ -5,6 +5,29 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.23.3
+
+> Release Date: 2026-08-04
+
+### New Features
+
+1. Enhanced version update notification: Interactive notification with View History, Ignore, and Update actions
+2. New Version History dialog: Displays official release notes with safe download links
+
+### Improvements
+
+1. Email address validation upgraded: Adopts strict MIME compliance mode for sender, recipients, CC, BCC, and reply-to address validation
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.23.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.3.0.zip)
+
+[uzonmail-service-win-x64-0.23.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.3.0.zip)
+
+[uzonmail-service-linux-x64-0.23.3.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.3.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.2
 
 > Release Date: 2026-07-31

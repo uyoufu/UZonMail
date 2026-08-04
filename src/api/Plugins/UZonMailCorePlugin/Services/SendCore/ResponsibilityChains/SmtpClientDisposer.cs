@@ -25,14 +25,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
 
             // 释放发件箱
             var outboxKey = new OutboxKey(outbox.UserId, outbox.Id);
-            var keys = clientFactory.SmtpClientKeys.Where(x => x.Outbox == outboxKey).ToList();
-            foreach (var key in keys)
-            {
-                // 仍有可用发件箱时，不释放共享的 SMTP 连接
-                if (outboxesPoolList.ExistValidOutbox(key.Outbox))
-                    continue;
-                await clientFactory.DisposeSmtpClientAsync(key);
-            }
+            // 仍有可用发件箱时，不释放共享的 SMTP 连接。
+            if (!outboxesPoolList.ExistValidOutbox(outboxKey))
+                await clientFactory.DisposeSmtpClientsAsync(outboxKey);
 
             return HandlerResult.Success();
         }
