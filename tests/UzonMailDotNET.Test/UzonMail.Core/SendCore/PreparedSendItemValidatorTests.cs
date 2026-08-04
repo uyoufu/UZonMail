@@ -41,6 +41,47 @@ public sealed class PreparedSendItemValidatorTests
         Assert.IsTrue(_validator.Validate(item).IsValid);
     }
 
+    [TestMethod]
+    [DataRow("发件箱", "友件")]
+    [DataRow("收件人", "友件")]
+    [DataRow("抄送", "友件")]
+    [DataRow("密送", "友件")]
+    [DataRow("回复地址", "友件")]
+    [DataRow("收件人", "名称 <to@test.com>")]
+    public void Validate_ReturnsStronglyTypedFailureForInvalidMimeAddress(
+        string addressRole,
+        string invalidAddress
+    )
+    {
+        var item = CreatePreparedItem([new EmailAddress { Email = "to@test.com" }], "body");
+
+        switch (addressRole)
+        {
+            case "发件箱":
+                item.Outbox.Email = invalidAddress;
+                break;
+            case "收件人":
+                item.SourceItem.Inboxes = [new EmailAddress { Email = invalidAddress }];
+                break;
+            case "抄送":
+                item.SourceItem.CC = [new EmailAddress { Email = invalidAddress }];
+                break;
+            case "密送":
+                item.SourceItem.BCC = [new EmailAddress { Email = invalidAddress }];
+                break;
+            case "回复地址":
+                item = item with { ReplyToEmails = [invalidAddress] };
+                break;
+        }
+
+        var result = _validator.Validate(item);
+
+        Assert.IsFalse(result.IsValid);
+        Assert.AreEqual(SendItemValidationFailure.InvalidEmailAddress, result.Failure);
+        StringAssert.Contains(result.Message, addressRole);
+        StringAssert.Contains(result.Message, invalidAddress);
+    }
+
     private static PreparedSendItem CreatePreparedItem(List<EmailAddress> inboxes, string htmlBody)
     {
         var encryption = new EncryptParams();
