@@ -1,5 +1,6 @@
 ﻿using log4net;
 using Microsoft.EntityFrameworkCore;
+using UzonMail.DB.SQL.Core.EmailReceiving;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.DB.SQL.Core.Files;
@@ -56,6 +57,30 @@ namespace UzonMail.DB.SQL
         public DbSet<SendingGroup> SendingGroups { get; set; }
         public DbSet<SendingItem> SendingItems { get; set; }
         public DbSet<SendingItemInbox> SendingItemInboxes { get; set; }
+
+        public DbSet<ImapAccount> ImapAccounts { get; set; }
+        public DbSet<ImapAccountCredential> ImapAccountCredentials { get; set; }
+        public DbSet<ImapAccountOutboxLink> ImapAccountOutboxLinks { get; set; }
+        public DbSet<ImapAccountPrimaryOutbox> ImapAccountPrimaryOutboxes { get; set; }
+        public DbSet<ImapMailbox> ImapMailboxes { get; set; }
+        public DbSet<ImapMailboxSyncCheckpoint> ImapMailboxSyncCheckpoints { get; set; }
+        public DbSet<ImapSyncRun> ImapSyncRuns { get; set; }
+        public DbSet<ImapMailboxSyncRun> ImapMailboxSyncRuns { get; set; }
+        public DbSet<ImapSyncCommand> ImapSyncCommands { get; set; }
+        public DbSet<IncomingMailMessage> IncomingMailMessages { get; set; }
+        public DbSet<IncomingMailLocation> IncomingMailLocations { get; set; }
+        public DbSet<IncomingMailAddress> IncomingMailAddresses { get; set; }
+        public DbSet<IncomingMailReference> IncomingMailReferences { get; set; }
+        public DbSet<IncomingMailKeyword> IncomingMailKeywords { get; set; }
+        public DbSet<IncomingMailMimePart> IncomingMailMimeParts { get; set; }
+        public DbSet<IncomingMailSendingItemLink> IncomingMailSendingItemLinks { get; set; }
+        public DbSet<IncomingMailAnalysis> IncomingMailAnalyses { get; set; }
+        public DbSet<IncomingMailAnalysisClassification> IncomingMailAnalysisClassifications { get; set; }
+        public DbSet<IncomingMailCurrentClassification> IncomingMailCurrentClassifications { get; set; }
+        public DbSet<IncomingMailDeliveryStatus> IncomingMailDeliveryStatuses { get; set; }
+        public DbSet<IncomingMailFeedbackReport> IncomingMailFeedbackReports { get; set; }
+        public DbSet<IncomingMailClassificationEvidence> IncomingMailClassificationEvidences { get; set; }
+        public DbSet<IncomingMailAuditEvent> IncomingMailAuditEvents { get; set; }
 
         public DbSet<AppSetting> AppSettings { get; set; }
         public DbSet<Proxy> Proxies { get; set; }

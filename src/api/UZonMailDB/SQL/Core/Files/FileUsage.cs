@@ -7,6 +7,23 @@ using UzonMail.DB.SQL.Core.Organization;
 namespace UzonMail.DB.SQL.Core.Files
 {
     /// <summary>
+    /// 逻辑文件的所有权范围。
+    /// 收件缓存不应出现在用户可管理的文件列表中，也不能被用户主动删除。
+    /// </summary>
+    public enum FileUsageScope
+    {
+        /// <summary>
+        /// 用户主动上传和管理的文件。
+        /// </summary>
+        UserManaged = 0,
+
+        /// <summary>
+        /// 后台为收件正文或附件创建的缓存文件。
+        /// </summary>
+        IncomingMailCache = 1,
+    }
+
+    /// <summary>
     /// 用户可管理和引用的逻辑文件。
     /// </summary>
     public class FileUsage : SqlId, IEntityTypeConfiguration<FileUsage>
@@ -46,7 +63,12 @@ namespace UzonMail.DB.SQL.Core.Files
         public bool IsPublic { get; set; }
 
         /// <summary>
-        /// 发送项对该逻辑文件的引用数量。
+        /// 文件的所有权范围。
+        /// </summary>
+        public FileUsageScope Scope { get; set; } = FileUsageScope.UserManaged;
+
+        /// <summary>
+        /// 发件项、收件邮件等业务实体对该逻辑文件的引用数量。
         /// </summary>
         public long ReferenceCount { get; set; }
 
@@ -61,6 +83,12 @@ namespace UzonMail.DB.SQL.Core.Files
             {
                 x.OwnerUserId,
                 x.CategoryId,
+                x.CreateDate
+            });
+            builder.HasIndex(x => new
+            {
+                x.OwnerUserId,
+                x.Scope,
                 x.CreateDate
             });
         }

@@ -136,6 +136,17 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         public bool IsHardBounce { get; set; }
 
         /// <summary>
+        /// 实际投递邮件的 RFC Message-ID。
+        /// 后续收件服务通过入站邮件的 In-Reply-To 和 References 进行精确归因。
+        /// </summary>
+        public string? InternetMessageId { get; set; }
+
+        /// <summary>
+        /// 规范化后的 RFC Message-ID，用于和入站线程头、DSN 进行稳定匹配。
+        /// </summary>
+        public string? InternetMessageIdKey { get; set; }
+
+        /// <summary>
         /// Smpt 服务器返回的 Id
         /// 通过这个 id 去获取阅读状态
         /// </summary>
@@ -163,6 +174,9 @@ namespace UzonMail.DB.SQL.Core.EmailSending
                     x.Id
                 })
                 .HasDatabaseName("IX_SendingItems_Group_Status_Outbox_Id");
+            builder.Property(x => x.InternetMessageId).HasMaxLength(1000);
+            builder.Property(x => x.InternetMessageIdKey).HasMaxLength(1000);
+            builder.HasIndex(x => x.InternetMessageIdKey).IsUnique();
         }
     }
 }

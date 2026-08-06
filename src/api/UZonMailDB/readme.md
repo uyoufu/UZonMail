@@ -6,9 +6,9 @@
 
 z uzonmaildb
 
-1. Mysql
+1. PostgreSQL
 
-dotnet ef migrations add addSendingGroupSorceType --context MysqlContext --output-dir Migrations/Mysql -v
+dotnet ef migrations add addSendingGroupSorceType --context PostgreSQLContext --output-dir Migrations/PostgreSQL -v
 
 2. SqLite
 
@@ -16,9 +16,9 @@ dotnet ef migrations add addSendingGroupSorceType --context SqLiteContext --outp
 
 ## 取消数据迁移
 
-1. Mysql
+1. PostgreSQL
 
-dotnet ef migrations remove --context MysqlContext -v
+dotnet ef migrations remove --context PostgreSQLContext -v
 
 2. SqLite
 
