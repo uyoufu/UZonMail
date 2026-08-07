@@ -5,6 +5,30 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 permalink: /downloads
 ---
 
+## 0.23.4
+
+> 更新时期: 2026-08-07
+
+### Bug 修复
+
+1. 修复了收件箱状态计算逻辑：之前 ExcelDataStatus.All 要求每行都填写收件箱，但计算时错误地使用了去重后的收件箱数量，现已修正为按行计数。
+2. 改进了收件箱数据校验：现在正确使用 Trim() 清理空格并通过 IsNullOrWhiteSpace 进行空值判断。
+
+### 功能优化
+
+1. 在 SendingGroupValidator 中新增行级错误提示，明确显示缺失收件箱数据的 Excel 行号。
+2. 优化了重复收件人错误提示信息，引导用户前往「允许重复发送」设置。
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.23.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.4.0.zip)
+
+[uzonmail-service-win-x64-0.23.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.4.0.zip)
+
+[uzonmail-service-linux-x64-0.23.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.4.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.3
 
 > 更新时期: 2026-08-04
