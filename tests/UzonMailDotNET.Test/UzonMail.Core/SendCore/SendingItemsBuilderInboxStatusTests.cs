@@ -26,9 +26,9 @@ public sealed class SendingItemsBuilderInboxStatusTests
             FullPath = "/1",
             Type = DepartmentType.Organization,
         };
-        var currentUser = CreateUser(101, organization.Id);
-        var sameOrganizationUser = CreateUser(102, organization.Id);
-        var otherOrganizationUser = CreateUser(201, 2);
+        var currentUser = SendCoreTestEntityFactory.CreateUser(101, organization.Id);
+        var sameOrganizationUser = SendCoreTestEntityFactory.CreateUser(102, organization.Id);
+        var otherOrganizationUser = SendCoreTestEntityFactory.CreateUser(201, 2);
         var otherOrganization = new Department
         {
             Id = 2,
@@ -126,7 +126,7 @@ public sealed class SendingItemsBuilderInboxStatusTests
             FullPath = "/1",
             Type = DepartmentType.Organization,
         };
-        var user = CreateUser(101, organization.Id);
+        var user = SendCoreTestEntityFactory.CreateUser(101, organization.Id);
         var inboxGroup = new EmailGroup
         {
             Id = 10,
@@ -175,14 +175,4 @@ public sealed class SendingItemsBuilderInboxStatusTests
         Assert.HasCount(2, sendingItems);
         Assert.AreEqual(2, await testDatabase.Db.SendingItems.CountAsync());
     }
-
-    private static User CreateUser(long id, long organizationId) =>
-        new()
-        {
-            Id = id,
-            UserId = $"user-{id}",
-            Password = "password",
-            OrganizationId = organizationId,
-            DepartmentId = organizationId,
-        };
 }
