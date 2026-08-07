@@ -16,18 +16,20 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         public ExcelDataInfo(JArray excelData)
         {
             TotalCount = excelData.Count;
+            var inboxRowCount = 0;
 
             // 计算 inboxes , outboxes, body 的数量
             foreach (var item in excelData)
             {
                 if (item is not JObject row)
                     continue;
-                var inbox = row.GetValue("inbox")?.ToString();
+                var inbox = row.GetValue("inbox")?.ToString()?.Trim();
                 var outbox = row.GetValue("outbox")?.ToString();
                 var body = row.GetValue("body")?.ToString();
 
-                if (!string.IsNullOrEmpty(inbox))
+                if (!string.IsNullOrWhiteSpace(inbox))
                 {
+                    inboxRowCount++;
                     InboxSet.Add(inbox);
                 }
                 if (!string.IsNullOrEmpty(outbox))
@@ -41,7 +43,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
             }
 
             // 解析 status
-            InboxStatus = ParseStatus(InboxesCount, TotalCount);
+            InboxStatus = ParseStatus(inboxRowCount, TotalCount);
             OutboxStatus = ParseStatus(OutboxesCount, TotalCount);
             BodyStatus = ParseStatus(BodyCount, TotalCount);
         }

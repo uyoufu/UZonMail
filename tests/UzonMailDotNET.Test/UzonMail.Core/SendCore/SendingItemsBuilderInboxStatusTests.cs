@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
@@ -112,6 +113,67 @@ public sealed class SendingItemsBuilderInboxStatusTests
         Assert.HasCount(1, sendingItems);
         Assert.AreEqual("valid@example.com", sendingItems[0].Inboxes[0].Email);
         Assert.AreEqual(1, await testDatabase.Db.SendingItems.CountAsync());
+    }
+
+    [TestMethod]
+    public async Task GenerateAndSave_AllowDuplicateSending_CreatesItemForEveryDuplicateExcelRow()
+    {
+        await using var testDatabase = await SqliteTestDatabase.CreateAsync();
+        var organization = new Department
+        {
+            Id = 1,
+            Name = "Organization",
+            FullPath = "/1",
+            Type = DepartmentType.Organization,
+        };
+        var user = CreateUser(101, organization.Id);
+        var inboxGroup = new EmailGroup
+        {
+            Id = 10,
+            UserId = user.Id,
+            Name = "Recipients",
+            Type = EmailGroupType.InBox,
+        };
+        var sendingGroup = new SendingGroup
+        {
+            Id = 20,
+            UserId = user.Id,
+            Data =
+            [
+                new JObject { ["inbox"] = "recipient@example.com" },
+                new JObject { ["inbox"] = "recipient@example.com" },
+            ],
+        };
+        testDatabase.Db.AddRange(
+            organization,
+            user,
+            inboxGroup,
+            sendingGroup,
+            new Inbox
+            {
+                Id = 30,
+                UserId = user.Id,
+                OrganizationId = organization.Id,
+                EmailGroupId = inboxGroup.Id,
+                Email = "recipient@example.com",
+                Status = InboxStatus.Valid,
+            }
+        );
+        await testDatabase.Db.SaveChangesAsync();
+
+        var builder = new SendingItemsBuilder(
+            testDatabase.Db,
+            sendingGroup,
+            maxSendingBatchSize: 20,
+            allowDuplicateSending: true,
+            excelAttachments: new Dictionary<string, FileUsage>(),
+            organizationId: organization.Id
+        );
+
+        var sendingItems = await builder.GenerateAndSave();
+
+        Assert.HasCount(2, sendingItems);
+        Assert.AreEqual(2, await testDatabase.Db.SendingItems.CountAsync());
     }
 
     private static User CreateUser(long id, long organizationId) =>

@@ -303,7 +303,9 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 ", ",
                 duplicateRecipients.Select(x => $"{x.Email} ({x.Count} 次)")
             );
-            throw new KnownException($"Excel 中存在重复收件人，当前未开启允许重复发件: {duplicateDetails}");
+            throw new KnownException(
+                $"Excel 中存在重复收件人：{duplicateDetails}。当前未开启“允许重复发件”，请删除重复项或开启该设置。"
+            );
         }
 
         /// <summary>
