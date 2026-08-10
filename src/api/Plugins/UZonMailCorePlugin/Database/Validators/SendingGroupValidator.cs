@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
+using Newtonsoft.Json.Linq;
 using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.Utils.Results;
 
@@ -77,7 +78,9 @@ namespace UzonMail.CorePlugin.Database.Validators
                 }
                 if (excelDataInfo.InboxStatus != ExcelDataStatus.All)
                 {
-                    return new ErrorResult<bool>("请保证每条数据都有 inbox (收件人邮箱)");
+                    var missingInboxRows = GetMissingInboxRowNumbers(sendingGroup.Data);
+                    var rowNumbers = string.Join("、", missingInboxRows);
+                    return new ErrorResult<bool>($"Excel 数据第 {rowNumbers} 行缺少 inbox (收件人邮箱)");
                 }
                 if (
                     !ExistGlobalBody(sendingGroup)
@@ -89,6 +92,21 @@ namespace UzonMail.CorePlugin.Database.Validators
             }
 
             return new SuccessResult<bool>(true);
+        }
+
+        /// <summary>
+        /// 返回缺少收件人邮箱的 Excel 数据行号。
+        /// </summary>
+        private static List<int> GetMissingInboxRowNumbers(JArray excelData)
+        {
+            return excelData
+                .Select((row, index) => new { Row = row, Number = index + 1 })
+                .Where(x =>
+                    x.Row is not JObject excelRow
+                    || string.IsNullOrWhiteSpace(excelRow.GetValue("inbox")?.ToString())
+                )
+                .Select(x => x.Number)
+                .ToList();
         }
 
         private Result<bool> ValidateGlobalData(SendingGroup sendingGroup)

@@ -5,6 +5,51 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.23.5
+
+> Release Date: 2026-08-07
+
+### Bug Fixes
+
+1. Fixed Excel data status calculation: when multiple rows share the same inbox, the status was incorrectly calculated using unique inbox count instead of row count, resulting in more accurate status determination
+2. Improved inbox data validation: properly handles whitespace-only inbox values for more accurate validation logic
+3. Improved error messaging: validation failures now display specific Excel row numbers missing inbox data, helping users quickly locate issues
+4. Improved duplicate recipient error guidance: directs users to the "Allow Duplicate Sending" feature to resolve duplicate recipient issues
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.23.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.5.0.zip)
+
+[uzonmail-service-win-x64-0.23.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.5.0.zip)
+
+[uzonmail-service-linux-x64-0.23.5.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.5.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
+## 0.23.4
+
+> Release Date: 2026-08-07
+
+### Bug Fixes
+
+1. Fixed inbox status calculation: previously ExcelDataStatus.All required every row to have an inbox, but the calculation incorrectly used unique inbox count instead of row count. This has been corrected.
+2. Improved inbox data validation: now properly trims whitespace and uses IsNullOrWhiteSpace for empty value checks.
+
+### Improvements
+
+1. Added row-level error reporting in SendingGroupValidator to display specific Excel row numbers that are missing inbox data.
+2. Improved duplicate recipient error message to guide users toward the "Allow Duplicate Sending" setting.
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.23.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.4.0.zip)
+
+[uzonmail-service-win-x64-0.23.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.4.0.zip)
+
+[uzonmail-service-linux-x64-0.23.4.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.4.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.3
 
 > Release Date: 2026-08-04

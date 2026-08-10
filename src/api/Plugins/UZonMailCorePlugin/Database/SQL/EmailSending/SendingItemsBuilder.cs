@@ -66,10 +66,10 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             });
 
             // 生成发件项与收件箱对应关系
-            var sendingIitemes = await GenerateSendingItems(recipients);
+            var sendingItems = GenerateSendingItems(recipients);
 
             // 保存到数据库中
-            db.SendingItems.AddRange(sendingIitemes);
+            db.SendingItems.AddRange(sendingItems);
             await db.SaveChangesAsync();
 
             var userInfo = await db
@@ -79,7 +79,7 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
 
             // 保存关系
             var sendingItemInboxRelations = new List<SendingItemInbox>();
-            foreach (var sendingItem in sendingIitemes)
+            foreach (var sendingItem in sendingItems)
             {
                 // 添加组织 id
                 sendingItem.OrganizationId = userInfo.OrganizationId;
@@ -128,7 +128,7 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             db.SendingItemInboxes.AddRange(sendingItemInboxRelations);
             await db.SaveChangesAsync();
 
-            return sendingIitemes;
+            return sendingItems;
         }
 
         /// <summary>
@@ -216,11 +216,9 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
         /// 2-没有数据
         /// 3-只有一个模板或者没有模板
         /// </summary>
-        /// <param name="inboxes"></param>
+        /// <param name="recipients"></param>
         /// <returns></returns>
-        private async Task<List<SendingItem>> GenerateSendingItems(
-            List<SendingRecipient> recipients
-        )
+        private List<SendingItem> GenerateSendingItems(List<SendingRecipient> recipients)
         {
             // 合并发件的情况
             if (
@@ -255,20 +253,11 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                         .ToList();
                     total += inboxesTemp.Count;
 
-                    var sendingItem = new SendingItem()
-                    {
-                        // TODO: 因为只有发件有一个时，才会被合并，后期考虑优化
-                        OutBoxId = group.Outboxes[0].Id,
-                        FromEmail = group.Outboxes[0].Email,
-                        SendingGroupId = group.Id,
-                        UserId = group.UserId,
-                        Inboxes = inboxesTemp,
-                        CC = group.CcBoxes,
-                        BCC = group.BccBoxes,
-                        Attachments = group.Attachments,
-                        Status = SendingItemStatus.Created,
-                        IsSendingBatch = true
-                    };
+                    var sendingItem = CreateSendingItemSnapshot(inboxesTemp, null);
+                    // TODO: 因为只有发件有一个时，才会被合并，后期考虑优化
+                    sendingItem.OutBoxId = group.Outboxes[0].Id;
+                    sendingItem.FromEmail = group.Outboxes[0].Email;
+                    sendingItem.IsSendingBatch = true;
                     sendingItemsResult.Add(sendingItem);
                 }
                 return sendingItemsResult;
@@ -277,89 +266,103 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             List<SendingItem> sendingItems = [];
             foreach (var recipient in recipients)
             {
-                var sendingItem = new SendingItem()
-                {
-                    SendingGroupId = group.Id,
-                    UserId = group.UserId,
-                    // 对于携带变量的情况，仅支持一对一发件
-                    Inboxes = [recipient.Inbox],
-                    CC = group.CcBoxes,
-                    BCC = group.BccBoxes,
-                    // 附件
-                    Attachments = group.Attachments,
-                    Status = SendingItemStatus.Created
-                };
+                var excelRow = recipient.ExcelData;
+                var sendingItem = CreateSendingItemSnapshot([recipient.Inbox], excelRow);
                 // 在发送时，才会设置具体的模板
                 sendingItems.Add(sendingItem);
 
-                var row = recipient.ExcelData;
-                if (row == null)
+                if (excelRow == null)
                     continue;
 
                 // 设置发件箱
-                sendingItem.OutBoxId = row.OutboxId;
-                sendingItem.FromEmail = row.Outbox;
-                if (row.OutboxId > 0 && row.ProxyId > 0)
+                sendingItem.OutBoxId = excelRow.OutboxId;
+                sendingItem.FromEmail = excelRow.Outbox;
+                if (excelRow.OutboxId > 0 && excelRow.ProxyId > 0)
                 {
                     // 代理 Id
-                    sendingItem.ProxyId = row.ProxyId;
-                }
-
-                // 设置数据
-                // 抄送
-                if (row.CC != null && row.CC.Count > 0)
-                {
-                    sendingItem.CC ??= [];
-
-                    foreach (var cc in row.CC)
-                    {
-                        // 如果不存在，则添加
-                        if (sendingItem.CC.Any(x => x.Email == cc))
-                            continue;
-                        sendingItem.CC.Add(new EmailAddress() { Email = cc, Name = cc });
-                    }
-                }
-
-                // 密送
-                if (row.BCC != null && row.BCC.Count > 0)
-                {
-                    sendingItem.BCC ??= [];
-
-                    foreach (var bcc in row.BCC)
-                    {
-                        // 如果不存在，则添加
-                        if (sendingItem.BCC.Any(x => x.Email == bcc))
-                            continue;
-                        sendingItem.BCC.Add(new EmailAddress() { Email = bcc, Name = bcc });
-                    }
+                    sendingItem.ProxyId = excelRow.ProxyId;
                 }
 
                 // 指定模板
-                if (row.TemplateId > 0)
+                if (excelRow.TemplateId > 0)
                 {
-                    sendingItem.EmailTemplateId = row.TemplateId;
+                    sendingItem.EmailTemplateId = excelRow.TemplateId;
                 }
 
                 // 覆盖正文
                 // 正文和模板在 SendGroupTask.Init() 中设置
 
-                // 添加附件
-                // 覆盖正文中的附件
-                if (row.AttachmentNames != null && row.AttachmentNames.Count > 0)
-                {
-                    sendingItem.Attachments = row
-                        .AttachmentNames.Select(FileStoreService.NormalizeDisplayName)
-                        .Distinct(StringComparer.Ordinal)
-                        .Select(x => excelAttachments[x])
-                        .ToList();
-                }
-
                 // 保存数据
-                sendingItem.Data = row;
+                sendingItem.Data = excelRow;
             }
 
             return sendingItems;
         }
+
+        /// <summary>
+        /// 创建与发件组隔离的邮件项快照，行级非空集合覆盖全局集合。
+        /// </summary>
+        private SendingItem CreateSendingItemSnapshot(
+            IReadOnlyCollection<EmailAddress> recipientAddresses,
+            SendingItemExcelData? excelRow
+        )
+        {
+            return new SendingItem
+            {
+                SendingGroupId = group.Id,
+                UserId = group.UserId,
+                Inboxes = recipientAddresses.Select(CloneEmailAddress).ToList(),
+                CC = ResolveEmailAddresses(group.CcBoxes, excelRow?.CC),
+                BCC = ResolveEmailAddresses(group.BccBoxes, excelRow?.BCC),
+                Attachments = ResolveAttachments(excelRow),
+                Status = SendingItemStatus.Created
+            };
+        }
+
+        /// <summary>
+        /// 解析抄送或密送地址；Excel 行非空时完全覆盖全局地址。
+        /// </summary>
+        private static List<EmailAddress>? ResolveEmailAddresses(
+            IReadOnlyCollection<EmailAddress>? groupAddresses,
+            IReadOnlyCollection<string>? excelAddresses
+        )
+        {
+            if (excelAddresses is not { Count: > 0 })
+                return groupAddresses?.Select(CloneEmailAddress).ToList();
+
+            List<EmailAddress> resolvedAddresses = [];
+            foreach (var email in excelAddresses)
+            {
+                if (resolvedAddresses.Any(x => x.Email == email))
+                    continue;
+
+                resolvedAddresses.Add(new EmailAddress { Email = email, Name = email });
+            }
+            return resolvedAddresses;
+        }
+
+        /// <summary>
+        /// 解析附件；Excel 行非空时完全覆盖全局附件。
+        /// </summary>
+        private List<FileUsage>? ResolveAttachments(SendingItemExcelData? excelRow)
+        {
+            if (excelRow?.AttachmentNames is not { Count: > 0 })
+                return group.Attachments is null ? null : [.. group.Attachments];
+
+            return excelRow
+                .AttachmentNames.Select(FileStoreService.NormalizeDisplayName)
+                .Distinct(StringComparer.Ordinal)
+                .Select(x => excelAttachments[x])
+                .ToList();
+        }
+
+        private static EmailAddress CloneEmailAddress(EmailAddress sourceAddress) =>
+            new()
+            {
+                Id = sourceAddress.Id,
+                Email = sourceAddress.Email,
+                Name = sourceAddress.Name
+            };
 
         /// <summary>
         /// 收件人及其可能覆盖默认发送内容的 Excel 行。

@@ -4,6 +4,7 @@ using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL.Core.Organization;
 using UzonMail.Utils.Extensions;
 
 namespace UzonMailDotNET.Test.UzonMail.Core.SendCore.Support;
@@ -11,6 +12,16 @@ namespace UzonMailDotNET.Test.UzonMail.Core.SendCore.Support;
 internal static class SendCoreTestEntityFactory
 {
     internal static EncryptParams Encryption { get; } = new();
+
+    internal static User CreateUser(long userId, long organizationId) =>
+        new()
+        {
+            Id = userId,
+            UserId = $"user-{userId}",
+            Password = "password",
+            OrganizationId = organizationId,
+            DepartmentId = organizationId,
+        };
 
     internal static OutboxEmailAddress CreateOutboxAddress(
         long outboxId = 20,
@@ -36,13 +47,7 @@ internal static class SendCoreTestEntityFactory
             Status = OutboxStatus.Valid,
         };
         configure?.Invoke(outbox);
-        return new OutboxEmailAddress(
-            outbox,
-            sendingGroupId,
-            Encryption,
-            type,
-            sendingItemIds
-        );
+        return new OutboxEmailAddress(outbox, sendingGroupId, Encryption, type, sendingItemIds);
     }
 
     internal static PreparedSendItem CreatePreparedItem(
