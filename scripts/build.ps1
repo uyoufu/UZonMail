@@ -25,7 +25,7 @@ Set-StrictMode -Version Latest
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'UzonMail.Build.psm1') -Force
+Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'internal/UzonMail.Build.psm1') -Force
 
 $BuildTargetOptions = @('All', 'Desktop', 'WindowsServer', 'Linux', 'Docker')
 $ServicePublishDirectories = @('public', 'wwwroot', 'Plugins', 'Assembly', 'data/db')
@@ -203,10 +203,10 @@ function Publish-PluginProject {
     }
 
     Get-ChildItem -LiteralPath $pluginPublishDirectory -File -Filter '*.dll' |
-        Where-Object { -not $serviceAssemblyNames.Contains($_.Name) -and $_.Name -ne "$($PluginProject.AssemblyName).dll" } |
-        ForEach-Object {
-            Copy-Item -LiteralPath $_.FullName -Destination (Join-Path -Path $ServiceDirectory -ChildPath $PluginAssemblyDirectoryName) -Force
-        }
+    Where-Object { -not $serviceAssemblyNames.Contains($_.Name) -and $_.Name -ne "$($PluginProject.AssemblyName).dll" } |
+    ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path -Path $ServiceDirectory -ChildPath $PluginAssemblyDirectoryName) -Force
+    }
 
     $pluginAssembly = Join-Path -Path $pluginPublishDirectory -ChildPath "$($PluginProject.AssemblyName).dll"
     if (-not (Test-Path -LiteralPath $pluginAssembly -PathType Leaf)) {
@@ -215,13 +215,13 @@ function Publish-PluginProject {
     Copy-Item -LiteralPath $pluginAssembly -Destination $pluginDirectory -Force
 
     Get-ChildItem -LiteralPath $pluginPublishDirectory -Recurse -File |
-        Where-Object { $_.Extension -ne '.dll' } |
-        ForEach-Object {
-            $relativePath = [System.IO.Path]::GetRelativePath($pluginPublishDirectory, $_.FullName)
-            $destinationPath = Join-Path -Path $pluginDirectory -ChildPath $relativePath
-            New-Item -ItemType Directory -Path (Split-Path -Path $destinationPath -Parent) -Force | Out-Null
-            Copy-Item -LiteralPath $_.FullName -Destination $destinationPath -Force
-        }
+    Where-Object { $_.Extension -ne '.dll' } |
+    ForEach-Object {
+        $relativePath = [System.IO.Path]::GetRelativePath($pluginPublishDirectory, $_.FullName)
+        $destinationPath = Join-Path -Path $pluginDirectory -ChildPath $relativePath
+        New-Item -ItemType Directory -Path (Split-Path -Path $destinationPath -Parent) -Force | Out-Null
+        Copy-Item -LiteralPath $_.FullName -Destination $destinationPath -Force
+    }
 
     if (Test-Path -LiteralPath $pluginPublishRoot -PathType Container) {
         Remove-Item -LiteralPath $pluginPublishRoot -Recurse -Force
@@ -299,9 +299,7 @@ function New-ServiceArchive {
         @($Context.DockerDeployScript, $Context.DockerCompose, $Context.DockerEnvironment) | ForEach-Object {
             Invoke-BuildNativeCommand -Command '7z.exe' -Arguments @('a', '-tzip', $archivePath, $_)
         }
-        @('install.sh', 'uzon-mail.service') | ForEach-Object {
-            Invoke-BuildNativeCommand -Command '7z.exe' -Arguments @('a', '-tzip', $archivePath, (Join-Path -Path $Context.LinuxServiceRoot -ChildPath $_))
-        }
+        Invoke-BuildNativeCommand -Command '7z.exe' -Arguments @('a', '-tzip', $archivePath, $Context.LinuxInstallerPath)
     }
     else {
         Invoke-BuildNativeCommand -Command '7z.exe' -Arguments @('a', '-tzip', $archivePath, (Join-Path -Path $ServicePackage.Directory -ChildPath '*'))

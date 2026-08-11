@@ -55,6 +55,7 @@ Describe 'UzonMail unified build script' {
         $context.DesktopRoot | Should Be (Join-Path -Path $repositoryRoot -ChildPath 'src/win-desktop')
         $context.ServiceProject | Should Be (Join-Path -Path $repositoryRoot -ChildPath 'src/api/UZonMailService/UzonMailService.csproj')
         $context.PluginsRoot | Should Be (Join-Path -Path $repositoryRoot -ChildPath 'src/api/Plugins')
+        $context.LinuxInstallerPath | Should Be (Join-Path -Path $repositoryRoot -ChildPath 'scripts/install/uzonmail_linux_install.py')
     }
 
     It 'discovers plugin projects without fixed project paths' {
@@ -112,6 +113,36 @@ Describe 'UzonMail unified build script' {
         $resolvedTargets = @(Resolve-BuildTargets -RequestedTargets @('All', 'Docker') -HasRemoteLinuxPackage $false)
 
         ($resolvedTargets -contains 'Docker') | Should Be $true
+    }
+
+    It 'packages the Python Linux installer without legacy service helpers' {
+        . (Import-BuildScriptFunction -FunctionName 'New-ServiceArchive')
+        $artifactRoot = Join-Path -Path $TestDrive -ChildPath 'linux-archive'
+        $serviceRoot = Join-Path -Path $artifactRoot -ChildPath 'service-linux-x64'
+        New-Item -ItemType Directory -Path $serviceRoot -Force | Out-Null
+        $context = [pscustomobject]@{
+            ArtifactRoot = $artifactRoot
+            DockerDeployScript = Join-Path -Path $repositoryRoot -ChildPath 'scripts/docker-deploy.sh'
+            DockerCompose = Join-Path -Path $repositoryRoot -ChildPath 'docker/docker-compose.yml'
+            DockerEnvironment = Join-Path -Path $repositoryRoot -ChildPath 'docker/.env'
+            LinuxInstallerPath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/install/uzonmail_linux_install.py'
+        }
+        $servicePackage = [pscustomobject]@{
+            RuntimeIdentifier = 'linux-x64'
+            Directory = $serviceRoot
+            Version = '1.2.3.4'
+        }
+        Mock Invoke-BuildNativeCommand {}
+
+        New-ServiceArchive -Context $context -ServicePackage $servicePackage | Out-Null
+
+        Assert-MockCalled Invoke-BuildNativeCommand -Times 1 -Exactly -ParameterFilter {
+            $Command -eq '7z.exe' -and
+            $Arguments[-1] -eq $context.LinuxInstallerPath
+        }
+        Assert-MockCalled Invoke-BuildNativeCommand -Times 0 -Exactly -ParameterFilter {
+            ($Arguments -join ' ') -match 'install\.sh|uzon-mail\.service'
+        }
     }
 }
 

@@ -12,42 +12,44 @@ The examples below use Ubuntu 22.04 LTS.
 
 This guide assumes SSH access to the Ubuntu host.
 
-## Install runtime
+## Install
 
-Follow Microsoft's documentation to install .NET on Ubuntu: https://learn.microsoft.com/dotnet/core/install/linux-ubuntu
-
-Install with:
+The installer supports x64 systemd Linux. It explains the directories, system account, and service it will create, validates sudo access, downloads the latest Linux package, and installs the .NET runtimes declared by the update manifest when necessary.
 
 ``` bash
-sudo apt update && sudo apt install -y aspnetcore-runtime-10.0
-```
-
-## Download
-
-Download `uzonmail-service-linux-x64-version.zip` from [Versions](/versions).
-
-Example commands:
-
-``` bash
-# install unzip if needed
-sudo apt install -y unzip
-
-# download and unzip to ~/uzonmail
 cd ~
-wget --no-check-certificate https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.10.0.0.zip -O uzonmail.zip
-unzip uzonmail.zip -d ./uzonmail
-cd ./uzonmail
-
-# run installer
-bash ./install.sh
+wget https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/scripts/install/uzonmail_linux_install.py
+python3 ./uzonmail_linux_install.py --install
 ```
 
-## Register service
-
-Run the bundled `install.sh` script to register the service:
+The same installer is included at the root of the Linux release archive. Normal mode confirms every system-changing step. For automation, validate sudo first and use quiet mode:
 
 ``` bash
-bash ./install.sh
+sudo -v
+python3 ./uzonmail_linux_install.py --quiet --install
+```
+
+The application is installed in `/var/www/uzonmail/`, backups default to `/var/uzonmail/backup/`, and the systemd unit is named `uzon-mail.service`.
+
+## Update, backup, and uninstall
+
+``` bash
+# Show the installed version
+python3 ./uzonmail_linux_install.py --version
+
+# Update to the latest compatible release
+python3 ./uzonmail_linux_install.py --update
+
+# Back up to the default or a custom parent directory
+python3 ./uzonmail_linux_install.py --backup
+python3 ./uzonmail_linux_install.py --backup /srv/uzonmail-backups
+
+# Restore a specific backup, or select one from the default directory
+python3 ./uzonmail_linux_install.py --restore /srv/uzonmail-backups/uzonmail-backup-version-time
+python3 ./uzonmail_linux_install.py --restore
+
+# Uninstall; quiet mode creates a backup first
+python3 ./uzonmail_linux_install.py --uninstall
 ```
 
 ## Firewall
@@ -58,11 +60,11 @@ Allow port 22345:
 sudo ufw allow 22345/tcp
 ```
 
-At this point the backend should be installed. Visit `http://your-ubuntu-ip:22345` in a browser.
+After the service starts, visit `http://your-ubuntu-ip:22345` in a browser.
 
 ## Modify configuration
 
-For server deployments you may proxy the service to the public Internet. Make related configuration changes in the [Backend Configuration](/guide/setup/) section.
+The installer generates `appsettings.Production.json` and configures token and encryption secrets, the administrator account, BaseUrl, and its CORS origin. See [Backend Configuration](/guide/setup/) for additional server settings.
 
 ::: warning
 If you expose the service publicly, make sure to change default configuration for security!
