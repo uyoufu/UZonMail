@@ -50,6 +50,7 @@ public sealed class AppPackageService
         ValidateHttpUrl(resolvedEndpoint, nameof(endpoint));
         ValidateHttpUrl(resolvedZipUrl, nameof(zipUrl));
 
+        var environment = RuntimeEnvironmentReader.Read(rootDirectory);
         var matcher = CreateIgnoreMatcher(DefaultIgnores.Append(ManifestFileName));
         var dependencies = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (
@@ -72,6 +73,7 @@ public sealed class AppPackageService
         {
             Name = "UzonMail",
             Version = version,
+            Env = environment,
             Dependencies = dependencies,
             Endpoint = resolvedEndpoint,
             ZipUrl = resolvedZipUrl,
