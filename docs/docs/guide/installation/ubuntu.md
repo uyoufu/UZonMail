@@ -14,7 +14,7 @@ permalink: /guide/installation/ubuntu
 
 ## 安装
 
-安装器仅支持 x64 systemd Linux。它会说明即将创建的目录、系统账号和服务，验证 sudo 权限，下载最新的 Linux 安装包，并在缺少环境时安装清单指定的 .NET 运行时。
+安装器仅支持 x64 systemd Linux。除查看版本外，它会在启动时通过 sudo 重新执行一次，并在每项操作开始前统一确认。安装包会根据更新清单中的 SHA-256 校验；缺少所需 .NET 运行时时，还会使用 `gpg` 验证微软安装脚本后再执行，因此这种情况下需要预先安装 `gnupg`。
 
 ``` bash
 cd ~
@@ -22,14 +22,16 @@ wget https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/scripts
 python3 ./uzonmail_linux_install.py --install
 ```
 
-Linux 发布压缩包根目录中也包含同名安装器。普通模式会在每个系统修改步骤前要求确认；自动化部署可以预先验证 sudo 后使用静默模式：
+Linux 发布压缩包根目录中也包含同名安装器。自动化部署可以预先验证 sudo 后使用静默模式：
 
 ``` bash
 sudo -v
 python3 ./uzonmail_linux_install.py --quiet --install
 ```
 
-安装目录为 `/var/www/uzonmail/`，数据备份默认保存在 `/var/uzonmail/backup/`，systemd 服务名为 `uzon-mail.service`。
+安装目录和运行数据均位于 `/var/www/uzonmail/`。备份默认保存在 root 专用的 `/var/backups/uzonmail/`，普通用户需要通过 sudo 查看或复制。systemd 服务名为 `uzon-mail.service`。
+
+确认安装后，输入的密钥和管理员密码会暂存在权限为 `0600` 的 `/var/lib/uzonmail-installer/pending-config.json`。安装成功后自动删除；失败或中断时保留，供下次重试使用。卸载会清理安装器状态，但保留 `uzonmail` 系统账户。
 
 ## 更新、备份和卸载
 

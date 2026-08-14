@@ -32,6 +32,7 @@ $ServicePublishDirectories = @('public', 'wwwroot', 'Plugins', 'Assembly', 'data
 $PluginDirectoryName = 'Plugins'
 $PluginAssemblyDirectoryName = 'Assembly'
 $PluginPublishStagingDirectoryName = '.plugin-publish'
+$ReleaseDownloadUrlPrefix = 'https://oss.uzoncloud.com:2234/public/files/soft/'
 
 function Show-BuildTargetMenu {
     param(
@@ -133,8 +134,8 @@ function Resolve-BuildTargets {
         }
     }
 
-    # Docker 镜像必须基于 Linux 发布目录构建，单独指定 Docker 时自动补齐该依赖
-    if ($resolvedTargets.Contains('Docker')) {
+    # Docker 镜像和统一更新清单都依赖 Linux 发布包
+    if ($resolvedTargets.Contains('Docker') -or $resolvedTargets.Contains('Desktop')) {
         [void]$resolvedTargets.Add('Linux')
     }
 
@@ -314,7 +315,10 @@ function Publish-DesktopArchive {
         [pscustomobject]$Context,
 
         [Parameter(Mandatory = $true)]
-        [pscustomobject]$WindowsServicePackage
+        [pscustomobject]$WindowsServicePackage,
+
+        [Parameter(Mandatory = $true)]
+        [string]$LinuxArchivePath
     )
 
     $desktopDirectory = Join-Path -Path $Context.ArtifactRoot -ChildPath 'desktop'
@@ -358,6 +362,8 @@ function Publish-DesktopArchive {
     Invoke-BuildNativeCommand -Command dotnet -Arguments @(
         'run', '--project', $Context.UpdaterProject, '-c', 'Release', '--', 'package',
         '--project-directory', $desktopDirectory,
+        '--linux-package-path', $LinuxArchivePath,
+        '--linux-package-url', "$ReleaseDownloadUrlPrefix$([System.IO.Path]::GetFileName($LinuxArchivePath))",
         '--out', (Join-Path -Path $desktopDirectory -ChildPath 'appPackage.json'),
         '--out', $latestManifest,
         '--out', $versionManifest
@@ -586,6 +592,7 @@ try {
 
     $archivePaths = [System.Collections.Generic.List[string]]::new()
     $servicePackages = @{}
+    $linuxArchivePath = $null
     $frontendOutputDirectory = $null
 
     if ($hasLocalPublishTarget) {
@@ -604,15 +611,16 @@ try {
         if ($resolvedTargets -contains 'Desktop' -or $resolvedTargets -contains 'WindowsServer') {
             $servicePackages['win-x64'] = Publish-ServicePackage -Context $buildContext -RuntimeIdentifier 'win-x64' -FrontendOutputDirectory $frontendOutputDirectory -PluginProjects $pluginProjects
         }
-        if ($resolvedTargets -contains 'Desktop') {
-            $archivePaths.Add((Publish-DesktopArchive -Context $buildContext -WindowsServicePackage $servicePackages['win-x64']))
-        }
         if ($resolvedTargets -contains 'WindowsServer') {
             $archivePaths.Add((New-ServiceArchive -Context $buildContext -ServicePackage $servicePackages['win-x64']))
         }
         if ($resolvedTargets -contains 'Linux') {
             $servicePackages['linux-x64'] = Publish-ServicePackage -Context $buildContext -RuntimeIdentifier 'linux-x64' -FrontendOutputDirectory $frontendOutputDirectory -PluginProjects $pluginProjects
-            $archivePaths.Add((New-ServiceArchive -Context $buildContext -ServicePackage $servicePackages['linux-x64']))
+            $linuxArchivePath = New-ServiceArchive -Context $buildContext -ServicePackage $servicePackages['linux-x64']
+            $archivePaths.Add($linuxArchivePath)
+        }
+        if ($resolvedTargets -contains 'Desktop') {
+            $archivePaths.Add((Publish-DesktopArchive -Context $buildContext -WindowsServicePackage $servicePackages['win-x64'] -LinuxArchivePath $linuxArchivePath))
         }
         Complete-BuildStage -Stopwatch $stage -Title '发布应用与安装包'
     }

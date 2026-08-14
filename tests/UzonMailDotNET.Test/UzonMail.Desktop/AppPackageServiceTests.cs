@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UzonMailUpdater.Models;
@@ -135,6 +136,65 @@ public sealed class AppPackageServiceTests
             );
 
             StringAssert.Contains(exception.Message, "runtimeconfig");
+        }
+        finally
+        {
+            Directory.Delete(temporaryDirectory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task CreateAsync_WithLinuxPackage_AddsVerifiedArtifact()
+    {
+        var temporaryDirectory = CreateProjectDirectory();
+        try
+        {
+            await WriteRuntimeConfigAsync(
+                temporaryDirectory,
+                "desktop.runtimeconfig.json",
+                CreateSingleFrameworkJson("Microsoft.NETCore.App", "10.0.0")
+            );
+            var linuxPackagePath = Path.Combine(temporaryDirectory, "linux.zip");
+            await File.WriteAllTextAsync(linuxPackagePath, "linux-package");
+
+            var manifest = await new AppPackageService().CreateAsync(
+                temporaryDirectory,
+                linuxPackagePath: linuxPackagePath,
+                linuxPackageUrl: "https://example.com/linux.zip"
+            );
+
+            var artifact = manifest.Artifacts[AppPackageService.LinuxRuntimeIdentifier];
+            Assert.AreEqual("https://example.com/linux.zip", artifact.Url);
+            var expectedHash = Convert.ToHexStringLower(
+                SHA256.HashData(await File.ReadAllBytesAsync(linuxPackagePath))
+            );
+            Assert.AreEqual(expectedHash, artifact.Sha256);
+        }
+        finally
+        {
+            Directory.Delete(temporaryDirectory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task CreateAsync_WithIncompleteLinuxArtifact_ThrowsArgumentException()
+    {
+        var temporaryDirectory = CreateProjectDirectory();
+        try
+        {
+            await WriteRuntimeConfigAsync(
+                temporaryDirectory,
+                "desktop.runtimeconfig.json",
+                CreateSingleFrameworkJson("Microsoft.NETCore.App", "10.0.0")
+            );
+
+            await Assert.ThrowsAsync<ArgumentException>(
+                () =>
+                    new AppPackageService().CreateAsync(
+                        temporaryDirectory,
+                        linuxPackagePath: "package.zip"
+                    )
+            );
         }
         finally
         {

@@ -14,7 +14,7 @@ This guide assumes SSH access to the Ubuntu host.
 
 ## Install
 
-The installer supports x64 systemd Linux. It explains the directories, system account, and service it will create, validates sudo access, downloads the latest Linux package, and installs the .NET runtimes declared by the update manifest when necessary.
+The installer supports x64 systemd Linux. Except for version queries, it re-executes through sudo once and asks for one confirmation per operation. Linux packages are checked against the SHA-256 in the update manifest. When a required .NET runtime is missing, `gnupg` must be installed so the Microsoft install script can be verified before execution.
 
 ``` bash
 cd ~
@@ -22,14 +22,16 @@ wget https://raw.githubusercontent.com/uyoufu/UzonMail/refs/heads/master/scripts
 python3 ./uzonmail_linux_install.py --install
 ```
 
-The same installer is included at the root of the Linux release archive. Normal mode confirms every system-changing step. For automation, validate sudo first and use quiet mode:
+The same installer is included at the root of the Linux release archive. For automation, validate sudo first and use quiet mode:
 
 ``` bash
 sudo -v
 python3 ./uzonmail_linux_install.py --quiet --install
 ```
 
-The application is installed in `/var/www/uzonmail/`, backups default to `/var/uzonmail/backup/`, and the systemd unit is named `uzon-mail.service`.
+The application and its runtime data remain under `/var/www/uzonmail/`. Backups default to the root-only `/var/backups/uzonmail/`, so sudo is required to inspect or copy them. The systemd unit is named `uzon-mail.service`.
+
+After installation is confirmed, credentials are cached in `/var/lib/uzonmail-installer/pending-config.json` with mode `0600`. The cache is deleted after success and retained after a failure or interruption for the next attempt. Uninstall removes installer state but retains the `uzonmail` system account.
 
 ## Update, backup, and uninstall
 

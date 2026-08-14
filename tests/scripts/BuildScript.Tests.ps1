@@ -1,6 +1,6 @@
 ﻿$repositoryRoot = Split-Path -Path $PSScriptRoot -Parent
 $repositoryRoot = Split-Path -Path $repositoryRoot -Parent
-$buildModulePath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/UzonMail.Build.psm1'
+$buildModulePath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/internal/UzonMail.Build.psm1'
 $buildScriptPath = Join-Path -Path $repositoryRoot -ChildPath 'scripts/build.ps1'
 
 Import-Module $buildModulePath -Force
@@ -113,6 +113,26 @@ Describe 'UzonMail unified build script' {
         $resolvedTargets = @(Resolve-BuildTargets -RequestedTargets @('All', 'Docker') -HasRemoteLinuxPackage $false)
 
         ($resolvedTargets -contains 'Docker') | Should Be $true
+    }
+
+    It 'adds Linux when Desktop needs a unified update manifest' {
+        . (Import-BuildScriptFunction -FunctionName 'Resolve-BuildTargets')
+
+        $resolvedTargets = @(Resolve-BuildTargets -RequestedTargets @('Desktop') -HasRemoteLinuxPackage $false)
+
+        ($resolvedTargets -contains 'Desktop') | Should Be $true
+        ($resolvedTargets -contains 'Linux') | Should Be $true
+    }
+
+    It 'creates the Linux archive before the desktop manifest and passes its integrity inputs' {
+        $buildSource = Get-Content -LiteralPath $buildScriptPath -Raw
+        $linuxArchiveIndex = $buildSource.IndexOf('$linuxArchivePath = New-ServiceArchive')
+        $desktopArchiveIndex = $buildSource.IndexOf('Publish-DesktopArchive -Context')
+
+        $linuxArchiveIndex | Should BeGreaterThan -1
+        $desktopArchiveIndex | Should BeGreaterThan $linuxArchiveIndex
+        $buildSource | Should Match 'linux-package-path'
+        $buildSource | Should Match "'--linux-package-url'"
     }
 
     It 'packages the Python Linux installer without legacy service helpers' {

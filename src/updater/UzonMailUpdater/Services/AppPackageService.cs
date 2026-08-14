@@ -12,6 +12,7 @@ namespace UzonMailUpdater.Services;
 public sealed class AppPackageService
 {
     public const string ManifestFileName = "appPackage.json";
+    public const string LinuxRuntimeIdentifier = "linux-x64";
     public const string DefaultEndpoint = "https://uzonmail.uzoncloud.com/updates/latest.json";
     private const string DefaultZipUrlPrefix =
         "https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-";
@@ -29,6 +30,8 @@ public sealed class AppPackageService
         string projectDirectory,
         string? endpoint = null,
         string? zipUrl = null,
+        string? linuxPackagePath = null,
+        string? linuxPackageUrl = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -49,6 +52,29 @@ public sealed class AppPackageService
         var resolvedZipUrl = zipUrl ?? $"{DefaultZipUrlPrefix}{version}.zip";
         ValidateHttpUrl(resolvedEndpoint, nameof(endpoint));
         ValidateHttpUrl(resolvedZipUrl, nameof(zipUrl));
+
+        var artifacts = new Dictionary<string, ReleaseArtifact>(StringComparer.Ordinal);
+        if (linuxPackagePath is not null || linuxPackageUrl is not null)
+        {
+            if (
+                string.IsNullOrWhiteSpace(linuxPackagePath)
+                || string.IsNullOrWhiteSpace(linuxPackageUrl)
+            )
+                throw new ArgumentException("Linux 安装包路径和 URL 必须同时提供");
+
+            var resolvedLinuxPackagePath = Path.GetFullPath(linuxPackagePath);
+            if (!File.Exists(resolvedLinuxPackagePath))
+                throw new FileNotFoundException("Linux 安装包不存在", resolvedLinuxPackagePath);
+            ValidateHttpUrl(linuxPackageUrl, nameof(linuxPackageUrl));
+            artifacts.Add(
+                LinuxRuntimeIdentifier,
+                new ReleaseArtifact
+                {
+                    Url = linuxPackageUrl,
+                    Sha256 = await ComputeSha256Async(resolvedLinuxPackagePath, cancellationToken)
+                }
+            );
+        }
 
         var environment = RuntimeEnvironmentReader.Read(rootDirectory);
         var matcher = CreateIgnoreMatcher(DefaultIgnores.Append(ManifestFileName));
@@ -74,6 +100,7 @@ public sealed class AppPackageService
             Name = "UzonMail",
             Version = version,
             Env = environment,
+            Artifacts = artifacts,
             Dependencies = dependencies,
             Endpoint = resolvedEndpoint,
             ZipUrl = resolvedZipUrl,
