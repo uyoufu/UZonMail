@@ -9,6 +9,14 @@ var projectDirectoryOption = new Option<DirectoryInfo>("--project-directory")
 };
 var endpointOption = new Option<string?>("--endpoint") { Description = "更新清单地址" };
 var zipUrlOption = new Option<string?>("--zip-url") { Description = "更新 ZIP 下载地址" };
+var linuxPackagePathOption = new Option<FileInfo?>("--linux-package-path")
+{
+    Description = "Linux x64 安装包路径"
+};
+var linuxPackageUrlOption = new Option<string?>("--linux-package-url")
+{
+    Description = "Linux x64 安装包下载地址"
+};
 var outputOption = new Option<FileInfo[]>("--out")
 {
     Description = "清单输出文件，可重复指定",
@@ -23,6 +31,8 @@ var packageCommand = new Command("package", "生成应用更新清单");
 packageCommand.Options.Add(projectDirectoryOption);
 packageCommand.Options.Add(endpointOption);
 packageCommand.Options.Add(zipUrlOption);
+packageCommand.Options.Add(linuxPackagePathOption);
+packageCommand.Options.Add(linuxPackageUrlOption);
 packageCommand.Options.Add(outputOption);
 packageCommand.SetAction(async parseResult =>
 {
@@ -32,7 +42,9 @@ packageCommand.SetAction(async parseResult =>
     var manifest = await packageService.CreateAsync(
         projectDirectory.FullName,
         parseResult.GetValue(endpointOption),
-        parseResult.GetValue(zipUrlOption)
+        parseResult.GetValue(zipUrlOption),
+        parseResult.GetValue(linuxPackagePathOption)?.FullName,
+        parseResult.GetValue(linuxPackageUrlOption)
     );
     await packageService.WriteAsync(
         manifest,

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Emails.DTOs;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
@@ -9,6 +10,9 @@ using UzonMail.Utils.Web.ResponseModel;
 
 namespace UzonMail.CorePlugin.Controllers.Emails
 {
+    /// <summary>
+    /// 提供当前用户发件明细的分页查询与只读内容接口。
+    /// </summary>
     public class SendingItemController(SqlContext db, TokenService tokenService) : ControllerBaseV1
     {
         /// <summary>
@@ -145,6 +149,58 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             if (sendingItem == null)
                 return ResponseResult<string?>.Fail("邮件已被删除");
             return sendingItem.Content.ToSuccessResponse();
+        }
+
+        /// <summary>
+        /// 获取当前用户拥有的已发送邮件完整内容。
+        /// </summary>
+        /// <param name="sendingItemId">发件项数据库标识。</param>
+        /// <param name="cancellationToken">请求取消令牌。</param>
+        /// <returns>邮件头、最终正文及附件摘要。</returns>
+        [HttpGet("{sendingItemId:long}/detail")]
+        public async Task<ResponseResult<SendingItemDetailDto>> GetSendingItemDetail(
+            long sendingItemId,
+            CancellationToken cancellationToken
+        )
+        {
+            var userId = tokenService.GetUserSqlId();
+            var sendingItem = await db
+                .SendingItems.AsNoTracking()
+                .Include(x => x.Attachments!)
+                .ThenInclude(x => x.FileObject)
+                .FirstOrDefaultAsync(
+                    x => x.Id == sendingItemId && x.UserId == userId,
+                    cancellationToken
+                );
+            if (sendingItem == null)
+                return ResponseResult<SendingItemDetailDto>.Fail("邮件不存在或无权访问");
+
+            var sendingItemDetail = new SendingItemDetailDto
+            {
+                Id = sendingItem.Id,
+                Subject = sendingItem.Subject ?? string.Empty,
+                FromEmail = sendingItem.FromEmail ?? string.Empty,
+                SentAt = sendingItem.SendDate,
+                Recipients = sendingItem
+                    .Inboxes.Select(x => new EmailAddressDto { Email = x.Email, Name = x.Name })
+                    .ToList(),
+                CcRecipients = (sendingItem.CC ?? [])
+                    .Select(x => new EmailAddressDto { Email = x.Email, Name = x.Name })
+                    .ToList(),
+                BccRecipients = (sendingItem.BCC ?? [])
+                    .Select(x => new EmailAddressDto { Email = x.Email, Name = x.Name })
+                    .ToList(),
+                Content = sendingItem.Content ?? string.Empty,
+                Attachments = (sendingItem.Attachments ?? [])
+                    .Select(x => new SendingItemAttachmentDto
+                    {
+                        Id = x.Id,
+                        DisplayName = x.DisplayName,
+                        Size = x.FileObject.Size,
+                    })
+                    .ToList(),
+            };
+            return sendingItemDetail.ToSuccessResponse();
         }
     }
 }

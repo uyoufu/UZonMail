@@ -1,15 +1,37 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IRequestPagination } from 'src/compositions/types'
 import { httpClient } from './base/httpClient'
 
 export interface ISendingItem {
   id: number
   subject: string
-  fromEmail: string,
-  inboxes: Record<string, any>[],
-  sendDate: string,
-  status: number,
-  SendResult?: string
+  fromEmail: string
+  inboxes: IEmailAddress[]
+  sendDate: string
+  status: SendingItemStatus
+  sendResult?: string
+}
+
+export interface IEmailAddress {
+  email: string
+  name?: string
+}
+
+export interface ISendingItemAttachment {
+  id: number
+  displayName: string
+  size: number
+}
+
+export interface ISendingItemDetail {
+  id: number
+  subject: string
+  fromEmail: string
+  sentAt: string
+  recipients: IEmailAddress[]
+  ccRecipients: IEmailAddress[]
+  bccRecipients: IEmailAddress[]
+  content: string
+  attachments: ISendingItemAttachment[]
 }
 
 /// <summary>
@@ -101,4 +123,9 @@ export function getSendingItemsData (sendingGroupId: number, filter: string | un
  */
 export function getSendingItemBody (sendingItemId: number) {
   return httpClient.get<string>(`/sending-item/${sendingItemId}/body`)
+}
+
+/** 获取当前用户拥有的完整发件内容。 */
+export function getSendingItemDetail(sendingItemId: number) {
+  return httpClient.get<ISendingItemDetail>(`/sending-item/${sendingItemId}/detail`)
 }

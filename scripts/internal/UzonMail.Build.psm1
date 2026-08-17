@@ -136,7 +136,7 @@ function Resolve-BuildContext {
         DesktopProject          = Join-Path -Path $repositoryRoot -ChildPath 'src/win-desktop/UzonMailDesktop/UzonMailDesktop.csproj'
         UpdaterProject          = Join-Path -Path $repositoryRoot -ChildPath 'src/updater/UzonMailUpdater/UzonMailUpdater.csproj'
         WindowsServiceRoot      = Join-Path -Path $repositoryRoot -ChildPath 'src/api/WindowsService'
-        LinuxServiceRoot        = Join-Path -Path $repositoryRoot -ChildPath 'src/api/LinuxService'
+        LinuxInstallerPath      = Join-Path -Path $repositoryRoot -ChildPath 'scripts/install/uzonmail_linux_install.py'
         QuartzDatabase          = Join-Path -Path $repositoryRoot -ChildPath 'src/api/UZonMailService/Quartz/quartz-sqlite.sqlite3'
         Dockerfile              = Join-Path -Path $repositoryRoot -ChildPath 'scripts/Dockerfile'
         DockerCompose           = Join-Path -Path $repositoryRoot -ChildPath 'docker/docker-compose.yml'
@@ -154,7 +154,7 @@ function Resolve-BuildContext {
         $context.DesktopProject,
         $context.UpdaterProject,
         $context.WindowsServiceRoot,
-        $context.LinuxServiceRoot,
+        $context.LinuxInstallerPath,
         $context.QuartzDatabase,
         $context.Dockerfile,
         $context.DockerCompose,

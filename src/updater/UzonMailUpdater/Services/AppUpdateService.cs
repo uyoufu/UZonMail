@@ -206,6 +206,14 @@ public sealed class AppUpdateService
     {
         if (string.IsNullOrWhiteSpace(manifest.Name) || !Version.TryParse(manifest.Version, out _))
             throw new InvalidDataException("更新清单缺少有效的软件名称或版本");
+        if (
+            manifest.Env is null
+            || manifest.Env.Any(requirement =>
+                string.IsNullOrWhiteSpace(requirement.Key)
+                || !Version.TryParse(requirement.Value, out _)
+            )
+        )
+            throw new InvalidDataException("更新清单包含无效的运行环境要求");
         AppPackageService.ValidateHttpUrl(manifest.Endpoint, nameof(manifest.Endpoint));
         AppPackageService.ValidateHttpUrl(manifest.ZipUrl, nameof(manifest.ZipUrl));
         AppPackageService.NormalizeRelativePath(manifest.RestartExecutablePath);

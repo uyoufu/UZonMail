@@ -15,6 +15,8 @@ UzonMailUpdater.exe package --project-directory D:\UzonMail `
 
 清单中的 `dependencies` 使用相对文件路径到 SHA-256 的映射。默认不更新 `Updater/**`、`appsettings*.json` 和 `service/data/**`，以保护本地更新器、配置和用户数据。
 
+清单中的 `env` 是安装所需的 .NET 共享框架名称到版本的映射，例如 `Microsoft.AspNetCore.App: 10.0.0`。生成器会递归读取发布目录中的 `*.runtimeconfig.json` 自动汇总；缺少有效框架信息、配置损坏或同一框架存在版本冲突时，生成操作会失败。
+
 ## 执行更新
 
 ```powershell
