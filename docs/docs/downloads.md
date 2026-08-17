@@ -5,6 +5,31 @@ description: 本页收录了宇正群邮所有历史发布版本。宇正群邮�
 permalink: /downloads
 ---
 
+## 0.23.6
+
+> 更新时期: 2026-08-17
+
+### 功能新增
+
+1. 新增 Python 编写的 Linux 安装器，替代传统的 Bash 脚本和手动 .NET 配置流程，支持安装、更新、备份、恢复和卸载操作
+2. Linux 安装器新增 GPG 签名验证和统一更新清单（manifest），安装包在解压前会依据清单中的 SHA-256 进行校验，.NET 安装脚本通过 Microsoft 签名密钥验证
+3. 新增邮件详情查看功能，支持查看主题、发件人、所有收件人类型（收件人/抄送/密送）、正文和可下载附件
+
+### 功能优化
+
+1. 主题切换器从侧边栏抽屉移至工具栏，改为下拉菜单形式展示文字标签，替代原有色块图标
+2. 更新清单新增 Env 字段记录运行时 .NET 共享框架信息，启动时验证框架版本一致性，版本冲突或配置损坏时中止操作
+
+### 下载地址
+
+[uzonmail-desktop-win-x64-0.23.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.6.0.zip)
+
+[uzonmail-service-win-x64-0.23.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.6.0.zip)
+
+[uzonmail-service-linux-x64-0.23.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.6.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.5
 
 > 更新时期: 2026-08-07

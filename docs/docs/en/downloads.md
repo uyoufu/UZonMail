@@ -5,6 +5,31 @@ description: This page contains all historical releases of UzonMail. UzonMail is
 permalink: /en/downloads
 ---
 
+## 0.23.6
+
+> Release Date: 2026-08-17
+
+### New Features
+
+1. New Python-based Linux installer replacing legacy Bash scripts and manual .NET setup, supporting install, update, backup, restore, and uninstall operations
+2. Linux installer now supports GPG signature verification and unified update manifest; packages are verified against SHA-256 from manifest before extraction, and .NET install script is validated using Microsoft's pinned GPG key
+3. New read-only email detail view displaying subject, sender, all recipient types (To/CC/BCC), body, and downloadable attachments
+
+### Improvements
+
+1. Theme switcher relocated from sidebar drawer to toolbar header, redesigned as a dropdown menu with text labels instead of color swatches
+2. Updater manifest now includes Env field tracking runtime .NET shared framework requirements; AppUpdateService validates framework versions on every manifest load and aborts on version conflicts or malformed configs
+
+### Downloads
+
+[uzonmail-desktop-win-x64-0.23.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-desktop-win-x64-0.23.6.0.zip)
+
+[uzonmail-service-win-x64-0.23.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-win-x64-0.23.6.0.zip)
+
+[uzonmail-service-linux-x64-0.23.6.0.zip](https://oss.uzoncloud.com:2234/public/files/soft/uzonmail-service-linux-x64-0.23.6.0.zip)
+
+[docker](https://hub.docker.com/r/gmxgalens/uzon-mail/tags)
+
 ## 0.23.5
 
 > Release Date: 2026-08-07
