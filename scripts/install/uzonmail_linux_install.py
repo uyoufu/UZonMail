@@ -94,9 +94,8 @@ class Version:
     def parse(cls, value: str, field_name: str = "version") -> Version:
         """Parse a two-to-four-part numeric version from an untrusted source."""
         parts = value.strip().split(".")
-        if (
-            not 2 <= len(parts) <= 4
-            or any(not part.isdigit() or len(part) > 9 for part in parts)
+        if not 2 <= len(parts) <= 4 or any(
+            not part.isdigit() or len(part) > 9 for part in parts
         ):
             raise InstallerError(f"Invalid {field_name}: {value!r}")
         normalized = [int(part) for part in parts]
@@ -303,7 +302,9 @@ def reexecute_as_root(arguments: Sequence[str], quiet: bool) -> None:
     try:
         os.execvp("sudo", sudo_arguments)
     except OSError as exception:
-        raise InstallerError(f"Unable to restart the installer with sudo: {exception}") from exception
+        raise InstallerError(
+            f"Unable to restart the installer with sudo: {exception}"
+        ) from exception
 
 
 def validate_managed_path_layout() -> None:
@@ -352,7 +353,9 @@ def create_private_temp_root() -> pathlib.Path:
         path.chmod(0o700)
         return path
     except OSError as exception:
-        raise InstallerError(f"Unable to create a private temporary directory: {exception}") from exception
+        raise InstallerError(
+            f"Unable to create a private temporary directory: {exception}"
+        ) from exception
 
 
 def require_temp_root() -> pathlib.Path:
@@ -396,7 +399,9 @@ def ensure_private_temp_directory(path: pathlib.Path) -> None:
     try:
         relative_parts = path.relative_to(temp_root).parts
     except ValueError as exception:
-        raise InstallerError(f"Temporary path is outside {temp_root}: {path}") from exception
+        raise InstallerError(
+            f"Temporary path is outside {temp_root}: {path}"
+        ) from exception
     current = temp_root
     for path_part in relative_parts:
         current /= path_part
@@ -415,7 +420,9 @@ def ensure_private_temp_directory(path: pathlib.Path) -> None:
                 ) from exception
 
 
-def read_limited_file(path: pathlib.Path, maximum_bytes: int, description: str) -> bytes:
+def read_limited_file(
+    path: pathlib.Path, maximum_bytes: int, description: str
+) -> bytes:
     """Read an untrusted file only after enforcing a fixed size boundary."""
     try:
         file_status = path.lstat()
@@ -427,7 +434,9 @@ def read_limited_file(path: pathlib.Path, maximum_bytes: int, description: str) 
             )
         return path.read_bytes()
     except OSError as exception:
-        raise InstallerError(f"Unable to read {description} {path}: {exception}") from exception
+        raise InstallerError(
+            f"Unable to read {description} {path}: {exception}"
+        ) from exception
 
 
 def path_lexists(path: pathlib.Path) -> bool:
@@ -438,7 +447,9 @@ def path_lexists(path: pathlib.Path) -> bool:
     except FileNotFoundError:
         return False
     except OSError as exception:
-        raise InstallerError(f"Unable to inspect path {path}: {exception}") from exception
+        raise InstallerError(
+            f"Unable to inspect path {path}: {exception}"
+        ) from exception
 
 
 def atomic_write_file(path: pathlib.Path, content: bytes, mode: int) -> pathlib.Path:
@@ -449,7 +460,9 @@ def atomic_write_file(path: pathlib.Path, content: bytes, mode: int) -> pathlib.
         path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     else:
         ensure_private_temp_directory(path.parent)
-    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", dir=path.parent
+    )
     temporary_path = pathlib.Path(temporary_name)
     try:
         os.fchmod(descriptor, mode)
@@ -470,11 +483,17 @@ def atomic_write_file(path: pathlib.Path, content: bytes, mode: int) -> pathlib.
 
 def validate_https_response(response: Any, requested_url: str) -> None:
     """Reject a redirect that leaves HTTPS before trusting response bytes."""
-    final_url = response.geturl() if callable(getattr(response, "geturl", None)) else requested_url
+    final_url = (
+        response.geturl()
+        if callable(getattr(response, "geturl", None))
+        else requested_url
+    )
     if not isinstance(final_url, str):
         final_url = requested_url
     if urllib.parse.urlsplit(final_url).scheme != "https":
-        raise InstallerError(f"HTTPS request was redirected to an unsafe URL: {final_url}")
+        raise InstallerError(
+            f"HTTPS request was redirected to an unsafe URL: {final_url}"
+        )
 
 
 def load_cached_install_config() -> InstallConfig | None:
@@ -587,7 +606,10 @@ def collect_install_config(quiet: bool) -> InstallConfig:
     print("Installation settings:")
     print(f"  Base URL: {config.base_url}")
     print(f"  Administrator: {config.admin_user}")
-    if generated_admin_password is not None and config.admin_password == generated_admin_password:
+    if (
+        generated_admin_password is not None
+        and config.admin_password == generated_admin_password
+    ):
         print(f"  Generated administrator password: {generated_admin_password}")
         print("  Store this password securely; it will not be shown again.")
     else:
@@ -637,7 +659,9 @@ def fetch_update_manifest() -> UpdateManifest:
             str(framework_version), f"runtime version for {framework_name}"
         )
     artifacts = value.get("artifacts")
-    linux_artifact = artifacts.get(LINUX_RUNTIME_IDENTIFIER) if isinstance(artifacts, dict) else None
+    linux_artifact = (
+        artifacts.get(LINUX_RUNTIME_IDENTIFIER) if isinstance(artifacts, dict) else None
+    )
     if not isinstance(linux_artifact, dict):
         raise InstallerError(
             f"The update manifest does not contain artifacts.{LINUX_RUNTIME_IDENTIFIER}."
@@ -991,7 +1015,9 @@ def read_installed_runtimes(
     dotnet_path: pathlib.Path | str | None = None,
 ) -> dict[str, list[Version]]:
     """Read installed shared frameworks from dotnet without changing the system."""
-    dotnet = os.fspath(dotnet_path) if dotnet_path is not None else shutil.which("dotnet")
+    dotnet = (
+        os.fspath(dotnet_path) if dotnet_path is not None else shutil.which("dotnet")
+    )
     if dotnet is None:
         return {}
     try:
@@ -1074,7 +1100,9 @@ def parse_stored_dotnet_path(value: Any) -> pathlib.Path:
         or "\\" in value
         or any(character.isspace() for character in value)
     ):
-        raise InstallerError(f"Installer state has an invalid dotnetPath value: {value!r}")
+        raise InstallerError(
+            f"Installer state has an invalid dotnetPath value: {value!r}"
+        )
     return path
 
 
@@ -1133,11 +1161,12 @@ def verify_dotnet_install_script(
     has_expected_valid_signature = any(
         DOTNET_INSTALL_KEY_FINGERPRINT in fields[2:]
         for line in signature_result.stdout.splitlines()
-        if line.startswith("[GNUPG:] VALIDSIG ")
-        and len(fields := line.split()) > 2
+        if line.startswith("[GNUPG:] VALIDSIG ") and len(fields := line.split()) > 2
     )
     if not has_expected_valid_signature:
-        raise InstallerError("dotnet-install.sh does not have the expected valid signature.")
+        raise InstallerError(
+            "dotnet-install.sh does not have the expected valid signature."
+        )
 
 
 def ensure_dotnet_environment(
@@ -1168,7 +1197,10 @@ def ensure_dotnet_environment(
     signature_path = temp_root / "dotnet-install.sig"
     key_path = temp_root / "dotnet-install.asc"
     download_file(
-        DOTNET_INSTALL_URL, installer_path, runner.quiet, maximum_bytes=MAX_MANIFEST_BYTES
+        DOTNET_INSTALL_URL,
+        installer_path,
+        runner.quiet,
+        maximum_bytes=MAX_MANIFEST_BYTES,
     )
     download_file(
         DOTNET_INSTALL_SIGNATURE_URL,
@@ -1644,7 +1676,9 @@ def install_service_unit(dotnet_path: pathlib.Path, runner: CommandRunner) -> No
     )
 
 
-def register_and_start_service(dotnet_path: pathlib.Path, runner: CommandRunner) -> None:
+def register_and_start_service(
+    dotnet_path: pathlib.Path, runner: CommandRunner
+) -> None:
     """Install, enable, start, and verify the UzonMail systemd unit."""
     install_service_unit(dotnet_path, runner)
     runner.run(
@@ -1782,10 +1816,13 @@ def validate_backup_tree(
     try:
         root_status = path.lstat()
     except OSError as exception:
-        raise InstallerError(f"Unable to inspect backup directory {path}: {exception}") from exception
+        raise InstallerError(
+            f"Unable to inspect backup directory {path}: {exception}"
+        ) from exception
     if not stat.S_ISDIR(root_status.st_mode):
         raise InstallerError(f"Backup directory is invalid: {path}")
     visited_entries = 0
+
     def on_walk_error(exception: OSError) -> None:
         raise InstallerError(
             f"Unable to traverse backup directory {path}: {exception}"
@@ -1807,12 +1844,9 @@ def validate_backup_tree(
                 raise InstallerError(
                     f"Unable to inspect backup content {candidate}: {exception}"
                 ) from exception
-            if (
-                candidate_status.st_dev != root_status.st_dev
-                or not (
-                    stat.S_ISDIR(candidate_status.st_mode)
-                    or stat.S_ISREG(candidate_status.st_mode)
-                )
+            if candidate_status.st_dev != root_status.st_dev or not (
+                stat.S_ISDIR(candidate_status.st_mode)
+                or stat.S_ISREG(candidate_status.st_mode)
             ):
                 raise InstallerError(
                     f"Backup contains a mount, link, or special file: {candidate}"
@@ -1867,7 +1901,9 @@ def reject_existing_symlink_components(path: pathlib.Path, description: str) -> 
         except FileNotFoundError:
             continue
         except OSError as exception:
-            raise InstallerError(f"Unable to inspect {description} {current}: {exception}") from exception
+            raise InstallerError(
+                f"Unable to inspect {description} {current}: {exception}"
+            ) from exception
         if stat.S_ISLNK(current_status.st_mode):
             raise InstallerError(f"{description} contains a symbolic link: {current}")
 
@@ -1880,14 +1916,18 @@ def validate_backup_destination(destination_root: pathlib.Path) -> pathlib.Path:
         raise InstallerError(
             f"Unable to resolve backup destination {destination_root}: {exception}"
         ) from exception
-    reject_existing_symlink_components(destination_root.expanduser().absolute(), "Backup path")
+    reject_existing_symlink_components(
+        destination_root.expanduser().absolute(), "Backup path"
+    )
     managed_paths = (
         INSTALL_ROOT.resolve(strict=False),
         INSTALLER_STATE_ROOT.resolve(strict=False),
         require_temp_root().resolve(strict=False),
         INSTALL_ROOT.with_name(f"{INSTALL_ROOT.name}.next").resolve(strict=False),
         INSTALL_ROOT.with_name(f"{INSTALL_ROOT.name}.previous").resolve(strict=False),
-        INSTALL_ROOT.with_name(f"{INSTALL_ROOT.name}.uninstalling").resolve(strict=False),
+        INSTALL_ROOT.with_name(f"{INSTALL_ROOT.name}.uninstalling").resolve(
+            strict=False
+        ),
     )
     if any(
         path_is_within(resolved, managed) or path_is_within(managed, resolved)
@@ -2450,7 +2490,8 @@ def install_application(runner: CommandRunner) -> None:
         should_restore = bool(candidates) and (
             runner.quiet
             or ask_yes_no(
-                "A backup was found. Restore the latest compatible backup?", default=True
+                "A backup was found. Restore the latest compatible backup?",
+                default=True,
             )
         )
         if should_restore:
@@ -2747,7 +2788,9 @@ def uninstall_application(runner: CommandRunner) -> None:
         )
     except (Exception, KeyboardInterrupt) as original_error:
         rollback_errors: list[str] = []
-        if path_lexists(uninstall_state_root) and not path_lexists(INSTALLER_STATE_ROOT):
+        if path_lexists(uninstall_state_root) and not path_lexists(
+            INSTALLER_STATE_ROOT
+        ):
             try:
                 runner.run(
                     ["mv", uninstall_state_root, INSTALLER_STATE_ROOT],
