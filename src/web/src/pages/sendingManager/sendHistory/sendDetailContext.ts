@@ -25,7 +25,6 @@ export function useContextMenu() {
       label: t('sendDetail.viewEmail'),
       tooltip: t('sendDetail.viewEmailTooltip'),
       icon: ContextMenuIcon.visibility,
-      vif: (email) => email.status >= SendingItemStatus.Success,
       onClick: onViewEmail
     }
   ])
@@ -46,4 +45,3 @@ export function useContextMenu() {
 
   return { sendDetailContextItems, ContextMenu }
 }
-

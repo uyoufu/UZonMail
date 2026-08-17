@@ -11,6 +11,8 @@
 
           <GlobalSignalR />
 
+          <ThemeSwitcher class="q-mr-md" />
+
           <I18nSetting />
 
           <UserInfo class="q-ml-md" />
@@ -26,8 +28,6 @@
     <q-drawer v-model="drawer" show-if-above :mini="miniState" :width="280">
       <div class="fit column no-wrap">
         <MenuTree />
-        <q-separator />
-        <ThemeSwitcher />
       </div>
     </q-drawer>
 
@@ -61,7 +61,7 @@ import GlobalSignalR from '../components/signalR/GlobalSignalR.vue'
 import { useScrollAreaStyle } from 'src/compositions/scrollUtils'
 // import LeftSidebarIndex from '../components/leftSidebar/leftSidebarIndex.vue'
 import MenuTree from '../components/leftSidebar/menuTree.vue'
-import ThemeSwitcher from '../components/leftSidebar/ThemeSwitcher.vue'
+import ThemeSwitcher from '../components/themeSwitcher/ThemeSwitcher.vue'
 import { getRouteId, useRouteHistories } from '../components/tags/routeHistories'
 
 // #region 路由
