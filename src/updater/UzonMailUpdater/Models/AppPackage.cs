@@ -9,6 +9,12 @@ public sealed class AppPackage
 {
     public required string Name { get; init; }
     public required string Version { get; init; }
+
+    /// <summary>
+    /// 安装应用所需的 .NET 共享框架及其最低版本
+    /// </summary>
+    public Dictionary<string, string> Env { get; init; } = [];
+    public Dictionary<string, ReleaseArtifact> Artifacts { get; init; } = [];
     public required Dictionary<string, string> Dependencies { get; init; }
     public required string Endpoint { get; init; }
     public required string ZipUrl { get; init; }

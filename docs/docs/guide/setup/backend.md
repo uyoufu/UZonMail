@@ -122,8 +122,6 @@ permalink: /guide/setup/backend
 
   // 初始用户设置
   "User": {
-    // 每个用户在服务器的文件缓存位置
-    "CachePath": "users/{0}",
     // 管理员用户名和密码, 只在第一次启动时初始化
     "AdminUser": {
       "UserId": "admin",
@@ -210,8 +208,6 @@ permalink: /guide/setup/backend
 ```json
 {
   "User": {
-    // 每个用户在服务器的文件缓存位置
-    "CachePath": "users/{0}",
     // 管理员用户名和密码, 只在第一次启动时初始化
     "AdminUser": {
       "UserId": "admin",

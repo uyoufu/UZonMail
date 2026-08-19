@@ -1,25 +1,24 @@
-import { useFileSystemAccess } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { createObjectPersistentReader } from 'src/api/pro/objectReader'
-import {
-  deleteFileUsages,
-  moveFileUsages,
-  updateDisplayName,
-  type IFileUsage
-} from 'src/api/file'
+import { deleteFileUsages, moveFileUsages, updateDisplayName, type IFileUsage } from 'src/api/file'
 import { getFileCategories } from 'src/api/fileCategory'
-import { getFileReaderId, getFileStreamByReaderId } from 'src/api/fileReader'
-import { ContextMenuIcon, ContextMenuWhen, type IActionContext, type IContextMenuItem } from 'src/components/contextMenu/types'
+import {
+  ContextMenuIcon,
+  ContextMenuWhen,
+  type IActionContext,
+  type IContextMenuItem
+} from 'src/components/contextMenu/types'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
+import { useFileUsageDownload } from 'src/compositions/useFileUsageDownload'
 import type { refreshTableType } from 'src/compositions/qTableUtils'
 import { useConfig } from 'src/config'
 import { confirmOperation, notifySuccess, showDialog } from 'src/utils/dialog'
-import { saveFileSmart } from 'src/utils/file'
 
 /** 创建附件表格右键菜单，并内聚单项与批量附件操作。 */
 export function useAttachmentContextMenu(refreshTable: refreshTableType) {
   const { t } = useI18n()
   const config = useConfig()
+  const { downloadFileUsage } = useFileUsageDownload()
 
   const attachmentContextMenuItems = computed<IContextMenuItem<IFileUsage>[]>(() => [
     {
@@ -27,7 +26,7 @@ export function useAttachmentContextMenu(refreshTable: refreshTableType) {
       label: t('fileManager.download'),
       icon: ContextMenuIcon.download,
       when: ContextMenuWhen.onlySingle,
-      onClick: onDownloadAttachment
+      onClick: downloadFileUsage
     },
     {
       name: 'rename',
@@ -58,25 +57,6 @@ export function useAttachmentContextMenu(refreshTable: refreshTableType) {
     }
   ])
 
-  async function onDownloadAttachment(attachment: IFileUsage) {
-    const { data: fileReaderId } = await getFileReaderId(attachment.id)
-    const extension = attachment.displayName.split('.').pop() || ''
-    const fileSystemAccess = useFileSystemAccess({
-      dataType: ref<'Text' | 'ArrayBuffer' | 'Blob'>('ArrayBuffer'),
-      types: [{ description: attachment.displayName, accept: { '*/*': extension ? [`.${extension}`] : [] } }],
-      excludeAcceptAllOption: true
-    })
-    if (fileSystemAccess.isSupported.value) {
-      await fileSystemAccess.create({ suggestedName: attachment.displayName })
-      const { data } = await getFileStreamByReaderId(fileReaderId)
-      fileSystemAccess.data.value = data
-      await fileSystemAccess.save()
-    } else {
-      await saveFileSmart(attachment.displayName, `${config.baseUrl}${config.api}/file-reader/${fileReaderId}/stream`)
-    }
-    notifySuccess(t('fileManager.downloadSuccess'))
-  }
-
   async function onRenameAttachment(attachment: IFileUsage) {
     const result = await showDialog({
       title: t('fileManager.rename'),
@@ -106,10 +86,7 @@ export function useAttachmentContextMenu(refreshTable: refreshTableType) {
     notifySuccess(t('fileManager.shareSuccess'))
   }
 
-  async function onMoveAttachments(
-    _cursorAttachment: IFileUsage,
-    actionContext: IActionContext<IFileUsage>
-  ) {
+  async function onMoveAttachments(_cursorAttachment: IFileUsage, actionContext: IActionContext<IFileUsage>) {
     const { data: categories } = await getFileCategories()
     const result = await showDialog({
       title: t('fileManager.moveSelected'),
@@ -139,14 +116,12 @@ export function useAttachmentContextMenu(refreshTable: refreshTableType) {
     actionContext.clearSelection()
   }
 
-  async function onDeleteAttachments(
-    _cursorAttachment: IFileUsage,
-    actionContext: IActionContext<IFileUsage>
-  ) {
+  async function onDeleteAttachments(_cursorAttachment: IFileUsage, actionContext: IActionContext<IFileUsage>) {
     const attachments = actionContext.targetValues
-    const confirmationMessage = attachments.length === 1
-      ? t('fileManager.deleteFileConfirm', { name: attachments[0]!.displayName })
-      : t('fileManager.batchDeleteConfirm', { count: attachments.length })
+    const confirmationMessage =
+      attachments.length === 1
+        ? t('fileManager.deleteFileConfirm', { name: attachments[0]!.displayName })
+        : t('fileManager.batchDeleteConfirm', { count: attachments.length })
     const confirmed = await confirmOperation(t('fileManager.deleteConfirmTitle'), confirmationMessage)
     if (!confirmed) return
 

@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UzonMail.Utils.Web.Configs;
 
 namespace UzonMail.CorePlugin.Config.SubConfigs
 {
     public class UserOptions : IAppOptions
     {
-        public string CachePath { get; set; } = string.Empty;
-
         /// <summary>
         /// 管理员用户设置
         /// </summary>

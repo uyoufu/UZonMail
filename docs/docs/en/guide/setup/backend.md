@@ -67,7 +67,6 @@ The default system configuration is in `appsettings.json`. It's not recommended 
     "Log4netPath": "logs/uzon-mail.stdout.log"
   },
   "User": {
-    "CachePath": "users/{0}",
     "AdminUser": { "UserId": "admin", "Password": "admin1234", "Avatar": "" },
     "DefaultPassword": "uzonmail123"
   },
@@ -110,7 +109,6 @@ Add `User` to `appsettings.Production.json` before first initialization to custo
 ```json
 {
   "User": {
-    "CachePath": "users/{0}",
     "AdminUser": { "UserId": "admin", "Password": "admin1234", "Avatar": "" },
     "DefaultPassword": "uzonmail123"
   }
