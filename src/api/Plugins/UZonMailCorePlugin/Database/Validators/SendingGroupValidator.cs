@@ -52,12 +52,14 @@ namespace UzonMail.CorePlugin.Database.Validators
             {
                 // 有 excel 数据的情况
                 ExcelDataInfo excelDataInfo = new(sendingGroup.Data);
-                // 若用户选择了收件箱，要判断发件箱是否在数据表格中出现
-                if (sendingGroup.Inboxes.Count > 0)
+                // 合并界面所选联系人后，仍需保留 Excel 行级完整性校验。
+                if (sendingGroup.Recipients.Count > 0)
                 {
-                    int dataCount = excelDataInfo.InboxSet.Count;
-                    sendingGroup.Inboxes.ForEach(x => excelDataInfo.InboxSet.Add(x.Email));
-                    int allCount = excelDataInfo.InboxSet.Count;
+                    int dataCount = excelDataInfo.RecipientEmails.Count;
+                    sendingGroup.Recipients.ForEach(x =>
+                        excelDataInfo.RecipientEmails.Add(x.Email)
+                    );
+                    int allCount = excelDataInfo.RecipientEmails.Count;
                     if (dataCount < allCount)
                     {
                         // 验证通用数据
@@ -69,18 +71,20 @@ namespace UzonMail.CorePlugin.Database.Validators
 
                 // 验证其它数据
                 if (
-                    sendingGroup.Outboxes.Count == 0
-                    && excelDataInfo.OutboxStatus != ExcelDataStatus.All
-                    && sendingGroup.OutboxGroups?.Count == 0
+                    sendingGroup.SenderAccounts.Count == 0
+                    && excelDataInfo.SenderAccountStatus != ExcelDataStatus.All
+                    && sendingGroup.SenderAccountGroups?.Count == 0
                 )
                 {
-                    return new ErrorResult<bool>("缺失发件箱，请在数据中指定发件箱或选择发件箱");
+                    return new ErrorResult<bool>("缺失发件账号，请在数据中指定发件账号或选择发件账号");
                 }
-                if (excelDataInfo.InboxStatus != ExcelDataStatus.All)
+                if (excelDataInfo.RecipientValidationStatus != ExcelDataStatus.All)
                 {
-                    var missingInboxRows = GetMissingInboxRowNumbers(sendingGroup.Data);
-                    var rowNumbers = string.Join("、", missingInboxRows);
-                    return new ErrorResult<bool>($"Excel 数据第 {rowNumbers} 行缺少 inbox (收件人邮箱)");
+                    var missingRecipientContactRows = GetMissingRecipientContactRowNumbers(
+                        sendingGroup.Data
+                    );
+                    var rowNumbers = string.Join("、", missingRecipientContactRows);
+                    return new ErrorResult<bool>($"Excel 数据第 {rowNumbers} 行缺少 recipientEmail");
                 }
                 if (
                     !ExistGlobalBody(sendingGroup)
@@ -97,13 +101,13 @@ namespace UzonMail.CorePlugin.Database.Validators
         /// <summary>
         /// 返回缺少收件人邮箱的 Excel 数据行号。
         /// </summary>
-        private static List<int> GetMissingInboxRowNumbers(JArray excelData)
+        private static List<int> GetMissingRecipientContactRowNumbers(JArray excelData)
         {
             return excelData
                 .Select((row, index) => new { Row = row, Number = index + 1 })
                 .Where(x =>
                     x.Row is not JObject excelRow
-                    || string.IsNullOrWhiteSpace(excelRow.GetValue("inbox")?.ToString())
+                    || string.IsNullOrWhiteSpace(excelRow.GetValue("recipientEmail")?.ToString())
                 )
                 .Select(x => x.Number)
                 .ToList();
@@ -117,16 +121,22 @@ namespace UzonMail.CorePlugin.Database.Validators
             }
 
             if (
-                sendingGroup.Outboxes.Count == 0
-                && (sendingGroup.OutboxGroups == null || sendingGroup.OutboxGroups.Count == 0)
+                sendingGroup.SenderAccounts.Count == 0
+                && (
+                    sendingGroup.SenderAccountGroups == null
+                    || sendingGroup.SenderAccountGroups.Count == 0
+                )
             )
             {
                 return new ErrorResult<bool>("请选择发件人");
             }
 
             if (
-                sendingGroup.Inboxes.Count == 0
-                && (sendingGroup.InboxGroups == null || sendingGroup.InboxGroups.Count == 0)
+                sendingGroup.Recipients.Count == 0
+                && (
+                    sendingGroup.RecipientContactGroups == null
+                    || sendingGroup.RecipientContactGroups.Count == 0
+                )
             )
             {
                 return new ErrorResult<bool>("请选择收件人");

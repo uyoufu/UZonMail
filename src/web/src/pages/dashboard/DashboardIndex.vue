@@ -1,10 +1,10 @@
 <template>
   <div ref="containerElementRef" class="row justify-around q-pt-sm">
     <div class="col-auto-2 q-pa-sm" style="height: 250px;">
-      <div id="chart-outbox" class="full-height full-width card-like"></div>
+      <div id="chart-sender-accounts" class="full-height full-width card-like"></div>
     </div>
     <div class="col-auto-2 q-pa-sm" style="height: 250px;">
-      <div id="chart-inbox" class="full-height full-width card-like"></div>
+      <div id="chart-recipient-contacts" class="full-height full-width card-like"></div>
     </div>
     <div id="chart-monthly" class="col-auto-2 q-pa-sm card-like q-ma-sm" style="height: 250px;"></div>
   </div>
@@ -63,18 +63,17 @@ onUnmounted(() => {
 })
 
 import type { IEmailCount, IMonthlySendingInfo } from 'src/api/statistics'
-import { getInboxEmailCountStatistics, getOutboxEmailCountStatistics, getMonthlySendingCountInfo } from 'src/api/statistics'
-const outboxesCount: Ref<IEmailCount[]> = ref([])
-// 渲染 outbox 数量柱状图
-function renderOutboxCountBar () {
-  const barChart = initCharts.find(x => x.name === 'outbox')?.chart
+import { getRecipientContactCountStatistics, getSenderAccountCountStatistics, getMonthlySendingCountInfo } from 'src/api/statistics'
+const senderAccountCounts: Ref<IEmailCount[]> = ref([])
+function renderSenderAccountCountBar () {
+  const barChart = initCharts.find(x => x.name === 'senderAccounts')?.chart
   logger.log('[Dashboard] barChart:', barChart, initCharts)
   // 开始渲染
   // 基于准备好的dom，初始化echarts实例
   // 绘制图表
   const options: EChartsOption = {
     title: {
-      text: translateDashboardPage('inboxStatsTitle'),
+      text: translateDashboardPage('senderAccountStatsTitle'),
       left: 'center',
       textStyle: {
         fontSize: 14
@@ -91,7 +90,7 @@ function renderOutboxCountBar () {
       axisLabel: {
         color: '#5cc093'
       },
-      data: outboxesCount.value.map(item => item.domain)
+      data: senderAccountCounts.value.map(domainCount => domainCount.domain)
     },
     color: '#7367f0',
     series: [
@@ -99,7 +98,7 @@ function renderOutboxCountBar () {
         name: translateDashboardPage('emailCount'),
         type: 'bar',
         barWidth: '75%',
-        data: outboxesCount.value.map(item => item.count),
+        data: senderAccountCounts.value.map(domainCount => domainCount.count),
         label: {
           show: true, // 开启显示
           position: 'top' // 在上方显示
@@ -109,19 +108,19 @@ function renderOutboxCountBar () {
   }
   barChart?.setOption(options)
 }
-watch(outboxesCount, () => {
-  renderOutboxCountBar()
+watch(senderAccountCounts, () => {
+  renderSenderAccountCountBar()
 })
 
-const inboxesCount: Ref<IEmailCount[]> = ref([])
-function renderInboxCountBar () {
-  const barChart = initCharts.find(x => x.name === 'inbox')?.chart
+const recipientContactCounts: Ref<IEmailCount[]> = ref([])
+function renderRecipientContactCountBar () {
+  const barChart = initCharts.find(x => x.name === 'recipientContacts')?.chart
   // 开始渲染
   // 基于准备好的dom，初始化echarts实例
   // 绘制图表
   const options: EChartsOption = {
     title: {
-      text: translateDashboardPage('inboxStatsTitle'),
+      text: translateDashboardPage('recipientContactStatsTitle'),
       left: 'center',
       textStyle: {
         fontSize: 14
@@ -138,7 +137,7 @@ function renderInboxCountBar () {
       axisLabel: {
         color: '#5cc093'
       },
-      data: inboxesCount.value.map(item => item.domain)
+      data: recipientContactCounts.value.map(domainCount => domainCount.domain)
     },
     color: '#7367f0',
     series: [
@@ -146,7 +145,7 @@ function renderInboxCountBar () {
         name: translateDashboardPage('emailCount'),
         type: 'bar',
         barWidth: '75%',
-        data: inboxesCount.value.map(item => item.count),
+        data: recipientContactCounts.value.map(domainCount => domainCount.count),
         label: {
           show: true, // 开启显示
           position: 'top' // 在上方显示
@@ -156,8 +155,8 @@ function renderInboxCountBar () {
   }
   barChart?.setOption(options)
 }
-watch(inboxesCount, () => {
-  renderInboxCountBar()
+watch(recipientContactCounts, () => {
+  renderRecipientContactCountBar()
 })
 
 const monthlySendingInfo: Ref<IMonthlySendingInfo[]> = ref([])
@@ -212,15 +211,15 @@ watch(monthlySendingInfo, () => {
 })
 
 onMounted(async () => {
-  const outboxChart = echarts.init(document.getElementById('chart-outbox'))
+  const senderAccountChart = echarts.init(document.getElementById('chart-sender-accounts'))
   initCharts.push({
-    name: 'outbox',
-    chart: outboxChart
+    name: 'senderAccounts',
+    chart: senderAccountChart
   })
-  const inboxChart = echarts.init(document.getElementById('chart-inbox'))
+  const recipientContactChart = echarts.init(document.getElementById('chart-recipient-contacts'))
   initCharts.push({
-    name: 'inbox',
-    chart: inboxChart
+    name: 'recipientContacts',
+    chart: recipientContactChart
   })
   const monthlyChart = echarts.init(document.getElementById('chart-monthly'))
   initCharts.push({
@@ -228,11 +227,11 @@ onMounted(async () => {
     chart: monthlyChart
   })
 
-  const { data: outboxesCountData } = await getOutboxEmailCountStatistics()
-  outboxesCount.value = outboxesCountData
+  const { data: senderAccountCountData } = await getSenderAccountCountStatistics()
+  senderAccountCounts.value = senderAccountCountData
 
-  const { data: inboxesCountData } = await getInboxEmailCountStatistics()
-  inboxesCount.value = inboxesCountData
+  const { data: recipientContactCountData } = await getRecipientContactCountStatistics()
+  recipientContactCounts.value = recipientContactCountData
 
   const { data: monthlySendingInfoData } = await getMonthlySendingCountInfo()
   monthlySendingInfo.value = monthlySendingInfoData
@@ -252,8 +251,8 @@ import { useI18n } from 'vue-i18n'
 const { locale } = useI18n()
 watch(locale, () => {
   // 重新渲染图表
-  renderOutboxCountBar()
-  renderInboxCountBar()
+  renderSenderAccountCountBar()
+  renderRecipientContactCountBar()
   renderMonthlySendingInfoBar()
 })
 

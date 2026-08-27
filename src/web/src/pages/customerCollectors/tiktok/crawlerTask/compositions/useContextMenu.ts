@@ -6,7 +6,7 @@ import {
   startCrawlerTask,
   stopCrawlerTask,
   updateCrawlerTaskInfo,
-  saveCrawlerResultsAsInbox
+  saveCrawlerResultsAsRecipientContacts
 } from 'src/api/pro/crawlerTask'
 import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
@@ -62,11 +62,11 @@ export function useContextMenu(
       onClick: onViewCrawlerResult
     },
     {
-      name: 'saveAsInbox',
-      label: t('pages.crawlerTask.saveAsInbox'),
-      tooltip: t('pages.crawlerTask.saveAsInboxTooltip'),
+      name: 'saveAsRecipientContacts',
+      label: t('pages.crawlerTask.saveAsRecipientContacts'),
+      tooltip: t('pages.crawlerTask.saveAsRecipientContactsTooltip'),
       icon: ContextMenuIcon.save,
-      onClick: onSaveAsInbox
+      onClick: onSaveAsRecipientContacts
     }
   ])
 
@@ -147,37 +147,38 @@ export function useContextMenu(
     })
   }
 
-  async function onSaveAsInbox(crawlerTaskInfo: ICrawlerTaskInfo) {
+  async function onSaveAsRecipientContacts(crawlerTaskInfo: ICrawlerTaskInfo) {
     // 进行确认
     const confirm = await confirmOperation(
-      t('pages.crawlerTask.saveAsInboxTooltip'),
-      t('pages.crawlerTask.saveAsInboxConfirm', { name: crawlerTaskInfo.name })
+      t('pages.crawlerTask.saveAsRecipientContactsTooltip'),
+      t('pages.crawlerTask.saveAsRecipientContactsConfirm', { name: crawlerTaskInfo.name })
     )
     if (!confirm) return
 
     // 开始另存为
-    const inboxGroupId = await notifyUntil(async () => {
-      const { data } = await saveCrawlerResultsAsInbox(crawlerTaskInfo.id as number)
+    const recipientContactGroupId = await notifyUntil(async () => {
+      const { data } = await saveCrawlerResultsAsRecipientContacts(crawlerTaskInfo.id as number)
       return data
-    }, t('pages.crawlerTask.savingAsInbox'))
+    }, t('pages.crawlerTask.savingAsRecipientContacts'))
 
-    if (!inboxGroupId) {
-      notifyError(t('pages.crawlerTask.saveAsInboxFailed'))
+    if (!recipientContactGroupId) {
+      notifyError(t('pages.crawlerTask.saveAsRecipientContactsFailed'))
       return
     }
 
     // 提示跳转
-    notifySuccess(t('pages.crawlerTask.saveAsInboxSuccess'))
+    notifySuccess(t('pages.crawlerTask.saveAsRecipientContactsSuccess'))
 
-    const confirm2InboxDetail = await confirmOperation(
-      t('pages.crawlerTask.saveAsInboxSuccess'),
-      t('pages.crawlerTask.goToInboxDetail')
+    const shouldOpenRecipientContacts = await confirmOperation(
+      t('pages.crawlerTask.saveAsRecipientContactsSuccess'),
+      t('pages.crawlerTask.goToRecipientContactDetail')
     )
-    if (!confirm2InboxDetail) return
+    if (!shouldOpenRecipientContacts) return
 
     // 开始跳转
     await router.push({
-      name: 'inboxManager'
+      name: 'RecipientContactsIndex',
+      query: { emailGroupId: recipientContactGroupId }
     })
   }
 

@@ -1,4 +1,4 @@
-﻿using log4net;
+using log4net;
 using Microsoft.EntityFrameworkCore;
 using UzonMail.DB.SQL.Core.EmailReceiving;
 using UzonMail.DB.SQL.Core.Emails;
@@ -50,18 +50,21 @@ namespace UzonMail.DB.SQL
         public DbSet<FileReader> FileReaders { get; set; }
 
         public DbSet<EmailGroup> EmailGroups { get; set; }
+        public DbSet<EmailAccount> EmailAccounts { get; set; }
+        public DbSet<SenderAccount> SenderAccounts { get; set; }
+        public DbSet<SenderAccountSmtpCredential> SenderAccountSmtpCredentials { get; set; }
+        public DbSet<EmailAccountOAuthCredential> EmailAccountOAuthCredentials { get; set; }
+        public DbSet<RecipientContact> RecipientContacts { get; set; }
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
-        public DbSet<Inbox> Inboxes { get; set; }
-        public DbSet<Outbox> Outboxes { get; set; }
-
         public DbSet<SendingGroup> SendingGroups { get; set; }
         public DbSet<SendingItem> SendingItems { get; set; }
-        public DbSet<SendingItemInbox> SendingItemInboxes { get; set; }
+        public DbSet<SendingItemRecipient> SendingItemRecipients { get; set; }
 
-        public DbSet<ImapAccount> ImapAccounts { get; set; }
-        public DbSet<ImapAccountCredential> ImapAccountCredentials { get; set; }
-        public DbSet<ImapAccountOutboxLink> ImapAccountOutboxLinks { get; set; }
-        public DbSet<ImapAccountPrimaryOutbox> ImapAccountPrimaryOutboxes { get; set; }
+        public DbSet<ReceivingAccount> ReceivingAccounts { get; set; }
+        public DbSet<ReceivingAccountImapCredential> ReceivingAccountImapCredentials { get; set; }
+        public DbSet<ReceivingAccountSenderLink> ReceivingAccountSenderLinks { get; set; }
+        public DbSet<ReceivingAccountPrimarySender> ReceivingAccountPrimarySenders { get; set; }
+        public DbSet<RecipientSuppression> RecipientSuppressions { get; set; }
         public DbSet<ImapMailbox> ImapMailboxes { get; set; }
         public DbSet<ImapMailboxSyncCheckpoint> ImapMailboxSyncCheckpoints { get; set; }
         public DbSet<ImapSyncRun> ImapSyncRuns { get; set; }

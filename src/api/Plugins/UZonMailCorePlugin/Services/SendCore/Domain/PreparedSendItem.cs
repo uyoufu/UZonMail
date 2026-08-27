@@ -1,5 +1,5 @@
 using UzonMail.CorePlugin.Database.SQL.EmailSending;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.EmailSending;
 
@@ -15,7 +15,7 @@ public sealed record PreparedSendAttachment(string FileName, FileInfo File);
 /// </summary>
 public sealed record PreparedSendItem(
     SendingItem SourceItem,
-    OutboxEmailAddress Outbox,
+    SenderEmailAddress SenderAccount,
     SendingItemExcelData? Variables,
     string Subject,
     string HtmlBody,
@@ -29,7 +29,7 @@ public sealed record PreparedSendItem(
     public long UserId => SourceItem.UserId;
 
     /// <summary>主要收件人。</summary>
-    public IReadOnlyList<EmailAddress> Inboxes => SourceItem.Inboxes;
+    public IReadOnlyList<EmailAddress> Recipients => SourceItem.Recipients;
 
     /// <summary>抄送收件人。</summary>
     public IReadOnlyList<EmailAddress> CC => SourceItem.CC ?? [];
@@ -43,7 +43,8 @@ public sealed record PreparedSendItem(
     /// <summary>
     /// 邮件级代理优先于发件箱级代理。
     /// </summary>
-    public long EffectiveProxyId => SourceItem.ProxyId > 0 ? SourceItem.ProxyId : Outbox.ProxyId;
+    public long EffectiveProxyId =>
+        SourceItem.ProxyId > 0 ? SourceItem.ProxyId : SenderAccount.ProxyId;
 }
 
 /// <summary>

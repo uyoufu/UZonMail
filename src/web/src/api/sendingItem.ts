@@ -4,8 +4,8 @@ import { httpClient } from './base/httpClient'
 export interface ISendingItem {
   id: number
   subject: string
-  fromEmail: string
-  inboxes: IEmailAddress[]
+  senderEmail: string
+  recipients: IEmailAddress[]
   sendDate: string
   status: SendingItemStatus
   sendResult?: string
@@ -25,7 +25,7 @@ export interface ISendingItemAttachment {
 export interface ISendingItemDetail {
   id: number
   subject: string
-  fromEmail: string
+  senderEmail: string
   sentAt: string
   recipients: IEmailAddress[]
   ccRecipients: IEmailAddress[]

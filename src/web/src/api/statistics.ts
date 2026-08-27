@@ -13,18 +13,18 @@ export interface IMonthlySendingInfo {
 }
 
 /**
- * 获取发件箱邮件统计
+ * 获取发件账户统计
  */
-export function getOutboxEmailCountStatistics () {
-  return httpClient.get<IEmailCount[]>('/statistics/outbox')
+export function getSenderAccountCountStatistics () {
+  return httpClient.get<IEmailCount[]>('/statistics/sender-accounts')
 }
 
 /**
- * 获取收件箱邮件统计
+ * 获取收件联系人统计
  * @returns
  */
-export function getInboxEmailCountStatistics () {
-  return httpClient.get<IEmailCount[]>('/statistics/inbox')
+export function getRecipientContactCountStatistics () {
+  return httpClient.get<IEmailCount[]>('/statistics/recipient-contacts')
 }
 
 /**

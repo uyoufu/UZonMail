@@ -2,15 +2,13 @@ using System.Collections.Concurrent;
 using log4net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using UzonMail.CorePlugin.Services.Encrypt;
-using UzonMail.CorePlugin.Services.Encrypt.Models;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Proxies;
 using UzonMail.CorePlugin.Services.SendCore.Reading;
 using UzonMail.CorePlugin.Services.SendCore.Runtime;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.CorePlugin.SignalRHubs.Extensions;
@@ -33,14 +31,14 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
     /// <remarks>
     /// </remarks>
     public class GroupTask(
-        EncryptService encryptService,
+        SenderAccountRuntimeFactory senderAccountRuntimeFactory,
         ISendItemReaderPool readerPool,
         ISendPayloadReader payloadReader,
         ISendLeaseStore leaseStore,
         ISendingWorkerCoordinator workerCoordinator,
         EmailTemplateCacheLeaseManager templateCacheLeaseManager,
         IOptions<SendingQuotaOptions> quotaOptions,
-        IOptions<OutboxSupplyOptions> outboxSupplyOptions,
+        IOptions<SenderAccountSupplyOptions> senderAccountSupplyOptions,
         TimeProvider timeProvider
     ) : ITransientService
     {
@@ -52,10 +50,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         private readonly ConcurrentDictionary<long, SendLease> _activeLeases = [];
         private readonly CancellationTokenSource _lifetime = new();
         private int _closed;
-        private readonly SemaphoreSlim _outboxCatalogLock = new(1, 1);
-        private List<long> _outboxGroupIds = [];
-        private long _sharedOutboxCursor;
-        private bool _isSharedOutboxCatalogCompleted;
+        private readonly SemaphoreSlim _senderAccountCatalogLock = new(1, 1);
+        private List<long> _senderAccountGroupIds = [];
+        private long _sharedSenderAccountCursor;
+        private bool _isSharedSenderAccountCatalogCompleted;
 
         private sealed class DelayedItem(SendItemDescriptor descriptor)
         {
@@ -102,11 +100,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         private SendingGroup _sendingGroup = null!;
 
         /// <summary>
-        /// 密钥
-        /// </summary>
-        public EncryptParams SmtpPasswordSecretKeys => encryptService.GetEncrypParams();
-
-        /// <summary>
         /// 所属用户
         /// </summary>
         public long UserId { get; private set; }
@@ -114,7 +107,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 发件项数据
         /// 此处只保存自由发件的项
-        /// 若指定发件箱，数据 id 会保存在 outbox 中
+        /// 若指定发件箱，数据 id 会保存在 senderAccount 中
         /// </summary>
         private readonly SendItemQueue _sendItemQueue = new();
 
@@ -181,15 +174,16 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             _sendingGroup = sendingGroup;
 
             // 将收件箱重置为空，方便垃圾回收
-            sendingGroup.Inboxes = [];
+            sendingGroup.Recipients = [];
 
             // 更新用户 id
             UserId = sendingGroup.UserId;
 
             // 将公共的发件箱添加到发件池中
             // 邮件级别的发件箱在初始化发送项时，再添加
-            _outboxGroupIds = sendingGroup.OutboxGroups?.Select(group => group.Id).ToList() ?? [];
-            await LoadNextSharedOutboxPage(sendingContext);
+            _senderAccountGroupIds =
+                sendingGroup.SenderAccountGroups?.Select(group => group.Id).ToList() ?? [];
+            await LoadNextSharedSenderAccountPage(sendingContext);
 
             // 保存所使用的代理
             ProxyIds = sendingGroup.ProxyIds ?? [];
@@ -213,66 +207,73 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// 会自动去重
         /// </summary>
         /// <param name="sendingContext"></param>
-        /// <param name="outboxes"></param>
-        /// <param name="outboxGroup"></param>
+        /// <param name="senderAccounts"></param>
+        /// <param name="senderAccountGroup"></param>
         /// <returns></returns>
         /// <summary>
         /// 从共享发件箱目录继续读取一页，并返回实际注册数量。
         /// </summary>
-        public async Task<int> LoadNextSharedOutboxPage(
+        public async Task<int> LoadNextSharedSenderAccountPage(
             SendingContext sendingContext,
             int maxCount = int.MaxValue
         )
         {
-            if (_isSharedOutboxCatalogCompleted)
+            if (_isSharedSenderAccountCatalogCompleted)
                 return 0;
 
-            await _outboxCatalogLock.WaitAsync(_lifetime.Token);
+            await _senderAccountCatalogLock.WaitAsync(_lifetime.Token);
             try
             {
-                if (_isSharedOutboxCatalogCompleted)
+                if (_isSharedSenderAccountCatalogCompleted)
                     return 0;
 
                 var sqlContext = sendingContext.Provider.GetRequiredService<SqlContext>();
-                var directlyLinkedOutboxes = sqlContext
+                var directlyLinkedSenderAccounts = sqlContext
                     .SendingGroups.AsNoTracking()
                     .Where(group => group.Id == SendingGroupId)
-                    .SelectMany(group => group.Outboxes);
-                var groupedOutboxes = sqlContext
-                    .Outboxes.AsNoTracking()
-                    .Where(outbox => _outboxGroupIds.Contains(outbox.EmailGroupId));
-                var pageSize = Math.Min(outboxSupplyOptions.Value.CatalogPageSize, maxCount);
+                    .SelectMany(group => group.SenderAccounts);
+                var groupedSenderAccounts = sqlContext
+                    .SenderAccounts.AsNoTracking()
+                    .Where(senderAccount =>
+                        _senderAccountGroupIds.Contains(senderAccount.EmailGroupId)
+                    );
+                var pageSize = Math.Min(senderAccountSupplyOptions.Value.CatalogPageSize, maxCount);
                 if (pageSize <= 0)
                     return 0;
-                var outboxes = await directlyLinkedOutboxes
-                    .Union(groupedOutboxes)
-                    .Where(outbox => outbox.Id > _sharedOutboxCursor && outbox.IsValid)
-                    .OrderBy(outbox => outbox.Id)
+                var senderAccounts = await directlyLinkedSenderAccounts
+                    .Union(groupedSenderAccounts)
+                    .Where(senderAccount =>
+                        senderAccount.Id > _sharedSenderAccountCursor
+                        && senderAccount.Status == SenderAccountStatus.Valid
+                    )
+                    .OrderBy(senderAccount => senderAccount.Id)
                     .Take(pageSize)
+                    .Include(senderAccount => senderAccount.EmailAccount)
+                    .ThenInclude(emailAccount => emailAccount.OAuthCredential)
+                    .Include(senderAccount => senderAccount.SmtpCredential)
                     .ToListAsync(_lifetime.Token);
 
-                if (outboxes.Count > 0)
-                    _sharedOutboxCursor = outboxes[^1].Id;
-                _isSharedOutboxCatalogCompleted = outboxes.Count < pageSize;
+                if (senderAccounts.Count > 0)
+                    _sharedSenderAccountCursor = senderAccounts[^1].Id;
+                _isSharedSenderAccountCatalogCompleted = senderAccounts.Count < pageSize;
 
-                var container = sendingContext.Provider.GetRequiredService<OutboxesManager>();
-                foreach (var outbox in outboxes)
+                var container = sendingContext.Provider.GetRequiredService<SenderAccountsManager>();
+                foreach (var senderAccount in senderAccounts)
                 {
-                    container.AddOutbox(
-                        new OutboxEmailAddress(
-                            outbox,
+                    container.AddSenderAccount(
+                        senderAccountRuntimeFactory.Create(
+                            senderAccount,
                             SendingGroupId,
-                            SmtpPasswordSecretKeys,
-                            OutboxEmailAddressType.Shared
+                            SenderEmailAddressType.Shared
                         )
                     );
                 }
 
-                return outboxes.Count;
+                return senderAccounts.Count;
             }
             finally
             {
-                _outboxCatalogLock.Release();
+                _senderAccountCatalogLock.Release();
             }
         }
 
@@ -317,12 +318,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                                 x.Status == SendingItemStatus.Created
                                 || x.Status == SendingItemStatus.Failed
                             )
-                            .OrderBy(x => x.OutBoxId)
+                            .OrderBy(x => x.SenderAccountId)
                             .ThenBy(x => x.Id)
                             .Select(x => new SendItemDescriptor(
                                 x.Id,
                                 x.SendingGroupId,
-                                x.OutBoxId,
+                                x.SenderAccountId,
                                 x.TriedCount
                             ))
                             .ToListAsync();
@@ -382,18 +383,23 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 return;
 
             var sqlContext = sendingContext.SqlContext;
-            var specificOutboxIds = pending
-                .Where(x => x.OutboxId > 0)
-                .Select(x => x.OutboxId)
+            var specificSenderAccountIds = pending
+                .Where(x => x.SenderAccountId > 0)
+                .Select(x => x.SenderAccountId)
                 .Distinct()
                 .ToList();
-            var outboxes = await sqlContext
-                .Outboxes.AsNoTracking()
-                .Where(x => specificOutboxIds.Contains(x.Id))
+            var senderAccounts = await sqlContext
+                .SenderAccounts.AsNoTracking()
+                .Where(x => specificSenderAccountIds.Contains(x.Id))
+                .Include(x => x.EmailAccount)
+                .ThenInclude(x => x.OAuthCredential)
+                .Include(x => x.SmtpCredential)
                 .ToListAsync();
-            var validOutboxIds = outboxes.Select(x => x.Id).ToHashSet();
+            var validSenderAccountIds = senderAccounts.Select(x => x.Id).ToHashSet();
             var invalidIds = pending
-                .Where(x => x.OutboxId > 0 && !validOutboxIds.Contains(x.OutboxId))
+                .Where(x =>
+                    x.SenderAccountId > 0 && !validSenderAccountIds.Contains(x.SenderAccountId)
+                )
                 .Select(x => x.Id)
                 .ToList();
             if (invalidIds.Count > 0)
@@ -410,21 +416,21 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
 
             _sendItemQueue.AddRange(pending);
 
-            var outboxesPool = sendingContext.Provider.GetRequiredService<OutboxesManager>();
-            foreach (var outbox in outboxes)
+            var senderAccountsPool =
+                sendingContext.Provider.GetRequiredService<SenderAccountsManager>();
+            foreach (var senderAccount in senderAccounts)
             {
                 var itemIds = pending
-                    .Where(x => x.OutboxId == outbox.Id)
+                    .Where(x => x.SenderAccountId == senderAccount.Id)
                     .Select(x => x.Id)
                     .ToList();
                 if (itemIds.Count == 0)
                     continue;
-                outboxesPool.AddOutbox(
-                    new OutboxEmailAddress(
-                        outbox,
+                senderAccountsPool.AddSenderAccount(
+                    senderAccountRuntimeFactory.Create(
+                        senderAccount,
                         SendingGroupId,
-                        SmtpPasswordSecretKeys,
-                        OutboxEmailAddressType.Specific,
+                        SenderEmailAddressType.Specific,
                         itemIds
                     )
                 );
@@ -492,12 +498,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             sendingContext.GroupTaskStartDate = _startDate;
             sendingContext.GroupTask = this;
 
-            var outbox = sendingContext.OutboxAddress;
-            if (outbox == null)
+            var senderAccount = sendingContext.SenderAccountAddress;
+            if (senderAccount == null)
                 return null;
 
             // 判断是否为当前组对应的发件箱
-            if (!outbox.ContainsSendingGroup(SendingGroupId))
+            if (!senderAccount.ContainsSendingGroup(SendingGroupId))
                 return null;
 
             // 从列表中移除发件项并转换成 sendItem
@@ -534,20 +540,21 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// <returns></returns>
         private async Task<SendItemExecution?> GetEmailItemFromDb(SendingContext sendingContext)
         {
-            var outbox =
-                sendingContext.OutboxAddress ?? throw new Exception("GetSendItem 调用失败, 请先获取发件箱");
+            var senderAccount =
+                sendingContext.SenderAccountAddress
+                ?? throw new Exception("GetSendItem 调用失败, 请先获取发件箱");
 
             // 先发指定项
             SendItemDescriptor? descriptor = null;
-            var bindingType = outbox.GetTypeForSendingGroup(SendingGroupId);
-            if (bindingType.HasFlag(OutboxEmailAddressType.Specific))
+            var bindingType = senderAccount.GetTypeForSendingGroup(SendingGroupId);
+            if (bindingType.HasFlag(SenderEmailAddressType.Specific))
             {
                 // 获取特定项
-                descriptor = _sendItemQueue.AcquireSpecific(outbox.Id);
+                descriptor = _sendItemQueue.AcquireSpecific(senderAccount.Id);
             }
 
             // 若特定项已经发完，则从共享项中获取
-            if (descriptor == null && bindingType.HasFlag(OutboxEmailAddressType.Shared))
+            if (descriptor == null && bindingType.HasFlag(SenderEmailAddressType.Shared))
             {
                 descriptor = _sendItemQueue.AcquireShared();
             }
@@ -556,7 +563,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
 
             var acquired = leaseStore.TryAcquire(
                 descriptor,
-                new OutboxKey(outbox.UserId, outbox.Id),
+                new SenderAccountKey(senderAccount.UserId, senderAccount.Id),
                 timeProvider.GetUtcNow(),
                 quotaOptions.Value.LeaseDuration,
                 out var lease
@@ -603,7 +610,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             var preparedItem = await preparer.PrepareAsync(
                 sendingContext,
                 sendingItem,
-                outbox,
+                senderAccount,
                 _sendingGroup,
                 _templateResolver ?? throw new InvalidOperationException("发件组模板解析器尚未初始化"),
                 ProxyIds
@@ -613,30 +620,30 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         }
 
         /// <summary>
-        /// 判断 outbox 能否匹配到发件项
+        /// 判断 senderAccount 能否匹配到发件项
         /// </summary>
-        /// <param name="outbox"></param>
+        /// <param name="senderAccount"></param>
         /// <returns></returns>
-        public bool MatchEmailItem(OutboxEmailAddress outbox)
+        public bool MatchEmailItem(SenderEmailAddress senderAccount)
         {
             // 特定发件箱
-            var bindingType = outbox.GetTypeForSendingGroup(SendingGroupId);
-            if (bindingType.HasFlag(OutboxEmailAddressType.Specific))
+            var bindingType = senderAccount.GetTypeForSendingGroup(SendingGroupId);
+            if (bindingType.HasFlag(SenderEmailAddressType.Specific))
             {
-                var matchSpecific = _sendItemQueue.Contains(outbox.Id, true);
+                var matchSpecific = _sendItemQueue.Contains(senderAccount.Id, true);
                 if (matchSpecific)
                     return true;
-                if (_delayedItems.Values.Any(x => x.Descriptor.OutboxId == outbox.Id))
+                if (_delayedItems.Values.Any(x => x.Descriptor.SenderAccountId == senderAccount.Id))
                     return true;
             }
 
             // 从当前组中获取
-            if (bindingType.HasFlag(OutboxEmailAddressType.Shared))
+            if (bindingType.HasFlag(SenderEmailAddressType.Shared))
             {
-                var matchShared = _sendItemQueue.Contains(outbox.Id, false);
+                var matchShared = _sendItemQueue.Contains(senderAccount.Id, false);
                 if (matchShared)
                     return true;
-                if (_delayedItems.Values.Any(x => x.Descriptor.OutboxId <= 0))
+                if (_delayedItems.Values.Any(x => x.Descriptor.SenderAccountId <= 0))
                     return true;
             }
 
@@ -646,18 +653,20 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             return false;
         }
 
-        public bool MatchReadyEmailItem(OutboxEmailAddress outbox)
+        public bool MatchReadyEmailItem(SenderEmailAddress senderAccount)
         {
             if (
-                outbox
+                senderAccount
                     .GetTypeForSendingGroup(SendingGroupId)
-                    .HasFlag(OutboxEmailAddressType.Specific)
-                && _sendItemQueue.ContainsReady(outbox.Id, true)
+                    .HasFlag(SenderEmailAddressType.Specific)
+                && _sendItemQueue.ContainsReady(senderAccount.Id, true)
             )
                 return true;
             if (
-                outbox.GetTypeForSendingGroup(SendingGroupId).HasFlag(OutboxEmailAddressType.Shared)
-                && _sendItemQueue.ContainsReady(outbox.Id, false)
+                senderAccount
+                    .GetTypeForSendingGroup(SendingGroupId)
+                    .HasFlag(SenderEmailAddressType.Shared)
+                && _sendItemQueue.ContainsReady(senderAccount.Id, false)
             )
                 return true;
             return _reader is { IsCompleted: false };
@@ -666,7 +675,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// <summary>
         /// 移除指定发件箱的发件项
         /// </summary>
-        /// <param name="outboxEmail"></param>
+        /// <param name="senderAccountEmail"></param>
         /// <returns></returns>
         public void RemovePendingItems(List<long> sendingItemIds)
         {

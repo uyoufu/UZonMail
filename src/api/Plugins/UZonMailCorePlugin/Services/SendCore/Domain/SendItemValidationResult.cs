@@ -6,7 +6,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Domain;
 public enum SendItemValidationFailure
 {
     None,
-    MissingOutbox,
+    MissingSenderAccount,
     MissingRecipients,
     MissingBody,
 

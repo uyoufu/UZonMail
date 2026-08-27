@@ -106,10 +106,13 @@ public sealed class SendItemReaderTests
                 .Where(x => x.SendingGroupId == request.SendingGroupId)
                 .Where(x => selected is null || selected.Contains(x.Id))
                 .Where(x =>
-                    x.OutboxId > request.Cursor.OutboxId
-                    || (x.OutboxId == request.Cursor.OutboxId && x.Id > request.Cursor.Id)
+                    x.SenderAccountId > request.Cursor.SenderAccountId
+                    || (
+                        x.SenderAccountId == request.Cursor.SenderAccountId
+                        && x.Id > request.Cursor.Id
+                    )
                 )
-                .OrderBy(x => x.OutboxId)
+                .OrderBy(x => x.SenderAccountId)
                 .ThenBy(x => x.Id)
                 .Take(request.Take)
                 .ToList();

@@ -29,36 +29,36 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
   })
   // 验证 excel 数据
   interface IValidateExcelDataResult {
-    inboxStatus: number, // 0 全部不存在，1 部分存在，2 所有数据都存在
-    outboxStatus: number,
+    recipientStatus: number, // 0 全部不存在，1 部分存在，2 所有数据都存在
+    senderStatus: number,
     bodyStatus: number,
-    inboxSet: Set<string>
+    recipientEmailSet: Set<string>
   }
   // 验证 excel 数据，参数必须不能为空
   function validateExcelData (dataList: Record<string, any>[]): IValidateExcelDataResult {
-    const inboxSet = new Set<string>()
+    const recipientEmailSet = new Set<string>()
     // 验证收件箱
-    let inboxesCount = 0, outboxesCount = 0, bodiesCount = 0
+    let recipientsCount = 0, senderAccountsCount = 0, bodiesCount = 0
     for (const data of dataList) {
-      if (data.inbox) {
-        inboxesCount++
-        inboxSet.add(data.inbox)
+      if (data.recipientEmail) {
+        recipientsCount++
+        recipientEmailSet.add(data.recipientEmail)
       }
 
-      if (data.outbox) outboxesCount++
+      if (data.senderEmail) senderAccountsCount++
       if (data.templateId || data.templateName || data.body) bodiesCount++
     }
 
-    logger.debug(`[NewEmail] inbox count: ${inboxesCount}, outbox count: ${outboxesCount}, body count: ${bodiesCount}, data count: ${dataList.length}`)
+    logger.debug(`[NewEmail] recipient count: ${recipientsCount}, senderAccount count: ${senderAccountsCount}, body count: ${bodiesCount}, data count: ${dataList.length}`)
 
     return {
-      inboxStatus: formateExcelDataValidateResult(inboxesCount, dataList.length),
-      outboxStatus: formateExcelDataValidateResult(outboxesCount, dataList.length),
-      bodyStatus: formateExcelDataValidateResult(bodiesCount, dataList.length),
-      inboxSet
+      recipientStatus: formatExcelValidationStatus(recipientsCount, dataList.length),
+      senderStatus: formatExcelValidationStatus(senderAccountsCount, dataList.length),
+      bodyStatus: formatExcelValidationStatus(bodiesCount, dataList.length),
+      recipientEmailSet
     }
   }
-  function formateExcelDataValidateResult (count: number, total: number) {
+  function formatExcelValidationStatus (count: number, total: number) {
     if (count >= total) return 2
     if (count <= 0) return 0
     return 1
@@ -69,12 +69,12 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
       return false
     }
 
-    if (!emailInfo.value.outboxes.length && !emailInfo.value.outboxGroups.length) {
+    if (!emailInfo.value.senderAccounts.length && !emailInfo.value.senderAccountGroups.length) {
       notifyError(translateSendingTask('pleaseSelectSender'))
       return false
     }
 
-    if (!emailInfo.value.inboxes.length && !emailInfo.value.inboxGroups.length) {
+    if (!emailInfo.value.recipients.length && !emailInfo.value.recipientContactGroups.length) {
       notifyError(translateSendingTask('pleaseSelectRecipients'))
       return false
     }
@@ -96,28 +96,28 @@ export function useBottomFunctions (emailInfo: Ref<IEmailCreateInfo>) {
       // 有数据的情况
       const vdDataResult = validateExcelData(emailInfo.value.data)
       // 用户选择了收件箱，要判断发件箱是否在数据表格中出现
-      if (emailInfo.value.inboxes.length > 0) {
-        const inboxSet = vdDataResult.inboxSet
-        const inboxesCount = inboxSet.size
-        emailInfo.value.inboxes.forEach(x => inboxSet.add(x.email))
-        const inboxesNowCount = inboxSet.size
-        if (inboxesNowCount > inboxesCount) {
-          notifySuccess(translateSendingTask('notifyExtraInboxSelected'))
+      if (emailInfo.value.recipients.length > 0) {
+        const recipientEmailSet = vdDataResult.recipientEmailSet
+        const recipientsCount = recipientEmailSet.size
+        emailInfo.value.recipients.forEach(x => recipientEmailSet.add(x.email))
+        const recipientsNowCount = recipientEmailSet.size
+        if (recipientsNowCount > recipientsCount) {
+          notifySuccess(translateSendingTask('notifyExtraRecipientSelected'))
           // 说明选择了额外的收件箱，还要验证非数据的情况
           if (!validateParamsWhenNoExcelData()) return false
         }
       }
 
       // 验证其它情况
-      const { inboxStatus, outboxStatus, bodyStatus } = vdDataResult
-      if (inboxStatus !== 2) {
-        notifyError(translateSendingTask('pleaseEnsureEachDataHasInbox'))
+      const { recipientStatus, senderStatus, bodyStatus } = vdDataResult
+      if (recipientStatus !== 2) {
+        notifyError(translateSendingTask('pleaseEnsureEachDataHasRecipient'))
         return false
       }
 
-      if (emailInfo.value.outboxes.length === 0 && emailInfo.value.outboxGroups.length == 0 && outboxStatus < 2) {
+      if (emailInfo.value.senderAccounts.length === 0 && emailInfo.value.senderAccountGroups.length === 0 && senderStatus < 2) {
         // 没有发件
-        notifyError(translateSendingTask('outboxMissingInData'))
+        notifyError(translateSendingTask('senderAccountMissingInData'))
         return false
       }
 

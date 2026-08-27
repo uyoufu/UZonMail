@@ -4,7 +4,7 @@ import _ from 'lodash'
 
 import { getSendingGroup } from 'src/api/sendingGroup'
 import type { IEmailCreateInfo } from "src/api/emailSending"
-import type { IFileObject, IObsUploadedResult } from "src/utils/file"
+import type { IObsUploadedResult } from "src/utils/file"
 
 import { format } from 'quasar'
 
@@ -27,20 +27,19 @@ export function useSendingGroupTemplate (emailInfo: Ref<IEmailCreateInfo>) {
     if (!data) return
 
     emailInfo.value = Object.assign(emailInfo.value,
-      _.pick(data, 'subjects', 'templates', 'outboxes', 'data', 'outboxGroups', 'inboxGroups', 'inboxes', 'ccBoxes', 'body', 'sendBatch', 'proxyIds'))
+      _.pick(data, 'subjects', 'templates', 'senderAccounts', 'data', 'senderAccountGroups', 'recipientContactGroups', 'recipients', 'ccBoxes', 'body', 'sendBatch', 'proxyIds'))
 
     // 恢复 id
     emailInfo.value.attachments = data.attachments.map(x => {
-      const fileObject = x.fileObject as IFileObject
       return {
         __fileName: x.fileName,
-        __sha256: fileObject.sha256,
+        __sha256: x.sha256,
         __key: x.fileName,
-        __size: format.humanStorageSize(fileObject.size),
+        __size: format.humanStorageSize(x.size),
         __progressLabel: '0.00%',
         __fileUsageId: x.id,
         name: x.fileName,
-        size: fileObject.size,
+        size: x.size,
       } as IObsUploadedResult
     })
 

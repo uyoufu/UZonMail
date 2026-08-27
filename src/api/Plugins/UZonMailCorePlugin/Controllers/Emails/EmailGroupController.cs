@@ -22,7 +22,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         SqlContext db,
         EmailGroupService groupService,
         TokenService tokenService,
-        OutboxValidateService outboxValidator,
+        SenderAccountValidateService senderAccountValidator,
         IHubContext<UzonMailHub, IUzonMailClient> hub
     ) : ControllerBaseV1
     {
@@ -61,11 +61,11 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <returns></returns>
         [HttpGet("all")]
         public async Task<ResponseResult<List<EmailGroup>>> GetEmailGroups(
-            [FromQuery] EmailGroupType type
+            [FromQuery] EmailGroupCategory category
         )
         {
             var userId = tokenService.GetUserSqlId();
-            var groups = await groupService.GetEmailGroups(userId, type);
+            var groups = await groupService.GetEmailGroups(userId, category);
             return groups.ToSuccessResponse();
         }
 
@@ -121,47 +121,53 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 删除组中所有无效的发件箱
         /// </summary>
-        /// <param name="outboxIds"></param>
+        /// <param name="senderAccountIds"></param>
         /// <returns></returns>
-        [HttpDelete("{groupId:long}/invalid-outboxes")]
-        public async Task<ResponseResult<bool>> DeleteAllInvalidOutboxesInGroup(long groupId)
+        [HttpDelete("{groupId:long}/invalid-sender-accounts")]
+        public async Task<ResponseResult<bool>> DeleteAllInvalidSenderAccountsInGroup(long groupId)
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
-            var emailBoxes = db.Outboxes.Where(x =>
-                !x.IsValid && x.EmailGroupId == groupId && x.UserId == userId
+            var emailAccounts = db.SenderAccounts.Where(x =>
+                x.Status == SenderAccountStatus.Invalid
+                && x.EmailGroupId == groupId
+                && x.EmailAccount.UserId == userId
             );
-            db.Outboxes.RemoveRange(emailBoxes);
+            db.SenderAccounts.RemoveRange(emailAccounts);
             await db.SaveChangesAsync();
 
             return true.ToSuccessResponse();
         }
 
-        [HttpPut("{groupId:long}/invalid-outbox/validate")]
-        public async Task<ResponseResult<bool>> ValidateAllInvalidOutboxes(long groupId)
+        [HttpPut("{groupId:long}/invalid-sender-accounts/validate")]
+        public async Task<ResponseResult<bool>> ValidateAllInvalidSenderAccounts(long groupId)
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
-            var outboxes = await db
-                .Outboxes.AsNoTracking()
-                .Where(x => !x.IsValid && x.EmailGroupId == groupId && x.UserId == userId)
+            var senderAccounts = await db
+                .SenderAccounts.AsNoTracking()
+                .Where(x =>
+                    x.Status == SenderAccountStatus.Invalid
+                    && x.EmailGroupId == groupId
+                    && x.EmailAccount.UserId == userId
+                )
                 .ToListAsync();
 
             var client = hub.GetUserClient(userId);
 
             // 开始进行验证
-            foreach (var outbox in outboxes)
+            foreach (var senderAccount in senderAccounts)
             {
                 // 发送测试邮件
                 // 已在内部保存修改
-                var vdResult = await outboxValidator.ValidateOutbox(outbox);
+                var vdResult = await senderAccountValidator.ValidateSenderAccount(senderAccount);
 
-                outbox.Status = vdResult.Ok ? OutboxStatus.Valid : OutboxStatus.Invalid;
-                outbox.ValidFailReason = vdResult.Message;
-                outbox.IsValid = vdResult.Ok;
-
+                senderAccount.Status = vdResult.Ok
+                    ? SenderAccountStatus.Valid
+                    : SenderAccountStatus.Invalid;
+                senderAccount.ValidationFailureReason = vdResult.Message;
                 // 推送验证结果
-                await client.OutboxStatusChanged(outbox);
+                await client.SenderAccountStatusChanged(senderAccount);
             }
             return true.ToSuccessResponse();
         }
@@ -169,17 +175,19 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <summary>
         /// 删除组中所有无效的收件箱
         /// </summary>
-        /// <param name="outboxIds"></param>
+        /// <param name="senderAccountIds"></param>
         /// <returns></returns>
-        [HttpDelete("{groupId:long}/invalid-inboxes")]
-        public async Task<ResponseResult<bool>> DeleteAllInvalidInboxesInGroup(long groupId)
+        [HttpDelete("{groupId:long}/invalid-recipient-contacts")]
+        public async Task<ResponseResult<bool>> DeleteAllInvalidRecipientsInGroup(long groupId)
         {
             // 判断是否属于自己的组
             var userId = tokenService.GetUserSqlId();
-            var emailBoxes = db.Inboxes.Where(x =>
-                x.EmailGroupId == groupId && x.UserId == userId && x.Status != InboxStatus.Valid
+            var emailAccounts = db.RecipientContacts.Where(x =>
+                x.EmailGroupId == groupId
+                && x.UserId == userId
+                && x.ValidationStatus != RecipientValidationStatus.Valid
             );
-            db.Inboxes.RemoveRange(emailBoxes);
+            db.RecipientContacts.RemoveRange(emailAccounts);
             await db.SaveChangesAsync();
 
             return true.ToSuccessResponse();

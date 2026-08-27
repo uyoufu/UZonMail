@@ -6,7 +6,7 @@ import { formatDateToUTC } from 'src/utils/format'
 import logger from 'loglevel'
 import dayjs from 'dayjs'
 import { createIpWarmUpPlan } from 'src/api/pro/ipWarmUp'
-import { getInboxesCountInGroups } from 'src/api/emailBox'
+import { getRecipientContacts } from 'src/api/recipientContacts'
 
 import type { IEmailCreateInfo } from 'src/api/emailSending'
 import { t } from 'src/i18n/helpers'
@@ -28,17 +28,20 @@ export function useIpWarmUp (validateSendingTaskParams: () => boolean, emailInfo
 
     logger.debug('[IpWarmUp] 点击 IP 预热按钮', emailInfo.value)
 
-    // 获取收件箱中的邮箱数量
-    let totalInboxesCount = emailInfo.value.inboxes.length
-    if (emailInfo.value.inboxGroups.length > 0) {
-      const { data: inboxesCount } = await getInboxesCountInGroups(emailInfo.value.inboxGroups.map(x => x.id!))
-      totalInboxesCount += inboxesCount
+    // 获取选定联系人和联系人组中的去重地址数量
+    const recipientEmails = new Set(emailInfo.value.recipients.map(recipient => recipient.email.toLowerCase()))
+    if (emailInfo.value.recipientContactGroups.length > 0) {
+      const recipientGroupIds = new Set(emailInfo.value.recipientContactGroups.map(group => group.id))
+      const { data: persistedRecipients } = await getRecipientContacts()
+      persistedRecipients
+        .filter(recipient => recipientGroupIds.has(recipient.emailGroupId))
+        .forEach(recipient => recipientEmails.add(recipient.email.toLowerCase()))
     }
 
 
     // TODO 打开预热弹窗
     const { ok, data } = await showComponentDialog(IpWarmUpSettingDialog, {
-      totalCount: totalInboxesCount || 10
+      totalCount: recipientEmails.size || 10
     })
     if (!ok)
       return

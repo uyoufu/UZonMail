@@ -16,21 +16,24 @@ public sealed class FieldsDecoratorTests
     {
         var sendingItem = new SendingItem
         {
-            Inboxes = [new EmailAddress { Email = "to@test.com", Name = "Recipient" }],
+            Recipients = [new EmailAddress { Email = "to@test.com", Name = "Recipient" }],
         };
         var variables = new SendingItemExcelData(new JObject { ["customField"] = "custom-value" });
         var context = new EmailDecoratorParams(
             new SendingSetting(),
             sendingItem,
             variables,
-            new Outbox { Email = "from@test.com", Name = "Sender" },
+            new SenderAccount
+            {
+                EmailAccount = new EmailAccount { Email = "from@test.com", Name = "Sender", },
+            },
             "subject",
             "body"
         );
 
         var result = await new FieldsDecorator().StartDecorating(
             context,
-            "{{ inbox }}|{{ inboxName }}|{{ customField }}"
+            "{{ recipientContact }}|{{ recipientContactName }}|{{ customField }}"
         );
 
         Assert.AreEqual("to@test.com|Recipient|custom-value", result);

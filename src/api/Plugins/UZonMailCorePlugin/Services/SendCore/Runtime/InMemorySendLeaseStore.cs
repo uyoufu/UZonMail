@@ -11,7 +11,7 @@ public sealed class InMemorySendLeaseStore : ISendLeaseStore, ISingletonService<
 
     public bool TryAcquire(
         SendItemDescriptor item,
-        OutboxKey outbox,
+        SenderAccountKey senderAccount,
         DateTimeOffset now,
         TimeSpan duration,
         out SendLease lease
@@ -33,7 +33,7 @@ public sealed class InMemorySendLeaseStore : ISendLeaseStore, ISingletonService<
                 _activeItems.Remove(item.Id);
             }
 
-            lease = new SendLease(Guid.CreateVersion7(), item, outbox, now, now + duration);
+            lease = new SendLease(Guid.CreateVersion7(), item, senderAccount, now, now + duration);
             _leases.Add(lease.LeaseId, lease);
             _activeItems.Add(item.Id, lease.LeaseId);
             return true;

@@ -4,15 +4,15 @@ import { getDuplicateRecipientSummaries } from 'src/pages/sendingManager/sending
 describe('getDuplicateRecipientSummaries', () => {
   it('groups recipient addresses after trimming and ignoring case', () => {
     const results = getDuplicateRecipientSummaries([
-      { inbox: ' Alice@Example.com ', inboxName: 'Alice' },
-      { inbox: 'alice@example.com', inboxName: '' },
-      { inbox: 'bob@example.com', inboxName: 'Bob' }
+      { recipientEmail: ' Alice@Example.com ', recipientName: 'Alice' },
+      { recipientEmail: 'alice@example.com', recipientName: '' },
+      { recipientEmail: 'bob@example.com', recipientName: 'Bob' }
     ])
 
     expect(results).toEqual([
       {
-        inbox: 'Alice@Example.com',
-        inboxName: 'Alice',
+        recipientEmail: 'Alice@Example.com',
+        recipientName: 'Alice',
         sendingCount: 2
       }
     ])
@@ -20,16 +20,16 @@ describe('getDuplicateRecipientSummaries', () => {
 
   it('uses the first non-empty name and excludes recipients sent once', () => {
     const results = getDuplicateRecipientSummaries([
-      { inbox: 'alice@example.com' },
-      { inbox: 'alice@example.com', inboxName: 'Alice' },
-      { inbox: 'invalid@example.com', inboxName: 'Ignored' },
-      { inbox: '   ' }
+      { recipientEmail: 'alice@example.com' },
+      { recipientEmail: 'alice@example.com', recipientName: 'Alice' },
+      { recipientEmail: 'invalid@example.com', recipientName: 'Ignored' },
+      { recipientEmail: '   ' }
     ])
 
     expect(results).toEqual([
       {
-        inbox: 'alice@example.com',
-        inboxName: 'Alice',
+        recipientEmail: 'alice@example.com',
+        recipientName: 'Alice',
         sendingCount: 2
       }
     ])

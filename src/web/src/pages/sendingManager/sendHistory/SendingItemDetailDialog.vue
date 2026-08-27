@@ -35,7 +35,7 @@
               <q-icon name="outgoing_mail" />
               <span>{{ t('sendDetail.sender') }}</span>
             </div>
-            <div class="email-detail-dialog__metadata-value">{{ emailDetail.fromEmail || t('sendDetail.none') }}</div>
+            <div class="email-detail-dialog__metadata-value">{{ emailDetail.senderEmail || t('sendDetail.none') }}</div>
           </div>
           <div class="email-detail-dialog__metadata-row">
             <div class="email-detail-dialog__metadata-label">

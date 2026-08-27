@@ -13,21 +13,21 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
         /// <summary>
         /// 获取邮件发送器
         /// </summary>
-        /// <param name="outboxEmail"></param>
+        /// <param name="senderAccountEmail"></param>
         /// <returns></returns>
-        public IEmailTransport GetEmailSender(OutboxType outboxType)
+        public IEmailTransport GetEmailSender(SendingProtocol senderAccountType)
         {
-            var matches = transports.Where(x => x.Type == outboxType).ToList();
+            var matches = transports.Where(x => x.Type == senderAccountType).ToList();
             return matches.Count switch
             {
                 1 => matches[0],
                 0
                     => throw new InvalidOperationException(
-                        $"未找到匹配的邮件 Transport，OutboxType：{outboxType}"
+                        $"未找到匹配的邮件 Transport，SendingProtocol：{senderAccountType}"
                     ),
                 _
                     => throw new InvalidOperationException(
-                        $"找到多个邮件 Transport，OutboxType：{outboxType}"
+                        $"找到多个邮件 Transport，SendingProtocol：{senderAccountType}"
                     ),
             };
         }

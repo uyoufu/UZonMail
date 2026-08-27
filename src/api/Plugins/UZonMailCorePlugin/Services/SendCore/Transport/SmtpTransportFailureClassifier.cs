@@ -24,7 +24,7 @@ public sealed class SmtpTransportFailureClassifier
             or System.Security.Authentication.AuthenticationException
             or SslHandshakeException
                 => TransportResult.Failure(
-                    SendFailureKind.OutboxPermanent,
+                    SendFailureKind.SenderAccountPermanent,
                     exception.Message,
                     errorCode: exception.GetType().Name
                 ),
@@ -53,14 +53,14 @@ public sealed class SmtpTransportFailureClassifier
         var kind = statusCode switch
         {
             _ when PermanentAuthenticationCodes.Contains(statusCode)
-                => SendFailureKind.OutboxPermanent,
+                => SendFailureKind.SenderAccountPermanent,
             >= 400 and < 500 => SendFailureKind.Transient,
             _ when IsHardBounce(exception) => SendFailureKind.HardBounce,
             >= 500 when exception.ErrorCode == SmtpErrorCode.RecipientNotAccepted
                 => SendFailureKind.RecipientPermanent,
             >= 500 when exception.ErrorCode == SmtpErrorCode.MessageNotAccepted
                 => SendFailureKind.MessagePermanent,
-            >= 500 => SendFailureKind.OutboxPermanent,
+            >= 500 => SendFailureKind.SenderAccountPermanent,
             _ => SendFailureKind.Unknown,
         };
 

@@ -2,7 +2,7 @@ namespace UzonMail.CorePlugin.SignalRHubs.SendEmail
 {
     public class EmailSendingStatus
     {
-        public string Inbox { get; set; } = string.Empty;
+        public string RecipientContact { get; set; } = string.Empty;
 
         public string Message { get; set; } = string.Empty;
 

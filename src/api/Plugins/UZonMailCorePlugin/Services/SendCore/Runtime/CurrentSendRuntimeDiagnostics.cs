@@ -1,6 +1,6 @@
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.Utils.Web.Service;
 
@@ -8,7 +8,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Runtime;
 
 public sealed class CurrentSendRuntimeDiagnostics(
     UserGroupTasksPools groupPools,
-    OutboxesManager outboxes,
+    SenderAccountsManager senderAccounts,
     ISendingTasksManager tasksManager
 ) : ISendRuntimeDiagnostics, ISingletonService<ISendRuntimeDiagnostics>
 {
@@ -27,11 +27,11 @@ public sealed class CurrentSendRuntimeDiagnostics(
                     ))
             )
             .ToList();
-        var outboxSnapshots = outboxes
-            .Values.Select(outbox => new SendRuntimeOutboxSnapshot(
-                new OutboxKey(outbox.UserId, outbox.Id),
-                outbox.IsRunningInTask ? 1 : 0,
-                outbox.ShouldDispose
+        var senderAccountSnapshots = senderAccounts
+            .Values.Select(senderAccount => new SendRuntimeSenderAccountSnapshot(
+                new SenderAccountKey(senderAccount.UserId, senderAccount.Id),
+                senderAccount.IsRunningInTask ? 1 : 0,
+                senderAccount.ShouldDispose
             ))
             .ToList();
         return new SendRuntimeSnapshot(
@@ -39,7 +39,7 @@ public sealed class CurrentSendRuntimeDiagnostics(
             groups.Sum(x => x.ReadyCount),
             groups.Sum(x => x.DelayedCount),
             groups,
-            outboxSnapshots
+            senderAccountSnapshots
         );
     }
 }

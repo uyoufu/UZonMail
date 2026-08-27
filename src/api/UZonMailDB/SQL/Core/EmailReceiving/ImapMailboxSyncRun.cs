@@ -13,7 +13,7 @@ public class ImapMailboxSyncRun : SqlId, IEntityTypeConfiguration<ImapMailboxSyn
     /// 本次同步所属 IMAP 账户的标识。
     /// 与同步批次、文件夹组成复合外键，禁止跨账户记录。
     /// </summary>
-    public long ImapAccountId { get; set; }
+    public long ReceivingAccountId { get; set; }
 
     /// <summary>
     /// 所属账户同步记录的标识。
@@ -101,14 +101,14 @@ public class ImapMailboxSyncRun : SqlId, IEntityTypeConfiguration<ImapMailboxSyn
         builder
             .HasOne(x => x.ImapSyncRun)
             .WithMany(x => x.MailboxRuns)
-            .HasForeignKey(x => new { x.ImapSyncRunId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.ImapSyncRunId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
         builder
             .HasOne(x => x.ImapMailbox)
             .WithMany()
-            .HasForeignKey(x => new { x.ImapMailboxId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.ImapMailboxId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

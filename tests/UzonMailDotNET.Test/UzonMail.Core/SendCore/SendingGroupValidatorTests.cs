@@ -12,27 +12,27 @@ namespace UzonMailDotNET.Test.UzonMail.Core.SendCore;
 public sealed class SendingGroupValidatorTests
 {
     [TestMethod]
-    public void Validate_DuplicateInboxRows_DoesNotReportMissingInbox()
+    public void Validate_DuplicateRecipientContactRows_DoesNotReportMissingRecipientContact()
     {
         var excelData = CreateExcelData(
-            new JObject { ["inbox"] = "recipient@example.com" },
-            new JObject { ["inbox"] = "recipient@example.com" }
+            new JObject { ["recipientEmail"] = "recipient@example.com" },
+            new JObject { ["recipientEmail"] = "recipient@example.com" }
         );
 
         var excelDataInfo = new ExcelDataInfo(excelData);
         var validationResult = new SendingGroupValidator().Validate(CreateSendingGroup(excelData));
 
-        Assert.AreEqual(ExcelDataStatus.All, excelDataInfo.InboxStatus);
-        Assert.HasCount(1, excelDataInfo.InboxSet);
+        Assert.AreEqual(ExcelDataStatus.All, excelDataInfo.RecipientValidationStatus);
+        Assert.HasCount(1, excelDataInfo.RecipientEmails);
         Assert.IsTrue(validationResult.IsValid);
     }
 
     [TestMethod]
-    public void Validate_MissingInboxRows_ReportsMissingRowNumbers()
+    public void Validate_MissingRecipientContactRows_ReportsMissingRowNumbers()
     {
         var excelData = CreateExcelData(
-            new JObject { ["inbox"] = "recipient@example.com" },
-            new JObject { ["inbox"] = "  " },
+            new JObject { ["recipientEmail"] = "recipient@example.com" },
+            new JObject { ["recipientEmail"] = "  " },
             new JValue("invalid-row")
         );
 
@@ -40,7 +40,10 @@ public sealed class SendingGroupValidatorTests
 
         Assert.IsFalse(validationResult.IsValid);
         Assert.HasCount(1, validationResult.Errors);
-        Assert.AreEqual("Excel 数据第 2、3 行缺少 inbox (收件人邮箱)", validationResult.Errors[0].ErrorMessage);
+        Assert.AreEqual(
+            "Excel 数据第 2、3 行缺少 recipientEmail",
+            validationResult.Errors[0].ErrorMessage
+        );
     }
 
     private static JArray CreateExcelData(params JToken[] rows) => new(rows);
@@ -51,6 +54,12 @@ public sealed class SendingGroupValidatorTests
             Subjects = "Test subject",
             Body = "Test body",
             Data = excelData,
-            Outboxes = [new Outbox { Email = "sender@example.com" }],
+            SenderAccounts =
+            [
+                new SenderAccount
+                {
+                    EmailAccount = new EmailAccount { Email = "sender@example.com" },
+                },
+            ],
         };
 }

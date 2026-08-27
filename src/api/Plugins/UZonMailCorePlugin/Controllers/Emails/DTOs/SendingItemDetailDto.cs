@@ -7,7 +7,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
     {
         public long Id { get; set; }
         public string Subject { get; set; } = string.Empty;
-        public string FromEmail { get; set; } = string.Empty;
+        public string SenderEmail { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
         public List<EmailAddressDto> Recipients { get; set; } = [];
         public List<EmailAddressDto> CcRecipients { get; set; } = [];

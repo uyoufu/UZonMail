@@ -58,25 +58,25 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             "first-row.txt",
             'b'
         );
-        var inboxGroup = new EmailGroup
+        var recipientContactGroup = new EmailGroup
         {
             Id = 10,
             UserId = user.Id,
             Name = "Recipients",
-            Type = EmailGroupType.InBox,
+            Category = EmailGroupCategory.Recipient,
         };
-        var firstInbox = CreateInbox(
+        var firstRecipientContact = CreateRecipientContact(
             31,
             user.Id,
             organization.Id,
-            inboxGroup.Id,
+            recipientContactGroup.Id,
             "first@example.com"
         );
-        var secondInbox = CreateInbox(
+        var secondRecipientContact = CreateRecipientContact(
             32,
             user.Id,
             organization.Id,
-            inboxGroup.Id,
+            recipientContactGroup.Id,
             "second@example.com"
         );
         var sendingGroup = new SendingGroup
@@ -90,13 +90,13 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             [
                 new JObject
                 {
-                    ["inbox"] = firstInbox.Email,
+                    ["recipientEmail"] = firstRecipientContact.Email,
                     ["cc"] = "first-row-cc@example.com",
                     ["attachmentNames"] = firstRowAttachment.DisplayName,
                 },
                 new JObject
                 {
-                    ["inbox"] = secondInbox.Email,
+                    ["recipientEmail"] = secondRecipientContact.Email,
                     ["bcc"] = "second-row-bcc@example.com",
                 },
             ],
@@ -108,9 +108,9 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             fileCategory,
             globalAttachment,
             firstRowAttachment,
-            inboxGroup,
-            firstInbox,
-            secondInbox,
+            recipientContactGroup,
+            firstRecipientContact,
+            secondRecipientContact,
             sendingGroup
         );
         await testDatabase.Db.SaveChangesAsync();
@@ -129,8 +129,12 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
         var sendingItems = await builder.GenerateAndSave();
 
         Assert.HasCount(2, sendingItems);
-        var firstItem = sendingItems.Single(x => x.Inboxes.Single().Email == firstInbox.Email);
-        var secondItem = sendingItems.Single(x => x.Inboxes.Single().Email == secondInbox.Email);
+        var firstItem = sendingItems.Single(x =>
+            x.Recipients.Single().Email == firstRecipientContact.Email
+        );
+        var secondItem = sendingItems.Single(x =>
+            x.Recipients.Single().Email == secondRecipientContact.Email
+        );
         CollectionAssert.AreEqual(
             new[] { "first-row-cc@example.com" },
             firstItem.CC!.Select(x => x.Email).ToArray()
@@ -167,30 +171,32 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
         Assert.AreNotSame(sendingGroup.BccBoxes![0], firstItem.BCC![0]);
         Assert.AreNotSame(sendingGroup.CcBoxes![0], secondItem.CC![0]);
 
-        var inboxRelations = await testDatabase.Db.SendingItemInboxes.AsNoTracking().ToListAsync();
+        var recipientContactRelations = await testDatabase
+            .Db.SendingItemRecipients.AsNoTracking()
+            .ToListAsync();
         CollectionAssert.AreEqual(
             new[] { "first-row-cc@example.com" },
-            GetRoleEmails(inboxRelations, firstItem.Id, InboxRole.CC)
+            GetRoleEmails(recipientContactRelations, firstItem.Id, RecipientRole.CC)
         );
         CollectionAssert.AreEqual(
             new[] { "global-bcc@example.com" },
-            GetRoleEmails(inboxRelations, firstItem.Id, InboxRole.BCC)
+            GetRoleEmails(recipientContactRelations, firstItem.Id, RecipientRole.BCC)
         );
         CollectionAssert.AreEqual(
             new[] { "global-cc@example.com" },
-            GetRoleEmails(inboxRelations, secondItem.Id, InboxRole.CC)
+            GetRoleEmails(recipientContactRelations, secondItem.Id, RecipientRole.CC)
         );
         CollectionAssert.AreEqual(
             new[] { "second-row-bcc@example.com" },
-            GetRoleEmails(inboxRelations, secondItem.Id, InboxRole.BCC)
+            GetRoleEmails(recipientContactRelations, secondItem.Id, RecipientRole.BCC)
         );
         Assert.AreEqual(
             "first@example.com,first-row-cc@example.com,global-bcc@example.com",
-            firstItem.ToEmails
+            firstItem.RecipientEmails
         );
         Assert.AreEqual(
             "second@example.com,global-cc@example.com,second-row-bcc@example.com",
-            secondItem.ToEmails
+            secondItem.RecipientEmails
         );
     }
 
@@ -206,41 +212,45 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             Type = DepartmentType.Organization,
         };
         var user = SendCoreTestEntityFactory.CreateUser(101, organization.Id);
-        var inboxGroup = new EmailGroup
+        var recipientContactGroup = new EmailGroup
         {
             Id = 10,
             UserId = user.Id,
             Name = "Recipients",
-            Type = EmailGroupType.InBox,
+            Category = EmailGroupCategory.Recipient,
         };
-        var outboxGroup = new EmailGroup
+        var senderAccountGroup = new EmailGroup
         {
             Id = 11,
             UserId = user.Id,
             Name = "Senders",
-            Type = EmailGroupType.OutBox,
+            Category = EmailGroupCategory.Sender,
         };
-        var outbox = new Outbox
+        var senderAccount = new SenderAccount
         {
             Id = 21,
-            UserId = user.Id,
-            EmailGroupId = outboxGroup.Id,
-            Email = "sender@example.com",
-            IsValid = true,
-            Status = OutboxStatus.Valid,
+            EmailAccount = new EmailAccount
+            {
+                UserId = user.Id,
+                OrganizationId = organization.Id,
+                Email = "sender@example.com",
+            },
+            EmailGroupId = senderAccountGroup.Id,
+            Protocol = SendingProtocol.Smtp,
+            Status = SenderAccountStatus.Valid,
         };
-        var firstInbox = CreateInbox(
+        var firstRecipientContact = CreateRecipientContact(
             31,
             user.Id,
             organization.Id,
-            inboxGroup.Id,
+            recipientContactGroup.Id,
             "first@example.com"
         );
-        var secondInbox = CreateInbox(
+        var secondRecipientContact = CreateRecipientContact(
             32,
             user.Id,
             organization.Id,
-            inboxGroup.Id,
+            recipientContactGroup.Id,
             "second@example.com"
         );
         var sendingGroup = new SendingGroup
@@ -248,11 +258,19 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             Id = 20,
             UserId = user.Id,
             SendBatch = true,
-            Outboxes = [outbox],
-            Inboxes =
+            SenderAccounts = [senderAccount],
+            Recipients =
             [
-                new EmailAddress { Id = firstInbox.Id, Email = firstInbox.Email },
-                new EmailAddress { Id = secondInbox.Id, Email = secondInbox.Email },
+                new EmailAddress
+                {
+                    Id = firstRecipientContact.Id,
+                    Email = firstRecipientContact.Email
+                },
+                new EmailAddress
+                {
+                    Id = secondRecipientContact.Id,
+                    Email = secondRecipientContact.Email
+                },
             ],
             CcBoxes = [new EmailAddress { Email = "global-cc@example.com" }],
             BccBoxes = [new EmailAddress { Email = "global-bcc@example.com" }],
@@ -260,11 +278,11 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
         testDatabase.Db.AddRange(
             organization,
             user,
-            inboxGroup,
-            outboxGroup,
-            outbox,
-            firstInbox,
-            secondInbox,
+            recipientContactGroup,
+            senderAccountGroup,
+            senderAccount,
+            firstRecipientContact,
+            secondRecipientContact,
             sendingGroup
         );
         await testDatabase.Db.SaveChangesAsync();
@@ -343,8 +361,8 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             },
         };
 
-    private static Inbox CreateInbox(
-        long inboxId,
+    private static RecipientContact CreateRecipientContact(
+        long recipientContactId,
         long userId,
         long organizationId,
         long emailGroupId,
@@ -352,12 +370,12 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
     ) =>
         new()
         {
-            Id = inboxId,
+            Id = recipientContactId,
             UserId = userId,
             OrganizationId = organizationId,
             EmailGroupId = emailGroupId,
             Email = email,
-            Status = InboxStatus.Valid,
+            ValidationStatus = RecipientValidationStatus.Valid,
         };
 
     private static void AssertIndependentCollections(
@@ -378,12 +396,12 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
     }
 
     private static string[] GetRoleEmails(
-        IEnumerable<SendingItemInbox> inboxRelations,
+        IEnumerable<SendingItemRecipient> recipientContactRelations,
         long sendingItemId,
-        InboxRole inboxRole
+        RecipientRole recipientContactRole
     ) =>
-        inboxRelations
-            .Where(x => x.SendingItemId == sendingItemId && x.Role == inboxRole)
-            .Select(x => x.ToEmail!)
+        recipientContactRelations
+            .Where(x => x.SendingItemId == sendingItemId && x.Role == recipientContactRole)
+            .Select(x => x.RecipientEmail!)
             .ToArray();
 }

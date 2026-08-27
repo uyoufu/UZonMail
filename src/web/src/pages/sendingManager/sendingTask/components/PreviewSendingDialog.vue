@@ -1,198 +1,169 @@
 <template>
-  <q-dialog ref='dialogRef' @hide="onDialogHide">
-    <q-card class='column justify-start q-pa-sm width-800 height-500'>
+  <q-dialog ref="dialogRef" @hide="onDialogHide">
+    <q-card class="column justify-start q-pa-sm width-800 height-500">
       <div class="text-subtitle1 text-primary">
         {{ t('pages.sendingTask.subject') }}: {{ emailSubject }}
       </div>
-
       <div class="text-secondary">
-        {{ t('pages.sendingTask.recipient') }}: {{ currentInbox }}
+        {{ t('pages.sendingTask.recipient') }}: {{ currentRecipientEmail }}
       </div>
-
       <q-separator class="q-mb-sm" />
-
       <div class="q-pb-md col hover-scroll full-width" v-html="emailBody"></div>
-
-      <q-pagination v-if="pagesCount > 1" class="self-center q-pt-sm" v-model="currentPage" :max="pagesCount"
-        :max-pages="6" boundary-numbers size="md" padding="0px" />
+      <q-pagination
+        v-if="pagesCount > 1"
+        v-model="currentPage"
+        class="self-center q-pt-sm"
+        :max="pagesCount"
+        :max-pages="6"
+        boundary-numbers
+        size="md"
+        padding="0px"
+      />
     </q-card>
   </q-dialog>
 </template>
 
-<script lang='ts' setup>
-// 预览邮件发件正文
-// 为了与后端结果保持一致，预览的变量替换部分在后端处理
-
-/**
- * warning: 该组件一个弹窗的示例，不可直接使用
- * 参考：http://www.quasarchs.com/quasar-plugins/dialog#composition-api-variant
- */
+<script lang="ts" setup>
 import logger from 'loglevel'
+import { useDialogPluginComponent } from 'quasar'
+import { useInstanceRequestCache } from 'src/api/base/httpCache'
+import type {
+  IEmailCreateInfo,
+  IRecipientContactSelection,
+  ISenderAccountSelection,
+  ISendingItemPreview
+} from 'src/api/emailSending'
+import { previewSendingItem } from 'src/api/emailSending'
+import { getEmailTemplateById, getEmailTemplateByIdOrName } from 'src/api/emailTemplate'
+import { getRecipientContacts } from 'src/api/recipientContacts'
+import { getSenderAccounts } from 'src/api/senderAccounts'
 import { t } from 'src/i18n/helpers'
 
-import { useDialogPluginComponent } from 'quasar'
-defineEmits([
-  // 必需；需要指定一些事件
-  // （组件将通过useDialogPluginComponent()发出）
-  ...useDialogPluginComponent.emits
-])
-const { dialogRef, onDialogHide /* , onDialogOK, onDialogCancel */ } = useDialogPluginComponent()
+defineOptions({ name: 'PreviewSendingDialog' })
+defineEmits([...useDialogPluginComponent.emits])
+const { dialogRef, onDialogHide } = useDialogPluginComponent()
 
-import { IEmailCreateInfo, ISendingItemPreview, previewSendingItem } from 'src/api/emailSending'
 const props = defineProps({
-  emailCreateInfo: {
-    type: Object as PropType<IEmailCreateInfo>,
-    required: true
-  }
+  emailCreateInfo: { type: Object as PropType<IEmailCreateInfo>, required: true }
 })
 
-// 分页
-const pagesCount = ref(0)
 const currentPage = ref(1)
-
-// #region 预览邮件发件正文逻辑
-// 若用户数据中有收件箱，则要与收件箱中的数据进行合并
-let inboxes = [...props.emailCreateInfo.inboxes]
-// 将数据转换成 IInbox 类型
-logger.debug('[preview] emailCreateInfo.data', props.emailCreateInfo.data)
-const userDataInboxes = props.emailCreateInfo.data.map((x) => ({
-  email: x.inbox,
-  name: x.inboxName
-} as IInbox))
-  .filter(x => x)
-if (userDataInboxes.length > 0) {
-  inboxes.push(...userDataInboxes)
-}
-// 获取收件箱组中的邮箱
-import { getGroupsOutboxes, IOutbox } from 'src/api/emailBox'
-onMounted(async () => {
-  // 获取发件组中的邮箱
-  if (props.emailCreateInfo.inboxGroups.length > 0) {
-    const { data } = await getGroupsInboxes(props.emailCreateInfo.inboxGroups.map(x => x.id as number))
-    inboxes.push(...data)
-  }
-
-  // 对邮箱去重
-  const inboxMap = new Map<string, IInbox>()
-  inboxes.forEach(x => {
-    inboxMap.set(x.email, x)
-  })
-  inboxes = Array.from(inboxMap.values())
-
-  pagesCount.value = inboxes.length
-})
-
-// 获取所有的发件箱列表
-import { getGroupsInboxes } from 'src/api/emailBox'
-let outboxes = [...props.emailCreateInfo.outboxes]
-onMounted(async () => {
-  if (props.emailCreateInfo.outboxGroups.length > 0) {
-    const { data } = await getGroupsOutboxes(props.emailCreateInfo.outboxGroups.map(x => x.id as number))
-    outboxes.push(...data)
-
-    // 对邮箱去重
-    const outboxMap = new Map<string, IOutbox>()
-    outboxes.forEach(x => {
-      outboxMap.set(x.email, x)
-    })
-    outboxes = Array.from(outboxMap.values())
-  }
-})
-
-import { useInstanceRequestCache } from 'src/api/base/httpCache'
-import { getEmailTemplateById, getEmailTemplateByIdOrName } from 'src/api/emailTemplate'
-import { IInbox } from 'src/api/emailBox'
+const pagesCount = ref(0)
+const currentRecipientEmail = ref('')
+const emailBody = ref('')
+const emailSubject = ref('')
+const recipients = ref<IRecipientContactSelection[]>([])
+const senderAccounts = ref<ISenderAccountSelection[]>([])
+const isInitialized = ref(false)
 const cacheKey = useInstanceRequestCache()
-// 主题
-function getSubjects() {
-  // 通过分号，换行符进行分隔
-  // 先将所有的 ; 和 ； 替换为 \n
-  const regex = /;|；/gm
-  const subject = props.emailCreateInfo.subjects.replace(regex, '\n')
-  return subject.split('\n').filter(x => x)
-}
-const subjects = getSubjects()
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applyVariablesToTemplate(userData?: Record<string, any>, templateContent?: string) {
-  if (!templateContent || !userData) return templateContent
 
-  // 应用变量
-  for (const key of Object.keys(userData)) {
-    const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'gm')
-    templateContent = templateContent.replace(regex, userData[key])
+const subjects = props.emailCreateInfo.subjects
+  .replace(/;|；/gm, '\n')
+  .split('\n')
+  .filter(Boolean)
+
+onMounted(async () => {
+  const userDataRecipients = props.emailCreateInfo.data
+    .filter(row => typeof row.recipientEmail === 'string' && row.recipientEmail)
+    .map(row => ({
+      email: String(row.recipientEmail),
+      name: typeof row.recipientName === 'string' ? row.recipientName : undefined
+    }))
+
+  let recipientCandidates = [...props.emailCreateInfo.recipients, ...userDataRecipients]
+  const recipientGroupIds = new Set(props.emailCreateInfo.recipientContactGroups.map(group => group.id))
+  if (recipientGroupIds.size > 0) {
+    const { data: persistedRecipients } = await getRecipientContacts()
+    recipientCandidates = recipientCandidates.concat(
+      persistedRecipients.filter(recipient => recipientGroupIds.has(recipient.emailGroupId))
+    )
   }
-  return templateContent
+  recipients.value = uniqueByEmail(recipientCandidates)
+
+  let senderCandidates = [...props.emailCreateInfo.senderAccounts]
+  const senderGroupIds = new Set(props.emailCreateInfo.senderAccountGroups.map(group => group.id))
+  if (senderGroupIds.size > 0) {
+    const { data: persistedSenders } = await getSenderAccounts()
+    senderCandidates = senderCandidates.concat(
+      persistedSenders.filter(sender => senderGroupIds.has(sender.emailGroupId))
+    )
+  }
+  senderAccounts.value = uniqueByEmail(senderCandidates)
+
+  pagesCount.value = recipients.value.length
+  isInitialized.value = true
+  await refreshPreview()
+})
+
+watch(currentPage, refreshPreview)
+
+function uniqueByEmail<TAccount extends { email: string }> (accounts: TAccount[]): TAccount[] {
+  const accountsByEmail = new Map<string, TAccount>()
+  for (const account of accounts) {
+    if (!account.email) continue
+    accountsByEmail.set(account.email.trim().toLowerCase(), account)
+  }
+  return [...accountsByEmail.values()]
 }
 
-async function getEmailBody(inbox: string, inboxIndex: number) {
-  // 正文优先级：用户数据/正文 > 用户数据/模板 > 界面/正文 > 界面/模板
-  const userData = props.emailCreateInfo.data.find((item) => item.inbox === inbox)
+async function refreshPreview () {
+  if (!isInitialized.value || recipients.value.length === 0) return
+
+  const recipientIndex = currentPage.value - 1
+  const recipientEmail = recipients.value[recipientIndex]!.email
+  const userData = props.emailCreateInfo.data.find(row => row.recipientEmail === recipientEmail)
+  emailSubject.value = typeof userData?.subject === 'string'
+    ? userData.subject
+    : subjects[recipientIndex % subjects.length] || ''
+  currentRecipientEmail.value = recipientEmail
+  emailBody.value = await resolveEmailBody(recipientEmail, recipientIndex)
+
+  const previewRequest: ISendingItemPreview = {
+    recipientContact: recipientEmail,
+    senderAccount: senderAccounts.value.length > 0
+      ? senderAccounts.value[recipientIndex % senderAccounts.value.length]!.email
+      : '',
+    subject: emailSubject.value,
+    body: emailBody.value,
+    data: userData || {}
+  }
+  logger.debug('[PreviewSendingDialog] preview request', previewRequest)
+  const { data: previewResult } = await previewSendingItem(previewRequest)
+  emailSubject.value = previewResult.subject
+  emailBody.value = previewResult.body
+}
+
+async function resolveEmailBody (recipientEmail: string, recipientIndex: number): Promise<string> {
+  const userData = props.emailCreateInfo.data.find(row => row.recipientEmail === recipientEmail)
   let templateContent = ''
-  if (userData) {
-    // 查找模板
-    // 若数据中有模板，则使用数据模板
-    if (userData.body) {
-      templateContent = userData.body
-    } else if (userData.templateId || userData.templateName) {
-      const { data } = await getEmailTemplateByIdOrName(userData.templateId, userData.templateName, cacheKey)
-      templateContent = data.content
-    }
+  if (typeof userData?.body === 'string') {
+    templateContent = userData.body
+  } else if (userData?.templateId || userData?.templateName) {
+    const { data: template } = await getEmailTemplateByIdOrName(userData.templateId, userData.templateName, cacheKey)
+    templateContent = template.content
   }
 
-  // 说明没有变量，直接从界面正文中获取
   if (!templateContent) templateContent = props.emailCreateInfo.body
-
   if (!templateContent && props.emailCreateInfo.templates.length > 0) {
-    // 从模板中读取
-    // 查找模板
-    const templateIndex = inboxIndex % props.emailCreateInfo.templates.length
-    const template = props.emailCreateInfo.templates[templateIndex]
-    const { data } = await getEmailTemplateById(template!.id as number, cacheKey)
-
-    // 返回模板数据
-    templateContent = data.content
+    const templateIndex = recipientIndex % props.emailCreateInfo.templates.length
+    const selectedTemplate = props.emailCreateInfo.templates[templateIndex]!
+    const { data: template } = await getEmailTemplateById(selectedTemplate.id as number, cacheKey)
+    templateContent = template.content
   }
 
   return applyVariablesToTemplate(userData, templateContent) || t('pages.sendingTask.emptyBody')
 }
 
-const currentInbox = ref('')
-const emailBody = ref('')
-const emailSubject = ref('')
-watch(currentPage, async () => {
-  const index = currentPage.value - 1
-  const inbox = inboxes[index]!.email as string
-
-  // subject 优先级：Excel数据/subject  > 界面/主题
-  const userData = props.emailCreateInfo.data.find((x) => x.inbox === inbox)
-  if (userData && userData.subject) emailSubject.value = userData.subject
-  else {
-    emailSubject.value = subjects[index % subjects.length] as string
+function applyVariablesToTemplate (variables?: Record<string, unknown>, templateContent = ''): string {
+  if (!variables) return templateContent
+  let resolvedContent = templateContent
+  for (const [variableName, variableValue] of Object.entries(variables)) {
+    const variablePattern = new RegExp(`{{\\s*${variableName}\\s*}}`, 'gm')
+    const replacementValue = typeof variableValue === 'string'
+      ? variableValue
+      : JSON.stringify(variableValue) ?? ''
+    resolvedContent = resolvedContent.replace(variablePattern, replacementValue)
   }
-  if (userData && userData.inbox) currentInbox.value = userData.inbox
-  else currentInbox.value = inbox
-
-  const body = await getEmailBody(currentInbox.value, index)
-  emailBody.value = body || ''
-
-  // 从服务器解析变量
-  const previewData: ISendingItemPreview = {
-    inbox,
-    outbox: outboxes.length > 0 ? outboxes[index % outboxes.length]!.email : "",
-    subject: emailSubject.value,
-    body: emailBody.value,
-    data: userData || {},
-    // cc 与 bcc 暂不适配
-    ccBoxes: [],
-    bccBoxes: []
-  }
-  const { data: previewResult } = await previewSendingItem(previewData)
-  emailSubject.value = previewResult.subject
-  emailBody.value = previewResult.body
-}, {
-  immediate: true
-})
-// #endregion
+  return resolvedContent
+}
 </script>
-
-<style lang='scss' scoped></style>

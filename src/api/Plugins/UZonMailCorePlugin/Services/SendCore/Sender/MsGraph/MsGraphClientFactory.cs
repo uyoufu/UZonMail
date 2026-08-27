@@ -1,36 +1,24 @@
 using System.Collections.Concurrent;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.DB.SQL;
 using UzonMail.Utils.Extensions;
 using UzonMail.Utils.Web.Service;
 
 namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph;
 
-/// <summary>
-/// 表示可认证并通过 Microsoft Graph 发送邮件的客户端。
-/// </summary>
 public interface IMsGraphClient : IEmailSendingClient
 {
     Task AuthenticateAsync(
-        string email,
-        string username,
-        string password,
-        long outboxId,
-        SqlContext db
+        SenderEmailAddress senderAccount,
+        SqlContext db,
+        CancellationToken cancellationToken = default
     );
 }
 
-/// <summary>
-/// 按发件箱与凭据快照缓存 Microsoft Graph 客户端。
-/// </summary>
 public interface IMsGraphClientFactory
 {
-    IMsGraphClient GetClient(
-        OutboxKey outbox,
-        string email,
-        string username,
-        string password
-    );
+    IMsGraphClient GetClient(SenderEmailAddress senderAccount);
 }
 
 public sealed class MsGraphClientFactory(IServiceProvider serviceProvider)
@@ -39,24 +27,27 @@ public sealed class MsGraphClientFactory(IServiceProvider serviceProvider)
 {
     private readonly ConcurrentDictionary<MsGraphClientKey, IMsGraphClient> _clients = [];
 
-    public IMsGraphClient GetClient(
-        OutboxKey outbox,
-        string email,
-        string username,
-        string password
-    )
+    public IMsGraphClient GetClient(SenderEmailAddress senderAccount)
     {
-        var fingerprint = $"{email}\n{username}\n{password}".MD5();
+        var oauth = senderAccount.Credentials.OAuth;
+        var fingerprint =
+            $"{senderAccount.Email}\n{oauth?.ClientId}\n{oauth?.RefreshToken}\n{oauth?.AuthorizedScopes}".MD5();
         return _clients.GetOrAdd(
-            new MsGraphClientKey(outbox, fingerprint),
+            new MsGraphClientKey(
+                new SenderAccountKey(senderAccount.UserId, senderAccount.Id),
+                fingerprint
+            ),
             _ =>
             {
                 var client = serviceProvider.GetRequiredService<MsGraphClient>();
-                client.SetParams(email, 0);
+                client.SetParams(senderAccount.Email, 0);
                 return client;
             }
         );
     }
 
-    private readonly record struct MsGraphClientKey(OutboxKey Outbox, string ProfileFingerprint);
+    private readonly record struct MsGraphClientKey(
+        SenderAccountKey SenderAccount,
+        string ProfileFingerprint
+    );
 }

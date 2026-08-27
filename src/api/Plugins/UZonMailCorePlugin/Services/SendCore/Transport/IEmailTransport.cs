@@ -1,6 +1,7 @@
 using MimeKit;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.Utils.Web.Service;
 
@@ -8,7 +9,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Transport;
 
 public interface IEmailTransport : ISingletonService<IEmailTransport>
 {
-    OutboxType Type { get; }
+    SendingProtocol Type { get; }
 
     Task<TransportResult> SendAsync(
         SendingContext context,
@@ -18,7 +19,7 @@ public interface IEmailTransport : ISingletonService<IEmailTransport>
 
     Task<TransportResult> ValidateAsync(
         IServiceProvider scopeServiceProvider,
-        Outbox outbox,
+        SenderEmailAddress senderAccount,
         CancellationToken cancellationToken = default
     );
 }

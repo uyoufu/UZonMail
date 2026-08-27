@@ -5,7 +5,7 @@
         {{ translateSendingTask('duplicateRecipientsDialogTitle') }}
       </q-card-section>
 
-      <q-table :rows="duplicateRecipients" :columns="columns" row-key="inbox" dense flat hide-bottom />
+      <q-table :rows="duplicateRecipients" :columns="columns" row-key="recipientEmail" dense flat hide-bottom />
 
       <q-card-actions align="right">
         <OkBtn :label="translateSendingTask('closeDuplicateRecipientsDialog')" @click="onCloseClick" />
@@ -38,16 +38,16 @@ const { dialogRef, onDialogHide, onDialogOK } = useDialogPluginComponent()
 
 const columns = computed<QTableColumn[]>(() => [
   {
-    name: 'inboxName',
+    name: 'recipientName',
     label: translateSendingTask('duplicateRecipientName'),
     align: 'left',
-    field: 'inboxName'
+    field: 'recipientName'
   },
   {
-    name: 'inbox',
+    name: 'recipientEmail',
     label: translateSendingTask('duplicateRecipientEmail'),
     align: 'left',
-    field: 'inbox'
+    field: 'recipientEmail'
   },
   {
     name: 'sendingCount',

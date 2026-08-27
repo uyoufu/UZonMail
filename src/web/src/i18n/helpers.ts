@@ -4,11 +4,9 @@ import type {
   RoutesLangKey,
   LoginPageLangKey,
   DashboardPageLangKey,
-  InboxManagerLangKey,
   ButtonLangKey,
   EmailGroupLangKey,
   GlobalLangKey,
-  outboxManagerLangKey,
   SendingTaskLangKey,
   UtilsLangKey,
   TemplateLangKey,
@@ -69,14 +67,6 @@ export function translateDashboardPage (key: DashboardPageLangKey, named?: Named
   return translateSub<DashboardPageLangKey>(key, 'dashboardPage', named)
 }
 
-export function translateInboxManager (key: InboxManagerLangKey, named?: NamedValue): string {
-  return translateSub<InboxManagerLangKey>(key, 'inboxManager', named)
-}
-
-export function translateOutboxManager (key: outboxManagerLangKey, named?: NamedValue): string {
-  return translateSub<outboxManagerLangKey>(key, 'outboxManager', named)
-}
-
 export function translateButton (key: ButtonLangKey): string {
   return translateSub<ButtonLangKey>(key, 'buttons')
 }
@@ -116,4 +106,3 @@ export function translateBasicSettings (key: BasicSettingsLangKey, named?: Named
 export function translateAI (key: AiLangKey, named?: NamedValue): string {
   return translateSub<AiLangKey>(key, 'ai', named)
 }
-

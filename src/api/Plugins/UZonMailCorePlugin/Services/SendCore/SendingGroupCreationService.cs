@@ -21,7 +21,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
         SqlContext db,
         TokenService tokenService,
         AppSettingsManager settingsService,
-        OutboxValidateService outboxValidateService,
+        SenderAccountValidateService senderAccountValidateService,
         FileReferenceService fileReferenceService
     ) : ISendingGroupCreationService, IScopedService<ISendingGroupCreationService>
     {
@@ -45,8 +45,8 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 .Where(x => x.Id == userId)
                 .Select(x => x.OrganizationId)
                 .SingleAsync();
-            await FilterInvalidInboxes(sendingGroupData, organizationId);
-            await ValidateOutboxes(userId, sendingGroupData);
+            await FilterInvalidRecipients(sendingGroupData, organizationId);
+            await ValidateSenderAccounts(userId, sendingGroupData);
 
             await db.RunTransaction(async ctx =>
             {
@@ -58,13 +58,15 @@ namespace UzonMail.CorePlugin.Services.SendCore
                         .ToList();
                 }
 
-                if (sendingGroupData.Outboxes != null)
+                if (sendingGroupData.SenderAccounts != null)
                 {
-                    var outboxIds = sendingGroupData.Outboxes.Select(t => t.Id).ToList();
-                    sendingGroupData.Outboxes = ctx
-                        .Outboxes.Where(x => outboxIds.Contains(x.Id))
+                    var senderAccountIds = sendingGroupData
+                        .SenderAccounts.Select(t => t.Id)
                         .ToList();
-                    sendingGroupData.OutboxesCount = sendingGroupData.Outboxes.Count;
+                    sendingGroupData.SenderAccounts = ctx
+                        .SenderAccounts.Where(x => senderAccountIds.Contains(x.Id))
+                        .ToList();
+                    sendingGroupData.SenderAccountCount = sendingGroupData.SenderAccounts.Count;
                 }
 
                 if (sendingGroupData.Attachments != null)
@@ -95,12 +97,16 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 );
 
                 sendingGroupData.Status = SendingGroupStatus.Created;
-                sendingGroupData.TotalCount = sendingGroupData.Inboxes.Count;
+                sendingGroupData.TotalCount = sendingGroupData.Recipients.Count;
                 sendingGroupData.UserId = userId;
                 ctx.SendingGroups.Add(sendingGroupData);
                 await ctx.SaveChangesAsync();
 
-                await SaveInboxes(sendingGroupData.Data, sendingGroupData.UserId, organizationId);
+                await SaveRecipients(
+                    sendingGroupData.Data,
+                    sendingGroupData.UserId,
+                    organizationId
+                );
 
                 var builder = new SendingItemsBuilder(
                     ctx,
@@ -115,7 +121,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
                     throw new KnownException("没有可发送的有效收件箱");
 
                 sendingGroupData.TotalCount = items.Count;
-                await UpdateOutboxCountFromGroups(sendingGroupData);
+                await UpdateSenderAccountCountFromGroups(sendingGroupData);
                 await fileReferenceService.IncreaseReferencesAsync(items);
 
                 return await ctx.SaveChangesAsync();
@@ -132,11 +138,14 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 return data;
             }
 
-            var outboxEmails = data.Select(x => x.SelectTokenOrDefault("outbox", ""))
+            var senderEmails = data.Select(x => x.SelectTokenOrDefault("senderEmail", ""))
                 .Where(x => !string.IsNullOrEmpty(x))
                 .ToList();
-            var outboxes = await db
-                .Outboxes.Where(x => x.UserId == userId && outboxEmails.Contains(x.Email))
+            var senderAccounts = await db
+                .SenderAccounts.Include(x => x.EmailAccount)
+                .Where(x =>
+                    x.EmailAccount.UserId == userId && senderEmails.Contains(x.EmailAccount.Email)
+                )
                 .ToListAsync();
 
             var templateIds = data.Select(x => x.SelectTokenOrDefault("templateId", 0L))
@@ -158,26 +167,26 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 if (token is not JObject)
                     continue;
 
-                var inboxEmail = (
-                    token.SelectTokenOrDefault("inbox", string.Empty) ?? string.Empty
+                var recipientEmail = (
+                    token.SelectTokenOrDefault("recipientEmail", string.Empty) ?? string.Empty
                 ).Trim();
-                if (!string.IsNullOrEmpty(inboxEmail))
+                if (!string.IsNullOrEmpty(recipientEmail))
                 {
-                    token["inbox"] = inboxEmail;
+                    token["recipientEmail"] = recipientEmail;
                 }
 
-                var outboxEmail = token.SelectTokenOrDefault("outbox", "");
-                if (!string.IsNullOrEmpty(outboxEmail))
+                var senderEmail = token.SelectTokenOrDefault("senderEmail", "");
+                if (!string.IsNullOrEmpty(senderEmail))
                 {
-                    var outboxEntity = outboxes.FirstOrDefault(x => x.Email == outboxEmail);
-                    if (outboxEntity != null)
+                    var senderAccount = senderAccounts.FirstOrDefault(x => x.Email == senderEmail);
+                    if (senderAccount != null)
                     {
-                        token["outboxId"] = outboxEntity.Id;
+                        token["senderAccountId"] = senderAccount.Id;
                     }
                     else
                     {
-                        token["outboxId"] = 0;
-                        token["outbox"] = string.Empty;
+                        token["senderAccountId"] = 0;
+                        token["senderEmail"] = string.Empty;
                     }
                 }
 
@@ -198,31 +207,35 @@ namespace UzonMail.CorePlugin.Services.SendCore
         /// 移除直选和 Excel 中已被当前组织标记为无效的收件箱
         /// 收件组在生成发送项时展开，因此由生成器使用同一组织条件过滤
         /// </summary>
-        private async Task FilterInvalidInboxes(SendingGroup sendingGroupData, long organizationId)
+        private async Task FilterInvalidRecipients(
+            SendingGroup sendingGroupData,
+            long organizationId
+        )
         {
-            var inboxEmails = sendingGroupData
-                .Inboxes.Select(x => x.Email)
+            var recipientEmails = sendingGroupData
+                .Recipients.Select(x => x.Email)
                 .Concat(
                     sendingGroupData
                         .Data?.OfType<JObject>()
-                        .Select(x => x.SelectTokenOrDefault("inbox", string.Empty) ?? string.Empty)
-                        ?? []
+                        .Select(x =>
+                            x.SelectTokenOrDefault("recipientEmail", string.Empty) ?? string.Empty
+                        ) ?? []
                 )
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(x => x.Trim())
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
-            if (inboxEmails.Count == 0)
+            if (recipientEmails.Count == 0)
                 return;
 
             var invalidEmails = (
                 await db
-                    .Inboxes.AsNoTracking()
+                    .RecipientContacts.AsNoTracking()
                     .IgnoreQueryFilters()
                     .Where(x =>
                         x.OrganizationId == organizationId
-                        && x.Status == InboxStatus.Invalid
-                        && inboxEmails.Contains(x.Email)
+                        && x.ValidationStatus == RecipientValidationStatus.Invalid
+                        && recipientEmails.Contains(x.Email)
                     )
                     .Select(x => x.Email)
                     .ToListAsync()
@@ -230,48 +243,53 @@ namespace UzonMail.CorePlugin.Services.SendCore
             if (invalidEmails.Count == 0)
                 return;
 
-            sendingGroupData.Inboxes.RemoveAll(x => invalidEmails.Contains(x.Email));
+            sendingGroupData.Recipients.RemoveAll(x => invalidEmails.Contains(x.Email));
             foreach (var data in sendingGroupData.Data?.OfType<JObject>().ToList() ?? [])
             {
-                var inboxEmail = data.SelectTokenOrDefault("inbox", string.Empty) ?? string.Empty;
-                if (invalidEmails.Contains(inboxEmail.Trim()))
+                var recipientEmail =
+                    data.SelectTokenOrDefault("recipientEmail", string.Empty) ?? string.Empty;
+                if (invalidEmails.Contains(recipientEmail.Trim()))
                     data.Remove();
             }
         }
 
-        private async Task ValidateOutboxes(long userId, SendingGroup sendingGroupData)
+        private async Task ValidateSenderAccounts(long userId, SendingGroup sendingGroupData)
         {
             _logger.Debug("开始验证发件箱");
-            var outboxIds = sendingGroupData.Outboxes?.Select(x => x.Id).ToList() ?? [];
-            var groupOutboxIds = sendingGroupData.OutboxGroups?.Select(x => x.Id).ToList() ?? [];
-            var dataOutboxIds =
+            var senderAccountIds =
+                sendingGroupData.SenderAccounts?.Select(x => x.Id).ToList() ?? [];
+            var groupSenderAccountIds =
+                sendingGroupData.SenderAccountGroups?.Select(x => x.Id).ToList() ?? [];
+            var dataSenderAccountIds =
                 sendingGroupData
-                    .Data?.Select(x => x.SelectTokenOrDefault("outboxId", ""))
+                    .Data?.Select(x => x.SelectTokenOrDefault("senderAccountId", ""))
                     .Where(x => !string.IsNullOrEmpty(x))
                     .Select(x => long.TryParse(x, out var id) ? id : 0)
                     .Where(x => x > 0) ?? [];
-            var dataOutboxEmails =
+            var excelSenderEmails =
                 sendingGroupData
-                    .Data?.Select(x => x.SelectTokenOrDefault("outbox", ""))
+                    .Data?.Select(x => x.SelectTokenOrDefault("senderEmail", ""))
                     .Where(x => !string.IsNullOrEmpty(x)) ?? [];
 
-            var allOutboxIds = outboxIds.Concat(dataOutboxIds).ToList();
-            var outboxes = await db
-                .Outboxes.AsNoTracking()
-                .Where(x => x.Status != OutboxStatus.Valid)
+            var allSenderAccountIds = senderAccountIds.Concat(dataSenderAccountIds).ToList();
+            var invalidSenderAccounts = await db
+                .SenderAccounts.AsNoTracking()
+                .Where(x => x.Status != SenderAccountStatus.Valid)
                 .Where(x =>
-                    allOutboxIds.Contains(x.Id)
-                    || dataOutboxEmails.Contains(x.Email)
-                    || groupOutboxIds.Contains(x.EmailGroupId)
+                    allSenderAccountIds.Contains(x.Id)
+                    || excelSenderEmails.Contains(x.EmailAccount.Email)
+                    || groupSenderAccountIds.Contains(x.EmailGroupId)
                 )
                 .ToListAsync();
 
-            foreach (var outbox in outboxes)
+            foreach (var senderAccount in invalidSenderAccounts)
             {
-                var result = await outboxValidateService.ValidateOutbox(outbox);
+                var result = await senderAccountValidateService.ValidateSenderAccount(
+                    senderAccount
+                );
                 if (result.NotOk)
                 {
-                    throw new KnownException($"发件箱 {outbox.Email} 验证失败: {result.Message}");
+                    throw new KnownException($"发件账户 {senderAccount.Email} 验证失败: {result.Message}");
                 }
             }
 
@@ -290,7 +308,9 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 return;
 
             var duplicateRecipients = data.OfType<JObject>()
-                .Select(x => (x.SelectTokenOrDefault("inbox", string.Empty) ?? string.Empty).Trim())
+                .Select(x =>
+                    (x.SelectTokenOrDefault("recipientEmail", string.Empty) ?? string.Empty).Trim()
+                )
                 .Where(x => !string.IsNullOrEmpty(x))
                 .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
                 .Select(x => new { Email = x.First(), Count = x.Count() })
@@ -370,12 +390,12 @@ namespace UzonMail.CorePlugin.Services.SendCore
             return resolved;
         }
 
-        private async Task SaveInboxes(JArray? data, long userId, long organizationId)
+        private async Task SaveRecipients(JArray? data, long userId, long organizationId)
         {
             if (data == null)
                 return;
 
-            var emails = data.Select(x => x["inbox"])
+            var emails = data.Select(x => x["recipientEmail"])
                 .Where(x => x != null)
                 .Select(x => x!.ToString())
                 .ToList();
@@ -383,57 +403,65 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 return;
 
             var existsEmails = await db
-                .Inboxes.AsNoTracking()
+                .RecipientContacts.AsNoTracking()
                 .IgnoreQueryFilters()
                 .Where(x => x.UserId == userId && emails.Contains(x.Email))
                 .Select(x => x.Email)
                 .ToListAsync();
 
             var newEmails = emails.Except(existsEmails);
-            var defaultInboxGroup = await db
+            var defaultRecipientContactGroup = await db
                 .EmailGroups.Where(x =>
-                    x.UserId == userId && x.Type == EmailGroupType.InBox && x.IsDefault
+                    x.UserId == userId && x.Category == EmailGroupCategory.Recipient && x.IsDefault
                 )
                 .FirstOrDefaultAsync();
-            if (defaultInboxGroup == null)
+            if (defaultRecipientContactGroup == null)
             {
-                defaultInboxGroup = EmailGroup.GetDefaultEmailGroup(userId, EmailGroupType.InBox);
-                db.EmailGroups.Add(defaultInboxGroup);
+                defaultRecipientContactGroup = EmailGroup.GetDefaultEmailGroup(
+                    userId,
+                    EmailGroupCategory.Recipient
+                );
+                db.EmailGroups.Add(defaultRecipientContactGroup);
                 await db.SaveChangesAsync();
             }
 
             await db
-                .Inboxes.IgnoreQueryFilters()
+                .RecipientContacts.IgnoreQueryFilters()
                 .Where(x => x.UserId == userId && x.IsDeleted && emails.Contains(x.Email))
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, false));
 
             foreach (var email in newEmails)
             {
-                var inbox = new Inbox()
+                var recipientContact = new RecipientContact()
                 {
                     Email = email,
                     UserId = userId,
                     OrganizationId = organizationId,
-                    EmailGroupId = defaultInboxGroup.Id
+                    EmailGroupId = defaultRecipientContactGroup.Id
                 };
-                inbox.SetStatusNormal();
-                db.Inboxes.Add(inbox);
+                recipientContact.ValidationStatus = RecipientValidationStatus.Unverified;
+                db.RecipientContacts.Add(recipientContact);
             }
 
             await db.SaveChangesAsync();
         }
 
-        private async Task UpdateOutboxCountFromGroups(SendingGroup sendingGroupData)
+        private async Task UpdateSenderAccountCountFromGroups(SendingGroup sendingGroupData)
         {
-            if (sendingGroupData.OutboxGroups == null || sendingGroupData.OutboxGroups.Count == 0)
+            if (
+                sendingGroupData.SenderAccountGroups == null
+                || sendingGroupData.SenderAccountGroups.Count == 0
+            )
                 return;
 
-            var outboxGroupIds = sendingGroupData.OutboxGroups.Select(x => x.Id).ToList();
-            var outboxCount = await db
-                .Outboxes.AsNoTracking()
-                .Where(x => outboxGroupIds.Contains(x.EmailGroupId))
+            var senderAccountGroupIds = sendingGroupData
+                .SenderAccountGroups.Select(x => x.Id)
+                .ToList();
+            var senderAccountCount = await db
+                .SenderAccounts.AsNoTracking()
+                .Where(x => senderAccountGroupIds.Contains(x.EmailGroupId))
                 .CountAsync();
-            sendingGroupData.OutboxesCount += outboxCount;
+            sendingGroupData.SenderAccountCount += senderAccountCount;
         }
     }
 }

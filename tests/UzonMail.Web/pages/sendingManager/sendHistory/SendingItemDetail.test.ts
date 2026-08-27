@@ -121,8 +121,8 @@ describe('sending item detail', () => {
     const sendingItem: ISendingItem = {
       id: 81,
       subject: 'Quarterly update',
-      fromEmail: 'sender@example.com',
-      inboxes: completeEmail.recipients,
+      senderEmail: 'sender@example.com',
+      recipients: completeEmail.recipients,
       sendDate: completeEmail.sentAt,
       status: SendingItemStatus.Success
     }

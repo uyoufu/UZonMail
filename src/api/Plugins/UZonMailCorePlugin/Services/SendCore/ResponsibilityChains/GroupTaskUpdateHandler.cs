@@ -35,7 +35,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             );
 
             var lastMessage =
-                $"[{context.OutboxAddress!.Email}] -> [{string.Join(",", currentAttempt.PreparedItem.Inboxes.Select(x => x.Email))}]";
+                $"[{context.SenderAccountAddress!.Email}] -> [{string.Join(",", currentAttempt.PreparedItem.Recipients.Select(x => x.Email))}]";
             sendingGroup.LastMessage = lastMessage;
             await sqlContext.SaveChangesAsync();
 
@@ -47,8 +47,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                     new SendingGroupProgressArg(sendingGroup, context.GroupTaskStartDate)
                 );
 
-            var outbox = context.OutboxAddress;
-            if (outbox == null)
+            var senderAccount = context.SenderAccountAddress;
+            if (senderAccount == null)
                 return HandlerResult.Skiped();
 
             // 判断是否还有待发送的邮件，若有，则直接返回
@@ -56,7 +56,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
                 return HandlerResult.Skiped();
 
             // 若是最后一封邮件，要标记办结
-            if (await groupTasksManager.RemoveSendingGroupTaskAsync(outbox.UserId, sendingGroup.Id))
+            if (
+                await groupTasksManager.RemoveSendingGroupTaskAsync(
+                    senderAccount.UserId,
+                    sendingGroup.Id
+                )
+            )
             {
                 var finisher = context.Provider.GetRequiredService<SendingGroupFinisher>();
                 await finisher.SetSendingGroupStatusAndNotify(

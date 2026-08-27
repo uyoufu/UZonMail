@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using UzonMail.DB.SQL.Base;
 using UzonMail.DB.SQL.Core.Emails;
 
@@ -56,7 +56,7 @@ namespace UzonMail.DB.SQL.Core.Settings
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public bool IsMatch(string outboxEmail)
+        public bool IsMatch(string senderAccountEmail)
         {
             if (string.IsNullOrEmpty(MatchRegex))
                 return true;
@@ -71,7 +71,7 @@ namespace UzonMail.DB.SQL.Core.Settings
                 return false;
             }
 
-            return Regex.IsMatch(outboxEmail, MatchRegex);
+            return Regex.IsMatch(senderAccountEmail, MatchRegex);
         }
 
         /// <summary>

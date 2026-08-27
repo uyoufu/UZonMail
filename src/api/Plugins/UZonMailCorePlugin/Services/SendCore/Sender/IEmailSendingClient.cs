@@ -13,15 +13,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
         void SetParams(string email, int cooldownMilliseconds);
 
         /// <summary>
-        /// 验证邮箱
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        Task AuthenticateAsync(string email, string username, string password);
-
-        /// <summary>
         /// 发送邮箱
         /// </summary>
         /// <param name="mimeMessage"></param>

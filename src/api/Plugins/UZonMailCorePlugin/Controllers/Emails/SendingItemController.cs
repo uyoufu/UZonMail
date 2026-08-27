@@ -60,8 +60,8 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             {
                 dbSet = dbSet.Where(x =>
                     (x.Subject ?? string.Empty).Contains(filter)
-                    || (x.ToEmails ?? string.Empty).Contains(filter)
-                    || (x.FromEmail ?? string.Empty).Contains(filter)
+                    || (x.RecipientEmails ?? string.Empty).Contains(filter)
+                    || (x.SenderEmail ?? string.Empty).Contains(filter)
                 );
             }
             var count = await dbSet.CountAsync();
@@ -76,7 +76,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <param name="pagination"></param>
         /// <returns></returns>
         [HttpPost("filtered-data")]
-        public async Task<ResponseResult<List<SendingItem>>> GetEmailTemplatesData(
+        public async Task<ResponseResult<List<SendingItemSummaryDto>>> GetEmailTemplatesData(
             long sendingGroupId,
             string filter,
             Pagination pagination,
@@ -90,7 +90,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             );
             if (sendingGroup == null)
             {
-                return new List<SendingItem>().ToSuccessResponse();
+                return new List<SendingItemSummaryDto>().ToSuccessResponse();
             }
 
             var dbSet = db.SendingItems.Where(x => x.SendingGroupId == sendingGroupId);
@@ -116,26 +116,44 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             {
                 dbSet = dbSet.Where(x =>
                     (x.Subject ?? string.Empty).Contains(filter)
-                    || (x.ToEmails ?? string.Empty).Contains(filter)
-                    || (x.FromEmail ?? string.Empty).Contains(filter)
+                    || (x.RecipientEmails ?? string.Empty).Contains(filter)
+                    || (x.SenderEmail ?? string.Empty).Contains(filter)
                 );
             }
 
-            var results = await dbSet
+            var sendingItemRows = await dbSet
+                .AsNoTracking()
                 .Page(pagination)
-                .Select(x => new SendingItem()
+                .Select(x => new
                 {
-                    Id = x.Id,
-                    Subject = x.Subject,
-                    OutBoxId = x.OutBoxId,
-                    FromEmail = x.FromEmail,
-                    Inboxes = x.Inboxes,
-                    Status = x.Status,
-                    CreateDate = x.CreateDate,
-                    SendDate = x.SendDate,
-                    SendResult = x.SendResult
+                    x.Id,
+                    x.Subject,
+                    x.SenderEmail,
+                    x.Recipients,
+                    x.Status,
+                    x.SendDate,
+                    x.SendResult,
                 })
                 .ToListAsync();
+
+            var results = sendingItemRows
+                .Select(x => new SendingItemSummaryDto
+                {
+                    Id = x.Id,
+                    Subject = x.Subject ?? string.Empty,
+                    SenderEmail = x.SenderEmail ?? string.Empty,
+                    Recipients = x
+                        .Recipients.Select(recipient => new EmailAddressDto
+                        {
+                            Email = recipient.Email,
+                            Name = recipient.Name,
+                        })
+                        .ToList(),
+                    Status = x.Status,
+                    SendDate = x.SendDate,
+                    SendResult = x.SendResult,
+                })
+                .ToList();
             return results.ToSuccessResponse();
         }
 
@@ -179,10 +197,10 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             {
                 Id = sendingItem.Id,
                 Subject = sendingItem.Subject ?? string.Empty,
-                FromEmail = sendingItem.FromEmail ?? string.Empty,
+                SenderEmail = sendingItem.SenderEmail ?? string.Empty,
                 SentAt = sendingItem.SendDate,
                 Recipients = sendingItem
-                    .Inboxes.Select(x => new EmailAddressDto { Email = x.Email, Name = x.Name })
+                    .Recipients.Select(x => new EmailAddressDto { Email = x.Email, Name = x.Name })
                     .ToList(),
                 CcRecipients = (sendingItem.CC ?? [])
                     .Select(x => new EmailAddressDto { Email = x.Email, Name = x.Name })

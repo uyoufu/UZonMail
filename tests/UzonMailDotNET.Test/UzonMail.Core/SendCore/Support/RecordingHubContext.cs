@@ -79,9 +79,9 @@ internal sealed class RecordingUzonMailClient : IUzonMailClient
 
     internal List<List<string>> PermissionUpdates { get; } = [];
 
-    internal List<Outbox> OutboxUpdates { get; } = [];
+    internal List<SenderAccount> SenderAccountUpdates { get; } = [];
 
-    internal List<Inbox> InboxUpdates { get; } = [];
+    internal List<RecipientContact> RecipientContactUpdates { get; } = [];
 
     public Task SendingGroupProgressChanged(SendingGroupProgressArg arg)
     {
@@ -113,15 +113,15 @@ internal sealed class RecordingUzonMailClient : IUzonMailClient
         return Task.CompletedTask;
     }
 
-    public Task OutboxStatusChanged(Outbox outbox)
+    public Task SenderAccountStatusChanged(SenderAccount senderAccount)
     {
-        OutboxUpdates.Add(outbox);
+        SenderAccountUpdates.Add(senderAccount);
         return Task.CompletedTask;
     }
 
-    public Task InboxStatusChanged(Inbox inbox)
+    public Task RecipientContactStatusChanged(RecipientContact recipientContact)
     {
-        InboxUpdates.Add(inbox);
+        RecipientContactUpdates.Add(recipientContact);
         return Task.CompletedTask;
     }
 }

@@ -11,78 +11,10 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
     /// </summary>
     internal static class EmailRequestDtoMapper
     {
-        internal static Outbox ToEntity(this CreateOutboxDto request) =>
-            new()
-            {
-                EmailGroupId = request.EmailGroupId,
-                Email = request.Email ?? string.Empty,
-                Name = request.Name,
-                Description = request.Description,
-                Remark = request.Remark,
-                Type = request.Type,
-                SmtpHost = request.SmtpHost ?? string.Empty,
-                SmtpPort = request.SmtpPort,
-                UserName = request.UserName,
-                Password = request.Password ?? string.Empty,
-                ConnectionSecurity = request.ConnectionSecurity,
-                ProxyId = request.ProxyId,
-                MaxSendCountPerDay = request.MaxSendCountPerDay,
-                ReplyToEmails = request.ReplyToEmails,
-                Weight = request.Weight,
-            };
-
-        internal static Outbox ToEntity(this UpdateOutboxDto request) =>
-            new()
-            {
-                Email = request.Email ?? string.Empty,
-                Name = request.Name,
-                Type = request.Type,
-                SmtpHost = request.SmtpHost ?? string.Empty,
-                SmtpPort = request.SmtpPort,
-                UserName = request.UserName,
-                Password = request.Password ?? string.Empty,
-                ConnectionSecurity = request.ConnectionSecurity,
-                Description = request.Description,
-                ProxyId = request.ProxyId,
-                ReplyToEmails = request.ReplyToEmails,
-            };
-
-        internal static Inbox ToEntity(this CreateInboxDto request) =>
-            new()
-            {
-                EmailGroupId = request.EmailGroupId,
-                Email = request.Email ?? string.Empty,
-                Name = request.Name,
-                Description = request.Description,
-                Remark = request.Remark,
-                MinInboxCooldownHours = request.MinInboxCooldownHours,
-                Status = request.Status,
-            };
-
-        internal static Inbox ToEntity(this CreateUngroupedInboxDto request, long emailGroupId) =>
-            new()
-            {
-                EmailGroupId = emailGroupId,
-                Email = request.Email ?? string.Empty,
-                Name = request.Name,
-                Description = request.Description,
-                Remark = request.Remark,
-                MinInboxCooldownHours = request.MinInboxCooldownHours,
-            };
-
-        internal static Inbox ToEntity(this UpdateInboxDto request) =>
-            new()
-            {
-                Email = request.Email ?? string.Empty,
-                Name = request.Name,
-                Description = request.Description,
-                MinInboxCooldownHours = request.MinInboxCooldownHours,
-            };
-
         internal static EmailGroup ToEntity(this CreateEmailGroupDto request) =>
             new()
             {
-                Type = request.Type,
+                Category = request.Category,
                 Icon = request.Icon,
                 Name = request.Name ?? string.Empty,
                 Description = request.Description,
@@ -131,18 +63,19 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
                     Id = id,
                 }),
                 Body = request.Body,
-                Outboxes = (request.OutboxIds ?? []).ConvertAll(id => new Outbox { Id = id }),
-                OutboxGroups = (request.OutboxGroupIds ?? []).ConvertAll(id => new IdAndName
+                SenderAccounts = (request.SenderAccountIds ?? []).ConvertAll(id => new SenderAccount
                 {
-                    Id = id,
+                    Id = id
                 }),
-                Inboxes = (request.Inboxes ?? []).ConvertAll(ToEmailAddress),
-                InboxGroups = (request.InboxGroupIds ?? []).ConvertAll(id => new IdAndName
-                {
-                    Id = id,
-                }),
-                CcBoxes = (request.CcBoxes ?? []).ConvertAll(ToEmailAddress),
-                BccBoxes = (request.BccBoxes ?? []).ConvertAll(ToEmailAddress),
+                SenderAccountGroups = (request.SenderAccountGroupIds ?? []).ConvertAll(
+                    id => new IdAndName { Id = id, }
+                ),
+                Recipients = (request.Recipients ?? []).ConvertAll(RecipientEmailAddress),
+                RecipientContactGroups = (request.RecipientContactGroupIds ?? []).ConvertAll(
+                    id => new IdAndName { Id = id, }
+                ),
+                CcBoxes = (request.CcBoxes ?? []).ConvertAll(RecipientEmailAddress),
+                BccBoxes = (request.BccBoxes ?? []).ConvertAll(RecipientEmailAddress),
                 Attachments = (request.AttachmentIds ?? []).ConvertAll(id => new FileUsage
                 {
                     __fileUsageId = id,
@@ -153,7 +86,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
                 ScheduleDate = scheduleDate,
             };
 
-        private static EmailAddress ToEmailAddress(EmailAddressDto address) =>
+        private static EmailAddress RecipientEmailAddress(EmailAddressDto address) =>
             new() { Email = address.Email ?? string.Empty, Name = address.Name };
     }
 }

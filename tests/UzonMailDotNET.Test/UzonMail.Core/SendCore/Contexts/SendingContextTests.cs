@@ -30,10 +30,10 @@ public sealed class SendingContextTests
     public void Context_AggregatesFailuresAndExitRequests()
     {
         var context = new SendingContext(null!, null!, null!);
-        var outbox = SendCoreTestEntityFactory.CreateOutboxAddress();
+        var senderAccount = SendCoreTestEntityFactory.CreateSenderAccountAddress();
 
-        Assert.AreSame(context, context.SetOutbox(outbox));
-        Assert.AreSame(outbox, context.OutboxAddress);
+        Assert.AreSame(context, context.SetSenderAccount(senderAccount));
+        Assert.AreSame(senderAccount, context.SenderAccountAddress);
         Assert.IsFalse(context.IsFailed());
         Assert.IsFalse(context.ShouldExitTask());
 

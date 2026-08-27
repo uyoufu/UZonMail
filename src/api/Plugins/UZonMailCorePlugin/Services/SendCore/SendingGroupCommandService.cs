@@ -5,8 +5,8 @@ using UzonMail.CorePlugin.Services.Config;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.Utils.Extensions;
 using UzonMail.DB.SQL;
@@ -24,7 +24,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
         ISendingScheduleService scheduleService,
         ISendingWorkerCoordinator workerCoordinator,
         GroupTasksManager waitList,
-        OutboxesManager outboxesManager,
+        SenderAccountsManager senderAccountsManager,
         ISmtpClientsManager clientFactory,
         IServiceProvider serviceProvider
     ) : ISendingGroupCommandService, IScopedService<ISendingGroupCommandService>
@@ -101,12 +101,15 @@ namespace UzonMail.CorePlugin.Services.SendCore
                     or SendingGroupStatus.WaitingForQuotaReset
             )
             {
-                var removedOutboxes = outboxesManager.RemoveOutbox(sendingGroup.Id, removeReason);
+                var removedSenderAccounts = senderAccountsManager.RemoveSenderAccount(
+                    sendingGroup.Id,
+                    removeReason
+                );
 
-                foreach (var outbox in removedOutboxes)
+                foreach (var senderAccount in removedSenderAccounts)
                 {
                     await clientFactory.DisposeSmtpClientsAsync(
-                        new OutboxKey(outbox.UserId, outbox.Id)
+                        new SenderAccountKey(senderAccount.UserId, senderAccount.Id)
                     );
                 }
 

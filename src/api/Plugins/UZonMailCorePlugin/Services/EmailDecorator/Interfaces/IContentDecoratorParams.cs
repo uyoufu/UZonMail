@@ -25,14 +25,14 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator.Interfaces
         /// <summary>
         /// 发件箱
         /// </summary>
-        Outbox Outbox { get; }
+        SenderAccount SenderAccount { get; }
 
         /// <summary>
         /// 发件箱邮箱
         /// </summary>
-        string OutboxEmail { get; }
+        string SenderEmail { get; }
 
-        IReadOnlyList<EmailAddress> Inboxes { get; }
+        IReadOnlyList<EmailAddress> Recipients { get; }
 
         IReadOnlyList<EmailAddress> CC { get; }
 

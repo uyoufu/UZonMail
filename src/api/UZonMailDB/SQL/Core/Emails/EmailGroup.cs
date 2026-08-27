@@ -14,12 +14,8 @@ namespace UzonMail.DB.SQL.Core.Emails
         public long UserId { get; set; }
         public User User { get; set; } = null!;
 
-        /// <summary>
-        /// 类型
-        /// 1-发件箱
-        /// 2-收件箱
-        /// </summary>
-        public EmailGroupType Type { get; set; }
+        /// <summary>分组所属的账户类别。</summary>
+        public EmailGroupCategory Category { get; set; }
 
         /// <summary>
         /// 图标名称
@@ -43,10 +39,9 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// </summary>
         public long Order { get; set; }
 
-        /// <summary>
-        /// 收件箱
-        /// </summary>
-        public List<Inbox> Inboxes { get; set; } = [];
+        public List<SenderAccount> SenderAccounts { get; set; } = [];
+
+        public List<RecipientContact> RecipientContacts { get; set; } = [];
 
         /// <summary>
         /// 是否是默认分组
@@ -69,9 +64,9 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// 获取默认的邮箱组
         /// </summary>
         /// <param name="userId"></param>
-        /// <param name="emailGroupType"></param>
+        /// <param name="category"></param>
         /// <returns></returns>
-        public static EmailGroup GetDefaultEmailGroup(long userId, EmailGroupType emailGroupType)
+        public static EmailGroup GetDefaultEmailGroup(long userId, EmailGroupCategory category)
         {
             return new EmailGroup()
             {
@@ -79,7 +74,7 @@ namespace UzonMail.DB.SQL.Core.Emails
                 Name = DefaultGroupName,
                 Description = "默认邮箱组",
                 Order = 0,
-                Type = emailGroupType,
+                Category = category,
                 UserId = userId,
             };
         }

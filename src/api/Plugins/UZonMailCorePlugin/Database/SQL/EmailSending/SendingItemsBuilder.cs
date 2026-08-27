@@ -42,27 +42,35 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             // 获取收件箱
             List<SendingRecipient> recipients = await GetAllRecipients();
             // 更新发件箱总数
-            group.InboxesCount = recipients.Count;
+            group.RecipientCount = recipients.Count;
 
-            // allInboxes 有的是从数据中解析得到的，需要获取其 id
-            var inboxesWithoutId = recipients.Select(x => x.Inbox).Where(x => x.Id == 0).ToList();
+            // allRecipients 有的是从数据中解析得到的，需要获取其 id
+            var recipientContactsWithoutId = recipients
+                .Select(x => x.RecipientContact)
+                .Where(x => x.Id == 0)
+                .ToList();
             // 获取当前用户下的发件箱
-            var inboxesEmails = inboxesWithoutId.Select(x => x.Email).Distinct().ToList();
-            var inboxes = await db
-                .Inboxes.AsNoTracking()
-                .Where(x => x.UserId == group.UserId && inboxesEmails.Contains(x.Email))
+            var recipientContactsEmails = recipientContactsWithoutId
+                .Select(x => x.Email)
+                .Distinct()
+                .ToList();
+            var recipientContacts = await db
+                .RecipientContacts.AsNoTracking()
+                .Where(x => x.UserId == group.UserId && recipientContactsEmails.Contains(x.Email))
                 .ToListAsync();
-            inboxesWithoutId.ForEach(x =>
+            recipientContactsWithoutId.ForEach(x =>
             {
-                var existInbox = inboxes.FirstOrDefault(i =>
+                var existRecipientContact = recipientContacts.FirstOrDefault(i =>
                     string.Equals(i.Email, x.Email, StringComparison.OrdinalIgnoreCase)
                 );
-                if (existInbox == null)
+                if (existRecipientContact == null)
                 {
-                    recipients.RemoveAll(recipient => ReferenceEquals(recipient.Inbox, x));
+                    recipients.RemoveAll(recipient =>
+                        ReferenceEquals(recipient.RecipientContact, x)
+                    );
                     return;
                 }
-                x.Id = existInbox.Id;
+                x.Id = existRecipientContact.Id;
             });
 
             // 生成发件项与收件箱对应关系
@@ -78,54 +86,54 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 .FirstAsync();
 
             // 保存关系
-            var sendingItemInboxRelations = new List<SendingItemInbox>();
+            var sendingItemRecipientContactRelations = new List<SendingItemRecipient>();
             foreach (var sendingItem in sendingItems)
             {
                 // 添加组织 id
                 sendingItem.OrganizationId = userInfo.OrganizationId;
 
-                var temps = new List<SendingItemInbox>();
-                sendingItem.Inboxes?.ForEach(inbox =>
+                var temps = new List<SendingItemRecipient>();
+                sendingItem.Recipients?.ForEach(recipientContact =>
                 {
-                    var sendingItemInbox = new SendingItemInbox()
+                    var sendingItemRecipientContact = new SendingItemRecipient()
                     {
                         SendingItemId = sendingItem.Id,
-                        InboxId = inbox.Id,
-                        ToEmail = inbox.Email,
-                        Role = InboxRole.Recipient
+                        RecipientContactId = recipientContact.Id,
+                        RecipientEmail = recipientContact.Email,
+                        Role = RecipientRole.Recipient
                     };
-                    temps.Add(sendingItemInbox);
+                    temps.Add(sendingItemRecipientContact);
                 });
 
-                sendingItem.CC?.ForEach(inbox =>
+                sendingItem.CC?.ForEach(recipientContact =>
                 {
-                    var sendingItemInbox = new SendingItemInbox()
+                    var sendingItemRecipientContact = new SendingItemRecipient()
                     {
                         SendingItemId = sendingItem.Id,
-                        InboxId = inbox.Id,
-                        ToEmail = inbox.Email,
-                        Role = InboxRole.CC
+                        RecipientContactId = recipientContact.Id,
+                        RecipientEmail = recipientContact.Email,
+                        Role = RecipientRole.CC
                     };
-                    temps.Add(sendingItemInbox);
+                    temps.Add(sendingItemRecipientContact);
                 });
 
-                sendingItem.BCC?.ForEach(inbox =>
+                sendingItem.BCC?.ForEach(recipientContact =>
                 {
-                    var sendingItemInbox = new SendingItemInbox()
+                    var sendingItemRecipientContact = new SendingItemRecipient()
                     {
                         SendingItemId = sendingItem.Id,
-                        InboxId = inbox.Id,
-                        ToEmail = inbox.Email,
-                        Role = InboxRole.BCC
+                        RecipientContactId = recipientContact.Id,
+                        RecipientEmail = recipientContact.Email,
+                        Role = RecipientRole.BCC
                     };
-                    temps.Add(sendingItemInbox);
+                    temps.Add(sendingItemRecipientContact);
                 });
 
                 // 更新搜索关键字
-                sendingItem.ToEmails = string.Join(",", temps.Select(x => x.ToEmail));
-                sendingItemInboxRelations.AddRange(temps);
+                sendingItem.RecipientEmails = string.Join(",", temps.Select(x => x.RecipientEmail));
+                sendingItemRecipientContactRelations.AddRange(temps);
             }
-            db.SendingItemInboxes.AddRange(sendingItemInboxRelations);
+            db.SendingItemRecipients.AddRange(sendingItemRecipientContactRelations);
             await db.SaveChangesAsync();
 
             return sendingItems;
@@ -137,26 +145,28 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
         /// <returns></returns>
         private async Task<List<SendingRecipient>> GetAllRecipients()
         {
-            List<EmailAddress> inboxes = [];
-            inboxes.AddRange(group.Inboxes);
+            List<EmailAddress> recipientContacts = [];
+            recipientContacts.AddRange(group.Recipients);
 
             // 按组添加
-            if (group.InboxGroups?.Count > 0)
+            if (group.RecipientContactGroups?.Count > 0)
             {
-                var groupIds = group.InboxGroups.Select(x => x.Id).ToList();
-                var invalidInboxEmails = db
-                    .Inboxes.IgnoreQueryFilters()
+                var groupIds = group.RecipientContactGroups.Select(x => x.Id).ToList();
+                var invalidRecipientEmails = db
+                    .RecipientContacts.IgnoreQueryFilters()
                     .Where(x =>
-                        x.OrganizationId == organizationId && x.Status == InboxStatus.Invalid
+                        x.OrganizationId == organizationId
+                        && x.ValidationStatus == RecipientValidationStatus.Invalid
                     )
                     .Select(x => x.Email);
                 var temps = await db
-                    .Inboxes.AsNoTracking()
+                    .RecipientContacts.AsNoTracking()
                     .Where(x =>
-                        groupIds.Contains(x.EmailGroupId) && !invalidInboxEmails.Contains(x.Email)
+                        groupIds.Contains(x.EmailGroupId)
+                        && !invalidRecipientEmails.Contains(x.Email)
                     )
                     .ToListAsync();
-                inboxes.AddRange(
+                recipientContacts.AddRange(
                     temps.ConvertAll(x =>
                     {
                         return new EmailAddress()
@@ -169,7 +179,7 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 );
             }
 
-            var recipients = inboxes
+            var recipients = recipientContacts
                 .GroupBy(x => x.Email, StringComparer.OrdinalIgnoreCase)
                 .Select(x => new SendingRecipient(x.First()))
                 .ToList();
@@ -177,16 +187,16 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 return recipients;
 
             var recipientByEmail = recipients.ToDictionary(
-                x => x.Inbox.Email,
+                x => x.RecipientContact.Email,
                 StringComparer.OrdinalIgnoreCase
             );
             foreach (var data in group.Data.OfType<JObject>())
             {
                 var row = new SendingItemExcelData(data);
-                if (string.IsNullOrEmpty(row.Inbox))
+                if (string.IsNullOrEmpty(row.RecipientEmail))
                     continue;
 
-                if (recipientByEmail.TryGetValue(row.Inbox, out var existingRecipient))
+                if (recipientByEmail.TryGetValue(row.RecipientEmail, out var existingRecipient))
                 {
                     if (existingRecipient.ExcelData == null)
                     {
@@ -199,11 +209,11 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 }
 
                 var recipient = new SendingRecipient(
-                    new EmailAddress { Email = row.Inbox, Name = row.InboxName },
+                    new EmailAddress { Email = row.RecipientEmail, Name = row.RecipientName },
                     row
                 );
                 recipients.Add(recipient);
-                recipientByEmail.TryAdd(row.Inbox, recipient);
+                recipientByEmail.TryAdd(row.RecipientEmail, recipient);
             }
 
             return recipients;
@@ -223,7 +233,7 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             // 合并发件的情况
             if (
                 group.SendBatch
-                && group.Outboxes.Count == 1
+                && group.SenderAccounts.Count == 1
                 && (group.Data == null || group.Data.Count == 0)
                 && (group.Templates == null || group.Templates.Count <= 1)
             )
@@ -246,17 +256,17 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                 int total = 0;
                 while (total < recipients.Count)
                 {
-                    var inboxesTemp = recipients
+                    var recipientContactsTemp = recipients
                         .Skip(total)
                         .Take(actualBatchSize)
-                        .Select(x => x.Inbox)
+                        .Select(x => x.RecipientContact)
                         .ToList();
-                    total += inboxesTemp.Count;
+                    total += recipientContactsTemp.Count;
 
-                    var sendingItem = CreateSendingItemSnapshot(inboxesTemp, null);
+                    var sendingItem = CreateSendingItemSnapshot(recipientContactsTemp, null);
                     // TODO: 因为只有发件有一个时，才会被合并，后期考虑优化
-                    sendingItem.OutBoxId = group.Outboxes[0].Id;
-                    sendingItem.FromEmail = group.Outboxes[0].Email;
+                    sendingItem.SenderAccountId = group.SenderAccounts[0].Id;
+                    sendingItem.SenderEmail = group.SenderAccounts[0].Email;
                     sendingItem.IsSendingBatch = true;
                     sendingItemsResult.Add(sendingItem);
                 }
@@ -267,7 +277,7 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             foreach (var recipient in recipients)
             {
                 var excelRow = recipient.ExcelData;
-                var sendingItem = CreateSendingItemSnapshot([recipient.Inbox], excelRow);
+                var sendingItem = CreateSendingItemSnapshot([recipient.RecipientContact], excelRow);
                 // 在发送时，才会设置具体的模板
                 sendingItems.Add(sendingItem);
 
@@ -275,9 +285,9 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
                     continue;
 
                 // 设置发件箱
-                sendingItem.OutBoxId = excelRow.OutboxId;
-                sendingItem.FromEmail = excelRow.Outbox;
-                if (excelRow.OutboxId > 0 && excelRow.ProxyId > 0)
+                sendingItem.SenderAccountId = excelRow.SenderAccountId;
+                sendingItem.SenderEmail = excelRow.SenderEmail;
+                if (excelRow.SenderAccountId > 0 && excelRow.ProxyId > 0)
                 {
                     // 代理 Id
                     sendingItem.ProxyId = excelRow.ProxyId;
@@ -311,7 +321,7 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             {
                 SendingGroupId = group.Id,
                 UserId = group.UserId,
-                Inboxes = recipientAddresses.Select(CloneEmailAddress).ToList(),
+                Recipients = recipientAddresses.Select(CloneEmailAddress).ToList(),
                 CC = ResolveEmailAddresses(group.CcBoxes, excelRow?.CC),
                 BCC = ResolveEmailAddresses(group.BccBoxes, excelRow?.BCC),
                 Attachments = ResolveAttachments(excelRow),
@@ -368,11 +378,11 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
         /// 收件人及其可能覆盖默认发送内容的 Excel 行。
         /// </summary>
         private sealed class SendingRecipient(
-            EmailAddress inbox,
+            EmailAddress recipientContact,
             SendingItemExcelData? excelData = null
         )
         {
-            public EmailAddress Inbox { get; } = inbox;
+            public EmailAddress RecipientContact { get; } = recipientContact;
 
             public SendingItemExcelData? ExcelData { get; set; } = excelData;
         }

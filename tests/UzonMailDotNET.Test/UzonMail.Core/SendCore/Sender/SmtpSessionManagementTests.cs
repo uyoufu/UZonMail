@@ -9,6 +9,7 @@ using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Networking;
 using UzonMail.CorePlugin.Services.SendCore.Sender;
 using UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.Transport;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMailDotNET.Test.UzonMail.Core.SendCore.Support;
@@ -157,7 +158,7 @@ public sealed class SmtpSessionManagementTests
     }
 
     [TestMethod]
-    public async Task Manager_SeparatesRoutesAndDisposesByKeyOrOutbox()
+    public async Task Manager_SeparatesRoutesAndDisposesByKeyOrSenderAccount()
     {
         var direct = new StubSmtpSession();
         var proxied = new StubSmtpSession();
@@ -178,7 +179,7 @@ public sealed class SmtpSessionManagementTests
         Assert.HasCount(1, manager.SmtpClientKeys);
 
         await proxyLease.DisposeAsync();
-        await manager.DisposeSmtpClientsAsync(new OutboxKey(30, 20));
+        await manager.DisposeSmtpClientsAsync(new SenderAccountKey(30, 20));
         Assert.IsTrue(proxied.Disposed);
         Assert.IsEmpty(manager.SmtpClientKeys);
     }
@@ -269,7 +270,12 @@ public sealed class SmtpSessionManagementTests
     [TestMethod]
     public void SmtpKeyAndResultParserExposeStableValues()
     {
-        var direct = new SmtpClientKey(new OutboxKey(1, 2), "profile", "direct", "a@test.com");
+        var direct = new SmtpClientKey(
+            new SenderAccountKey(1, 2),
+            "profile",
+            "direct",
+            "a@test.com"
+        );
         var proxy = direct with { RouteIdentity = "proxy" };
 
         Assert.IsFalse(direct.HasProxy);
@@ -280,16 +286,16 @@ public sealed class SmtpSessionManagementTests
     [TestMethod]
     public void EmailSendersManager_RequiresExactlyOneMatchingTransport()
     {
-        var smtp = new StubTransport(OutboxType.SMTP);
-        Assert.AreSame(smtp, new EmailSendersManager([smtp]).GetEmailSender(OutboxType.SMTP));
+        var smtp = new StubTransport(SendingProtocol.Smtp);
+        Assert.AreSame(smtp, new EmailSendersManager([smtp]).GetEmailSender(SendingProtocol.Smtp));
         Assert.ThrowsExactly<InvalidOperationException>(
-            () => new EmailSendersManager([]).GetEmailSender(OutboxType.SMTP)
+            () => new EmailSendersManager([]).GetEmailSender(SendingProtocol.Smtp)
         );
         Assert.ThrowsExactly<InvalidOperationException>(
             () =>
-                new EmailSendersManager([smtp, new StubTransport(OutboxType.SMTP)]).GetEmailSender(
-                    OutboxType.SMTP
-                )
+                new EmailSendersManager(
+                    [smtp, new StubTransport(SendingProtocol.Smtp)]
+                ).GetEmailSender(SendingProtocol.Smtp)
         );
     }
 
@@ -303,13 +309,13 @@ public sealed class SmtpSessionManagementTests
         var descriptor = new SendItemDescriptor(
             prepared.SourceItem.Id,
             prepared.SourceItem.SendingGroupId,
-            prepared.Outbox.Id,
+            prepared.SenderAccount.Id,
             0
         );
         var lease = new SendLease(
             Guid.CreateVersion7(),
             descriptor,
-            new OutboxKey(prepared.UserId, prepared.Outbox.Id),
+            new SenderAccountKey(prepared.UserId, prepared.SenderAccount.Id),
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow.AddMinutes(1)
         );
@@ -423,9 +429,9 @@ public sealed class SmtpSessionManagementTests
         public void Dispose() => Disposed = true;
     }
 
-    private sealed class StubTransport(OutboxType type) : IEmailTransport
+    private sealed class StubTransport(SendingProtocol type) : IEmailTransport
     {
-        public OutboxType Type { get; } = type;
+        public SendingProtocol Type { get; } = type;
 
         public Task<TransportResult> SendAsync(
             SendingContext context,
@@ -435,7 +441,7 @@ public sealed class SmtpSessionManagementTests
 
         public Task<TransportResult> ValidateAsync(
             IServiceProvider scopeServiceProvider,
-            Outbox outbox,
+            SenderEmailAddress senderAccount,
             CancellationToken cancellationToken = default
         ) => Task.FromResult(TransportResult.Success());
     }

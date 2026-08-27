@@ -101,8 +101,8 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         /// <returns></returns>
         public async Task<SendItemExecution?> GetEmailItem(SendingContext sendingContext)
         {
-            var outbox = sendingContext.OutboxAddress;
-            if (outbox == null)
+            var senderAccount = sendingContext.SenderAccountAddress;
+            if (senderAccount == null)
             {
                 _logger.Error("GetSendItem 调用失败, 请先获取发件箱");
                 return null;
@@ -110,7 +110,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
 
             // 获取用户的发件任务
             // 发件任务可能每次都为空，导致无法获取到有效的发件项，需要避免
-            var userGroupTasksPool = GetUserGroupTasksPool(outbox.UserId);
+            var userGroupTasksPool = GetUserGroupTasksPool(senderAccount.UserId);
             if (userGroupTasksPool == null)
             {
                 return null;

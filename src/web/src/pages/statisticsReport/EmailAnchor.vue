@@ -30,19 +30,19 @@ const { indexColumn, QTableIndex } = useQTableIndex()
 const columns = computed<QTableColumn[]>(() => [
   indexColumn,
   {
-    name: 'outboxEmail',
+    name: 'senderEmail',
     required: true,
-    label: t('statisticsReport.outbox'),
+    label: t('statisticsReport.senderAccount'),
     align: 'left',
-    field: 'outboxEmail',
+    field: 'senderEmail',
     sortable: true
   },
   {
-    name: 'inboxEmails',
+    name: 'recipientEmails',
     required: true,
-    label: t('statisticsReport.inbox'),
+    label: t('statisticsReport.recipientContacts'),
     align: 'left',
-    field: 'inboxEmails',
+    field: 'recipientEmails',
     sortable: true
   },
   {

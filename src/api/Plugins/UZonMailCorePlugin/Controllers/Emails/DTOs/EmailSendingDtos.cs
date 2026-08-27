@@ -19,10 +19,10 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
         public string Subjects { get; set; } = string.Empty;
         public List<long> TemplateIds { get; set; } = [];
         public string? Body { get; set; }
-        public List<long> OutboxIds { get; set; } = [];
-        public List<long> OutboxGroupIds { get; set; } = [];
-        public List<EmailAddressDto> Inboxes { get; set; } = [];
-        public List<long> InboxGroupIds { get; set; } = [];
+        public List<long> SenderAccountIds { get; set; } = [];
+        public List<long> SenderAccountGroupIds { get; set; } = [];
+        public List<EmailAddressDto> Recipients { get; set; } = [];
+        public List<long> RecipientContactGroupIds { get; set; } = [];
         public List<EmailAddressDto> CcBoxes { get; set; } = [];
         public List<EmailAddressDto> BccBoxes { get; set; } = [];
         public List<long> AttachmentIds { get; set; } = [];

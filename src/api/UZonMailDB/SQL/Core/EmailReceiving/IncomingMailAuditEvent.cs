@@ -12,12 +12,12 @@ public class IncomingMailAuditEvent : SqlId, IEntityTypeConfiguration<IncomingMa
     /// <summary>
     /// 审计事件所属 IMAP 账户的标识。
     /// </summary>
-    public long ImapAccountId { get; set; }
+    public long ReceivingAccountId { get; set; }
 
     /// <summary>
     /// 审计事件所属 IMAP 账户。
     /// </summary>
-    public ImapAccount ImapAccount { get; set; } = null!;
+    public ReceivingAccount ReceivingAccount { get; set; } = null!;
 
     /// <summary>
     /// 事件关联的入站邮件标识；账户级事件时为空。
@@ -91,36 +91,36 @@ public class IncomingMailAuditEvent : SqlId, IEntityTypeConfiguration<IncomingMa
     {
         builder.ToTable("IncomingMailAuditEvents");
         builder.Property(x => x.Description).HasMaxLength(2000);
-        builder.HasIndex(x => new { x.ImapAccountId, x.OccurredAtUtc });
+        builder.HasIndex(x => new { x.ReceivingAccountId, x.OccurredAtUtc });
         builder.HasIndex(x => new { x.IncomingMailMessageId, x.OccurredAtUtc });
         builder
-            .HasOne(x => x.ImapAccount)
+            .HasOne(x => x.ReceivingAccount)
             .WithMany()
-            .HasForeignKey(x => x.ImapAccountId)
+            .HasForeignKey(x => x.ReceivingAccountId)
             .OnDelete(DeleteBehavior.NoAction);
         builder
             .HasOne(x => x.IncomingMailMessage)
             .WithMany()
-            .HasForeignKey(x => new { x.IncomingMailMessageId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.IncomingMailMessageId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
         builder
             .HasOne(x => x.IncomingMailLocation)
             .WithMany()
-            .HasForeignKey(x => new { x.IncomingMailLocationId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.IncomingMailLocationId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
         builder
             .HasOne(x => x.ImapSyncRun)
             .WithMany()
-            .HasForeignKey(x => new { x.ImapSyncRunId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.ImapSyncRunId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
         builder
             .HasOne(x => x.ImapSyncCommand)
             .WithMany()
-            .HasForeignKey(x => new { x.ImapSyncCommandId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.ImapSyncCommandId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

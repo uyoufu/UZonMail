@@ -12,12 +12,12 @@ public class ImapSyncRun : SqlId, IEntityTypeConfiguration<ImapSyncRun>
     /// <summary>
     /// 执行同步的 IMAP 账户标识。
     /// </summary>
-    public long ImapAccountId { get; set; }
+    public long ReceivingAccountId { get; set; }
 
     /// <summary>
     /// 执行同步的 IMAP 账户。
     /// </summary>
-    public ImapAccount ImapAccount { get; set; } = null!;
+    public ReceivingAccount ReceivingAccount { get; set; } = null!;
 
     /// <summary>
     /// 本次同步的触发来源。
@@ -86,12 +86,12 @@ public class ImapSyncRun : SqlId, IEntityTypeConfiguration<ImapSyncRun>
     {
         builder.ToTable("ImapSyncRuns");
         builder.Property(x => x.ErrorSummary).HasMaxLength(2000);
-        builder.HasAlternateKey(x => new { x.Id, x.ImapAccountId });
-        builder.HasIndex(x => new { x.ImapAccountId, x.StartedAtUtc });
+        builder.HasAlternateKey(x => new { x.Id, x.ReceivingAccountId });
+        builder.HasIndex(x => new { x.ReceivingAccountId, x.StartedAtUtc });
         builder
-            .HasOne(x => x.ImapAccount)
+            .HasOne(x => x.ReceivingAccount)
             .WithMany()
-            .HasForeignKey(x => x.ImapAccountId)
+            .HasForeignKey(x => x.ReceivingAccountId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

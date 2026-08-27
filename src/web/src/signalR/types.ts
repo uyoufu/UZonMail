@@ -16,8 +16,10 @@ export enum UzonMailClientMethods {
   // 发送错误
   sendError,
 
-  // 发件箱状态变化
-  outboxStatusChanged
+  // 发件账户状态变化
+  senderAccountStatusChanged,
+  // 收件联系人状态变化
+  recipientContactStatusChanged
 }
 
 export enum SendingGroupProgressType {
@@ -58,8 +60,8 @@ export interface ISendingItemStatusChangedArg {
   status: number,
   sendResult: string,
   triedCount: number,
-  fromEmail: string,
-  outboxes: object[],
+  senderEmail: string,
+  senderAccounts: object[],
   sendDate: string,
   subject: string
 }

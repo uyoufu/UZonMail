@@ -25,12 +25,13 @@ export function useContextMenu() {
       label: t('sendDetail.viewEmail'),
       tooltip: t('sendDetail.viewEmailTooltip'),
       icon: ContextMenuIcon.visibility,
+      vif: (email) => email.status >= SendingItemStatus.Success,
       onClick: onViewEmail
     }
   ])
 
   async function onResendEmail(email: ISendingItem): Promise<void> {
-    const recipients = email.inboxes.map((inbox) => inbox.email).join(', ')
+    const recipients = email.recipients.map((recipient) => recipient.email).join(', ')
     const confirmed = await confirmOperation(t('sendDetail.resend'), t('sendDetail.resendConfirm', { recipients }))
     if (!confirmed) return
 

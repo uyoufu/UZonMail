@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
+using UzonMail.CorePlugin.Controllers.Emails.DTOs;
 using UzonMail.CorePlugin.Controllers.Emails.Models;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.DB.SQL;
@@ -57,7 +58,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             }
             dbSet = dbSet
                 .Include(x => x.Templates)
-                .Include(x => x.Outboxes)
+                .Include(x => x.SenderAccounts)
                 .Select(x => new SendingGroup()
                 {
                     Id = x.Id,
@@ -68,9 +69,9 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                     StatusReason = x.StatusReason,
                     ResumeAtUtc = x.ResumeAtUtc,
                     Templates = x.Templates,
-                    Outboxes = x.Outboxes, // 兼容旧数据
-                    OutboxesCount = x.OutboxesCount,
-                    InboxesCount = x.InboxesCount,
+                    SenderAccounts = x.SenderAccounts,
+                    SenderAccountCount = x.SenderAccountCount,
+                    RecipientCount = x.RecipientCount,
                     SuccessCount = x.SuccessCount,
                     SentCount = x.SentCount,
                     CreateDate = x.CreateDate,
@@ -143,21 +144,24 @@ namespace UzonMail.CorePlugin.Controllers.Emails
         /// <param name="sendingGroupObjId"></param>
         /// <returns></returns>
         [HttpGet("{sendingGroupObjId:length(24)}")]
-        public async Task<ResponseResult<SendingGroup>> GetSendingGroup(string sendingGroupObjId)
+        public async Task<ResponseResult<SendingGroupTemplateDto>> GetSendingGroup(
+            string sendingGroupObjId
+        )
         {
             var userId = tokenService.GetUserSqlId();
             // 只能获取自己的发件组数据
             var sendingGroup = await db
                 .SendingGroups.Where(x => x.UserId == userId && x.ObjectId == sendingGroupObjId)
-                .Include(x => x.Outboxes)
+                .Include(x => x.SenderAccounts)
+                .ThenInclude(x => x.EmailAccount)
                 .Include(x => x.Templates)
                 .Include(x => x.Attachments!)
                 .ThenInclude(x => x.FileObject)
                 .FirstOrDefaultAsync();
             if (sendingGroup == null)
-                return ResponseResult<SendingGroup>.Fail("未找到发件组模板");
+                return ResponseResult<SendingGroupTemplateDto>.Fail("未找到发件组模板");
 
-            return sendingGroup.ToSuccessResponse();
+            return SendingGroupTemplateDto.FromEntity(sendingGroup).ToSuccessResponse();
         }
 
         /// <summary>

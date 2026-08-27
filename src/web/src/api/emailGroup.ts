@@ -1,12 +1,12 @@
 import { httpClient } from 'src/api//base/httpClient'
 
 /** 邮箱分组类型 */
-export const EmailGroupType = {
-  Outbox: 1,
-  Inbox: 2
+export const EmailGroupCategory = {
+  Sender: 1,
+  Recipient: 2
 } as const
 
-export type EmailGroupType = typeof EmailGroupType[keyof typeof EmailGroupType]
+export type EmailGroupCategory = typeof EmailGroupCategory[keyof typeof EmailGroupCategory]
 
 export interface IEmailGroup {
   id?: number,
@@ -15,7 +15,7 @@ export interface IEmailGroup {
   icon?: string,
   description?: string,
   order: number,
-  type?: EmailGroupType,
+  category?: EmailGroupCategory,
   selectable?: boolean,
   selected?: boolean
 }
@@ -26,10 +26,10 @@ export interface IEmailGroup {
  * @param type
  * @returns
  */
-export function getEmailGroups (type: EmailGroupType) {
+export function getEmailGroups (category: EmailGroupCategory) {
   return httpClient.get<IEmailGroup[]>('/email-group/all', {
     params: {
-      type
+      category
     }
   })
 }
@@ -70,8 +70,8 @@ export function deleteEmailGroupById (groupId: number) {
  * 删除所有无效的发件箱
  * @returns
  */
-export function deleteAllInvalidOutboxesInGroup (groupId: number) {
-  return httpClient.delete<boolean>(`/email-group/${groupId}/invalid-outboxes`)
+export function deleteAllInvalidSenderAccountsInGroup (groupId: number) {
+  return httpClient.delete<boolean>(`/email-group/${groupId}/invalid-sender-accounts`)
 }
 
 /**
@@ -80,6 +80,6 @@ export function deleteAllInvalidOutboxesInGroup (groupId: number) {
  * @param groupId
  * @returns
  */
-export function validateAllInvalidOutboxes (groupId: number) {
-  return httpClient.put<boolean>(`/email-group/${groupId}/invalid-outbox/validate`)
+export function validateAllInvalidSenderAccounts (groupId: number) {
+  return httpClient.put<boolean>(`/email-group/${groupId}/invalid-sender-accounts/validate`)
 }

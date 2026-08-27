@@ -1,7 +1,7 @@
 using UzonMail.CorePlugin.Database.SQL.EmailSending;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
@@ -16,7 +16,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Interfaces
         Task<PreparedSendItem> PrepareAsync(
             SendingContext sendingContext,
             SendingItem sendingItem,
-            OutboxEmailAddress outbox,
+            SenderEmailAddress senderAccount,
             SendingGroup sendingGroup,
             SendingGroupTemplateResolver templateResolver,
             IReadOnlyList<long> proxyIds

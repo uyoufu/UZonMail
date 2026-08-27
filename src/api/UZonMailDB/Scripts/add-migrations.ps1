@@ -24,16 +24,30 @@ function Find-ProjectRoot {
 }
 
 $current = Get-Location
-$projectRoot = Find-ProjectRoot -startPath $current
-Set-Location $projectRoot
+$projectRoot = Find-ProjectRoot -startPath $PSScriptRoot
+try {
+  Set-Location $projectRoot
 
-# 迁移 sqlite
-Write-Host "正在添加 SQLite 迁移脚本：$Name"
-dotnet ef migrations add $Name --context SqLiteContext --output-dir Migrations/SqLite -v
+  Write-Host "正在构建数据库项目"
+  dotnet build
+  if ($LASTEXITCODE -ne 0) {
+    throw "数据库项目构建失败，退出码：$LASTEXITCODE"
+  }
 
-# 迁移 postgresql
-Write-Host "正在添加 PostgreSQL 迁移脚本：$Name"
-dotnet ef migrations add $Name --context PostgreSqlContext --output-dir Migrations/PostgreSQL -v
+  Write-Host "正在添加 SQLite 迁移脚本：$Name"
+  dotnet ef migrations add $Name --context SqLiteContext --output-dir Migrations/SqLite --no-build -v
+  if ($LASTEXITCODE -ne 0) {
+    throw "SQLite 迁移生成失败，退出码：$LASTEXITCODE"
+  }
 
-Set-Location $current
-Write-Host "迁移脚本添加完成。" -ForegroundColor Green
+  Write-Host "正在添加 PostgreSQL 迁移脚本：$Name"
+  dotnet ef migrations add $Name --context PostgreSqlContext --output-dir Migrations/PostgreSQL --no-build -v
+  if ($LASTEXITCODE -ne 0) {
+    throw "PostgreSQL 迁移生成失败，退出码：$LASTEXITCODE"
+  }
+
+  Write-Host "迁移脚本添加完成。" -ForegroundColor Green
+}
+finally {
+  Set-Location $current
+}

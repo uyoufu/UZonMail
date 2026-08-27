@@ -21,19 +21,19 @@ public sealed class PreparedSendItemValidator : ISingletonService
     /// </summary>
     public SendItemValidationResult Validate(PreparedSendItem item)
     {
-        if (string.IsNullOrWhiteSpace(item.Outbox.Email))
+        if (string.IsNullOrWhiteSpace(item.SenderAccount.Email))
         {
             return SendItemValidationResult.Invalid(
-                SendItemValidationFailure.MissingOutbox,
+                SendItemValidationFailure.MissingSenderAccount,
                 "发件箱不存在"
             );
         }
 
-        var addressValidation = ValidateAddress("发件箱", item.Outbox.Email);
+        var addressValidation = ValidateAddress("发件箱", item.SenderAccount.Email);
         if (addressValidation != null)
             return addressValidation;
 
-        if (item.Inboxes.Count == 0)
+        if (item.Recipients.Count == 0)
         {
             return SendItemValidationResult.Invalid(
                 SendItemValidationFailure.MissingRecipients,
@@ -41,7 +41,7 @@ public sealed class PreparedSendItemValidator : ISingletonService
             );
         }
 
-        addressValidation = ValidateAddresses("收件人", item.Inboxes.Select(x => x.Email));
+        addressValidation = ValidateAddresses("收件人", item.Recipients.Select(x => x.Email));
         if (addressValidation != null)
             return addressValidation;
 

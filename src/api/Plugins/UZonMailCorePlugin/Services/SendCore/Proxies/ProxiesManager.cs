@@ -16,7 +16,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
         Task<IProxyHandler?> GetProxyHandler(
             IServiceProvider serviceProvider,
             long userId,
-            string outboxEmail,
+            string senderAccountEmail,
             long proxyId,
             List<long>? availableProxyIds = null
         );
@@ -61,7 +61,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
             return await GetProxyHandler(
                 sendingContext.Provider,
                 currentItem.UserId,
-                currentItem.Outbox.Email,
+                currentItem.SenderAccount.Email,
                 currentItem.EffectiveProxyId,
                 [.. currentItem.AvailableProxyIds]
             );
@@ -70,7 +70,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
         public async Task<IProxyHandler?> GetProxyHandler(
             IServiceProvider serviceProvider,
             long userId,
-            string outboxEmail,
+            string senderAccountEmail,
             long proxyId,
             List<long>? availableProxyIds = null
         )
@@ -87,7 +87,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Proxies
             if (availableProxyIds == null || availableProxyIds.Count == 0)
                 return null;
 
-            return manager.RandomProxyHandler(outboxEmail, availableProxyIds);
+            return manager.RandomProxyHandler(senderAccountEmail, availableProxyIds);
         }
 
         public async Task<IProxyHandler?> GetProxyHander(

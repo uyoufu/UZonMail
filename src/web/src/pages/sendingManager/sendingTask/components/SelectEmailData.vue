@@ -72,10 +72,10 @@ async function onSelectExcel () {
   logger.debug('[SelectEmailData] selected data:', data)
   // 检查数据中每条数据是否都有收件箱
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const emptyInboxRowIndex = data.findIndex((item: Record<string, any>) => !item.inbox || item.inbox.indexOf('@') <= 0)
-  if (emptyInboxRowIndex > 0) {
-    logger.warn('[SelectEmailData] selected data has empty inbox:', emptyInboxRowIndex + 2, data[emptyInboxRowIndex])
-    notifyError(translateSendingTask('inboxEmptyOrInvalidAtRow', { row: emptyInboxRowIndex + 2 }))
+  const invalidRecipientRowIndex = data.findIndex((row: Record<string, any>) => !row.recipientEmail || row.recipientEmail.indexOf('@') <= 0)
+  if (invalidRecipientRowIndex >= 0) {
+    logger.warn('[SelectEmailData] selected data has invalid recipient:', invalidRecipientRowIndex + 2, data[invalidRecipientRowIndex])
+    notifyError(translateSendingTask('recipientEmptyOrInvalidAtRow', { row: invalidRecipientRowIndex + 2 }))
     return
   }
 
@@ -86,7 +86,7 @@ async function onSelectExcel () {
 
 // placeholder 显示
 import { useCustomQField } from '../helper'
-import { translateInboxManager, translateOutboxManager, translateProxy, translateSendingTask, translateTemplate } from 'src/i18n/helpers'
+import { translateProxy, translateSendingTask, translateTemplate } from 'src/i18n/helpers'
 const { isActive, fieldModelValue, fieldText } = useCustomQField('请选择数据 (该项可为空)')
 
 // 删除选择的数据
@@ -99,21 +99,21 @@ function onRemoveSelectedFile () {
 function getEmailSendingExcelDataMapper (): IExcelColumnMapper[] {
   return [
     {
-      headerName: translateInboxManager('col_inbox'),
-      fieldName: 'inbox',
+      headerName: translateSendingTask('recipientEmailColumn'),
+      fieldName: 'recipientEmail',
       required: true
     },
     {
-      headerName: translateInboxManager('col_inboxName'),
-      fieldName: 'inboxName'
+      headerName: translateSendingTask('recipientNameColumn'),
+      fieldName: 'recipientName'
     },
     {
-      headerName: translateOutboxManager('col_outbox'),
-      fieldName: 'outbox'
+      headerName: translateSendingTask('senderEmailColumn'),
+      fieldName: 'senderEmail'
     },
     {
-      headerName: translateOutboxManager('col_outboxName'),
-      fieldName: 'outboxName'
+      headerName: translateSendingTask('senderNameColumn'),
+      fieldName: 'senderName'
     },
     {
       headerName: translateSendingTask('subject'),
@@ -157,10 +157,10 @@ async function onDownloadEmailDataTemplate () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any[] = [
     {
-      inbox: translateSendingTask('example_inbox'),
-      inboxName: translateSendingTask('example_inboxName'),
-      outbox: translateSendingTask('example_outbox'),
-      outboxName: translateSendingTask('example_outboxName'),
+      recipientEmail: translateSendingTask('example_recipientEmail'),
+      recipientName: translateSendingTask('example_recipientName'),
+      senderEmail: translateSendingTask('example_senderEmail'),
+      senderName: translateSendingTask('example_senderName'),
       subject: translateSendingTask('example_subject'),
       body: translateSendingTask('example_body'),
       cc: translateSendingTask('example_cc'),

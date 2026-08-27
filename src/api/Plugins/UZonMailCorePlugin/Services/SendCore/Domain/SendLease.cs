@@ -11,7 +11,7 @@ public enum SendLeaseState
 public sealed record SendLease(
     Guid LeaseId,
     SendItemDescriptor Item,
-    OutboxKey Outbox,
+    SenderAccountKey SenderAccount,
     DateTimeOffset AcquiredAt,
     DateTimeOffset ExpiresAt,
     SendLeaseState State = SendLeaseState.Active
@@ -21,7 +21,7 @@ public interface ISendLeaseStore
 {
     bool TryAcquire(
         SendItemDescriptor item,
-        OutboxKey outbox,
+        SenderAccountKey senderAccount,
         DateTimeOffset now,
         TimeSpan duration,
         out SendLease lease

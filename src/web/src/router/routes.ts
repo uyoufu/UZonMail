@@ -66,25 +66,34 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
       label: 'emailManagement',
       icon: 'alternate_email'
     },
-    redirect: '/email-manager/out-box',
+    redirect: '/email-management/sender-accounts',
     children: [
       {
-        name: 'outboxManager',
-        path: 'out-box',
+        name: 'SenderAccountsIndex',
+        path: 'sender-accounts',
         meta: {
           icon: 'forward_to_inbox',
-          label: 'outbox'
+          label: 'senderAccounts'
         },
-        component: () => import('pages/emailManager/outbox/outboxManager.vue')
+        component: () => import('pages/emailManager/senderAccounts/SenderAccountsIndex.vue')
       },
       {
-        name: 'inboxManager',
-        path: 'in-box',
+        name: 'RecipientContactsIndex',
+        path: 'recipient-contacts',
         meta: {
           icon: 'mark_email_unread',
-          label: 'inbox'
+          label: 'recipientContacts'
         },
-        component: () => import('pages/emailManager/inbox/inboxManager.vue')
+        component: () => import('pages/emailManager/recipientContacts/RecipientContactsIndex.vue')
+      },
+      {
+        name: 'ReceivingAccountsIndex',
+        path: 'receiving-accounts',
+        meta: {
+          icon: 'move_to_inbox',
+          label: 'receivingAccounts'
+        },
+        component: () => import('pages/emailManager/receivingAccounts/ReceivingAccountsIndex.vue')
       }
     ]
   },

@@ -21,10 +21,13 @@ namespace UzonMail.CorePlugin.Services.Emails
         /// <param name="userId"></param>
         /// <param name="groupType"></param>
         /// <returns></returns>
-        public async Task<List<EmailGroup>> GetEmailGroups(long userId, EmailGroupType groupType)
+        public async Task<List<EmailGroup>> GetEmailGroups(
+            long userId,
+            EmailGroupCategory groupType
+        )
         {
             var results = await Db
-                .EmailGroups.Where(x => x.UserId == userId && x.Type == groupType)
+                .EmailGroups.Where(x => x.UserId == userId && x.Category == groupType)
                 .ToListAsync();
             return results;
         }
@@ -35,7 +38,7 @@ namespace UzonMail.CorePlugin.Services.Emails
         /// <param name="groupType"></param>
         /// <returns></returns>
         public async Task<EmailGroup> GetDefaultEmailGroup(
-            EmailGroupType groupType = EmailGroupType.InBox
+            EmailGroupCategory groupType = EmailGroupCategory.Recipient
         )
         {
             var tokenPayloads = tokenService.GetTokenPayloads();
@@ -43,7 +46,9 @@ namespace UzonMail.CorePlugin.Services.Emails
                 throw new KnownException("无法获取用户信息");
 
             var defaultGroup = await Db
-                .EmailGroups.Where(x => x.IsDefault && x.UserId == tokenPayloads.UserId)
+                .EmailGroups.Where(x =>
+                    x.IsDefault && x.UserId == tokenPayloads.UserId && x.Category == groupType
+                )
                 .FirstOrDefaultAsync();
             if (defaultGroup == null)
             {
@@ -66,7 +71,7 @@ namespace UzonMail.CorePlugin.Services.Emails
             if (
                 await Db.EmailGroups.AnyAsync(x =>
                     x.UserId == emailGroup.UserId
-                    && x.Type == emailGroup.Type
+                    && x.Category == emailGroup.Category
                     && x.Name == emailGroup.Name
                 )
             )
@@ -127,31 +132,14 @@ namespace UzonMail.CorePlugin.Services.Emails
                     // 先获取组
                     EmailGroup? group = await ctx
                         .EmailGroups.Where(x => x.Id == id)
-                        .Include(x => x.Inboxes)
+                        .Include(x => x.RecipientContacts)
                         .FirstOrDefaultAsync();
 
                     if (group == null)
                         return true;
 
-                    // 将其它邮件标记为删除
-                    List<Inbox> boxes = [];
-                    if (group.Inboxes != null)
-                    {
-                        boxes.AddRange(group.Inboxes);
-                    }
-                    bool shouldKeepGroup = boxes.Any(x => x.LinkCount > 0);
-
-                    if (shouldKeepGroup)
-                    {
-                        // 将组标记为删除，同时将组中未使用的邮箱标记为删除
-                        group.IsDeleted = true;
-                    }
-                    else
-                    {
-                        // 先删除邮箱，再删除组
-                        boxes.ForEach(x => ctx.Remove(x));
-                        ctx.Remove(group);
-                    }
+                    group.IsDeleted = true;
+                    group.RecipientContacts.ForEach(x => x.IsDeleted = true);
                     await ctx.SaveChangesAsync();
 
                     return true;

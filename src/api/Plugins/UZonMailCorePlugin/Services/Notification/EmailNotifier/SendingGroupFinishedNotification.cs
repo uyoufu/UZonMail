@@ -62,8 +62,8 @@ namespace UzonMail.CorePlugin.Services.Notification.EmailNotifier
                 .StringValue.Replace("{{id}}", sendingGroup.Id.ToString())
                 .Replace("{{type}}", sendingGroup.SendingType.ToString())
                 .Replace("{{subject}}", sendingGroup.Subjects)
-                .Replace("{{outboxCount}}", sendingGroup.OutboxesCount.ToString())
-                .Replace("{{inboxCount}}", sendingGroup.InboxesCount.ToString())
+                .Replace("{{senderAccountCount}}", sendingGroup.SenderAccountCount.ToString())
+                .Replace("{{recipientContactCount}}", sendingGroup.RecipientCount.ToString())
                 .Replace("{{successCount}}", sendingGroup.SuccessCount.ToString())
                 .Replace(
                     "{{startDate}}",
@@ -85,4 +85,3 @@ namespace UzonMail.CorePlugin.Services.Notification.EmailNotifier
         }
     }
 }
-

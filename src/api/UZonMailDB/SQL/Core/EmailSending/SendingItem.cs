@@ -1,4 +1,4 @@
-﻿using Innofactor.EfCoreJsonValueConverter;
+using Innofactor.EfCoreJsonValueConverter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json.Linq;
@@ -31,20 +31,20 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// 由于是多线程发件，这个值只有发送后才能确定
         /// 若一开始由数据指定，则其值 > 0
         /// </summary>
-        public long OutBoxId { get; set; }
+        public long SenderAccountId { get; set; }
 
         /// <summary>
         /// 实际发件人
         /// 由于是多线程发件，这个值只有发送后才能确定
         /// </summary>
-        public string? FromEmail { get; set; }
+        public string? SenderEmail { get; set; }
 
         /// <summary>
         /// 收件人
         /// 可能有多个收件人
         /// </summary>
         [JsonField]
-        public List<EmailAddress> Inboxes { get; set; } = [];
+        public List<EmailAddress> Recipients { get; set; } = [];
 
         /// <summary>
         /// 抄送人
@@ -62,7 +62,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         /// 收件人、抄送人、密送人的邮箱地址，使用逗号分隔
         /// 方便查询
         /// </summary>
-        public string? ToEmails { get; set; }
+        public string? RecipientEmails { get; set; }
 
         /// <summary>
         /// 邮件模板 Id
@@ -170,10 +170,10 @@ namespace UzonMail.DB.SQL.Core.EmailSending
                 {
                     x.SendingGroupId,
                     x.Status,
-                    x.OutBoxId,
+                    x.SenderAccountId,
                     x.Id
                 })
-                .HasDatabaseName("IX_SendingItems_Group_Status_Outbox_Id");
+                .HasDatabaseName("IX_SendingItems_Group_Status_SenderAccount_Id");
             builder.Property(x => x.InternetMessageId).HasMaxLength(1000);
             builder.Property(x => x.InternetMessageIdKey).HasMaxLength(1000);
             builder.HasIndex(x => x.InternetMessageIdKey).IsUnique();

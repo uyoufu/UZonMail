@@ -1,5 +1,5 @@
 import { httpClient } from './base/httpClient'
-import type { ConnectionSecurity } from './emailBox'
+import type { ConnectionSecurity } from './accountEnums'
 
 
 export interface ISmtpInfo {

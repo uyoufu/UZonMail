@@ -104,10 +104,10 @@ export function getSystemSetting<T = IAppSetting> (key: string, type: AppSetting
 export interface ISendingSetting {
   userId: string,
   maxSendCountPerEmailDay: number,
-  minOutboxCooldownSecond: number,
-  maxOutboxCooldownSecond: number,
+  minSenderAccountCooldownSecond: number,
+  maxSenderAccountCooldownSecond: number,
   maxSendingBatchSize: number,
-  minInboxCooldownHours: number,
+  minimumCooldownHours: number,
   replyToEmails?: string,
   changeIpAfterEmailCount: number,
   maxCountPerIPDomainHour: number,

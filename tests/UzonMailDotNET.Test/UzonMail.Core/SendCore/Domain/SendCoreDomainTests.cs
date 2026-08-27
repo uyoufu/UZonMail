@@ -1,6 +1,6 @@
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Networking;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMailDotNET.Test.UzonMail.Core.SendCore.Support;
 
 namespace UzonMailDotNET.Test.UzonMail.Core.SendCore.Domain;
@@ -30,22 +30,22 @@ public sealed class SendCoreDomainTests
     }
 
     [TestMethod]
-    public void PreparedItem_UsesMessageProxyBeforeOutboxProxy()
+    public void PreparedItem_UsesMessageProxyBeforeSenderAccountProxy()
     {
-        var outbox = SendCoreTestEntityFactory.CreateOutboxAddress(
+        var senderAccount = SendCoreTestEntityFactory.CreateSenderAccountAddress(
             configure: entity => entity.ProxyId = 41
         );
-        var outboxProxy = SendCoreTestEntityFactory.CreatePreparedItem(outbox);
+        var senderAccountProxy = SendCoreTestEntityFactory.CreatePreparedItem(senderAccount);
         var messageProxy = SendCoreTestEntityFactory.CreatePreparedItem(
-            outbox,
+            senderAccount,
             configureItem: item => item.ProxyId = 52,
             configureSetting: setting => setting.MaxRetryCount = 7
         );
 
-        Assert.AreEqual(41L, outboxProxy.EffectiveProxyId);
+        Assert.AreEqual(41L, senderAccountProxy.EffectiveProxyId);
         Assert.AreEqual(52L, messageProxy.EffectiveProxyId);
         Assert.AreEqual(7, messageProxy.MaxRetryCount);
-        Assert.HasCount(1, messageProxy.Inboxes);
+        Assert.HasCount(1, messageProxy.Recipients);
         Assert.IsEmpty(messageProxy.CC);
         Assert.IsEmpty(messageProxy.BCC);
     }
@@ -98,7 +98,7 @@ public sealed class SendCoreDomainTests
         var lease = new SendLease(
             Guid.CreateVersion7(),
             descriptor,
-            new OutboxKey(30, 20),
+            new SenderAccountKey(30, 20),
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow.AddMinutes(1)
         );

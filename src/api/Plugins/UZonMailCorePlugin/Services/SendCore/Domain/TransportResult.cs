@@ -6,7 +6,7 @@ public enum SendFailureKind
     HardBounce,
     RecipientPermanent,
     MessagePermanent,
-    OutboxPermanent,
+    SenderAccountPermanent,
     Transient,
     Network,
     Proxy,

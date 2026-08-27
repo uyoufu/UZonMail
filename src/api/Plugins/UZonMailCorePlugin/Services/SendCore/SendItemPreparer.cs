@@ -4,7 +4,7 @@ using UzonMail.CorePlugin.Services.EmailDecorator.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
@@ -27,7 +27,7 @@ public sealed class SendItemPreparer(
     public async Task<PreparedSendItem> PrepareAsync(
         SendingContext sendingContext,
         SendingItem sendingItem,
-        OutboxEmailAddress outbox,
+        SenderEmailAddress senderAccount,
         SendingGroup sendingGroup,
         SendingGroupTemplateResolver templateResolver,
         IReadOnlyList<long> proxyIds
@@ -50,7 +50,7 @@ public sealed class SendItemPreparer(
             setting,
             sendingItem,
             variables,
-            outbox.Outbox,
+            senderAccount.SenderAccount,
             originSubject,
             originBody
         );
@@ -59,22 +59,24 @@ public sealed class SendItemPreparer(
             setting,
             sendingItem,
             variables,
-            outbox.Outbox,
+            senderAccount.SenderAccount,
             originSubject,
             htmlBody
         );
         var subject = await contentDecorateService.ResolveVariables(subjectParams, originSubject);
-        var replyToEmails =
-            outbox.ReplyToEmails.Count > 0 ? outbox.ReplyToEmails : setting.ReplyToEmailsList;
+        var replyRecipientEmails =
+            senderAccount.ReplyToEmails.Count > 0
+                ? senderAccount.ReplyToEmails
+                : setting.ReplyToEmailsList;
 
         return new PreparedSendItem(
             sendingItem,
-            outbox,
+            senderAccount,
             variables,
             subject,
             htmlBody,
             attachments,
-            [.. replyToEmails],
+            [.. replyRecipientEmails],
             [.. proxyIds],
             setting
         );

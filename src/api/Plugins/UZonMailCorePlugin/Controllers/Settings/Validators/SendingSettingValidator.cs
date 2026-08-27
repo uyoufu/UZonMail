@@ -14,15 +14,15 @@ namespace UzonMail.CorePlugin.Controllers.Settings.Validators
         /// </summary>
         public SendingSettingValidator()
         {
-            RuleFor(x => x.MinOutboxCooldownSecond)
+            RuleFor(x => x.MinSenderAccountCooldownSecond)
                 .GreaterThanOrEqualTo(0)
                 .WithMessage("最小发件时间间隔不能小于0");
-            RuleFor(x => x.MaxOutboxCooldownSecond)
+            RuleFor(x => x.MaxSenderAccountCooldownSecond)
                 .GreaterThanOrEqualTo(0)
                 .WithMessage("最大发件时间间隔不能小于0");
 
-            RuleFor(x => x.MaxOutboxCooldownSecond)
-                .GreaterThan(x => x.MinOutboxCooldownSecond)
+            RuleFor(x => x.MaxSenderAccountCooldownSecond)
+                .GreaterThan(x => x.MinSenderAccountCooldownSecond)
                 .WithMessage("最大发件箱冷却时间不能小于最小发件箱冷却时间");
         }
     }

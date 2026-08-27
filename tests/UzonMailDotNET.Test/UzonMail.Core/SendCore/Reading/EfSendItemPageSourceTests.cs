@@ -12,7 +12,7 @@ namespace UzonMailDotNET.Test.UzonMail.Core.SendCore.Reading;
 public sealed class EfSendItemPageSourceTests
 {
     [TestMethod]
-    public async Task ReadPageAsync_FiltersStatusesAndOrdersByOutboxThenId()
+    public async Task ReadPageAsync_FiltersStatusesAndOrdersBySenderAccountThenId()
     {
         await using var database = await SqliteTestDatabase.CreateAsync();
         database.Db.SendingGroups.AddRange(
@@ -80,7 +80,7 @@ public sealed class EfSendItemPageSourceTests
     private static SendingItem CreateItem(
         long id,
         long groupId,
-        long outboxId,
+        long senderAccountId,
         SendingItemStatus status,
         bool isHardBounce = false
     ) =>
@@ -89,7 +89,7 @@ public sealed class EfSendItemPageSourceTests
             Id = id,
             SendingGroupId = groupId,
             UserId = 1,
-            OutBoxId = outboxId,
+            SenderAccountId = senderAccountId,
             Status = status,
             IsHardBounce = isHardBounce,
         };

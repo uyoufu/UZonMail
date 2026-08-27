@@ -70,20 +70,20 @@ const columns = computed<QTableColumn[]>(() => [
     sortable: true
   },
   {
-    name: 'outboxIds',
+    name: 'senderAccountIds',
     required: true,
-    label: t('pages.ipWarmUp.outboxCount'),
+    label: t('pages.ipWarmUp.senderAccountCount'),
     align: 'left',
-    field: 'outboxIds',
+    field: 'senderAccountIds',
     format: (val: number[]) => String(val.length),
     sortable: true
   },
   {
-    name: 'inboxIds',
+    name: 'recipientContactIds',
     required: true,
-    label: t('pages.ipWarmUp.inboxCount'),
+    label: t('pages.ipWarmUp.recipientContactCount'),
     align: 'left',
-    field: 'inboxIds',
+    field: 'recipientContactIds',
     format: (val: number[]) => String(val.length),
     sortable: true
   },

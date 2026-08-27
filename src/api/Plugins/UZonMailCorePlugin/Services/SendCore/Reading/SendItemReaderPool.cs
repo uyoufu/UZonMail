@@ -239,7 +239,7 @@ public sealed class SendItemReaderSession
                 if (page.Count > 0)
                 {
                     var last = page[^1];
-                    _cursor = new SendItemCursor(last.OutboxId, last.Id);
+                    _cursor = new SendItemCursor(last.SenderAccountId, last.Id);
                 }
 
                 if (page.Count < reserved)

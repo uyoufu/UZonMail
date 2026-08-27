@@ -1,11 +1,10 @@
-using UzonMail.CorePlugin.Services.Encrypt.Models;
 using UzonMail.CorePlugin.Services.SendCore;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
-using UzonMail.Utils.Extensions;
+using UzonMailDotNET.Test.UzonMail.Core.SendCore.Support;
 
 namespace UzonMailDotNET.Test.UzonMail.Core.SendCore;
 
@@ -58,10 +57,10 @@ public sealed class PreparedSendItemValidatorTests
         switch (addressRole)
         {
             case "发件箱":
-                item.Outbox.Email = invalidAddress;
+                item.SenderAccount.Email = invalidAddress;
                 break;
             case "收件人":
-                item.SourceItem.Inboxes = [new EmailAddress { Email = invalidAddress }];
+                item.SourceItem.Recipients = [new EmailAddress { Email = invalidAddress }];
                 break;
             case "抄送":
                 item.SourceItem.CC = [new EmailAddress { Email = invalidAddress }];
@@ -82,26 +81,16 @@ public sealed class PreparedSendItemValidatorTests
         StringAssert.Contains(result.Message, invalidAddress);
     }
 
-    private static PreparedSendItem CreatePreparedItem(List<EmailAddress> inboxes, string htmlBody)
+    private static PreparedSendItem CreatePreparedItem(
+        List<EmailAddress> recipientContacts,
+        string htmlBody
+    )
     {
-        var encryption = new EncryptParams();
-        var outbox = new Outbox
-        {
-            Id = 20,
-            UserId = 30,
-            Email = "from@test.com",
-            Password = "password".AES(encryption.Key, encryption.Iv),
-        };
-        var outboxAddress = new OutboxEmailAddress(
-            outbox,
-            10,
-            encryption,
-            OutboxEmailAddressType.Shared
-        );
-        var sendingItem = new SendingItem { UserId = 30, Inboxes = inboxes };
+        var senderAccountAddress = SendCoreTestEntityFactory.CreateSenderAccountAddress();
+        var sendingItem = new SendingItem { UserId = 30, Recipients = recipientContacts };
         return new PreparedSendItem(
             sendingItem,
-            outboxAddress,
+            senderAccountAddress,
             null,
             "subject",
             htmlBody,

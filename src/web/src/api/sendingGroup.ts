@@ -68,7 +68,8 @@ export interface ISendingGroupInfo {
 export interface ISendingGroupHistory extends ISendingGroupInfo {
   objectId: string,
   templatesCount: number, // 模板数量
-  outboxesCount: number, // 发件人邮箱数量
+  senderAccountCount: number, // 发件账户数量
+  recipientCount: number, // 收件联系人数量
   ccBoxesCount: number, // 抄送人邮箱数量
   bccBoxesCount: number, // 密送人邮箱数量
 }
@@ -148,9 +149,18 @@ export function getSendingGroupRunningInfo (sendingGroupId: number) {
 
 export interface ISendingGroupFull extends ISendingGroupInfo {
   objectId: string,
-  templates: Record<string, any>[], // 模板
-  outboxes: Record<string, any>[], // 发件人邮箱
-  attachments: Record<string, any>[], // 收件人邮箱
+  templates: Array<{ id: number, name: string }>,
+  senderAccounts: Array<{ id: number, email: string, name?: string }>,
+  senderAccountGroups: Array<{ id: number, name: string }>,
+  recipientContactGroups: Array<{ id: number, name: string }>,
+  recipients: Array<{ email: string, name?: string }>,
+  ccBoxes: Array<{ email: string, name?: string }>,
+  bccBoxes: Array<{ email: string, name?: string }>,
+  attachments: Array<{ id: number, fileName: string, sha256: string, size: number }>,
+  data: Record<string, any>[],
+  body: string,
+  sendBatch: boolean,
+  proxyIds: number[]
 }
 
 /**

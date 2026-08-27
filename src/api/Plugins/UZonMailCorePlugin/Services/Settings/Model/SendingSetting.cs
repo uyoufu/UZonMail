@@ -11,20 +11,20 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
     public class SendingSetting : BaseSettingModel
     {
         /// <summary>
-        /// 每日每个发件箱最大发送次数
+        /// 每日每个发件账户最大发送次数
         /// 为 0 时表示不限制
         /// </summary>
         public int MaxSendCountPerEmailDay { get; set; } = 0;
 
         /// <summary>
-        /// 最小发件箱冷却时间
+        /// 最小发件账户冷却时间
         /// </summary>
-        public int MinOutboxCooldownSecond { get; set; } = 5;
+        public int MinSenderAccountCooldownSecond { get; set; } = 5;
 
         /// <summary>
-        /// 最大发件箱冷却时间
+        /// 最大发件账户冷却时间
         /// </summary>
-        public int MaxOutboxCooldownSecond { get; set; } = 10;
+        public int MaxSenderAccountCooldownSecond { get; set; } = 10;
 
         /// <summary>
         /// 最大批量发件数
@@ -32,9 +32,9 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
         public int MaxSendingBatchSize { get; set; } = 20;
 
         /// <summary>
-        /// 收件箱最小收件间隔时间，单位小时
+        /// 收件联系人最小投递间隔时间，单位小时
         /// </summary>
-        public int MinInboxCooldownHours { get; set; } = -1;
+        public int MinimumCooldownHours { get; set; } = -1;
 
         /// <summary>
         /// 回复的邮箱地址, 多个邮箱用逗号分隔
@@ -79,8 +79,8 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
         /// <returns></returns>
         public int GetCooldownMilliseconds()
         {
-            var min = Math.Max(0, MinOutboxCooldownSecond);
-            var max = Math.Max(0, MaxOutboxCooldownSecond);
+            var min = Math.Max(0, MinSenderAccountCooldownSecond);
+            var max = Math.Max(0, MaxSenderAccountCooldownSecond);
             if (max <= min)
             {
                 return min * 1000;
@@ -93,9 +93,13 @@ namespace UzonMail.CorePlugin.Services.Settings.Model
         protected override void ReadValuesFromJson()
         {
             MaxSendCountPerEmailDay = GetIntValue(nameof(MaxSendCountPerEmailDay), 0);
-            MinOutboxCooldownSecond = GetIntValue(nameof(MinOutboxCooldownSecond), 5);
+            MinSenderAccountCooldownSecond = GetIntValue(nameof(MinSenderAccountCooldownSecond), 5);
+            MaxSenderAccountCooldownSecond = GetIntValue(
+                nameof(MaxSenderAccountCooldownSecond),
+                10
+            );
             MaxSendingBatchSize = GetIntValue(nameof(MaxSendingBatchSize), 20);
-            MinInboxCooldownHours = GetIntValue(nameof(MinInboxCooldownHours), 0);
+            MinimumCooldownHours = GetIntValue(nameof(MinimumCooldownHours), 0);
             ReplyToEmails = GetStringValue(nameof(ReplyToEmails), string.Empty);
             // 0 明确表示不重试，负值按无效配置回退到默认值。
             var maxRetryCount = GetIntValue(nameof(MaxRetryCount), 3);

@@ -9,7 +9,7 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator.Interfaces
         SendingSetting sendingSetting,
         SendingItem sendingItem,
         SendingItemExcelData? variables,
-        Outbox outbox,
+        SenderAccount senderAccount,
         string subject,
         string htmlBody
     ) : IContentDecoratorParams
@@ -32,11 +32,11 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator.Interfaces
         /// <summary>
         /// 发件箱
         /// </summary>
-        public Outbox Outbox { get; } = outbox;
+        public SenderAccount SenderAccount { get; } = senderAccount;
 
-        public string OutboxEmail { get; } = outbox.Email;
+        public string SenderEmail { get; } = senderAccount.Email;
 
-        public IReadOnlyList<EmailAddress> Inboxes { get; } = sendingItem.Inboxes;
+        public IReadOnlyList<EmailAddress> Recipients { get; } = sendingItem.Recipients;
 
         public IReadOnlyList<EmailAddress> CC { get; } = sendingItem.CC ?? [];
 

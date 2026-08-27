@@ -32,19 +32,21 @@ public sealed class SendAttemptDecisionPolicyTests
     }
 
     [TestMethod]
-    public void OutboxPermanent_RetriesOnlyWhenAnotherSharedOutboxExists()
+    public void SenderAccountPermanent_RetriesOnlyWhenAnotherSharedSenderAccountExists()
     {
         var retry = SendAttemptDecisionPolicy.Decide(
-            TransportResult.Failure(SendFailureKind.OutboxPermanent, "invalid"),
+            TransportResult.Failure(SendFailureKind.SenderAccountPermanent, "invalid"),
             0,
             3,
-            new OutboxRetirementResult(CurrentSendItemDisposition.RetryWithAnotherOutbox)
+            new SenderAccountRetirementResult(
+                CurrentSendItemDisposition.RetryWithAnotherSenderAccount
+            )
         );
         var fail = SendAttemptDecisionPolicy.Decide(
-            TransportResult.Failure(SendFailureKind.OutboxPermanent, "invalid"),
+            TransportResult.Failure(SendFailureKind.SenderAccountPermanent, "invalid"),
             0,
             3,
-            new OutboxRetirementResult(CurrentSendItemDisposition.Fail)
+            new SenderAccountRetirementResult(CurrentSendItemDisposition.Fail)
         );
 
         Assert.AreEqual(SendAttemptDisposition.Retry, retry.Disposition);

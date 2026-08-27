@@ -17,8 +17,8 @@
         </template>
       </q-select>
 
-      <CreateBtn :label="t('qqGetter.save')" :tooltip="t('qqGetter.saveAsInbox')" class="q-ml-sm"
-        @click="onSaveGroupMembersAsInbox" />
+      <CreateBtn :label="t('qqGetter.save')" :tooltip="t('qqGetter.saveAsRecipientContacts')" class="q-ml-sm"
+        @click="onSaveGroupMembersAsRecipientContacts" />
     </template>
 
     <template v-slot:top-right>
@@ -155,17 +155,17 @@ watch(selectedGroup, async (newGroup) => {
 // #endregion
 
 // #region 保存数据
-import { saveQQMemberAsInbox } from 'src/api/pro/qqMembers'
-async function onSaveGroupMembersAsInbox () {
-  const confirm = await confirmOperation(t('qqGetter.saveAsInbox'),
-    t('qqGetter.confirmSaveAllMembersAsInboxes', {
+import { saveQQMembersAsRecipientContacts } from 'src/api/pro/qqMembers'
+async function onSaveGroupMembersAsRecipientContacts () {
+  const confirm = await confirmOperation(t('qqGetter.saveAsRecipientContacts'),
+    t('qqGetter.confirmSaveAllMembersAsRecipientContacts', {
       count: allGroupMembers.value.length,
     }))
   if (!confirm) return
 
   // 保存到服务器
-  await saveQQMemberAsInbox(selectedGroup.value, allGroupMembers.value)
-  notifySuccess(t('qqGetter.saveMembersAsInboxesSuccess'))
+  await saveQQMembersAsRecipientContacts(selectedGroup.value, allGroupMembers.value)
+  notifySuccess(t('qqGetter.saveMembersAsRecipientContactsSuccess'))
 }
 // #endregion
 </script>

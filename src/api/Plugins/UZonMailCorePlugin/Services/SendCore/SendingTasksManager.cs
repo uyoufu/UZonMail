@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Interfaces;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Runtime;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.EmailSending;
@@ -25,13 +25,13 @@ public sealed class SendingTasksManager
 
     private static readonly ILog _logger = LogManager.GetLogger(typeof(SendingTasksManager));
     private readonly IServiceProvider _provider;
-    private readonly OutboxesManager _outboxesManager;
+    private readonly SenderAccountsManager _senderAccountsManager;
     private readonly UserGroupTasksPools _userGroupTasksPools;
     private readonly SendingQuotaOptions _quotas;
-    private readonly OutboxSupplyOptions _outboxSupply;
+    private readonly SenderAccountSupplyOptions _senderAccountSupply;
     private readonly TimeProvider _timeProvider;
     private readonly FairSendingTaskSelector _taskSelector = new();
-    private readonly ConcurrentDictionary<OutboxKey, WorkerInfo> _workers = [];
+    private readonly ConcurrentDictionary<SenderAccountKey, WorkerInfo> _workers = [];
     private readonly ConcurrentDictionary<long, long> _userOrganizations = [];
     private readonly Channel<bool> _wakeUps = Channel.CreateBounded<bool>(
         new BoundedChannelOptions(1)
@@ -45,27 +45,27 @@ public sealed class SendingTasksManager
     private readonly object _scheduledWakeLock = new();
     private CancellationTokenSource? _scheduledWake;
     private long _scheduledWakeAtUtcTicks;
-    private int _isRefillingOutboxes;
+    private int _isRefillingSenderAccounts;
     private int _refillStartOffset;
     private readonly Task _dispatcher;
 
     public SendingTasksManager(
         IServiceProvider provider,
-        OutboxesManager outboxesManager,
+        SenderAccountsManager senderAccountsManager,
         UserGroupTasksPools userGroupTasksPools,
         IOptions<SendingQuotaOptions> quotas,
-        IOptions<OutboxSupplyOptions> outboxSupply,
+        IOptions<SenderAccountSupplyOptions> senderAccountSupply,
         TimeProvider timeProvider
     )
     {
         _provider = provider;
-        _outboxesManager = outboxesManager;
+        _senderAccountsManager = senderAccountsManager;
         _userGroupTasksPools = userGroupTasksPools;
         _quotas = quotas.Value;
-        _outboxSupply = outboxSupply.Value;
+        _senderAccountSupply = senderAccountSupply.Value;
         _timeProvider = timeProvider;
         _quotas.Validate();
-        _outboxSupply.Validate();
+        _senderAccountSupply.Validate();
         _dispatcher = DispatchLoopAsync(_shutdown.Token);
     }
 
@@ -108,50 +108,61 @@ public sealed class SendingTasksManager
             return;
 
         var activeKeys = workerSnapshot.Select(pair => pair.Key).ToHashSet();
-        var outboxSnapshot = _outboxesManager.Values;
+        var senderAccountSnapshot = _senderAccountsManager.Values;
         var organizations = new Dictionary<long, long>();
-        var availableOutboxes = new Dictionary<OutboxKey, OutboxEmailAddress>(outboxSnapshot.Count);
-        var candidates = new List<SendingTaskCandidate>(outboxSnapshot.Count);
+        var availableSenderAccounts = new Dictionary<SenderAccountKey, SenderEmailAddress>(
+            senderAccountSnapshot.Count
+        );
+        var candidates = new List<SendingTaskCandidate>(senderAccountSnapshot.Count);
         var utcNow = _timeProvider.GetUtcNow();
         DateTimeOffset? earliestCooldownEnd = null;
-        foreach (var outbox in outboxSnapshot)
+        foreach (var senderAccount in senderAccountSnapshot)
         {
-            var key = new OutboxKey(outbox.UserId, outbox.Id);
-            if (outbox.ShouldDispose || activeKeys.Contains(key))
+            var key = new SenderAccountKey(senderAccount.UserId, senderAccount.Id);
+            if (senderAccount.ShouldDispose || activeKeys.Contains(key))
                 continue;
 
-            if (!outbox.IsEligible(utcNow))
+            if (!senderAccount.IsEligible(utcNow))
             {
                 if (
-                    outbox.IsWorking
-                    && outbox.NextEligibleUtc > utcNow
-                    && (earliestCooldownEnd == null || outbox.NextEligibleUtc < earliestCooldownEnd)
+                    senderAccount.IsWorking
+                    && senderAccount.NextEligibleUtc > utcNow
+                    && (
+                        earliestCooldownEnd == null
+                        || senderAccount.NextEligibleUtc < earliestCooldownEnd
+                    )
                 )
-                    earliestCooldownEnd = outbox.NextEligibleUtc;
+                    earliestCooldownEnd = senderAccount.NextEligibleUtc;
                 continue;
             }
 
             if (
-                !_userGroupTasksPools.TryGetValue(outbox.UserId, out var userTasksPool)
-                || !userTasksPool.MatchReadyEmailItem(outbox)
+                !_userGroupTasksPools.TryGetValue(senderAccount.UserId, out var userTasksPool)
+                || !userTasksPool.MatchReadyEmailItem(senderAccount)
             )
                 continue;
 
-            if (!organizations.TryGetValue(outbox.UserId, out var organizationId))
+            if (!organizations.TryGetValue(senderAccount.UserId, out var organizationId))
             {
-                organizationId = GetOrganizationId(outbox.UserId);
-                organizations.Add(outbox.UserId, organizationId);
+                organizationId = GetOrganizationId(senderAccount.UserId);
+                organizations.Add(senderAccount.UserId, organizationId);
             }
 
-            availableOutboxes.Add(key, outbox);
+            availableSenderAccounts.Add(key, senderAccount);
             candidates.Add(
-                new SendingTaskCandidate(key, organizationId, outbox.UserId, outbox.CreateDate)
+                new SendingTaskCandidate(
+                    key,
+                    organizationId,
+                    senderAccount.UserId,
+                    senderAccount.CreateDate
+                )
             );
         }
 
-        var readyLowWatermark = _quotas.SystemHardLimit * _outboxSupply.ReadyLowWatermarkMultiplier;
+        var readyLowWatermark =
+            _quotas.SystemHardLimit * _senderAccountSupply.ReadyLowWatermarkMultiplier;
         if (candidates.Count < readyLowWatermark)
-            StartOutboxRefill(cancellationToken);
+            StartSenderAccountRefill(cancellationToken);
 
         var snapshot = new SendingDispatchSnapshot(
             candidates,
@@ -170,7 +181,7 @@ public sealed class SendingTasksManager
         while (selectionCycle.TryReserveNext(out var selected))
         {
             if (
-                !availableOutboxes.TryGetValue(selected.Key, out var candidate)
+                !availableSenderAccounts.TryGetValue(selected.Key, out var candidate)
                 || !candidate.TryMarkTaskRunning()
             )
             {
@@ -207,15 +218,15 @@ public sealed class SendingTasksManager
     }
 
     private async Task RunWorkerAsync(
-        OutboxKey key,
-        OutboxEmailAddress outbox,
+        SenderAccountKey key,
+        SenderEmailAddress senderAccount,
         Task<bool> startGate,
         CancellationToken cancellationToken
     )
     {
         if (!await startGate)
             return;
-        _logger.Info($"开始执行发件任务: {key} {outbox.Email}");
+        _logger.Info($"开始执行发件任务: {key} {senderAccount.Email}");
         try
         {
             // 一个工作槽只执行一次发送尝试，结束后重新参加组织、用户和组公平调度。
@@ -223,7 +234,7 @@ public sealed class SendingTasksManager
             await using var scope = _provider.CreateAsyncScope();
             var sendingContext = scope
                 .ServiceProvider.GetRequiredService<Contexts.SendingContext>()
-                .SetOutbox(outbox);
+                .SetSenderAccount(senderAccount);
             var pipeline = scope.ServiceProvider.GetRequiredService<ISendingPipeline>();
             await pipeline.Handle(sendingContext);
         }
@@ -234,7 +245,7 @@ public sealed class SendingTasksManager
         }
         finally
         {
-            outbox.MarkTaskStopped();
+            senderAccount.MarkTaskStopped();
             _workers.TryRemove(key, out _);
             _wakeUps.Writer.TryWrite(true);
         }
@@ -262,20 +273,20 @@ public sealed class SendingTasksManager
     private long GetOrganizationId(long userId) =>
         _userOrganizations.TryGetValue(userId, out var organizationId) ? organizationId : 0;
 
-    private void StartOutboxRefill(CancellationToken cancellationToken)
+    private void StartSenderAccountRefill(CancellationToken cancellationToken)
     {
-        if (Interlocked.CompareExchange(ref _isRefillingOutboxes, 1, 0) != 0)
+        if (Interlocked.CompareExchange(ref _isRefillingSenderAccounts, 1, 0) != 0)
             return;
-        _ = RefillOutboxesAsync(cancellationToken);
+        _ = RefillSenderAccountsAsync(cancellationToken);
     }
 
-    private async Task RefillOutboxesAsync(CancellationToken cancellationToken)
+    private async Task RefillSenderAccountsAsync(CancellationToken cancellationToken)
     {
         try
         {
-            var readyTarget = _quotas.SystemHardLimit * _outboxSupply.ReadyTargetMultiplier;
+            var readyTarget = _quotas.SystemHardLimit * _senderAccountSupply.ReadyTargetMultiplier;
             while (
-                _outboxesManager.Count < _outboxSupply.MaxTrackedOutboxes
+                _senderAccountsManager.Count < _senderAccountSupply.MaxTrackedSenderAccounts
                 && GetReadyCandidateCount(_timeProvider.GetUtcNow()) < readyTarget
             )
             {
@@ -300,7 +311,7 @@ public sealed class SendingTasksManager
                 var fairBatchSize = Math.Max(
                     1,
                     Math.Min(
-                        _outboxSupply.CatalogPageSize,
+                        _senderAccountSupply.CatalogPageSize,
                         (readyShortage + groupTasks.Count - 1) / groupTasks.Count
                     )
                 );
@@ -311,10 +322,11 @@ public sealed class SendingTasksManager
                         (int)((startOffset + (uint)offset) % (uint)groupTasks.Count)
                     ];
                     var remainingCapacity =
-                        _outboxSupply.MaxTrackedOutboxes - _outboxesManager.Count;
+                        _senderAccountSupply.MaxTrackedSenderAccounts
+                        - _senderAccountsManager.Count;
                     if (remainingCapacity <= 0)
                         break;
-                    addedInRound += await groupTask.LoadNextSharedOutboxPage(
+                    addedInRound += await groupTask.LoadNextSharedSenderAccountPage(
                         sendingContext,
                         Math.Min(remainingCapacity, fairBatchSize)
                     );
@@ -333,7 +345,7 @@ public sealed class SendingTasksManager
         }
         finally
         {
-            Interlocked.Exchange(ref _isRefillingOutboxes, 0);
+            Interlocked.Exchange(ref _isRefillingSenderAccounts, 0);
             _wakeUps.Writer.TryWrite(true);
         }
     }
@@ -341,12 +353,12 @@ public sealed class SendingTasksManager
     private int GetReadyCandidateCount(DateTimeOffset utcNow)
     {
         var readyCount = 0;
-        foreach (var outbox in _outboxesManager.Values)
+        foreach (var senderAccount in _senderAccountsManager.Values)
         {
             if (
-                outbox.IsEligible(utcNow)
-                && _userGroupTasksPools.TryGetValue(outbox.UserId, out var userTasksPool)
-                && userTasksPool.MatchReadyEmailItem(outbox)
+                senderAccount.IsEligible(utcNow)
+                && _userGroupTasksPools.TryGetValue(senderAccount.UserId, out var userTasksPool)
+                && userTasksPool.MatchReadyEmailItem(senderAccount)
             )
                 readyCount++;
         }

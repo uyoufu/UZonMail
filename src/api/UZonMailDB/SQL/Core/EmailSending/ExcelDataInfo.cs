@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace UzonMail.DB.SQL.Core.EmailSending
 {
@@ -16,25 +16,25 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         public ExcelDataInfo(JArray excelData)
         {
             TotalCount = excelData.Count;
-            var inboxRowCount = 0;
+            var recipientRowCount = 0;
 
-            // 计算 inboxes , outboxes, body 的数量
+            // 计算 recipientContacts , senderAccounts, body 的数量
             foreach (var item in excelData)
             {
                 if (item is not JObject row)
                     continue;
-                var inbox = row.GetValue("inbox")?.ToString()?.Trim();
-                var outbox = row.GetValue("outbox")?.ToString();
+                var recipientEmail = row.GetValue("recipientEmail")?.ToString()?.Trim();
+                var senderEmail = row.GetValue("senderEmail")?.ToString();
                 var body = row.GetValue("body")?.ToString();
 
-                if (!string.IsNullOrWhiteSpace(inbox))
+                if (!string.IsNullOrWhiteSpace(recipientEmail))
                 {
-                    inboxRowCount++;
-                    InboxSet.Add(inbox);
+                    recipientRowCount++;
+                    RecipientEmails.Add(recipientEmail);
                 }
-                if (!string.IsNullOrEmpty(outbox))
+                if (!string.IsNullOrEmpty(senderEmail))
                 {
-                    OutboxSet.Add(outbox);
+                    SenderEmails.Add(senderEmail);
                 }
                 if (!string.IsNullOrEmpty(body))
                 {
@@ -43,8 +43,8 @@ namespace UzonMail.DB.SQL.Core.EmailSending
             }
 
             // 解析 status
-            InboxStatus = ParseStatus(inboxRowCount, TotalCount);
-            OutboxStatus = ParseStatus(OutboxesCount, TotalCount);
+            RecipientValidationStatus = ParseStatus(recipientRowCount, TotalCount);
+            SenderAccountStatus = ParseStatus(SenderAccountCount, TotalCount);
             BodyStatus = ParseStatus(BodyCount, TotalCount);
         }
 
@@ -61,18 +61,18 @@ namespace UzonMail.DB.SQL.Core.EmailSending
             return ExcelDataStatus.Some;
         }
 
-        public int InboxesCount => InboxSet.Count;
+        public int RecipientCount => RecipientEmails.Count;
 
-        public int OutboxesCount => OutboxSet.Count;
+        public int SenderAccountCount => SenderEmails.Count;
 
         public int BodyCount { get; }
 
-        public HashSet<string> InboxSet { get; } = [];
+        public HashSet<string> RecipientEmails { get; } = [];
 
-        public HashSet<string> OutboxSet { get; } = [];
+        public HashSet<string> SenderEmails { get; } = [];
 
-        public ExcelDataStatus InboxStatus { get; }
-        public ExcelDataStatus OutboxStatus { get; }
+        public ExcelDataStatus RecipientValidationStatus { get; }
+        public ExcelDataStatus SenderAccountStatus { get; }
         public ExcelDataStatus BodyStatus { get; }
     }
 

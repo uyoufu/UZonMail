@@ -22,13 +22,13 @@
 
     <SelectEmailData v-model="emailInfo.data" class="q-mb-sm" />
 
-    <SelectEmailBox v-model="emailInfo.outboxes" v-model:selectedGroups="emailInfo.outboxGroups" :emailBoxType="0"
+    <SelectAccount v-model="emailInfo.senderAccounts" v-model:selectedGroups="emailInfo.senderAccountGroups" :account-category="EmailGroupCategory.Sender"
       icon="directions_run" :label="translateSendingTask('sender')" class="q-mb-sm" icon-color="secondary"
       :placeholder="translateSendingTask('senderPlaceholder')" />
 
     <div class="q-mb-sm row justify-start items-center">
-      <SelectEmailBox class="col" v-model="emailInfo.inboxes" v-model:selectedGroups="emailInfo.inboxGroups"
-        :emailBoxType="1" icon="hail" :label="translateSendingTask('recipients')"
+      <SelectAccount class="col" v-model="emailInfo.recipients" v-model:selectedGroups="emailInfo.recipientContactGroups"
+        :account-category="EmailGroupCategory.Recipient" icon="hail" :label="translateSendingTask('recipients')"
         :placeholder="translateSendingTask('recipientsPlaceholder')" />
 
       <q-checkbox dense keep-color v-model="emailInfo.sendBatch" :label="translateSendingTask('mergeToSend')"
@@ -37,7 +37,7 @@
       </q-checkbox>
     </div>
 
-    <SelectEmailBox v-model="emailInfo.ccBoxes" :emailBoxType="1" icon="settings_accessibility"
+    <SelectAccount v-model="emailInfo.ccBoxes" :account-category="EmailGroupCategory.Recipient" icon="settings_accessibility"
       :label="translateSendingTask('ccRecipients')" :placeholder="translateSendingTask('ccRecipientsPlaceholder')"
       class="q-mb-sm" icon-color="secondary" />
 
@@ -67,7 +67,7 @@
 
 <script lang="ts" setup>
 import SelectEmailTemplate from './components/SelectEmailTemplate.vue'
-import SelectEmailBox from './components/SelectEmailBox.vue'
+import SelectAccount from './components/SelectAccount.vue'
 import SelectEmailData from './components/SelectEmailData.vue'
 import ObjectUploader from 'components/uploader/ObjectUploader.vue'
 import AsyncTooltip from 'components/asyncTooltip/AsyncTooltip.vue'
@@ -77,6 +77,7 @@ import { useBottomFunctions } from './bottomFunctions'
 import { translateAI, translateSendingTask } from 'src/i18n/helpers'
 
 import type { IEmailCreateInfo } from 'src/api/emailSending'
+import { EmailGroupCategory } from 'src/api/emailGroup'
 
 // 设置名称
 defineOptions({
@@ -87,10 +88,10 @@ const emailInfo: Ref<IEmailCreateInfo> = ref({
   subjects: '', // 主题
   templates: [], // 模板 id
   data: [], // 用户发件数据
-  inboxGroups: [],
-  outboxes: [], // 发件人邮箱
-  outboxGroups: [],
-  inboxes: [], // 收件人邮箱
+  recipientContactGroups: [],
+  senderAccounts: [], // 发件人邮箱
+  senderAccountGroups: [],
+  recipients: [], // 收件人邮箱
   ccBoxes: [], // 抄送人邮箱
   bccBoxes: [], // 密送人邮箱
   body: '', // 邮件正文
@@ -109,8 +110,8 @@ const {
 // 合并发送
 const sendBatchTooltips = translateSendingTask('sendBatchTooltips')
 // 进行重置
-// inboxes 数量太少时不批量
-watch(() => emailInfo.value.inboxes, (newValue) => {
+// recipients 数量太少时不批量
+watch(() => emailInfo.value.recipients, (newValue) => {
   if (newValue.length < 2) emailInfo.value.sendBatch = false
 })
 // 有数据时，不批量
@@ -118,10 +119,10 @@ watch(() => emailInfo.value.data, (newValue) => {
   if (newValue.length > 0) emailInfo.value.sendBatch = false
 })
 // 多个发件箱时，不批量
-watch(() => emailInfo.value.outboxes, (newValue) => {
+watch(() => emailInfo.value.senderAccounts, (newValue) => {
   if (newValue.length > 1) emailInfo.value.sendBatch = false
 })
-watch(() => emailInfo.value.outboxGroups, (newValue) => {
+watch(() => emailInfo.value.senderAccountGroups, (newValue) => {
   if (newValue.length > 0) emailInfo.value.sendBatch = false
 })
 // 格式化 body，可能有一些无用的字符, 比如 \n, <br>
@@ -132,7 +133,7 @@ watch(() => emailInfo.value.body, (newValue) => {
 })
 
 const disableSendBatchCheckbox = computed(() => {
-  return emailInfo.value.data.length === 0 && emailInfo.value.inboxes.length < 2 && emailInfo.value.outboxes.length < 2
+  return emailInfo.value.data.length === 0 && emailInfo.value.recipients.length < 2 && emailInfo.value.senderAccounts.length < 2
 })
 
 // #region 代理相关

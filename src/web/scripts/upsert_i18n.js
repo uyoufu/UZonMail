@@ -7,7 +7,7 @@ const DEFAULT_LOCALES_DIR = path.resolve(__dirname, '../src/i18n/locales')
 const SUPPORTED_LOCALES = ['zh-CN', 'en-US']
 
 /**
- * Parses CLI arguments passed as `--name value` pairs, repeated `--pair key zh en` groups or repeated `--delete key`.
+ * Parses CLI arguments passed as `--name value` pairs, repeated `--pair key zh en`, `--rename old new` or `--delete key`.
  * @param {string[]} argv Command line arguments after the script name.
  * @returns {Record<string, string | Array<{ key: string, translations: Record<string, string> }>>} Parsed argument map.
  */
@@ -56,6 +56,17 @@ export function parseCliArgs(argv) {
 
       parsedArgs.deleteKeys.push(deleteKey)
       index += 1
+      continue
+    }
+
+    if (argName === 'rename') {
+      const renameValues = argv.slice(index + 1, index + 3)
+      if (renameValues.length < 2 || renameValues.some((renameValue) => renameValue.startsWith('--'))) {
+        throw new Error('Missing value for --rename. Expected --rename old-key new-key.')
+      }
+      if (!parsedArgs.renameEntries) parsedArgs.renameEntries = []
+      parsedArgs.renameEntries.push({ oldKey: renameValues[0], newKey: renameValues[1] })
+      index += 2
       continue
     }
 
@@ -233,6 +244,41 @@ export function deleteI18nTranslationKeys({ keys, localesDir = DEFAULT_LOCALES_D
     })
 }
 
+/** Renames translation keys while preserving every locale value. */
+export function renameI18nTranslationKeys({ entries, localesDir = DEFAULT_LOCALES_DIR }) {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    throw new Error('Missing required --rename value.')
+  }
+  entries.forEach(({ oldKey, newKey }) => {
+    validateTranslationKey(oldKey)
+    validateTranslationKey(newKey)
+  })
+
+  return SUPPORTED_LOCALES.map((locale) => {
+    const localeFilePath = path.resolve(localesDir, `${locale}.ts`)
+    const localeData = readLocaleFile(localeFilePath)
+    entries.forEach(({ oldKey, newKey }) => {
+      const translation = getLocaleValue(localeData, oldKey)
+      if (typeof translation !== 'string') {
+        throw new Error(`Translation key "${oldKey}" does not contain a string in ${locale}.`)
+      }
+      upsertLocaleValue(localeData, newKey, translation)
+      deleteLocaleValue(localeData, oldKey)
+    })
+    writeLocaleFile(localeFilePath, localeData)
+    return localeFilePath
+  })
+}
+
+function getLocaleValue(localeData, dottedKey) {
+  let currentValue = localeData
+  for (const keyPart of getTranslationKeyParts(dottedKey)) {
+    if (!isPlainObject(currentValue)) return undefined
+    currentValue = currentValue[keyPart]
+  }
+  return currentValue
+}
+
 /**
  * Validates batch upsert input.
  * @param {Array<{ key: string, translations: Record<string, string> }> | undefined} entries Translation entries.
@@ -389,6 +435,16 @@ function isPlainObject(value) {
  */
 export function runCli(argv) {
   const args = parseCliArgs(argv)
+  const renameEntries = args.renameEntries
+  if (Array.isArray(renameEntries) && renameEntries.length > 0) {
+    if (hasCliDeleteKeys(args) || hasCliPairEntries(args) || args.key !== undefined) {
+      throw new Error('Do not mix --rename with upsert or delete arguments.')
+    }
+    const writtenFiles = renameI18nTranslationKeys({ entries: renameEntries, localesDir: args.localesDir })
+    console.log(`Renamed ${renameEntries.length} translation key(s). Updated ${writtenFiles.length} locale file(s).`)
+    writtenFiles.forEach((filePath) => console.log(filePath))
+    return
+  }
   const deleteKeys = getCliDeleteKeys(args)
   if (deleteKeys.length > 0) {
     const writtenFiles = deleteI18nTranslationKeys({
@@ -502,4 +558,3 @@ if (isCliEntrypoint) {
     process.exitCode = 1
   }
 }
-

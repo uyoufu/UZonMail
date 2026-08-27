@@ -32,8 +32,8 @@ export interface IIpWarmUpUpPlan {
   name: string
   subjects: string[]
   templateIds: number[]
-  outboxIds: number[]
-  inboxIds: number[]
+  senderAccountIds: number[]
+  recipientContactIds: number[]
   ccIds: number[]
   bccIds: number[]
   attachmentIds: number[]

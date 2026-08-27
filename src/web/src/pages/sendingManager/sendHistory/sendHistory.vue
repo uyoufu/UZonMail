@@ -98,16 +98,16 @@ const columns = computed<QTableColumn[]>(() => [
     field: 'templatesCount'
   },
   {
-    name: 'outboxesCount',
+    name: 'senderAccountCount',
     required: true,
-    label: t('sendHistory.outboxCount'),
+    label: t('sendHistory.senderAccountCount'),
     align: 'left',
-    field: 'outboxesCount'
+    field: 'senderAccountCount'
   },
   {
     name: 'totalCount',
     required: true,
-    label: t('sendHistory.inboxCount'),
+    label: t('sendHistory.recipientCount'),
     align: 'left',
     field: 'totalCount',
     sortable: true

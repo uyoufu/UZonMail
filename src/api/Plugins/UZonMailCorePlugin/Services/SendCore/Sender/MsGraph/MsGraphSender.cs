@@ -1,23 +1,20 @@
 using System.Security.Authentication;
 using log4net;
 using MimeKit;
-using UzonMail.CorePlugin.Services.Encrypt;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.Transport;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Emails;
 
 namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph;
 
-public sealed class MsGraphSender(
-    EncryptService encryptService,
-    IMsGraphClientFactory clientFactory
-) : IEmailTransport
+public sealed class MsGraphSender(IMsGraphClientFactory clientFactory) : IEmailTransport
 {
     private static readonly ILog Logger = LogManager.GetLogger(typeof(MsGraphSender));
 
-    public OutboxType Type => OutboxType.MsGraph;
+    public SendingProtocol Type => SendingProtocol.MicrosoftGraph;
 
     public async Task<TransportResult> SendAsync(
         SendingContext context,
@@ -25,29 +22,15 @@ public sealed class MsGraphSender(
         CancellationToken cancellationToken = default
     )
     {
-        var sendItem = context.CurrentAttempt!.PreparedItem;
-        var outbox = sendItem.Outbox;
-        if (sendItem.EffectiveProxyId > 0 || sendItem.AvailableProxyIds.Count > 0)
-            return TransportResult.Failure(SendFailureKind.LocalData, "Outlook Graph 发件不支持代理配置");
+        var senderAccount = context.CurrentAttempt!.PreparedItem.SenderAccount;
+        if (senderAccount.ProxyId > 0)
+            return TransportResult.Failure(SendFailureKind.LocalData, "Microsoft Graph 发件不支持代理配置");
 
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var client = clientFactory.GetClient(
-                new OutboxKey(outbox.UserId, outbox.Id),
-                outbox.Email,
-                outbox.OutlookClientId,
-                outbox.PlainPassword ?? string.Empty
-            );
-            await client.AuthenticateAsync(
-                outbox.Email,
-                outbox.OutlookClientId,
-                outbox.PlainPassword ?? string.Empty,
-                outbox.Id,
-                context.SqlContext
-            );
-            var receiptId = await client.SendAsync(message);
-            return TransportResult.Success(receiptId);
+            var client = clientFactory.GetClient(senderAccount);
+            await client.AuthenticateAsync(senderAccount, context.SqlContext, cancellationToken);
+            return TransportResult.Success(await client.SendAsync(message));
         }
         catch (Exception exception)
         {
@@ -58,26 +41,18 @@ public sealed class MsGraphSender(
 
     public async Task<TransportResult> ValidateAsync(
         IServiceProvider scopeServiceProvider,
-        Outbox outbox,
+        SenderEmailAddress senderAccount,
         CancellationToken cancellationToken = default
     )
     {
-        if (outbox.ProxyId > 0)
-            return TransportResult.Failure(SendFailureKind.LocalData, "Outlook Graph 发件不支持代理配置");
+        if (senderAccount.ProxyId > 0)
+            return TransportResult.Failure(SendFailureKind.LocalData, "Microsoft Graph 发件不支持代理配置");
 
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var password = encryptService.DecryptPassword(outbox.Password);
-            var username = outbox.UserName ?? string.Empty;
-            var client = clientFactory.GetClient(
-                new OutboxKey(outbox.UserId, outbox.Id),
-                outbox.Email,
-                username,
-                password
-            );
+            var client = clientFactory.GetClient(senderAccount);
             var db = scopeServiceProvider.GetRequiredService<SqlContext>();
-            await client.AuthenticateAsync(outbox.Email, username, password, outbox.Id, db);
+            await client.AuthenticateAsync(senderAccount, db, cancellationToken);
             return TransportResult.Success();
         }
         catch (Exception exception)
@@ -87,15 +62,14 @@ public sealed class MsGraphSender(
         }
     }
 
-    private static TransportResult Classify(Exception exception)
-    {
-        return exception switch
+    private static TransportResult Classify(Exception exception) =>
+        exception switch
         {
             OperationCanceledException
                 => TransportResult.Failure(SendFailureKind.Cancelled, exception.Message),
             AuthenticationException
                 => TransportResult.Failure(
-                    SendFailureKind.OutboxPermanent,
+                    SendFailureKind.SenderAccountPermanent,
                     exception.Message,
                     errorCode: exception.GetType().Name
                 ),
@@ -114,5 +88,4 @@ public sealed class MsGraphSender(
                     errorCode: exception.GetType().Name
                 ),
         };
-    }
 }

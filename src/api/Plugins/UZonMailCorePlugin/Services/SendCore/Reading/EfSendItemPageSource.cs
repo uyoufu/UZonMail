@@ -25,17 +25,22 @@ public sealed class EfSendItemPageSource(SqlContext db)
                 || (request.IncludePending && x.Status == SendingItemStatus.Pending)
             )
             .Where(x =>
-                x.OutBoxId > request.Cursor.OutboxId
-                || (x.OutBoxId == request.Cursor.OutboxId && x.Id > request.Cursor.Id)
+                x.SenderAccountId > request.Cursor.SenderAccountId
+                || (x.SenderAccountId == request.Cursor.SenderAccountId && x.Id > request.Cursor.Id)
             );
 
         if (request.SelectedItemIds is { Count: > 0 })
             query = query.Where(x => request.SelectedItemIds.Contains(x.Id));
 
         return await query
-            .OrderBy(x => x.OutBoxId)
+            .OrderBy(x => x.SenderAccountId)
             .ThenBy(x => x.Id)
-            .Select(x => new SendItemDescriptor(x.Id, x.SendingGroupId, x.OutBoxId, x.TriedCount))
+            .Select(x => new SendItemDescriptor(
+                x.Id,
+                x.SendingGroupId,
+                x.SenderAccountId,
+                x.TriedCount
+            ))
             .Take(request.Take)
             .ToListAsync(cancellationToken);
     }

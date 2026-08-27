@@ -36,7 +36,7 @@ public static class SendAttemptDecisionPolicy
         TransportResult transportResult,
         int triedCount,
         int maxRetryCount,
-        OutboxRetirementResult? outboxRetirement
+        SenderAccountRetirementResult? senderAccountRetirement
     )
     {
         if (transportResult.IsSuccess)
@@ -60,11 +60,11 @@ public static class SendAttemptDecisionPolicy
         if (isPermanentItemFailure)
             return new SendAttemptDecision(SendAttemptDisposition.Failed, transportResult.Message);
 
-        if (transportResult.FailureKind == SendFailureKind.OutboxPermanent)
+        if (transportResult.FailureKind == SendFailureKind.SenderAccountPermanent)
         {
             if (
-                outboxRetirement?.CurrentItemDisposition
-                != CurrentSendItemDisposition.RetryWithAnotherOutbox
+                senderAccountRetirement?.CurrentItemDisposition
+                != CurrentSendItemDisposition.RetryWithAnotherSenderAccount
             )
                 return new SendAttemptDecision(
                     SendAttemptDisposition.Failed,

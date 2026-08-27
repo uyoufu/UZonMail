@@ -1,7 +1,7 @@
 using UzonMail.CorePlugin.SignalRHubs.Notify;
-using UzonMail.CorePlugin.SignalRHubs.OutboxInfo;
 using UzonMail.CorePlugin.SignalRHubs.Permission;
 using UzonMail.CorePlugin.SignalRHubs.SendEmail;
+using UzonMail.CorePlugin.SignalRHubs.SenderAccountInfo;
 
 namespace UzonMail.CorePlugin.SignalRHubs
 {
@@ -12,5 +12,5 @@ namespace UzonMail.CorePlugin.SignalRHubs
         : ISendEmailClient,
             INotifyClient,
             IPermissionClient,
-            IOutboxStatusChanged { }
+            ISenderAccountStatusChanged { }
 }

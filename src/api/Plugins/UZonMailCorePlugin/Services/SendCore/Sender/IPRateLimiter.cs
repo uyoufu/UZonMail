@@ -51,29 +51,37 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
         /// 等待发送
         /// </summary>
         /// <param name="context"></param>
-        /// <param name="outbox"></param>
+        /// <param name="senderAccount"></param>
         /// <param name="hostIp"></param>
         /// <returns></returns>
-        public async Task WaitForReleaseAsync(SendingContext context, string outbox, string? hostIp)
+        public async Task WaitForReleaseAsync(
+            SendingContext context,
+            string senderAccount,
+            string? hostIp
+        )
         {
             var settingsManager = context.Provider.GetRequiredService<AppSettingsManager>();
-            var outboxAddress =
-                context.OutboxAddress ?? throw new InvalidOperationException("限流前必须先设置发件箱");
+            var senderAccountAddress =
+                context.SenderAccountAddress ?? throw new InvalidOperationException("限流前必须先设置发件箱");
             var sendingSetting = await settingsManager.GetSetting<SendingSetting>(
                 context.SqlContext,
-                outboxAddress.UserId
+                senderAccountAddress.UserId
             );
-            await WaitForReleaseAsync(outbox, hostIp, sendingSetting.MaxCountPerIPDomainHour);
+            await WaitForReleaseAsync(
+                senderAccount,
+                hostIp,
+                sendingSetting.MaxCountPerIPDomainHour
+            );
         }
 
         /// <summary>
         /// 等待发送
         /// </summary>
-        /// <param name="outbox"></param>
+        /// <param name="senderAccount"></param>
         /// <param name="hostIp"></param>
         /// <returns></returns>
         public async Task WaitForReleaseAsync(
-            string outbox,
+            string senderAccount,
             string? hostIp,
             int maxCountPerIPDomainHour = 0
         )
@@ -83,7 +91,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
 
             var cooldownMilliseconds = 60 * 60 * 1000 / maxCountPerIPDomainHour;
 
-            var key = GetKey(outbox, hostIp);
+            var key = GetKey(senderAccount, hostIp);
             var keyLock = _keyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
             await keyLock.WaitAsync();
             try
@@ -96,7 +104,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
                         var waitTime =
                             cooldownMilliseconds - (int)timeSinceLastSend.TotalMilliseconds;
                         _logger.Info(
-                            $"等待 {waitTime} 毫秒以满足发送速率限制，Outbox: {outbox}, HostIp: {hostIp}"
+                            $"等待 {waitTime} 毫秒以满足发送速率限制，SenderAccount: {senderAccount}, HostIp: {hostIp}"
                         );
                         await Task.Delay(waitTime);
                     }
@@ -114,18 +122,18 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
         /// <summary>
         /// 是否已经达到限制
         /// </summary>
-        /// <param name="outbox"></param>
+        /// <param name="senderAccount"></param>
         /// <param name="hostIp"></param>
         /// <param name="maxCountPerIPDomainHour"></param>
         /// <returns></returns>
-        public bool IsLimited(string outbox, string? hostIp, int maxCountPerIPDomainHour = 0)
+        public bool IsLimited(string senderAccount, string? hostIp, int maxCountPerIPDomainHour = 0)
         {
             if (maxCountPerIPDomainHour <= 0)
                 return false;
 
             var cooldownMilliseconds = 60 * 60 * 1000 / maxCountPerIPDomainHour;
 
-            var key = GetKey(outbox, hostIp);
+            var key = GetKey(senderAccount, hostIp);
             if (_lastSendedDateDic.TryGetValue(key, out var lastDate))
             {
                 var timeSinceLastSend = DateTime.UtcNow - lastDate;
@@ -135,9 +143,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender
             return false;
         }
 
-        private static string GetKey(string outbox, string? hostIp)
+        private static string GetKey(string senderAccount, string? hostIp)
         {
-            var domain = outbox.Split('@').Last();
+            var domain = senderAccount.Split('@').Last();
             if (string.IsNullOrEmpty(hostIp))
                 return domain;
             return $"{domain}_{hostIp}";

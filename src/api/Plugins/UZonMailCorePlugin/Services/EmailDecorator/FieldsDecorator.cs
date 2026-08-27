@@ -33,10 +33,10 @@ namespace UzonMail.CorePlugin.Services.EmailDecorator
             Dictionary<string, string> emailItemVariables =
                 new()
                 {
-                    { "inbox", decoratorParams.Inboxes.First().Email },
-                    { "inboxName", decoratorParams.Inboxes.First().Name ?? "" },
-                    { "outbox", decoratorParams.Outbox.Email },
-                    { "outboxName", decoratorParams.Outbox.Name ?? "" }
+                    { "recipientContact", decoratorParams.Recipients.First().Email },
+                    { "recipientContactName", decoratorParams.Recipients.First().Name ?? "" },
+                    { "senderAccount", decoratorParams.SenderAccount.Email },
+                    { "senderAccountName", decoratorParams.SenderAccount.Name ?? "" }
                 };
 
             foreach (var variable in variables)

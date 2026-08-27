@@ -16,7 +16,7 @@ public sealed class NetworkRouteResolver(
     {
         cancellationToken.ThrowIfCancellationRequested();
         var hasProxy = request.ExplicitProxyId > 0 || request.AvailableProxyIds.Count > 0;
-        if (request.OutboxType == OutboxType.MsGraph)
+        if (request.SendingProtocol == SendingProtocol.MicrosoftGraph)
         {
             return hasProxy
                 ? NetworkRouteResolution.Failure("Outlook Graph 发件不支持代理配置")
@@ -28,7 +28,7 @@ public sealed class NetworkRouteResolver(
 
         var handler = await proxiesManager.GetProxyHandler(
             serviceProvider,
-            request.Outbox.UserId,
+            request.SenderAccount.UserId,
             request.MatchAddress,
             request.ExplicitProxyId,
             [.. request.AvailableProxyIds]

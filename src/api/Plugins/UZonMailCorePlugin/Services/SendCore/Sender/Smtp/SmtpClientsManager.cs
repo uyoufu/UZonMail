@@ -7,8 +7,8 @@ using UzonMail.CorePlugin.Services.Config;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Networking;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
 using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.Emails;
@@ -63,7 +63,7 @@ public interface ISmtpSessionFactory
 }
 
 /// <summary>
-/// Manages SMTP sessions isolated by outbox, protocol profile, and network route.
+/// Manages SMTP sessions isolated by senderAccount, protocol profile, and network route.
 /// </summary>
 public interface ISmtpClientsManager
 {
@@ -77,7 +77,7 @@ public interface ISmtpClientsManager
 
     Task DisposeSmtpClientAsync(SmtpClientKey key);
 
-    Task DisposeSmtpClientsAsync(OutboxKey outbox);
+    Task DisposeSmtpClientsAsync(SenderAccountKey senderAccount);
 }
 
 /// <inheritdoc />
@@ -135,19 +135,19 @@ public sealed class SmtpClientsManager
         if (_shutdown.IsCancellationRequested)
             return Result<ISmtpSessionLease>.Fail("SMTP 会话管理器正在停止");
 
-        var outbox = context.CurrentAttempt!.PreparedItem.Outbox;
+        var senderAccount = context.CurrentAttempt!.PreparedItem.SenderAccount;
         var key = new SmtpClientKey(
-            new OutboxKey(outbox.UserId, outbox.Id),
-            GetProfileFingerprint(outbox),
+            new SenderAccountKey(senderAccount.UserId, senderAccount.Id),
+            GetProfileFingerprint(senderAccount),
             route.Identity,
-            outbox.Email
+            senderAccount.Email
         );
         var profile = new SmtpConnectionProfile(
-            outbox.SmtpHost,
-            outbox.SmtpPort,
-            outbox.ConnectionSecurity.ToMailKitSecureSocketOptions(),
-            outbox.SmtpAuthUserName ?? outbox.Email,
-            outbox.PlainPassword ?? string.Empty,
+            senderAccount.SmtpHost,
+            senderAccount.SmtpPort,
+            senderAccount.ConnectionSecurity.ToMailKitSecureSocketOptions(),
+            senderAccount.SmtpAuthUserName ?? senderAccount.Email,
+            senderAccount.PlainPassword ?? string.Empty,
             context.Provider.GetRequiredService<DebugConfig>().IsDemo
         );
 
@@ -213,14 +213,14 @@ public sealed class SmtpClientsManager
             await RetireEntryAsync(key, client, SmtpSessionRetirementReason.ExplicitDisposal);
     }
 
-    public async Task DisposeSmtpClientsAsync(OutboxKey outbox)
+    public async Task DisposeSmtpClientsAsync(SenderAccountKey senderAccount)
     {
-        var entries = _clients.Where(entry => entry.Key.Outbox == outbox).ToArray();
+        var entries = _clients.Where(entry => entry.Key.SenderAccount == senderAccount).ToArray();
         foreach (var entry in entries)
             await RetireEntryAsync(
                 entry.Key,
                 entry.Value,
-                SmtpSessionRetirementReason.OutboxDisposal
+                SmtpSessionRetirementReason.SenderAccountDisposal
             );
     }
 
@@ -455,8 +455,8 @@ public sealed class SmtpClientsManager
         }
     }
 
-    private static string GetProfileFingerprint(OutboxEmailAddress outbox) =>
-        $"{outbox.SmtpHost}\n{outbox.SmtpPort}\n{outbox.SmtpAuthUserName}\n{outbox.PlainPassword}\n{outbox.ConnectionSecurity}".MD5();
+    private static string GetProfileFingerprint(SenderEmailAddress senderAccount) =>
+        $"{senderAccount.SmtpHost}\n{senderAccount.SmtpPort}\n{senderAccount.SmtpAuthUserName}\n{senderAccount.PlainPassword}\n{senderAccount.ConnectionSecurity}".MD5();
 
     private enum SmtpSessionRetirementReason
     {
@@ -464,7 +464,7 @@ public sealed class SmtpClientsManager
         IdleTimeout,
         KeepAliveFailure,
         ManagerShutdown,
-        OutboxDisposal,
+        SenderAccountDisposal,
         SessionInvalidated,
     }
 }

@@ -33,7 +33,12 @@ namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp
         {
             _email = email.Trim();
             _cooldownMilliseconds = cooldownMilliseconds;
-            _clientKey = new SmtpClientKey(new OutboxKey(0, 0), string.Empty, "direct", _email);
+            _clientKey = new SmtpClientKey(
+                new SenderAccountKey(0, 0),
+                string.Empty,
+                "direct",
+                _email
+            );
         }
 
         public void SetParams(SmtpClientKey clientKey, int cooldownMilliseconds)

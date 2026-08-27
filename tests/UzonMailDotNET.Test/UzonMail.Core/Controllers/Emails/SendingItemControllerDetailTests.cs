@@ -33,7 +33,7 @@ public sealed class SendingItemControllerDetailTests
         Assert.IsTrue(response.Ok);
         Assert.IsNotNull(response.Data);
         Assert.AreEqual("Quarterly update", response.Data.Subject);
-        Assert.AreEqual("sender@example.com", response.Data.FromEmail);
+        Assert.AreEqual("sender@example.com", response.Data.SenderEmail);
         Assert.AreEqual("<p>Hello customer</p>", response.Data.Content);
         Assert.AreEqual("recipient@example.com", response.Data.Recipients.Single().Email);
         Assert.AreEqual("Copy", response.Data.CcRecipients.Single().Name);
@@ -127,11 +127,11 @@ public sealed class SendingItemControllerDetailTests
             UserId = owner.Id,
             OrganizationId = organization.Id,
             Subject = "Quarterly update",
-            FromEmail = "sender@example.com",
+            SenderEmail = "sender@example.com",
             SendDate = new DateTime(2026, 8, 11, 2, 30, 0, DateTimeKind.Utc),
             Status = SendingItemStatus.Success,
             Content = "<p>Hello customer</p>",
-            Inboxes = [new EmailAddress { Email = "recipient@example.com", Name = "Recipient" }],
+            Recipients = [new EmailAddress { Email = "recipient@example.com", Name = "Recipient" }],
             CC = [new EmailAddress { Email = "copy@example.com", Name = "Copy" }],
             BCC = [new EmailAddress { Email = "hidden@example.com", Name = "Hidden" }],
             Attachments = [attachment],

@@ -5,8 +5,8 @@ import { AppSettingType } from '../appSetting'
 
 export interface IEmailAnchor {
   userId: string,
-  outboxEmail: string,
-  inboxEmail: string,
+  senderEmail: string,
+  recipientEmails: string,
   visitedCount: string,
   firstVisitDate: string,
   lastVisitDate: string,

@@ -20,11 +20,11 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             if (row == null)
                 return;
 
-            OutboxId = row.SelectTokenOrDefault("outboxId", 0L);
-            Outbox = row.SelectTokenOrDefault("outbox", string.Empty);
-            OutboxName = row.SelectTokenOrDefault("outboxName", string.Empty);
-            Inbox = row.SelectTokenOrDefault("inbox", string.Empty);
-            InboxName = row.SelectTokenOrDefault("inboxName", string.Empty);
+            SenderAccountId = row.SelectTokenOrDefault("senderAccountId", 0L);
+            SenderEmail = row.SelectTokenOrDefault("senderEmail", string.Empty);
+            SenderName = row.SelectTokenOrDefault("senderName", string.Empty);
+            RecipientEmail = row.SelectTokenOrDefault("recipientEmail", string.Empty);
+            RecipientName = row.SelectTokenOrDefault("recipientName", string.Empty);
             Subject = row.SelectTokenOrDefault("subject", string.Empty);
             CC = row.SelectTokenOrDefault("cc", string.Empty)
                 .SplitBySeparators()
@@ -62,14 +62,14 @@ namespace UzonMail.CorePlugin.Database.SQL.EmailSending
             }
         }
 
-        // 发件箱
-        public long OutboxId { get; private set; }
-        public string? Outbox { get; private set; }
-        public string? OutboxName { get; private set; }
+        // 发件账户
+        public long SenderAccountId { get; private set; }
+        public string? SenderEmail { get; private set; }
+        public string? SenderName { get; private set; }
 
-        // 发件箱
-        public string? Inbox { get; private set; }
-        public string? InboxName { get; private set; }
+        // 收件联系人
+        public string? RecipientEmail { get; private set; }
+        public string? RecipientName { get; private set; }
 
         // 主题
         public string? Subject { get; private set; }

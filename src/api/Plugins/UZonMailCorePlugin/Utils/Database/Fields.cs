@@ -12,7 +12,7 @@ namespace UzonMail.CorePlugin.Utils.Database
         public const string userId = "userId";
         public const string password = "password";
         public const string token = "token";
-        public const string inbox = "inbox";
+        public const string recipientContact = "recipientContact";
         public const string body = "body";
         public const string template = "template";
         public const string _id = "_id";
@@ -28,7 +28,7 @@ namespace UzonMail.CorePlugin.Utils.Database
         public const string historyId = "historyId";
         public const string name = "name";
         public const string value = "value";
-        public const string copyToEmails = "copyToEmails";
+        public const string copyRecipientEmails = "copyRecipientEmails";
         public const string subPath = "subPath";
         public const string avatar = "avatar";
         public const string connectionId = "connectionId";

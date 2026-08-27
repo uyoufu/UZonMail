@@ -11,8 +11,8 @@ public sealed record SendRuntimeGroupSnapshot(
     int ActiveLeaseCount
 );
 
-public sealed record SendRuntimeOutboxSnapshot(
-    OutboxKey Key,
+public sealed record SendRuntimeSenderAccountSnapshot(
+    SenderAccountKey Key,
     int ActiveLeaseCount,
     bool IsDraining
 );
@@ -22,7 +22,7 @@ public sealed record SendRuntimeSnapshot(
     int ReadyCount,
     int DelayedCount,
     IReadOnlyList<SendRuntimeGroupSnapshot> Groups,
-    IReadOnlyList<SendRuntimeOutboxSnapshot> Outboxes
+    IReadOnlyList<SendRuntimeSenderAccountSnapshot> SenderAccounts
 );
 
 public interface ISendRuntimeDiagnostics

@@ -5,7 +5,7 @@ using UzonMail.Utils.Web.Service;
 namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
 {
     /// <summary>
-    /// 解析 Outbox 的 graph 设置
+    /// 解析 SenderAccount 的 graph 设置
     /// 用户名有以下 2 种格式:
     /// 1. client_id
     /// 2. client_id/tenant_id

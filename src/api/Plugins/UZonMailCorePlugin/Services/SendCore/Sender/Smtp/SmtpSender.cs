@@ -1,16 +1,15 @@
 using log4net;
-using UzonMail.CorePlugin.Services.Encrypt;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
 using UzonMail.CorePlugin.Services.SendCore.Networking;
 using UzonMail.CorePlugin.Services.SendCore.Proxies.Clients;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.Transport;
 using UzonMail.DB.SQL.Core.Emails;
 
 namespace UzonMail.CorePlugin.Services.SendCore.Sender.Smtp;
 
 public sealed class SmtpSender(
-    EncryptService encryptService,
     IPRateLimiter ipRateLimiter,
     ITransportFailureClassifier failureClassifier,
     SmtpConnector connector,
@@ -20,7 +19,7 @@ public sealed class SmtpSender(
     private const int MaxTransportAttempts = 3;
     private static readonly ILog Logger = LogManager.GetLogger(typeof(SmtpSender));
 
-    public OutboxType Type => OutboxType.SMTP;
+    public SendingProtocol Type => SendingProtocol.Smtp;
 
     public async Task<TransportResult> SendAsync(
         SendingContext context,
@@ -37,9 +36,9 @@ public sealed class SmtpSender(
             var routeResolver = context.Provider.GetRequiredService<INetworkRouteResolver>();
             var routeResult = await routeResolver.ResolveAsync(
                 new NetworkRouteRequest(
-                    new OutboxKey(sendItem.Outbox.UserId, sendItem.Outbox.Id),
-                    sendItem.Outbox.OutboxType,
-                    sendItem.Outbox.Email,
+                    new SenderAccountKey(sendItem.SenderAccount.UserId, sendItem.SenderAccount.Id),
+                    sendItem.SenderAccount.SendingProtocol,
+                    sendItem.SenderAccount.Email,
                     sendItem.EffectiveProxyId,
                     sendItem.AvailableProxyIds
                 ),
@@ -72,7 +71,7 @@ public sealed class SmtpSender(
                 await using var clientLease = clientResult.Data;
                 await ipRateLimiter.WaitForReleaseAsync(
                     context,
-                    sendItem.Outbox.Email,
+                    sendItem.SenderAccount.Email,
                     clientLease.ProxyClient?.ProxyHost
                 );
 
@@ -90,7 +89,7 @@ public sealed class SmtpSender(
                             cancellationToken
                         );
                         Logger.Info(
-                            $"邮件发送完成：{sendItem.Outbox.Email} -> {string.Join(",", sendItem.Inboxes.Select(x => x.Email))}"
+                            $"邮件发送完成：{sendItem.SenderAccount.Email} -> {string.Join(",", sendItem.Recipients.Select(x => x.Email))}"
                         );
                         return TransportResult.Success(receiptId);
                     }
@@ -118,25 +117,23 @@ public sealed class SmtpSender(
 
     public async Task<TransportResult> ValidateAsync(
         IServiceProvider scopeServiceProvider,
-        Outbox outbox,
+        SenderEmailAddress senderAccount,
         CancellationToken cancellationToken = default
     )
     {
-        var smtpUserName = string.IsNullOrWhiteSpace(outbox.UserName)
-            ? outbox.Email
-            : outbox.UserName;
-        var smtpPassword = encryptService.DecryptPassword(outbox.Password);
-        var localError = ValidateParameters(outbox, smtpUserName, smtpPassword);
+        var smtpUserName = senderAccount.SmtpAuthUserName;
+        var smtpPassword = senderAccount.PlainPassword ?? string.Empty;
+        var localError = ValidateParameters(senderAccount, smtpUserName, smtpPassword);
         if (localError is not null)
             return localError;
 
         var routeResolver = scopeServiceProvider.GetRequiredService<INetworkRouteResolver>();
         var routeResult = await routeResolver.ResolveAsync(
             new NetworkRouteRequest(
-                new OutboxKey(outbox.UserId, outbox.Id),
-                outbox.Type,
-                outbox.Email,
-                outbox.ProxyId,
+                new SenderAccountKey(senderAccount.UserId, senderAccount.Id),
+                senderAccount.SendingProtocol,
+                senderAccount.Email,
+                senderAccount.ProxyId,
                 []
             ),
             cancellationToken
@@ -145,16 +142,16 @@ public sealed class SmtpSender(
             return TransportResult.Failure(routeResult.FailureKind, routeResult.Message);
 
         using var client = scopeServiceProvider.GetRequiredService<ThrottlingSmtpClient>();
-        client.SetParams(outbox.Email, 0);
+        client.SetParams(senderAccount.Email, 0);
         client.ProxyClient = routeResult.Route!.ProxyClient;
         try
         {
             await connector.ConnectAndAuthenticateAsync(
                 client,
                 new SmtpConnectionProfile(
-                    outbox.SmtpHost,
-                    outbox.SmtpPort,
-                    outbox.ConnectionSecurity.ToMailKitSecureSocketOptions(),
+                    senderAccount.SmtpHost,
+                    senderAccount.SmtpPort,
+                    senderAccount.ConnectionSecurity.ToMailKitSecureSocketOptions(),
                     smtpUserName!,
                     smtpPassword
                 ),
@@ -175,14 +172,14 @@ public sealed class SmtpSender(
     }
 
     private static TransportResult? ValidateParameters(
-        Outbox outbox,
+        SenderEmailAddress senderAccount,
         string? smtpUserName,
         string smtpPassword
     )
     {
-        if (string.IsNullOrWhiteSpace(outbox.SmtpHost))
+        if (string.IsNullOrWhiteSpace(senderAccount.SmtpHost))
             return TransportResult.Failure(SendFailureKind.LocalData, "SMTP 服务器地址不能为空");
-        if (outbox.SmtpPort is <= 0 or > 65535)
+        if (senderAccount.SmtpPort is <= 0 or > 65535)
             return TransportResult.Failure(SendFailureKind.LocalData, "SMTP 端口号不正确");
         if (string.IsNullOrWhiteSpace(smtpUserName))
             return TransportResult.Failure(SendFailureKind.LocalData, "SMTP 用户名不能为空");

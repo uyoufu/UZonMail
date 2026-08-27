@@ -1,13 +1,13 @@
 /** Excel 行中的收件人字段。 */
 export interface IEmailDataRecipientRow {
-  inbox?: unknown,
-  inboxName?: unknown
+  recipientEmail?: unknown,
+  recipientName?: unknown
 }
 
 /** 重复收件人的汇总信息。 */
 export interface IDuplicateRecipientSummary {
-  inbox: string,
-  inboxName: string,
+  recipientEmail: string,
+  recipientName: string,
   sendingCount: number
 }
 
@@ -21,23 +21,23 @@ export function getDuplicateRecipientSummaries (
   const recipients = new Map<string, IDuplicateRecipientSummary>()
 
   for (const emailDataRow of emailDataRows) {
-    const inbox = typeof emailDataRow.inbox === 'string' ? emailDataRow.inbox.trim() : ''
-    if (!inbox) continue
+    const recipientEmail = typeof emailDataRow.recipientEmail === 'string' ? emailDataRow.recipientEmail.trim() : ''
+    if (!recipientEmail) continue
 
-    const duplicateKey = inbox.toLowerCase()
-    const inboxName = typeof emailDataRow.inboxName === 'string' ? emailDataRow.inboxName.trim() : ''
+    const duplicateKey = recipientEmail.toLowerCase()
+    const recipientName = typeof emailDataRow.recipientName === 'string' ? emailDataRow.recipientName.trim() : ''
     const existingRecipient = recipients.get(duplicateKey)
     if (existingRecipient) {
       existingRecipient.sendingCount += 1
-      if (!existingRecipient.inboxName && inboxName) {
-        existingRecipient.inboxName = inboxName
+      if (!existingRecipient.recipientName && recipientName) {
+        existingRecipient.recipientName = recipientName
       }
       continue
     }
 
     recipients.set(duplicateKey, {
-      inbox,
-      inboxName,
+      recipientEmail,
+      recipientName,
       sendingCount: 1
     })
   }
@@ -46,6 +46,6 @@ export function getDuplicateRecipientSummaries (
     .filter(recipient => recipient.sendingCount > 1)
     .map(recipient => ({
       ...recipient,
-      inboxName: recipient.inboxName || recipient.inbox
+      recipientName: recipient.recipientName || recipient.recipientEmail
     }))
 }

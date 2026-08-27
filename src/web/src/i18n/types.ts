@@ -13,10 +13,6 @@ export type LoginPageLangKey = keyof typeof LocaleLang.loginPage
 
 export type DashboardPageLangKey = keyof typeof LocaleLang.dashboardPage
 
-export type InboxManagerLangKey = keyof typeof LocaleLang.inboxManager
-
-export type outboxManagerLangKey = keyof typeof LocaleLang.outboxManager
-
 export type ButtonLangKey = keyof typeof LocaleLang.buttons
 
 export type EmailGroupLangKey = keyof typeof LocaleLang.emailGroup

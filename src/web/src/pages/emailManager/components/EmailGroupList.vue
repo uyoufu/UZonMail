@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { translateEmailGroup, translateGlobal } from 'src/i18n/helpers'
+import { t, translateEmailGroup, translateGlobal } from 'src/i18n/helpers'
 
 import type { PropType } from 'vue'
 import type { IEmailGroupListItem, IFlatHeader } from './types'
@@ -87,7 +87,7 @@ const props = defineProps({
   // 组类型
   // 1-发件
   // 2-收件
-  groupType: {
+  groupCategory: {
     type: Number as PropType<1 | 2>,
     default: 1
   },
@@ -105,14 +105,14 @@ const props = defineProps({
   }
 })
 const header: ComputedRef<IFlatHeader> = computed(() => {
-  if (props.groupType === 1) {
+  if (props.groupCategory === 1) {
     return {
-      label: translateEmailGroup('outboxGroup'),
+      label: t('accountManagement.sender.group'),
       icon: 'group'
     }
   }
   return {
-    label: translateEmailGroup('inboxGroup'),
+    label: t('accountManagement.recipient.group'),
     icon: 'group'
   }
 })
@@ -143,7 +143,7 @@ onMounted(loadGroups)
 
 /** 重新加载分类，供移动收件箱后的页面刷新调用。 */
 async function loadGroups () {
-  const { data: groups } = await getEmailGroups(props.groupType)
+  const { data: groups } = await getEmailGroups(props.groupCategory)
   groupItems.value = groups.map(x => {
     // 判断是否有初始值，若有，则恢复选中状态
     if (selectedValues.value.some(y => y.id === x.id)) {
@@ -206,7 +206,7 @@ async function onCreateEmailGroup () {
   const { data: group } = await createEmailCroup({
     icon: 'group',
     ...result.data,
-    type: props.groupType
+    category: props.groupCategory
   })
 
   groupItems.value.push({
@@ -299,7 +299,7 @@ async function deleteGroup (emailGroup: IEmailGroupListItem) {
   // 进行确认
   const confirm = await confirmOperation(
     translateGlobal('deleteConfirmation'),
-    translateEmailGroup('deleteGroupAndInboxesConfirm', { groupName: emailGroup.label })
+    translateEmailGroup('deleteGroupAndRecipientContactsConfirm', { groupName: emailGroup.label })
   )
   if (!confirm) return
 

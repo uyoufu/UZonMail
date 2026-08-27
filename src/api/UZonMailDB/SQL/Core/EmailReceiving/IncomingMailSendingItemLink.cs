@@ -36,12 +36,12 @@ public class IncomingMailSendingItemLink
     /// 被归因的具体发送收件人；批量发送或 DSN 含多个收件人时使用。
     /// 无法精确定位收件人时为空。
     /// </summary>
-    public long? SendingItemInboxId { get; set; }
+    public long? SendingItemRecipientId { get; set; }
 
     /// <summary>
     /// 被归因的具体发送收件人导航。
     /// </summary>
-    public SendingItemInbox? SendingItemInbox { get; set; }
+    public SendingItemRecipient? SendingItemRecipient { get; set; }
 
     /// <summary>
     /// 该关联代表回复、投递状态通知还是垃圾邮件投诉。
@@ -91,7 +91,7 @@ public class IncomingMailSendingItemLink
             {
                 x.IncomingMailMessageId,
                 x.SendingItemId,
-                x.SendingItemInboxId,
+                x.SendingItemRecipientId,
                 x.LinkType,
             })
             .IsUnique();
@@ -101,7 +101,7 @@ public class IncomingMailSendingItemLink
             x.LinkType,
             x.Status
         });
-        builder.HasIndex(x => x.SendingItemInboxId);
+        builder.HasIndex(x => x.SendingItemRecipientId);
         builder
             .HasOne(x => x.IncomingMailMessage)
             .WithMany(x => x.SendingItemLinks)
@@ -113,9 +113,9 @@ public class IncomingMailSendingItemLink
             .HasForeignKey(x => x.SendingItemId)
             .OnDelete(DeleteBehavior.NoAction);
         builder
-            .HasOne(x => x.SendingItemInbox)
+            .HasOne(x => x.SendingItemRecipient)
             .WithMany()
-            .HasForeignKey(x => x.SendingItemInboxId)
+            .HasForeignKey(x => x.SendingItemRecipientId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

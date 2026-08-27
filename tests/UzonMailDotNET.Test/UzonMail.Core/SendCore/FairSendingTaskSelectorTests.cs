@@ -26,7 +26,7 @@ public sealed class FairSendingTaskSelectorTests
                 )
                 .ToArray();
 
-            var nextOutboxId = 1L;
+            var nextSenderAccountId = 1L;
             var candidates = users
                 .SelectMany(user =>
                     Enumerable
@@ -35,7 +35,7 @@ public sealed class FairSendingTaskSelectorTests
                             Candidate(
                                 user.OrganizationId,
                                 user.UserId,
-                                nextOutboxId++,
+                                nextSenderAccountId++,
                                 random.Next(0, 20)
                             )
                         )
@@ -77,7 +77,12 @@ public sealed class FairSendingTaskSelectorTests
         var selected = SelectWithCycle(snapshot);
 
         CollectionAssert.AreEqual(
-            new[] { new OutboxKey(10, 1), new OutboxKey(20, 3), new OutboxKey(11, 2), },
+            new[]
+            {
+                new SenderAccountKey(10, 1),
+                new SenderAccountKey(20, 3),
+                new SenderAccountKey(11, 2),
+            },
             selected
         );
     }
@@ -96,11 +101,11 @@ public sealed class FairSendingTaskSelectorTests
         );
 
         Assert.IsTrue(cycle.TryReserveNext(out var rejected));
-        Assert.AreEqual(new OutboxKey(10, 1), rejected.Key);
+        Assert.AreEqual(new SenderAccountKey(10, 1), rejected.Key);
         cycle.Reject(rejected.Key);
 
         Assert.IsTrue(cycle.TryReserveNext(out var selected));
-        Assert.AreEqual(new OutboxKey(20, 2), selected.Key);
+        Assert.AreEqual(new SenderAccountKey(20, 2), selected.Key);
         cycle.Commit(selected.Key);
     }
 
@@ -139,20 +144,20 @@ public sealed class FairSendingTaskSelectorTests
     private static SendingTaskCandidate Candidate(
         long organizationId,
         long userId,
-        long outboxId,
+        long senderAccountId,
         int createdOffset
     ) =>
         new(
-            new OutboxKey(userId, outboxId),
+            new SenderAccountKey(userId, senderAccountId),
             organizationId,
             userId,
             BaseDate.AddSeconds(createdOffset)
         );
 
-    private static OutboxKey[] SelectWithCycle(SendingDispatchSnapshot snapshot)
+    private static SenderAccountKey[] SelectWithCycle(SendingDispatchSnapshot snapshot)
     {
         var cycle = new FairSendingTaskSelector().CreateCycle(snapshot);
-        var selected = new List<OutboxKey>();
+        var selected = new List<SenderAccountKey>();
         while (cycle.TryReserveNext(out var candidate))
         {
             selected.Add(candidate.Key);
@@ -162,12 +167,12 @@ public sealed class FairSendingTaskSelectorTests
         return [.. selected];
     }
 
-    private static OutboxKey[] SelectWithReference(SendingDispatchSnapshot snapshot)
+    private static SenderAccountKey[] SelectWithReference(SendingDispatchSnapshot snapshot)
     {
         var remaining = snapshot.Candidates.ToList();
         var activeByOrganization = CountBy(snapshot.ActiveWorkers, worker => worker.OrganizationId);
         var activeByUser = CountBy(snapshot.ActiveWorkers, worker => worker.UserId);
-        var selected = new List<OutboxKey>();
+        var selected = new List<SenderAccountKey>();
 
         while (selected.Count < snapshot.MaxSelections && remaining.Count > 0)
         {
@@ -181,7 +186,7 @@ public sealed class FairSendingTaskSelectorTests
                 .ThenBy(item => GetCount(activeByUser, item.UserId))
                 .ThenBy(item => item.CreateDate)
                 .ThenBy(item => item.UserId)
-                .ThenBy(item => item.Key.OutboxId)
+                .ThenBy(item => item.Key.SenderAccountId)
                 .First();
 
             remaining.Remove(candidate);

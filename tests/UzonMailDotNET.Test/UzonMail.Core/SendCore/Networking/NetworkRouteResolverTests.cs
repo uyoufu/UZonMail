@@ -16,13 +16,8 @@ namespace UzonMailDotNET.Test.UzonMail.Core.SendCore.Networking;
 [TestClass]
 public sealed class NetworkRouteResolverTests
 {
-    private static readonly NetworkRouteRequest DirectSmtpRequest = new(
-        new OutboxKey(1, 2),
-        OutboxType.SMTP,
-        "sender@test.com",
-        0,
-        []
-    );
+    private static readonly NetworkRouteRequest DirectSmtpRequest =
+        new(new SenderAccountKey(1, 2), SendingProtocol.Smtp, "sender@test.com", 0, []);
 
     [TestMethod]
     public async Task ResolveAsync_DirectSmtpReturnsSharedDirectRoute()
@@ -40,8 +35,12 @@ public sealed class NetworkRouteResolverTests
     public async Task ResolveAsync_GraphRejectsProxyAndAllowsDirectConnection()
     {
         var resolver = CreateResolver(new StubProxiesManager());
-        var proxied = DirectSmtpRequest with { OutboxType = OutboxType.MsGraph, ExplicitProxyId = 9 };
-        var direct = DirectSmtpRequest with { OutboxType = OutboxType.MsGraph };
+        var proxied = DirectSmtpRequest with
+        {
+            SendingProtocol = SendingProtocol.MicrosoftGraph,
+            ExplicitProxyId = 9
+        };
+        var direct = DirectSmtpRequest with { SendingProtocol = SendingProtocol.MicrosoftGraph };
 
         var failure = await resolver.ResolveAsync(proxied);
         var success = await resolver.ResolveAsync(direct);
@@ -55,9 +54,8 @@ public sealed class NetworkRouteResolverTests
     [TestMethod]
     public async Task ResolveAsync_ConfiguredProxyWithoutHandlerReturnsFailure()
     {
-        var result = await CreateResolver(new StubProxiesManager()).ResolveAsync(
-            DirectSmtpRequest with { AvailableProxyIds = [7] }
-        );
+        var result = await CreateResolver(new StubProxiesManager())
+            .ResolveAsync(DirectSmtpRequest with { AvailableProxyIds = [7] });
 
         Assert.IsFalse(result.IsSuccess);
         StringAssert.Contains(result.Message, "没有匹配到");
@@ -68,9 +66,8 @@ public sealed class NetworkRouteResolverTests
     {
         var manager = new StubProxiesManager { Handler = new StubProxyHandler("proxy-1", false) };
 
-        var result = await CreateResolver(manager).ResolveAsync(
-            DirectSmtpRequest with { ExplicitProxyId = 7 }
-        );
+        var result = await CreateResolver(manager)
+            .ResolveAsync(DirectSmtpRequest with { ExplicitProxyId = 7 });
 
         Assert.IsFalse(result.IsSuccess);
         StringAssert.Contains(result.Message, "proxy-1");
@@ -88,9 +85,8 @@ public sealed class NetworkRouteResolverTests
         handler.Client = new ProxyClientAdapter(handler, new Socks5Client("proxy.test", 1080));
         var manager = new StubProxiesManager { Handler = handler };
 
-        var result = await CreateResolver(manager).ResolveAsync(
-            DirectSmtpRequest with { ExplicitProxyId = 7 }
-        );
+        var result = await CreateResolver(manager)
+            .ResolveAsync(DirectSmtpRequest with { ExplicitProxyId = 7 });
 
         Assert.IsTrue(result.IsSuccess);
         Assert.AreEqual(expectedKind, result.Route!.Kind);
@@ -104,11 +100,10 @@ public sealed class NetworkRouteResolverTests
         using var cancellation = new CancellationTokenSource();
         cancellation.Cancel();
 
-        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() =>
-            CreateResolver(new StubProxiesManager()).ResolveAsync(
-                DirectSmtpRequest,
-                cancellation.Token
-            )
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(
+            () =>
+                CreateResolver(new StubProxiesManager())
+                    .ResolveAsync(DirectSmtpRequest, cancellation.Token)
         );
     }
 
@@ -127,7 +122,7 @@ public sealed class NetworkRouteResolverTests
         public Task<IProxyHandler?> GetProxyHandler(
             IServiceProvider serviceProvider,
             long userId,
-            string outboxEmail,
+            string senderAccountEmail,
             long proxyId,
             List<long>? availableProxyIds = null
         )

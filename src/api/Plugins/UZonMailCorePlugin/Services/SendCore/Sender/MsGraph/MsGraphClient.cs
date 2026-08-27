@@ -1,304 +1,192 @@
 using System.Net;
+using System.Security.Authentication;
 using log4net;
 using MailKit.Net.Proxy;
-using MailKit.Security;
-using Microsoft.Identity.Client;
+using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using Newtonsoft.Json.Linq;
 using UzonMail.CorePlugin.Services.Config;
-using UzonMail.CorePlugin.Services.Encrypt;
-using UzonMail.DB.Extensions;
+using UzonMail.CorePlugin.Services.Credentials;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.DB.SQL;
-using UzonMail.Utils.Extensions;
-using UzonMail.Utils.Http.Request;
+using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.Utils.Json;
 
-namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph
+namespace UzonMail.CorePlugin.Services.SendCore.Sender.MsGraph;
+
+/// <summary>
+/// 使用授权码流产生的委托令牌调用 Microsoft Graph。
+/// </summary>
+public sealed class MsGraphClient(
+    ICredentialProtector credentialProtector,
+    DebugConfig debugConfig,
+    HttpClient httpClient
+) : IMsGraphClient
 {
-    /// <summary>
-    /// 参考： https://learn.microsoft.com/en-us/graph/sdks/choose-authentication-providers?tabs=csharp#client-credentials-provider
-    /// </summary>
-    /// <param name="email"></param>
-    /// <param name="cooldownMilliseconds"></param>
-    public class MsGraphClient(
-        EncryptService encryptService,
-        IConfiguration configuration,
-        DebugConfig debugConfig,
-        HttpClient httpClient
-    ) : IMsGraphClient
+    private static readonly ILog Logger = LogManager.GetLogger(typeof(MsGraphClient));
+    private AuthenticationResult2? _authenticationResult;
+    private string _authenticationFingerprint = string.Empty;
+    private string _email = string.Empty;
+
+    public IProxyClient? ProxyClient { get; set; }
+
+    public void SetParams(string email, int cooldownMilliseconds)
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(MsGraphClient));
+        _email = email;
+    }
 
-        private bool _isRefreshTokenChanged = false;
-        private AuthenticationResult2? _authenticationResult;
-        private AuthenticationResult2? AuthenticationResult
+    public async Task AuthenticateAsync(
+        SenderEmailAddress senderAccount,
+        SqlContext db,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var oauth = senderAccount.Credentials.OAuth;
+        if (oauth is not { Provider: OAuthProvider.Microsoft })
+            throw new AuthenticationException("Microsoft Graph 发件账户缺少 Microsoft OAuth 凭据。");
+        if (string.IsNullOrWhiteSpace(oauth.ClientId))
+            throw new AuthenticationException("Microsoft Graph OAuth ClientId 未配置。");
+        if (string.IsNullOrWhiteSpace(oauth.RefreshToken))
+            throw new AuthenticationException("Microsoft Graph 授权已失效，请重新授权。");
+
+        var fingerprint = $"{oauth.ClientId}\n{oauth.RefreshToken}";
+        if (
+            _authenticationResult is { } cached
+            && cached.ExpireAt > DateTime.UtcNow
+            && _authenticationFingerprint == fingerprint
+        )
+            return;
+
+        _authenticationFingerprint = fingerprint;
+        if (
+            !string.IsNullOrWhiteSpace(oauth.AccessToken)
+            && oauth.AccessTokenExpiresAtUtc > DateTime.UtcNow.AddMinutes(1)
+        )
         {
-            get => _authenticationResult;
-            set
+            _authenticationResult = new AuthenticationResult2
             {
-                var newRefreshToken = value?.RefreshToken ?? string.Empty;
-                var oldRefreshToken = _authenticationResult?.RefreshToken ?? string.Empty;
-                _isRefreshTokenChanged =
-                    !string.IsNullOrEmpty(newRefreshToken) && newRefreshToken != oldRefreshToken;
-
-                _authenticationResult = value;
-            }
-        }
-        private string _email = string.Empty;
-        private int _cooldownMilliseconds;
-
-        public void SetParams(string email, int cooldownMilliseconds)
-        {
-            _email = email;
-            _cooldownMilliseconds = cooldownMilliseconds;
-        }
-
-        public IProxyClient? ProxyClient { get; set; }
-
-        private string _authenticateInputMd5 = string.Empty;
-
-        /// <summary>
-        /// 验证邮箱是否正确
-        /// 该接口不会保存新的 refreshToken 到数据库中, 若需要，请调用 AuthenticateAsync 的重载方法
-        /// 外部尽量不要调用
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        /// <exception cref="AuthenticationException"></exception>
-        public async Task AuthenticateAsync(string email, string username, string password)
-        {
-            // 相当一起缓存验证结果，避免重复验证
-            var inputMd5 = $"{email}-{username}-{password}".MD5();
-            if (
-                AuthenticationResult != null
-                && AuthenticationResult.ExpireAt > DateTime.UtcNow
-                && _authenticateInputMd5 == inputMd5
-            )
-                return;
-            _authenticateInputMd5 = inputMd5;
-
-            // 解析用户名和密码
-            var msGraphParams = new MsGraphParamsResolver(configuration);
-            msGraphParams.SetGraphInfo(username, password);
-            if (string.IsNullOrEmpty(msGraphParams.ClientId))
-            {
-                string message = "Outlook 邮箱没有配置用户名，无法进行 OAuth2 验证。";
-                _logger.Warn(message);
-                throw new AuthenticationException(message);
-            }
-
-            // 授权码流（Authorization Code Flow）形式
-            if (msGraphParams.HasRefreshToken)
-            {
-                // 说明是 clientId, refreshToken 的形式
-                AuthenticationResult =
-                    await GetAccessByRefreshToken(
-                        msGraphParams.ClientId,
-                        msGraphParams.ClientSecret,
-                        msGraphParams.RefreshToken!
-                    )
-                    ?? throw new AuthenticationException("Outlook 邮箱的 refreshToken 无效或已过期，请检查配置。");
-                return;
-            }
-
-            var tenantId = msGraphParams.TenantId;
-            username = msGraphParams.ClientId;
-
-            // TODO: 还有一种授权方式，客户端凭据流（Client Credentials Flow）形式，后期再研究
-            if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(username))
-            {
-                _logger.Warn("Outlook 邮箱的用户名格式不正确，应为 tenantId/clientId 的形式。");
-                throw new AuthenticationException("Outlook 邮箱的用户名格式不正确，应为 tenantId/clientId 的形式。");
-            }
-            if (string.IsNullOrEmpty(msGraphParams.ClientSecret))
-                throw new AuthenticationException("客户端凭据授权缺少 clientSecret。");
-
-            var authenticateResult = await GetConfidentialClientOAuth2CredentialsAsync(
-                tenantId,
-                username,
-                msGraphParams.ClientSecret
-            );
-            AuthenticationResult = AuthenticationResult2.FromAuthenticationResult(
-                authenticateResult
-            );
+                AccessToken = oauth.AccessToken,
+                Scope = oauth.AuthorizedScopes,
+                ExpiresIn = (oauth.AccessTokenExpiresAtUtc.Value - DateTime.UtcNow).TotalSeconds,
+            };
             return;
         }
 
-        /// <summary>
-        /// 验证邮箱，并将 refreshToken 保存到数据库中
-        /// 要求邮箱只能属于一个账号
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="username"></param>
-        /// <param name="password">解密后的密码</param>
-        /// <param name="db"></param>
-        /// <returns></returns>
-        public async Task AuthenticateAsync(
-            string email,
-            string username,
-            string password,
-            long outboxId,
-            SqlContext db
-        )
-        {
-            // 直接调用 AuthenticateAsync
-            await AuthenticateAsync(email, username, password);
+        var result = await RefreshAccessTokenAsync(oauth, cancellationToken);
+        _authenticationResult = result;
+        await PersistTokensAsync(db, oauth, result, cancellationToken);
+    }
 
-            // 判断是否采用 refreshToken 的方式发件，若是，则保存 refreshToken 到数据库中
-            // 包含 '/' 的 username 说明是 tenantId/clientId 形式，不保存 refreshToken
-            if (username.Contains('/'))
-                return;
-
-            // 加密 refreshToken
-            if (string.IsNullOrEmpty(AuthenticationResult!.RefreshToken))
-                return;
-            if (!_isRefreshTokenChanged)
-                return;
-
-            // 保存新的 refreshToken 到数据库中
-            var encryptedPassword = encryptService.EncrytPassword(
-                AuthenticationResult.RefreshToken
-            );
-            await db.Outboxes.UpdateAsync(
-                x => x.Id == outboxId,
-                x => x.SetProperty(y => y.Password, encryptedPassword)
-            );
-        }
-
-        /// <summary>
-        /// 正常情况下获取 accessToken
-        /// </summary>
-        /// <param name="protocol"></param>
-        /// <param name="tenantId"></param>
-        /// <param name="clientId"></param>
-        /// <param name="clientSecret"></param>
-        /// <returns></returns>
-        private static async Task<AuthenticationResult> GetConfidentialClientOAuth2CredentialsAsync(
-            string tenantId,
-            string clientId,
-            string clientSecret
-        )
-        {
-            var loginUrl = "https://login.microsoftonline.com/";
-            var confidentialClientApplication = ConfidentialClientApplicationBuilder
-                .Create(clientId)
-                .WithAuthority($"{loginUrl}{tenantId}/v2.0")
-                .WithClientSecret(clientSecret) // or .WithClientSecret (clientSecret)
-                .Build();
-
-            //var scopes = [
-            //      // For IMAP and POP3, use the following scope
-            //      "https://ps.outlook.com/.default"
-            //  ];
-            // For SMTP, use the following scope
-            var scopes = new List<string>() { "https://graph.microsoft.com/.default" };
-            return await confidentialClientApplication.AcquireTokenForClient(scopes).ExecuteAsync();
-        }
-
-        /// <summary>
-        /// 刷新访问令牌
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="refreshToken"></param>
-        /// <returns></returns>
-        private async Task<AuthenticationResult2?> GetAccessByRefreshToken(
-            string clientId,
-            string? clienSecret,
-            string refreshToken
-        )
-        {
-            var formContent = new Dictionary<string, string>()
+    private async Task<AuthenticationResult2> RefreshAccessTokenAsync(
+        OAuthCredentialSnapshot oauth,
+        CancellationToken cancellationToken
+    )
+    {
+        Dictionary<string, string> form =
+            new()
             {
-                { "client_id", clientId },
-                { "refresh_token", refreshToken },
-                { "grant_type", "refresh_token" },
-                { "scope", "https://graph.microsoft.com/.default" }
+                ["client_id"] = oauth.ClientId,
+                ["refresh_token"] = oauth.RefreshToken,
+                ["grant_type"] = "refresh_token",
+                ["scope"] = oauth.AuthorizedScopes,
             };
-            if (!string.IsNullOrEmpty(clienSecret))
-            {
-                formContent.Add("client_secret", clienSecret);
-            }
+        if (!string.IsNullOrWhiteSpace(oauth.ClientSecret))
+            form["client_secret"] = oauth.ClientSecret;
 
-            var token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
-            var fluentHttpRequest = new FluentHttpRequest()
-                .WithHttpClient(httpClient)
-                .WithMethod(HttpMethod.Post)
-                .WithUrl(token_url)
-                .WithFormContent(formContent);
-
-            var response = await fluentHttpRequest.SendAsync();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
-            {
-                // 表示没有成功请求到授权
-                _logger.Error($"{clientId} 请求授权失败: {responseContent}");
-                // 获取错误信息
-                var errorMessage = JObject
-                    .Parse(responseContent)
-                    .SelectTokenOrDefault("error_description", "未知错误");
-                throw new AuthenticationException(errorMessage ?? "未知错误");
-            }
-            var jsonResult = responseContent.JsonTo<AuthenticationResult2>();
-            if (jsonResult == null)
-            {
-                _logger.Warn($"{clientId} 请求授权失败:{responseContent}");
-                throw new AuthenticationException("返回结果非预期值");
-            }
-
-            // 判断是否有 SMTP.Send 权限
-            if (!jsonResult.Scope.Contains("Mail.Send"))
-                throw new AuthenticationException($"{clientId} 缺失 Mail.Send 权限");
-
-            return jsonResult;
-        }
-
-        /// <summary>
-        /// 开始发件
-        /// 参考: https://learn.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http#request-3
-        /// </summary>
-        /// <param name="mimeMessage"></param>
-        /// <returns></returns>
-        public async Task<string> SendAsync(MimeMessage mimeMessage)
+        using var response = await httpClient.PostAsync(
+            oauth.TokenEndpoint,
+            new FormUrlEncodedContent(form),
+            cancellationToken
+        );
+        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
         {
-            if (debugConfig.PreventSending)
-            {
-                return "调试模式中已阻止真实发件";
-            }
-
-            var authenticationResult =
-                AuthenticationResult ?? throw new AuthenticationException("发送邮件前必须先完成 OAuth2 验证");
-            var apiPath = GetSendMailApiPath(_email, authenticationResult.IsPersonalAccount);
-            var request = new MsGraphSendMailRequest()
-                .WithAccessToken(authenticationResult.AccessToken)
-                .WithMimeMessage(mimeMessage)
-                .WithUrl($"https://graph.microsoft.com/v1.0/{apiPath}/sendMail")
-                .WithHttpClient(httpClient);
-
-            var response = await request.SendAsync();
-            // 根据状态返回发送结果
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                return string.Empty;
-            }
-
-            // 其它情况，表示发送失败
-            _logger.Error($"发件箱 {_email} 错误。{response.ReasonPhrase}");
-            var responseResult = await response.Content.ReadAsStringAsync();
-            _logger.Error($"发件箱 {_email} 错误详情：{responseResult}");
-
-            // 抛出异常
-            throw new Exception($"发件箱 {_email} 错误：{response.ReasonPhrase}，详情：{responseResult}");
+            var message = TryReadOAuthError(responseContent) ?? response.ReasonPhrase ?? "未知错误";
+            Logger.Warn($"Microsoft Graph OAuth 刷新失败: {response.StatusCode} {message}");
+            throw new AuthenticationException(message);
         }
 
-        public static string GetSendMailApiPath(string email, bool isPersonalAccount)
+        var result = responseContent.JsonTo<AuthenticationResult2>();
+        if (result == null || string.IsNullOrWhiteSpace(result.AccessToken))
+            throw new AuthenticationException("Microsoft Graph OAuth 响应缺少访问令牌。");
+        if (!result.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains("Mail.Send"))
+            throw new AuthenticationException("Microsoft Graph 授权缺少 Mail.Send 权限。");
+        return result;
+    }
+
+    private async Task PersistTokensAsync(
+        SqlContext db,
+        OAuthCredentialSnapshot oauth,
+        AuthenticationResult2 result,
+        CancellationToken cancellationToken
+    )
+    {
+        var credential = await db.EmailAccountOAuthCredentials.FirstOrDefaultAsync(
+            x => x.Id == oauth.CredentialId,
+            cancellationToken
+        );
+        if (credential == null)
+            throw new AuthenticationException("Microsoft Graph OAuth 凭据不存在。");
+
+        var refreshToken = string.IsNullOrWhiteSpace(result.RefreshToken)
+            ? oauth.RefreshToken
+            : result.RefreshToken;
+        var protectedAccessToken = credentialProtector.Protect(result.AccessToken);
+        var protectedRefreshToken = credentialProtector.Protect(refreshToken);
+        credential.EncryptedAccessToken = protectedAccessToken.Ciphertext;
+        credential.EncryptedRefreshToken = protectedRefreshToken.Ciphertext;
+        credential.EncryptionKeyVersion = protectedAccessToken.KeyVersion;
+        credential.AccessTokenExpiresAtUtc = DateTime.UtcNow.AddSeconds(result.ExpiresIn);
+        credential.AuthorizedScopes = result.Scope;
+        credential.CredentialUpdatedAtUtc = DateTime.UtcNow;
+
+        if (
+            credential.ApplicationSource == OAuthApplicationSource.Custom
+            && !string.IsNullOrWhiteSpace(oauth.ClientSecret)
+        )
+            credential.EncryptedClientSecret = credentialProtector
+                .Protect(oauth.ClientSecret)
+                .Ciphertext;
+        else
+            credential.EncryptedClientSecret = null;
+
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static string? TryReadOAuthError(string responseContent)
+    {
+        try
         {
-            if (isPersonalAccount)
-                return "me";
-
-            var encodedEmail = Uri.EscapeDataString(email);
-            return $"users/{encodedEmail}";
+            return JObject.Parse(responseContent).Value<string>("error_description");
         }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<string> SendAsync(MimeMessage mimeMessage)
+    {
+        if (debugConfig.PreventSending)
+            return "调试模式中已阻止真实发件";
+
+        var accessToken =
+            _authenticationResult?.AccessToken
+            ?? throw new AuthenticationException("发送邮件前必须先完成 OAuth2 验证。");
+        var request = new MsGraphSendMailRequest()
+            .WithAccessToken(accessToken)
+            .WithMimeMessage(mimeMessage)
+            .WithUrl("https://graph.microsoft.com/v1.0/me/sendMail")
+            .WithHttpClient(httpClient);
+        using var response = await request.SendAsync();
+        if (response.StatusCode == HttpStatusCode.Accepted)
+            return string.Empty;
+
+        Logger.Warn($"Microsoft Graph 发件失败: {_email} {response.StatusCode}");
+        throw new HttpRequestException(
+            $"Microsoft Graph 发件失败：{response.ReasonPhrase}",
+            null,
+            response.StatusCode
+        );
     }
 }

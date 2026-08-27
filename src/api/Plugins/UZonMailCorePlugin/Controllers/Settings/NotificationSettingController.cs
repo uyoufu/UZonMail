@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Services.Encrypt;
 using UzonMail.CorePlugin.Services.SendCore.Sender;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.Settings;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.Emails;
@@ -18,8 +19,7 @@ namespace UzonMail.CorePlugin.Controllers.Settings
         IServiceProvider serviceProvider,
         AppSettingService settingService,
         TokenService tokenService,
-        EmailSendersManager sendersManager,
-        EncryptService encryptService
+        EmailSendersManager sendersManager
     ) : ControllerBaseV1
     {
         /// <summary>
@@ -52,23 +52,32 @@ namespace UzonMail.CorePlugin.Controllers.Settings
             AppSettingType type = AppSettingType.System
         )
         {
-            var emailSender = sendersManager.GetEmailSender(OutboxType.SMTP);
+            var emailSender = sendersManager.GetEmailSender(SendingProtocol.Smtp);
 
             var userId = tokenService.GetUserSqlId();
 
-            var outbox = new Outbox()
+            var senderAccount = new SenderAccount()
             {
-                UserId = userId,
-                Email = smtpSettings.Email,
-                UserName = string.Empty,
-                Password = encryptService.EncrytPassword(smtpSettings.Password),
-                SmtpHost = smtpSettings.SmtpHost,
-                SmtpPort = smtpSettings.SmtpPort,
-                //EnableSSL = true
-                ConnectionSecurity = smtpSettings.ConnectionSecurity
+                EmailAccount = new EmailAccount { UserId = userId, Email = smtpSettings.Email, },
+                Protocol = SendingProtocol.Smtp,
             };
+            var runtimeAccount = new SenderEmailAddress(
+                senderAccount,
+                new SenderCredentialSnapshot(
+                    new SmtpCredentialSnapshot(
+                        smtpSettings.SmtpHost,
+                        smtpSettings.SmtpPort,
+                        smtpSettings.ConnectionSecurity,
+                        smtpSettings.Email,
+                        smtpSettings.Password
+                    ),
+                    null
+                ),
+                0,
+                SenderEmailAddressType.Shared
+            );
             // 开始验证
-            var result = await emailSender.ValidateAsync(serviceProvider, outbox);
+            var result = await emailSender.ValidateAsync(serviceProvider, runtimeAccount);
 
             // 验证通过后，更新数据库
             smtpSettings.IsValid = result.IsSuccess;

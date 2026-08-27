@@ -23,13 +23,13 @@ namespace UzonMail.CorePlugin.Controllers.Emails.Models
         public required JObject Data { get; set; }
 
         /// <summary>
-        /// 收件箱
+        /// 收件联系人地址
         /// </summary>
-        public required string Inbox { get; set; }
+        public required string RecipientContact { get; set; }
 
         /// <summary>
-        /// 发件箱
+        /// 发件账户地址
         /// </summary>
-        public required string Outbox { get; set; }
+        public required string SenderAccount { get; set; }
     }
 }

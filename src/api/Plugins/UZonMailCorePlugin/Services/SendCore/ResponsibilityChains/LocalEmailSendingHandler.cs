@@ -65,13 +65,13 @@ public sealed class LocalEmailSendingHandler(
 
         var message = await CreateMimeMessageAsync(context, currentAttempt.PreparedItem);
         var transport = sendersManager.GetEmailSender(
-            currentAttempt.PreparedItem.Outbox.OutboxType
+            currentAttempt.PreparedItem.SenderAccount.SendingProtocol
         );
         var result = await transport.SendAsync(context, message);
         context.TransportResult = result;
 
-        if (result.FailureKind == SendFailureKind.OutboxPermanent)
-            currentAttempt.PreparedItem.Outbox.MarkInvalid(result.Message);
+        if (result.FailureKind == SendFailureKind.SenderAccountPermanent)
+            currentAttempt.PreparedItem.SenderAccount.MarkInvalid(result.Message);
 
         return result switch
         {
@@ -87,9 +87,9 @@ public sealed class LocalEmailSendingHandler(
     )
     {
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress(item.Outbox.Name, item.Outbox.Email));
+        message.From.Add(new MailboxAddress(item.SenderAccount.Name, item.SenderAccount.Email));
         message.To.AddRange(
-            item.Inboxes.Where(x => !string.IsNullOrEmpty(x.Email))
+            item.Recipients.Where(x => !string.IsNullOrEmpty(x.Email))
                 .Select(x => new MailboxAddress(x.Name, x.Email))
         );
         message.Cc.AddRange(
@@ -109,7 +109,7 @@ public sealed class LocalEmailSendingHandler(
             item.SendingSetting,
             item.SourceItem,
             item.Variables,
-            item.Outbox.Outbox,
+            item.SenderAccount.SenderAccount,
             item.Subject,
             item.HtmlBody
         );

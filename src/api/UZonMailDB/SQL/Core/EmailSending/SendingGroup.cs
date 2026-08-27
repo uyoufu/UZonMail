@@ -43,39 +43,39 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         public string? Body { get; set; }
 
         /// <summary>
-        /// 发件箱
-        /// 不包含数据中的发件箱
+        /// 发件账户
+        /// 不包含数据中的发件账户
         /// </summary>
-        public List<Outbox> Outboxes { get; set; } = [];
+        public List<SenderAccount> SenderAccounts { get; set; } = [];
 
         /// <summary>
-        /// 发件箱组
+        /// 发件账户组
         /// </summary>
         [JsonField]
-        public List<IdAndName>? OutboxGroups { get; set; } = [];
+        public List<IdAndName>? SenderAccountGroups { get; set; } = [];
 
         /// <summary>
-        /// 所有的发件箱的数量
+        /// 所有发件账户的数量
         /// </summary>
-        public int OutboxesCount { get; set; }
+        public int SenderAccountCount { get; set; }
 
         #region 用于前端传递参数
         /// <summary>
-        /// 收件箱
+        /// 收件联系人
         /// </summary>
         [JsonField]
-        public List<EmailAddress> Inboxes { get; set; } = [];
+        public List<EmailAddress> Recipients { get; set; } = [];
 
         /// <summary>
-        /// 收件箱组
+        /// 收件联系人组
         /// </summary>
         [JsonField]
-        public List<IdAndName>? InboxGroups { get; set; } = [];
+        public List<IdAndName>? RecipientContactGroups { get; set; } = [];
 
         /// <summary>
-        /// 所有发件箱的数量
+        /// 所有收件联系人的数量
         /// </summary>
-        public int InboxesCount { get; set; }
+        public int RecipientCount { get; set; }
 
         /// <summary>
         /// 抄送箱
@@ -108,7 +108,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
 
         /// <summary>
         /// 总发件数量
-        /// Inboxes 的数量
+        /// Recipients 的数量
         /// </summary>
         public int TotalCount { get; set; }
 
@@ -232,7 +232,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
             });
             builder.HasMany(x => x.Templates).WithMany();
             builder.HasMany(x => x.Attachments).WithMany();
-            builder.HasMany(x => x.Outboxes).WithMany();
+            builder.HasMany(x => x.SenderAccounts).WithMany();
         }
     }
 }

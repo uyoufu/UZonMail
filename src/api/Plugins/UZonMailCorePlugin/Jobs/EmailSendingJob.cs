@@ -33,7 +33,7 @@ namespace UzonMail.CorePlugin.Jobs
                 .SendingGroups.Where(x =>
                     x.Id == sendingGroupId && x.SendingType == SendingGroupType.Scheduled
                 )
-                .Include(x => x.Outboxes)
+                .Include(x => x.SenderAccounts)
                 .Include(x => x.Templates)
                 .FirstOrDefaultAsync();
 

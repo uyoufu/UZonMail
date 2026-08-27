@@ -1,19 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { httpClient } from 'src/api//base/httpClient'
 import type { IEmailTemplate } from './emailTemplate'
-import type { IInbox, IOutbox } from './emailBox'
 import type { IEmailGroupListItem } from 'src/pages/emailManager/components/types'
+
+export interface ISenderAccountSelection {
+  id?: number
+  email: string
+  name?: string
+  description?: string
+}
+
+export interface IRecipientContactSelection {
+  id?: number
+  email: string
+  name?: string
+  description?: string
+}
 
 export interface IEmailCreateInfo {
   subjects: string, // 主题
   templates: IEmailTemplate[], // 模板 id
   data: Record<string, any>[], // 用户发件数据
-  outboxGroups: IEmailGroupListItem[], // 发件人邮箱组
-  outboxes: IOutbox[], // 发件人邮箱
-  inboxGroups: IEmailGroupListItem[], // 收件人邮箱组
-  inboxes: IInbox[], // 收件人邮箱
-  ccBoxes: IInbox[], // 抄送人邮箱
-  bccBoxes: IInbox[], // 密送人邮箱
+  senderAccountGroups: IEmailGroupListItem[], // 发件人邮箱组
+  senderAccounts: ISenderAccountSelection[], // 发件账户
+  recipientContactGroups: IEmailGroupListItem[], // 收件人邮箱组
+  recipients: IRecipientContactSelection[], // 收件联系人
+  ccBoxes: IRecipientContactSelection[], // 抄送联系人
+  bccBoxes: IRecipientContactSelection[], // 密送联系人
   body: string, // 邮件正文
   // 附件必须先上传，此处保存的是附件的Id
   attachments: Record<string, any>[], // 附件
@@ -34,10 +47,10 @@ interface ISendEmailRequest {
   subjects: string,
   templateIds: number[],
   data: Record<string, any>[],
-  outboxGroupIds: number[],
-  outboxIds: number[],
-  inboxGroupIds: number[],
-  inboxes: IEmailAddressRequest[],
+  senderAccountGroupIds: number[],
+  senderAccountIds: number[],
+  recipientContactGroupIds: number[],
+  recipients: IEmailAddressRequest[],
   ccBoxes: IEmailAddressRequest[],
   bccBoxes: IEmailAddressRequest[],
   body: string,
@@ -54,10 +67,8 @@ export interface ISendingItemPreview {
   subject: string, // 主题
   body: string, // 邮件正文
   data: Record<string, any>, // 用户发件数据
-  outbox: string, // 发件人邮箱
-  inbox: string, // 收件人邮箱
-  ccBoxes: string[], // 抄送人邮箱
-  bccBoxes: string[], // 密送人邮箱
+  senderAccount: string, // 发件账户地址
+  recipientContact: string, // 收件联系人地址
 }
 
 /**
@@ -104,19 +115,19 @@ function toSendEmailRequest (sendingGroup: IEmailCreateInfo): ISendEmailRequest 
   const toIds = (records: { id?: number }[]) => records
     .map(record => record.id)
     .filter((id): id is number => typeof id === 'number' && id > 0)
-  const toEmailAddresses = (inboxes: IInbox[]): IEmailAddressRequest[] => inboxes.map(inbox => ({
-    email: inbox.email,
-    name: inbox.name
+  const toEmailAddresses = (recipients: IRecipientContactSelection[]): IEmailAddressRequest[] => recipients.map(recipient => ({
+    email: recipient.email,
+    name: recipient.name
   }))
 
   return {
     subjects: sendingGroup.subjects,
     templateIds: toIds(sendingGroup.templates),
     data: sendingGroup.data,
-    outboxGroupIds: toIds(sendingGroup.outboxGroups),
-    outboxIds: toIds(sendingGroup.outboxes),
-    inboxGroupIds: toIds(sendingGroup.inboxGroups),
-    inboxes: toEmailAddresses(sendingGroup.inboxes),
+    senderAccountGroupIds: toIds(sendingGroup.senderAccountGroups),
+    senderAccountIds: toIds(sendingGroup.senderAccounts),
+    recipientContactGroupIds: toIds(sendingGroup.recipientContactGroups),
+    recipients: toEmailAddresses(sendingGroup.recipients),
     ccBoxes: toEmailAddresses(sendingGroup.ccBoxes),
     bccBoxes: toEmailAddresses(sendingGroup.bccBoxes),
     body: sendingGroup.body,

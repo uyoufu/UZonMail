@@ -7,7 +7,7 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
     /// </summary>
     public class CreateEmailGroupDto
     {
-        public EmailGroupType Type { get; set; }
+        public EmailGroupCategory Category { get; set; }
         public string? Icon { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }

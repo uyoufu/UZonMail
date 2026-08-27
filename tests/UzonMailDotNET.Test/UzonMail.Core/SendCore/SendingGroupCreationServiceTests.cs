@@ -18,7 +18,7 @@ namespace UzonMailDotNET.Test.UzonMail.Core.SendCore;
 public sealed class SendingGroupCreationServiceTests
 {
     [TestMethod]
-    public async Task CreateSendingGroup_DuplicateInboxesWhenDisabled_ReportsDuplicates()
+    public async Task CreateSendingGroup_DuplicateRecipientsWhenDisabled_ReportsDuplicates()
     {
         await using var testDatabase = await SqliteTestDatabase.CreateAsync();
         const long userId = 100;
@@ -60,8 +60,8 @@ public sealed class SendingGroupCreationServiceTests
             UserId = userId,
             Data =
             [
-                new JObject { ["inbox"] = "recipient@example.com" },
-                new JObject { ["inbox"] = "recipient@example.com" },
+                new JObject { ["recipientEmail"] = "recipient@example.com" },
+                new JObject { ["recipientEmail"] = "recipient@example.com" },
             ],
         };
 

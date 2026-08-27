@@ -1,18 +1,14 @@
-using UzonMail.CorePlugin.Services.Encrypt.Models;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.Settings.Model;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.DB.SQL.Core.Organization;
-using UzonMail.Utils.Extensions;
 
 namespace UzonMailDotNET.Test.UzonMail.Core.SendCore.Support;
 
 internal static class SendCoreTestEntityFactory
 {
-    internal static EncryptParams Encryption { get; } = new();
-
     internal static User CreateUser(long userId, long organizationId) =>
         new()
         {
@@ -23,35 +19,50 @@ internal static class SendCoreTestEntityFactory
             DepartmentId = organizationId,
         };
 
-    internal static OutboxEmailAddress CreateOutboxAddress(
-        long outboxId = 20,
+    internal static SenderEmailAddress CreateSenderAccountAddress(
+        long senderAccountId = 20,
         long userId = 30,
         long sendingGroupId = 10,
-        OutboxEmailAddressType type = OutboxEmailAddressType.Shared,
+        SenderEmailAddressType type = SenderEmailAddressType.Shared,
         List<long>? sendingItemIds = null,
-        Action<Outbox>? configure = null
+        Action<SenderAccount>? configure = null
     )
     {
-        var outbox = new Outbox
+        var senderAccount = new SenderAccount
         {
-            Id = outboxId,
-            UserId = userId,
-            Email = $"sender-{outboxId}@test.com",
-            Name = "Sender",
-            Password = "password".AES(Encryption.Key, Encryption.Iv),
-            SmtpHost = "smtp.test.com",
-            SmtpPort = 465,
+            Id = senderAccountId,
+            EmailAccount = new EmailAccount
+            {
+                UserId = userId,
+                Email = $"sender-{senderAccountId}@test.com",
+                Name = "Sender",
+            },
+            Protocol = SendingProtocol.Smtp,
             ReplyToEmails = string.Empty,
             Weight = 1,
-            IsValid = true,
-            Status = OutboxStatus.Valid,
+            Status = SenderAccountStatus.Valid,
         };
-        configure?.Invoke(outbox);
-        return new OutboxEmailAddress(outbox, sendingGroupId, Encryption, type, sendingItemIds);
+        configure?.Invoke(senderAccount);
+        return new SenderEmailAddress(
+            senderAccount,
+            new SenderCredentialSnapshot(
+                new SmtpCredentialSnapshot(
+                    "smtp.test.com",
+                    465,
+                    ConnectionSecurity.SSL,
+                    senderAccount.Email,
+                    "password"
+                ),
+                null
+            ),
+            sendingGroupId,
+            type,
+            sendingItemIds
+        );
     }
 
     internal static PreparedSendItem CreatePreparedItem(
-        OutboxEmailAddress? outbox = null,
+        SenderEmailAddress? senderAccount = null,
         long sendingItemId = 1,
         long sendingGroupId = 10,
         int triedCount = 0,
@@ -63,8 +74,8 @@ internal static class SendCoreTestEntityFactory
         {
             Id = sendingItemId,
             SendingGroupId = sendingGroupId,
-            UserId = outbox?.UserId ?? 30,
-            Inboxes = [new EmailAddress { Id = 100, Email = "recipient@test.com" }],
+            UserId = senderAccount?.UserId ?? 30,
+            Recipients = [new EmailAddress { Id = 100, Email = "recipient@test.com" }],
             TriedCount = triedCount,
         };
         configureItem?.Invoke(sendingItem);
@@ -72,7 +83,7 @@ internal static class SendCoreTestEntityFactory
         configureSetting?.Invoke(setting);
         return new PreparedSendItem(
             sendingItem,
-            outbox ?? CreateOutboxAddress(),
+            senderAccount ?? CreateSenderAccountAddress(),
             null,
             "subject",
             "<p>body</p>",

@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using log4net;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 
 namespace UzonMail.CorePlugin.Services.SendCore.WaitList
 {
@@ -66,7 +66,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
         }
 
         /// <summary>
-        /// 获取组中可被 outboxId 发送的邮件项
+        /// 获取组中可被 senderAccountId 发送的邮件项
         /// </summary>
         /// <returns></returns>
         public async Task<SendItemExecution?> GetEmailItem(SendingContext context)
@@ -100,9 +100,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             return null;
         }
 
-        public bool MatchEmailItem(OutboxEmailAddress outbox)
+        public bool MatchEmailItem(SenderEmailAddress senderAccount)
         {
-            if (outbox.UserId != UserId)
+            if (senderAccount.UserId != UserId)
                 return false;
 
             // 依次获取发件项
@@ -110,7 +110,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             {
                 if (!_tasks.TryGetValue(sendingGroupId, out var groupTask))
                     continue;
-                var match = groupTask.MatchEmailItem(outbox);
+                var match = groupTask.MatchEmailItem(senderAccount);
                 if (match)
                     return true;
             }
@@ -118,10 +118,10 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
             return false;
         }
 
-        public bool MatchReadyEmailItem(OutboxEmailAddress outbox)
+        public bool MatchReadyEmailItem(SenderEmailAddress senderAccount)
         {
-            return outbox.UserId == UserId
-                && _tasks.Values.Any(task => task.MatchReadyEmailItem(outbox));
+            return senderAccount.UserId == UserId
+                && _tasks.Values.Any(task => task.MatchReadyEmailItem(senderAccount));
         }
 
         #region 实现 ConcurrentDictionary 需要的接口

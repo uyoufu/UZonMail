@@ -22,8 +22,8 @@ public sealed record NetworkRoute(
 }
 
 public sealed record NetworkRouteRequest(
-    OutboxKey Outbox,
-    OutboxType OutboxType,
+    SenderAccountKey SenderAccount,
+    SendingProtocol SendingProtocol,
     string MatchAddress,
     long ExplicitProxyId,
     IReadOnlyList<long> AvailableProxyIds

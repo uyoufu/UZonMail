@@ -90,19 +90,19 @@ const columns = computed<QTableColumn[]>(() => [
     sortable: true
   },
   {
-    name: 'fromEmail',
+    name: 'senderEmail',
     required: true,
-    label: t('sendDetail.outbox'),
+    label: t('sendDetail.senderAccount'),
     align: 'left',
-    field: 'fromEmail',
+    field: 'senderEmail',
     sortable: true
   },
   {
-    name: 'inboxes',
+    name: 'recipients',
     required: true,
-    label: t('sendDetail.inbox'),
+    label: t('sendDetail.recipients'),
     align: 'left',
-    field: 'inboxes',
+    field: 'recipients',
     sortable: true,
     format: v => {
       return v.map((e: { email: string }) => e.email).join(';')

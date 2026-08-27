@@ -41,28 +41,43 @@ namespace UzonMail.CorePlugin.Controllers.Emails
             // 对数据进行替换
             var userId = tokenService.GetUserSqlId();
 
-            var inbox =
+            var recipient =
                 await db
-                    .Inboxes.Where(x => x.UserId == userId && x.Email == data.Inbox)
+                    .RecipientContacts.Where(x =>
+                        x.UserId == userId && x.Email == data.RecipientContact
+                    )
                     .Select(x => new EmailAddress() { Email = x.Email, Name = x.Name })
                     .FirstOrDefaultAsync()
-                ?? new EmailAddress() { Email = data.Inbox, Name = "inbox-name-preview" };
+                ?? new EmailAddress()
+                {
+                    Email = data.RecipientContact,
+                    Name = "recipient-name-preview"
+                };
 
-            // 获取指定的 outbox
-            var outboxEmail = data.Data.SelectTokenOrDefault("outbox", data.Outbox);
-            var outbox =
+            // 预览变量与 Excel 公开字段保持一致。
+            var senderEmail = data.Data.SelectTokenOrDefault("senderEmail", data.SenderAccount);
+            var senderAccount =
                 await db
-                    .Outboxes.Where(x => x.UserId == userId && x.Email == data.Outbox)
+                    .SenderAccounts.Include(x => x.EmailAccount)
+                    .Where(x =>
+                        x.EmailAccount.UserId == userId && x.EmailAccount.Email == senderEmail
+                    )
                     .FirstOrDefaultAsync()
-                ?? new Outbox() { Email = "outbox-preview@test.com", Name = "outbox-name" };
+                ?? new SenderAccount
+                {
+                    EmailAccount = new EmailAccount
+                    {
+                        Email = "sender-preview@test.com",
+                        Name = "sender-name",
+                    },
+                };
 
-            // 允许通过 data 参数覆盖 outbox name
-            var outboxNameFromData = data.Data.SelectTokenOrDefault("outboxName", string.Empty);
-            if (!string.IsNullOrEmpty(outboxNameFromData))
-                outbox.Name = outboxNameFromData;
-            var inboxNameFromData = data.Data.SelectTokenOrDefault("inboxName", string.Empty);
-            if (!string.IsNullOrEmpty(inboxNameFromData))
-                inbox.Name = inboxNameFromData;
+            var senderName = data.Data.SelectTokenOrDefault("senderName", string.Empty);
+            if (!string.IsNullOrEmpty(senderName))
+                senderAccount.EmailAccount.Name = senderName;
+            var recipientName = data.Data.SelectTokenOrDefault("recipientName", string.Empty);
+            if (!string.IsNullOrEmpty(recipientName))
+                recipient.Name = recipientName;
 
             var sendingItem = new SendingItem()
             {
@@ -70,14 +85,14 @@ namespace UzonMail.CorePlugin.Controllers.Emails
                 Subject = data.Subject,
                 Content = data.Body,
                 Data = data.Data,
-                Inboxes = [inbox]
+                Recipients = [recipient]
             };
 
             var decoratorParams = new EmailDecoratorParams(
                 new SendingSetting(),
                 sendingItem,
                 new SendingItemExcelData(sendingItem.Data),
-                outbox,
+                senderAccount,
                 data.Subject,
                 data.Body
             );

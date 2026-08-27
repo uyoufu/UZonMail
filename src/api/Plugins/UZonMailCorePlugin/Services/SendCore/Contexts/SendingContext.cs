@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using UzonMail.CorePlugin.Services.SendCore.Domain;
-using UzonMail.CorePlugin.Services.SendCore.Outboxes;
+using UzonMail.CorePlugin.Services.SendCore.SenderAccounts;
 using UzonMail.CorePlugin.Services.SendCore.WaitList;
 using UzonMail.CorePlugin.SignalRHubs;
 using UzonMail.DB.SQL;
@@ -44,7 +44,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Contexts
         /// <summary>
         /// 发件箱地址
         /// </summary>
-        public OutboxEmailAddress? OutboxAddress { get; private set; }
+        public SenderEmailAddress? SenderAccountAddress { get; private set; }
 
         #region 发件列表相关临时参数
         /// <summary>
@@ -62,7 +62,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.Contexts
         public SendAttemptDecision? SendAttemptDecision { get; set; }
 
         /// <summary>当前发件箱退出运行池后的处理结果。</summary>
-        public OutboxRetirementResult? OutboxRetirement { get; set; }
+        public SenderAccountRetirementResult? SenderAccountRetirement { get; set; }
 
         private bool ExitWorkerRequested { get; set; }
         #endregion
@@ -70,9 +70,9 @@ namespace UzonMail.CorePlugin.Services.SendCore.Contexts
         #endregion
 
         #region 外部调用的方法
-        public SendingContext SetOutbox(OutboxEmailAddress outbox)
+        public SendingContext SetSenderAccount(SenderEmailAddress senderAccount)
         {
-            this.OutboxAddress = outbox;
+            this.SenderAccountAddress = senderAccount;
             return this;
         }
 

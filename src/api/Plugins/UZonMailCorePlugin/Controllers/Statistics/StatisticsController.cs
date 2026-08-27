@@ -13,34 +13,33 @@ namespace UzonMail.CorePlugin.Controllers.Statistics
     public class StatisticsController(SqlContext db, TokenService tokenService) : ControllerBaseV1
     {
         /// <summary>
-        /// 获取发件箱统计信息
+        /// 获取发件账户统计信息
         /// </summary>
         /// <returns></returns>
-        [HttpGet("outbox")]
-        public async Task<ResponseResult<List<EmailCount>>> GetOutboxEmailCountInfo()
+        [HttpGet("sender-accounts")]
+        public async Task<ResponseResult<List<EmailCount>>> GetSenderEmailCountInfo()
         {
             var userId = tokenService.GetUserSqlId();
             var emailCounts = await db
-                .Outboxes.OfType<Outbox>()
-                .Where(x => x.UserId == userId)
+                .SenderAccounts.Where(x => x.EmailAccount.UserId == userId)
                 .Where(x => !x.IsDeleted)
-                .GroupBy(x => x.Domain)
+                .GroupBy(x => x.EmailAccount.Domain)
                 .Select(x => new EmailCount { Domain = x.Key ?? string.Empty, Count = x.Count() })
                 .ToListAsync();
             return emailCounts.ToSuccessResponse();
         }
 
         /// <summary>
-        /// 获取收件箱统计信息
+        /// 获取收件联系人统计信息
         /// </summary>
         /// <param name="date"></param>
         /// <returns></returns>
-        [HttpGet("inbox")]
-        public async Task<ResponseResult<List<EmailCount>>> GetInboxesEmailCountInfo()
+        [HttpGet("recipient-contacts")]
+        public async Task<ResponseResult<List<EmailCount>>> GetRecipientsEmailCountInfo()
         {
             var userId = tokenService.GetUserSqlId();
             var emailCounts = await db
-                .Inboxes.Where(x => x.UserId == userId)
+                .RecipientContacts.Where(x => x.UserId == userId)
                 .Where(x => !x.IsDeleted)
                 .GroupBy(x => x.Domain)
                 .Select(x => new EmailCount { Domain = x.Key ?? string.Empty, Count = x.Count() })

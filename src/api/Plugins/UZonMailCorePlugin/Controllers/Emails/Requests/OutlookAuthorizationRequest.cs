@@ -51,11 +51,11 @@ namespace UzonMail.CorePlugin.Controllers.Emails.Requests
         /// <summary>
         /// 通过 state 进行回调
         /// </summary>
-        /// <param name="outboxObjectId"></param>
+        /// <param name="senderAccountObjectId"></param>
         /// <returns></returns>
-        public OutlookAuthorizationRequest WithState(string outboxObjectId)
+        public OutlookAuthorizationRequest WithState(string senderAccountObjectId)
         {
-            AddQuery("state", outboxObjectId);
+            AddQuery("state", senderAccountObjectId);
             return this;
         }
 

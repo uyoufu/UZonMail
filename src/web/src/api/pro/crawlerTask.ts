@@ -165,10 +165,10 @@ export function getCrawlerTaskResultsData (crawlerTaskId: number, filter: string
 }
 
 /**
- * 保存爬虫结果到收件箱
+ * 保存爬虫结果到收件联系人组
  * @param crawlerTaskId
- * @returns 保存成功的收件箱id
+ * @returns 保存成功的收件联系人组 id
  */
-export function saveCrawlerResultsAsInbox (crawlerTaskId: number) {
-  return httpClientPro.post<number[]>(`/crawler-task-info/${crawlerTaskId}/inbox-group`)
+export function saveCrawlerResultsAsRecipientContacts (crawlerTaskId: number) {
+  return httpClientPro.post<number>(`/crawler-task-info/${crawlerTaskId}/recipient-contact-group`)
 }

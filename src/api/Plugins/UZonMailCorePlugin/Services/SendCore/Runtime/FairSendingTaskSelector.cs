@@ -3,7 +3,7 @@ using UzonMail.CorePlugin.Services.SendCore.Domain;
 namespace UzonMail.CorePlugin.Services.SendCore.Runtime;
 
 internal readonly record struct SendingTaskCandidate(
-    OutboxKey Key,
+    SenderAccountKey Key,
     long OrganizationId,
     long UserId,
     DateTime CreateDate
@@ -29,7 +29,7 @@ internal sealed class FairSendingSelectionCycle
     private readonly record struct CandidatePriority(
         DateTime CreateDate,
         long UserId,
-        long OutboxId
+        long SenderAccountId
     ) : IComparable<CandidatePriority>
     {
         public int CompareTo(CandidatePriority other)
@@ -39,7 +39,7 @@ internal sealed class FairSendingSelectionCycle
                 return result;
 
             result = UserId.CompareTo(other.UserId);
-            return result != 0 ? result : OutboxId.CompareTo(other.OutboxId);
+            return result != 0 ? result : SenderAccountId.CompareTo(other.SenderAccountId);
         }
     }
 
@@ -50,7 +50,7 @@ internal sealed class FairSendingSelectionCycle
         int UserActiveCount,
         DateTime CreateDate,
         long UserId,
-        long OutboxId
+        long SenderAccountId
     ) : IComparable<SchedulingPriority>
     {
         public int CompareTo(SchedulingPriority other)
@@ -76,7 +76,7 @@ internal sealed class FairSendingSelectionCycle
                 return result;
 
             result = UserId.CompareTo(other.UserId);
-            return result != 0 ? result : OutboxId.CompareTo(other.OutboxId);
+            return result != 0 ? result : SenderAccountId.CompareTo(other.SenderAccountId);
         }
     }
 
@@ -148,7 +148,7 @@ internal sealed class FairSendingSelectionCycle
                         new CandidatePriority(
                             candidate.CreateDate,
                             candidate.UserId,
-                            candidate.Key.OutboxId
+                            candidate.Key.SenderAccountId
                         )
                     )
                 )
@@ -205,7 +205,7 @@ internal sealed class FairSendingSelectionCycle
         return true;
     }
 
-    public void Commit(OutboxKey key)
+    public void Commit(SenderAccountKey key)
     {
         var reservation = TakeReservation(key);
         reservation.Organization.ActiveCount++;
@@ -214,13 +214,13 @@ internal sealed class FairSendingSelectionCycle
         Requeue(reservation.Organization, reservation.User);
     }
 
-    public void Reject(OutboxKey key)
+    public void Reject(SenderAccountKey key)
     {
         var reservation = TakeReservation(key);
         Requeue(reservation.Organization, reservation.User);
     }
 
-    private Reservation TakeReservation(OutboxKey key)
+    private Reservation TakeReservation(SenderAccountKey key)
     {
         var reservation = _reservation;
         if (reservation is null || reservation.Candidate.Key != key)
@@ -250,7 +250,7 @@ internal sealed class FairSendingSelectionCycle
             user.ActiveCount,
             candidate.CreateDate,
             candidate.UserId,
-            candidate.Key.OutboxId
+            candidate.Key.SenderAccountId
         );
     }
 
@@ -265,7 +265,7 @@ internal sealed class FairSendingSelectionCycle
             user.ActiveCount,
             candidate.CreateDate,
             candidate.UserId,
-            candidate.Key.OutboxId
+            candidate.Key.SenderAccountId
         );
     }
 

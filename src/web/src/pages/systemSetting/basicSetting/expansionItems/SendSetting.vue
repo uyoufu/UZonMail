@@ -2,12 +2,12 @@
   <q-expansion-item v-model="expanded" popup :icon="icon" :label="label" :caption="caption"
     header-class="text-primary card-like-borderless" @before-show="onBeforeShow" group="settings1">
     <div class="row justify-start items-center q-pa-md">
-      <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.maxSendCountPerEmailDay"
-        :debounce="500" type="number" :label="t('pages.basicSettings.maxDailySendPerOutbox')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+      <q-input outlined class="col-auto-4" standout dense v-model.number="sendingSettingRef.maxSendCountPerEmailDay"
+        :debounce="500" type="number" :label="t('pages.basicSettings.maxDailySendPerSenderAccount')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
         <AsyncTooltip :tooltip="[t('pages.basicSettings.maxDailySendTooltip'), t('pages.basicSettings.zeroMeansUnlimited')]" />
       </q-input>
 
-      <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.maxSendingBatchSize"
+      <q-input outlined class="col-auto-4" standout dense v-model.number="sendingSettingRef.maxSendingBatchSize"
         :debounce="500" type="number" :label="t('pages.basicSettings.maxMergedRecipients')" :placeholder="t('pages.basicSettings.zeroMeansNoMerge')">
         <AsyncTooltip :tooltip="[
           t('pages.basicSettings.mergedRecipientsTooltip'),
@@ -16,35 +16,35 @@
         ]" />
       </q-input>
 
-      <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.minOutboxCooldownSecond"
-        type="number" :debounce="500" :label="t('pages.basicSettings.minOutboxCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+      <q-input outlined class="col-auto-4" standout dense v-model.number="sendingSettingRef.minSenderAccountCooldownSecond"
+        type="number" :debounce="500" :label="t('pages.basicSettings.minSenderAccountCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
       </q-input>
 
-      <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.maxOutboxCooldownSecond"
-        type="number" :debounce="500" :label="t('pages.basicSettings.maxOutboxCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+      <q-input outlined class="col-auto-4" standout dense v-model.number="sendingSettingRef.maxSenderAccountCooldownSecond"
+        type="number" :debounce="500" :label="t('pages.basicSettings.maxSenderAccountCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
       </q-input>
 
-      <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.minInboxCooldownHours"
-        type="number" :debounce="500" :label="t('pages.basicSettings.minInboxCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
-        <AsyncTooltip :tooltip="t('pages.basicSettings.minInboxCooldownTooltip')" />
+      <q-input outlined class="col-auto-4" standout dense v-model.number="sendingSettingRef.minimumCooldownHours"
+        type="number" :debounce="500" :label="t('pages.basicSettings.minimumRecipientCooldown')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+        <AsyncTooltip :tooltip="t('pages.basicSettings.minimumRecipientCooldownTooltip')" />
       </q-input>
 
-      <q-input outlined class="col-auto-4" standout dense v-model="outboxSettingRef.replyToEmails" :debounce="500"
+      <q-input outlined class="col-auto-4" standout dense v-model="sendingSettingRef.replyToEmails" :debounce="500"
         :label="t('pages.basicSettings.replyRecipients')" :placeholder="t('pages.basicSettings.replyRecipientsPlaceholder')">
         <AsyncTooltip :tooltip="[t('pages.basicSettings.replyRecipientsTooltip'), t('pages.basicSettings.emptyMeansNotSet'), t('pages.basicSettings.separateEmailsWithComma')]" />
       </q-input>
 
-      <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.changeIpAfterEmailCount"
-        :debounce="500" type="number" :label="t('pages.basicSettings.maxSendPerProxyOutbox')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
-        <AsyncTooltip :tooltip="[t('pages.basicSettings.maxSendPerProxyOutboxTooltip'), t('pages.basicSettings.nonPositiveMeansUnlimited')]" />
+      <q-input outlined class="col-auto-4" standout dense v-model.number="sendingSettingRef.changeIpAfterEmailCount"
+        :debounce="500" type="number" :label="t('pages.basicSettings.maxSendPerProxySenderAccount')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
+        <AsyncTooltip :tooltip="[t('pages.basicSettings.maxSendPerProxySenderAccountTooltip'), t('pages.basicSettings.nonPositiveMeansUnlimited')]" />
       </q-input>
 
-      <q-input outlined class="col-auto-4" standout dense v-model.number="outboxSettingRef.maxCountPerIPDomainHour"
+      <q-input outlined class="col-auto-4" standout dense v-model.number="sendingSettingRef.maxCountPerIPDomainHour"
         :debounce="500" type="number" :label="t('pages.basicSettings.maxSendPerIpDomainHour')" :placeholder="t('pages.basicSettings.zeroMeansUnlimited')">
         <AsyncTooltip :tooltip="[t('pages.basicSettings.maxSendPerIpDomainHourTooltip'), t('pages.basicSettings.dynamicIpCalculatedSeparately'), t('pages.basicSettings.nonPositiveMeansUnlimited')]" />
       </q-input>
 
-      <q-checkbox class="col-auto-4" dense keep-color v-model="outboxSettingRef.allowDuplicateSending" color="secondary"
+      <q-checkbox class="col-auto-4" dense keep-color v-model="sendingSettingRef.allowDuplicateSending" color="secondary"
         :label="translateBasicSettings('allowDuplicateSending')">
         <AsyncTooltip :tooltip="translateBasicSettings('allowDuplicateSendingTooltip')" />
       </q-checkbox>
@@ -90,13 +90,13 @@ const label = computed(() => props.label ?? t('pages.basicSettings.sendSettings'
 const caption = computed(() => props.caption ?? t('pages.basicSettings.sendSettingsCaption'))
 
 const userInfoStore = useUserInfoStore()
-const outboxSettingRef: Ref<ISendingSetting> = ref({
+const sendingSettingRef: Ref<ISendingSetting> = ref({
   userId: userInfoStore.userId,
   maxSendCountPerEmailDay: 0,
-  minOutboxCooldownSecond: 5,
-  maxOutboxCooldownSecond: 10,
+  minSenderAccountCooldownSecond: 5,
+  maxSenderAccountCooldownSecond: 10,
   maxSendingBatchSize: 20,
-  minInboxCooldownHours: 0,
+  minimumCooldownHours: 0,
   replyToEmails: '',
   changeIpAfterEmailCount: 0,
   maxCountPerIPDomainHour: -1,
@@ -111,7 +111,7 @@ async function onBeforeShow() {
   const { data: setting } = await getSendingSetting(props.settingType)
   if (setting) {
     updateSettingSignal = false
-    outboxSettingRef.value = setting
+    sendingSettingRef.value = setting
   }
 }
 
@@ -120,7 +120,7 @@ watch(() => props.settingType, async () => {
   await onBeforeShow()
 })
 watch(
-  outboxSettingRef,
+  sendingSettingRef,
   async () => {
     logger.debug('[SendingSetting] when watch expanded', expanded.value)
     // 保存设置
@@ -130,9 +130,9 @@ watch(
     }
 
     // 对参数进行验证
-    if (!validateOutboxSetting()) return
+    if (!validateSendingSetting()) return
 
-    await updateSendingSetting(outboxSettingRef.value, props.settingType)
+    await updateSendingSetting(sendingSettingRef.value, props.settingType)
 
     notifySuccess(t('pages.basicSettings.settingsEffective'))
   },
@@ -140,15 +140,15 @@ watch(
 )
 
 import { isEmail } from 'src/utils/validator';
-function validateOutboxSetting() {
-  if (outboxSettingRef.value.minOutboxCooldownSecond > 0
-    && outboxSettingRef.value.maxOutboxCooldownSecond < outboxSettingRef.value.minOutboxCooldownSecond) {
-    notifyError(t('pages.basicSettings.invalidOutboxCooldown'))
+function validateSendingSetting() {
+  if (sendingSettingRef.value.minSenderAccountCooldownSecond > 0
+    && sendingSettingRef.value.maxSenderAccountCooldownSecond < sendingSettingRef.value.minSenderAccountCooldownSecond) {
+    notifyError(t('pages.basicSettings.invalidSenderAccountCooldown'))
     return false
   }
 
-  if (outboxSettingRef.value.replyToEmails) {
-    const emails = outboxSettingRef.value.replyToEmails.split(',')
+  if (sendingSettingRef.value.replyToEmails) {
+    const emails = sendingSettingRef.value.replyToEmails.split(',')
     if (emails.some(email => !isEmail(email.trim()))) {
       notifyError(t('pages.basicSettings.invalidReplyRecipients'))
       return false

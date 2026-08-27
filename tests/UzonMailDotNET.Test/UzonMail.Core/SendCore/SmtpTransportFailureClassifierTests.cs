@@ -15,10 +15,10 @@ public sealed class SmtpTransportFailureClassifierTests
     [TestMethod]
     [DataRow(421, SendFailureKind.Transient)]
     [DataRow(450, SendFailureKind.Transient)]
-    [DataRow(432, SendFailureKind.OutboxPermanent)]
-    [DataRow(530, SendFailureKind.OutboxPermanent)]
-    [DataRow(535, SendFailureKind.OutboxPermanent)]
-    [DataRow(538, SendFailureKind.OutboxPermanent)]
+    [DataRow(432, SendFailureKind.SenderAccountPermanent)]
+    [DataRow(530, SendFailureKind.SenderAccountPermanent)]
+    [DataRow(535, SendFailureKind.SenderAccountPermanent)]
+    [DataRow(538, SendFailureKind.SenderAccountPermanent)]
     public void StatusCode_IsClassified(int statusCode, SendFailureKind expected)
     {
         var exception = new SmtpCommandException(
@@ -31,7 +31,7 @@ public sealed class SmtpTransportFailureClassifierTests
     }
 
     [TestMethod]
-    public void RecipientAndMessageFailures_DoNotInvalidateOutbox()
+    public void RecipientAndMessageFailures_DoNotInvalidateSenderAccount()
     {
         var recipient = new SmtpCommandException(
             SmtpErrorCode.RecipientNotAccepted,
@@ -55,7 +55,7 @@ public sealed class SmtpTransportFailureClassifierTests
     }
 
     [TestMethod]
-    public void RecipientHardBounce_WithRecipientAddress_IsMarkedForInboxCleaning()
+    public void RecipientHardBounce_WithRecipientAddress_IsMarkedForRecipientContactCleaning()
     {
         var exception = new SmtpCommandException(
             SmtpErrorCode.RecipientNotAccepted,
@@ -78,7 +78,7 @@ public sealed class SmtpTransportFailureClassifierTests
             _classifier.Classify(new OperationCanceledException()).FailureKind
         );
         Assert.AreEqual(
-            SendFailureKind.OutboxPermanent,
+            SendFailureKind.SenderAccountPermanent,
             _classifier.Classify(new AuthenticationException()).FailureKind
         );
         Assert.AreEqual(

@@ -61,8 +61,8 @@ public sealed class SendItemQueue
     public SendItemDescriptor? AcquireShared() => TryAcquire(_sharedReady);
 
     /// <summary>获取一个指定发件箱可发送的描述符。</summary>
-    public SendItemDescriptor? AcquireSpecific(long outboxId) =>
-        _specificReady.TryGetValue(outboxId, out var queue) ? TryAcquire(queue) : null;
+    public SendItemDescriptor? AcquireSpecific(long senderAccountId) =>
+        _specificReady.TryGetValue(senderAccountId, out var queue) ? TryAcquire(queue) : null;
 
     /// <summary>完成并移除活动描述符。</summary>
     public bool Complete(SendItemDescriptor descriptor)
@@ -114,32 +114,38 @@ public sealed class SendItemQueue
     }
 
     /// <summary>判断队列是否包含匹配发件箱类型的描述符。</summary>
-    public bool Contains(long outboxId, bool onlySpecific)
+    public bool Contains(long senderAccountId, bool onlySpecific)
     {
         return _items.Values.Any(x =>
-            onlySpecific ? x.Descriptor.OutboxId == outboxId : x.Descriptor.OutboxId <= 0
+            onlySpecific
+                ? x.Descriptor.SenderAccountId == senderAccountId
+                : x.Descriptor.SenderAccountId <= 0
         );
     }
 
     /// <summary>判断待发队列是否包含匹配发件箱类型的描述符。</summary>
-    public bool ContainsReady(long outboxId, bool onlySpecific)
+    public bool ContainsReady(long senderAccountId, bool onlySpecific)
     {
         return _items.Values.Any(x =>
             Volatile.Read(ref x.State) == Ready
-            && (onlySpecific ? x.Descriptor.OutboxId == outboxId : x.Descriptor.OutboxId <= 0)
+            && (
+                onlySpecific
+                    ? x.Descriptor.SenderAccountId == senderAccountId
+                    : x.Descriptor.SenderAccountId <= 0
+            )
         );
     }
 
     private void Enqueue(SendItemDescriptor descriptor)
     {
-        if (descriptor.OutboxId <= 0)
+        if (descriptor.SenderAccountId <= 0)
         {
             _sharedReady.Enqueue(descriptor.Id);
             return;
         }
 
         _specificReady
-            .GetOrAdd(descriptor.OutboxId, static _ => new ConcurrentQueue<long>())
+            .GetOrAdd(descriptor.SenderAccountId, static _ => new ConcurrentQueue<long>())
             .Enqueue(descriptor.Id);
     }
 

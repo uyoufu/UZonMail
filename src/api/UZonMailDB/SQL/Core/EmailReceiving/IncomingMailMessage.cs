@@ -15,12 +15,12 @@ public class IncomingMailMessage : SqlId, IEntityTypeConfiguration<IncomingMailM
     /// <summary>
     /// 接收该邮件的 IMAP 账户标识。
     /// </summary>
-    public long ImapAccountId { get; set; }
+    public long ReceivingAccountId { get; set; }
 
     /// <summary>
     /// 接收该邮件的 IMAP 账户。
     /// </summary>
-    public ImapAccount ImapAccount { get; set; } = null!;
+    public ReceivingAccount ReceivingAccount { get; set; } = null!;
 
     /// <summary>
     /// 邮件头中的 RFC Message-ID；发件方未提供时为空。
@@ -154,33 +154,33 @@ public class IncomingMailMessage : SqlId, IEntityTypeConfiguration<IncomingMailM
         builder.Property(x => x.Subject).HasMaxLength(1000);
         builder.Property(x => x.AnalysisSummary).HasMaxLength(2000);
         builder.Property(x => x.CurrentSpamScore).HasPrecision(5, 2);
-        builder.HasAlternateKey(x => new { x.Id, x.ImapAccountId });
-        builder.HasIndex(x => new { x.ImapAccountId, x.InternetMessageIdKey });
-        builder.HasIndex(x => new { x.ImapAccountId, x.ContentSha256 }).IsUnique();
-        builder.HasIndex(x => new { x.ImapAccountId, x.ReceivedAtUtc });
+        builder.HasAlternateKey(x => new { x.Id, x.ReceivingAccountId });
+        builder.HasIndex(x => new { x.ReceivingAccountId, x.InternetMessageIdKey });
+        builder.HasIndex(x => new { x.ReceivingAccountId, x.ContentSha256 }).IsUnique();
+        builder.HasIndex(x => new { x.ReceivingAccountId, x.ReceivedAtUtc });
         builder.HasIndex(x => new
         {
-            x.ImapAccountId,
+            x.ReceivingAccountId,
             x.CurrentPrimaryClassification,
             x.ReceivedAtUtc
         });
         builder.HasIndex(x => new
         {
-            x.ImapAccountId,
+            x.ReceivingAccountId,
             x.CurrentBounceType,
             x.ReceivedAtUtc
         });
         builder.HasIndex(x => new
         {
-            x.ImapAccountId,
+            x.ReceivingAccountId,
             x.BodyContentStatus,
             x.ReceivedAtUtc
         });
-        builder.HasIndex(x => new { x.ImapAccountId, x.CurrentSpamScore });
+        builder.HasIndex(x => new { x.ReceivingAccountId, x.CurrentSpamScore });
         builder
-            .HasOne(x => x.ImapAccount)
+            .HasOne(x => x.ReceivingAccount)
             .WithMany()
-            .HasForeignKey(x => x.ImapAccountId)
+            .HasForeignKey(x => x.ReceivingAccountId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

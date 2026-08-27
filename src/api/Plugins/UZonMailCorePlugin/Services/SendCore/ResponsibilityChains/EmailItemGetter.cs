@@ -17,11 +17,11 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             if (context.IsFailed())
                 return HandlerResult.Failed();
 
-            var outbox = context.OutboxAddress;
-            if (outbox == null)
+            var senderAccount = context.SenderAccountAddress;
+            if (senderAccount == null)
                 return HandlerResult.Failed("发件箱信息为空，无法申请发件项");
 
-            _logger.Debug($"发件箱 {outbox.Email} 开始申请发件项");
+            _logger.Debug($"发件箱 {senderAccount.Email} 开始申请发件项");
 
             // 从等待列表中获取一个发送项
             var currentAttempt = await groupTasksManager.GetEmailItem(context);
@@ -35,7 +35,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.ResponsibilityChains
             else
             {
                 _logger.Info(
-                    $"线程申请发件项成功，收件箱：{string.Join(",", currentAttempt.PreparedItem.Inboxes.Select(x => x.Email))}"
+                    $"线程申请发件项成功，收件箱：{string.Join(",", currentAttempt.PreparedItem.Recipients.Select(x => x.Email))}"
                 );
             }
 

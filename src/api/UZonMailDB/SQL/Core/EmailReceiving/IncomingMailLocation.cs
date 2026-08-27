@@ -13,7 +13,7 @@ public class IncomingMailLocation : SqlId, IEntityTypeConfiguration<IncomingMail
     /// 所属 IMAP 账户的标识。
     /// 与邮件和文件夹组成复合外键，禁止跨账户位置关联。
     /// </summary>
-    public long ImapAccountId { get; set; }
+    public long ReceivingAccountId { get; set; }
 
     /// <summary>
     /// 所属入站邮件元数据的标识。
@@ -89,7 +89,7 @@ public class IncomingMailLocation : SqlId, IEntityTypeConfiguration<IncomingMail
                 x.Uid
             })
             .IsUnique();
-        builder.HasAlternateKey(x => new { x.Id, x.ImapAccountId });
+        builder.HasAlternateKey(x => new { x.Id, x.ReceivingAccountId });
         builder.HasIndex(x => new
         {
             x.ImapMailboxId,
@@ -100,14 +100,14 @@ public class IncomingMailLocation : SqlId, IEntityTypeConfiguration<IncomingMail
         builder
             .HasOne(x => x.IncomingMailMessage)
             .WithMany(x => x.Locations)
-            .HasForeignKey(x => new { x.IncomingMailMessageId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.IncomingMailMessageId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
         builder
             .HasOne(x => x.ImapMailbox)
             .WithMany(x => x.MessageLocations)
-            .HasForeignKey(x => new { x.ImapMailboxId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.ImapMailboxId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

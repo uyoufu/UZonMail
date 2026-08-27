@@ -12,12 +12,12 @@ public class ImapMailbox : SqlId, IEntityTypeConfiguration<ImapMailbox>
     /// <summary>
     /// 所属 IMAP 账户的数据库标识。
     /// </summary>
-    public long ImapAccountId { get; set; }
+    public long ReceivingAccountId { get; set; }
 
     /// <summary>
     /// 所属 IMAP 账户。
     /// </summary>
-    public ImapAccount ImapAccount { get; set; } = null!;
+    public ReceivingAccount ReceivingAccount { get; set; } = null!;
 
     /// <summary>
     /// 父文件夹标识；根文件夹为空。
@@ -129,19 +129,19 @@ public class ImapMailbox : SqlId, IEntityTypeConfiguration<ImapMailbox>
         builder.Property(x => x.DisplayName).HasMaxLength(500).IsRequired();
         builder.Property(x => x.HierarchyDelimiter).HasMaxLength(1);
         builder.Property(x => x.LastSyncError).HasMaxLength(2000);
-        builder.HasIndex(x => new { x.ImapAccountId, x.RemoteFullName }).IsUnique();
-        builder.HasIndex(x => new { x.ImapAccountId, x.IsSynchronizationEnabled });
-        builder.HasAlternateKey(x => new { x.Id, x.ImapAccountId });
+        builder.HasIndex(x => new { x.ReceivingAccountId, x.RemoteFullName }).IsUnique();
+        builder.HasIndex(x => new { x.ReceivingAccountId, x.IsSynchronizationEnabled });
+        builder.HasAlternateKey(x => new { x.Id, x.ReceivingAccountId });
         builder
-            .HasOne(x => x.ImapAccount)
+            .HasOne(x => x.ReceivingAccount)
             .WithMany(x => x.Mailboxes)
-            .HasForeignKey(x => x.ImapAccountId)
+            .HasForeignKey(x => x.ReceivingAccountId)
             .OnDelete(DeleteBehavior.NoAction);
         builder
             .HasOne(x => x.Parent)
             .WithMany(x => x.Children)
-            .HasForeignKey(x => new { x.ParentId, x.ImapAccountId })
-            .HasPrincipalKey(x => new { x.Id, x.ImapAccountId })
+            .HasForeignKey(x => new { x.ParentId, x.ReceivingAccountId })
+            .HasPrincipalKey(x => new { x.Id, x.ReceivingAccountId })
             .OnDelete(DeleteBehavior.NoAction);
     }
 }
