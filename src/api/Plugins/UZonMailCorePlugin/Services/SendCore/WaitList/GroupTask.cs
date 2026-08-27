@@ -235,7 +235,7 @@ namespace UzonMail.CorePlugin.Services.SendCore.WaitList
                 var groupedSenderAccounts = sqlContext
                     .SenderAccounts.AsNoTracking()
                     .Where(senderAccount =>
-                        _senderAccountGroupIds.Contains(senderAccount.EmailGroupId)
+                        _senderAccountGroupIds.Contains(senderAccount.EmailAccount.EmailGroupId)
                     );
                 var pageSize = Math.Min(senderAccountSupplyOptions.Value.CatalogPageSize, maxCount);
                 if (pageSize <= 0)

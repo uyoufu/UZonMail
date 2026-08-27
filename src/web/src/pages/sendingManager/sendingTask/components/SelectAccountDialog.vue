@@ -57,7 +57,7 @@ import { QTable, useDialogPluginComponent } from 'quasar'
 import { EmailGroupCategory, type EmailGroupCategory as EmailGroupCategoryValue } from 'src/api/emailGroup'
 import type { IRecipientContactSelection, ISenderAccountSelection } from 'src/api/emailSending'
 import { getRecipientContacts } from 'src/api/recipientContacts'
-import { getSenderAccounts } from 'src/api/senderAccounts'
+import { getSenderEmailAccountOptions } from 'src/api/emailAccounts'
 import { useTableCollapseLeft } from 'src/components/collapseIcon/useCollapseLeft'
 import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
 import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
@@ -76,7 +76,7 @@ type SelectableAccount = AccountSelection & { selectionKey: string }
 const props = defineProps({
   accountCategory: {
     type: Number as PropType<EmailGroupCategoryValue>,
-    default: EmailGroupCategory.Sender
+    default: EmailGroupCategory.EmailAccount
   },
   initialAccounts: { type: Array as PropType<AccountSelection[]>, default: () => [] },
   initialGroups: { type: Array as PropType<IEmailGroupListItem[]>, default: () => [] }
@@ -95,7 +95,7 @@ const categoryTopItems = ref<IEmailGroupListItem[]>([{
 const selectedAccounts = ref<SelectableAccount[]>(props.initialAccounts.map(toSelectableAccount))
 const selectedGroups = ref<IEmailGroupListItem[]>([...props.initialGroups])
 const shouldShowTemporaryRecipientButton = computed(() =>
-  props.accountCategory === EmailGroupCategory.Recipient && selectedGroup.value.name === 'selected'
+  props.accountCategory === EmailGroupCategory.RecipientEmail && selectedGroup.value.name === 'selected'
 )
 
 const { indexColumn, QTableIndex } = useQTableIndex()
@@ -113,8 +113,8 @@ async function loadAccounts (filterText: string): Promise<SelectableAccount[]> {
   }
 
   const groupId = selectedGroup.value.id
-  const response = props.accountCategory === EmailGroupCategory.Sender
-    ? await getSenderAccounts(groupId, filterText)
+  const response = props.accountCategory === EmailGroupCategory.EmailAccount
+    ? await getSenderEmailAccountOptions()
     : await getRecipientContacts(groupId, filterText)
   return response.data.map(toSelectableAccount)
 }

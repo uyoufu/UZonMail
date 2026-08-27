@@ -66,16 +66,16 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
       label: 'emailManagement',
       icon: 'alternate_email'
     },
-    redirect: '/email-management/sender-accounts',
+    redirect: '/email-management/email-accounts',
     children: [
       {
-        name: 'SenderAccountsIndex',
-        path: 'sender-accounts',
+        name: 'EmailAccountsIndex',
+        path: 'email-accounts',
         meta: {
           icon: 'forward_to_inbox',
-          label: 'senderAccounts'
+          label: 'emailAccounts'
         },
-        component: () => import('pages/emailManager/senderAccounts/SenderAccountsIndex.vue')
+        component: () => import('pages/emailManager/emailAccounts/EmailAccountsIndex.vue')
       },
       {
         name: 'RecipientContactsIndex',
@@ -85,15 +85,6 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           label: 'recipientContacts'
         },
         component: () => import('pages/emailManager/recipientContacts/RecipientContactsIndex.vue')
-      },
-      {
-        name: 'ReceivingAccountsIndex',
-        path: 'receiving-accounts',
-        meta: {
-          icon: 'move_to_inbox',
-          label: 'receivingAccounts'
-        },
-        component: () => import('pages/emailManager/receivingAccounts/ReceivingAccountsIndex.vue')
       }
     ]
   },

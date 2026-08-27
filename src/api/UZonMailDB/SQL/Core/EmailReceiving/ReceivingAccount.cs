@@ -21,8 +21,6 @@ public class ReceivingAccount : SqlId, IEntityTypeConfiguration<ReceivingAccount
     public DateTime? NextSyncAtUtc { get; set; }
     public DateTime? LastConnectedAtUtc { get; set; }
     public string? LastError { get; set; }
-    public List<ReceivingAccountSenderLink> SenderLinks { get; set; } = [];
-    public ReceivingAccountPrimarySender? PrimarySender { get; set; }
     public List<ImapMailbox> Mailboxes { get; set; } = [];
 
     public void Configure(EntityTypeBuilder<ReceivingAccount> builder)

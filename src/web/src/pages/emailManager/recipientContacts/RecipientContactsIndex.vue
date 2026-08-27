@@ -3,7 +3,7 @@
     <EmailGroupList
       v-show="!isCollapseGroupList"
       v-model="selectedGroup"
-      :group-category="EmailGroupCategory.Recipient"
+      :group-category="EmailGroupCategory.RecipientEmail"
       class="q-card q-mr-sm full-height"
       style="min-width: 176px"
     />

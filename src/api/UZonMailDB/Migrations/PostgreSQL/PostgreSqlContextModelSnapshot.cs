@@ -1542,82 +1542,6 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.ToTable("ReceivingAccountImapCredentials", (string)null);
                 });
 
-            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccountPrimarySender", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("ReceivingAccountId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("ReceivingAccountSenderLinkId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceivingAccountId")
-                        .IsUnique();
-
-                    b.HasIndex("ReceivingAccountSenderLinkId", "ReceivingAccountId");
-
-                    b.ToTable("ReceivingAccountPrimarySenders", (string)null);
-                });
-
-            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccountSenderLink", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("_id");
-
-                    b.Property<long>("ReceivingAccountId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("SenderAccountId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SenderAccountId");
-
-                    b.HasIndex("ReceivingAccountId", "SenderAccountId")
-                        .IsUnique();
-
-                    b.ToTable("ReceivingAccountSenderLinks", (string)null);
-                });
-
             modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailReceiving.RecipientSuppression", b =>
                 {
                     b.Property<long>("Id")
@@ -2007,6 +1931,9 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)");
 
+                    b.Property<long>("EmailGroupId")
+                        .HasColumnType("bigint");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -2038,6 +1965,8 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmailGroupId", "Id");
 
                     b.HasIndex("OrganizationId", "Domain");
 
@@ -2280,9 +2209,6 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.Property<long>("EmailAccountId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("EmailGroupId")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -2328,7 +2254,7 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.HasIndex("EmailAccountId")
                         .IsUnique();
 
-                    b.HasIndex("EmailGroupId", "Status", "Id");
+                    b.HasIndex("Status", "Id");
 
                     b.ToTable("SenderAccounts", null, t =>
                         {
@@ -3571,45 +3497,6 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                     b.Navigation("ReceivingAccount");
                 });
 
-            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccountPrimarySender", b =>
-                {
-                    b.HasOne("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccount", "ReceivingAccount")
-                        .WithOne("PrimarySender")
-                        .HasForeignKey("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccountPrimarySender", "ReceivingAccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccountSenderLink", "ReceivingAccountSenderLink")
-                        .WithMany()
-                        .HasForeignKey("ReceivingAccountSenderLinkId", "ReceivingAccountId")
-                        .HasPrincipalKey("Id", "ReceivingAccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ReceivingAccount");
-
-                    b.Navigation("ReceivingAccountSenderLink");
-                });
-
-            modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccountSenderLink", b =>
-                {
-                    b.HasOne("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccount", "ReceivingAccount")
-                        .WithMany("SenderLinks")
-                        .HasForeignKey("ReceivingAccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("UzonMail.DB.SQL.Core.Emails.SenderAccount", "SenderAccount")
-                        .WithMany()
-                        .HasForeignKey("SenderAccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ReceivingAccount");
-
-                    b.Navigation("SenderAccount");
-                });
-
             modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailSending.SendingItem", b =>
                 {
                     b.HasOne("UzonMail.DB.SQL.Core.EmailSending.SendingGroup", "SendingGroup")
@@ -3619,6 +3506,17 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                         .IsRequired();
 
                     b.Navigation("SendingGroup");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.EmailAccount", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.Emails.EmailGroup", "EmailGroup")
+                        .WithMany("EmailAccounts")
+                        .HasForeignKey("EmailGroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("EmailGroup");
                 });
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.EmailAccountOAuthCredential", b =>
@@ -3662,15 +3560,7 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UzonMail.DB.SQL.Core.Emails.EmailGroup", "EmailGroup")
-                        .WithMany("SenderAccounts")
-                        .HasForeignKey("EmailGroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("EmailAccount");
-
-                    b.Navigation("EmailGroup");
                 });
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.SenderAccountSmtpCredential", b =>
@@ -3812,10 +3702,6 @@ namespace UzonMail.DB.Migrations.PostgreSQL
             modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailReceiving.ReceivingAccount", b =>
                 {
                     b.Navigation("Mailboxes");
-
-                    b.Navigation("PrimarySender");
-
-                    b.Navigation("SenderLinks");
                 });
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.EmailAccount", b =>
@@ -3829,9 +3715,9 @@ namespace UzonMail.DB.Migrations.PostgreSQL
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.EmailGroup", b =>
                 {
-                    b.Navigation("RecipientContacts");
+                    b.Navigation("EmailAccounts");
 
-                    b.Navigation("SenderAccounts");
+                    b.Navigation("RecipientContacts");
                 });
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Emails.SenderAccount", b =>

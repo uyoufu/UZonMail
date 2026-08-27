@@ -12,8 +12,6 @@ public class SenderAccount : SqlId, IEntityTypeConfiguration<SenderAccount>
 {
     public long EmailAccountId { get; set; }
     public EmailAccount EmailAccount { get; set; } = null!;
-    public long EmailGroupId { get; set; }
-    public EmailGroup EmailGroup { get; set; } = null!;
     public SendingProtocol Protocol { get; set; }
     public AuthenticationMethod AuthenticationMethod { get; set; }
     public long? ProxyId { get; set; }
@@ -54,21 +52,11 @@ public class SenderAccount : SqlId, IEntityTypeConfiguration<SenderAccount>
         builder.Property(x => x.ReplyToEmails).HasMaxLength(2000);
         builder.Property(x => x.ValidationFailureReason).HasMaxLength(2000);
         builder.HasIndex(x => x.EmailAccountId).IsUnique();
-        builder.HasIndex(x => new
-        {
-            x.EmailGroupId,
-            x.Status,
-            x.Id
-        });
+        builder.HasIndex(x => new { x.Status, x.Id });
         builder
             .HasOne(x => x.EmailAccount)
             .WithOne(x => x.SenderAccount)
             .HasForeignKey<SenderAccount>(x => x.EmailAccountId)
-            .OnDelete(DeleteBehavior.NoAction);
-        builder
-            .HasOne(x => x.EmailGroup)
-            .WithMany(x => x.SenderAccounts)
-            .HasForeignKey(x => x.EmailGroupId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

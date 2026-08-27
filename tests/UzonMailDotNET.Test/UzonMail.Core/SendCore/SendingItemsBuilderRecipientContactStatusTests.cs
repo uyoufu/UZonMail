@@ -41,14 +41,14 @@ public sealed class SendingItemsBuilderRecipientValidationStatusTests
             Id = 10,
             UserId = currentUser.Id,
             Name = "Recipients",
-            Category = EmailGroupCategory.Recipient,
+            Category = EmailGroupCategory.RecipientEmail,
         };
         var otherRecipientContactGroup = new EmailGroup
         {
             Id = 11,
             UserId = otherOrganizationUser.Id,
             Name = "Other recipients",
-            Category = EmailGroupCategory.Recipient,
+            Category = EmailGroupCategory.RecipientEmail,
         };
         var sendingGroup = new SendingGroup
         {
@@ -132,7 +132,7 @@ public sealed class SendingItemsBuilderRecipientValidationStatusTests
             Id = 10,
             UserId = user.Id,
             Name = "Recipients",
-            Category = EmailGroupCategory.Recipient,
+            Category = EmailGroupCategory.RecipientEmail,
         };
         var sendingGroup = new SendingGroup
         {

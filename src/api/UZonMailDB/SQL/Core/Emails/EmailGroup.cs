@@ -39,7 +39,7 @@ namespace UzonMail.DB.SQL.Core.Emails
         /// </summary>
         public long Order { get; set; }
 
-        public List<SenderAccount> SenderAccounts { get; set; } = [];
+        public List<EmailAccount> EmailAccounts { get; set; } = [];
 
         public List<RecipientContact> RecipientContacts { get; set; } = [];
 

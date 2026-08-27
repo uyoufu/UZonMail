@@ -14,7 +14,7 @@ namespace UzonMailDotNET.Test.UzonMail.DB.Emails;
 public sealed class EmailAccountModelTests
 {
     [TestMethod]
-    public async Task Model_RegistersSeparatedIdentityCapabilitiesAndCredentials()
+    public async Task Model_RegistersUnifiedIdentityAndSeparatedCapabilities()
     {
         await using var connection = await OpenConnectionAsync();
         await using var db = CreateContext(connection);
@@ -23,10 +23,17 @@ public sealed class EmailAccountModelTests
         Assert.IsNotNull(db.Model.FindEntityType(typeof(EmailAccount)));
         Assert.IsNotNull(db.Model.FindEntityType(typeof(SenderAccount)));
         Assert.IsNotNull(db.Model.FindEntityType(typeof(ReceivingAccount)));
-        Assert.IsNotNull(db.Model.FindEntityType(typeof(RecipientContact)));
         Assert.IsNotNull(db.Model.FindEntityType(typeof(SenderAccountSmtpCredential)));
         Assert.IsNotNull(db.Model.FindEntityType(typeof(ReceivingAccountImapCredential)));
         Assert.IsNotNull(db.Model.FindEntityType(typeof(EmailAccountOAuthCredential)));
+        Assert.IsFalse(
+            db.Model.GetEntityTypes()
+                .Any(x =>
+                    x.ClrType?.Name
+                        is "ReceivingAccountSenderLink"
+                            or "ReceivingAccountPrimarySender"
+                )
+        );
 
         AssertUniqueIndex<SenderAccount>(db, nameof(SenderAccount.EmailAccountId));
         AssertUniqueIndex<ReceivingAccount>(db, nameof(ReceivingAccount.EmailAccountId));
@@ -42,6 +49,14 @@ public sealed class EmailAccountModelTests
             db,
             nameof(EmailAccountOAuthCredential.EmailAccountId)
         );
+        Assert.IsTrue(
+            db.Model.FindEntityType(typeof(EmailAccount))!
+                .GetForeignKeys()
+                .Any(foreignKey =>
+                    foreignKey.Properties.Single().Name == nameof(EmailAccount.EmailGroupId)
+                    && foreignKey.PrincipalEntityType.ClrType == typeof(EmailGroup)
+                )
+        );
     }
 
     [TestMethod]
@@ -51,128 +66,11 @@ public sealed class EmailAccountModelTests
         await using var db = CreateContext(connection);
         await db.Database.EnsureCreatedAsync();
 
-        db.EmailAccounts.Add(
-            new EmailAccount
-            {
-                UserId = 10,
-                OrganizationId = 20,
-                Email = " Sender@Example.com ",
-            }
-        );
+        var group = CreateEmailAccountGroup();
+        db.EmailGroups.Add(group);
+        db.EmailAccounts.Add(CreateEmailAccount(" Sender@Example.com ", group.Id));
         await db.SaveChangesAsync();
-        db.EmailAccounts.Add(
-            new EmailAccount
-            {
-                UserId = 10,
-                OrganizationId = 20,
-                Email = "sender@example.com",
-            }
-        );
-
-        await Assert.ThrowsExactlyAsync<DbUpdateException>(() => db.SaveChangesAsync());
-    }
-
-    [TestMethod]
-    public async Task ReceivingSenderLinks_EnforcePairAndPrimaryUniqueness()
-    {
-        await using var connection = await OpenConnectionAsync();
-        await using var db = CreateContext(connection);
-        await db.Database.EnsureCreatedAsync();
-
-        var emailAccount = new EmailAccount
-        {
-            UserId = 10,
-            OrganizationId = 20,
-            Email = "shared@example.com",
-        };
-        var receiving = new ReceivingAccount
-        {
-            EmailAccount = emailAccount,
-            Protocol = ReceivingProtocol.Imap,
-            AuthenticationMethod = AuthenticationMethod.Password,
-        };
-        var sender = new SenderAccount
-        {
-            EmailAccount = new EmailAccount
-            {
-                UserId = 10,
-                OrganizationId = 20,
-                Email = "sender@example.com",
-            },
-            EmailGroupId = 1,
-            Protocol = SendingProtocol.Smtp,
-            AuthenticationMethod = AuthenticationMethod.Password,
-        };
-        db.AddRange(receiving, sender);
-        await db.SaveChangesAsync();
-
-        var link = new ReceivingAccountSenderLink
-        {
-            ReceivingAccountId = receiving.Id,
-            SenderAccountId = sender.Id,
-        };
-        db.ReceivingAccountSenderLinks.Add(link);
-        await db.SaveChangesAsync();
-        db.ReceivingAccountSenderLinks.Add(
-            new ReceivingAccountSenderLink
-            {
-                ReceivingAccountId = receiving.Id,
-                SenderAccountId = sender.Id,
-            }
-        );
-        await Assert.ThrowsExactlyAsync<DbUpdateException>(() => db.SaveChangesAsync());
-    }
-
-    [TestMethod]
-    public async Task ReceivingPrimarySender_EnforcesOnePrimaryPerReceivingAccount()
-    {
-        await using var connection = await OpenConnectionAsync();
-        await using var db = CreateContext(connection);
-        await db.Database.EnsureCreatedAsync();
-
-        var receivingAccount = new ReceivingAccount
-        {
-            EmailAccount = CreateEmailAccount("receiving@example.com"),
-            Protocol = ReceivingProtocol.Imap,
-            AuthenticationMethod = AuthenticationMethod.Password,
-        };
-        var firstSenderAccount = CreateSenderAccount("first@example.com");
-        var secondSenderAccount = CreateSenderAccount("second@example.com");
-        db.AddRange(receivingAccount, firstSenderAccount, secondSenderAccount);
-        await db.SaveChangesAsync();
-
-        var firstLink = new ReceivingAccountSenderLink
-        {
-            ReceivingAccountId = receivingAccount.Id,
-            SenderAccountId = firstSenderAccount.Id,
-        };
-        var secondLink = new ReceivingAccountSenderLink
-        {
-            ReceivingAccountId = receivingAccount.Id,
-            SenderAccountId = secondSenderAccount.Id,
-        };
-        db.AddRange(firstLink, secondLink);
-        await db.SaveChangesAsync();
-
-        db.ReceivingAccountPrimarySenders.Add(
-            new ReceivingAccountPrimarySender
-            {
-                ReceivingAccountId = receivingAccount.Id,
-                ReceivingAccountSenderLinkId = firstLink.Id,
-            }
-        );
-        await db.SaveChangesAsync();
-
-        var receivingAccountId = receivingAccount.Id;
-        var secondLinkId = secondLink.Id;
-        db.ChangeTracker.Clear();
-        db.ReceivingAccountPrimarySenders.Add(
-            new ReceivingAccountPrimarySender
-            {
-                ReceivingAccountId = receivingAccountId,
-                ReceivingAccountSenderLinkId = secondLinkId,
-            }
-        );
+        db.EmailAccounts.Add(CreateEmailAccount("sender@example.com", group.Id));
 
         await Assert.ThrowsExactlyAsync<DbUpdateException>(() => db.SaveChangesAsync());
     }
@@ -184,24 +82,30 @@ public sealed class EmailAccountModelTests
         await using var db = CreateContext(connection);
         await db.Database.EnsureCreatedAsync();
 
+        var group = CreateEmailAccountGroup();
         db.AddRange(
-            CreateSenderAccount("smtp@example.com"),
+            group,
             new SenderAccount
             {
-                EmailAccount = CreateEmailAccount("graph-sender@example.com"),
-                EmailGroupId = 1,
+                EmailAccount = CreateEmailAccount("smtp@example.com", group.Id),
+                Protocol = SendingProtocol.Smtp,
+                AuthenticationMethod = AuthenticationMethod.Password,
+            },
+            new SenderAccount
+            {
+                EmailAccount = CreateEmailAccount("graph-sender@example.com", group.Id),
                 Protocol = SendingProtocol.MicrosoftGraph,
                 AuthenticationMethod = AuthenticationMethod.OAuth2,
             },
             new ReceivingAccount
             {
-                EmailAccount = CreateEmailAccount("imap@example.com"),
+                EmailAccount = CreateEmailAccount("imap@example.com", group.Id),
                 Protocol = ReceivingProtocol.Imap,
                 AuthenticationMethod = AuthenticationMethod.Password,
             },
             new ReceivingAccount
             {
-                EmailAccount = CreateEmailAccount("graph-receiving@example.com"),
+                EmailAccount = CreateEmailAccount("graph-receiving@example.com", group.Id),
                 Protocol = ReceivingProtocol.MicrosoftGraph,
                 AuthenticationMethod = AuthenticationMethod.OAuth2,
             }
@@ -211,8 +115,7 @@ public sealed class EmailAccountModelTests
         db.SenderAccounts.Add(
             new SenderAccount
             {
-                EmailAccount = CreateEmailAccount("invalid-sender@example.com"),
-                EmailGroupId = 1,
+                EmailAccount = CreateEmailAccount("invalid-sender@example.com", group.Id),
                 Protocol = SendingProtocol.MicrosoftGraph,
                 AuthenticationMethod = AuthenticationMethod.Password,
             }
@@ -223,7 +126,7 @@ public sealed class EmailAccountModelTests
         db.ReceivingAccounts.Add(
             new ReceivingAccount
             {
-                EmailAccount = CreateEmailAccount("invalid-receiving@example.com"),
+                EmailAccount = CreateEmailAccount("invalid-receiving@example.com", group.Id),
                 Protocol = ReceivingProtocol.MicrosoftGraph,
                 AuthenticationMethod = AuthenticationMethod.Password,
             }
@@ -274,10 +177,17 @@ public sealed class EmailAccountModelTests
     }
 
     [TestMethod]
-    public void OrdinaryResponseDtos_DoNotExposeSecretsOrTokens()
+    public void AccountResponseDtos_DoNotExposeSecretsOrTokens()
     {
         string[] forbiddenFragments = ["Password", "Secret", "AccessToken", "RefreshToken"];
-        foreach (var dtoType in new[] { typeof(SenderAccountDto), typeof(ReceivingAccountDto) })
+        foreach (
+            var dtoType in new[]
+            {
+                typeof(EmailAccountDto),
+                typeof(EmailAccountSenderCapabilityDto),
+                typeof(EmailAccountReceivingCapabilityDto),
+            }
+        )
         {
             var propertyNames = dtoType.GetProperties().Select(x => x.Name).ToList();
             Assert.IsFalse(
@@ -301,21 +211,22 @@ public sealed class EmailAccountModelTests
     private static SqlContext CreateContext(SqliteConnection connection) =>
         new(new DbContextOptionsBuilder<SqlContext>().UseSqlite(connection).Options);
 
-    private static EmailAccount CreateEmailAccount(string email) =>
+    private static EmailGroup CreateEmailAccountGroup() =>
+        new()
+        {
+            Id = 1,
+            UserId = 10,
+            Category = EmailGroupCategory.EmailAccount,
+            Name = "Accounts",
+        };
+
+    private static EmailAccount CreateEmailAccount(string email, long emailGroupId) =>
         new()
         {
             UserId = 10,
             OrganizationId = 20,
+            EmailGroupId = emailGroupId,
             Email = email,
-        };
-
-    private static SenderAccount CreateSenderAccount(string email) =>
-        new()
-        {
-            EmailAccount = CreateEmailAccount(email),
-            EmailGroupId = 1,
-            Protocol = SendingProtocol.Smtp,
-            AuthenticationMethod = AuthenticationMethod.Password,
         };
 
     private static void AssertUniqueIndex<TEntity>(SqlContext db, params string[] propertyNames)

@@ -1,196 +1,199 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Uamazing.Utils.Web.ResponseModel;
 using UzonMail.CorePlugin.Controllers.Emails.DTOs;
-using UzonMail.CorePlugin.Controllers.Users.Model;
 using UzonMail.CorePlugin.Services.Emails;
 using UzonMail.CorePlugin.Services.Settings;
-using UzonMail.CorePlugin.SignalRHubs;
-using UzonMail.CorePlugin.SignalRHubs.Extensions;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.Utils.Web.Exceptions;
 using UzonMail.Utils.Web.ResponseModel;
 
-namespace UzonMail.CorePlugin.Controllers.Emails
+namespace UzonMail.CorePlugin.Controllers.Emails;
+
+/// <summary>
+/// 邮箱账户与收件邮箱共用的平面分组接口。
+/// </summary>
+public sealed class EmailGroupController(
+    SqlContext db,
+    EmailGroupService groupService,
+    TokenService tokenService
+) : ControllerBaseV1
 {
-    /// <summary>
-    /// 邮件管理
-    /// </summary>
-    public class EmailGroupController(
-        SqlContext db,
-        EmailGroupService groupService,
-        TokenService tokenService,
-        SenderAccountValidateService senderAccountValidator,
-        IHubContext<UzonMailHub, IUzonMailClient> hub
-    ) : ControllerBaseV1
+    [HttpGet("{emailGroupId:long}")]
+    public async Task<ResponseResult<EmailGroupSummaryDto>> FindOneById(
+        long emailGroupId,
+        CancellationToken cancellationToken = default
+    )
     {
-        /// <summary>
-        /// 获取值
-        /// </summary>
-        /// <param name="groupId"></param>
-        /// <returns></returns>
-        [HttpGet("{groupId:long}")]
-        public async Task<ResponseResult<EmailGroup?>> FindOneById(long groupId)
-        {
-            var result = await db.EmailGroups.Where(x => x.Id == groupId).FirstOrDefaultAsync();
-            return result.ToSuccessResponse();
-        }
+        var userId = tokenService.GetUserSqlId();
+        var group =
+            await db.EmailGroups.FirstOrDefaultAsync(
+                x => x.Id == emailGroupId && x.UserId == userId,
+                cancellationToken
+            ) ?? throw new KnownException("邮箱分组不存在");
+        return (await ToSummaryAsync(group, cancellationToken)).ToSuccessResponse();
+    }
 
-        /// <summary>
-        /// 创建邮件组
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost()]
-        public async Task<ResponseResult<EmailGroup>> Create([FromBody] CreateEmailGroupDto request)
-        {
-            var entity = request.ToEntity();
-            var userId = tokenService.GetUserSqlId();
-            entity.UserId = userId;
-
-            EmailGroup emailGroup = await groupService.Create(entity);
-            return emailGroup.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 获取用户组
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        [HttpGet("all")]
-        public async Task<ResponseResult<List<EmailGroup>>> GetEmailGroups(
-            [FromQuery] EmailGroupCategory category
-        )
-        {
-            var userId = tokenService.GetUserSqlId();
-            var groups = await groupService.GetEmailGroups(userId, category);
-            return groups.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 更新
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut("{id:long}")]
-        public async Task<ResponseResult<EmailGroup>> Update(
-            long id,
-            [FromBody] UpdateEmailGroupDto request
-        )
-        {
-            var entity = request.ToEntity();
-            // 数据验证
-            if (string.IsNullOrEmpty(entity.Name))
-                throw new KnownException("组名不允许为空");
-
-            entity.Id = id;
-            await groupService.Update(
-                entity,
-                [nameof(EmailGroup.Name), nameof(EmailGroup.Description), nameof(EmailGroup.Order)]
-            );
-            return entity.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 根据 id 删除组
-        /// 组可能已经被使用，若被使用，则不允许删除
-        /// </summary>
-        /// <param name="groupId"></param>
-        /// <returns></returns>
-        [HttpDelete("{groupId:long}")]
-        public async Task<ResponseResult<bool>> Delete(long groupId)
-        {
-            var userId = tokenService.GetUserSqlId();
-            // 将组重新命名
-            var emailGroup = await db
-                .EmailGroups.Where(x => x.Id == groupId && x.UserId == userId)
-                .FirstOrDefaultAsync();
-            if (emailGroup == null)
-                return false.ToFailResponse("未找到该邮件组");
-
-            // 将组进行重命名
-            emailGroup.Name += "_deletedAt" + DateTime.UtcNow.ToString("D");
-            emailGroup.IsDeleted = true;
-            await db.SaveChangesAsync();
-            return true.ToSuccessResponse();
-        }
-
-        /// <summary>
-        /// 删除组中所有无效的发件箱
-        /// </summary>
-        /// <param name="senderAccountIds"></param>
-        /// <returns></returns>
-        [HttpDelete("{groupId:long}/invalid-sender-accounts")]
-        public async Task<ResponseResult<bool>> DeleteAllInvalidSenderAccountsInGroup(long groupId)
-        {
-            // 判断是否属于自己的组
-            var userId = tokenService.GetUserSqlId();
-            var emailAccounts = db.SenderAccounts.Where(x =>
-                x.Status == SenderAccountStatus.Invalid
-                && x.EmailGroupId == groupId
-                && x.EmailAccount.UserId == userId
-            );
-            db.SenderAccounts.RemoveRange(emailAccounts);
-            await db.SaveChangesAsync();
-
-            return true.ToSuccessResponse();
-        }
-
-        [HttpPut("{groupId:long}/invalid-sender-accounts/validate")]
-        public async Task<ResponseResult<bool>> ValidateAllInvalidSenderAccounts(long groupId)
-        {
-            // 判断是否属于自己的组
-            var userId = tokenService.GetUserSqlId();
-            var senderAccounts = await db
-                .SenderAccounts.AsNoTracking()
-                .Where(x =>
-                    x.Status == SenderAccountStatus.Invalid
-                    && x.EmailGroupId == groupId
-                    && x.EmailAccount.UserId == userId
-                )
-                .ToListAsync();
-
-            var client = hub.GetUserClient(userId);
-
-            // 开始进行验证
-            foreach (var senderAccount in senderAccounts)
+    [HttpPost]
+    public async Task<ResponseResult<EmailGroupSummaryDto>> Create(
+        [FromBody] CreateEmailGroupDto request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        ValidateCategory(request.Category);
+        var group = await groupService.Create(
+            new EmailGroup
             {
-                // 发送测试邮件
-                // 已在内部保存修改
-                var vdResult = await senderAccountValidator.ValidateSenderAccount(senderAccount);
-
-                senderAccount.Status = vdResult.Ok
-                    ? SenderAccountStatus.Valid
-                    : SenderAccountStatus.Invalid;
-                senderAccount.ValidationFailureReason = vdResult.Message;
-                // 推送验证结果
-                await client.SenderAccountStatusChanged(senderAccount);
+                UserId = tokenService.GetUserSqlId(),
+                Category = request.Category,
+                Icon = request.Icon,
+                Name = request.Name,
+                Description = request.Description,
             }
-            return true.ToSuccessResponse();
-        }
+        );
+        return (await ToSummaryAsync(group, cancellationToken)).ToSuccessResponse();
+    }
 
-        /// <summary>
-        /// 删除组中所有无效的收件箱
-        /// </summary>
-        /// <param name="senderAccountIds"></param>
-        /// <returns></returns>
-        [HttpDelete("{groupId:long}/invalid-recipient-contacts")]
-        public async Task<ResponseResult<bool>> DeleteAllInvalidRecipientsInGroup(long groupId)
-        {
-            // 判断是否属于自己的组
-            var userId = tokenService.GetUserSqlId();
-            var emailAccounts = db.RecipientContacts.Where(x =>
-                x.EmailGroupId == groupId
+    [HttpGet("all")]
+    public async Task<ResponseResult<List<EmailGroupSummaryDto>>> GetEmailGroups(
+        [FromQuery] EmailGroupCategory category,
+        CancellationToken cancellationToken = default
+    )
+    {
+        ValidateCategory(category);
+        var groups = await groupService.GetEmailGroupsAsync(
+            tokenService.GetUserSqlId(),
+            category,
+            cancellationToken
+        );
+        return (await ToSummariesAsync(groups, cancellationToken)).ToSuccessResponse();
+    }
+
+    [HttpPut("{emailGroupId:long}")]
+    public async Task<ResponseResult<EmailGroupSummaryDto>> Update(
+        long emailGroupId,
+        [FromBody] UpdateEmailGroupDto request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var group = await groupService.UpdateMetadataAsync(
+            tokenService.GetUserSqlId(),
+            emailGroupId,
+            request.Name,
+            request.Description,
+            cancellationToken
+        );
+        return (await ToSummaryAsync(group, cancellationToken)).ToSuccessResponse();
+    }
+
+    [HttpPut("reorder")]
+    public async Task<ResponseResult<bool>> Reorder(
+        [FromBody] ReorderEmailGroupsDto request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        ValidateCategory(request.Category);
+        await groupService.ReorderAsync(
+            tokenService.GetUserSqlId(),
+            request.Category,
+            request.EmailGroupIds,
+            cancellationToken
+        );
+        return true.ToSuccessResponse();
+    }
+
+    [HttpDelete("{emailGroupId:long}")]
+    public async Task<ResponseResult<bool>> Delete(
+        long emailGroupId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await groupService.DeleteAsync(
+            tokenService.GetUserSqlId(),
+            emailGroupId,
+            cancellationToken
+        );
+        return true.ToSuccessResponse();
+    }
+
+    [HttpDelete("{emailGroupId:long}/invalid-recipient-contacts")]
+    public async Task<ResponseResult<bool>> DeleteInvalidRecipientEmails(
+        long emailGroupId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var userId = tokenService.GetUserSqlId();
+        await db
+            .RecipientContacts.Where(x =>
+                x.EmailGroupId == emailGroupId
                 && x.UserId == userId
                 && x.ValidationStatus != RecipientValidationStatus.Valid
-            );
-            db.RecipientContacts.RemoveRange(emailAccounts);
-            await db.SaveChangesAsync();
+            )
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, true), cancellationToken);
+        return true.ToSuccessResponse();
+    }
 
-            return true.ToSuccessResponse();
-        }
+    private async Task<List<EmailGroupSummaryDto>> ToSummariesAsync(
+        IReadOnlyCollection<EmailGroup> groups,
+        CancellationToken cancellationToken
+    )
+    {
+        if (groups.Count == 0)
+            return [];
+        var groupIds = groups.Select(x => x.Id).ToList();
+        var category = groups.First().Category;
+        var counts =
+            category == EmailGroupCategory.EmailAccount
+                ? await db
+                    .EmailAccounts.Where(x => groupIds.Contains(x.EmailGroupId))
+                    .GroupBy(x => x.EmailGroupId)
+                    .Select(x => new { EmailGroupId = x.Key, Count = x.Count() })
+                    .ToDictionaryAsync(x => x.EmailGroupId, x => x.Count, cancellationToken)
+                : await db
+                    .RecipientContacts.Where(x => groupIds.Contains(x.EmailGroupId))
+                    .GroupBy(x => x.EmailGroupId)
+                    .Select(x => new { EmailGroupId = x.Key, Count = x.Count() })
+                    .ToDictionaryAsync(x => x.EmailGroupId, x => x.Count, cancellationToken);
+        return groups
+            .Select(group => ToSummary(group, counts.GetValueOrDefault(group.Id)))
+            .ToList();
+    }
+
+    private async Task<EmailGroupSummaryDto> ToSummaryAsync(
+        EmailGroup group,
+        CancellationToken cancellationToken
+    )
+    {
+        var accountCount =
+            group.Category == EmailGroupCategory.EmailAccount
+                ? await db.EmailAccounts.CountAsync(
+                    x => x.EmailGroupId == group.Id,
+                    cancellationToken
+                )
+                : await db.RecipientContacts.CountAsync(
+                    x => x.EmailGroupId == group.Id,
+                    cancellationToken
+                );
+        return ToSummary(group, accountCount);
+    }
+
+    private static EmailGroupSummaryDto ToSummary(EmailGroup group, int accountCount) =>
+        new(
+            group.Id,
+            group.Category,
+            group.Icon,
+            group.Name,
+            group.Description,
+            group.Order,
+            group.IsDefault,
+            accountCount
+        );
+
+    private static void ValidateCategory(EmailGroupCategory category)
+    {
+        if (category is EmailGroupCategory.EmailAccount or EmailGroupCategory.RecipientEmail)
+            return;
+        throw new KnownException("不支持的邮箱分组类别");
     }
 }

@@ -63,7 +63,7 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             Id = 10,
             UserId = user.Id,
             Name = "Recipients",
-            Category = EmailGroupCategory.Recipient,
+            Category = EmailGroupCategory.RecipientEmail,
         };
         var firstRecipientContact = CreateRecipientContact(
             31,
@@ -217,14 +217,14 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             Id = 10,
             UserId = user.Id,
             Name = "Recipients",
-            Category = EmailGroupCategory.Recipient,
+            Category = EmailGroupCategory.RecipientEmail,
         };
         var senderAccountGroup = new EmailGroup
         {
             Id = 11,
             UserId = user.Id,
             Name = "Senders",
-            Category = EmailGroupCategory.Sender,
+            Category = EmailGroupCategory.EmailAccount,
         };
         var senderAccount = new SenderAccount
         {
@@ -233,9 +233,9 @@ public sealed class SendingItemsBuilderRecipientIsolationTests
             {
                 UserId = user.Id,
                 OrganizationId = organization.Id,
+                EmailGroupId = senderAccountGroup.Id,
                 Email = "sender@example.com",
             },
-            EmailGroupId = senderAccountGroup.Id,
             Protocol = SendingProtocol.Smtp,
             Status = SenderAccountStatus.Valid,
         };

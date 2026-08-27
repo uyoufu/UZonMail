@@ -8,13 +8,12 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   // 函数名后添加空格，与 eslint 规范兼容
   // 在代码开发时，可以使用 shift+alt+f 来格式化代码
-  "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
-  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "js/ts.format.insertSpaceBeforeFunctionParenthesis": true,
   // 代码保存时，自动执行ESlint格式化代码
   "editor.codeActionsOnSave": ["source.fixAll.eslint"],
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.format.semicolons": "remove",
+  "js/ts.tsdk": "node_modules/typescript/lib",
+  "js/ts.format.semicolons": "remove",
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },

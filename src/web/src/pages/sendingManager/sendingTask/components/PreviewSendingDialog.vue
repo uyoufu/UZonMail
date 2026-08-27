@@ -36,7 +36,7 @@ import type {
 import { previewSendingItem } from 'src/api/emailSending'
 import { getEmailTemplateById, getEmailTemplateByIdOrName } from 'src/api/emailTemplate'
 import { getRecipientContacts } from 'src/api/recipientContacts'
-import { getSenderAccounts } from 'src/api/senderAccounts'
+import { getEmailAccounts } from 'src/api/emailAccounts'
 import { t } from 'src/i18n/helpers'
 
 defineOptions({ name: 'PreviewSendingDialog' })
@@ -83,9 +83,16 @@ onMounted(async () => {
   let senderCandidates = [...props.emailCreateInfo.senderAccounts]
   const senderGroupIds = new Set(props.emailCreateInfo.senderAccountGroups.map(group => group.id))
   if (senderGroupIds.size > 0) {
-    const { data: persistedSenders } = await getSenderAccounts()
+    const { data: persistedAccounts } = await getEmailAccounts()
     senderCandidates = senderCandidates.concat(
-      persistedSenders.filter(sender => senderGroupIds.has(sender.emailGroupId))
+      persistedAccounts
+        .filter(account => account.sender && senderGroupIds.has(account.emailGroupId))
+        .map(account => ({
+          id: account.sender!.id,
+          email: account.email,
+          name: account.name,
+          description: account.description
+        }))
     )
   }
   senderAccounts.value = uniqueByEmail(senderCandidates)

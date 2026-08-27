@@ -62,8 +62,6 @@ namespace UzonMail.DB.SQL
 
         public DbSet<ReceivingAccount> ReceivingAccounts { get; set; }
         public DbSet<ReceivingAccountImapCredential> ReceivingAccountImapCredentials { get; set; }
-        public DbSet<ReceivingAccountSenderLink> ReceivingAccountSenderLinks { get; set; }
-        public DbSet<ReceivingAccountPrimarySender> ReceivingAccountPrimarySenders { get; set; }
         public DbSet<RecipientSuppression> RecipientSuppressions { get; set; }
         public DbSet<ImapMailbox> ImapMailboxes { get; set; }
         public DbSet<ImapMailboxSyncCheckpoint> ImapMailboxSyncCheckpoints { get; set; }

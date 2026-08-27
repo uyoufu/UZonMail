@@ -28,6 +28,8 @@ public class EmailAccount : UserAndOrgId, IEntityTypeConfiguration<EmailAccount>
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? Remark { get; set; }
+    public long EmailGroupId { get; set; }
+    public EmailGroup EmailGroup { get; set; } = null!;
     public SenderAccount? SenderAccount { get; set; }
     public ReceivingAccount? ReceivingAccount { get; set; }
     public EmailAccountOAuthCredential? OAuthCredential { get; set; }
@@ -43,5 +45,11 @@ public class EmailAccount : UserAndOrgId, IEntityTypeConfiguration<EmailAccount>
         builder.Property(x => x.Remark).HasMaxLength(2000);
         builder.HasIndex(x => new { x.UserId, x.NormalizedEmail }).IsUnique();
         builder.HasIndex(x => new { x.OrganizationId, x.Domain });
+        builder.HasIndex(x => new { x.EmailGroupId, x.Id });
+        builder
+            .HasOne(x => x.EmailGroup)
+            .WithMany(x => x.EmailAccounts)
+            .HasForeignKey(x => x.EmailGroupId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -37,7 +37,7 @@ const props = defineProps({
   placeholder: { type: String, default: '' },
   accountCategory: {
     type: Number as PropType<EmailGroupCategoryValue>,
-    default: EmailGroupCategory.Sender
+    default: EmailGroupCategory.EmailAccount
   }
 })
 

@@ -24,27 +24,29 @@ public sealed class RecipientContactsController(SqlContext db, TokenService toke
     )
     {
         var userId = tokenService.GetUserSqlId();
-        var query = QueryDtos(userId);
+        var recipientContacts = QueryRecipientContacts(userId);
         if (emailGroupId.HasValue)
-            query = query.Where(x => x.EmailGroupId == emailGroupId.Value);
+            recipientContacts = recipientContacts.Where(x => x.EmailGroupId == emailGroupId.Value);
         if (!string.IsNullOrWhiteSpace(filter))
         {
             var normalizedFilter = filter.Trim().ToLower();
-            query = query.Where(x =>
+            recipientContacts = recipientContacts.Where(x =>
                 x.Email.ToLower().Contains(normalizedFilter)
                 || (x.Name != null && x.Name.ToLower().Contains(normalizedFilter))
             );
         }
-        return (await query.ToListAsync()).ToSuccessResponse();
+        return (await SelectDtos(recipientContacts).ToListAsync()).ToSuccessResponse();
     }
 
     [HttpGet("{recipientContactId:long}")]
     public async Task<ResponseResult<RecipientContactDto>> Get(long recipientContactId)
     {
         var dto =
-            await QueryDtos(tokenService.GetUserSqlId())
-                .FirstOrDefaultAsync(x => x.Id == recipientContactId)
-            ?? throw new KnownException("收件人不存在");
+            await SelectDtos(
+                    QueryRecipientContacts(tokenService.GetUserSqlId())
+                        .Where(x => x.Id == recipientContactId)
+                )
+                .FirstOrDefaultAsync() ?? throw new KnownException("收件人不存在");
         return dto.ToSuccessResponse();
     }
 
@@ -56,7 +58,8 @@ public sealed class RecipientContactsController(SqlContext db, TokenService toke
         var entity = await CreateEntityAsync(request);
         await db.SaveChangesAsync();
         return (
-            await QueryDtos(entity.UserId).FirstAsync(x => x.Id == entity.Id)
+            await SelectDtos(QueryRecipientContacts(entity.UserId).Where(x => x.Id == entity.Id))
+                .FirstAsync()
         ).ToSuccessResponse();
     }
 
@@ -87,8 +90,10 @@ public sealed class RecipientContactsController(SqlContext db, TokenService toke
         await db.SaveChangesAsync();
         var createdIds = created.Select(x => x.Id).ToList();
         return (
-            await QueryDtos(tokenService.GetUserSqlId())
-                .Where(x => createdIds.Contains(x.Id))
+            await SelectDtos(
+                    QueryRecipientContacts(tokenService.GetUserSqlId())
+                        .Where(x => createdIds.Contains(x.Id))
+                )
                 .ToListAsync()
         ).ToSuccessResponse();
     }
@@ -122,7 +127,10 @@ public sealed class RecipientContactsController(SqlContext db, TokenService toke
         contact.Remark = request.Remark;
         contact.MinimumCooldownHours = request.MinimumCooldownHours;
         await db.SaveChangesAsync();
-        return (await QueryDtos(userId).FirstAsync(x => x.Id == contact.Id)).ToSuccessResponse();
+        return (
+            await SelectDtos(QueryRecipientContacts(userId).Where(x => x.Id == contact.Id))
+                .FirstAsync()
+        ).ToSuccessResponse();
     }
 
     [HttpPut("validation-status")]
@@ -188,28 +196,34 @@ public sealed class RecipientContactsController(SqlContext db, TokenService toke
             !await db.EmailGroups.AnyAsync(x =>
                 x.Id == emailGroupId
                 && x.UserId == userId
-                && x.Category == EmailGroupCategory.Recipient
+                && x.Category == EmailGroupCategory.RecipientEmail
             )
         )
             throw new KnownException("收件人分组不存在");
     }
 
-    private IQueryable<RecipientContactDto> QueryDtos(long userId) =>
-        db
-            .RecipientContacts.Where(x => x.UserId == userId)
-            .Select(x => new RecipientContactDto(
-                x.Id,
-                x.EmailGroupId,
-                x.Email,
-                x.Name,
-                x.Description,
-                x.Remark,
-                x.MinimumCooldownHours,
-                x.ValidationStatus,
-                x.ValidationFailureReason,
-                x.LastDeliveredAtUtc,
-                x.LastSuccessDeliveryDate
-            ));
+    private IQueryable<RecipientContact> QueryRecipientContacts(long userId) =>
+        db.RecipientContacts.Where(x => x.UserId == userId);
+
+    /// <summary>
+    /// 保持所有 SQL 筛选作用于实体字段，避免 EF Core 继续翻译 record DTO 的成员访问。
+    /// </summary>
+    private static IQueryable<RecipientContactDto> SelectDtos(
+        IQueryable<RecipientContact> recipientContacts
+    ) =>
+        recipientContacts.Select(x => new RecipientContactDto(
+            x.Id,
+            x.EmailGroupId,
+            x.Email,
+            x.Name,
+            x.Description,
+            x.Remark,
+            x.MinimumCooldownHours,
+            x.ValidationStatus,
+            x.ValidationFailureReason,
+            x.LastDeliveredAtUtc,
+            x.LastSuccessDeliveryDate
+        ));
 }
 
 public sealed class UpdateRecipientValidationStatusDto

@@ -1,18 +1,36 @@
-using MailKit.Security;
 using UzonMail.DB.SQL.Core.Emails;
 
 namespace UzonMail.CorePlugin.Controllers.Emails.DTOs;
 
-public sealed record SenderAccountDto(
+/// <summary>
+/// 账户配置使用的协议族。一个邮箱身份中的发送、收件能力必须属于同一协议族，
+/// 这样 Microsoft Graph 的 OAuth 授权可以被两个能力安全复用。
+/// </summary>
+public enum EmailAccountConfigurationKind
+{
+    Basic = 1,
+    MicrosoftGraph = 2,
+}
+
+/// <summary>
+/// 邮箱身份的非敏感展示数据。
+/// </summary>
+public sealed record EmailAccountDto(
     long Id,
-    long EmailAccountId,
     long EmailGroupId,
     string Email,
     string? Name,
     string? Description,
     string? Remark,
+    EmailAccountSenderCapabilityDto? Sender,
+    EmailAccountReceivingCapabilityDto? Receiving,
+    OAuthApplicationSource? OAuthApplicationSource,
+    bool HasOAuthAuthorization
+);
+
+public sealed record EmailAccountSenderCapabilityDto(
+    long Id,
     SendingProtocol Protocol,
-    AuthenticationMethod AuthenticationMethod,
     SenderAccountStatus Status,
     string? ValidationFailureReason,
     long? ProxyId,
@@ -20,48 +38,60 @@ public sealed record SenderAccountDto(
     int SentTotalToday,
     string? ReplyToEmails,
     int Weight,
-    bool HasSmtpCredential,
-    OAuthApplicationSource? OAuthApplicationSource,
-    bool HasOAuthAuthorization
+    bool HasCredential
 );
 
-public sealed class CreateSmtpSenderAccountDto
+public sealed record EmailAccountReceivingCapabilityDto(
+    long Id,
+    ReceivingProtocol Protocol,
+    ReceivingAccountStatus Status,
+    int ContentRetentionDays,
+    DateTime? LastConnectedAtUtc,
+    string? LastError,
+    bool HasCredential
+);
+
+/// <summary>
+/// 发送任务选择器需要的发送能力摘要。
+/// </summary>
+public sealed record SenderEmailAccountOptionDto(
+    long Id,
+    string Email,
+    string? Name,
+    string? Description
+);
+
+/// <summary>
+/// 创建或更新邮箱身份及其能力。密钥字段仅用于写入，响应不会回显它们。
+/// </summary>
+public sealed class EmailAccountWriteDto
 {
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public long EmailGroupId { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? Remark { get; set; }
-    public long EmailGroupId { get; set; }
+    public EmailAccountConfigurationKind ConfigurationKind { get; set; }
+    public EmailAccountSenderCapabilityWriteDto Sender { get; set; } = new();
+    public EmailAccountReceivingCapabilityWriteDto Receiving { get; set; } = new();
+    public MicrosoftGraphApplicationWriteDto? MicrosoftGraphApplication { get; set; }
+}
+
+public sealed class EmailAccountSenderCapabilityWriteDto
+{
+    public bool IsEnabled { get; set; }
     public long? ProxyId { get; set; }
     public int MaxSendCountPerDay { get; set; }
     public string? ReplyToEmails { get; set; }
     public int Weight { get; set; } = 1;
-    public SmtpCredentialWriteDto Credential { get; set; } = new();
+    public SmtpCredentialWriteDto? SmtpCredential { get; set; }
 }
 
-public sealed class CreateMicrosoftGraphSenderAccountDto
+public sealed class EmailAccountReceivingCapabilityWriteDto
 {
-    public string Email { get; set; } = string.Empty;
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public string? Remark { get; set; }
-    public long EmailGroupId { get; set; }
-    public int MaxSendCountPerDay { get; set; }
-    public string? ReplyToEmails { get; set; }
-    public int Weight { get; set; } = 1;
-    public MicrosoftGraphApplicationWriteDto Application { get; set; } = new();
-}
-
-public sealed class UpdateSenderAccountDto
-{
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public string? Remark { get; set; }
-    public long EmailGroupId { get; set; }
-    public long? ProxyId { get; set; }
-    public int MaxSendCountPerDay { get; set; }
-    public string? ReplyToEmails { get; set; }
-    public int Weight { get; set; } = 1;
+    public bool IsEnabled { get; set; }
+    public int ContentRetentionDays { get; set; } = 30;
+    public ImapCredentialWriteDto? ImapCredential { get; set; }
 }
 
 public sealed class SmtpCredentialWriteDto
@@ -73,12 +103,32 @@ public sealed class SmtpCredentialWriteDto
     public string? Password { get; set; }
 }
 
+public sealed class ImapCredentialWriteDto
+{
+    public string Host { get; set; } = string.Empty;
+    public int Port { get; set; } = 993;
+    public ConnectionSecurity ConnectionSecurity { get; set; } = ConnectionSecurity.SSL;
+    public string LoginName { get; set; } = string.Empty;
+    public string? Password { get; set; }
+}
+
 public sealed class MicrosoftGraphApplicationWriteDto
 {
-    public OAuthApplicationSource ApplicationSource { get; set; }
+    public OAuthApplicationSource ApplicationSource { get; set; } = OAuthApplicationSource.System;
     public string? TenantId { get; set; }
     public string? ClientId { get; set; }
     public string? ClientSecret { get; set; }
+}
+
+public sealed class MoveEmailAccountsDto
+{
+    public List<long> EmailAccountIds { get; set; } = [];
+    public long TargetEmailGroupId { get; set; }
+}
+
+public sealed class ValidateEmailAccountsDto
+{
+    public List<long> EmailAccountIds { get; set; } = [];
 }
 
 public sealed record RecipientContactDto(
@@ -106,64 +156,3 @@ public class CreateRecipientContactDto
 }
 
 public sealed class UpdateRecipientContactDto : CreateRecipientContactDto;
-
-public sealed record ReceivingAccountDto(
-    long Id,
-    long EmailAccountId,
-    string Email,
-    string? Name,
-    ReceivingProtocol Protocol,
-    AuthenticationMethod AuthenticationMethod,
-    ReceivingAccountStatus Status,
-    int ContentRetentionDays,
-    DateTime? LastConnectedAtUtc,
-    string? LastError,
-    bool HasImapCredential,
-    OAuthApplicationSource? OAuthApplicationSource,
-    bool HasOAuthAuthorization,
-    IReadOnlyList<long> SenderAccountIds,
-    long? PrimarySenderAccountId
-);
-
-public sealed class CreateBasicReceivingAccountDto
-{
-    public string Email { get; set; } = string.Empty;
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public string? Remark { get; set; }
-    public int ContentRetentionDays { get; set; } = 30;
-    public ImapCredentialWriteDto Credential { get; set; } = new();
-    public List<long> SenderAccountIds { get; set; } = [];
-    public long? PrimarySenderAccountId { get; set; }
-}
-
-public sealed class CreateMicrosoftGraphReceivingAccountDto
-{
-    public string Email { get; set; } = string.Empty;
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public string? Remark { get; set; }
-    public int ContentRetentionDays { get; set; } = 30;
-    public MicrosoftGraphApplicationWriteDto Application { get; set; } = new();
-    public List<long> SenderAccountIds { get; set; } = [];
-    public long? PrimarySenderAccountId { get; set; }
-}
-
-public sealed class UpdateReceivingAccountDto
-{
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public string? Remark { get; set; }
-    public int ContentRetentionDays { get; set; } = 30;
-    public List<long> SenderAccountIds { get; set; } = [];
-    public long? PrimarySenderAccountId { get; set; }
-}
-
-public sealed class ImapCredentialWriteDto
-{
-    public string Host { get; set; } = string.Empty;
-    public int Port { get; set; } = 993;
-    public ConnectionSecurity ConnectionSecurity { get; set; } = ConnectionSecurity.SSL;
-    public string LoginName { get; set; } = string.Empty;
-    public string? Password { get; set; }
-}

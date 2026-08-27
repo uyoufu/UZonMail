@@ -57,6 +57,6 @@ public enum ReceivingAccountStatus
 
 public enum EmailGroupCategory
 {
-    Sender = 1,
-    Recipient = 2,
+    EmailAccount = 1,
+    RecipientEmail = 2,
 }

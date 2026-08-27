@@ -62,7 +62,7 @@ public sealed class RecipientContactFailureGroupService(SqlContext db) : IScoped
         var failureGroup = await db.EmailGroups.FirstOrDefaultAsync(
             x =>
                 x.UserId == userId
-                && x.Category == EmailGroupCategory.Recipient
+                && x.Category == EmailGroupCategory.RecipientEmail
                 && x.Name == ValidationFailedGroupName,
             cancellationToken
         );
@@ -72,7 +72,7 @@ public sealed class RecipientContactFailureGroupService(SqlContext db) : IScoped
         failureGroup = new EmailGroup
         {
             UserId = userId,
-            Category = EmailGroupCategory.Recipient,
+            Category = EmailGroupCategory.RecipientEmail,
             Name = ValidationFailedGroupName,
             Description = "验证未通过的收件人",
             Icon = "error",

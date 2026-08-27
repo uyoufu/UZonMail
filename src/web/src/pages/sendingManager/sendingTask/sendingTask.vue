@@ -22,13 +22,13 @@
 
     <SelectEmailData v-model="emailInfo.data" class="q-mb-sm" />
 
-    <SelectAccount v-model="emailInfo.senderAccounts" v-model:selectedGroups="emailInfo.senderAccountGroups" :account-category="EmailGroupCategory.Sender"
+    <SelectAccount v-model="emailInfo.senderAccounts" v-model:selectedGroups="emailInfo.senderAccountGroups" :account-category="EmailGroupCategory.EmailAccount"
       icon="directions_run" :label="translateSendingTask('sender')" class="q-mb-sm" icon-color="secondary"
       :placeholder="translateSendingTask('senderPlaceholder')" />
 
     <div class="q-mb-sm row justify-start items-center">
       <SelectAccount class="col" v-model="emailInfo.recipients" v-model:selectedGroups="emailInfo.recipientContactGroups"
-        :account-category="EmailGroupCategory.Recipient" icon="hail" :label="translateSendingTask('recipients')"
+        :account-category="EmailGroupCategory.RecipientEmail" icon="hail" :label="translateSendingTask('recipients')"
         :placeholder="translateSendingTask('recipientsPlaceholder')" />
 
       <q-checkbox dense keep-color v-model="emailInfo.sendBatch" :label="translateSendingTask('mergeToSend')"
@@ -37,7 +37,7 @@
       </q-checkbox>
     </div>
 
-    <SelectAccount v-model="emailInfo.ccBoxes" :account-category="EmailGroupCategory.Recipient" icon="settings_accessibility"
+    <SelectAccount v-model="emailInfo.ccBoxes" :account-category="EmailGroupCategory.RecipientEmail" icon="settings_accessibility"
       :label="translateSendingTask('ccRecipients')" :placeholder="translateSendingTask('ccRecipientsPlaceholder')"
       class="q-mb-sm" icon-color="secondary" />
 

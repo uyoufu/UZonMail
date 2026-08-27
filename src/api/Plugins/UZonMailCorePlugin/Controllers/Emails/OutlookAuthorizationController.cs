@@ -46,23 +46,6 @@ public sealed class OutlookAuthorizationController(
         "UzonMail.MicrosoftGraph.AuthorizationState.v1"
     );
 
-    [HttpPost("{senderAccountId:long}")]
-    public async Task<ResponseResult<string>> OnAuthorizationRequest(long senderAccountId)
-    {
-        var userId = tokenService.GetUserSqlId();
-        var senderAccount =
-            await db
-                .SenderAccounts.Include(x => x.EmailAccount)
-                .ThenInclude(x => x.OAuthCredential)
-                .FirstOrDefaultAsync(x =>
-                    x.Id == senderAccountId && x.EmailAccount.UserId == userId
-                ) ?? throw new KnownException("未找到发件账户");
-
-        return (
-            await BuildAuthorizationUrlAsync(senderAccount.EmailAccount, userId)
-        ).ToSuccessResponse();
-    }
-
     /// <summary>
     /// 为仅配置收件能力的邮箱身份发起同一授权码流。
     /// </summary>

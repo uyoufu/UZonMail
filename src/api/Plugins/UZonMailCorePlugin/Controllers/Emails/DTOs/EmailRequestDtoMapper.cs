@@ -11,24 +11,6 @@ namespace UzonMail.CorePlugin.Controllers.Emails.DTOs
     /// </summary>
     internal static class EmailRequestDtoMapper
     {
-        internal static EmailGroup ToEntity(this CreateEmailGroupDto request) =>
-            new()
-            {
-                Category = request.Category,
-                Icon = request.Icon,
-                Name = request.Name ?? string.Empty,
-                Description = request.Description,
-                Order = request.Order,
-            };
-
-        internal static EmailGroup ToEntity(this UpdateEmailGroupDto request) =>
-            new()
-            {
-                Name = request.Name ?? string.Empty,
-                Description = request.Description,
-                Order = request.Order,
-            };
-
         internal static SendingGroup ToEntity(this SendEmailNowDto request) =>
             request.ToEntity(DateTime.MinValue);
 

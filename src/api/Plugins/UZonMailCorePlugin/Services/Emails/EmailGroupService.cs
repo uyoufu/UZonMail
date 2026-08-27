@@ -1,150 +1,160 @@
 using Microsoft.EntityFrameworkCore;
 using UzonMail.CorePlugin.Services.Common;
 using UzonMail.CorePlugin.Services.Settings;
-using UzonMail.CorePlugin.Utils.Database;
-using UzonMail.DB.Extensions;
 using UzonMail.DB.SQL;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.Utils.Web.Exceptions;
 
-namespace UzonMail.CorePlugin.Services.Emails
+namespace UzonMail.CorePlugin.Services.Emails;
+
+/// <summary>
+/// 邮箱分组的写入边界。账户数量由读取端聚合，不在分组实体中冗余保存。
+/// </summary>
+public sealed class EmailGroupService(SqlContext db, TokenService tokenService)
+    : CurdService<EmailGroup>(db)
 {
+    public async Task<List<EmailGroup>> GetEmailGroupsAsync(
+        long userId,
+        EmailGroupCategory category,
+        CancellationToken cancellationToken = default
+    ) =>
+        await Db
+            .EmailGroups.Where(x => x.UserId == userId && x.Category == category)
+            .OrderBy(x => x.Order)
+            .ThenBy(x => x.Id)
+            .ToListAsync(cancellationToken);
+
     /// <summary>
-    /// 邮件组
+    /// 获取当前用户的默认分组；首次访问时创建它。
     /// </summary>
-    public class EmailGroupService(SqlContext db, TokenService tokenService)
-        : CurdService<EmailGroup>(db)
+    public async Task<EmailGroup> GetDefaultEmailGroup(
+        EmailGroupCategory category = EmailGroupCategory.RecipientEmail
+    )
     {
-        /// <summary>
-        /// 获取用户的邮箱组
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="groupType"></param>
-        /// <returns></returns>
-        public async Task<List<EmailGroup>> GetEmailGroups(
-            long userId,
-            EmailGroupCategory groupType
-        )
-        {
-            var results = await Db
-                .EmailGroups.Where(x => x.UserId == userId && x.Category == groupType)
-                .ToListAsync();
-            return results;
-        }
+        var tokenPayloads = tokenService.GetTokenPayloads();
+        if (tokenPayloads.Count == 0)
+            throw new KnownException("无法获取用户信息");
 
-        /// <summary>
-        /// 获取默认的邮箱分组
-        /// </summary>
-        /// <param name="groupType"></param>
-        /// <returns></returns>
-        public async Task<EmailGroup> GetDefaultEmailGroup(
-            EmailGroupCategory groupType = EmailGroupCategory.Recipient
-        )
-        {
-            var tokenPayloads = tokenService.GetTokenPayloads();
-            if (tokenPayloads.Count == 0)
-                throw new KnownException("无法获取用户信息");
-
-            var defaultGroup = await Db
-                .EmailGroups.Where(x =>
-                    x.IsDefault && x.UserId == tokenPayloads.UserId && x.Category == groupType
-                )
-                .FirstOrDefaultAsync();
-            if (defaultGroup == null)
-            {
-                defaultGroup = EmailGroup.GetDefaultEmailGroup(tokenPayloads.UserId, groupType);
-                await Db.EmailGroups.AddAsync(defaultGroup);
-            }
-            await Db.SaveChangesAsync();
+        var defaultGroup = await Db.EmailGroups.FirstOrDefaultAsync(x =>
+            x.IsDefault && x.UserId == tokenPayloads.UserId && x.Category == category
+        );
+        if (defaultGroup != null)
             return defaultGroup;
-        }
 
-        /// <summary>
-        /// 新建邮箱组
-        /// 特别注意要修改表中的 type 字段
-        /// </summary>
-        /// <param name="emailGroup"></param>
-        /// <returns></returns>
-        public override async Task<EmailGroup> Create(EmailGroup emailGroup)
-        {
-            // 判断组名是否重复
-            if (
-                await Db.EmailGroups.AnyAsync(x =>
-                    x.UserId == emailGroup.UserId
-                    && x.Category == emailGroup.Category
-                    && x.Name == emailGroup.Name
-                )
+        defaultGroup = EmailGroup.GetDefaultEmailGroup(tokenPayloads.UserId, category);
+        Db.EmailGroups.Add(defaultGroup);
+        await Db.SaveChangesAsync();
+        return defaultGroup;
+    }
+
+    public override async Task<EmailGroup> Create(EmailGroup emailGroup)
+    {
+        if (string.IsNullOrWhiteSpace(emailGroup.Name))
+            throw new KnownException("组名不允许为空");
+        if (
+            await Db.EmailGroups.AnyAsync(x =>
+                x.UserId == emailGroup.UserId
+                && x.Category == emailGroup.Category
+                && x.Name == emailGroup.Name
             )
-            {
-                throw new KnownException("组名重复");
-            }
-
-            // 新建组
-            return await base.Create(emailGroup);
-        }
-
-        /// <summary>
-        /// 更新组
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="description"></param>
-        /// <param name="icon"></param>
-        /// <returns></returns>
-        public async Task<EmailGroup?> UpdateBoxGroup(
-            string name,
-            string? description,
-            string? icon
         )
-        {
-            ;
-            if (string.IsNullOrEmpty(name))
-                throw new KnownException("组名不允许为空");
-            // 获取当前用户 id
-            var userId = tokenService.GetUserSqlId();
-            var emailGroup = new EmailGroup()
-            {
-                Id = 0,
-                Name = name,
-                Description = description,
-                Icon = icon
-            };
-            List<string> updatedNames = [name];
-            if (!string.IsNullOrEmpty(description))
-                updatedNames.Add(description);
-            if (!string.IsNullOrEmpty(icon))
-                updatedNames.Add(icon);
+            throw new KnownException("组名重复");
 
-            var result = await Db.UpdateById(emailGroup, updatedNames);
-            await Db.SaveChangesAsync();
-            return result;
-        }
+        emailGroup.Name = emailGroup.Name.Trim();
+        emailGroup.Order =
+            await Db
+                .EmailGroups.Where(x =>
+                    x.UserId == emailGroup.UserId && x.Category == emailGroup.Category
+                )
+                .Select(x => (long?)x.Order)
+                .MaxAsync() ?? -1;
+        emailGroup.Order++;
+        return await base.Create(emailGroup);
+    }
 
-        /// <summary>
-        /// 通过 id 删除组
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public override Task<bool> DeleteById(long id)
-        {
-            return Db.RunTransaction(
-                async (ctx) =>
-                {
-                    // 先获取组
-                    EmailGroup? group = await ctx
-                        .EmailGroups.Where(x => x.Id == id)
-                        .Include(x => x.RecipientContacts)
-                        .FirstOrDefaultAsync();
+    public async Task<EmailGroup> UpdateMetadataAsync(
+        long userId,
+        long emailGroupId,
+        string name,
+        string? description,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new KnownException("组名不允许为空");
+        var group =
+            await Db.EmailGroups.FirstOrDefaultAsync(
+                x => x.Id == emailGroupId && x.UserId == userId,
+                cancellationToken
+            ) ?? throw new KnownException("邮箱分组不存在");
+        var normalizedName = name.Trim();
+        if (
+            await Db.EmailGroups.AnyAsync(
+                x =>
+                    x.Id != emailGroupId
+                    && x.UserId == userId
+                    && x.Category == group.Category
+                    && x.Name == normalizedName,
+                cancellationToken
+            )
+        )
+            throw new KnownException("组名重复");
 
-                    if (group == null)
-                        return true;
+        group.Name = normalizedName;
+        group.Description = description;
+        await Db.SaveChangesAsync(cancellationToken);
+        return group;
+    }
 
-                    group.IsDeleted = true;
-                    group.RecipientContacts.ForEach(x => x.IsDeleted = true);
-                    await ctx.SaveChangesAsync();
+    public async Task ReorderAsync(
+        long userId,
+        EmailGroupCategory category,
+        IReadOnlyCollection<long> emailGroupIds,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var ids = emailGroupIds.Distinct().ToList();
+        var groups = await Db
+            .EmailGroups.Where(x => x.UserId == userId && x.Category == category)
+            .OrderBy(x => x.Order)
+            .ThenBy(x => x.Id)
+            .ToListAsync(cancellationToken);
+        if (ids.Count != groups.Count || !groups.All(x => ids.Contains(x.Id)))
+            throw new KnownException("分组排序请求不完整");
 
-                    return true;
-                }
-            );
-        }
+        for (var index = 0; index < ids.Count; index++)
+            groups.Single(x => x.Id == ids[index]).Order = index;
+        await Db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(
+        long userId,
+        long emailGroupId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var group =
+            await Db.EmailGroups.FirstOrDefaultAsync(
+                x => x.Id == emailGroupId && x.UserId == userId,
+                cancellationToken
+            ) ?? throw new KnownException("邮箱分组不存在");
+        if (group.IsDefault)
+            throw new KnownException("默认分组不允许删除");
+
+        var isInUse =
+            group.Category == EmailGroupCategory.EmailAccount
+                ? await Db.EmailAccounts.AnyAsync(
+                    x => x.EmailGroupId == group.Id,
+                    cancellationToken
+                )
+                : await Db.RecipientContacts.AnyAsync(
+                    x => x.EmailGroupId == group.Id,
+                    cancellationToken
+                );
+        if (isInUse)
+            throw new KnownException("分组内仍有账户，无法删除");
+
+        group.IsDeleted = true;
+        await Db.SaveChangesAsync(cancellationToken);
     }
 }

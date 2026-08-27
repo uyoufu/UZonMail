@@ -278,7 +278,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 .Where(x =>
                     allSenderAccountIds.Contains(x.Id)
                     || excelSenderEmails.Contains(x.EmailAccount.Email)
-                    || groupSenderAccountIds.Contains(x.EmailGroupId)
+                    || groupSenderAccountIds.Contains(x.EmailAccount.EmailGroupId)
                 )
                 .ToListAsync();
 
@@ -412,14 +412,16 @@ namespace UzonMail.CorePlugin.Services.SendCore
             var newEmails = emails.Except(existsEmails);
             var defaultRecipientContactGroup = await db
                 .EmailGroups.Where(x =>
-                    x.UserId == userId && x.Category == EmailGroupCategory.Recipient && x.IsDefault
+                    x.UserId == userId
+                    && x.Category == EmailGroupCategory.RecipientEmail
+                    && x.IsDefault
                 )
                 .FirstOrDefaultAsync();
             if (defaultRecipientContactGroup == null)
             {
                 defaultRecipientContactGroup = EmailGroup.GetDefaultEmailGroup(
                     userId,
-                    EmailGroupCategory.Recipient
+                    EmailGroupCategory.RecipientEmail
                 );
                 db.EmailGroups.Add(defaultRecipientContactGroup);
                 await db.SaveChangesAsync();
@@ -459,7 +461,7 @@ namespace UzonMail.CorePlugin.Services.SendCore
                 .ToList();
             var senderAccountCount = await db
                 .SenderAccounts.AsNoTracking()
-                .Where(x => senderAccountGroupIds.Contains(x.EmailGroupId))
+                .Where(x => senderAccountGroupIds.Contains(x.EmailAccount.EmailGroupId))
                 .CountAsync();
             sendingGroupData.SenderAccountCount += senderAccountCount;
         }
