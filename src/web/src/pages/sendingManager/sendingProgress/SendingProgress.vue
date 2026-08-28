@@ -45,9 +45,9 @@ defineEmits([
 ])
 const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } = useDialogPluginComponent()
 
-import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
-import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
-import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
+import CommonBtn from 'src/components/buttons/CommonBtn.vue'
+import OkBtn from 'src/components/buttons/OkBtn.vue'
+import CancelBtn from 'src/components/buttons/CancelBtn.vue'
 
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
 import { t } from 'src/i18n/helpers'

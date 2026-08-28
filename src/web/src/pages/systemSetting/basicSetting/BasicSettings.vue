@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
 import { AppSettingType } from 'src/api/appSetting'
-import UTabs from 'src/components/quasarWrapper/UTabs.vue'
+import UTabs from 'src/components/utabs/UTabs.vue'
 import { translateBasicSettings } from 'src/i18n/helpers'
 
 import NotifySetting from './expansionItems/NotifySetting.vue'

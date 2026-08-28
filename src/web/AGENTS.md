@@ -98,9 +98,9 @@ export function useReportContextMenu() {
 1. 通用表格展示先读取 src/components/tableComponents/README.md，再以 src/components/tableComponents/tableExample.vue 为初始化模板，复用 src/compositions/qTableUtils
 2. 右键菜单组件，读取 src/components/contextMenu/README.md 使用说明进行复用
 3. 若要使用弹窗，读取 src/components/lowCode/README.md 使用说明进行复用
-4. 对于按钮，优先复用 `src/web/src/components/quasarWrapper/buttons/` 下实际存在的语义按钮组件；没有合适的语义按钮时使用 `CommonBtn`，不要在页面中直接新增 `q-btn`。
+4. 对于按钮，优先复用 `src/web/src/components/buttons/` 下实际存在的语义按钮组件；没有合适的语义按钮时使用 `CommonBtn`，不要在页面中直接新增 `q-btn`。
 5. 将既有 `q-btn` 重构为 `CommonBtn` 时，若按钮内包含 `q-tooltip`，删除嵌套的 `q-tooltip`，并将提示内容通过 `CommonBtn` 的 `:tooltip` 属性传入。
-6. `src/web/src/components/quasarWrapper/buttons/` 下的按钮组件已自动注册，在模板中直接使用，不需要手动导入。
+6. `src/web/src/components/buttons/` 下的按钮组件已自动注册，在模板中直接使用，不需要手动导入。
 7. `src/web/src/pages/login/loginIndex.vue` 中的登录按钮是保留原 `q-btn` 实现的明确例外。
 
 ## Quasar 组件使用
@@ -126,7 +126,7 @@ export function useReportContextMenu() {
 - 表单弹窗优先使用 `src/components/lowCode`
 - 长耗时操作使用 `notifyUntil` 包裹，以提供执行进度反馈
 - 优先使用 `src/utils/dialog.ts` 中的提示工具，尤其是 `notifySuccess`、`notifyError`、`notifyWarning` 和 `confirmOperation`
-- 需要原生 q-dialog 的复杂交互时, 使用 `src/components/quasarWrapper/PopupDialogExample.vue` 模板定义成页面私有组件，然后在独立的composable 组件中调用 `showComponentDialog` 函数显示弹窗。
+- 需要原生 q-dialog 的复杂交互时, 使用 `src/components/lowCode/PopupDialogExample.vue` 模板定义成页面私有组件，然后在独立的composable 组件中调用 `showComponentDialog` 函数显示弹窗。
 
 ## 组合式 API
 

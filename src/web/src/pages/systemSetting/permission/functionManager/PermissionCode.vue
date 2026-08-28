@@ -28,7 +28,7 @@ import type { QTableColumn } from 'quasar'
 import { useQTable, useQTableIndex } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import ImportBtn from 'src/components/quasarWrapper/buttons/ImportBtn.vue'
+import ImportBtn from 'src/components/buttons/ImportBtn.vue'
 import { t } from 'src/i18n/helpers'
 
 const { indexColumn, QTableIndex } = useQTableIndex()

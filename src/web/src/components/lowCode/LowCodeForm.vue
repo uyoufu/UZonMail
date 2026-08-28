@@ -84,9 +84,9 @@
 <script lang="ts" setup>
 import dayjs from 'dayjs'
 
-import CommonBtn from '../quasarWrapper/buttons/CommonBtn.vue'
-import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
-import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
+import CommonBtn from '../buttons/CommonBtn.vue'
+import OkBtn from 'src/components/buttons/OkBtn.vue'
+import CancelBtn from 'src/components/buttons/CancelBtn.vue'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import PasswordInput from '../passwordInput/PasswordInput.vue'
 

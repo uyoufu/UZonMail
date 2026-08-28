@@ -211,7 +211,7 @@ await showHtmlDialog2('说明', '<p>这里是 HTML 内容</p>')
 
 ## 自定义弹窗
 
-若通过配置无法实现弹窗功能，参考 src/components/quasarWrapper/PopupDialogExample.vue 模板自定义弹窗组件，然后通过 `await showComponentDialog(component, componentProps)` 显示。
+若通过配置无法实现弹窗功能，参考 src/components/lowCode/PopupDialogExample.vue 模板自定义弹窗组件，然后通过 `await showComponentDialog(component, componentProps)` 显示。
 
 ## 注意事项
 

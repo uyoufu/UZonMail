@@ -41,8 +41,8 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 import dayjs from 'dayjs'
 const modelValue = ref(dayjs().format('YYYY-MM-DD HH:mm'))
 
-import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
-import CancelBtn from 'src/components/quasarWrapper/buttons/CancelBtn.vue'
+import OkBtn from 'src/components/buttons/OkBtn.vue'
+import CancelBtn from 'src/components/buttons/CancelBtn.vue'
 import { notifyError } from 'src/utils/dialog'
 import { t } from 'src/i18n/helpers'
 function onOkClick () {

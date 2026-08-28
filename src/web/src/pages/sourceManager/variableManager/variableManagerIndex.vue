@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import UTabs from 'src/components/quasarWrapper/UTabs.vue'
+import UTabs from 'src/components/utabs/UTabs.vue'
 import { t } from 'src/i18n/helpers'
 
 // #region 菜单切换

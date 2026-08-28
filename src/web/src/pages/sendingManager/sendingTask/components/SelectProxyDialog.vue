@@ -35,7 +35,7 @@ const props = defineProps({
   },
 })
 
-import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
+import OkBtn from 'src/components/buttons/OkBtn.vue'
 const selected: Ref<{ id: string }[]> = ref(props.proxyIds.map(x => ({ id: x })))
 function onOkBtnClicked () {
   onDialogOK({

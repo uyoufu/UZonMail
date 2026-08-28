@@ -17,7 +17,7 @@
 <script lang="ts" setup>
 import type { QTableColumn } from 'quasar'
 import { useDialogPluginComponent } from 'quasar'
-import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
+import OkBtn from 'src/components/buttons/OkBtn.vue'
 import { translateSendingTask } from 'src/i18n/helpers'
 import type { IDuplicateRecipientSummary } from './compositions/duplicateRecipient'
 

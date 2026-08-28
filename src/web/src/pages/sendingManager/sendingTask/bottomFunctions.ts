@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // 底部按钮
-import OkBtn from 'src/components/quasarWrapper/buttons/OkBtn.vue'
-import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
+import OkBtn from 'src/components/buttons/OkBtn.vue'
+import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { formatDateToUTC } from 'src/utils/format'
 import type { IEmailCreateInfo } from 'src/api/emailSending'

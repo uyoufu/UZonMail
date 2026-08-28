@@ -34,7 +34,7 @@ import type { QTableColumn } from 'quasar'
 import { useQTable } from 'src/compositions/qTableUtils'
 import type { IRequestPagination, TTableFilterObject } from 'src/compositions/types'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
-import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
+import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import { t } from 'src/i18n/helpers'
 
 import type { IUnsubscribePage

@@ -43,7 +43,7 @@
 
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import PasswordInput from 'src/components/passwordInput/PasswordInput.vue'
-import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
+import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 
 import { AppSettingType } from 'src/api/appSetting'
 import { t } from 'src/i18n/helpers'

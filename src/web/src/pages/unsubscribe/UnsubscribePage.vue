@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
+import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import { useI18n } from 'vue-i18n'
 import { getCurrentLocale } from 'src/i18n/helpers'
 const { t } = useI18n()

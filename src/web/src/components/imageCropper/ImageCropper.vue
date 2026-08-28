@@ -32,8 +32,8 @@ import 'vue-cropper/dist/index.css'
 // 组件中使用
 import { VueCropper } from 'vue-cropper'
 
-import OkBtn from '../quasarWrapper/buttons/OkBtn.vue'
-import CancelBtn from '../quasarWrapper/buttons/CancelBtn.vue'
+import OkBtn from '../buttons/OkBtn.vue'
+import CancelBtn from '../buttons/CancelBtn.vue'
 
 defineProps({
   img: {

@@ -113,7 +113,7 @@ import {
   type ISendingItemAttachment,
   type ISendingItemDetail
 } from 'src/api/sendingItem'
-import CommonBtn from 'src/components/quasarWrapper/buttons/CommonBtn.vue'
+import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import { useFileUsageDownload } from 'src/compositions/useFileUsageDownload'
 import { formatDate } from 'src/utils/format'
 import { useI18n } from 'vue-i18n'
