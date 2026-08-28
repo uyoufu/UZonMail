@@ -129,7 +129,8 @@ export function useReportContextMenu() {
 - 优先使用 `src/utils/dialog.ts` 中的提示工具，尤其是 `notifySuccess`、`notifyError`、`notifyWarning` 和 `confirmOperation`
 - 需要原生 q-dialog 的复杂交互时, 使用 `src/components/lowCode/PopupDialogExample.vue` 模板定义成页面私有组件，然后在独立的 composable 组件中调用 `showComponentDialog` 函数显示弹窗
 - 禁止在组件上使用 `v-model=` 来控制弹窗的显示与隐藏，而应使用 `showComponentDialog` 函数来显示弹窗
-
+- 所有窗体的标题栏应复用 src/components/windowLike/TitleBar.vue
+- 窗体内容应具备 `q-pa-sm` 类，以保持一致的内边距
 
 ## 组合式 API
 

@@ -16,52 +16,25 @@
       </q-item-section>
     </q-item>
 
-    <q-item class="plain-list__item q-mt-xs">
-      <SearchInput v-model="filter" dense />
-    </q-item>
+    <SearchInput v-model="filter" dense class="q-px-xs q-mt-xs" />
+
 
     <q-list class="col scroll-y hover-scroll" dense>
-      <GroupListItem
-        v-for="group in extraItems"
-        :key="group.name"
-        :group="group"
-        :selectable="selectable"
-        :readonly="readonly"
-        :context-menu-items="itemContextMenuItems"
-        @click="onItemClick"
-        @selection-change="onItemCheckboxClicked"
-      />
+      <GroupListItem v-for="group in extraItems" :key="group.name" :group="group" :selectable="selectable"
+        :readonly="readonly" :context-menu-items="itemContextMenuItems" @click="onItemClick"
+        @selection-change="onItemCheckboxClicked" />
 
       <template v-if="isFiltering">
-        <GroupListItem
-          v-for="group in matchedGroups"
-          :key="group.id"
-          :group="group"
-          :selectable="selectable"
-          :readonly="readonly"
-          :context-menu-items="itemContextMenuItems"
-          @click="onItemClick"
-          @selection-change="onItemCheckboxClicked"
-        />
+        <GroupListItem v-for="group in matchedGroups" :key="group.id" :group="group" :selectable="selectable"
+          :readonly="readonly" :context-menu-items="itemContextMenuItems" @click="onItemClick"
+          @selection-change="onItemCheckboxClicked" />
       </template>
-      <draggable
-        v-else
-        v-model="groupItems"
-        item-key="id"
-        :disabled="readonly"
-        handle=".group-drag-handle"
-        @end="onGroupsReordered"
-      >
+      <draggable v-else v-model="groupItems" item-key="id" :disabled="readonly" handle=".group-drag-handle"
+        @end="onGroupsReordered">
         <template #item="{ element: group }">
-          <GroupListItem
-            :group="group"
-            :selectable="selectable"
-            :readonly="readonly"
-            :context-menu-items="itemContextMenuItems"
-            draggable
-            @click="onItemClick"
-            @selection-change="onItemCheckboxClicked"
-          />
+          <GroupListItem :group="group" :selectable="selectable" :readonly="readonly"
+            :context-menu-items="itemContextMenuItems" draggable @click="onItemClick"
+            @selection-change="onItemCheckboxClicked" />
         </template>
       </draggable>
     </q-list>
@@ -152,7 +125,7 @@ const matchedGroups = computed(() => {
   return groupItems.value.filter(group => group.name.toLowerCase().includes(normalizedFilter))
 })
 
-function onItemCheckboxClicked (emailGroup: IEmailGroupListItem) {
+function onItemCheckboxClicked(emailGroup: IEmailGroupListItem) {
   if (emailGroup.selected) {
     if (!selectedValues.value.some(group => group.id === emailGroup.id)) selectedValues.value.push(emailGroup)
     return
@@ -160,16 +133,16 @@ function onItemCheckboxClicked (emailGroup: IEmailGroupListItem) {
   selectedValues.value = selectedValues.value.filter(group => group.id !== emailGroup.id)
 }
 
-function activeGroup (group: IEmailGroupListItem) {
+function activeGroup(group: IEmailGroupListItem) {
   for (const candidate of [...props.extraItems, ...groupItems.value]) candidate.active = candidate === group
   modelValue.value = group
 }
 
-function onItemClick (group: IEmailGroupListItem) {
+function onItemClick(group: IEmailGroupListItem) {
   activeGroup(group)
 }
 
-async function loadGroups () {
+async function loadGroups() {
   const { data: groups } = await getEmailGroups(props.groupCategory)
   const currentGroupId = modelValue.value?.id
   groupItems.value = groups.map(group => toListItem(group))
@@ -179,7 +152,7 @@ async function loadGroups () {
   if (selectedGroup) activeGroup(selectedGroup)
 }
 
-function toListItem (group: IEmailGroup): IEmailGroupListItem {
+function toListItem(group: IEmailGroup): IEmailGroupListItem {
   return {
     ...group,
     label: group.name,
@@ -188,13 +161,13 @@ function toListItem (group: IEmailGroup): IEmailGroupListItem {
   }
 }
 
-async function onGroupsReordered () {
+async function onGroupsReordered() {
   const groupIds = groupItems.value.flatMap(group => group.id === undefined ? [] : [group.id])
   if (groupIds.length !== groupItems.value.length) return
   await reorderEmailGroups(props.groupCategory, groupIds)
 }
 
-async function onCreateEmailGroup () {
+async function onCreateEmailGroup() {
   const dialogParams: IPopupDialogParams = {
     title: translateEmailGroup('newGroup'),
     oneColumn: true,
@@ -218,7 +191,7 @@ async function onCreateEmailGroup () {
   notifySuccess(translateEmailGroup('newGroupSuccess'))
 }
 
-async function modifyGroup (emailGroup: IEmailGroupListItem) {
+async function modifyGroup(emailGroup: IEmailGroupListItem) {
   if (emailGroup.id === undefined) return
   const dialogParams: IPopupDialogParams = {
     title: translateEmailGroup('modifyEmailGroup'),
@@ -235,7 +208,7 @@ async function modifyGroup (emailGroup: IEmailGroupListItem) {
   notifySuccess(t('accountManagement.updated'))
 }
 
-async function deleteGroup (emailGroup: IEmailGroupListItem) {
+async function deleteGroup(emailGroup: IEmailGroupListItem) {
   if (emailGroup.id === undefined) return
   const confirmed = await confirmOperation(
     translateGlobal('deleteConfirmation'),
