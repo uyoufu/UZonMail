@@ -731,7 +731,7 @@ export default {
       dataSourceDescription: 'Data source description',
       dataSourceFormat: 'Format:',
       dataSourceFormatArray: '2. An array beginning with [ and ending with ] is supported',
-      dataSourceFormatObject: '3. An object beginning with { and ending with } is supported',
+      dataSourceFormatObject: "3. An object beginning with {'{'} and ending with {'}'} is supported",
       dataSourceFormatSingle: '1. A single value is supported',
       dataSourceInvalid: 'Invalid data source format. Enter valid JSON data.',
       dataSourceName: 'Data source name',

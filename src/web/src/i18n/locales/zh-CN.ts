@@ -726,7 +726,7 @@ export default {
       dataSourceDescription: '数据源描述',
       dataSourceFormat: '格式:',
       dataSourceFormatArray: '2. 可以是数组, 以 [ 开头, 以 ] 结尾',
-      dataSourceFormatObject: '3. 可以是对象, 以 { 开头, 以 } 结尾',
+      dataSourceFormatObject: "3. 可以是对象, 以 {'{'} 开头, 以 {'}'} 结尾",
       dataSourceFormatSingle: '1. 可以是单个值',
       dataSourceInvalid: '数据源格式不正确，请输入有效的 JSON 格式数据',
       dataSourceName: '数据源名称',
@@ -987,7 +987,7 @@ export default {
     saveTemplate: '保存模板',
     saveTemplateSuccess: '模板保存成功',
     savingTemplate: '正在保存模板...',
-    templateEditorPlaceholder: '在此处输入模板内容, 变量使用 {\'{{  }}\'} 号包裹, 例如 {\'{{ variableName }}\'}',
+    templateEditorPlaceholder: "在此处输入模板内容, 变量使用 {'{{  }}'} 号包裹, 例如 {'{{ variableName }}'}",
     templateId: '模板ID',
     templateName: '模板名称'
   },

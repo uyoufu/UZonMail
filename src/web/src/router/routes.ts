@@ -42,7 +42,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     meta: {
       label: 'userInfo',
       icon: 'person',
-      noTag: true,
+      noTag: false,
       noMenu: true
     },
     redirect: '/user/profile',
@@ -157,7 +157,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
           icon: 'autorenew',
           label: 'ipWarmUp',
           noCache: true,
-          access: ['professional'],
+          access: ['professional']
         },
         component: () => import('pages/sendingManager/ipWarmUp/IpWarmUpManager.vue')
       },
@@ -185,10 +185,10 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'attachment-manager',
         meta: {
           icon: 'cloud_upload',
-          label: 'attachmentManagement',
+          label: 'attachmentManagement'
         },
         component: () => import('pages/sendingManager/fileManager/AttachmentManager.vue')
-      },
+      }
     ]
   },
   {
@@ -291,7 +291,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
             component: () => import('pages/customerCollectors/qqOnebot/qqGroupMemberGetter.vue')
           }
         ]
-      },
+      }
     ]
   },
   {
@@ -319,7 +319,7 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
         path: 'proxy',
         meta: {
           icon: 'public',
-          label: 'proxyManagement',
+          label: 'proxyManagement'
         },
         component: () => import('pages/systemSetting/proxyManager/ProxyManager.vue')
       },
@@ -501,3 +501,4 @@ export const exceptionRoutes: ExtendedRouteRecordRaw[] = [
     component: () => import('pages/ErrorNotFound.vue')
   }
 ]
+

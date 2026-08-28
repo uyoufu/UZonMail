@@ -1,16 +1,16 @@
-import type { IJsVariableSource } from "src/api/pro/jsVariable"
-import { ContextMenuIcon, type IActionContext, type IContextMenuItem } from "src/components/contextMenu/types"
-import type { IPopupDialogParams } from "src/components/lowCode/types"
-import { LowCodeFieldType } from "src/components/lowCode/types"
-import { notifySuccess, showDialog } from "src/utils/dialog"
+import type { IJsVariableSource } from 'src/api/pro/jsVariable'
+import { ContextMenuIcon, type IActionContext, type IContextMenuItem } from 'src/components/contextMenu/types'
+import type { IPopupDialogParams } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
+import { notifySuccess, showDialog } from 'src/utils/dialog'
 
 import { upsertJsVariableSource, deleteJsVariableSourcesData } from 'src/api/pro/jsVariable'
-import type { addNewRowType, deleteRowByIdType } from "src/compositions/qTableUtils"
+import type { addNewRowType, deleteRowByIdType } from 'src/compositions/qTableUtils'
 
 import logger from 'loglevel'
 import { t } from 'src/i18n/helpers'
 
-export function useDataSourceContext (
+export function useDataSourceContext(
   addNewRow: addNewRowType<IJsVariableSource>,
   deleteRowById: deleteRowByIdType<IJsVariableSource>
 ) {
@@ -28,11 +28,11 @@ export function useDataSourceContext (
       tooltip: t('pages.variableManager.deleteDataSources'),
       color: 'negative',
       icon: ContextMenuIcon.delete,
-      onClick: onDeleteDataSource,
+      onClick: onDeleteDataSource
     }
   ])
 
-  async function onNewDataSource () {
+  async function onNewDataSource() {
     const newDoc = await onUpsertDataSource()
     if (!newDoc) return
 
@@ -40,8 +40,7 @@ export function useDataSourceContext (
     addNewRow(newDoc)
   }
 
-
-  async function onUpdateDataSource (dataSource: IJsVariableSource) {
+  async function onUpdateDataSource(dataSource: IJsVariableSource) {
     const newDoc = await onUpsertDataSource(dataSource)
     if (!newDoc) return
 
@@ -50,10 +49,11 @@ export function useDataSourceContext (
     notifySuccess(t('pages.variableManager.updateSuccess'))
   }
 
-
-  async function onUpsertDataSource (dataSource?: IJsVariableSource) {
+  async function onUpsertDataSource(dataSource?: IJsVariableSource) {
     const popupParams: IPopupDialogParams = {
-      title: dataSource ? t('pages.variableManager.editDataSourceTitle', { name: dataSource.name }) : t('pages.variableManager.createDataSource'),
+      title: dataSource
+        ? t('pages.variableManager.editDataSourceTitle', { name: dataSource.name })
+        : t('pages.variableManager.createDataSource'),
       oneColumn: true,
       fields: [
         {
@@ -61,18 +61,23 @@ export function useDataSourceContext (
           label: t('pages.variableManager.name'),
           tooltip: t('pages.variableManager.dataSourceName'),
           value: dataSource?.name || '',
-          required: true,
+          required: true
         },
         {
           name: 'description',
           label: t('pages.variableManager.description'),
           tooltip: t('pages.variableManager.dataSourceDescription'),
-          value: dataSource?.description || '',
+          value: dataSource?.description || ''
         },
         {
           name: 'value',
           label: t('pages.variableManager.dataSourceValue'),
-          tooltip: [t('pages.variableManager.dataSourceFormat'), t('pages.variableManager.dataSourceFormatSingle'), t('pages.variableManager.dataSourceFormatArray'), t('pages.variableManager.dataSourceFormatObject')],
+          tooltip: [
+            t('pages.variableManager.dataSourceFormat'),
+            t('pages.variableManager.dataSourceFormatSingle'),
+            t('pages.variableManager.dataSourceFormatArray'),
+            t('pages.variableManager.dataSourceFormatObject')
+          ],
           type: LowCodeFieldType.textarea,
           value: dataSource ? JSON.stringify(dataSource.value, null, 2) : '',
           required: true,
@@ -117,7 +122,7 @@ export function useDataSourceContext (
     return newDoc
   }
 
-  async function onDeleteDataSource (
+  async function onDeleteDataSource(
     _cursorDataSource: IJsVariableSource,
     { targetValues, clearSelection }: IActionContext<IJsVariableSource>
   ) {
@@ -137,3 +142,4 @@ export function useDataSourceContext (
     dataSourceContextMenuItems
   }
 }
+
