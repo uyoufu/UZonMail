@@ -179,14 +179,20 @@ function compareTreeNodeOrder(leftNode: TreeNodeData, rightNode: TreeNodeData) {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .draggable-tree {
   min-height: 100%;
   position: relative;
 }
 
 .draggable-tree__tree {
+  --el-tree-node-content-height: 32px;
+
   min-height: 100%;
+
+  :deep(.el-tree-node.is-current > .el-tree-node__content) {
+    color: var(--q-secondary);
+  }
 }
 
 .draggable-tree__node {
