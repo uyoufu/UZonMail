@@ -1,13 +1,38 @@
 import { mount } from '@vue/test-utils'
-import { computed, reactive, ref, watch } from 'vue'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { computed, onScopeDispose, reactive, ref, toRefs, watch } from 'vue'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmailAccountConfigurationKind } from 'src/api/emailAccounts'
 import EmailAccountDialog from 'src/pages/emailManager/emailAccounts/EmailAccountDialog.vue'
 
+const mocks = vi.hoisted(() => ({
+  onDialogCancel: vi.fn(),
+  onDialogHide: vi.fn(),
+  onDialogOK: vi.fn()
+}))
+
+vi.mock('quasar', async (importOriginal) => {
+  const original = await importOriginal()
+  if (!original || typeof original !== 'object') throw new Error('Quasar module mock initialization failed')
+  return {
+    ...original,
+    useDialogPluginComponent: Object.assign(
+      () => ({
+        dialogRef: ref(null),
+        onDialogCancel: mocks.onDialogCancel,
+        onDialogHide: mocks.onDialogHide,
+        onDialogOK: mocks.onDialogOK
+      }),
+      { emits: ['ok', 'hide'] }
+    )
+  }
+})
 vi.mock('src/i18n/helpers', () => ({
   t: (key: string) => key,
-  translateGlobal: (key: string) => key
+  translateGlobal: (key: string) => key,
+  translateButton: (key: string) => key
 }))
+vi.mock('src/api/smtpInfo', () => ({ guessSmtpInfoGet: vi.fn() }))
+vi.mock('src/api/imapInfo', () => ({ guessImapInfoGet: vi.fn() }))
 vi.mock('src/api/emailAccounts', async (importOriginal) => {
   const original = await importOriginal<typeof import('src/api/emailAccounts')>()
   return {
@@ -22,50 +47,62 @@ vi.mock('src/utils/dialog', () => ({
   notifySuccess: vi.fn()
 }))
 
+const slotStub = { template: '<div><slot /></div>' }
 const dialogStubs = {
-  QCard: { template: '<div><slot /></div>' },
-  QCardActions: { template: '<div><slot /></div>' },
-  QCardSection: { template: '<section><slot /></section>' },
-  QDialog: { props: ['modelValue'], template: '<div v-if="modelValue"><slot /></div>' },
+  QCard: slotStub,
+  QCardActions: slotStub,
+  QCardSection: slotStub,
+  QDialog: slotStub,
   QForm: { template: '<form><slot /></form>' },
-  QInput: { inheritAttrs: false, props: ['label', 'modelValue'], template: '<input :aria-label="label" />' },
-  QSelect: { inheritAttrs: false, props: ['label', 'modelValue'], template: '<select :aria-label="label" />' },
+  QInput: { inheritAttrs: false, template: '<input />' },
+  QSelect: { inheritAttrs: false, template: '<select />' },
   QSeparator: true,
-  QSpace: true,
-  QToggle: { inheritAttrs: false, props: ['label', 'modelValue'], template: '<label>{{ label }}</label>' },
-  QBtn: true,
-  QTooltip: true,
-  QTabs: { template: '<div><slot /></div>' },
-  QTab: { props: ['label'], template: '<button>{{ label }}</button>' },
-  QTabPanels: { template: '<div><slot /></div>' },
-  QTabPanel: { template: '<section><slot /></section>' }
+  QTabPanels: slotStub,
+  QTabPanel: slotStub,
+  QToggle: true,
+  CancelBtn: { template: '<button data-cancel-button />' },
+  OkBtn: { template: '<button data-ok-button />' },
+  TitleBar: {
+    props: ['title'],
+    emits: ['close'],
+    template: '<button data-title-bar @click="$emit(\'close\')">{{ title }}</button>'
+  },
+  UTabs: {
+    props: ['tabs', 'align'],
+    template:
+      '<div data-tabs :data-align="align"><span v-for="tab in tabs" :key="tab.name">{{ tab.label }}</span></div>'
+  }
 }
 
 describe('EmailAccountDialog', () => {
   beforeAll(() => {
     vi.stubGlobal('computed', computed)
+    vi.stubGlobal('onScopeDispose', onScopeDispose)
     vi.stubGlobal('reactive', reactive)
     vi.stubGlobal('ref', ref)
+    vi.stubGlobal('toRefs', toRefs)
     vi.stubGlobal('watch', watch)
   })
 
-  afterAll(() => {
-    vi.unstubAllGlobals()
-  })
+  afterAll(() => vi.unstubAllGlobals())
+  beforeEach(() => vi.clearAllMocks())
 
-  it('keeps Basic sender and receiving setup in one tabbed dialog', () => {
+  it('uses the shared title and centered tabs without capability toggles', async () => {
     const wrapper = mount(EmailAccountDialog, {
       props: {
-        modelValue: true,
         emailGroupId: 10,
         configurationKind: EmailAccountConfigurationKind.Basic
       },
       global: { stubs: dialogStubs }
     })
 
+    expect(wrapper.get('[data-title-bar]').text()).toBe('accountManagement.emailAccount.create')
+    expect(wrapper.get('[data-tabs]').attributes('data-align')).toBe('center')
     expect(wrapper.text()).toContain('accountManagement.emailAccount.senderSettings')
     expect(wrapper.text()).toContain('accountManagement.emailAccount.receivingSettings')
-    expect(wrapper.text()).toContain('accountManagement.emailAccount.enableSender')
-    expect(wrapper.text()).toContain('accountManagement.emailAccount.enableReceiving')
+    expect(wrapper.text()).not.toContain('accountManagement.emailAccount.enableSender')
+    expect(wrapper.text()).not.toContain('accountManagement.emailAccount.enableReceiving')
+    expect(wrapper.find('[data-cancel-button]').exists()).toBe(true)
+    expect(wrapper.find('[data-ok-button]').exists()).toBe(true)
   })
 })

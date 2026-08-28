@@ -18,21 +18,20 @@
 
     <SearchInput v-model="filter" dense class="q-px-xs q-mt-xs" />
 
-
     <q-list class="col scroll-y hover-scroll" dense>
-      <GroupListItem v-for="group in extraItems" :key="group.name" :group="group" :selectable="selectable"
+      <EmailGroupListItem v-for="group in extraItems" :key="group.name" :group="group" :selectable="selectable"
         :readonly="readonly" :context-menu-items="itemContextMenuItems" @click="onItemClick"
         @selection-change="onItemCheckboxClicked" />
 
       <template v-if="isFiltering">
-        <GroupListItem v-for="group in matchedGroups" :key="group.id" :group="group" :selectable="selectable"
+        <EmailGroupListItem v-for="group in matchedGroups" :key="group.id" :group="group" :selectable="selectable"
           :readonly="readonly" :context-menu-items="itemContextMenuItems" @click="onItemClick"
           @selection-change="onItemCheckboxClicked" />
       </template>
       <draggable v-else v-model="groupItems" item-key="id" :disabled="readonly" handle=".group-drag-handle"
         @end="onGroupsReordered">
         <template #item="{ element: group }">
-          <GroupListItem :group="group" :selectable="selectable" :readonly="readonly"
+          <EmailGroupListItem :group="group" :selectable="selectable" :readonly="readonly"
             :context-menu-items="itemContextMenuItems" draggable @click="onItemClick"
             @selection-change="onItemCheckboxClicked" />
         </template>
@@ -59,43 +58,12 @@ import type { IEmailGroupListItem, IFlatHeader } from './types'
 import ContextMenu from 'src/components/contextMenu/ContextMenu.vue'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import SearchInput from 'src/components/searchInput/SearchInput.vue'
+import EmailGroupListItem from './EmailGroupListItem.vue'
 import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import type { IPopupDialogParams } from 'src/components/lowCode/types'
 import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { showDialog } from 'src/components/lowCode/PopupDialog'
 import { confirmOperation, notifySuccess } from 'src/utils/dialog'
-
-const GroupListItem = defineComponent({
-  name: 'GroupListItem',
-  components: { AsyncTooltip, ContextMenu },
-  props: {
-    group: { type: Object as PropType<IEmailGroupListItem>, required: true },
-    selectable: { type: Boolean, required: true },
-    readonly: { type: Boolean, required: true },
-    draggable: { type: Boolean, default: false },
-    contextMenuItems: {
-      type: Array as PropType<IContextMenuItem<IEmailGroupListItem>[]>,
-      required: true
-    }
-  },
-  emits: ['click', 'selection-change'],
-  template: `
-    <q-item class="plain-list__item q-my-xs" clickable v-ripple :active="group.active"
-      active-class="text-secondary" @click="$emit('click', group)">
-      <div class="row justify-between no-wrap items-center full-width">
-        <div class="row justify-start items-center no-wrap overflow-hidden">
-          <q-icon v-if="draggable" class="group-drag-handle cursor-move q-mr-xs" name="drag_indicator" size="xs" />
-          <q-icon v-if="group.icon" color="primary" :name="group.icon" size="sm" />
-          <q-checkbox v-if="selectable && group.selectable !== false" dense v-model="group.selected"
-            color="secondary" class="q-ml-sm" keep-color @click.stop @update:model-value="$emit('selection-change', group)" />
-          <div class="q-ml-sm ellipsis">{{ group.label }}<AsyncTooltip :tooltip="group.label" /></div>
-        </div>
-        <q-badge v-if="group.accountCount !== undefined" class="q-ml-sm" color="grey-7" :label="group.accountCount" />
-      </div>
-      <ContextMenu v-if="!readonly" :items="contextMenuItems" :value="group" />
-    </q-item>
-  `
-})
 
 const modelValue = defineModel<IEmailGroupListItem>()
 const selectedValues = defineModel<IEmailGroupListItem[]>('selected', { default: () => [] })
@@ -125,8 +93,9 @@ const matchedGroups = computed(() => {
   return groupItems.value.filter(group => group.name.toLowerCase().includes(normalizedFilter))
 })
 
-function onItemCheckboxClicked(emailGroup: IEmailGroupListItem) {
-  if (emailGroup.selected) {
+function onItemCheckboxClicked(emailGroup: IEmailGroupListItem, isSelected: boolean) {
+  emailGroup.selected = isSelected
+  if (isSelected) {
     if (!selectedValues.value.some(group => group.id === emailGroup.id)) selectedValues.value.push(emailGroup)
     return
   }

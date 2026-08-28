@@ -5,7 +5,7 @@ namespace UzonMail.DB.SQL.Core.Emails
     /// <summary>
     /// Smtp配置
     /// </summary>
-    public class SmtpInfo : SqlId
+    public class SmtpInfo : SqlId, IMailServerInfo
     {
         /// <summary>
         /// 域名

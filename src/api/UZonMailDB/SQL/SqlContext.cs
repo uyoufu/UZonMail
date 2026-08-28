@@ -88,6 +88,7 @@ namespace UzonMail.DB.SQL
 
         // 设置相关
         public DbSet<SmtpInfo> SmtpInfos { get; set; }
+        public DbSet<ImapInfo> ImapInfos { get; set; }
         #endregion
 
         #region 测试

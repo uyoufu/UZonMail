@@ -50,6 +50,7 @@
 
 	<ItemGroup>
 	  <Content Remove="data\init\smtpInfo.json" />
+	  <Content Remove="data\init\imapInfoOverrides.json" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -63,6 +64,9 @@
 
 	<ItemGroup>
 	  <None Include="data\init\smtpInfo.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Include="data\init\imapInfoOverrides.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

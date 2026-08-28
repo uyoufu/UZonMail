@@ -1,0 +1,22 @@
+[
+  { "domain": "hotmail.com", "host": "outlook.office365.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "outlook.com", "host": "outlook.office365.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "live.cn", "host": "outlook.office365.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "live.com", "host": "outlook.office365.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "msn.com", "host": "outlook.office365.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "office365.com", "host": "outlook.office365.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "icloud.com", "host": "imap.mail.me.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "qq.com", "host": "imap.qq.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "vip.qq.com", "host": "imap.qq.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "foxmail.com", "host": "imap.qq.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "mail.ru", "host": "imap.mail.ru", "port": 993, "connectionSecurity": 1 },
+  { "domain": "inbox.ru", "host": "imap.mail.ru", "port": 993, "connectionSecurity": 1 },
+  { "domain": "list.ru", "host": "imap.mail.ru", "port": 993, "connectionSecurity": 1 },
+  { "domain": "bk.ru", "host": "imap.mail.ru", "port": 993, "connectionSecurity": 1 },
+  { "domain": "mail.ua", "host": "imap.mail.ru", "port": 993, "connectionSecurity": 1 },
+  { "domain": "wanadoo.fr", "host": "imap.orange.fr", "port": 993, "connectionSecurity": 1 },
+  { "domain": "yahoo.com", "host": "imap.mail.yahoo.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "yahoo.co.uk", "host": "imap.mail.yahoo.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "yahoo.co.jp", "host": "imap.mail.yahoo.com", "port": 993, "connectionSecurity": 1 },
+  { "domain": "yahoo.com.tw", "host": "imap.mail.yahoo.com", "port": 993, "connectionSecurity": 1 }
+]

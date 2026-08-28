@@ -92,6 +92,7 @@ export function useReportContextMenu() {
 - 同类逻辑重复出现两次及以上时，提取为工具函数或 composable
 - 若单个组件的职责多于 3 个时，应将其拆分为多个 composable
 - 页面中的右键菜单应在单独的 composable 中实现
+- vue 中使用 SFC 组件提升可读性，不要使用 JSX 或者字符串模板
 
 ## 组件复用
 
@@ -169,6 +170,10 @@ export function useReportContextMenu() {
 组件按需引入由 `unplugin-vue-components/vite` 负责，并配置了 `ElementPlusResolver()` 和 `QuasarResolver()`。在 Vue 模板中使用 Element Plus 或 Quasar 组件时，不需要手动导入组件，例如 `<ElButton>`、`<ElForm>`、`<QBtn>`、`<QTable>` 等。
 
 项目本地组件、业务 composable、工具函数、API 方法和 store 实例仍应按实际路径显式导入，除非已在 `quasar.config.ts` 中加入对应的自动导入规则。
+
+## vue 响应式
+
+- 禁止使用 `reactive` 函数，使用 `ref` 代替
 
 ## 国际化与多语言
 

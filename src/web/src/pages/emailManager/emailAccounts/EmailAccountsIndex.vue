@@ -59,8 +59,6 @@
     </q-table>
 
     <CollapseLeft v-model="isCollapseGroupList" :style="collapseStyleRef" />
-    <EmailAccountDialog v-model="isAccountDialogOpen" :email-group-id="selectedGroup.id ?? 0"
-      :configuration-kind="editingConfigurationKind" :account="editingAccount" @saved="onAccountSaved" />
   </div>
 </template>
 
@@ -103,6 +101,7 @@ import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMe
 import { useQTableIndex } from 'src/compositions/qTableUtils'
 import { useTableCollapseLeft } from 'src/components/collapseIcon/useCollapseLeft'
 import { LowCodeFieldType, type IPopupDialogParams } from 'src/components/lowCode/types'
+import { showComponentDialog } from 'src/components/lowCode/PopupDialog'
 import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
 import { readExcel, writeExcel, type IExcelColumnMapper } from 'src/utils/file'
 import { splitString } from 'src/utils/stringHelper'
@@ -117,9 +116,6 @@ const selectedRows = ref<IEmailAccount[]>([])
 const filter = ref('')
 const isLoading = ref(false)
 const isCreateMenuOpen = ref(false)
-const isAccountDialogOpen = ref(false)
-const editingAccount = ref<IEmailAccount>()
-const editingConfigurationKind = ref<EmailAccountConfigurationKind>(EmailAccountConfigurationKind.Basic)
 
 const columns = computed<QTableColumn[]>(() => [
   indexColumn,
@@ -165,18 +161,23 @@ async function loadRows() {
   }
 }
 
-function onCreate(configurationKind: EmailAccountConfigurationKind) {
+async function onCreate(configurationKind: EmailAccountConfigurationKind) {
   if (!selectedGroup.value.id) return
   isCreateMenuOpen.value = false
-  editingAccount.value = undefined
-  editingConfigurationKind.value = configurationKind
-  isAccountDialogOpen.value = true
+  const result = await showComponentDialog<IEmailAccount>(EmailAccountDialog, {
+    emailGroupId: selectedGroup.value.id,
+    configurationKind
+  })
+  if (result.ok) await onAccountSaved()
 }
 
-function onEdit(account: IEmailAccount) {
-  editingAccount.value = account
-  editingConfigurationKind.value = accountConfigurationKind(account)
-  isAccountDialogOpen.value = true
+async function onEdit(account: IEmailAccount) {
+  const result = await showComponentDialog<IEmailAccount>(EmailAccountDialog, {
+    emailGroupId: account.emailGroupId,
+    configurationKind: accountConfigurationKind(account),
+    account
+  })
+  if (result.ok) await onAccountSaved()
 }
 
 async function onAccountSaved() {
