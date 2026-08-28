@@ -1,5 +1,5 @@
 <template>
-  <q-bar dense class="q-px-sm q-py-md">
+  <q-bar dense class="q-px-sm q-py-md bg-accent">
     <q-icon :name="resolveSvgFullName('favicon')" size="md" class="q-ml-sm" />
     <div class="col ellipsis text-subtitle1 text-primary text-bold">{{ title }}</div>
     <CommonBtn flat dense round icon="close" color="negative" :tooltip="translateButton('cancelCurrentOperation')"

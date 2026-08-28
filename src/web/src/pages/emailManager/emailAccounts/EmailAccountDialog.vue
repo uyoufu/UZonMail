@@ -8,8 +8,16 @@
           <q-card-section class="q-pa-sm">
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-sm-6">
-                <q-input v-model.trim="form.email" :disable="isEditing" hide-bottom-space
-                  :label="t('accountManagement.email')" type="email" outlined dense :rules="[requiredRule]" />
+                <q-input
+                  v-model.trim="form.email"
+                  :disable="isEditing"
+                  hide-bottom-space
+                  :label="t('accountManagement.email')"
+                  type="email"
+                  outlined
+                  dense
+                  :rules="[requiredRule]"
+                />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input v-model.trim="form.name" :label="t('accountManagement.name')" outlined dense />
@@ -23,143 +31,47 @@
             </div>
           </q-card-section>
 
-          <UTabs v-model="activeTab" :tabs="tabs" />
+          <template v-if="isBasic">
+            <UTabs v-model="activeTab" :tabs="tabs" align="center" />
 
-          <q-tab-panels v-model="activeTab" animated>
-            <q-tab-panel :name="EmailAccountTab.Sender" class="q-pa-sm">
-              <div v-if="isBasic" class="q-mb-sm">
-                <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">
-                  {{ t('accountManagement.emailAccount.smtpCredential') }}
-                </div>
+            <q-tab-panels v-model="activeTab" animated>
+              <q-tab-panel :name="EmailAccountTab.Sender" class="q-pa-sm">
+                <SmtpEmailAccountSettings
+                  v-model:sender="form.sender"
+                  :password-label="smtpPasswordLabel"
+                  :host-rules="smtpHostRules"
+                  :login-rules="smtpLoginRules"
+                  :port-rules="smtpPortRules"
+                  :password-rules="smtpPasswordRules"
+                  @credential-field-changed="onCredentialFieldChanged(MailProtocol.Smtp, $event)"
+                  @connection-security-changed="onConnectionSecurityChanged(MailProtocol.Smtp)"
+                />
+              </q-tab-panel>
 
-                <div class="row q-col-gutter-sm">
-                  <div class="col-12 col-sm-6">
-                    <q-input v-model.trim="form.sender.host" :label="t('accountManagement.host')" hide-bottom-space
-                      outlined dense :rules="smtpHostRules"
-                      @update:model-value="onCredentialFieldChanged(MailProtocol.Smtp, CredentialField.Host)" />
-                  </div>
-                  <div class="col-12 col-sm-3">
-                    <q-input v-model.number="form.sender.port" :label="t('accountManagement.port')" hide-bottom-space
-                      type="number" min="1" max="65535" outlined dense :rules="smtpPortRules"
-                      @update:model-value="onCredentialFieldChanged(MailProtocol.Smtp, CredentialField.Port)" />
-                  </div>
-                  <div class="col-12 col-sm-3">
-                    <q-select v-model="form.sender.connectionSecurity"
-                      :label="t('accountManagement.connectionSecurity')" hide-bottom-space
-                      :options="connectionSecurityOptions" emit-value map-options outlined dense options-dense
-                      @update:model-value="onConnectionSecurityChanged(MailProtocol.Smtp)" />
-                  </div>
-                  <div class="col-12 col-sm-6">
-                    <q-input v-model.trim="form.sender.loginName" :label="t('accountManagement.loginName')"
-                      hide-bottom-space outlined dense :rules="smtpLoginRules"
-                      @update:model-value="onCredentialFieldChanged(MailProtocol.Smtp, CredentialField.LoginName)" />
-                  </div>
-                  <div class="col-12 col-sm-6">
-                    <q-input v-model="form.sender.password" :label="smtpPasswordLabel" hide-bottom-space type="password"
-                      outlined dense :rules="smtpPasswordRules"
-                      @update:model-value="onCredentialFieldChanged(MailProtocol.Smtp, CredentialField.Password)" />
-                  </div>
-                </div>
-              </div>
+              <q-tab-panel :name="EmailAccountTab.Receiving" class="q-pa-sm">
+                <ImapEmailAccountSettings
+                  v-model:receiving="form.receiving"
+                  :password-label="imapPasswordLabel"
+                  :host-rules="imapHostRules"
+                  :login-rules="imapLoginRules"
+                  :port-rules="imapPortRules"
+                  :password-rules="imapPasswordRules"
+                  @credential-field-changed="onCredentialFieldChanged(MailProtocol.Imap, $event)"
+                  @connection-security-changed="onConnectionSecurityChanged(MailProtocol.Imap)"
+                />
+              </q-tab-panel>
+            </q-tab-panels>
+          </template>
 
-              <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">{{ senderProtocolLabel }}</div>
-
-              <div class="row q-col-gutter-sm">
-                <div class="col-12 col-sm-4">
-                  <q-input v-model.number="form.sender.maxSendCountPerDay" :label="t('accountManagement.dailyLimit')"
-                    type="number" min="0" outlined dense />
-                </div>
-                <div class="col-12 col-sm-4">
-                  <q-input v-model.number="form.sender.weight" :label="t('accountManagement.weight')" type="number"
-                    min="1" outlined dense />
-                </div>
-                <div v-if="isBasic" class="col-12 col-sm-4">
-                  <q-select v-model="form.sender.proxyId" :label="t('accountManagement.emailAccount.proxy')"
-                    :options="proxyOptions" option-label="name" option-value="id" emit-value map-options clearable
-                    outlined dense options-dense hide-bottom-space :loading="isLoadingProxyOptions"
-                    @popup-show="onProxyPopupShow" />
-                </div>
-                <div class="col-12">
-                  <q-input v-model.trim="form.sender.replyToEmails" :label="t('accountManagement.replyTo')" outlined
-                    dense />
-                </div>
-              </div>
-            </q-tab-panel>
-
-            <q-tab-panel :name="EmailAccountTab.Receiving" class="q-pa-sm">
-              <div v-if="isBasic" class="q-mb-sm">
-                <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">
-                  {{ t('accountManagement.emailAccount.imapCredential') }}
-                </div>
-                <div class="row q-col-gutter-sm">
-                  <div class="col-12 col-sm-6">
-                    <q-input v-model.trim="form.receiving.host" :label="t('accountManagement.host')" hide-bottom-space
-                      outlined dense :rules="imapHostRules"
-                      @update:model-value="onCredentialFieldChanged(MailProtocol.Imap, CredentialField.Host)" />
-                  </div>
-                  <div class="col-12 col-sm-3">
-                    <q-input v-model.number="form.receiving.port" :label="t('accountManagement.port')" type="number"
-                      min="1" max="65535" hide-bottom-space outlined dense :rules="imapPortRules"
-                      @update:model-value="onCredentialFieldChanged(MailProtocol.Imap, CredentialField.Port)" />
-                  </div>
-                  <div class="col-12 col-sm-3">
-                    <q-select v-model="form.receiving.connectionSecurity"
-                      :label="t('accountManagement.connectionSecurity')" hide-bottom-space
-                      :options="connectionSecurityOptions" emit-value map-options outlined dense options-dense
-                      @update:model-value="onConnectionSecurityChanged(MailProtocol.Imap)" />
-                  </div>
-                  <div class="col-12 col-sm-6">
-                    <q-input v-model.trim="form.receiving.loginName" :label="t('accountManagement.loginName')" outlined
-                      dense hide-bottom-space :rules="imapLoginRules"
-                      @update:model-value="onCredentialFieldChanged(MailProtocol.Imap, CredentialField.LoginName)" />
-                  </div>
-                  <div class="col-12 col-sm-6">
-                    <q-input v-model="form.receiving.password" :label="imapPasswordLabel" hide-bottom-space
-                      type="password" outlined dense :rules="imapPasswordRules"
-                      @update:model-value="onCredentialFieldChanged(MailProtocol.Imap, CredentialField.Password)" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">{{ receivingProtocolLabel }}</div>
-
-              <div class="row q-col-gutter-sm">
-                <div class="col-12 col-sm-4">
-                  <q-input v-model.number="form.receiving.contentRetentionDays"
-                    :label="t('accountManagement.retentionDays')" type="number" min="1" max="3650" outlined dense />
-                </div>
-              </div>
-            </q-tab-panel>
-          </q-tab-panels>
-
-          <q-card-section v-if="isMicrosoftGraph" class="q-pa-sm q-gutter-sm">
-            <div class="row items-center justify-between">
-              <div class="text-subtitle2">{{ t('accountManagement.applicationSource') }}</div>
-              <q-toggle v-if="isEditing" v-model="form.replaceMicrosoftGraphApplication" dense color="primary"
-                :label="t('accountManagement.emailAccount.updateApplicationOnSave')" />
-            </div>
-            <div v-if="shouldSendMicrosoftGraphApplication" class="row q-col-gutter-sm">
-              <div class="col-12 col-sm-4">
-                <q-select v-model="form.microsoftGraphApplication.applicationSource"
-                  :label="t('accountManagement.applicationSource')" :options="applicationSourceOptions" emit-value
-                  map-options outlined dense options-dense />
-              </div>
-              <template v-if="form.microsoftGraphApplication.applicationSource === OAuthApplicationSource.Custom">
-                <div class="col-12 col-sm-4">
-                  <q-input v-model.trim="form.microsoftGraphApplication.tenantId" label="Tenant ID" outlined dense
-                    :rules="[requiredRule]" />
-                </div>
-                <div class="col-12 col-sm-4">
-                  <q-input v-model.trim="form.microsoftGraphApplication.clientId" label="Client ID" outlined dense
-                    :rules="[requiredRule]" />
-                </div>
-                <div class="col-12">
-                  <q-input v-model="form.microsoftGraphApplication.clientSecret" label="Client Secret" type="password"
-                    outlined dense />
-                </div>
-              </template>
-            </div>
-          </q-card-section>
+          <MicrosoftGraphEmailAccountSettings
+            v-else
+            v-model:sender="form.sender"
+            v-model:receiving="form.receiving"
+            v-model:application="form.microsoftGraphApplication"
+            v-model:replace-application="form.replaceMicrosoftGraphApplication"
+            :is-editing="isEditing"
+            :required-rule="requiredRule"
+          />
         </div>
 
         <q-card-actions align="right" class="q-pa-sm q-gutter-sm">
@@ -173,7 +85,6 @@
 
 <script lang="ts" setup>
 import { useDialogPluginComponent } from 'quasar'
-import { ConnectionSecurity, OAuthApplicationSource } from 'src/api/accountEnums'
 import {
   createBasicEmailAccount,
   createMicrosoftGraphEmailAccount,
@@ -186,9 +97,11 @@ import type { IUTabOptions } from 'src/components/utabs/types'
 import TitleBar from 'src/components/windowLike/TitleBar.vue'
 import { t } from 'src/i18n/helpers'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
-import { CredentialField, EmailAccountTab, MailProtocol } from './emailAccountDialogTypes'
+import ImapEmailAccountSettings from './components/ImapEmailAccountSettings.vue'
+import MicrosoftGraphEmailAccountSettings from './components/MicrosoftGraphEmailAccountSettings.vue'
+import SmtpEmailAccountSettings from './components/SmtpEmailAccountSettings.vue'
+import { EmailAccountTab, MailProtocol } from './emailAccountDialogTypes'
 import { useEmailAccountDialogForm } from './useEmailAccountDialogForm'
-import { useEmailAccountProxyOptions } from './useEmailAccountProxyOptions'
 
 defineOptions({ name: 'EmailAccountDialog' })
 
@@ -207,8 +120,6 @@ const {
   form,
   isEditing,
   isBasic,
-  isMicrosoftGraph,
-  shouldSendMicrosoftGraphApplication,
   smtpPasswordLabel,
   imapPasswordLabel,
   requiredRule,
@@ -225,7 +136,6 @@ const {
   hasValidCredentials,
   toWriteRequest
 } = useEmailAccountDialogForm({ emailGroupId, configurationKind, account })
-const { proxyOptions, isLoadingProxyOptions, onProxyPopupShow } = useEmailAccountProxyOptions()
 
 const tabs = computed<IUTabOptions[]>(() => [
   {
@@ -239,22 +149,9 @@ const tabs = computed<IUTabOptions[]>(() => [
     label: t('accountManagement.emailAccount.receivingSettings')
   }
 ])
-const senderProtocolLabel = computed(() => (isBasic.value ? 'SMTP' : 'Microsoft Graph'))
-const receivingProtocolLabel = computed(() => (isBasic.value ? 'IMAP' : 'Microsoft Graph'))
 const dialogTitle = computed(() =>
   isEditing.value ? t('accountManagement.emailAccount.edit') : t('accountManagement.emailAccount.create')
 )
-const connectionSecurityOptions = [
-  { label: 'None', value: ConnectionSecurity.None },
-  { label: 'SSL', value: ConnectionSecurity.SSL },
-  { label: 'TLS', value: ConnectionSecurity.TLS },
-  { label: 'StartTLS', value: ConnectionSecurity.StartTLS }
-]
-const applicationSourceOptions = [
-  { label: t('accountManagement.systemApplication'), value: OAuthApplicationSource.System },
-  { label: t('accountManagement.customApplication'), value: OAuthApplicationSource.Custom }
-]
-
 async function onSubmit() {
   if (!hasValidCredentials()) {
     notifyError(t('accountManagement.emailAccount.credentialRequired'))

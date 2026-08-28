@@ -113,11 +113,31 @@ describe('EmailAccountDialog', () => {
     expect(wrapper.text()).toContain('accountManagement.emailAccount.receivingSettings')
     expect(wrapper.text()).not.toContain('accountManagement.emailAccount.enableSender')
     expect(wrapper.text()).not.toContain('accountManagement.emailAccount.enableReceiving')
+    expect(wrapper.findComponent({ name: 'SmtpEmailAccountSettings' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'ImapEmailAccountSettings' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'MicrosoftGraphEmailAccountSettings' }).exists()).toBe(false)
     const proxySelector = wrapper.find('select[data-label="accountManagement.emailAccount.proxy"]')
     expect(proxySelector.attributes('data-clearable')).toBe('true')
     expect(proxySelector.attributes('data-option-label')).toBe('name')
     expect(proxySelector.attributes('data-option-value')).toBe('id')
     expect(wrapper.find('[data-cancel-button]').exists()).toBe(true)
     expect(wrapper.find('[data-ok-button]').exists()).toBe(true)
+  })
+
+  it('renders Microsoft Graph as a single protocol settings panel', () => {
+    const wrapper = mount(EmailAccountDialog, {
+      props: {
+        emailGroupId: 10,
+        configurationKind: EmailAccountConfigurationKind.MicrosoftGraph
+      },
+      global: { stubs: dialogStubs }
+    })
+
+    expect(wrapper.find('[data-tabs]').exists()).toBe(false)
+    expect(wrapper.findComponent({ name: 'SmtpEmailAccountSettings' }).exists()).toBe(false)
+    expect(wrapper.findComponent({ name: 'ImapEmailAccountSettings' }).exists()).toBe(false)
+    expect(wrapper.findComponent({ name: 'MicrosoftGraphEmailAccountSettings' }).exists()).toBe(true)
+    expect(wrapper.text()).toContain('accountManagement.emailAccount.senderSettings')
+    expect(wrapper.text()).toContain('accountManagement.emailAccount.receivingSettings')
   })
 })

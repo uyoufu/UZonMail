@@ -29,6 +29,15 @@ export const CredentialField = {
 
 export type CredentialField = (typeof CredentialField)[keyof typeof CredentialField]
 
+export type EmailAccountFormRule = (value: unknown) => boolean | string
+
+export const connectionSecurityOptions = [
+  { label: 'None', value: ConnectionSecurity.None },
+  { label: 'SSL', value: ConnectionSecurity.SSL },
+  { label: 'TLS', value: ConnectionSecurity.TLS },
+  { label: 'StartTLS', value: ConnectionSecurity.StartTLS }
+] as const
+
 export interface IProtocolCredentialForm {
   host: string
   port: number
