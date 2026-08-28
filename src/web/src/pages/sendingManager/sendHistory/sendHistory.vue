@@ -25,7 +25,9 @@
       <q-td :props="props">
         <StatusChip v-if="props.value !== 'Sending'" :status="props.value">
           <q-tooltip v-if="props.row.status === SendingGroupStatus.WaitingForQuotaReset">
-            {{ t('sendHistory.quotaResetHint', { reason: props.row.statusReason, date: formatDate(props.row.resumeAtUtc) }) }}
+            {{ t('sendHistory.quotaResetHint', {
+              reason: props.row.statusReason, date: formatDate(props.row.resumeAtUtc)
+            }) }}
           </q-tooltip>
         </StatusChip>
         <LinearProgress class="full-width" v-else :value="props.row.progress" :width="60"></LinearProgress>
@@ -59,7 +61,7 @@ import { getSendingGroupsCount, getEmailTemplatesData, sendingGroupStatusNames, 
 
 const { indexColumn, QTableIndex } = useQTableIndex()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatSuccessPercent (success: number, row: Record<string, any>) {
+function formatSuccessPercent(success: number, row: Record<string, any>) {
   if (!row.totalCount) return '0%'
   return ((success / row.totalCount) * 100).toFixed(0) + '%'
 }
@@ -160,12 +162,12 @@ const columns = computed<QTableColumn[]>(() => [
 ])
 
 
-async function getRowsNumberCount (filterObj: TTableFilterObject) {
+async function getRowsNumberCount(filterObj: TTableFilterObject) {
   const { data } = await getSendingGroupsCount(filterObj.filter)
   return data || 0
 }
 
-async function onRequest (filterObj: TTableFilterObject, pagination: IRequestPagination) {
+async function onRequest(filterObj: TTableFilterObject, pagination: IRequestPagination) {
   const { data } = await getEmailTemplatesData(filterObj.filter, pagination)
   return data || []
 }
@@ -194,7 +196,7 @@ import type { ISendingGroupProgressArg } from 'src/signalR/types'
 import { SendingGroupProgressType, UzonMailClientMethods } from 'src/signalR/types'
 
 // 进度变化
-function onSendingGroupProgressChanged (arg: ISendingGroupProgressArg) {
+function onSendingGroupProgressChanged(arg: ISendingGroupProgressArg) {
   logger.debug('[SendHistory] onSendingGroupProgressChanged:', arg, arg.progressType === SendingGroupProgressType.start)
   const row = rows.value.find(r => r.id === arg.sendingGroupId)
   if (!row) return

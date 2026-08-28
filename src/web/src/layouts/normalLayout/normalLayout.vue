@@ -4,19 +4,13 @@
       <q-card class="column bg-white">
         <q-toolbar class="row items-center full-width">
           <MenuOpenButton v-model="drawer" />
-
           <q-toolbar-title>
             <BreadcrumbsIndex />
           </q-toolbar-title>
-
           <GlobalSignalR />
-
           <ThemeSwitcher class="q-mr-md" />
-
           <I18nSetting />
-
           <UserInfo class="q-ml-md" />
-
         </q-toolbar>
 
         <q-separator />
@@ -33,7 +27,7 @@
 
     <q-page-container class="page-container">
       <q-page class="q-px-md q-pb-md full-height full-with">
-        <q-scroll-area class="page__scroll-area full-height full-with" :thumb-style="thumbStyle"
+        <q-scroll-area class="page__scroll-area full-height full-with border-radius-6" :thumb-style="thumbStyle"
           :content-style="contentStyle" :content-active-style="contentActiveStyle">
           <router-view v-slot="{ Component }">
             <transition appear enter-active-class="animated">
