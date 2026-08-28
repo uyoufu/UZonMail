@@ -52,17 +52,17 @@
             />
             <q-tooltip v-if="!selectedGroup.id">{{ t('accountManagement.groupRequired') }}</q-tooltip>
           </q-fab>
-          <ExportBtn label="" :tooltip="t('accountManagement.emailAccount.exportTemplate')" @click="onExportTemplate" />
+          <ExportBtn label="" :tooltip="exportTemplateTooltip" @click="onExportTemplate" />
           <ImportBtn
             label=""
-            :tooltip="t('accountManagement.emailAccount.importExcel')"
+            :tooltip="importExcelTooltip"
             :disable="!selectedGroup.id"
             @click="onImportExcel"
           />
           <ImportBtn
             label=""
             icon="description"
-            :tooltip="t('accountManagement.emailAccount.importText')"
+            :tooltip="importTextTooltip"
             :disable="!selectedGroup.id"
             @click="onImportText"
           />
@@ -130,25 +130,17 @@
 import type { QTable, QTableColumn } from 'quasar'
 import { t, translateEmailGroup, translateGlobal } from 'src/i18n/helpers'
 import { EmailGroupCategory, getEmailGroups } from 'src/api/emailGroup'
-import {
-  ConnectionSecurity,
-  ReceivingProtocol,
-  SendingProtocol,
-  type ConnectionSecurity as ConnectionSecurityValue
-} from 'src/api/accountEnums'
+import { ReceivingProtocol, SendingProtocol } from 'src/api/accountEnums'
 import {
   EmailAccountConfigurationKind,
-  createBasicEmailAccount,
   deleteEmailAccount,
   deleteInvalidSenderCapabilities,
   getEmailAccounts,
   moveEmailAccounts,
   startMicrosoftAuthorization,
   validateEmailAccounts,
-  type IEmailAccount,
-  type IEmailAccountWrite
+  type IEmailAccount
 } from 'src/api/emailAccounts'
-import { guessSmtpInfoPost } from 'src/api/smtpInfo'
 import type { IEmailGroupListItem } from '../components/types'
 import EmailGroupList from '../components/EmailGroupList.vue'
 import EmailAccountDialog from './EmailAccountDialog.vue'
@@ -161,11 +153,9 @@ import ImportBtn from 'src/components/buttons/ImportBtn.vue'
 import { ContextMenuIcon, type IContextMenuItem } from 'src/components/contextMenu/types'
 import { useQTableIndex } from 'src/compositions/qTableUtils'
 import { useTableCollapseLeft } from 'src/components/collapseIcon/useCollapseLeft'
-import { LowCodeFieldType, type IPopupDialogParams } from 'src/components/lowCode/types'
+import { LowCodeFieldType } from 'src/components/lowCode/types'
 import { showComponentDialog } from 'src/components/lowCode/PopupDialog'
-import { confirmOperation, notifyError, notifySuccess, notifyUntil, showDialog } from 'src/utils/dialog'
-import { readExcel, writeExcel, type IExcelColumnMapper } from 'src/utils/file'
-import { splitString } from 'src/utils/stringHelper'
+import { confirmOperation, notifyError, notifyUntil, showDialog } from 'src/utils/dialog'
 import {
   accountProtocols,
   accountValidationText,
@@ -174,6 +164,7 @@ import {
   senderStatusLabel,
   senderValidationStatusStyles
 } from './emailAccountPresentation'
+import { useEmailAccountImportExport } from './useEmailAccountImportExport'
 
 const tableRef = ref<InstanceType<typeof QTable>>()
 const { CollapseLeft, collapseStyleRef, isCollapseGroupList } = useTableCollapseLeft(tableRef)
@@ -211,21 +202,6 @@ const columns = computed<QTableColumn[]>(() => [
     field: (account) => account.sender?.maxSendCountPerDay ?? '-'
   }
 ])
-
-const excelMappers: IExcelColumnMapper[] = [
-  { headerName: 'email', fieldName: 'email', required: true },
-  { headerName: 'name', fieldName: 'name' },
-  { headerName: 'smtpHost', fieldName: 'smtpHost' },
-  { headerName: 'smtpPort', fieldName: 'smtpPort' },
-  { headerName: 'smtpLoginName', fieldName: 'smtpLoginName' },
-  { headerName: 'smtpPassword', fieldName: 'smtpPassword' },
-  { headerName: 'smtpSecurity', fieldName: 'smtpSecurity' },
-  { headerName: 'imapHost', fieldName: 'imapHost' },
-  { headerName: 'imapPort', fieldName: 'imapPort' },
-  { headerName: 'imapLoginName', fieldName: 'imapLoginName' },
-  { headerName: 'imapPassword', fieldName: 'imapPassword' },
-  { headerName: 'imapSecurity', fieldName: 'imapSecurity' }
-]
 
 watch(() => selectedGroup.value.id, loadRows, { immediate: true })
 
@@ -267,6 +243,18 @@ async function onEdit(account: IEmailAccount) {
 async function onAccountSaved() {
   await Promise.all([loadRows(), groupListRef.value?.reloadGroups()])
 }
+
+const currentGroupId = computed(() => selectedGroup.value.id)
+const {
+  exportTemplateTooltip,
+  importExcelTooltip,
+  importTextTooltip,
+  exportGroupTooltip,
+  onExportTemplate,
+  onExportGroup,
+  onImportExcel,
+  onImportText
+} = useEmailAccountImportExport(currentGroupId, onAccountSaved)
 
 function accountConfigurationKind(account: IEmailAccount): EmailAccountConfigurationKind {
   return account.sender?.protocol === SendingProtocol.MicrosoftGraph ||
@@ -314,18 +302,21 @@ const groupContextMenuItems = computed<IContextMenuItem<IEmailGroupListItem>[]>(
   {
     name: 'importExcel',
     label: t('accountManagement.emailAccount.importExcel'),
+    tooltip: importExcelTooltip.value,
     icon: ContextMenuIcon.uploadFile,
     onClick: (group) => onImportExcel(group.id)
   },
   {
     name: 'importText',
     label: t('accountManagement.emailAccount.importText'),
+    tooltip: importTextTooltip.value,
     icon: ContextMenuIcon.uploadFile,
     onClick: (group) => onImportText(group.id)
   },
   {
     name: 'export',
     label: translateGlobal('export'),
+    tooltip: exportGroupTooltip.value,
     icon: ContextMenuIcon.download,
     onClick: (group) => onExportGroup(group.id, group.name)
   },
@@ -408,194 +399,6 @@ async function onDeleteInvalidSenders(groupId?: number) {
   await Promise.all([loadRows(), groupListRef.value?.reloadGroups()])
 }
 
-async function onExportTemplate() {
-  await writeExcel(
-    [
-      {
-        email: 'sender@example.com',
-        name: 'Example sender',
-        smtpHost: 'smtp.example.com',
-        smtpPort: 465,
-        smtpLoginName: 'sender@example.com',
-        smtpPassword: 'app-password',
-        smtpSecurity: 'SSL',
-        imapHost: '',
-        imapPort: '',
-        imapLoginName: '',
-        imapPassword: '',
-        imapSecurity: 'SSL'
-      }
-    ],
-    {
-      fileName: 'email-accounts-template.xlsx',
-      sheetName: 'Email accounts',
-      mappers: excelMappers,
-      strict: true
-    }
-  )
-}
-
-async function onExportGroup(groupId?: number, groupName = 'email-accounts') {
-  if (!groupId) return
-  const { data: accounts } = await getEmailAccounts(groupId)
-  if (accounts.length === 0) {
-    notifyError(t('accountManagement.emailAccount.noAccountsToExport'))
-    return
-  }
-  await writeExcel(
-    accounts.map((account) => ({
-      email: account.email,
-      name: account.name ?? '',
-      description: account.description ?? '',
-      type: accountProtocols(account).join(', '),
-      senderStatus: account.sender ? senderStatusLabel(account.sender.status) : '',
-      receivingStatus: account.receiving ? receivingStatusLabel(account.receiving.status) : '',
-      sentTotalToday: account.sender?.sentTotalToday ?? '',
-      maxSendCountPerDay: account.sender?.maxSendCountPerDay ?? ''
-    })),
-    {
-      fileName: `${groupName}-email-accounts.xlsx`,
-      sheetName: groupName,
-      strict: false
-    }
-  )
-}
-
-async function onImportExcel(groupId = selectedGroup.value.id) {
-  if (!groupId) return
-  const importedRows = await readExcel({ sheetIndex: 0, selectSheet: true, mappers: excelMappers, strict: true })
-  const requests = importedRows
-    .map((row) => toBasicImportRequest(row, groupId))
-    .filter((request): request is IEmailAccountWrite => request !== null)
-  await importBasicAccounts(requests)
-}
-
-async function onImportText(groupId = selectedGroup.value.id) {
-  if (!groupId) return
-  const dialogParams: IPopupDialogParams = {
-    title: t('accountManagement.emailAccount.importText'),
-    oneColumn: true,
-    fields: [
-      {
-        name: 'text',
-        label: t('accountManagement.emailAccount.textAccounts'),
-        type: LowCodeFieldType.textarea,
-        required: true,
-        disableAutoGrow: true
-      }
-    ]
-  }
-  const result = await showDialog<{ text: string }>(dialogParams)
-  if (!result.ok) return
-  const parsedRows = result.data.text
-    .split(/\r?\n/)
-    .map((line) => splitString(line))
-    .map((tokens) => ({
-      email: tokens.find((token) => token.includes('@')),
-      password: tokens.find((token) => !token.includes('@') && !/^\d+$/.test(token) && !token.includes('.'))
-    }))
-    .filter((row): row is { email: string; password: string } => Boolean(row.email && row.password))
-  if (parsedRows.length === 0) {
-    notifyError(t('accountManagement.emailAccount.noImportableAccounts'))
-    return
-  }
-  const { data: smtpInfos } = await guessSmtpInfoPost(parsedRows.map((row) => row.email))
-  const requests = parsedRows
-    .map((row) => {
-      const smtpInfo = smtpInfos.find((info) => row.email.endsWith(`@${info.domain}`))
-      return toBasicImportRequest(
-        {
-          email: row.email,
-          smtpPassword: row.password,
-          smtpHost: smtpInfo?.host ?? `smtp.${row.email.split('@')[1]}`,
-          smtpPort: smtpInfo?.port ?? 465,
-          smtpLoginName: row.email,
-          smtpSecurity: smtpInfo?.connectionSecurity ?? ConnectionSecurity.SSL
-        },
-        groupId
-      )
-    })
-    .filter((request): request is IEmailAccountWrite => request !== null)
-  await importBasicAccounts(requests)
-}
-
-function toBasicImportRequest(row: Record<string, unknown>, emailGroupId: number): IEmailAccountWrite | null {
-  const email = toTextValue(row.email)
-  const smtpPassword = toTextValue(row.smtpPassword)
-  const imapPassword = toTextValue(row.imapPassword)
-  const isSenderEnabled = smtpPassword.length > 0
-  const isReceivingEnabled = imapPassword.length > 0
-  if (!email || (!isSenderEnabled && !isReceivingEnabled)) return null
-  return {
-    email,
-    emailGroupId,
-    name: optionalString(row.name),
-    configurationKind: EmailAccountConfigurationKind.Basic,
-    sender: {
-      isEnabled: isSenderEnabled,
-      maxSendCountPerDay: 0,
-      smtpCredential: isSenderEnabled
-        ? {
-            host: toTextValue(row.smtpHost),
-            port: toPort(row.smtpPort, 465),
-            loginName: toTextValue(row.smtpLoginName) || email,
-            password: smtpPassword,
-            connectionSecurity: toConnectionSecurity(row.smtpSecurity)
-          }
-        : undefined
-    },
-    receiving: {
-      isEnabled: isReceivingEnabled,
-      contentRetentionDays: 30,
-      imapCredential: isReceivingEnabled
-        ? {
-            host: toTextValue(row.imapHost),
-            port: toPort(row.imapPort, 993),
-            loginName: toTextValue(row.imapLoginName) || email,
-            password: imapPassword,
-            connectionSecurity: toConnectionSecurity(row.imapSecurity)
-          }
-        : undefined
-    }
-  }
-}
-
-async function importBasicAccounts(requests: IEmailAccountWrite[]) {
-  if (requests.length === 0) {
-    notifyError(t('accountManagement.emailAccount.noImportableAccounts'))
-    return
-  }
-  for (const request of requests) await createBasicEmailAccount(request)
-  await Promise.all([loadRows(), groupListRef.value?.reloadGroups()])
-  notifySuccess(t('accountManagement.emailAccount.imported', { count: requests.length }))
-}
-
-function optionalString(value: unknown) {
-  const result = toTextValue(value)
-  return result || undefined
-}
-
-/** Restricts imported spreadsheet values to scalar cells before building credential requests. */
-function toTextValue(value: unknown) {
-  if (typeof value === 'string') return value.trim()
-  if (typeof value === 'number') return value.toString()
-  return ''
-}
-
-function toPort(value: unknown, fallback: number) {
-  const port = Number(value)
-  return port > 0 && port <= 65535 ? port : fallback
-}
-
-function toConnectionSecurity(value: unknown): ConnectionSecurityValue {
-  if (typeof value === 'number' && value >= ConnectionSecurity.None && value <= ConnectionSecurity.StartTLS)
-    return value as ConnectionSecurityValue
-  const key = toTextValue(value).toLowerCase()
-  if (key === 'starttls') return ConnectionSecurity.StartTLS
-  if (key === 'tls') return ConnectionSecurity.TLS
-  if (key === 'none') return ConnectionSecurity.None
-  return ConnectionSecurity.SSL
-}
 </script>
 
 <style lang="scss" scoped></style>
