@@ -2221,9 +2221,6 @@ namespace UzonMail.DB.Migrations.SqLite
                         .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Weight")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EmailAccountId")

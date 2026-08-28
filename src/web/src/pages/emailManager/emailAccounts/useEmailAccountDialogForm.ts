@@ -1,5 +1,6 @@
 import logger from 'loglevel'
 import { debounce } from 'quasar'
+import { computed, onScopeDispose, ref, watch, type Ref } from 'vue'
 import { ConnectionSecurity, type ConnectionSecurity as ConnectionSecurityValue } from 'src/api/accountEnums'
 import { EmailAccountConfigurationKind, type IEmailAccount, type IEmailAccountWrite } from 'src/api/emailAccounts'
 import { guessImapInfoGet } from 'src/api/imapInfo'
@@ -19,6 +20,12 @@ interface IUseEmailAccountDialogFormOptions {
   emailGroupId: Ref<number>
   configurationKind: Ref<EmailAccountConfigurationKind>
   account: Ref<IEmailAccount | undefined>
+}
+
+interface IProtocolCredentialRecommendation {
+  host: string
+  port: number
+  connectionSecurity: ConnectionSecurityValue
 }
 
 const defaultPorts: Record<MailProtocolValue, Record<ConnectionSecurityValue, number>> = {
@@ -42,6 +49,10 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
   const manuallyChangedFields = {
     [MailProtocol.Smtp]: ref(new Set<CredentialFieldValue>()),
     [MailProtocol.Imap]: ref(new Set<CredentialFieldValue>())
+  }
+  const credentialRecommendations = {
+    [MailProtocol.Smtp]: ref<IProtocolCredentialRecommendation>(),
+    [MailProtocol.Imap]: ref<IProtocolCredentialRecommendation>()
   }
   let latestGuessSequence = 0
 
@@ -90,13 +101,11 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
 
   const requiredRule = (value: unknown) => Boolean(value) || translateGlobal('required')
   const smtpHostRules = computed(() => (shouldValidateSmtpDraft.value ? [requiredRule] : []))
-  const smtpLoginRules = computed(() => (shouldValidateSmtpDraft.value ? [requiredRule] : []))
   const smtpPortRules = computed(() => (shouldValidateSmtpDraft.value ? [validPortRule] : []))
   const smtpPasswordRules = computed(() =>
     shouldValidateSmtpDraft.value && !hasExistingSmtpCredential.value ? [requiredRule] : []
   )
   const imapHostRules = computed(() => (shouldValidateImapDraft.value ? [requiredRule] : []))
-  const imapLoginRules = computed(() => (shouldValidateImapDraft.value ? [requiredRule] : []))
   const imapPortRules = computed(() => (shouldValidateImapDraft.value ? [validPortRule] : []))
   const imapPasswordRules = computed(() =>
     shouldValidateImapDraft.value && !hasExistingImapCredential.value ? [requiredRule] : []
@@ -111,6 +120,8 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
   watch(
     () => form.value.email,
     (email) => {
+      credentialRecommendations[MailProtocol.Smtp].value = undefined
+      credentialRecommendations[MailProtocol.Imap].value = undefined
       if (!isBasic.value || !isEmail(email)) return
       onEmailGuess(email)
     }
@@ -132,7 +143,6 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
       form.value.sender.proxyId = account.sender.proxyId ?? null
       form.value.sender.maxSendCountPerDay = account.sender.maxSendCountPerDay
       form.value.sender.replyToEmails = account.sender.replyToEmails ?? ''
-      form.value.sender.weight = account.sender.weight
       Object.assign(form.value.sender, account.sender.smtpCredential)
     }
     if (account.receiving) {
@@ -150,14 +160,16 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
     if (guessSequence !== latestGuessSequence || email !== form.value.email) return
 
     const [smtpGuess, imapGuess] = guesses
-    if (smtpGuess.status === 'fulfilled' && !hasExistingSmtpCredential.value) {
-      applyServerGuess(MailProtocol.Smtp, form.value.sender, smtpGuess.value.data, email)
+    if (smtpGuess.status === 'fulfilled') {
+      credentialRecommendations[MailProtocol.Smtp].value = smtpGuess.value.data
+      applyServerGuess(MailProtocol.Smtp, form.value.sender, smtpGuess.value.data)
     } else if (smtpGuess.status === 'rejected') {
       logger.warn('[EmailAccountDialog] SMTP 参数推断失败', smtpGuess.reason)
     }
 
-    if (imapGuess.status === 'fulfilled' && !hasExistingImapCredential.value) {
-      applyServerGuess(MailProtocol.Imap, form.value.receiving, imapGuess.value.data, email)
+    if (imapGuess.status === 'fulfilled') {
+      credentialRecommendations[MailProtocol.Imap].value = imapGuess.value.data
+      applyServerGuess(MailProtocol.Imap, form.value.receiving, imapGuess.value.data)
     } else if (imapGuess.status === 'rejected') {
       logger.warn('[EmailAccountDialog] IMAP 参数推断失败', imapGuess.reason)
     }
@@ -166,13 +178,11 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
   function applyServerGuess(
     protocol: MailProtocolValue,
     credential: IProtocolCredentialForm,
-    guess: { host: string; port: number; connectionSecurity: ConnectionSecurityValue },
-    email: string
+    guess: IProtocolCredentialRecommendation
   ) {
     const changedFields = manuallyChangedFields[protocol]
-    if (!changedFields.value.has(CredentialField.Host)) credential.host = guess.host
-    if (!changedFields.value.has(CredentialField.Port)) credential.port = guess.port
-    if (!changedFields.value.has(CredentialField.LoginName)) credential.loginName = email
+    if (!changedFields.value.has(CredentialField.Host) || !credential.host.trim()) credential.host = guess.host
+    if (!changedFields.value.has(CredentialField.Port) || !isValidPort(credential.port)) credential.port = guess.port
     if (!changedFields.value.has(CredentialField.ConnectionSecurity)) {
       credential.connectionSecurity = guess.connectionSecurity
     }
@@ -180,8 +190,15 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
 
   function onCredentialFieldChanged(protocol: MailProtocolValue, field: CredentialFieldValue) {
     const changedFields = manuallyChangedFields[protocol]
-    if (changedFields.value.has(field)) return
-    changedFields.value = new Set([...changedFields.value, field])
+    if (!changedFields.value.has(field)) changedFields.value = new Set([...changedFields.value, field])
+
+    const recommendation = credentialRecommendations[protocol].value
+    if (!recommendation || field === CredentialField.LoginName || field === CredentialField.Password) return
+    const hasExistingCredential =
+      protocol === MailProtocol.Smtp ? hasExistingSmtpCredential.value : hasExistingImapCredential.value
+    if (hasExistingCredential) return
+    const credential = protocol === MailProtocol.Smtp ? form.value.sender : form.value.receiving
+    applyServerGuess(protocol, credential, recommendation)
   }
 
   function onConnectionSecurityChanged(protocol: MailProtocolValue) {
@@ -210,7 +227,6 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
         proxyId: form.value.sender.proxyId ?? undefined,
         maxSendCountPerDay: Number(form.value.sender.maxSendCountPerDay) || 0,
         replyToEmails: form.value.sender.replyToEmails || undefined,
-        weight: Math.max(1, Number(form.value.sender.weight) || 1),
         smtpCredential: shouldWriteSmtpCredential.value ? toCredentialWrite(form.value.sender) : undefined
       },
       receiving: {
@@ -240,11 +256,9 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
     imapPasswordLabel,
     requiredRule,
     smtpHostRules,
-    smtpLoginRules,
     smtpPortRules,
     smtpPasswordRules,
     imapHostRules,
-    imapLoginRules,
     imapPortRules,
     imapPasswordRules,
     onCredentialFieldChanged,
@@ -256,21 +270,23 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
 
 function isCredentialComplete(credential: IProtocolCredentialForm, hasExistingPassword: boolean): boolean {
   const port = Number(credential.port)
-  return Boolean(
-    credential.host && credential.loginName && (credential.password || hasExistingPassword) && port > 0 && port <= 65535
-  )
+  return Boolean(credential.host && (credential.password || hasExistingPassword) && isValidPort(port))
 }
 
 function validPortRule(value: unknown) {
+  return isValidPort(value) || t('accountManagement.emailAccount.portInvalid')
+}
+
+function isValidPort(value: unknown): boolean {
   const port = Number(value)
-  return (port > 0 && port <= 65535) || t('accountManagement.emailAccount.portInvalid')
+  return port > 0 && port <= 65535
 }
 
 function toCredentialWrite(credential: IProtocolCredentialForm) {
   return {
     host: credential.host,
     port: Number(credential.port),
-    loginName: credential.loginName,
+    loginName: credential.loginName || undefined,
     password: credential.password || undefined,
     connectionSecurity: credential.connectionSecurity
   }

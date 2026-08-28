@@ -69,11 +69,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.SenderAccounts
         public long UserId => SenderAccount.UserId;
 
         /// <summary>
-        /// 权重
-        /// </summary>
-        public int Weight { get; private set; }
-
-        /// <summary>
         /// 授权用户名
         /// </summary>
         public string? SmtpAuthUserName
@@ -246,7 +241,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.SenderAccounts
                 && SentTotalToday >= senderAccount.MaxSendCountPerDay
             )
                 ScheduleDailyQuotaReset(DateTimeOffset.UtcNow);
-            Weight = senderAccount.Weight > 0 ? senderAccount.Weight : 1;
         }
         #endregion
 
@@ -261,7 +255,6 @@ namespace UzonMail.CorePlugin.Services.SendCore.SenderAccounts
             lock (_stateLock)
             {
                 Type |= data.Type;
-                Weight = data.Weight;
                 ReplyToEmails = data.ReplyToEmails;
 
                 foreach (var targetId in data.GetSendingTargetsSnapshot())

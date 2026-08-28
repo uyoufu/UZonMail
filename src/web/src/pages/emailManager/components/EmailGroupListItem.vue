@@ -1,6 +1,6 @@
 <template>
-  <q-item class="email-group-list-item q-my-xs" clickable v-ripple :active="group.active"
-    active-class="text-secondary" @click="onGroupClick">
+  <q-item class="email-group-list-item q-my-xs" clickable v-ripple :active="group.active" active-class="text-secondary"
+    @click="onGroupClick">
     <div class="row justify-between no-wrap items-center full-width">
       <div class="row justify-start items-center no-wrap overflow-hidden">
         <q-icon v-if="draggable" class="group-drag-handle cursor-move q-mr-xs" name="drag_indicator" size="xs" />
@@ -12,7 +12,7 @@
           <AsyncTooltip :tooltip="group.label" />
         </div>
       </div>
-      <q-badge v-if="group.accountCount !== undefined" class="q-ml-sm" color="grey-7" :label="group.accountCount" />
+      <q-badge v-if="group.accountCount !== undefined" class="q-ml-sm" color="grey-5" :label="group.accountCount" />
     </div>
     <ContextMenu v-if="!readonly" :items="contextMenuItems" :value="group" />
   </q-item>

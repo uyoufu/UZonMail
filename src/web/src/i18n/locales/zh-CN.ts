@@ -36,12 +36,14 @@ export default {
       proxy: '代理',
       proxyId: '代理 ID',
       receivingSettings: '收件设置',
+      receivingValidationStatus: '{protocol} 收件：{status}',
+      senderName: '发件人名称',
       senderSettings: '发件设置',
+      senderValidationStatus: '{protocol} 发件：{status}',
       smtpCredential: 'SMTP 凭据',
       textAccounts: '每行一个邮箱账户，格式为：邮箱,密码',
       type: '账户类型',
       updateApplicationOnSave: '更新 Entra 应用配置',
-      validateSelected: '验证所选账户',
       validationResult: '验证结果'
     },
     groupRequired: '请先选择或创建分组',
@@ -94,8 +96,7 @@ export default {
     updateCredential: '更新凭证',
     updated: '更新成功',
     validate: '验证',
-    validating: '正在验证',
-    weight: '权重'
+    validating: '正在验证'
   },
   ai: {
     bodyOrTemplateRequired: '正文或模板不能为空',

@@ -76,17 +76,6 @@
           dense
         />
       </div>
-      <div class="col-12 col-sm-6">
-        <q-input
-          v-model.number="sender.weight"
-          :label="t('accountManagement.weight')"
-          hide-bottom-space
-          type="number"
-          min="1"
-          outlined
-          dense
-        />
-      </div>
       <div class="col-12">
         <q-input
           v-model.trim="sender.replyToEmails"

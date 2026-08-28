@@ -52,7 +52,6 @@
             hide-bottom-space
             outlined
             dense
-            :rules="props.loginRules"
             @update:model-value="emit('credentialFieldChanged', CredentialField.LoginName)"
           />
         </div>
@@ -74,7 +73,7 @@
     <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">SMTP</div>
 
     <div class="row q-col-gutter-sm">
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-6">
         <q-input
           v-model.number="sender.maxSendCountPerDay"
           :label="t('accountManagement.dailyLimit')"
@@ -85,18 +84,7 @@
           dense
         />
       </div>
-      <div class="col-12 col-sm-4">
-        <q-input
-          v-model.number="sender.weight"
-          :label="t('accountManagement.weight')"
-          hide-bottom-space
-          type="number"
-          min="1"
-          outlined
-          dense
-        />
-      </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-6">
         <q-select
           v-model="sender.proxyId"
           :label="t('accountManagement.emailAccount.proxy')"
@@ -144,7 +132,6 @@ const sender = defineModel<IEmailAccountDialogForm['sender']>('sender', { requir
 const props = defineProps<{
   passwordLabel: string
   hostRules: EmailAccountFormRule[]
-  loginRules: EmailAccountFormRule[]
   portRules: EmailAccountFormRule[]
   passwordRules: EmailAccountFormRule[]
 }>()

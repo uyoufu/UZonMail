@@ -39,7 +39,6 @@ internal static class SendCoreTestEntityFactory
             },
             Protocol = SendingProtocol.Smtp,
             ReplyToEmails = string.Empty,
-            Weight = 1,
             Status = SenderAccountStatus.Valid,
         };
         configure?.Invoke(senderAccount);

@@ -33,7 +33,6 @@ export interface IEmailAccountSenderCapability {
   maxSendCountPerDay: number
   sentTotalToday: number
   replyToEmails?: string
-  weight: number
   hasCredential: boolean
   smtpCredential?: IEmailAccountProtocolCredential
 }
@@ -66,7 +65,7 @@ export interface ISmtpCredentialWrite {
   host: string
   port: number
   connectionSecurity: ConnectionSecurity
-  loginName: string
+  loginName?: string
   password?: string
 }
 
@@ -74,7 +73,7 @@ export interface IImapCredentialWrite {
   host: string
   port: number
   connectionSecurity: ConnectionSecurity
-  loginName: string
+  loginName?: string
   password?: string
 }
 
@@ -90,7 +89,6 @@ export interface IEmailAccountSenderCapabilityWrite {
   proxyId?: number
   maxSendCountPerDay: number
   replyToEmails?: string
-  weight: number
   smtpCredential?: ISmtpCredentialWrite
 }
 
@@ -143,10 +141,6 @@ export function moveEmailAccounts(emailAccountIds: number[], targetEmailGroupId:
   return httpClient.put<boolean>('/email-accounts/move', {
     data: { emailAccountIds, targetEmailGroupId }
   })
-}
-
-export function validateEmailAccount(emailAccountId: number) {
-  return httpClient.post<IEmailAccount>(`/email-accounts/${emailAccountId}/validate`)
 }
 
 export function validateEmailAccounts(emailAccountIds: number[]) {

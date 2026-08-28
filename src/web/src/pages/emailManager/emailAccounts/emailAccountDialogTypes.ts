@@ -55,7 +55,6 @@ export interface IEmailAccountDialogForm {
     proxyId: number | null
     maxSendCountPerDay: number
     replyToEmails: string
-    weight: number
   }
   receiving: IProtocolCredentialForm & {
     contentRetentionDays: number
@@ -79,7 +78,6 @@ export function createEmailAccountDialogForm(): IEmailAccountDialogForm {
       proxyId: null,
       maxSendCountPerDay: 0,
       replyToEmails: '',
-      weight: 1,
       host: '',
       port: 465,
       loginName: '',

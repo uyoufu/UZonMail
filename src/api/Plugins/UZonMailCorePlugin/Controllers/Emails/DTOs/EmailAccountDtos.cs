@@ -37,7 +37,6 @@ public sealed record EmailAccountSenderCapabilityDto(
     int MaxSendCountPerDay,
     int SentTotalToday,
     string? ReplyToEmails,
-    int Weight,
     bool HasCredential,
     EmailAccountProtocolCredentialDto? SmtpCredential
 );
@@ -95,7 +94,6 @@ public sealed class EmailAccountSenderCapabilityWriteDto
     public long? ProxyId { get; set; }
     public int MaxSendCountPerDay { get; set; }
     public string? ReplyToEmails { get; set; }
-    public int Weight { get; set; } = 1;
     public SmtpCredentialWriteDto? SmtpCredential { get; set; }
 }
 
@@ -111,7 +109,7 @@ public sealed class SmtpCredentialWriteDto
     public string Host { get; set; } = string.Empty;
     public int Port { get; set; } = 465;
     public ConnectionSecurity ConnectionSecurity { get; set; } = ConnectionSecurity.SSL;
-    public string LoginName { get; set; } = string.Empty;
+    public string? LoginName { get; set; }
     public string? Password { get; set; }
 }
 
@@ -120,7 +118,7 @@ public sealed class ImapCredentialWriteDto
     public string Host { get; set; } = string.Empty;
     public int Port { get; set; } = 993;
     public ConnectionSecurity ConnectionSecurity { get; set; } = ConnectionSecurity.SSL;
-    public string LoginName { get; set; } = string.Empty;
+    public string? LoginName { get; set; }
     public string? Password { get; set; }
 }
 

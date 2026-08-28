@@ -15,7 +15,6 @@ public sealed class SenderEmailAddressTests
         var address = SendCoreTestEntityFactory.CreateSenderAccountAddress(
             configure: senderAccount =>
             {
-                senderAccount.Weight = 0;
                 senderAccount.ReplyToEmails = "first@test.com;first@test.com;second@test.com";
                 senderAccount.SentTotalToday = 3;
             }
@@ -23,7 +22,6 @@ public sealed class SenderEmailAddressTests
 
         Assert.AreEqual("password", address.PlainPassword);
         Assert.AreEqual(address.Email, address.SmtpAuthUserName);
-        Assert.AreEqual(1, address.Weight);
         Assert.AreEqual(3, address.SentTotalToday);
         CollectionAssert.AreEquivalent(
             new[] { "first@test.com", "second@test.com" },
@@ -62,7 +60,6 @@ public sealed class SenderEmailAddressTests
             sendingItemIds: [5, 6],
             configure: senderAccount =>
             {
-                senderAccount.Weight = 9;
                 senderAccount.ReplyToEmails = "updated@test.com";
             }
         );
@@ -71,7 +68,6 @@ public sealed class SenderEmailAddressTests
 
         Assert.IsTrue(shared.Type.HasFlag(SenderEmailAddressType.Shared));
         Assert.IsTrue(shared.Type.HasFlag(SenderEmailAddressType.Specific));
-        Assert.AreEqual(9, shared.Weight);
         CollectionAssert.AreEqual(new long[] { 5, 6 }, shared.GetSpecificSendingItemIds());
     }
 

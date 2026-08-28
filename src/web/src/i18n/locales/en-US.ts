@@ -36,12 +36,14 @@ export default {
       proxy: 'Proxy',
       proxyId: 'Proxy ID',
       receivingSettings: 'Receiving settings',
+      receivingValidationStatus: '{protocol} receiving: {status}',
+      senderName: 'Sender name',
       senderSettings: 'Sending settings',
+      senderValidationStatus: '{protocol} sender: {status}',
       smtpCredential: 'SMTP credential',
       textAccounts: 'One account per line: email,password',
       type: 'Account type',
       updateApplicationOnSave: 'Update Entra application configuration',
-      validateSelected: 'Validate selected accounts',
       validationResult: 'Validation result'
     },
     groupRequired: 'Select or create a group first',
@@ -94,8 +96,7 @@ export default {
     updateCredential: 'Update credential',
     updated: 'Updated',
     validate: 'Validate',
-    validating: 'Validating',
-    weight: 'Weight'
+    validating: 'Validating'
   },
   ai: {
     bodyOrTemplateRequired: 'Body or template cannot be empty',

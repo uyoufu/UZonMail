@@ -20,7 +20,12 @@
                 />
               </div>
               <div class="col-12 col-sm-6">
-                <q-input v-model.trim="form.name" :label="t('accountManagement.name')" outlined dense />
+                <q-input
+                  v-model.trim="form.name"
+                  :label="t('accountManagement.emailAccount.senderName')"
+                  outlined
+                  dense
+                />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input v-model.trim="form.description" :label="t('accountManagement.description')" outlined dense />
@@ -32,7 +37,7 @@
           </q-card-section>
 
           <template v-if="isBasic">
-            <UTabs v-model="activeTab" :tabs="tabs" align="center" />
+            <UTabs v-model="activeTab" :tabs="tabs" />
 
             <q-tab-panels v-model="activeTab" animated>
               <q-tab-panel :name="EmailAccountTab.Sender" class="q-pa-sm">
@@ -40,7 +45,6 @@
                   v-model:sender="form.sender"
                   :password-label="smtpPasswordLabel"
                   :host-rules="smtpHostRules"
-                  :login-rules="smtpLoginRules"
                   :port-rules="smtpPortRules"
                   :password-rules="smtpPasswordRules"
                   @credential-field-changed="onCredentialFieldChanged(MailProtocol.Smtp, $event)"
@@ -53,7 +57,6 @@
                   v-model:receiving="form.receiving"
                   :password-label="imapPasswordLabel"
                   :host-rules="imapHostRules"
-                  :login-rules="imapLoginRules"
                   :port-rules="imapPortRules"
                   :password-rules="imapPasswordRules"
                   @credential-field-changed="onCredentialFieldChanged(MailProtocol.Imap, $event)"
@@ -124,11 +127,9 @@ const {
   imapPasswordLabel,
   requiredRule,
   smtpHostRules,
-  smtpLoginRules,
   smtpPortRules,
   smtpPasswordRules,
   imapHostRules,
-  imapLoginRules,
   imapPortRules,
   imapPasswordRules,
   onCredentialFieldChanged,

@@ -98,7 +98,7 @@ describe('EmailAccountDialog', () => {
   afterAll(() => vi.unstubAllGlobals())
   beforeEach(() => vi.clearAllMocks())
 
-  it('uses the shared title, centered tabs, and a clearable proxy selector without capability toggles', async () => {
+  it('uses the shared title and a clearable proxy selector without capability toggles', async () => {
     const wrapper = mount(EmailAccountDialog, {
       props: {
         emailGroupId: 10,
@@ -108,7 +108,7 @@ describe('EmailAccountDialog', () => {
     })
 
     expect(wrapper.get('[data-title-bar]').text()).toBe('accountManagement.emailAccount.create')
-    expect(wrapper.get('[data-tabs]').attributes('data-align')).toBe('center')
+    expect(wrapper.get('[data-tabs]').attributes('data-align')).toBeUndefined()
     expect(wrapper.text()).toContain('accountManagement.emailAccount.senderSettings')
     expect(wrapper.text()).toContain('accountManagement.emailAccount.receivingSettings')
     expect(wrapper.text()).not.toContain('accountManagement.emailAccount.enableSender')

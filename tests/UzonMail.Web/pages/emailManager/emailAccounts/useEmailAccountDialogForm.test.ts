@@ -84,13 +84,13 @@ describe('useEmailAccountDialogForm', () => {
     expect(dialogFormApi.form.value.sender).toMatchObject({
       host: 'smtp.provider.test',
       port: 587,
-      loginName: 'owner@example.com',
+      loginName: '',
       connectionSecurity: ConnectionSecurity.StartTLS
     })
     expect(dialogFormApi.form.value.receiving).toMatchObject({
       host: 'imap.provider.test',
       port: 993,
-      loginName: 'owner@example.com',
+      loginName: '',
       connectionSecurity: ConnectionSecurity.SSL
     })
 
@@ -100,6 +100,8 @@ describe('useEmailAccountDialogForm', () => {
     expect(senderOnlyRequest.sender.isEnabled).toBe(true)
     expect(senderOnlyRequest.receiving.isEnabled).toBe(false)
     expect(senderOnlyRequest.sender.smtpCredential?.host).toBe('smtp.provider.test')
+    expect(senderOnlyRequest.sender.smtpCredential?.loginName).toBeUndefined()
+    expect(senderOnlyRequest.sender).not.toHaveProperty('weight')
 
     dialogFormApi.form.value.receiving.password = 'imap-secret'
     dialogFormApi.onCredentialFieldChanged(MailProtocol.Imap, CredentialField.Password)
@@ -119,6 +121,10 @@ describe('useEmailAccountDialogForm', () => {
 
     expect(dialogFormApi.form.value.sender.host).toBe('smtp.custom.test')
     expect(dialogFormApi.form.value.receiving.host).toBe('imap.provider.test')
+
+    dialogFormApi.form.value.sender.host = ''
+    dialogFormApi.onCredentialFieldChanged(MailProtocol.Smtp, CredentialField.Host)
+    expect(dialogFormApi.form.value.sender.host).toBe('smtp.provider.test')
     wrapper.unmount()
   })
 
@@ -145,7 +151,6 @@ describe('useEmailAccountDialogForm', () => {
         status: 0,
         maxSendCountPerDay: 100,
         sentTotalToday: 0,
-        weight: 1,
         hasCredential: true,
         smtpCredential: {
           host: 'smtp.custom.test',
@@ -187,7 +192,6 @@ describe('useEmailAccountDialogForm', () => {
         status: 0,
         maxSendCountPerDay: 100,
         sentTotalToday: 0,
-        weight: 1,
         hasCredential: true,
         smtpCredential: {
           host: 'smtp.custom.test',

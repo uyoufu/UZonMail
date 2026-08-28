@@ -218,7 +218,6 @@ public sealed class EmailAccountManagementService(
                     x.SenderAccount.MaxSendCountPerDay,
                     x.SenderAccount.SentTotalToday,
                     x.SenderAccount.ReplyToEmails,
-                    x.SenderAccount.Weight,
                     db.SenderAccountSmtpCredentials.Any(c =>
                         c.SenderAccountId == x.SenderAccount.Id
                     ),
@@ -297,6 +296,7 @@ public sealed class EmailAccountManagementService(
         if (request.ConfigurationKind == EmailAccountConfigurationKind.Basic)
         {
             await ApplyBasicCredentialsAsync(
+                emailAccount,
                 senderAccount,
                 receivingAccount,
                 request,
@@ -365,7 +365,6 @@ public sealed class EmailAccountManagementService(
         senderAccount.ProxyId = protocol == SendingProtocol.Smtp ? request.Sender.ProxyId : null;
         senderAccount.MaxSendCountPerDay = Math.Max(0, request.Sender.MaxSendCountPerDay);
         senderAccount.ReplyToEmails = request.Sender.ReplyToEmails;
-        senderAccount.Weight = Math.Max(1, request.Sender.Weight);
         return senderAccount;
     }
 
@@ -403,6 +402,7 @@ public sealed class EmailAccountManagementService(
     }
 
     private async Task ApplyBasicCredentialsAsync(
+        EmailAccount emailAccount,
         SenderAccount? senderAccount,
         ReceivingAccount? receivingAccount,
         EmailAccountWriteDto request,
@@ -423,6 +423,7 @@ public sealed class EmailAccountManagementService(
                         credential.LoginName,
                         credential.Password
                     ),
+                    emailAccount.Email,
                     cancellationToken
                 );
             }
@@ -446,6 +447,7 @@ public sealed class EmailAccountManagementService(
                     credential.LoginName,
                     credential.Password
                 ),
+                emailAccount.Email,
                 cancellationToken
             );
             return;

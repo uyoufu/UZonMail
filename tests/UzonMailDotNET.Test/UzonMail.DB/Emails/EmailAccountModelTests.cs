@@ -13,6 +13,8 @@ namespace UzonMailDotNET.Test.UzonMail.DB.Emails;
 [TestClass]
 public sealed class EmailAccountModelTests
 {
+    private const string RemovedSenderWeightPropertyName = "Weight";
+
     [TestMethod]
     public async Task Model_RegistersUnifiedIdentityAndSeparatedCapabilities()
     {
@@ -26,6 +28,10 @@ public sealed class EmailAccountModelTests
         Assert.IsNotNull(db.Model.FindEntityType(typeof(SenderAccountSmtpCredential)));
         Assert.IsNotNull(db.Model.FindEntityType(typeof(ReceivingAccountImapCredential)));
         Assert.IsNotNull(db.Model.FindEntityType(typeof(EmailAccountOAuthCredential)));
+        Assert.IsNull(
+            db.Model.FindEntityType(typeof(SenderAccount))!
+                .FindProperty(RemovedSenderWeightPropertyName)
+        );
         Assert.IsFalse(
             db.Model.GetEntityTypes()
                 .Any(x =>
@@ -156,7 +162,8 @@ public sealed class EmailAccountModelTests
                         ConnectionSecurity.SSL,
                         "user@example.com",
                         null
-                    )
+                    ),
+                    "user@example.com"
                 )
         );
 
@@ -171,8 +178,50 @@ public sealed class EmailAccountModelTests
                         ConnectionSecurity.SSL,
                         "user@example.com",
                         "secret"
-                    )
+                    ),
+                    "user@example.com"
                 )
+        );
+    }
+
+    [TestMethod]
+    public async Task PasswordCredentials_UseAccountEmailWhenLoginNameIsBlank()
+    {
+        await using var connection = await OpenConnectionAsync();
+        await using var db = CreateContext(connection);
+        await db.Database.EnsureCreatedAsync();
+        var service = new AccountCredentialService(db, new FakeCredentialProtector());
+
+        await service.SetSmtpCredentialAsync(
+            new SenderAccount(),
+            new ProtocolCredentialInput(
+                "smtp.example.com",
+                465,
+                ConnectionSecurity.SSL,
+                " ",
+                "smtp-secret"
+            ),
+            "sender@example.com"
+        );
+        await service.SetImapCredentialAsync(
+            new ReceivingAccount { AuthenticationMethod = AuthenticationMethod.Password },
+            new ProtocolCredentialInput(
+                "imap.example.com",
+                993,
+                ConnectionSecurity.SSL,
+                null,
+                "imap-secret"
+            ),
+            "receiver@example.com"
+        );
+
+        Assert.AreEqual(
+            "sender@example.com",
+            db.SenderAccountSmtpCredentials.Local.Single().LoginName
+        );
+        Assert.AreEqual(
+            "receiver@example.com",
+            db.ReceivingAccountImapCredentials.Local.Single().LoginName
         );
     }
 

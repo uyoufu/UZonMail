@@ -19,7 +19,6 @@ public class SenderAccount : SqlId, IEntityTypeConfiguration<SenderAccount>
     public int SentTotalToday { get; set; }
     public DateOnly? SentCountDateUtc { get; set; }
     public string? ReplyToEmails { get; set; }
-    public int Weight { get; set; } = 1;
     public SenderAccountStatus Status { get; set; }
     public string? ValidationFailureReason { get; set; }
     public SenderAccountSmtpCredential? SmtpCredential { get; set; }

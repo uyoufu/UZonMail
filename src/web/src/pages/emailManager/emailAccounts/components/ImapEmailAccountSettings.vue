@@ -52,7 +52,6 @@
             hide-bottom-space
             outlined
             dense
-            :rules="props.loginRules"
             @update:model-value="emit('credentialFieldChanged', CredentialField.LoginName)"
           />
         </div>
@@ -106,7 +105,6 @@ const receiving = defineModel<IEmailAccountDialogForm['receiving']>('receiving',
 const props = defineProps<{
   passwordLabel: string
   hostRules: EmailAccountFormRule[]
-  loginRules: EmailAccountFormRule[]
   portRules: EmailAccountFormRule[]
   passwordRules: EmailAccountFormRule[]
 }>()

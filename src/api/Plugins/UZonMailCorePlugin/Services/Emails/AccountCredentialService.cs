@@ -13,7 +13,7 @@ public sealed record ProtocolCredentialInput(
     string Host,
     int Port,
     ConnectionSecurity ConnectionSecurity,
-    string LoginName,
+    string? LoginName,
     string? Password
 );
 
@@ -37,6 +37,7 @@ public sealed partial class AccountCredentialService(
     public async Task SetSmtpCredentialAsync(
         SenderAccount senderAccount,
         ProtocolCredentialInput input,
+        string defaultLoginName,
         CancellationToken cancellationToken = default
     )
     {
@@ -55,7 +56,7 @@ public sealed partial class AccountCredentialService(
         credential.Host = input.Host.Trim();
         credential.Port = input.Port;
         credential.ConnectionSecurity = input.ConnectionSecurity;
-        credential.LoginName = input.LoginName.Trim();
+        credential.LoginName = ResolveLoginName(input.LoginName, defaultLoginName);
         if (input.Password != null)
         {
             RejectMaskedSecret(input.Password);
@@ -71,6 +72,7 @@ public sealed partial class AccountCredentialService(
     public async Task SetImapCredentialAsync(
         ReceivingAccount receivingAccount,
         ProtocolCredentialInput input,
+        string defaultLoginName,
         CancellationToken cancellationToken = default
     )
     {
@@ -95,7 +97,7 @@ public sealed partial class AccountCredentialService(
         credential.Host = input.Host.Trim();
         credential.Port = input.Port;
         credential.ConnectionSecurity = input.ConnectionSecurity;
-        credential.LoginName = input.LoginName.Trim();
+        credential.LoginName = ResolveLoginName(input.LoginName, defaultLoginName);
         if (input.Password != null)
         {
             RejectMaskedSecret(input.Password);
@@ -169,8 +171,16 @@ public sealed partial class AccountCredentialService(
             throw new KnownException("服务器地址不能为空");
         if (input.Port is <= 0 or > 65535)
             throw new KnownException("端口必须在 1 到 65535 之间");
-        if (string.IsNullOrWhiteSpace(input.LoginName))
-            throw new KnownException("登录名不能为空");
+    }
+
+    private static string ResolveLoginName(string? loginName, string defaultLoginName)
+    {
+        var resolvedLoginName = string.IsNullOrWhiteSpace(loginName)
+            ? defaultLoginName.Trim()
+            : loginName.Trim();
+        if (string.IsNullOrWhiteSpace(resolvedLoginName))
+            throw new KnownException("邮箱地址不能为空");
+        return resolvedLoginName;
     }
 
     private static void RequireNewPassword(string? password)
