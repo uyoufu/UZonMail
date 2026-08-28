@@ -28,8 +28,9 @@
           <q-tab-panels v-model="activeTab" animated>
             <q-tab-panel :name="EmailAccountTab.Sender" class="q-pa-sm">
               <div v-if="isBasic" class="q-mb-sm">
-                <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">{{
-                  t('accountManagement.emailAccount.smtpCredential') }}</div>
+                <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">
+                  {{ t('accountManagement.emailAccount.smtpCredential') }}
+                </div>
 
                 <div class="row q-col-gutter-sm">
                   <div class="col-12 col-sm-6">
@@ -73,8 +74,10 @@
                     min="1" outlined dense />
                 </div>
                 <div v-if="isBasic" class="col-12 col-sm-4">
-                  <q-input v-model.number="form.sender.proxyId" :label="t('accountManagement.emailAccount.proxyId')"
-                    type="number" min="1" outlined dense clearable />
+                  <q-select v-model="form.sender.proxyId" :label="t('accountManagement.emailAccount.proxy')"
+                    :options="proxyOptions" option-label="name" option-value="id" emit-value map-options clearable
+                    outlined dense options-dense hide-bottom-space :loading="isLoadingProxyOptions"
+                    @popup-show="onProxyPopupShow" />
                 </div>
                 <div class="col-12">
                   <q-input v-model.trim="form.sender.replyToEmails" :label="t('accountManagement.replyTo')" outlined
@@ -83,43 +86,47 @@
               </div>
             </q-tab-panel>
 
-            <q-tab-panel :name="EmailAccountTab.Receiving" class="q-pa-sm q-gutter-sm">
-              <div class="text-subtitle2">{{ receivingProtocolLabel }}</div>
-              <div class="row q-col-gutter-sm">
-                <div class="col-12 col-sm-4">
-                  <q-input v-model.number="form.receiving.contentRetentionDays"
-                    :label="t('accountManagement.retentionDays')" type="number" min="1" max="3650" outlined dense />
-                </div>
-              </div>
+            <q-tab-panel :name="EmailAccountTab.Receiving" class="q-pa-sm">
               <div v-if="isBasic" class="q-mb-sm">
-                <div class="text-caption text-grey-7">{{ t('accountManagement.emailAccount.imapCredential') }}</div>
+                <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">
+                  {{ t('accountManagement.emailAccount.imapCredential') }}
+                </div>
                 <div class="row q-col-gutter-sm">
                   <div class="col-12 col-sm-6">
-                    <q-input v-model.trim="form.receiving.host" :label="t('accountManagement.host')" outlined dense
-                      :rules="imapHostRules"
+                    <q-input v-model.trim="form.receiving.host" :label="t('accountManagement.host')" hide-bottom-space
+                      outlined dense :rules="imapHostRules"
                       @update:model-value="onCredentialFieldChanged(MailProtocol.Imap, CredentialField.Host)" />
                   </div>
                   <div class="col-12 col-sm-3">
                     <q-input v-model.number="form.receiving.port" :label="t('accountManagement.port')" type="number"
-                      min="1" max="65535" outlined dense :rules="imapPortRules"
+                      min="1" max="65535" hide-bottom-space outlined dense :rules="imapPortRules"
                       @update:model-value="onCredentialFieldChanged(MailProtocol.Imap, CredentialField.Port)" />
                   </div>
                   <div class="col-12 col-sm-3">
                     <q-select v-model="form.receiving.connectionSecurity"
-                      :label="t('accountManagement.connectionSecurity')" :options="connectionSecurityOptions" emit-value
-                      map-options outlined dense options-dense
+                      :label="t('accountManagement.connectionSecurity')" hide-bottom-space
+                      :options="connectionSecurityOptions" emit-value map-options outlined dense options-dense
                       @update:model-value="onConnectionSecurityChanged(MailProtocol.Imap)" />
                   </div>
                   <div class="col-12 col-sm-6">
                     <q-input v-model.trim="form.receiving.loginName" :label="t('accountManagement.loginName')" outlined
-                      dense :rules="imapLoginRules"
+                      dense hide-bottom-space :rules="imapLoginRules"
                       @update:model-value="onCredentialFieldChanged(MailProtocol.Imap, CredentialField.LoginName)" />
                   </div>
                   <div class="col-12 col-sm-6">
-                    <q-input v-model="form.receiving.password" :label="imapPasswordLabel" type="password" outlined dense
-                      :rules="imapPasswordRules"
+                    <q-input v-model="form.receiving.password" :label="imapPasswordLabel" hide-bottom-space
+                      type="password" outlined dense :rules="imapPasswordRules"
                       @update:model-value="onCredentialFieldChanged(MailProtocol.Imap, CredentialField.Password)" />
                   </div>
+                </div>
+              </div>
+
+              <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">{{ receivingProtocolLabel }}</div>
+
+              <div class="row q-col-gutter-sm">
+                <div class="col-12 col-sm-4">
+                  <q-input v-model.number="form.receiving.contentRetentionDays"
+                    :label="t('accountManagement.retentionDays')" type="number" min="1" max="3650" outlined dense />
                 </div>
               </div>
             </q-tab-panel>
@@ -181,6 +188,7 @@ import { t } from 'src/i18n/helpers'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { CredentialField, EmailAccountTab, MailProtocol } from './emailAccountDialogTypes'
 import { useEmailAccountDialogForm } from './useEmailAccountDialogForm'
+import { useEmailAccountProxyOptions } from './useEmailAccountProxyOptions'
 
 defineOptions({ name: 'EmailAccountDialog' })
 
@@ -217,6 +225,7 @@ const {
   hasValidCredentials,
   toWriteRequest
 } = useEmailAccountDialogForm({ emailGroupId, configurationKind, account })
+const { proxyOptions, isLoadingProxyOptions, onProxyPopupShow } = useEmailAccountProxyOptions()
 
 const tabs = computed<IUTabOptions[]>(() => [
   {

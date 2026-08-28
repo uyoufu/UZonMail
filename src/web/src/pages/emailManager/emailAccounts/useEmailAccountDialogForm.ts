@@ -38,10 +38,10 @@ const defaultPorts: Record<MailProtocolValue, Record<ConnectionSecurityValue, nu
 
 /** 内聚邮箱账户弹窗的初始化、能力派生、凭据推断和写入映射。 */
 export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOptions) {
-  const form = reactive(createEmailAccountDialogForm())
+  const form = ref(createEmailAccountDialogForm())
   const manuallyChangedFields = {
-    [MailProtocol.Smtp]: reactive(new Set<CredentialFieldValue>()),
-    [MailProtocol.Imap]: reactive(new Set<CredentialFieldValue>())
+    [MailProtocol.Smtp]: ref(new Set<CredentialFieldValue>()),
+    [MailProtocol.Imap]: ref(new Set<CredentialFieldValue>())
   }
   let latestGuessSequence = 0
 
@@ -52,29 +52,35 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
   const hasExistingReceivingCapability = computed(() => options.account.value?.receiving !== undefined)
   const hasExistingSmtpCredential = computed(() => options.account.value?.sender?.hasCredential === true)
   const hasExistingImapCredential = computed(() => options.account.value?.receiving?.hasCredential === true)
-  const hasSmtpChanges = computed(() => manuallyChangedFields[MailProtocol.Smtp].size > 0)
-  const hasImapChanges = computed(() => manuallyChangedFields[MailProtocol.Imap].size > 0)
-  const isSmtpCredentialComplete = computed(() => isCredentialComplete(form.sender, hasExistingSmtpCredential.value))
-  const isImapCredentialComplete = computed(() => isCredentialComplete(form.receiving, hasExistingImapCredential.value))
+  const hasSmtpChanges = computed(() => manuallyChangedFields[MailProtocol.Smtp].value.size > 0)
+  const hasImapChanges = computed(() => manuallyChangedFields[MailProtocol.Imap].value.size > 0)
+  const hasSmtpServer = computed(() => Boolean(form.value.sender.host.trim()))
+  const hasImapServer = computed(() => Boolean(form.value.receiving.host.trim()))
+  const isSmtpCredentialComplete = computed(() =>
+    isCredentialComplete(form.value.sender, hasExistingSmtpCredential.value)
+  )
+  const isImapCredentialComplete = computed(() =>
+    isCredentialComplete(form.value.receiving, hasExistingImapCredential.value)
+  )
   const isSenderEnabled = computed(() =>
     isMicrosoftGraph.value
       ? !isEditing.value || hasExistingSenderCapability.value
-      : hasExistingSenderCapability.value || (hasSmtpChanges.value && isSmtpCredentialComplete.value)
+      : hasSmtpServer.value &&
+        (hasExistingSmtpCredential.value || (hasSmtpChanges.value && isSmtpCredentialComplete.value))
   )
   const isReceivingEnabled = computed(() =>
     isMicrosoftGraph.value
       ? !isEditing.value || hasExistingReceivingCapability.value
-      : hasExistingReceivingCapability.value || (hasImapChanges.value && isImapCredentialComplete.value)
+      : hasImapServer.value &&
+        (hasExistingImapCredential.value || (hasImapChanges.value && isImapCredentialComplete.value))
   )
-  const shouldValidateSmtpDraft = computed(
-    () => hasSmtpChanges.value || (hasExistingSenderCapability.value && !hasExistingSmtpCredential.value)
-  )
-  const shouldValidateImapDraft = computed(
-    () => hasImapChanges.value || (hasExistingReceivingCapability.value && !hasExistingImapCredential.value)
-  )
+  const shouldValidateSmtpDraft = computed(() => hasSmtpChanges.value && hasSmtpServer.value)
+  const shouldValidateImapDraft = computed(() => hasImapChanges.value && hasImapServer.value)
   const shouldWriteSmtpCredential = computed(() => isBasic.value && isSenderEnabled.value && hasSmtpChanges.value)
   const shouldWriteImapCredential = computed(() => isBasic.value && isReceivingEnabled.value && hasImapChanges.value)
-  const shouldSendMicrosoftGraphApplication = computed(() => !isEditing.value || form.replaceMicrosoftGraphApplication)
+  const shouldSendMicrosoftGraphApplication = computed(
+    () => !isEditing.value || form.value.replaceMicrosoftGraphApplication
+  )
   const smtpPasswordLabel = computed(() =>
     hasExistingSmtpCredential.value ? t('accountManagement.newPassword') : t('accountManagement.password')
   )
@@ -103,7 +109,7 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
   }, 500)
 
   watch(
-    () => form.email,
+    () => form.value.email,
     (email) => {
       if (!isBasic.value || !isEmail(email)) return
       onEmailGuess(email)
@@ -111,43 +117,47 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
   )
   onScopeDispose(() => onEmailGuess.cancel())
 
-  if (isBasic.value && isEmail(form.email)) void guessProtocolCredentials(form.email)
+  if (isBasic.value && isEmail(form.value.email)) void guessProtocolCredentials(form.value.email)
 
   function initializeForm() {
-    Object.assign(form, createEmailAccountDialogForm())
+    form.value = createEmailAccountDialogForm()
     const account = options.account.value
     if (!account) return
 
-    form.email = account.email
-    form.name = account.name ?? ''
-    form.description = account.description ?? ''
-    form.remark = account.remark ?? ''
+    form.value.email = account.email
+    form.value.name = account.name ?? ''
+    form.value.description = account.description ?? ''
+    form.value.remark = account.remark ?? ''
     if (account.sender) {
-      form.sender.proxyId = account.sender.proxyId
-      form.sender.maxSendCountPerDay = account.sender.maxSendCountPerDay
-      form.sender.replyToEmails = account.sender.replyToEmails ?? ''
-      form.sender.weight = account.sender.weight
+      form.value.sender.proxyId = account.sender.proxyId ?? null
+      form.value.sender.maxSendCountPerDay = account.sender.maxSendCountPerDay
+      form.value.sender.replyToEmails = account.sender.replyToEmails ?? ''
+      form.value.sender.weight = account.sender.weight
+      Object.assign(form.value.sender, account.sender.smtpCredential)
     }
-    if (account.receiving) form.receiving.contentRetentionDays = account.receiving.contentRetentionDays
+    if (account.receiving) {
+      form.value.receiving.contentRetentionDays = account.receiving.contentRetentionDays
+      Object.assign(form.value.receiving, account.receiving.imapCredential)
+    }
     if (account.oAuthApplicationSource !== undefined) {
-      form.microsoftGraphApplication.applicationSource = account.oAuthApplicationSource
+      form.value.microsoftGraphApplication.applicationSource = account.oAuthApplicationSource
     }
   }
 
   async function guessProtocolCredentials(email: string) {
     const guessSequence = ++latestGuessSequence
     const guesses = await Promise.allSettled([guessSmtpInfoGet(email), guessImapInfoGet(email)])
-    if (guessSequence !== latestGuessSequence || email !== form.email) return
+    if (guessSequence !== latestGuessSequence || email !== form.value.email) return
 
     const [smtpGuess, imapGuess] = guesses
     if (smtpGuess.status === 'fulfilled' && !hasExistingSmtpCredential.value) {
-      applyServerGuess(MailProtocol.Smtp, form.sender, smtpGuess.value.data, email)
+      applyServerGuess(MailProtocol.Smtp, form.value.sender, smtpGuess.value.data, email)
     } else if (smtpGuess.status === 'rejected') {
       logger.warn('[EmailAccountDialog] SMTP 参数推断失败', smtpGuess.reason)
     }
 
     if (imapGuess.status === 'fulfilled' && !hasExistingImapCredential.value) {
-      applyServerGuess(MailProtocol.Imap, form.receiving, imapGuess.value.data, email)
+      applyServerGuess(MailProtocol.Imap, form.value.receiving, imapGuess.value.data, email)
     } else if (imapGuess.status === 'rejected') {
       logger.warn('[EmailAccountDialog] IMAP 参数推断失败', imapGuess.reason)
     }
@@ -160,20 +170,22 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
     email: string
   ) {
     const changedFields = manuallyChangedFields[protocol]
-    if (!changedFields.has(CredentialField.Host)) credential.host = guess.host
-    if (!changedFields.has(CredentialField.Port)) credential.port = guess.port
-    if (!changedFields.has(CredentialField.LoginName)) credential.loginName = email
-    if (!changedFields.has(CredentialField.ConnectionSecurity)) {
+    if (!changedFields.value.has(CredentialField.Host)) credential.host = guess.host
+    if (!changedFields.value.has(CredentialField.Port)) credential.port = guess.port
+    if (!changedFields.value.has(CredentialField.LoginName)) credential.loginName = email
+    if (!changedFields.value.has(CredentialField.ConnectionSecurity)) {
       credential.connectionSecurity = guess.connectionSecurity
     }
   }
 
   function onCredentialFieldChanged(protocol: MailProtocolValue, field: CredentialFieldValue) {
-    manuallyChangedFields[protocol].add(field)
+    const changedFields = manuallyChangedFields[protocol]
+    if (changedFields.value.has(field)) return
+    changedFields.value = new Set([...changedFields.value, field])
   }
 
   function onConnectionSecurityChanged(protocol: MailProtocolValue) {
-    const credential = protocol === MailProtocol.Smtp ? form.sender : form.receiving
+    const credential = protocol === MailProtocol.Smtp ? form.value.sender : form.value.receiving
     onCredentialFieldChanged(protocol, CredentialField.ConnectionSecurity)
     onCredentialFieldChanged(protocol, CredentialField.Port)
     credential.port = defaultPorts[protocol][credential.connectionSecurity]
@@ -187,32 +199,32 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
 
   function toWriteRequest(): IEmailAccountWrite {
     return {
-      email: isEditing.value ? undefined : form.email,
+      email: isEditing.value ? undefined : form.value.email,
       emailGroupId: options.emailGroupId.value,
-      name: form.name || undefined,
-      description: form.description || undefined,
-      remark: form.remark || undefined,
+      name: form.value.name || undefined,
+      description: form.value.description || undefined,
+      remark: form.value.remark || undefined,
       configurationKind: options.configurationKind.value,
       sender: {
         isEnabled: isSenderEnabled.value,
-        proxyId: form.sender.proxyId || undefined,
-        maxSendCountPerDay: Number(form.sender.maxSendCountPerDay) || 0,
-        replyToEmails: form.sender.replyToEmails || undefined,
-        weight: Math.max(1, Number(form.sender.weight) || 1),
-        smtpCredential: shouldWriteSmtpCredential.value ? toCredentialWrite(form.sender) : undefined
+        proxyId: form.value.sender.proxyId ?? undefined,
+        maxSendCountPerDay: Number(form.value.sender.maxSendCountPerDay) || 0,
+        replyToEmails: form.value.sender.replyToEmails || undefined,
+        weight: Math.max(1, Number(form.value.sender.weight) || 1),
+        smtpCredential: shouldWriteSmtpCredential.value ? toCredentialWrite(form.value.sender) : undefined
       },
       receiving: {
         isEnabled: isReceivingEnabled.value,
-        contentRetentionDays: Math.max(1, Number(form.receiving.contentRetentionDays) || 30),
-        imapCredential: shouldWriteImapCredential.value ? toCredentialWrite(form.receiving) : undefined
+        contentRetentionDays: Math.max(1, Number(form.value.receiving.contentRetentionDays) || 30),
+        imapCredential: shouldWriteImapCredential.value ? toCredentialWrite(form.value.receiving) : undefined
       },
       microsoftGraphApplication:
         isMicrosoftGraph.value && shouldSendMicrosoftGraphApplication.value
           ? {
-              applicationSource: form.microsoftGraphApplication.applicationSource,
-              tenantId: form.microsoftGraphApplication.tenantId || undefined,
-              clientId: form.microsoftGraphApplication.clientId || undefined,
-              clientSecret: form.microsoftGraphApplication.clientSecret || undefined
+              applicationSource: form.value.microsoftGraphApplication.applicationSource,
+              tenantId: form.value.microsoftGraphApplication.tenantId || undefined,
+              clientId: form.value.microsoftGraphApplication.clientId || undefined,
+              clientSecret: form.value.microsoftGraphApplication.clientSecret || undefined
             }
           : undefined
     }

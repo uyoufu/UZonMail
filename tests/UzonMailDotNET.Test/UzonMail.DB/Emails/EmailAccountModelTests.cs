@@ -186,6 +186,7 @@ public sealed class EmailAccountModelTests
                 typeof(EmailAccountDto),
                 typeof(EmailAccountSenderCapabilityDto),
                 typeof(EmailAccountReceivingCapabilityDto),
+                typeof(EmailAccountProtocolCredentialDto),
             }
         )
         {

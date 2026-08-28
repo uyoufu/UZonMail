@@ -29,6 +29,10 @@
 | src/web         | 前端 web 应用               | src/web/AGENTS.md         | 存在      |
 | src/win-desktop | Windows 端对 web 应用的封装 | src/win-desktop/AGENTS.md | 存在      |
 
+## 编码要求
+
+- 优先将不同的逻辑拆分为不同的模块，保持单模块的职责单一与代码简洁
+
 ## 数据库设计
 
 - 数据库项目位于 src/api/UZonMailDB/ 目录下，在生成过程中，若发现数据库定义不合理或者不满足需求，需要对数据库定义进行优化

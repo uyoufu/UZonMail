@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { computed, onScopeDispose, reactive, ref, toRefs, watch } from 'vue'
+import { computed, onScopeDispose, ref, toRefs, watch } from 'vue'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmailAccountConfigurationKind } from 'src/api/emailAccounts'
 import EmailAccountDialog from 'src/pages/emailManager/emailAccounts/EmailAccountDialog.vue'
@@ -55,7 +55,19 @@ const dialogStubs = {
   QDialog: slotStub,
   QForm: { template: '<form><slot /></form>' },
   QInput: { inheritAttrs: false, template: '<input />' },
-  QSelect: { inheritAttrs: false, template: '<select />' },
+  QSelect: {
+    props: {
+      label: String,
+      clearable: Boolean,
+      loading: Boolean,
+      optionLabel: String,
+      optionValue: String,
+      options: Array
+    },
+    emits: ['popup-show'],
+    template:
+      '<select :data-label="label" :data-clearable="clearable ? \'true\' : \'false\'" :data-option-label="optionLabel" :data-option-value="optionValue" />'
+  },
   QSeparator: true,
   QTabPanels: slotStub,
   QTabPanel: slotStub,
@@ -78,7 +90,6 @@ describe('EmailAccountDialog', () => {
   beforeAll(() => {
     vi.stubGlobal('computed', computed)
     vi.stubGlobal('onScopeDispose', onScopeDispose)
-    vi.stubGlobal('reactive', reactive)
     vi.stubGlobal('ref', ref)
     vi.stubGlobal('toRefs', toRefs)
     vi.stubGlobal('watch', watch)
@@ -87,7 +98,7 @@ describe('EmailAccountDialog', () => {
   afterAll(() => vi.unstubAllGlobals())
   beforeEach(() => vi.clearAllMocks())
 
-  it('uses the shared title and centered tabs without capability toggles', async () => {
+  it('uses the shared title, centered tabs, and a clearable proxy selector without capability toggles', async () => {
     const wrapper = mount(EmailAccountDialog, {
       props: {
         emailGroupId: 10,
@@ -102,6 +113,10 @@ describe('EmailAccountDialog', () => {
     expect(wrapper.text()).toContain('accountManagement.emailAccount.receivingSettings')
     expect(wrapper.text()).not.toContain('accountManagement.emailAccount.enableSender')
     expect(wrapper.text()).not.toContain('accountManagement.emailAccount.enableReceiving')
+    const proxySelector = wrapper.find('select[data-label="accountManagement.emailAccount.proxy"]')
+    expect(proxySelector.attributes('data-clearable')).toBe('true')
+    expect(proxySelector.attributes('data-option-label')).toBe('name')
+    expect(proxySelector.attributes('data-option-value')).toBe('id')
     expect(wrapper.find('[data-cancel-button]').exists()).toBe(true)
     expect(wrapper.find('[data-ok-button]').exists()).toBe(true)
   })

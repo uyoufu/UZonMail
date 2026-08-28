@@ -38,7 +38,8 @@ public sealed record EmailAccountSenderCapabilityDto(
     int SentTotalToday,
     string? ReplyToEmails,
     int Weight,
-    bool HasCredential
+    bool HasCredential,
+    EmailAccountProtocolCredentialDto? SmtpCredential
 );
 
 public sealed record EmailAccountReceivingCapabilityDto(
@@ -48,7 +49,18 @@ public sealed record EmailAccountReceivingCapabilityDto(
     int ContentRetentionDays,
     DateTime? LastConnectedAtUtc,
     string? LastError,
-    bool HasCredential
+    bool HasCredential,
+    EmailAccountProtocolCredentialDto? ImapCredential
+);
+
+/// <summary>
+/// 账户编辑所需的协议连接参数。密码等机密始终不出现在读取响应中。
+/// </summary>
+public sealed record EmailAccountProtocolCredentialDto(
+    string Host,
+    int Port,
+    ConnectionSecurity ConnectionSecurity,
+    string LoginName
 );
 
 /// <summary>

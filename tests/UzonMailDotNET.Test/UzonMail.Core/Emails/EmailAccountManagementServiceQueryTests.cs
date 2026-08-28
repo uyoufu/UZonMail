@@ -35,8 +35,24 @@ public sealed class EmailAccountManagementServiceQueryTests
         Assert.AreEqual(selectedAccount.Id, account.Id);
         Assert.IsNotNull(account.Sender);
         Assert.IsTrue(account.Sender.HasCredential);
+        Assert.IsNotNull(account.Sender.SmtpCredential);
+        Assert.AreEqual("smtp.example.com", account.Sender.SmtpCredential.Host);
+        Assert.AreEqual(587, account.Sender.SmtpCredential.Port);
+        Assert.AreEqual(
+            ConnectionSecurity.StartTLS,
+            account.Sender.SmtpCredential.ConnectionSecurity
+        );
+        Assert.AreEqual(selectedAccount.Email, account.Sender.SmtpCredential.LoginName);
         Assert.IsNotNull(account.Receiving);
         Assert.IsTrue(account.Receiving.HasCredential);
+        Assert.IsNotNull(account.Receiving.ImapCredential);
+        Assert.AreEqual("imap.example.com", account.Receiving.ImapCredential.Host);
+        Assert.AreEqual(993, account.Receiving.ImapCredential.Port);
+        Assert.AreEqual(
+            ConnectionSecurity.SSL,
+            account.Receiving.ImapCredential.ConnectionSecurity
+        );
+        Assert.AreEqual(selectedAccount.Email, account.Receiving.ImapCredential.LoginName);
         Assert.AreEqual(OAuthApplicationSource.Custom, account.OAuthApplicationSource);
         Assert.IsTrue(account.HasOAuthAuthorization);
     }
@@ -136,6 +152,8 @@ public sealed class EmailAccountManagementServiceQueryTests
             {
                 SenderAccountId = senderAccount.Id,
                 Host = "smtp.example.com",
+                Port = 587,
+                ConnectionSecurity = ConnectionSecurity.StartTLS,
                 LoginName = selectedAccount.Email,
                 EncryptedPassword = "password",
                 EncryptionKeyVersion = "test",
@@ -144,6 +162,8 @@ public sealed class EmailAccountManagementServiceQueryTests
             {
                 ReceivingAccountId = receivingAccount.Id,
                 Host = "imap.example.com",
+                Port = 993,
+                ConnectionSecurity = ConnectionSecurity.SSL,
                 LoginName = selectedAccount.Email,
                 EncryptedPassword = "password",
                 EncryptionKeyVersion = "test",

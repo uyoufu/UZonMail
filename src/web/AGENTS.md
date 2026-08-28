@@ -93,6 +93,7 @@ export function useReportContextMenu() {
 - 若单个组件的职责多于 3 个时，应将其拆分为多个 composable
 - 页面中的右键菜单应在单独的 composable 中实现
 - vue 中使用 SFC 组件提升可读性，不要使用 JSX 或者字符串模板
+- 分状态显示时，优先将每个状态拆分为单独的组件，精简父组件的逻辑
 
 ## 组件复用
 
@@ -106,8 +107,10 @@ export function useReportContextMenu() {
 
 ## Quasar 组件使用
 
-1. 采用 `dense` 样式，提高布局密度。 `<q-select dense options-dense>` q-select 需要同步设置 `options-dense`
-2. 边框采用 `outlined` 样式
+- 采用 `dense` 样式，提高布局密度。 `<q-select dense options-dense>` q-select 需要同步设置 `options-dense`
+- 边框采用 `outlined` 样式
+- 避免在组件中使用 `q-separator`，而是使用 `q-mb-sm` 类，以保持一致的间距
+- input 组件应设置 `hide-bottom-space` 类，以避免底部 hint 始终占位
 
 ## 通用工具函数
 

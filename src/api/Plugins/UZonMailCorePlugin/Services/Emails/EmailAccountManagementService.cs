@@ -221,7 +221,17 @@ public sealed class EmailAccountManagementService(
                     x.SenderAccount.Weight,
                     db.SenderAccountSmtpCredentials.Any(c =>
                         c.SenderAccountId == x.SenderAccount.Id
+                    ),
+                    db.SenderAccountSmtpCredentials.Where(c =>
+                        c.SenderAccountId == x.SenderAccount.Id
                     )
+                        .Select(c => new EmailAccountProtocolCredentialDto(
+                            c.Host,
+                            c.Port,
+                            c.ConnectionSecurity,
+                            c.LoginName
+                        ))
+                        .FirstOrDefault()
                 ),
             x.ReceivingAccount == null
                 ? null
@@ -234,7 +244,17 @@ public sealed class EmailAccountManagementService(
                     x.ReceivingAccount.LastError,
                     db.ReceivingAccountImapCredentials.Any(c =>
                         c.ReceivingAccountId == x.ReceivingAccount.Id
+                    ),
+                    db.ReceivingAccountImapCredentials.Where(c =>
+                        c.ReceivingAccountId == x.ReceivingAccount.Id
                     )
+                        .Select(c => new EmailAccountProtocolCredentialDto(
+                            c.Host,
+                            c.Port,
+                            c.ConnectionSecurity,
+                            c.LoginName
+                        ))
+                        .FirstOrDefault()
                 ),
             x.OAuthCredential == null ? null : x.OAuthCredential.ApplicationSource,
             x.OAuthCredential != null

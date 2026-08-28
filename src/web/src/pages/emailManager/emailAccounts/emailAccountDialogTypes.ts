@@ -43,7 +43,7 @@ export interface IEmailAccountDialogForm {
   description: string
   remark: string
   sender: IProtocolCredentialForm & {
-    proxyId?: number
+    proxyId: number | null
     maxSendCountPerDay: number
     replyToEmails: string
     weight: number
@@ -67,7 +67,7 @@ export function createEmailAccountDialogForm(): IEmailAccountDialogForm {
     description: '',
     remark: '',
     sender: {
-      proxyId: undefined,
+      proxyId: null,
       maxSendCountPerDay: 0,
       replyToEmails: '',
       weight: 1,

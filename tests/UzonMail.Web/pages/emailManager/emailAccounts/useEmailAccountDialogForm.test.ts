@@ -1,5 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { computed, defineComponent, h, onScopeDispose, reactive, ref, watch, type Ref } from 'vue'
+import { computed, defineComponent, h, onScopeDispose, ref, watch, type Ref } from 'vue'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ConnectionSecurity } from 'src/api/accountEnums'
 import { EmailAccountConfigurationKind, type IEmailAccount } from 'src/api/emailAccounts'
@@ -46,7 +46,7 @@ describe('useEmailAccountDialogForm', () => {
   beforeAll(() => {
     vi.stubGlobal('computed', computed)
     vi.stubGlobal('onScopeDispose', onScopeDispose)
-    vi.stubGlobal('reactive', reactive)
+    vi.stubGlobal('ref', ref)
     vi.stubGlobal('watch', watch)
   })
 
@@ -77,31 +77,31 @@ describe('useEmailAccountDialogForm', () => {
 
   it('fills SMTP and IMAP settings but enables only the completed capability', async () => {
     const { wrapper, dialogFormApi } = mountDialogForm(EmailAccountConfigurationKind.Basic)
-    dialogFormApi.form.email = 'owner@example.com'
+    dialogFormApi.form.value.email = 'owner@example.com'
     await vi.advanceTimersByTimeAsync(500)
     await flushPromises()
 
-    expect(dialogFormApi.form.sender).toMatchObject({
+    expect(dialogFormApi.form.value.sender).toMatchObject({
       host: 'smtp.provider.test',
       port: 587,
       loginName: 'owner@example.com',
       connectionSecurity: ConnectionSecurity.StartTLS
     })
-    expect(dialogFormApi.form.receiving).toMatchObject({
+    expect(dialogFormApi.form.value.receiving).toMatchObject({
       host: 'imap.provider.test',
       port: 993,
       loginName: 'owner@example.com',
       connectionSecurity: ConnectionSecurity.SSL
     })
 
-    dialogFormApi.form.sender.password = 'smtp-secret'
+    dialogFormApi.form.value.sender.password = 'smtp-secret'
     dialogFormApi.onCredentialFieldChanged(MailProtocol.Smtp, CredentialField.Password)
     const senderOnlyRequest = dialogFormApi.toWriteRequest()
     expect(senderOnlyRequest.sender.isEnabled).toBe(true)
     expect(senderOnlyRequest.receiving.isEnabled).toBe(false)
     expect(senderOnlyRequest.sender.smtpCredential?.host).toBe('smtp.provider.test')
 
-    dialogFormApi.form.receiving.password = 'imap-secret'
+    dialogFormApi.form.value.receiving.password = 'imap-secret'
     dialogFormApi.onCredentialFieldChanged(MailProtocol.Imap, CredentialField.Password)
     const completeRequest = dialogFormApi.toWriteRequest()
     expect(completeRequest.receiving.isEnabled).toBe(true)
@@ -111,20 +111,20 @@ describe('useEmailAccountDialogForm', () => {
 
   it('does not overwrite a manually changed host with a delayed guess', async () => {
     const { wrapper, dialogFormApi } = mountDialogForm(EmailAccountConfigurationKind.Basic)
-    dialogFormApi.form.sender.host = 'smtp.custom.test'
+    dialogFormApi.form.value.sender.host = 'smtp.custom.test'
     dialogFormApi.onCredentialFieldChanged(MailProtocol.Smtp, CredentialField.Host)
-    dialogFormApi.form.email = 'owner@example.com'
+    dialogFormApi.form.value.email = 'owner@example.com'
     await vi.advanceTimersByTimeAsync(500)
     await flushPromises()
 
-    expect(dialogFormApi.form.sender.host).toBe('smtp.custom.test')
-    expect(dialogFormApi.form.receiving.host).toBe('imap.provider.test')
+    expect(dialogFormApi.form.value.sender.host).toBe('smtp.custom.test')
+    expect(dialogFormApi.form.value.receiving.host).toBe('imap.provider.test')
     wrapper.unmount()
   })
 
   it('enables both Microsoft Graph capabilities for a new account', () => {
     const { wrapper, dialogFormApi } = mountDialogForm(EmailAccountConfigurationKind.MicrosoftGraph)
-    dialogFormApi.form.email = 'owner@example.com'
+    dialogFormApi.form.value.email = 'owner@example.com'
 
     const request = dialogFormApi.toWriteRequest()
     expect(request.sender.isEnabled).toBe(true)
@@ -133,7 +133,7 @@ describe('useEmailAccountDialogForm', () => {
     wrapper.unmount()
   })
 
-  it('preserves existing capabilities without rewriting untouched credentials', () => {
+  it('returns non-sensitive existing connection settings without rewriting untouched credentials', () => {
     const account: IEmailAccount = {
       id: 20,
       emailGroupId: 10,
@@ -146,15 +146,79 @@ describe('useEmailAccountDialogForm', () => {
         maxSendCountPerDay: 100,
         sentTotalToday: 0,
         weight: 1,
-        hasCredential: true
+        hasCredential: true,
+        smtpCredential: {
+          host: 'smtp.custom.test',
+          port: 465,
+          connectionSecurity: ConnectionSecurity.SSL,
+          loginName: 'owner@example.com'
+        }
       }
     }
     const { wrapper, dialogFormApi } = mountDialogForm(EmailAccountConfigurationKind.Basic, account)
 
+    expect(dialogFormApi.form.value.sender).toMatchObject({
+      host: 'smtp.custom.test',
+      port: 465,
+      loginName: 'owner@example.com',
+      password: ''
+    })
+
     const request = dialogFormApi.toWriteRequest()
     expect(request.sender.isEnabled).toBe(true)
     expect(request.sender.smtpCredential).toBeUndefined()
+    dialogFormApi.form.value.sender.proxyId = 42
+    expect(dialogFormApi.toWriteRequest().sender.proxyId).toBe(42)
+    dialogFormApi.form.value.sender.proxyId = null
+    expect(dialogFormApi.toWriteRequest().sender.proxyId).toBeUndefined()
     expect(request.receiving.isEnabled).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('disables an existing SMTP capability when its server is cleared', () => {
+    const account: IEmailAccount = {
+      id: 20,
+      emailGroupId: 10,
+      email: 'owner@example.com',
+      hasOAuthAuthorization: false,
+      sender: {
+        id: 21,
+        protocol: 0,
+        status: 0,
+        maxSendCountPerDay: 100,
+        sentTotalToday: 0,
+        weight: 1,
+        hasCredential: true,
+        smtpCredential: {
+          host: 'smtp.custom.test',
+          port: 465,
+          connectionSecurity: ConnectionSecurity.SSL,
+          loginName: 'owner@example.com'
+        }
+      },
+      receiving: {
+        id: 22,
+        protocol: 0,
+        status: 0,
+        contentRetentionDays: 30,
+        hasCredential: true,
+        imapCredential: {
+          host: 'imap.custom.test',
+          port: 993,
+          connectionSecurity: ConnectionSecurity.SSL,
+          loginName: 'owner@example.com'
+        }
+      }
+    }
+    const { wrapper, dialogFormApi } = mountDialogForm(EmailAccountConfigurationKind.Basic, account)
+    dialogFormApi.form.value.sender.host = ''
+    dialogFormApi.onCredentialFieldChanged(MailProtocol.Smtp, CredentialField.Host)
+
+    const request = dialogFormApi.toWriteRequest()
+    expect(request.sender.isEnabled).toBe(false)
+    expect(request.sender.smtpCredential).toBeUndefined()
+    expect(request.receiving.isEnabled).toBe(true)
+    expect(dialogFormApi.hasValidCredentials()).toBe(true)
     wrapper.unmount()
   })
 })
