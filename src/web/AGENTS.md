@@ -105,7 +105,8 @@ export function useReportContextMenu() {
 
 ## Quasar 组件使用
 
-1. 采用 dense 样式，提高布局密度。 `<q-select dense options-dense>` q-select 需要同步设置 `options-dense`
+1. 采用 `dense` 样式，提高布局密度。 `<q-select dense options-dense>` q-select 需要同步设置 `options-dense`
+2. 边框采用 `outlined` 样式
 
 ## 通用工具函数
 
@@ -126,7 +127,9 @@ export function useReportContextMenu() {
 - 表单弹窗优先使用 `src/components/lowCode`
 - 长耗时操作使用 `notifyUntil` 包裹，以提供执行进度反馈
 - 优先使用 `src/utils/dialog.ts` 中的提示工具，尤其是 `notifySuccess`、`notifyError`、`notifyWarning` 和 `confirmOperation`
-- 需要原生 q-dialog 的复杂交互时, 使用 `src/components/lowCode/PopupDialogExample.vue` 模板定义成页面私有组件，然后在独立的composable 组件中调用 `showComponentDialog` 函数显示弹窗。
+- 需要原生 q-dialog 的复杂交互时, 使用 `src/components/lowCode/PopupDialogExample.vue` 模板定义成页面私有组件，然后在独立的 composable 组件中调用 `showComponentDialog` 函数显示弹窗
+- 禁止在组件上使用 `v-model=` 来控制弹窗的显示与隐藏，而应使用 `showComponentDialog` 函数来显示弹窗
+
 
 ## 组合式 API
 

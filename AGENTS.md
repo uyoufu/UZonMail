@@ -21,7 +21,13 @@
 
 ## 项目规范
 
-- 项目 src/api、src/web、src/win-desktop 各自维护了 codegraph, 优先在这些目录中查询
+本项目采用 Monorepo 管理，在进行对应项目开发时，需要提前阅读项目下的 AGENTS.md 文件，了解项目的开发规范，然后优先使用各自项目下的 codegraph 来查询代码。目录结构如下：
+
+| 目录            | 说明                        | AGENTS.md 文件            | codegraph |
+| --------------- | --------------------------- | ------------------------- | --------- |
+| src/api         | API 层                      | src/api/AGENTS.md         | 存在      |
+| src/web         | 前端 web 应用               | src/web/AGENTS.md         | 存在      |
+| src/win-desktop | Windows 端对 web 应用的封装 | src/win-desktop/AGENTS.md | 存在      |
 
 ## 数据库设计
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="low-code_form-container" @keydown.enter="onEnterKeyPress">
+  <div class="low-code_form-container q-pt-sm" @keydown.enter="onEnterKeyPress">
     <div class="q-py-xs q-px-xs row justify-start items-center" :class="getContainerClass()">
       <template v-for="field in validFields" :key="field.name">
         <q-input v-if="isMatchedType(field, commonInputTypes)" outlined class="q-mb-sm low-code__field q-px-xs"

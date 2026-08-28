@@ -1,11 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide" :persistent="persistent">
     <q-card>
-      <div v-if="title" class="text-subtitle1 text-primary text-bold q-mx-sm q-mt-sm">{{ title }}</div>
+      <TitleBar v-if="title" :title="title" @close="onDialogCancelRequest" />
 
       <LowCodeForm :title="title" :fields="fields" :dataSet="dataSet" :validate="validate" :oneColumn="oneColumn"
         :disableDefaultBtns="disableDefaultBtns" :customBtns="customBtns" :onOkMain="onOkMain" :onSetup="onSetup"
-        @ok="onFormOk" @cancel="onFormCancel" />
+        @ok="onFormOk" @cancel="onDialogCancelRequest" />
     </q-card>
   </q-dialog>
 </template>
@@ -14,6 +14,7 @@
 import { useDialogPluginComponent } from 'quasar'
 
 import LowCodeForm from './LowCodeForm.vue'
+import TitleBar from '../windowLike/TitleBar.vue'
 
 import type { PropType } from 'vue'
 import type { ICustomPopupButton, ILowCodeField, IOnSetupParams } from './types'
@@ -95,8 +96,8 @@ function onFormOk(data: Record<string, unknown>) {
   onDialogOK(data)
 }
 
-// 处理表单的 cancel 事件
-function onFormCancel() {
+// 将所有显式取消入口统一为 Dialog 的取消结果。
+function onDialogCancelRequest() {
   onDialogCancel()
 }
 </script>
