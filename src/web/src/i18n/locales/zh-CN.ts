@@ -45,7 +45,8 @@ export default {
         },
         currentLanguageColumnsHint: '模板列名跟随当前界面语言',
         exampleSenderName: '示例发件人',
-        excelFormatHint: '请使用当前语言导出的模板并保持列名不变；邮箱必填，SMTP 或 IMAP 密码至少填写一项；代理可填写精确名称或 ID',
+        excelFormatHint:
+          '请使用当前语言导出的模板并保持列名不变；邮箱必填，SMTP 或 IMAP 密码至少填写一项；代理可填写精确名称或 ID',
         exportGroupTooltip: '导出该组的邮箱账户摘要',
         exportTemplateTooltip: '导出邮箱账户 Excel 导入模板',
         groupExported: '邮箱账户导出成功',
@@ -67,7 +68,7 @@ export default {
         skippedRows: '已跳过 {count} 个无效行',
         templateExported: '邮箱账户模板导出成功',
         templateFileName: '邮箱账户导入模板.xlsx',
-        textExample: 'sender@example.com app-password',
+        textExample: "sender{'@'}example.com app-password",
         textFormatHint: '每行一个账户，填写邮箱和密码，支持空格、中英文逗号或分号分隔',
         textRequired: '请输入要导入的邮箱账户'
       },
@@ -631,7 +632,7 @@ export default {
       no: '否',
       priority: '优先级',
       priorityPlaceholder: '数字越大优先级越高',
-      protocolMissing: '代理地址缺失协议,格式为：schema://username:password@host 或 host',
+      protocolMissing: "代理地址缺失协议,格式为：schema://username:password{'@'}host 或 host",
       shared: '共享',
       sharedByOther: '由其他用户共享',
       sharedHint: '共享后,其它用户可以使用该代理',
@@ -640,8 +641,8 @@ export default {
       unshared: '未共享',
       updateSuccess: '修改成功',
       url: '代理地址',
-      urlInvalid: '代理地址格式不正确,格式为：schema://username:password@host 或 schema://host',
-      urlPlaceholder: '格式：schema://username:password@host',
+      urlInvalid: "代理地址格式不正确,格式为：schema://username:password{'@'}host 或 schema://host",
+      urlPlaceholder: "格式：schema://username:password{'@'}host",
       urlRequired: '代理地址不能为空',
       yes: '是'
     },
@@ -768,7 +769,7 @@ export default {
       dataSourceDescription: '数据源描述',
       dataSourceFormat: '格式:',
       dataSourceFormatArray: '2. 可以是数组, 以 [ 开头, 以 ] 结尾',
-      dataSourceFormatObject: '3. 可以是对象, 以 {\'{\'} 开头, 以 {\'}\'} 结尾',
+      dataSourceFormatObject: "3. 可以是对象, 以 {'{'} 开头, 以 {'}'} 结尾",
       dataSourceFormatSingle: '1. 可以是单个值',
       dataSourceInvalid: '数据源格式不正确，请输入有效的 JSON 格式数据',
       dataSourceName: '数据源名称',
@@ -1029,7 +1030,7 @@ export default {
     saveTemplate: '保存模板',
     saveTemplateSuccess: '模板保存成功',
     savingTemplate: '正在保存模板...',
-    templateEditorPlaceholder: '在此处输入模板内容, 变量使用 {\'{{  }}\'} 号包裹, 例如 {\'{{ variableName }}\'}',
+    templateEditorPlaceholder: "在此处输入模板内容, 变量使用 {'{{  }}'} 号包裹, 例如 {'{{ variableName }}'}",
     templateId: '模板ID',
     templateName: '模板名称'
   },
@@ -1068,3 +1069,4 @@ export default {
     name: '变量名'
   }
 }
+

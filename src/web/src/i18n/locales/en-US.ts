@@ -45,7 +45,8 @@ export default {
         },
         currentLanguageColumnsHint: 'Template columns follow the current interface language',
         exampleSenderName: 'Example sender',
-        excelFormatHint: 'Use a template exported in the current language and keep its columns unchanged. Email is required, at least one SMTP or IMAP password is required, and proxy accepts an exact name or ID.',
+        excelFormatHint:
+          'Use a template exported in the current language and keep its columns unchanged. Email is required, at least one SMTP or IMAP password is required, and proxy accepts an exact name or ID.',
         exportGroupTooltip: 'Export an email account summary for this group',
         exportTemplateTooltip: 'Export the email account Excel import template',
         groupExported: 'Email accounts exported successfully',
@@ -67,8 +68,9 @@ export default {
         skippedRows: 'Skipped {count} invalid row(s)',
         templateExported: 'Email account template exported successfully',
         templateFileName: 'email-account-import-template.xlsx',
-        textExample: 'sender@example.com app-password',
-        textFormatHint: 'Enter one account per line with an email and password, separated by whitespace, a comma, or a semicolon.',
+        textExample: "sender{'@'}example.com app-password",
+        textFormatHint:
+          'Enter one account per line with an email and password, separated by whitespace, a comma, or a semicolon.',
         textRequired: 'Enter the email accounts to import'
       },
       importText: 'Import from text',
@@ -306,7 +308,7 @@ export default {
     deleteGroupSuccess: 'Delete group {groupName} success',
     field_description: 'Description',
     field_name: 'Group Name',
-    field_order: '@:{\'global.order\'}',
+    field_order: "@:{'global.order'}",
     modifyCurrentGroup: 'Modify current group',
     modifyEmailGroup: 'Modify email group',
     newEmailGroup: 'New Email Group',
@@ -324,7 +326,8 @@ export default {
   fileManager: {
     allFiles: 'All files',
     batchDelete: 'Delete selected',
-    batchDeleteConfirm: 'Delete {count} selected files? The entire operation will be canceled if any file is still referenced.',
+    batchDeleteConfirm:
+      'Delete {count} selected files? The entire operation will be canceled if any file is still referenced.',
     categories: 'File Categories',
     categoryName: 'Category name',
     createCategory: 'Create category',
@@ -458,8 +461,10 @@ export default {
       externalLink: 'External link',
       externalUnsubscribeTooltip: 'Use an external link to receive unsubscribe callbacks',
       htmlContent: 'HTML content',
-      invalidReplyRecipients: 'Reply recipient format is invalid; separate multiple email addresses with English commas',
-      invalidSenderAccountCooldown: 'The maximum send interval per sender account must be greater than the minimum interval',
+      invalidReplyRecipients:
+        'Reply recipient format is invalid; separate multiple email addresses with English commas',
+      invalidSenderAccountCooldown:
+        'The maximum send interval per sender account must be greater than the minimum interval',
       language: 'Language',
       maxDailySendPerSenderAccount: 'Maximum daily sends per sender account',
       maxDailySendTooltip: 'Set the maximum number of emails sent per sender account per day',
@@ -469,7 +474,8 @@ export default {
       maxSendPerIpDomainHourTooltip: 'Maximum hourly sends for each sender domain on the current IP',
       maxSendPerProxySenderAccount: 'Maximum sends per proxy and sender account',
       maxSendPerProxySenderAccountTooltip: 'Maximum total sends for a proxy and sender account combination',
-      mergedRecipientsRecommendation: 'Keep this value moderate, around 20; a value that is too high may cause sending to fail',
+      mergedRecipientsRecommendation:
+        'Keep this value moderate, around 20; a value that is too high may cause sending to fail',
       mergedRecipientsTooltip: 'Set how many recipients are merged into one email',
       minimumRecipientCooldown: 'Minimum receiving interval (hours)',
       minimumRecipientCooldownTooltip: 'Set the interval for the same recipient; 0 means unlimited',
@@ -500,10 +506,10 @@ export default {
       system: 'System',
       systemNotificationEmail: 'System notification sender email',
       systemNotificationEmailPlaceholder: 'Use this email to send completion notifications after sending finishes',
-      systemUnsubscribeTooltip: 'Manage unsubscribes using the system\'s built-in functionality',
+      systemUnsubscribeTooltip: "Manage unsubscribes using the system's built-in functionality",
       unsubscribeCallback: 'Unsubscribe callback',
       unsubscribePage: 'Unsubscribe page',
-      unsubscribePageLanguageTip: 'The matching unsubscribe page is shown according to the user\'s current language',
+      unsubscribePageLanguageTip: "The matching unsubscribe page is shown according to the user's current language",
       unsubscribeSettings: 'Unsubscribe settings',
       unsubscribeSettingsCaption: 'Configure unsubscribe behavior',
       unsubscribeUrl: 'Unsubscribe link',
@@ -560,7 +566,8 @@ export default {
       deleteWarmUpPlanConfirmation: 'Delete warm-up plan {name}?',
       endDate: 'End date',
       name: 'Name',
-      noAssociatedTask: 'This warm-up plan is not associated with a sending task group. Check whether the plan has started',
+      noAssociatedTask:
+        'This warm-up plan is not associated with a sending task group. Check whether the plan has started',
       recipientContactCount: 'Recipient contact count',
       sendCountWarmUpCurve: 'Sending volume warm-up curve',
       sendCountWarmUpTooltip: 'Day {day}<br/>Sent {count} emails',
@@ -578,7 +585,8 @@ export default {
       activationTime: 'Activation time',
       clickToActivate: 'Click to activate',
       deactivate: 'Deactivate',
-      deactivateConfirmation: 'After deactivation, advanced features will be unavailable for all users of this system. Continue?',
+      deactivateConfirmation:
+        'After deactivation, advanced features will be unavailable for all users of this system. Continue?',
       deactivated: 'Deactivated',
       enterLicenseCode: 'Enter license code',
       expirationTime: 'Expiration time',
@@ -636,7 +644,7 @@ export default {
       no: 'No',
       priority: 'Priority',
       priorityPlaceholder: 'Higher numbers have higher priority',
-      protocolMissing: 'Proxy address has no protocol. Use schema://username:password@host or host',
+      protocolMissing: "Proxy address has no protocol. Use schema://username:password{'@'}host or host",
       shared: 'Shared',
       sharedByOther: 'Shared by another user',
       sharedHint: 'Other users can use this proxy when shared',
@@ -645,8 +653,8 @@ export default {
       unshared: 'Not shared',
       updateSuccess: 'Updated successfully',
       url: 'Proxy Address',
-      urlInvalid: 'Invalid proxy address. Use schema://username:password@host or schema://host',
-      urlPlaceholder: 'Format: schema://username:password@host',
+      urlInvalid: "Invalid proxy address. Use schema://username:password{'@'}host or schema://host",
+      urlPlaceholder: "Format: schema://username:password{'@'}host",
       urlRequired: 'Proxy address is required',
       yes: 'Yes'
     },
@@ -731,11 +739,13 @@ export default {
     userManager: {
       cancelSubUser: 'Remove sub-account status',
       cancelSubUserConfirmation: 'Remove sub-account status for user {userId}?',
-      cancelSubUserHint: 'The user will become an independent account and will no longer be managed by the primary account',
+      cancelSubUserHint:
+        'The user will become an independent account and will no longer be managed by the primary account',
       createSuccess: 'User created successfully',
       createUserTooltip: 'Create user',
       disable: 'Disable',
-      disableConfirmation: 'Disable user {userId}? They will not be able to sign in, but existing sending tasks will continue.',
+      disableConfirmation:
+        'Disable user {userId}? They will not be able to sign in, but existing sending tasks will continue.',
       disableHint: 'The user cannot sign in after being disabled',
       disableSuccess: 'Disabled successfully',
       disableUser: 'Disable User',
@@ -754,7 +764,7 @@ export default {
       resetConfirmation: 'Reset the password to {password}?',
       resetPassword: 'Reset Password',
       resetSuccess: 'Password reset successfully',
-      resetUserPassword: 'Reset this user\'s password',
+      resetUserPassword: "Reset this user's password",
       setAsSubUser: 'Set as sub-account',
       setAsSubUserConfirmation: 'Set user {userId} as a sub-account?',
       setAsSubUserHint: 'Manage the sub-account settings centrally and view some sending data',
@@ -773,7 +783,7 @@ export default {
       dataSourceDescription: 'Data source description',
       dataSourceFormat: 'Format:',
       dataSourceFormatArray: '2. An array beginning with [ and ending with ] is supported',
-      dataSourceFormatObject: '3. An object beginning with {\'{\'} and ending with {\'}\'} is supported',
+      dataSourceFormatObject: "3. An object beginning with {'{'} and ending with {'}'} is supported",
       dataSourceFormatSingle: '1. A single value is supported',
       dataSourceInvalid: 'Invalid data source format. Enter valid JSON data.',
       dataSourceName: 'Data source name',
@@ -803,7 +813,8 @@ export default {
       variableDefinitionTooltip: 'Define function variables using data sources',
       variableDescription: 'Variable description',
       variableName: 'Variable Name',
-      variableNameInvalid: 'A variable name may contain only letters, numbers, and underscores, and cannot start with a number.',
+      variableNameInvalid:
+        'A variable name may contain only letters, numbers, and underscores, and cannot start with a number.',
       variableNameTooltip: 'Variable name'
     }
   },
@@ -998,9 +1009,11 @@ export default {
     scheduledSendingBooked: 'Scheduled sending booked',
     selectData: 'Select Data',
     selectTemplateTooltip: 'Please select a template (template and body must have at least one non-empty)',
-    sendBatchTooltips: 'If there are multiple senders, they will be merged into one email. Once enabled, you cannot resend for a single sender account. This mode is generally not recommended.',
+    sendBatchTooltips:
+      'If there are multiple senders, they will be merged into one email. Once enabled, you cannot resend for a single sender account. This mode is generally not recommended.',
     sender: 'Sender',
-    senderAccountMissingInData: 'Sender account is missing from the data. Specify one in the data or select a sender account.',
+    senderAccountMissingInData:
+      'Sender account is missing from the data. Specify one in the data or select a sender account.',
     senderEmailColumn: 'Sender email',
     senderNameColumn: 'Sender name',
     senderPlaceholder: 'Select a sender account or sender account group (required)',
@@ -1009,7 +1022,8 @@ export default {
     sendingProgress: 'Sending progress',
     sendingStarted: 'Sending started...',
     subject: 'Subject',
-    subjectPlaceholder: 'Please input email subject (if you need random subjects, separate multiple subjects with a semicolon ; or place each on its own line)',
+    subjectPlaceholder:
+      'Please input email subject (if you need random subjects, separate multiple subjects with a semicolon ; or place each on its own line)',
     template: 'Template',
     templateDownloadSuccess: 'Template download successful',
     templateUnit: 'templates',
@@ -1034,7 +1048,8 @@ export default {
     saveTemplate: 'Save Template',
     saveTemplateSuccess: 'Template saved successfully',
     savingTemplate: 'Saving template...',
-    templateEditorPlaceholder: 'Enter template content here, variables are wrapped in {\'{{ }}\'}, for example {\'{{ variableName }}\'}',
+    templateEditorPlaceholder:
+      "Enter template content here, variables are wrapped in {'{{ }}'}, for example {'{{ variableName }}'}",
     templateId: 'Template ID',
     templateName: 'Template Name'
   },

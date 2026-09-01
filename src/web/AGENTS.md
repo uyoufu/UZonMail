@@ -187,6 +187,7 @@ export function useReportContextMenu() {
 - 批量更新： `bun run i18n:upsert -- --pair loginPage.title "标题" "Title" --pair loginPage.subtitle "副标题" "Subtitle"`，每个 `--pair` 的参数顺序固定为 key、中文、英文
 - 批量删除：`bun run i18n:upsert -- --delete loginPage.title --delete loginPage.subtitle`，不存在的 key 会被忽略，`--delete` 不与新增或更新参数混用
 - 对于 q-table 中的 columns 定义，使用 computed 函数返回，以支持多语言切换
+- 在定义多语言时，对于特殊符号：`{,},@,$,|` 需要使用 Literal interpolation 方式来定义，如 `{address: "{account}{'@'}{domain}"}`
 
 ## 构建、测试与开发命令
 
