@@ -167,6 +167,7 @@ public sealed class ImapIdleCoordinator(
             credential.EncryptionKeyVersion
         );
         await client.AuthenticateAsync(credential.LoginName, password, stoppingToken);
+        await ImapClientIdentification.IdentifyAsync(client, stoppingToken);
         await client.Inbox.OpenAsync(FolderAccess.ReadOnly, stoppingToken);
 
         if (!client.Capabilities.HasFlag(ImapCapabilities.Idle))

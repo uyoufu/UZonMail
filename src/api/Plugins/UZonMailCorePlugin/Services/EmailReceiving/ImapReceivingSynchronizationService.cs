@@ -109,6 +109,7 @@ public sealed class ImapReceivingSynchronizationService(
                 credential.EncryptionKeyVersion
             );
             await client.AuthenticateAsync(credential.LoginName, password, cancellationToken);
+            await ImapClientIdentification.IdentifyAsync(client, cancellationToken);
 
             var folders = GetSynchronizationFolders(client);
             syncRun.MailboxesAttempted = folders.Count;

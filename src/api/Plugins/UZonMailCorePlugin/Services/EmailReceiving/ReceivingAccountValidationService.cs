@@ -107,6 +107,7 @@ public sealed class ReceivingAccountValidationService(
             cancellationToken
         );
         await client.AuthenticateAsync(credential.LoginName, password, cancellationToken);
+        await ImapClientIdentification.IdentifyAsync(client, cancellationToken);
         await client.DisconnectAsync(true, cancellationToken);
     }
 

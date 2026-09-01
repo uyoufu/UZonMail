@@ -166,6 +166,7 @@ public sealed class ImapMessageContentService(
             credential.EncryptionKeyVersion
         );
         await client.AuthenticateAsync(credential.LoginName, password, cancellationToken);
+        await ImapClientIdentification.IdentifyAsync(client, cancellationToken);
         var folder = await client.GetFolderAsync(
             location.ImapMailbox.RemoteFullName,
             cancellationToken
