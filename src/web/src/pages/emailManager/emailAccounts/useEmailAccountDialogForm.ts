@@ -60,7 +60,6 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
   const isBasic = computed(() => options.configurationKind.value === EmailAccountConfigurationKind.Basic)
   const isMicrosoftGraph = computed(() => !isBasic.value)
   const hasExistingSenderCapability = computed(() => options.account.value?.sender !== undefined)
-  const hasExistingReceivingCapability = computed(() => options.account.value?.receiving !== undefined)
   const hasExistingSmtpCredential = computed(() => options.account.value?.sender?.hasCredential === true)
   const hasExistingImapCredential = computed(() => options.account.value?.receiving?.hasCredential === true)
   const hasSmtpChanges = computed(() => manuallyChangedFields[MailProtocol.Smtp].value.size > 0)
@@ -80,15 +79,12 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
         (hasExistingSmtpCredential.value || (hasSmtpChanges.value && isSmtpCredentialComplete.value))
   )
   const isReceivingEnabled = computed(() =>
-    isMicrosoftGraph.value
-      ? !isEditing.value || hasExistingReceivingCapability.value
-      : hasImapServer.value &&
-        (hasExistingImapCredential.value || (hasImapChanges.value && isImapCredentialComplete.value))
+    form.value.receiving.isEnabled
   )
   const shouldValidateSmtpDraft = computed(() => hasSmtpChanges.value && hasSmtpServer.value)
-  const shouldValidateImapDraft = computed(() => hasImapChanges.value && hasImapServer.value)
+  const shouldValidateImapDraft = computed(() => isReceivingEnabled.value && hasImapChanges.value && hasImapServer.value)
   const shouldWriteSmtpCredential = computed(() => isBasic.value && isSenderEnabled.value && hasSmtpChanges.value)
-  const shouldWriteImapCredential = computed(() => isBasic.value && isReceivingEnabled.value && hasImapChanges.value)
+  const shouldWriteImapCredential = computed(() => isBasic.value && isReceivingEnabled.value && hasImapChanges.value && isImapCredentialComplete.value)
   const shouldSendMicrosoftGraphApplication = computed(
     () => !isEditing.value || form.value.replaceMicrosoftGraphApplication
   )
@@ -146,8 +142,11 @@ export function useEmailAccountDialogForm(options: IUseEmailAccountDialogFormOpt
       Object.assign(form.value.sender, account.sender.smtpCredential)
     }
     if (account.receiving) {
+      form.value.receiving.isEnabled = true
       form.value.receiving.contentRetentionDays = account.receiving.contentRetentionDays
       Object.assign(form.value.receiving, account.receiving.imapCredential)
+    } else if (isEditing.value) {
+      form.value.receiving.isEnabled = false
     }
     if (account.oAuthApplicationSource !== undefined) {
       form.value.microsoftGraphApplication.applicationSource = account.oAuthApplicationSource

@@ -35,6 +35,21 @@ public sealed class ReceivingAccountValidationService(
                     cancellationToken
                 ) ?? throw new KnownException("收件账户不存在");
 
+        if (
+            account.Protocol == ReceivingProtocol.Imap
+            && !await db.ReceivingAccountImapCredentials.AnyAsync(
+                x => x.ReceivingAccountId == account.Id,
+                cancellationToken
+            )
+        )
+        {
+            account.Status = ReceivingAccountStatus.ConfigurationRequired;
+            account.LastSyncAttemptAtUtc = DateTime.UtcNow;
+            account.LastError = "IMAP 凭据未配置";
+            await db.SaveChangesAsync(cancellationToken);
+            throw new KnownException(account.LastError);
+        }
+
         account.LastSyncAttemptAtUtc = DateTime.UtcNow;
         try
         {

@@ -453,8 +453,12 @@ public sealed class EmailAccountManagementService(
             return;
         }
 
-        if (!await HasImapCredentialAsync(receivingAccount.Id, cancellationToken))
-            throw new KnownException("启用 IMAP 收件设置时必须填写凭据");
+        if (await HasImapCredentialAsync(receivingAccount.Id, cancellationToken))
+            return;
+
+        // 收件能力默认存在，但允许用户稍后补齐 IMAP 凭据，避免影响发件账号创建。
+        receivingAccount.Status = ReceivingAccountStatus.ConfigurationRequired;
+        receivingAccount.LastError = "IMAP 凭据未配置";
     }
 
     private async Task<SenderAccount> GetOrCreateSenderAsync(

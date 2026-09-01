@@ -192,6 +192,38 @@ export const dynamicRoutes: ExtendedRouteRecordRaw[] = [
     ]
   },
   {
+    name: 'ReceivingManagement',
+    path: '/receiving-management',
+    component: NormalLayout,
+    meta: {
+      label: 'receivingManagement',
+      icon: 'move_to_inbox'
+    },
+    redirect: '/receiving-management/inbox',
+    children: [
+      {
+        name: 'ReceivingInbox',
+        path: 'inbox',
+        meta: {
+          icon: 'inbox',
+          label: 'receivingInbox',
+          noCache: true
+        },
+        component: () => import('pages/receivingManager/ReceivingManager.vue')
+      },
+      {
+        name: 'TodoManagement',
+        path: 'todos',
+        meta: {
+          icon: 'checklist',
+          label: 'todoManagement',
+          noCache: true
+        },
+        component: () => import('pages/todoManager/TodoManager.vue')
+      }
+    ]
+  },
+  {
     name: 'SendingStatistics',
     path: '/sending-statistics',
     component: NormalLayout,

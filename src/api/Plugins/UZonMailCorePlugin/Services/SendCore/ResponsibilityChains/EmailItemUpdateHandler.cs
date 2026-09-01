@@ -118,6 +118,8 @@ public sealed class EmailItemUpdateHandler(
         sendingItem.SendDate = DateTime.UtcNow;
         sendingItem.ReceiptId =
             decision.ReceiptId ?? new ResultParser(decision.Message).GetReceiptId();
+        sendingItem.InternetMessageId = item.SourceItem.InternetMessageId;
+        sendingItem.InternetMessageIdKey = item.SourceItem.InternetMessageIdKey;
 
         await db.SendingItemRecipients.UpdateAsync(
             x => x.SendingItemId == currentAttempt.Descriptor.Id,

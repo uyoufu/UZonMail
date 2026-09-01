@@ -5,5 +5,9 @@
         Manual = 0, // 手动创建
 
         API = 1, // API 创建
+
+        ConversationReply = 2,
+
+        TodoFollowUp = 3,
     }
 }

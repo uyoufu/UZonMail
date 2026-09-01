@@ -99,7 +99,7 @@ public sealed class EmailAccountSenderCapabilityWriteDto
 
 public sealed class EmailAccountReceivingCapabilityWriteDto
 {
-    public bool IsEnabled { get; set; }
+    public bool IsEnabled { get; set; } = true;
     public int ContentRetentionDays { get; set; } = 30;
     public ImapCredentialWriteDto? ImapCredential { get; set; }
 }

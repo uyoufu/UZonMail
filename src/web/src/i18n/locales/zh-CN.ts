@@ -45,8 +45,7 @@ export default {
         },
         currentLanguageColumnsHint: '模板列名跟随当前界面语言',
         exampleSenderName: '示例发件人',
-        excelFormatHint:
-          '请使用当前语言导出的模板并保持列名不变；邮箱必填，SMTP 或 IMAP 密码至少填写一项；代理可填写精确名称或 ID',
+        excelFormatHint: '请使用当前语言导出的模板并保持列名不变；邮箱必填，SMTP 或 IMAP 密码至少填写一项；代理可填写精确名称或 ID',
         exportGroupTooltip: '导出该组的邮箱账户摘要',
         exportTemplateTooltip: '导出邮箱账户 Excel 导入模板',
         groupExported: '邮箱账户导出成功',
@@ -68,7 +67,7 @@ export default {
         skippedRows: '已跳过 {count} 个无效行',
         templateExported: '邮箱账户模板导出成功',
         templateFileName: '邮箱账户导入模板.xlsx',
-        textExample: "sender{'@'}example.com app-password",
+        textExample: 'sender{\'@\'}example.com app-password',
         textFormatHint: '每行一个账户，填写邮箱和密码，支持空格、中英文逗号或分号分隔',
         textRequired: '请输入要导入的邮箱账户'
       },
@@ -89,6 +88,7 @@ export default {
       updateApplicationOnSave: '更新 Entra 应用配置',
       validationResult: '验证结果'
     },
+    enableReceiving: '启用收件',
     groupRequired: '请先选择或创建分组',
     host: '服务器',
     lastConnected: '最近连接',
@@ -200,6 +200,12 @@ export default {
   collapseIcon: {
     collapse: '折叠',
     expand: '展开'
+  },
+  common: {
+    back: '返回',
+    create: '创建',
+    delete: '删除',
+    save: '保存'
   },
   components: {
     abortUpload: '中止上传',
@@ -632,7 +638,7 @@ export default {
       no: '否',
       priority: '优先级',
       priorityPlaceholder: '数字越大优先级越高',
-      protocolMissing: "代理地址缺失协议,格式为：schema://username:password{'@'}host 或 host",
+      protocolMissing: '代理地址缺失协议,格式为：schema://username:password{\'@\'}host 或 host',
       shared: '共享',
       sharedByOther: '由其他用户共享',
       sharedHint: '共享后,其它用户可以使用该代理',
@@ -641,8 +647,8 @@ export default {
       unshared: '未共享',
       updateSuccess: '修改成功',
       url: '代理地址',
-      urlInvalid: "代理地址格式不正确,格式为：schema://username:password{'@'}host 或 schema://host",
-      urlPlaceholder: "格式：schema://username:password{'@'}host",
+      urlInvalid: '代理地址格式不正确,格式为：schema://username:password{\'@\'}host 或 schema://host',
+      urlPlaceholder: '格式：schema://username:password{\'@\'}host',
       urlRequired: '代理地址不能为空',
       yes: '是'
     },
@@ -650,6 +656,39 @@ export default {
       nickname: '昵称',
       none: '无',
       qqNumber: 'QQ Number'
+    },
+    receivingManagement: {
+      account: '收件账号',
+      addTag: '添加标签',
+      all: '全部',
+      completeReply: '请填写邮件主题和正文',
+      configurationRequired: '需要配置 IMAP 收件信息',
+      createTodo: '转存为待办',
+      empty: '暂无邮件会话',
+      expand: '展开正文',
+      insertTemplate: '插入模板',
+      mailBody: '邮件正文',
+      newTag: '新标签名称',
+      noBody: '暂无正文',
+      noPreview: '暂无摘要',
+      noSubject: '无主题',
+      quotedContent: '引用内容',
+      removeQuote: '取消引用',
+      reply: '回复',
+      replyAll: '回复全部',
+      search: '搜索联系人或会话',
+      selectConversation: '选择一个会话开始沟通',
+      send: '发送',
+      sent: '邮件已加入发送队列',
+      subject: '主题',
+      sync: '同步邮件',
+      syncComplete: '同步完成',
+      tagColor: '标签颜色',
+      tags: '联系人标签',
+      todoCreated: '邮件待办已创建',
+      unread: '未读',
+      unsupported: '暂不支持',
+      writeReply: '输入邮件正文'
     },
     sendingTask: {
       addedProxyCount: '已添加 {count} 个代理',
@@ -724,6 +763,33 @@ export default {
       editTitle: '修改TikTok设备',
       updateSuccess: '修改TikTok设备成功'
     },
+    todoManagement: {
+      active: '进行中',
+      add: '添加待办',
+      archived: '已归档',
+      completed: '已完成',
+      created: '待办已创建',
+      deleteConfirm: '确定删除当前待办？',
+      description: '描述',
+      details: '详细信息',
+      dueAt: '截止时间',
+      independentThread: '独立邮件跟进线程',
+      inProgress: '跟进中',
+      newThreadReady: '发送第一封邮件以开始独立跟进线程',
+      noDueDate: '无截止时间',
+      pending: '待处理',
+      priority: '优先级',
+      priorityHigh: '高',
+      priorityLow: '低',
+      priorityNormal: '普通',
+      priorityUrgent: '紧急',
+      saved: '待办已保存',
+      selectTask: '选择一个待办查看详细信息',
+      sourceMessages: '来源邮件数',
+      status: '状态',
+      taskTitle: '待办标题',
+      title: '待办清单'
+    },
     userManager: {
       cancelSubUser: '取消子账户',
       cancelSubUserConfirmation: '是否取消用户 {userId} 的子账户身份？',
@@ -769,7 +835,7 @@ export default {
       dataSourceDescription: '数据源描述',
       dataSourceFormat: '格式:',
       dataSourceFormatArray: '2. 可以是数组, 以 [ 开头, 以 ] 结尾',
-      dataSourceFormatObject: "3. 可以是对象, 以 {'{'} 开头, 以 {'}'} 结尾",
+      dataSourceFormatObject: '3. 可以是对象, 以 {\'{\'} 开头, 以 {\'}\'} 结尾',
       dataSourceFormatSingle: '1. 可以是单个值',
       dataSourceInvalid: '数据源格式不正确，请输入有效的 JSON 格式数据',
       dataSourceName: '数据源名称',
@@ -850,6 +916,8 @@ export default {
     proxyManagement: '代理管理',
     qqGroupMembersGetter: 'QQ 群采集',
     readStatistics: '阅读统计',
+    receivingInbox: '收件箱',
+    receivingManagement: '收件管理',
     recipientContacts: '收件邮箱',
     roleManagement: '角色管理',
     sendDetail: '发件明细',
@@ -866,6 +934,7 @@ export default {
     templateManagement: '模板管理',
     tiktokCrawler: 'TikTok爬虫',
     tiktokDevice: 'TikTok设备',
+    todoManagement: '待办清单',
     unsubscribe: 'Unsubscribe',
     unsubscribeStatistics: '退订统计',
     userInfo: '用户信息',
@@ -1030,7 +1099,7 @@ export default {
     saveTemplate: '保存模板',
     saveTemplateSuccess: '模板保存成功',
     savingTemplate: '正在保存模板...',
-    templateEditorPlaceholder: "在此处输入模板内容, 变量使用 {'{{  }}'} 号包裹, 例如 {'{{ variableName }}'}",
+    templateEditorPlaceholder: '在此处输入模板内容, 变量使用 {\'{{  }}\'} 号包裹, 例如 {\'{{ variableName }}\'}',
     templateId: '模板ID',
     templateName: '模板名称'
   },
@@ -1069,4 +1138,3 @@ export default {
     name: '变量名'
   }
 }
-

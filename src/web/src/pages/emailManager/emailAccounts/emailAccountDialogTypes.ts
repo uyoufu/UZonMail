@@ -57,6 +57,7 @@ export interface IEmailAccountDialogForm {
     replyToEmails: string
   }
   receiving: IProtocolCredentialForm & {
+    isEnabled: boolean
     contentRetentionDays: number
   }
   replaceMicrosoftGraphApplication: boolean
@@ -85,6 +86,7 @@ export function createEmailAccountDialogForm(): IEmailAccountDialogForm {
       connectionSecurity: ConnectionSecurity.SSL
     },
     receiving: {
+      isEnabled: true,
       contentRetentionDays: 30,
       host: '',
       port: 993,

@@ -1095,8 +1095,20 @@ namespace UzonMail.DB.Migrations.SqLite
                     b.Property<int>("AttachmentCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime?>("BodyCachedAtUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("BodyContentStatus")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("BodyExpiresAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CachedHtmlBody")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CachedTextBody")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ContentSha256")
                         .HasMaxLength(64)
@@ -1117,6 +1129,9 @@ namespace UzonMail.DB.Migrations.SqLite
                     b.Property<decimal?>("CurrentSpamScore")
                         .HasPrecision(5, 2)
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Direction")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("InlineResourceCount")
                         .HasColumnType("INTEGER");
@@ -1149,6 +1164,9 @@ namespace UzonMail.DB.Migrations.SqLite
                     b.Property<long>("ReceivingAccountId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long?>("SendingItemId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime?>("SentAtUtc")
                         .HasColumnType("TEXT");
 
@@ -1160,6 +1178,9 @@ namespace UzonMail.DB.Migrations.SqLite
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SendingItemId")
+                        .IsUnique();
 
                     b.HasIndex("ReceivingAccountId", "ContentSha256")
                         .IsUnique();
@@ -1720,6 +1741,10 @@ namespace UzonMail.DB.Migrations.SqLite
                     b.Property<bool>("EnableEmailTracker")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("InReplyToInternetMessageId")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("InternetMessageId")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
@@ -1761,6 +1786,10 @@ namespace UzonMail.DB.Migrations.SqLite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Recipients")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("ReferenceInternetMessageIds")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -2589,6 +2618,317 @@ namespace UzonMail.DB.Migrations.SqLite
                     b.ToTable("FileUsages");
                 });
 
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailContact", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastInteractionAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedEmail")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "LastInteractionAtUtc");
+
+                    b.HasIndex("UserId", "NormalizedEmail")
+                        .IsUnique();
+
+                    b.ToTable("MailContacts", (string)null);
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailContactTag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("MailContactId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("MailTagId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailTagId");
+
+                    b.HasIndex("MailContactId", "MailTagId")
+                        .IsUnique();
+
+                    b.ToTable("MailContactTags", (string)null);
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailConversation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ConversationType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayTitle")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("EmailAccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastMessageAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastMessagePreview")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastReadAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ParticipantSetKey")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UnreadCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmailAccountId");
+
+                    b.HasIndex("UserId", "EmailAccountId", "ParticipantSetKey")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "LastMessageAtUtc", "Id");
+
+                    b.ToTable("MailConversations", (string)null);
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailConversationMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Direction")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("IncomingMailMessageId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("MailConversationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("ReplyToConversationMessageId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("SendingItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SourceKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IncomingMailMessageId");
+
+                    b.HasIndex("ReplyToConversationMessageId");
+
+                    b.HasIndex("SendingItemId");
+
+                    b.HasIndex("MailConversationId", "SourceKey")
+                        .IsUnique();
+
+                    b.HasIndex("MailConversationId", "OccurredAtUtc", "Id");
+
+                    b.ToTable("MailConversationMessages", (string)null);
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailConversationParticipant", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("JoinedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LeftAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("MailContactId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("MailConversationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailContactId", "IsActive");
+
+                    b.HasIndex("MailConversationId", "MailContactId")
+                        .IsUnique();
+
+                    b.ToTable("MailConversationParticipants", (string)null);
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailTag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "NormalizedName")
+                        .IsUnique();
+
+                    b.ToTable("MailTags", (string)null);
+                });
+
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Organization.Department", b =>
                 {
                     b.Property<long>("Id")
@@ -2971,6 +3311,185 @@ namespace UzonMail.DB.Migrations.SqLite
                     b.HasKey("Id");
 
                     b.ToTable("EmailTemplates");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoMailBranch", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BranchSubject")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<long?>("RootSendingItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("SourceConversationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TodoTaskId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TodoTaskId")
+                        .IsUnique();
+
+                    b.HasIndex("SourceConversationId", "Id");
+
+                    b.ToTable("TodoMailBranches", (string)null);
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoMailBranchMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("MailConversationMessageId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<long>("TodoMailBranchId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailConversationMessageId")
+                        .IsUnique();
+
+                    b.HasIndex("TodoMailBranchId", "MailConversationMessageId")
+                        .IsUnique();
+
+                    b.ToTable("TodoMailBranchMessages", (string)null);
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoMailBranchSourceMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("MailConversationMessageId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<long>("TodoMailBranchId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailConversationMessageId");
+
+                    b.HasIndex("TodoMailBranchId", "MailConversationMessageId")
+                        .IsUnique();
+
+                    b.ToTable("TodoMailBranchSourceMessages", (string)null);
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoTask", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(10000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DueAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("_id");
+
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "UpdatedAtUtc", "Id");
+
+                    b.HasIndex("UserId", "Status", "DueAtUtc", "Id");
+
+                    b.ToTable("TodoTasks", (string)null);
                 });
 
             modelBuilder.Entity("DepartmentEmailTemplate", b =>
@@ -3359,7 +3878,14 @@ namespace UzonMail.DB.Migrations.SqLite
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("UzonMail.DB.SQL.Core.EmailSending.SendingItem", "SendingItem")
+                        .WithMany()
+                        .HasForeignKey("SendingItemId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("ReceivingAccount");
+
+                    b.Navigation("SendingItem");
                 });
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailReceiving.IncomingMailMimePart", b =>
@@ -3583,6 +4109,87 @@ namespace UzonMail.DB.Migrations.SqLite
                     b.Navigation("OwnerUser");
                 });
 
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailContactTag", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailContact", "MailContact")
+                        .WithMany("Tags")
+                        .HasForeignKey("MailContactId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailTag", "MailTag")
+                        .WithMany("Contacts")
+                        .HasForeignKey("MailTagId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("MailContact");
+
+                    b.Navigation("MailTag");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailConversation", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.Emails.EmailAccount", "EmailAccount")
+                        .WithMany()
+                        .HasForeignKey("EmailAccountId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("EmailAccount");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailConversationMessage", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.EmailReceiving.IncomingMailMessage", "IncomingMailMessage")
+                        .WithMany()
+                        .HasForeignKey("IncomingMailMessageId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailConversation", "MailConversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("MailConversationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailConversationMessage", "ReplyToConversationMessage")
+                        .WithMany()
+                        .HasForeignKey("ReplyToConversationMessageId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("UzonMail.DB.SQL.Core.EmailSending.SendingItem", "SendingItem")
+                        .WithMany()
+                        .HasForeignKey("SendingItemId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("IncomingMailMessage");
+
+                    b.Navigation("MailConversation");
+
+                    b.Navigation("ReplyToConversationMessage");
+
+                    b.Navigation("SendingItem");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailConversationParticipant", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailContact", "MailContact")
+                        .WithMany("ConversationParticipants")
+                        .HasForeignKey("MailContactId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailConversation", "MailConversation")
+                        .WithMany("Participants")
+                        .HasForeignKey("MailConversationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("MailContact");
+
+                    b.Navigation("MailConversation");
+                });
+
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Permission.UserRoles", b =>
                 {
                     b.HasOne("UzonMail.DB.SQL.Core.Organization.User", "User")
@@ -3592,6 +4199,63 @@ namespace UzonMail.DB.Migrations.SqLite
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoMailBranch", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailConversation", "SourceConversation")
+                        .WithMany()
+                        .HasForeignKey("SourceConversationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UzonMail.DB.SQL.Core.Todos.TodoTask", "TodoTask")
+                        .WithOne("MailBranch")
+                        .HasForeignKey("UzonMail.DB.SQL.Core.Todos.TodoMailBranch", "TodoTaskId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("SourceConversation");
+
+                    b.Navigation("TodoTask");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoMailBranchMessage", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailConversationMessage", "MailConversationMessage")
+                        .WithMany()
+                        .HasForeignKey("MailConversationMessageId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UzonMail.DB.SQL.Core.Todos.TodoMailBranch", "TodoMailBranch")
+                        .WithMany("Messages")
+                        .HasForeignKey("TodoMailBranchId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("MailConversationMessage");
+
+                    b.Navigation("TodoMailBranch");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoMailBranchSourceMessage", b =>
+                {
+                    b.HasOne("UzonMail.DB.SQL.Core.MailConversations.MailConversationMessage", "MailConversationMessage")
+                        .WithMany()
+                        .HasForeignKey("MailConversationMessageId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UzonMail.DB.SQL.Core.Todos.TodoMailBranch", "TodoMailBranch")
+                        .WithMany("SourceMessages")
+                        .HasForeignKey("TodoMailBranchId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("MailConversationMessage");
+
+                    b.Navigation("TodoMailBranch");
                 });
 
             modelBuilder.Entity("UzonMail.DB.SQL.Core.EmailReceiving.ImapMailbox", b =>
@@ -3674,9 +4338,40 @@ namespace UzonMail.DB.Migrations.SqLite
                     b.Navigation("FileUsages");
                 });
 
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailContact", b =>
+                {
+                    b.Navigation("ConversationParticipants");
+
+                    b.Navigation("Tags");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailConversation", b =>
+                {
+                    b.Navigation("Messages");
+
+                    b.Navigation("Participants");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.MailConversations.MailTag", b =>
+                {
+                    b.Navigation("Contacts");
+                });
+
             modelBuilder.Entity("UzonMail.DB.SQL.Core.Organization.User", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoMailBranch", b =>
+                {
+                    b.Navigation("Messages");
+
+                    b.Navigation("SourceMessages");
+                });
+
+            modelBuilder.Entity("UzonMail.DB.SQL.Core.Todos.TodoTask", b =>
+                {
+                    b.Navigation("MailBranch");
                 });
 #pragma warning restore 612, 618
         }

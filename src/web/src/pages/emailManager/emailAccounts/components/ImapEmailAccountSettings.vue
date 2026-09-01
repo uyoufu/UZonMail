@@ -1,9 +1,16 @@
 <template>
   <div>
-    <div class="q-mb-sm">
-      <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">
-        {{ t('accountManagement.emailAccount.imapCredential') }}
-      </div>
+    <q-toggle
+      v-model="receiving.isEnabled"
+      class="q-mb-md"
+      color="primary"
+      :label="t('accountManagement.enableReceiving')"
+    />
+    <div :class="{ 'settings-disabled': !receiving.isEnabled }">
+      <div class="q-mb-sm">
+        <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">
+          {{ t('accountManagement.emailAccount.imapCredential') }}
+        </div>
 
       <div class="row q-col-gutter-sm">
         <div class="col-12 col-sm-6">
@@ -68,22 +75,23 @@
           />
         </div>
       </div>
-    </div>
+      </div>
 
-    <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">IMAP</div>
+      <div class="text-subtitle2 q-mb-sm q-ml-xs text-primary">IMAP</div>
 
-    <div class="row q-col-gutter-sm">
-      <div class="col-12 col-sm-4">
-        <q-input
-          v-model.number="receiving.contentRetentionDays"
-          :label="t('accountManagement.retentionDays')"
-          hide-bottom-space
-          type="number"
-          min="1"
-          max="3650"
-          outlined
-          dense
-        />
+      <div class="row q-col-gutter-sm">
+        <div class="col-12 col-sm-4">
+          <q-input
+            v-model.number="receiving.contentRetentionDays"
+            :label="t('accountManagement.retentionDays')"
+            hide-bottom-space
+            type="number"
+            min="1"
+            max="3650"
+            outlined
+            dense
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -114,4 +122,9 @@ const emit = defineEmits<{
 }>()
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.settings-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+</style>

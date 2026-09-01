@@ -4,6 +4,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using log4net;
 using MimeKit;
+using MimeKit.Utils;
 using UzonMail.CorePlugin.Services.EmailDecorator;
 using UzonMail.CorePlugin.Services.EmailDecorator.Interfaces;
 using UzonMail.CorePlugin.Services.SendCore.Contexts;
@@ -102,6 +103,19 @@ public sealed class LocalEmailSendingHandler(
         );
         message.ReplyTo.AddRange(item.ReplyToEmails.Select(x => new MailboxAddress(x, x)));
         message.Subject = item.Subject;
+        message.MessageId = string.IsNullOrWhiteSpace(item.SourceItem.InternetMessageId)
+            ? MimeUtils.GenerateMessageId()
+            : item.SourceItem.InternetMessageId;
+        item.SourceItem.InternetMessageId = message.MessageId;
+        item.SourceItem.InternetMessageIdKey = message.MessageId.Trim().ToLowerInvariant();
+
+        if (!string.IsNullOrWhiteSpace(item.SourceItem.InReplyToInternetMessageId))
+            message.InReplyTo = item.SourceItem.InReplyToInternetMessageId;
+        foreach (var referenceMessageId in item.SourceItem.ReferenceInternetMessageIds)
+        {
+            if (!string.IsNullOrWhiteSpace(referenceMessageId))
+                message.References.Add(referenceMessageId);
+        }
 
         message.Body = CreateMessageBody(item.HtmlBody, item.Attachments);
 

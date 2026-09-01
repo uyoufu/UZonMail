@@ -53,6 +53,7 @@ public enum ReceivingAccountStatus
     Paused = 2,
     AuthenticationFailed = 3,
     ConnectionFailed = 4,
+    ConfigurationRequired = 5,
 }
 
 public enum EmailGroupCategory

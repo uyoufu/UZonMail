@@ -4,10 +4,12 @@ using UzonMail.DB.SQL.Core.EmailReceiving;
 using UzonMail.DB.SQL.Core.Emails;
 using UzonMail.DB.SQL.Core.EmailSending;
 using UzonMail.DB.SQL.Core.Files;
+using UzonMail.DB.SQL.Core.MailConversations;
 using UzonMail.DB.SQL.Core.Organization;
 using UzonMail.DB.SQL.Core.Permission;
 using UzonMail.DB.SQL.Core.Settings;
 using UzonMail.DB.SQL.Core.Templates;
+using UzonMail.DB.SQL.Core.Todos;
 using UzonMail.DB.SQL.EntityConfigs;
 
 namespace UzonMail.DB.SQL
@@ -82,6 +84,18 @@ namespace UzonMail.DB.SQL
         public DbSet<IncomingMailFeedbackReport> IncomingMailFeedbackReports { get; set; }
         public DbSet<IncomingMailClassificationEvidence> IncomingMailClassificationEvidences { get; set; }
         public DbSet<IncomingMailAuditEvent> IncomingMailAuditEvents { get; set; }
+
+        public DbSet<MailContact> MailContacts { get; set; }
+        public DbSet<MailTag> MailTags { get; set; }
+        public DbSet<MailContactTag> MailContactTags { get; set; }
+        public DbSet<MailConversation> MailConversations { get; set; }
+        public DbSet<MailConversationParticipant> MailConversationParticipants { get; set; }
+        public DbSet<MailConversationMessage> MailConversationMessages { get; set; }
+
+        public DbSet<TodoTask> TodoTasks { get; set; }
+        public DbSet<TodoMailBranch> TodoMailBranches { get; set; }
+        public DbSet<TodoMailBranchSourceMessage> TodoMailBranchSourceMessages { get; set; }
+        public DbSet<TodoMailBranchMessage> TodoMailBranchMessages { get; set; }
 
         public DbSet<AppSetting> AppSettings { get; set; }
         public DbSet<Proxy> Proxies { get; set; }

@@ -13,7 +13,7 @@ public enum ImapMailboxSpecialUse
     /// <summary>
     /// 收件箱。
     /// </summary>
-    RecipientContact = 1,
+    Inbox = 1,
 
     /// <summary>
     /// 已发送邮件。

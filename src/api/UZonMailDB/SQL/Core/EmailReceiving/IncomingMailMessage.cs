@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UzonMail.DB.SQL.Base;
+using UzonMail.DB.SQL.Core.EmailSending;
+using UzonMail.DB.SQL.Core.MailConversations;
 
 namespace UzonMail.DB.SQL.Core.EmailReceiving;
 
@@ -21,6 +23,18 @@ public class IncomingMailMessage : SqlId, IEntityTypeConfiguration<IncomingMailM
     /// 接收该邮件的 IMAP 账户。
     /// </summary>
     public ReceivingAccount ReceivingAccount { get; set; } = null!;
+
+    /// <summary>
+    /// 邮件相对于当前邮箱账号的方向，允许同一存储同时承载 Inbox 与 Sent。
+    /// </summary>
+    public MailMessageDirection Direction { get; set; }
+
+    /// <summary>
+    /// 由本应用发送时对应的发件项；外部客户端发送或入站邮件时为空。
+    /// </summary>
+    public long? SendingItemId { get; set; }
+
+    public SendingItem? SendingItem { get; set; }
 
     /// <summary>
     /// 邮件头中的 RFC Message-ID；发件方未提供时为空。
@@ -65,6 +79,19 @@ public class IncomingMailMessage : SqlId, IEntityTypeConfiguration<IncomingMailM
     /// 邮件正文的聚合本地可用状态。
     /// </summary>
     public IncomingMailBodyContentStatus BodyContentStatus { get; set; }
+
+    /// <summary>
+    /// 已按需下载的 HTML 正文缓存；列表查询不得投影该字段。
+    /// </summary>
+    public string? CachedHtmlBody { get; set; }
+
+    /// <summary>
+    /// 已按需下载的纯文本正文缓存。
+    /// </summary>
+    public string? CachedTextBody { get; set; }
+
+    public DateTime? BodyCachedAtUtc { get; set; }
+    public DateTime? BodyExpiresAtUtc { get; set; }
 
     /// <summary>
     /// 已发现的普通附件数量，不代表附件已下载。
@@ -158,6 +185,7 @@ public class IncomingMailMessage : SqlId, IEntityTypeConfiguration<IncomingMailM
         builder.HasIndex(x => new { x.ReceivingAccountId, x.InternetMessageIdKey });
         builder.HasIndex(x => new { x.ReceivingAccountId, x.ContentSha256 }).IsUnique();
         builder.HasIndex(x => new { x.ReceivingAccountId, x.ReceivedAtUtc });
+        builder.HasIndex(x => x.SendingItemId).IsUnique();
         builder.HasIndex(x => new
         {
             x.ReceivingAccountId,
@@ -181,6 +209,11 @@ public class IncomingMailMessage : SqlId, IEntityTypeConfiguration<IncomingMailM
             .HasOne(x => x.ReceivingAccount)
             .WithMany()
             .HasForeignKey(x => x.ReceivingAccountId)
+            .OnDelete(DeleteBehavior.NoAction);
+        builder
+            .HasOne(x => x.SendingItem)
+            .WithMany()
+            .HasForeignKey(x => x.SendingItemId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

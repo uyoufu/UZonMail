@@ -147,6 +147,17 @@ namespace UzonMail.DB.SQL.Core.EmailSending
         public string? InternetMessageIdKey { get; set; }
 
         /// <summary>
+        /// 回复邮件直接引用的父 Message-ID；新根线程时为空。
+        /// </summary>
+        public string? InReplyToInternetMessageId { get; set; }
+
+        /// <summary>
+        /// 回复邮件携带的 RFC References 消息链。
+        /// </summary>
+        [JsonField]
+        public List<string> ReferenceInternetMessageIds { get; set; } = [];
+
+        /// <summary>
         /// Smpt 服务器返回的 Id
         /// 通过这个 id 去获取阅读状态
         /// </summary>
@@ -176,6 +187,7 @@ namespace UzonMail.DB.SQL.Core.EmailSending
                 .HasDatabaseName("IX_SendingItems_Group_Status_SenderAccount_Id");
             builder.Property(x => x.InternetMessageId).HasMaxLength(1000);
             builder.Property(x => x.InternetMessageIdKey).HasMaxLength(1000);
+            builder.Property(x => x.InReplyToInternetMessageId).HasMaxLength(1000);
             builder.HasIndex(x => x.InternetMessageIdKey).IsUnique();
         }
     }
