@@ -180,7 +180,7 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-.receiving-workspace { height: calc(100vh - 98px); min-height: 540px; display: grid; grid-template-columns: minmax(300px, 34%) 1fr; border: 1px solid $grey-4; background: white; overflow: hidden; }
+.receiving-workspace { height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(300px, 34%) 1fr; border: 1px solid $grey-4; background: white; overflow: hidden; }
 .account-pane,.conversation-pane { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .account-pane { border-right: 1px solid $grey-4; }
 .pane-toolbar,.conversation-header { min-height: 54px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid $grey-4; }
@@ -198,5 +198,5 @@ onMounted(async () => {
 .dialog-card { width: min(560px, 92vw); max-height: 80vh; overflow: auto; border-radius: 6px; }
 .tag-color { flex: 0 0 58px; }
 .min-width-0 { min-width: 0; }
-@media (max-width: 1023px) { .receiving-workspace { grid-template-columns: 1fr; height: calc(100vh - 82px); }.account-pane { border-right: 0; }.message-row { max-width: 96%; } }
+@media (max-width: 1023px) { .receiving-workspace { grid-template-columns: 1fr; }.account-pane { border-right: 0; }.message-row { max-width: 96%; } }
 </style>

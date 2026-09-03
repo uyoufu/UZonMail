@@ -88,7 +88,7 @@ onMounted(() => loadTasks())
 </script>
 
 <style scoped lang="scss">
-.todo-workspace { height: calc(100vh - 98px); min-height: 540px; display: grid; grid-template-columns: 300px minmax(360px, 1fr) 320px; border: 1px solid $grey-4; background: white; overflow: hidden; }
+.todo-workspace { height: 100%; min-height: 0; display: grid; grid-template-columns: 300px minmax(360px, 1fr) 320px; border: 1px solid $grey-4; background: white; overflow: hidden; }
 .todo-list-pane,.branch-pane,.detail-pane { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid $grey-4; }
 .detail-pane { border-right: 0; }
 .todo-toolbar,.section-header { min-height: 58px; padding: 10px 14px; border-bottom: 1px solid $grey-4; }
@@ -99,5 +99,5 @@ onMounted(() => loadTasks())
 .branch-message { max-width: 88%; }.branch-message.outgoing { align-self: flex-end; }.branch-bubble { padding: 12px; border: 1px solid $grey-4; border-radius: 6px; background: white; cursor: pointer; }.outgoing .branch-bubble { background: #e7f6ea; border-color: #b8dfc0; }
 .branch-composer { padding: 10px 12px; border-top: 1px solid $grey-4; }.branch-empty,.empty-state { min-height: 240px; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; color: $grey-7; }.empty-state { grid-column: 2 / 4; }.detail-form { padding: 16px; overflow: auto; }.source-info { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid $grey-4; }.dialog-card { width: min(520px, 92vw); border-radius: 6px; }
 @media (max-width: 1199px) { .todo-workspace { grid-template-columns: 280px minmax(340px, 1fr); }.detail-pane { position: absolute; right: 16px; top: 82px; bottom: 16px; width: 320px; background: white; box-shadow: 0 4px 18px rgba(0,0,0,.14); z-index: 2; } }
-@media (max-width: 767px) { .todo-workspace { grid-template-columns: 180px 1fr; height: calc(100vh - 82px); }.detail-pane { width: min(320px, 86vw); }.branch-composer { padding: 8px; } }
+@media (max-width: 767px) { .todo-workspace { grid-template-columns: 180px 1fr; }.detail-pane { width: min(320px, 86vw); }.branch-composer { padding: 8px; } }
 </style>
