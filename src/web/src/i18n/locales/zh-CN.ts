@@ -916,7 +916,7 @@ export default {
     proxyManagement: '代理管理',
     qqGroupMembersGetter: 'QQ 群采集',
     readStatistics: '阅读统计',
-    receivingInbox: '收件箱',
+    receivingInbox: '我的邮件',
     receivingManagement: '收件管理',
     recipientContacts: '收件邮箱',
     roleManagement: '角色管理',
