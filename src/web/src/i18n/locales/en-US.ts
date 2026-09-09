@@ -331,7 +331,8 @@ export default {
   fileManager: {
     allFiles: 'All files',
     batchDelete: 'Delete selected',
-    batchDeleteConfirm: 'Delete {count} selected files? The entire operation will be canceled if any file is still referenced.',
+    batchDeleteConfirm:
+      'Delete {count} selected files? The entire operation will be canceled if any file is still referenced.',
     categories: 'File Categories',
     categoryName: 'Category name',
     createCategory: 'Create category',
@@ -507,10 +508,10 @@ export default {
       system: 'System',
       systemNotificationEmail: 'System notification sender email',
       systemNotificationEmailPlaceholder: 'Use this email to send completion notifications after sending finishes',
-      systemUnsubscribeTooltip: 'Manage unsubscribes using the system\'s built-in functionality',
+      systemUnsubscribeTooltip: "Manage unsubscribes using the system's built-in functionality",
       unsubscribeCallback: 'Unsubscribe callback',
       unsubscribePage: 'Unsubscribe page',
-      unsubscribePageLanguageTip: 'The matching unsubscribe page is shown according to the user\'s current language',
+      unsubscribePageLanguageTip: "The matching unsubscribe page is shown according to the user's current language",
       unsubscribeSettings: 'Unsubscribe settings',
       unsubscribeSettingsCaption: 'Configure unsubscribe behavior',
       unsubscribeUrl: 'Unsubscribe link',
@@ -585,7 +586,8 @@ export default {
       activationTime: 'Activation time',
       clickToActivate: 'Click to activate',
       deactivate: 'Deactivate',
-      deactivateConfirmation: 'After deactivation, advanced features will be unavailable for all users of this system. Continue?',
+      deactivateConfirmation:
+        'After deactivation, advanced features will be unavailable for all users of this system. Continue?',
       deactivated: 'Deactivated',
       enterLicenseCode: 'Enter license code',
       expirationTime: 'Expiration time',
@@ -798,11 +800,13 @@ export default {
     userManager: {
       cancelSubUser: 'Remove sub-account status',
       cancelSubUserConfirmation: 'Remove sub-account status for user {userId}?',
-      cancelSubUserHint: 'The user will become an independent account and will no longer be managed by the primary account',
+      cancelSubUserHint:
+        'The user will become an independent account and will no longer be managed by the primary account',
       createSuccess: 'User created successfully',
       createUserTooltip: 'Create user',
       disable: 'Disable',
-      disableConfirmation: 'Disable user {userId}? They will not be able to sign in, but existing sending tasks will continue.',
+      disableConfirmation:
+        'Disable user {userId}? They will not be able to sign in, but existing sending tasks will continue.',
       disableHint: 'The user cannot sign in after being disabled',
       disableSuccess: 'Disabled successfully',
       disableUser: 'Disable User',
@@ -821,7 +825,7 @@ export default {
       resetConfirmation: 'Reset the password to {password}?',
       resetPassword: 'Reset Password',
       resetSuccess: 'Password reset successfully',
-      resetUserPassword: 'Reset this user\'s password',
+      resetUserPassword: "Reset this user's password",
       setAsSubUser: 'Set as sub-account',
       setAsSubUserConfirmation: 'Set user {userId} as a sub-account?',
       setAsSubUserHint: 'Manage the sub-account settings centrally and view some sending data',
@@ -870,7 +874,8 @@ export default {
       variableDefinitionTooltip: 'Define function variables using data sources',
       variableDescription: 'Variable description',
       variableName: 'Variable Name',
-      variableNameInvalid: 'A variable name may contain only letters, numbers, and underscores, and cannot start with a number.',
+      variableNameInvalid:
+        'A variable name may contain only letters, numbers, and underscores, and cannot start with a number.',
       variableNameTooltip: 'Variable name'
     }
   },
@@ -1079,7 +1084,8 @@ export default {
     sendingProgress: 'Sending progress',
     sendingStarted: 'Sending started...',
     subject: 'Subject',
-    subjectPlaceholder: 'Please input email subject (if you need random subjects, separate multiple subjects with a semicolon ; or place each on its own line)',
+    subjectPlaceholder:
+      'Please input email subject (if you need random subjects, separate multiple subjects with a semicolon ; or place each on its own line)',
     template: 'Template',
     templateDownloadSuccess: 'Template download successful',
     templateUnit: 'templates',
@@ -1104,7 +1110,8 @@ export default {
     saveTemplate: 'Save Template',
     saveTemplateSuccess: 'Template saved successfully',
     savingTemplate: 'Saving template...',
-    templateEditorPlaceholder: 'Enter template content here, variables are wrapped in {\'{{ }}\'}, for example {\'{{ variableName }}\'}',
+    templateEditorPlaceholder:
+      "Enter template content here, variables are wrapped in {'{{ }}'}, for example {'{{ variableName }}'}",
     templateId: 'Template ID',
     templateName: 'Template Name'
   },
