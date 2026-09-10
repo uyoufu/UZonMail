@@ -134,7 +134,7 @@ public sealed class MailConversationSendService(
         };
         db.MailConversationMessages.Add(timelineMessage);
         conversation.LastMessageAtUtc = timelineMessage.OccurredAtUtc;
-        conversation.LastMessagePreview = CreatePreview(request.HtmlBody);
+        conversation.LastMessagePreview = MailMessagePreviewFormatter.Normalize(request.HtmlBody);
         if (todoBranch is not null)
         {
             db.TodoMailBranchMessages.Add(
@@ -291,13 +291,6 @@ public sealed class MailConversationSendService(
             throw new KnownException("邮件主题不能为空");
         if (string.IsNullOrWhiteSpace(request.HtmlBody))
             throw new KnownException("邮件正文不能为空");
-    }
-
-    private static string CreatePreview(string htmlBody)
-    {
-        var text = System.Text.RegularExpressions.Regex.Replace(htmlBody, "<[^>]+>", " ");
-        text = System.Net.WebUtility.HtmlDecode(text).Trim();
-        return text.Length <= 500 ? text : text[..500];
     }
 
     private sealed record ParentHeaders(string? InReplyTo, List<string> References);

@@ -259,6 +259,10 @@ public sealed class MailConversationQueryService(
             incoming is null
                 ? CreateAddressList(sending?.CC)
                 : CreateAddressList(incoming.Addresses, IncomingMailAddressType.Cc),
+            incoming?.PreviewText
+                ?? MailMessagePreviewFormatter.Normalize(sending?.Content)
+                ?? incoming?.Subject
+                ?? sending?.Subject,
             CreateAttachments(message)
         );
     }

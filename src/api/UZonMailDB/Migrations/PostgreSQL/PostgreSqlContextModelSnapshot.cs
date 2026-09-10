@@ -1197,6 +1197,10 @@ namespace UzonMail.DB.Migrations.PostgreSQL
                         .HasColumnType("text")
                         .HasColumnName("_id");
 
+                    b.Property<string>("PreviewText")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<DateTime>("ReceivedAtUtc")
                         .HasColumnType("timestamp with time zone");
 

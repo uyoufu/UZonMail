@@ -44,6 +44,7 @@ public sealed record MailConversationMessageDto(
     IReadOnlyList<MailAddressDto> From,
     IReadOnlyList<MailAddressDto> To,
     IReadOnlyList<MailAddressDto> Cc,
+    string? PreviewText,
     IReadOnlyList<MailAttachmentDto> Attachments
 );
 

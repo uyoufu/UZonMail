@@ -25,6 +25,7 @@ public sealed class ImapReceivingSynchronizationService(
 ) : IReceivingSynchronizationService, IScopedService<IReceivingSynchronizationService>
 {
     private const int InitialLookbackDays = 90;
+    private const int PreviewBackfillBatchSize = 100;
     private static readonly ConcurrentDictionary<long, SemaphoreSlim> AccountLocks = [];
 
     public async Task<ReceivingSynchronizationResult> SynchronizeAsync(
@@ -275,6 +276,8 @@ public sealed class ImapReceivingSynchronizationService(
             mailboxRun.CheckpointAdvanced = true;
         }
 
+        await BackfillPreviewTextAsync(localMailbox, remoteFolder, cancellationToken);
+
         localMailbox.UidValidity = uidValidity;
         localMailbox.RemoteMessageCount = remoteFolder.Count;
         localMailbox.RemoteUnreadCount = remoteFolder.Unread;
@@ -413,6 +416,50 @@ public sealed class ImapReceivingSynchronizationService(
         await db.SaveChangesAsync(cancellationToken);
         await conversationIngestionService.IngestAsync(message.Id, cancellationToken);
         return wasCreated;
+    }
+
+    private async Task BackfillPreviewTextAsync(
+        ImapMailbox localMailbox,
+        IMailFolder remoteFolder,
+        CancellationToken cancellationToken
+    )
+    {
+        var locations = await db
+            .IncomingMailLocations.Include(x => x.IncomingMailMessage)
+            .Where(x =>
+                x.ImapMailboxId == localMailbox.Id
+                && x.IsPresentOnServer
+                && x.IncomingMailMessage.PreviewText == null
+                && x.Uid > 0
+                && x.Uid <= uint.MaxValue
+            )
+            .OrderByDescending(x => x.IncomingMailMessage.ReceivedAtUtc)
+            .ThenByDescending(x => x.Id)
+            .Take(PreviewBackfillBatchSize)
+            .ToListAsync(cancellationToken);
+        if (locations.Count == 0)
+            return;
+
+        var uniqueIds = locations.Select(x => new UniqueId((uint)x.Uid)).Distinct().ToList();
+        var summaries = await remoteFolder.FetchAsync(
+            uniqueIds,
+            MessageSummaryItems.UniqueId | MessageSummaryItems.PreviewText,
+            cancellationToken
+        );
+        var previewsByUid = summaries.ToDictionary(
+            x => Convert.ToInt64(x.UniqueId.Id),
+            x => MailMessagePreviewFormatter.Normalize(x.PreviewText)
+        );
+
+        foreach (var location in locations)
+        {
+            previewsByUid.TryGetValue(location.Uid, out var previewText);
+            location.IncomingMailMessage.PreviewText =
+                previewText
+                ?? MailMessagePreviewFormatter.Normalize(location.IncomingMailMessage.Subject)
+                ?? string.Empty;
+        }
+        await db.SaveChangesAsync(cancellationToken);
     }
 
     private static SearchQuery CreateSearchQuery(long? lastCommittedUid)

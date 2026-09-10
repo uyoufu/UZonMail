@@ -1,0 +1,32 @@
+import dayjs from 'dayjs'
+import type { IMailContent, IMailMessage } from 'src/api/mailConversation'
+import { formatMailAddressRoute } from './mailMessagePresentation'
+
+export function createManualQuoteHtml(selectedText: string): string {
+  return `<blockquote>${toHtmlText(selectedText)}</blockquote><p><br></p>`
+}
+
+export function createFullMessageQuoteHtml(message: IMailMessage, content: IMailContent): string {
+  const plainText = content.textBody || htmlToPlainText(content.htmlBody || '')
+  const metadata = `${dayjs(message.occurredAtUtc).format('YYYY-MM-DD HH:mm')} ${formatMailAddressRoute(message)}`
+  return `<blockquote><p>${toHtmlText(metadata)}</p>${toHtmlText(plainText)}</blockquote>`
+}
+
+function htmlToPlainText(html: string): string {
+  const documentNode = new DOMParser().parseFromString(html, 'text/html')
+  return documentNode.body.textContent || ''
+}
+
+function toHtmlText(text: string): string {
+  return escapeHtml(text).replace(/\r?\n/g, '<br>')
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character] || character)
+}

@@ -10,7 +10,7 @@ export interface IReceivingAccount { emailAccountId: number, receivingAccountId:
 export interface IMailConversation { id: number, emailAccountId: number, emailAccount: string, conversationType: MailConversationType, displayTitle: string, lastMessageAtUtc: string, lastMessagePreview?: string, unreadCount: number, participants: IMailContact[] }
 export interface IMailAddress { email: string, displayName?: string }
 export interface IMailAttachment { id: number, fileName: string, contentType: string, size?: number, isOutgoingFileUsage: boolean }
-export interface IMailMessage { id: number, direction: MailMessageDirection, subject?: string, occurredAtUtc: string, isRead: boolean, sendingStatus?: number, from: IMailAddress[], to: IMailAddress[], cc: IMailAddress[], attachments: IMailAttachment[] }
+export interface IMailMessage { id: number, direction: MailMessageDirection, subject?: string, previewText?: string, occurredAtUtc: string, isRead: boolean, sendingStatus?: number, from: IMailAddress[], to: IMailAddress[], cc: IMailAddress[], attachments: IMailAttachment[] }
 export interface IMailContent { conversationMessageId: number, htmlBody?: string, textBody?: string, attachments: IMailAttachment[] }
 export interface ISendMailRequest { replyToMessageId?: number, replyMode: MailReplyMode, subject: string, htmlBody: string, attachmentFileUsageIds: number[] }
 

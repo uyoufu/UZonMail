@@ -90,6 +90,11 @@ public class IncomingMailMessage : SqlId, IEntityTypeConfiguration<IncomingMailM
     /// </summary>
     public string? CachedTextBody { get; set; }
 
+    /// <summary>
+    /// 同步阶段取得的受限正文摘要，用于时间线概览而不触发完整正文下载。
+    /// </summary>
+    public string? PreviewText { get; set; }
+
     public DateTime? BodyCachedAtUtc { get; set; }
     public DateTime? BodyExpiresAtUtc { get; set; }
 
@@ -179,6 +184,7 @@ public class IncomingMailMessage : SqlId, IEntityTypeConfiguration<IncomingMailM
         builder.Property(x => x.InternetMessageIdKey).HasMaxLength(1000);
         builder.Property(x => x.ContentSha256).HasMaxLength(64);
         builder.Property(x => x.Subject).HasMaxLength(1000);
+        builder.Property(x => x.PreviewText).HasMaxLength(500);
         builder.Property(x => x.AnalysisSummary).HasMaxLength(2000);
         builder.Property(x => x.CurrentSpamScore).HasPrecision(5, 2);
         builder.HasAlternateKey(x => new { x.Id, x.ReceivingAccountId });
