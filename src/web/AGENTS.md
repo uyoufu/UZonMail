@@ -111,6 +111,7 @@ export function useReportContextMenu() {
 - 边框采用 `outlined` 样式
 - 避免在组件中使用 `q-separator`，而是使用 `q-mb-sm` 类，以保持一致的间距
 - input 组件应设置 `hide-bottom-space` 类，以避免底部 hint 始终占位
+- 优化使用 `./quasar-css-helper.md` 帮助类来调整样式
 
 ## 通用工具函数
 
