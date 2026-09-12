@@ -663,6 +663,7 @@ export default {
       addTag: '添加标签',
       all: '全部',
       allAccounts: '全部收件账号',
+      collapseReply: '收起回复',
       completeReply: '请填写邮件主题和正文',
       configurationRequired: '需要配置 IMAP 收件信息',
       createTodo: '转存为待办',
@@ -694,6 +695,7 @@ export default {
       todoCreated: '邮件待办已创建',
       unread: '未读',
       unsupported: '暂不支持',
+      viewQuotedMessage: '查看引用邮件',
       writeReply: '输入邮件正文'
     },
     sendingTask: {

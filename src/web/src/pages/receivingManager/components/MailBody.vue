@@ -79,7 +79,14 @@ function createSelectionBridge(documentNode: Document): HTMLScriptElement {
   const bridge = documentNode.createElement('script')
   bridge.textContent = `
     document.addEventListener('contextmenu', function (event) {
-      var selectedText = window.getSelection().toString().trim();
+      var selection = window.getSelection();
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
+
+      var target = event.target;
+      var selectedRange = selection.getRangeAt(0);
+      if (!(target instanceof Node) || !selectedRange.intersectsNode(target)) return;
+
+      var selectedText = selection.toString().trim();
       if (!selectedText) return;
       event.preventDefault();
       window.parent.postMessage({
@@ -110,8 +117,15 @@ function escapeHtml(text: string): string {
 }
 
 function onWindowMessage(event: MessageEvent<unknown>) {
-  if (event.source !== bodyFrame.value?.contentWindow || !isSelectionContextPayload(event.data)) return
-  emit('quote-selection-contextmenu', event.data)
+  const frameElement = bodyFrame.value
+  if (event.source !== frameElement?.contentWindow || !isSelectionContextPayload(event.data)) return
+
+  const frameBounds = frameElement.getBoundingClientRect()
+  emit('quote-selection-contextmenu', {
+    selectedText: event.data.selectedText,
+    clientX: frameBounds.left + event.data.clientX,
+    clientY: frameBounds.top + event.data.clientY
+  })
 }
 
 function isSelectionContextPayload(value: unknown): value is IFrameSelectionContextPayload {

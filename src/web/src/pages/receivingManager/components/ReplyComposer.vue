@@ -1,44 +1,82 @@
 <template>
-  <section class="relative-position q-pa-sm q-pb-xl">
-    <div class="row items-center q-gutter-sm q-mb-sm">
-      <q-input v-model="draftSubject" dense outlined hide-bottom-space class="col" :label="t('pages.receivingManagement.subject')" />
-      <q-btn-toggle v-model="replyMode" dense unelevated toggle-color="primary" :options="replyOptions" />
-      <CommonBtn icon="article" flat :tooltip="t('pages.receivingManagement.insertTemplate')" @click="onInsertTemplate" />
+  <div class="reply-composer">
+    <div v-if="replyComposerState === ReplyComposerState.collapsed" ref="collapsedReplyElement" class="row justify-end q-pa-sm">
+      <CommonBtn icon="reply" flat color="primary" :tooltip="t('pages.receivingManagement.reply')" @click="onRestoreReply" />
     </div>
-    <div v-if="quotedMessage" class="row no-wrap items-center q-pa-xs q-mb-sm bg-grey-2 border-radius-4">
-      <q-icon name="format_quote" color="primary" class="q-mr-xs" />
-      <span class="col text-caption ellipsis">{{ quotedMessage.subject || t('pages.receivingManagement.noSubject') }}</span>
-      <CommonBtn icon="close" flat :tooltip="t('pages.receivingManagement.removeQuote')" @click="quotedMessageId = undefined" />
-    </div>
-    <q-editor ref="editorRef" v-model="draftBody" min-height="110px" :placeholder="t('pages.receivingManagement.writeReply')"
-      :toolbar="editorToolbar" />
-    <CommonBtn icon="send" class="absolute-bottom-right q-ma-sm" :loading="isSending"
-      :tooltip="t('pages.receivingManagement.send')" @click="onSend" />
-  </section>
+
+    <section v-if="replyComposerState === ReplyComposerState.expanded" ref="replyComposerElement" class="q-pa-sm">
+      <div class="row items-center q-gutter-sm q-mb-sm">
+        <q-input v-model="draftSubject" dense outlined hide-bottom-space class="col min-width-0" :label="t('pages.receivingManagement.subject')" />
+        <q-fab v-if="quotedMessage" v-model="isQuoteActionsOpen" color="primary" icon="format_quote" direction="down"
+          vertical-actions-align="right" padding="xs">
+          <q-fab-action icon="remove_circle_outline" :label="t('pages.receivingManagement.removeQuote')" @click="onRemoveQuote" />
+          <q-fab-action icon="visibility" :label="t('pages.receivingManagement.viewQuotedMessage')" @click="onViewQuotedMessage" />
+          <AsyncTooltip :tooltip="getQuotePreviewTooltip" :cache="false" anchor="bottom middle" self="top middle" />
+        </q-fab>
+        <q-btn-toggle v-model="replyMode" dense unelevated toggle-color="primary" :options="replyOptions" />
+        <CommonBtn icon="article" flat :tooltip="t('pages.receivingManagement.insertTemplate')" @click="onInsertTemplate" />
+        <CommonBtn icon="keyboard_arrow_down" flat :tooltip="t('pages.receivingManagement.collapseReply')" @click="onCollapseReply" />
+      </div>
+
+      <div class="reply-composer__editor relative-position">
+        <q-editor ref="editorRef" v-model="draftBody" min-height="110px" :placeholder="t('pages.receivingManagement.writeReply')"
+          :toolbar="editorToolbar" />
+        <CommonBtn icon="send" class="reply-composer__send" :loading="isSending"
+          :tooltip="t('pages.receivingManagement.send')" @click="onSend" />
+      </div>
+    </section>
+  </div>
 </template>
 
 <script setup lang="ts">
-import type { QEditor } from 'quasar'
+import { morph, type QEditor } from 'quasar'
+import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import TemplatePickerDialog from './TemplatePickerDialog.vue'
-import { createFullMessageQuoteHtml, createManualQuoteHtml } from './mailQuote'
+import { createFullMessageQuoteHtml, createManualQuoteHtml, getMailContentPlainText } from './mailQuote'
 import { getMailContent, MailReplyMode, sendMailConversationMessage, type IMailConversation, type IMailMessage } from 'src/api/mailConversation'
 import { showComponentDialog, notifyError, notifySuccess } from 'src/utils/dialog'
 import { useI18n } from 'vue-i18n'
+
+const ReplyComposerState = {
+  hidden: 'hidden',
+  expanded: 'expanded',
+  collapsed: 'collapsed'
+} as const
+
+type ReplyComposerState = typeof ReplyComposerState[keyof typeof ReplyComposerState]
+
+interface IReplyDraft {
+  state: ReplyComposerState
+  subject: string
+  body: string
+  replyMode: MailReplyMode
+  replyToMessageId?: number
+  quotedMessageId?: number
+}
 
 const props = defineProps<{
   conversation: IMailConversation
   messages: IMailMessage[]
 }>()
-const emit = defineEmits<{ sent: [] }>()
+const emit = defineEmits<{
+  sent: []
+  'view-quoted-message': [messageId: number]
+}>()
 const { t } = useI18n()
 const editorRef = ref<QEditor>()
+const replyComposerElement = ref<HTMLElement>()
+const collapsedReplyElement = ref<HTMLElement>()
+const replyComposerState = ref<ReplyComposerState>(ReplyComposerState.hidden)
+const replyDraftsByConversationId = new Map<number, IReplyDraft>()
+const quotePreviewByMessageId = new Map<number, string[]>()
 const draftSubject = ref('')
 const draftBody = ref('')
 const replyMode = ref(MailReplyMode.Reply)
 const replyToMessageId = ref<number>()
 const quotedMessageId = ref<number>()
 const isSending = ref(false)
+const isQuoteActionsOpen = ref(false)
 const editorToolbar = [['bold', 'italic', 'underline'], ['unordered', 'ordered'], ['link'], ['undo', 'redo']]
 const replyOptions = computed(() => [
   { label: t('pages.receivingManagement.reply'), value: MailReplyMode.Reply },
@@ -46,25 +84,89 @@ const replyOptions = computed(() => [
 ])
 const quotedMessage = computed(() => props.messages.find(message => message.id === quotedMessageId.value))
 
-function onConversationChanged() {
-  const latestMessage = props.messages.at(-1)
-  draftSubject.value = createReplySubject(latestMessage?.subject)
-  draftBody.value = ''
-  replyMode.value = MailReplyMode.Reply
-  replyToMessageId.value = latestMessage?.id
-  quotedMessageId.value = latestMessage?.id
-}
+async function startReply(message: IMailMessage): Promise<void> {
+  if (replyComposerState.value === ReplyComposerState.hidden) {
+    draftBody.value = ''
+    replyMode.value = MailReplyMode.Reply
+  }
 
-function startReply(message: IMailMessage) {
   draftSubject.value = createReplySubject(message.subject)
   replyToMessageId.value = message.id
   quotedMessageId.value = message.id
+  replyComposerState.value = ReplyComposerState.expanded
+  await nextTick()
   editorRef.value?.focus()
 }
 
-function insertManualQuote(selectedText: string) {
+async function insertManualQuote(message: IMailMessage, selectedText: string): Promise<void> {
+  if (!selectedText.trim()) return
+
+  await startReply(message)
   editorRef.value?.runCmd('insertHTML', createManualQuoteHtml(selectedText))
   editorRef.value?.focus()
+}
+
+function onCollapseReply() {
+  morphReplyComposer(ReplyComposerState.collapsed)
+}
+
+function onRestoreReply() {
+  morphReplyComposer(ReplyComposerState.expanded)
+}
+
+function morphReplyComposer(nextState: ReplyComposerState) {
+  const currentState = replyComposerState.value
+  if (currentState === nextState || currentState === ReplyComposerState.hidden) return
+
+  morph({
+    from: currentState === ReplyComposerState.expanded ? getReplyComposerElement : getCollapsedReplyElement,
+    to: currentState === ReplyComposerState.expanded ? getCollapsedReplyElement : getReplyComposerElement,
+    onToggle: () => {
+      replyComposerState.value = nextState
+      saveReplyDraft(props.conversation.id)
+    },
+    duration: 300
+  })
+}
+
+function getReplyComposerElement() {
+  return replyComposerElement.value
+}
+
+function getCollapsedReplyElement() {
+  return collapsedReplyElement.value
+}
+
+function onRemoveQuote() {
+  quotedMessageId.value = undefined
+  isQuoteActionsOpen.value = false
+}
+
+function onViewQuotedMessage() {
+  const messageId = quotedMessageId.value
+  if (!messageId) return
+
+  isQuoteActionsOpen.value = false
+  emit('view-quoted-message', messageId)
+}
+
+async function getQuotePreviewTooltip(): Promise<string[]> {
+  const message = quotedMessage.value
+  if (!message) return []
+
+  const cachedPreview = quotePreviewByMessageId.get(message.id)
+  if (cachedPreview) return cachedPreview
+
+  try {
+    const content = (await getMailContent(message.id)).data
+    const previewText = getMailContentPlainText(content).trim()
+    const truncatedPreview = previewText.length > 800 ? `${previewText.slice(0, 800)}...` : previewText
+    const quotePreview = [message.subject || t('pages.receivingManagement.noSubject'), truncatedPreview].filter(Boolean)
+    quotePreviewByMessageId.set(message.id, quotePreview)
+    return quotePreview
+  } catch {
+    return [message.subject || t('pages.receivingManagement.noSubject')]
+  }
 }
 
 async function onInsertTemplate() {
@@ -89,9 +191,8 @@ async function onSend() {
       htmlBody,
       attachmentFileUsageIds: []
     })
-    draftBody.value = ''
-    replyToMessageId.value = undefined
-    quotedMessageId.value = undefined
+    replyDraftsByConversationId.delete(props.conversation.id)
+    clearReplyDraft()
     notifySuccess(t('pages.receivingManagement.sent'))
     emit('sent')
   } catch {
@@ -108,6 +209,47 @@ async function createOutgoingHtml(): Promise<string> {
   return `${draftBody.value}${createFullMessageQuoteHtml(quotedMessageValue, content)}`
 }
 
+function saveReplyDraft(conversationId: number) {
+  if (replyComposerState.value === ReplyComposerState.hidden) {
+    replyDraftsByConversationId.delete(conversationId)
+    return
+  }
+
+  replyDraftsByConversationId.set(conversationId, {
+    state: replyComposerState.value,
+    subject: draftSubject.value,
+    body: draftBody.value,
+    replyMode: replyMode.value,
+    replyToMessageId: replyToMessageId.value,
+    quotedMessageId: quotedMessageId.value
+  })
+}
+
+function restoreReplyDraft(conversationId: number) {
+  const replyDraft = replyDraftsByConversationId.get(conversationId)
+  if (!replyDraft) {
+    clearReplyDraft()
+    return
+  }
+
+  draftSubject.value = replyDraft.subject
+  draftBody.value = replyDraft.body
+  replyMode.value = replyDraft.replyMode
+  replyToMessageId.value = replyDraft.replyToMessageId
+  quotedMessageId.value = replyDraft.quotedMessageId
+  replyComposerState.value = replyDraft.state
+}
+
+function clearReplyDraft() {
+  draftSubject.value = ''
+  draftBody.value = ''
+  replyMode.value = MailReplyMode.Reply
+  replyToMessageId.value = undefined
+  quotedMessageId.value = undefined
+  replyComposerState.value = ReplyComposerState.hidden
+  isQuoteActionsOpen.value = false
+}
+
 function createReplySubject(subject?: string): string {
   if (!subject) return 'Re: '
   return subject.startsWith('Re:') ? subject : `Re: ${subject}`
@@ -117,8 +259,28 @@ function hasEditorContent(html: string): boolean {
   return new DOMParser().parseFromString(html, 'text/html').body.textContent?.trim().length !== 0
 }
 
-watch(() => props.conversation.id, onConversationChanged, { immediate: true })
-watch(() => props.messages, onConversationChanged)
+watch(() => props.conversation.id, (conversationId, previousConversationId) => {
+  if (previousConversationId !== undefined) saveReplyDraft(previousConversationId)
+  restoreReplyDraft(conversationId)
+}, { immediate: true })
 
 defineExpose({ startReply, insertManualQuote })
 </script>
+
+<style lang="scss" scoped>
+.reply-composer {
+  border-top: 1px solid $grey-4;
+}
+
+.reply-composer__editor :deep(.q-editor__content) {
+  padding-right: 52px;
+  padding-bottom: 52px;
+}
+
+.reply-composer__send {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+}
+</style>

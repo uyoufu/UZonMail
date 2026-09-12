@@ -668,6 +668,7 @@ export default {
       addTag: 'Add tag',
       all: 'All',
       allAccounts: 'All receiving accounts',
+      collapseReply: 'Collapse reply',
       completeReply: 'Enter a subject and message',
       configurationRequired: 'IMAP configuration required',
       createTodo: 'Create todo',
@@ -699,6 +700,7 @@ export default {
       todoCreated: 'Mail todo created',
       unread: 'Unread',
       unsupported: 'Not supported',
+      viewQuotedMessage: 'View quoted message',
       writeReply: 'Write a message'
     },
     sendingTask: {

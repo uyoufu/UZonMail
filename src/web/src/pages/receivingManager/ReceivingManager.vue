@@ -29,6 +29,7 @@ import ReceivingConversationList from './components/ReceivingConversationList.vu
 import { getMailConversations, getMailMessages, getReceivingAccounts, markMailConversationRead, synchronizeReceivingAccount, type IMailConversation, type IMailMessage, type IReceivingAccount } from 'src/api/mailConversation'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { useI18n } from 'vue-i18n'
+import { restoreReceivingAccountSelection, saveReceivingAccountSelection } from './receivingAccountPreference'
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -115,11 +116,12 @@ async function onTagsSaved() {
   await loadConversations()
 }
 
+watch(selectedAccountId, saveReceivingAccountSelection)
 watch([selectedAccountId, filter, unreadOnly], () => void loadConversations())
 
 onMounted(async () => {
   accounts.value = (await getReceivingAccounts()).data
-  selectedAccountId.value = accounts.value.find(account => account.isSupported)?.emailAccountId
+  selectedAccountId.value = restoreReceivingAccountSelection(accounts.value)
   if (!selectedAccountId.value) await loadConversations()
 })
 </script>

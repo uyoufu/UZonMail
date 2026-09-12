@@ -7,9 +7,14 @@ export function createManualQuoteHtml(selectedText: string): string {
 }
 
 export function createFullMessageQuoteHtml(message: IMailMessage, content: IMailContent): string {
-  const plainText = content.textBody || htmlToPlainText(content.htmlBody || '')
+  const plainText = getMailContentPlainText(content)
   const metadata = `${dayjs(message.occurredAtUtc).format('YYYY-MM-DD HH:mm')} ${formatMailAddressRoute(message)}`
   return `<blockquote><p>${toHtmlText(metadata)}</p>${toHtmlText(plainText)}</blockquote>`
+}
+
+/** 将邮件内容转换为可安全显示在引用预览中的纯文本。 */
+export function getMailContentPlainText(content: IMailContent): string {
+  return content.textBody || htmlToPlainText(content.htmlBody || '')
 }
 
 function htmlToPlainText(html: string): string {

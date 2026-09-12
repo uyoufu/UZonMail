@@ -14,7 +14,7 @@
 
     <q-scroll-area class="col height-0 bg-grey-2 relative-position">
       <div class="q-pa-sm q-gutter-y-sm">
-        <article v-for="message in messages" :key="message.id" class="row no-wrap items-start q-gutter-sm"
+        <article v-for="message in messages" :key="message.id" :data-message-id="message.id" class="row no-wrap items-start q-gutter-sm"
           :class="{ 'justify-end': message.direction === MailMessageDirection.Outgoing }">
           <q-avatar v-if="message.direction === MailMessageDirection.Incoming" color="grey-3" text-color="primary" size="36px">
             {{ getMessageAvatarLabel(message) }}
@@ -28,11 +28,11 @@
                 :tooltip="t('pages.receivingManagement.expand')" @click="onToggleMessage(message.id)" />
               <CommonBtn icon="reply" flat :tooltip="t('pages.receivingManagement.reply')" @click="replyComposer?.startReply(message)" />
             </div>
-            <div class="text-caption text-grey-7 ellipsis q-mt-xs">{{ formatMailAddressRoute(message) }}</div>
             <div v-if="!expandedMessageIds.has(message.id)" class="text-body2 ellipsis-2-lines q-mt-sm">
               {{ getMessagePreview(message, t('pages.receivingManagement.noPreview')) }}
             </div>
-            <MailBody v-else :message-id="message.id" class="q-mt-sm" @quote-selection-contextmenu="onQuoteSelection" />
+            <MailBody v-else :message-id="message.id" class="q-mt-sm"
+              @quote-selection-contextmenu="context => onMailBodyQuoteSelection(message, context)" />
             <div v-if="message.attachments.length" class="row q-gutter-xs q-mt-sm">
               <q-chip v-for="attachment in message.attachments" :key="attachment.id" dense square icon="attach_file">
                 {{ attachment.fileName }}
@@ -51,8 +51,9 @@
       <q-inner-loading :showing="isLoadingMessages" color="primary" />
     </q-scroll-area>
 
-    <ReplyComposer ref="replyComposer" :conversation="conversation" :messages="messages" @sent="emit('message-sent')" />
-    <q-menu ref="quoteMenu" anchor="center middle" self="center middle">
+    <ReplyComposer ref="replyComposer" :conversation="conversation" :messages="messages" @sent="emit('message-sent')"
+      @view-quoted-message="onViewQuotedMessage" />
+    <q-menu ref="quoteMenu" touch-position no-focus>
       <q-list dense class="q-pa-xs">
         <q-item clickable @click="onInsertSelectionQuote">
           <q-item-section avatar><q-icon name="format_quote" /></q-item-section>
@@ -73,15 +74,12 @@ import CreateTodoDialog from './CreateTodoDialog.vue'
 import MailBody from './MailBody.vue'
 import ReplyComposer from './ReplyComposer.vue'
 import TagManagerDialog from './TagManagerDialog.vue'
-import { formatMailAddressRoute, formatMailEmailRoute, getMessageAvatarLabel, getMessagePreview } from './mailMessagePresentation'
+import { formatMailEmailRoute, getMessageAvatarLabel, getMessagePreview } from './mailMessagePresentation'
 import { MailMessageDirection, type IMailConversation, type IMailMessage } from 'src/api/mailConversation'
 import { showComponentDialog, notifySuccess } from 'src/utils/dialog'
 import { formatDate } from 'src/utils/format'
 import { useI18n } from 'vue-i18n'
-
-interface ISelectionQuoteContext {
-  selectedText: string
-}
+import { useMailBodyQuoteMenu, type IMailBodyQuoteSelectionContext } from './useMailBodyQuoteMenu'
 
 const props = defineProps<{
   conversation?: IMailConversation
@@ -95,11 +93,11 @@ const emit = defineEmits<{
   'tags-saved': []
 }>()
 const { t } = useI18n()
+const timelineElement = ref<HTMLElement>()
 const selectedMessageIds = ref<number[]>([])
 const expandedMessageIds = ref(new Set<number>())
-const selectedQuoteText = ref('')
 const replyComposer = ref<InstanceType<typeof ReplyComposer>>()
-const quoteMenu = ref<{ show: () => void }>()
+const { quoteMenu, onInsertSelectionQuote, onQuoteSelection } = useMailBodyQuoteMenu(replyComposer)
 
 const participantTitle = computed(() => props.conversation?.participants.map(contact => contact.displayName || contact.email).join(', ') || '')
 const headerAddressRoute = computed(() => {
@@ -114,14 +112,17 @@ function onToggleMessage(messageId: number) {
   expandedMessageIds.value = expandedMessageIdsValue
 }
 
-function onQuoteSelection(context: ISelectionQuoteContext) {
-  selectedQuoteText.value = context.selectedText
-  quoteMenu.value?.show()
+function onMailBodyQuoteSelection(message: IMailMessage, context: IMailBodyQuoteSelectionContext) {
+  onQuoteSelection(message, context)
 }
 
-function onInsertSelectionQuote() {
-  replyComposer.value?.insertManualQuote(selectedQuoteText.value)
-  selectedQuoteText.value = ''
+async function onViewQuotedMessage(messageId: number) {
+  if (!props.messages.some(message => message.id === messageId)) return
+
+  if (!expandedMessageIds.value.has(messageId)) onToggleMessage(messageId)
+  await nextTick()
+  timelineElement.value?.querySelector<HTMLElement>(`[data-message-id="${messageId}"]`)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
 async function onManageTags() {
