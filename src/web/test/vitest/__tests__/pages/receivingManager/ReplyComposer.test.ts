@@ -90,6 +90,7 @@ const firstMessage: IMailMessage = {
   subject: 'First subject',
   occurredAtUtc: '2026-09-11T00:00:00Z',
   isRead: true,
+  hasThreadReplies: false,
   from: [],
   to: [],
   cc: [],

@@ -14,10 +14,21 @@ public interface IImapMessageContentService
         long mimePartId,
         CancellationToken cancellationToken = default
     );
+
+    Task<MailboxMessageHeaderMetadata?> GetMetadataAsync(
+        long userId,
+        long mailboxMessageId,
+        CancellationToken cancellationToken = default
+    );
 }
 
 public sealed record MailboxAttachmentContent(
     string FileName,
     string ContentType,
     MemoryStream Content
+);
+
+public sealed record MailboxMessageHeaderMetadata(
+    DateTimeOffset? DeclaredSentAt,
+    IReadOnlyList<string> ReceivedHeaders
 );

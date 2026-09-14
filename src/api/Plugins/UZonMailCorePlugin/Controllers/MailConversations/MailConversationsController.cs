@@ -75,6 +75,32 @@ public sealed class MailConversationsController(
             )
         ).ToSuccessResponse();
 
+    [HttpGet("messages/{conversationMessageId:long}/thread-neighbors")]
+    public async Task<ResponseResult<MailThreadNeighborsDto>> GetThreadNeighbors(
+        long conversationMessageId,
+        CancellationToken cancellationToken
+    ) =>
+        (
+            await queryService.GetThreadNeighborsAsync(
+                tokenService.GetUserSqlId(),
+                conversationMessageId,
+                cancellationToken
+            )
+        ).ToSuccessResponse();
+
+    [HttpGet("messages/{conversationMessageId:long}/metadata")]
+    public async Task<ResponseResult<MailMessageMetadataDto>> GetMetadata(
+        long conversationMessageId,
+        CancellationToken cancellationToken
+    ) =>
+        (
+            await queryService.GetMessageMetadataAsync(
+                tokenService.GetUserSqlId(),
+                conversationMessageId,
+                cancellationToken
+            )
+        ).ToSuccessResponse();
+
     [HttpGet("messages/{conversationMessageId:long}/attachments/{mimePartId:long}")]
     public async Task<IActionResult> DownloadAttachment(
         long conversationMessageId,

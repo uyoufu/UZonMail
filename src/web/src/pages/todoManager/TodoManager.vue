@@ -20,7 +20,7 @@
         </article>
         <div v-if="selectedTask.mailBranch.messages.length === 0" class="branch-empty"><q-icon name="call_split" size="40px" /><span>{{ t('pages.todoManagement.newThreadReady') }}</span></div>
       </div></q-scroll-area>
-      <section class="branch-composer"><q-input v-model="mailSubject" dense outlined :label="t('pages.receivingManagement.subject')" class="q-mb-sm" /><q-editor v-model="mailBody" min-height="100px" :placeholder="t('pages.receivingManagement.writeReply')" :toolbar="editorToolbar" /><div class="row justify-end q-mt-sm"><CommonBtn icon="send" :label="t('pages.receivingManagement.send')" :loading="sending" @click="onSendBranchMail" /></div></section>
+      <section class="branch-composer"><MailReplyEditor v-model:subject="mailSubject" v-model:html-body="mailBody" :is-sending="sending" @submit="onSendBranchMail" /></section>
     </main>
 
     <section v-if="selectedTask" class="detail-pane">
@@ -31,7 +31,14 @@
         <q-select v-model="taskDraft.status" outlined dense emit-value map-options :label="t('pages.todoManagement.status')" :options="statusOptions" />
         <q-select v-model="taskDraft.priority" outlined dense emit-value map-options :label="t('pages.todoManagement.priority')" :options="priorityOptions" />
         <q-input v-model="taskDraft.dueAtLocal" outlined dense type="datetime-local" :label="t('pages.todoManagement.dueAt')" />
-        <div v-if="selectedTask.mailBranch" class="source-info"><div class="text-caption text-grey-7">{{ t('pages.todoManagement.sourceMessages') }}</div><div>{{ selectedTask.mailBranch.sourceMessageIds.length }}</div></div>
+        <div v-if="selectedTask.mailBranch?.sourceMessages.length" class="source-info q-gutter-y-sm">
+          <div class="text-caption text-grey-7">{{ t('pages.todoManagement.sourceMessages') }}</div>
+          <div v-for="sourceMessage in selectedTask.mailBranch.sourceMessages" :key="sourceMessage.id" class="row no-wrap items-center q-gutter-sm">
+            <div class="col min-width-0"><div class="ellipsis">{{ sourceMessage.subject || t('pages.receivingManagement.noSubject') }}</div>
+              <div class="text-caption text-grey-7 ellipsis">{{ formatSourceSender(sourceMessage) }} · {{ formatDate(sourceMessage.occurredAtUtc) }}</div></div>
+            <CommonBtn icon="info" flat :tooltip="t('pages.receivingManagement.mailInformation')" @click="onShowSourceMailMetadata(sourceMessage.id)" />
+          </div>
+        </div>
         <CommonBtn icon="save" class="full-width" :label="t('common.save')" @click="onSave" />
       </div>
     </section>
@@ -44,10 +51,12 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import CommonBtn from 'src/components/buttons/CommonBtn.vue'
-import MailBody from 'src/pages/receivingManager/components/MailBody.vue'
-import { MailMessageDirection, MailReplyMode } from 'src/api/mailConversation'
+import MailBody from 'src/components/mailMessage/MailBody.vue'
+import MailMessageMetadataDialog from 'src/components/mailMessage/MailMessageMetadataDialog.vue'
+import MailReplyEditor from 'src/components/mailMessage/MailReplyEditor.vue'
+import { MailMessageDirection, MailReplyMode, type IMailMessage } from 'src/api/mailConversation'
 import { createTodoTask, deleteTodoTask, getTodoTasks, sendTodoMailMessage, TodoTaskKind, TodoTaskPriority, TodoTaskStatus, updateTodoTask, type ITodoTask } from 'src/api/todoTask'
-import { confirmOperation, notifyError, notifySuccess } from 'src/utils/dialog'
+import { confirmOperation, notifyError, notifySuccess, showComponentDialog } from 'src/utils/dialog'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -59,7 +68,6 @@ const sending = ref(false)
 const mailSubject = ref('')
 const mailBody = ref('')
 const showCreateDialog = ref(false)
-const editorToolbar = [['bold', 'italic', 'underline'], ['unordered', 'ordered'], ['link'], ['undo', 'redo']]
 const createDraft = () => ({ title: '', description: '', status: TodoTaskStatus.Pending, priority: TodoTaskPriority.Normal, dueAtLocal: '' })
 const taskDraft = ref(createDraft())
 const newTask = ref(createDraft())
@@ -80,8 +88,12 @@ async function onSendBranchMail () {
   sending.value = true
   try { await sendTodoMailMessage(selectedTask.value.id, { replyMode: MailReplyMode.ReplyAll, subject: mailSubject.value, htmlBody: mailBody.value, attachmentFileUsageIds: [] }); mailBody.value = ''; await loadTasks(selectedTask.value.id); notifySuccess(t('pages.receivingManagement.sent')) } finally { sending.value = false }
 }
+async function onShowSourceMailMetadata (messageId: number) {
+  await showComponentDialog(MailMessageMetadataDialog, { messageId })
+}
 function toRequest (draft: ReturnType<typeof createDraft>) { return { title: draft.title, description: draft.description, status: draft.status, priority: draft.priority, dueAtUtc: draft.dueAtLocal ? new Date(draft.dueAtLocal).toISOString() : undefined } }
 function formatDate (date: string) { return dayjs(date).format('YYYY-MM-DD HH:mm') }
+function formatSourceSender (message: IMailMessage) { return message.from.map(address => address.displayName || address.email).join(', ') }
 function priorityColor (priority: TodoTaskPriority) { return ({ [TodoTaskPriority.Low]: 'grey-7', [TodoTaskPriority.Normal]: 'primary', [TodoTaskPriority.High]: 'orange-8', [TodoTaskPriority.Urgent]: 'negative' })[priority] }
 function priorityLabel (priority: TodoTaskPriority) { return t(`pages.todoManagement.priority${TodoTaskPriority[priority]}`) }
 onMounted(() => loadTasks())

@@ -10,6 +10,7 @@ const incomingMessage: IMailMessage = {
   previewText: 'The release is ready.',
   occurredAtUtc: '2026-09-10T08:30:00Z',
   isRead: false,
+  hasThreadReplies: false,
   from: [{ email: 'sender@example.com', displayName: 'Sender' }],
   to: [{ email: 'recipient@example.com', displayName: 'Recipient' }],
   cc: [],

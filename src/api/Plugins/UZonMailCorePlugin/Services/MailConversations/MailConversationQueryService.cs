@@ -1,3 +1,5 @@
+using System.Net;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using UzonMail.CorePlugin.Controllers.MailConversations.DTOs;
 using UzonMail.CorePlugin.Services.EmailReceiving;
@@ -19,6 +21,11 @@ public sealed class MailConversationQueryService(
     IImapMessageContentService messageContentService
 ) : IScopedService
 {
+    private static readonly Regex IpAddressPattern = new(
+        @"(?<![0-9A-Fa-f:.])(?<ip>[0-9A-Fa-f:.]+)(?![0-9A-Fa-f:.])",
+        RegexOptions.Compiled
+    );
+
     public async Task<List<MailConversationListItemDto>> GetConversationsAsync(
         long userId,
         long? emailAccountId,
@@ -99,21 +106,151 @@ public sealed class MailConversationQueryService(
                 x.OccurredAtUtc < beforeAtUtc || (x.OccurredAtUtc == beforeAtUtc && x.Id < cursorId)
             );
         }
-        var messages = await query
+        var messages = await IncludeMessageDetails(query)
             .OrderByDescending(x => x.OccurredAtUtc)
             .ThenByDescending(x => x.Id)
             .Take(limit)
-            .Include(x => x.IncomingMailMessage)
-            .ThenInclude(x => x!.Addresses)
-            .Include(x => x.IncomingMailMessage)
-            .ThenInclude(x => x!.MimeParts)
-            .Include(x => x.SendingItem)
-            .ThenInclude(x => x!.Attachments!)
-            .ThenInclude(x => x.FileObject)
-            .AsSplitQuery()
             .ToListAsync(cancellationToken);
         messages.Reverse();
-        return messages.Select(ToMessageDto).ToList();
+        return await ToMessageDtosAsync(messages, cancellationToken);
+    }
+
+    /// <summary>
+    /// 获取当前邮件在真实回复链中的直接父邮件和直接回复。
+    /// </summary>
+    public async Task<MailThreadNeighborsDto> GetThreadNeighborsAsync(
+        long userId,
+        long conversationMessageId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var currentMessage =
+            await db
+                .MailConversationMessages.AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.Id == conversationMessageId && x.MailConversation.UserId == userId,
+                    cancellationToken
+                ) ?? throw new KnownException("会话邮件不存在");
+
+        var previousMessage = currentMessage.ReplyToConversationMessageId is > 0
+            ? await IncludeMessageDetails(
+                    db.MailConversationMessages.AsNoTracking().Where(x =>
+                        x.Id == currentMessage.ReplyToConversationMessageId
+                        && x.MailConversationId == currentMessage.MailConversationId
+                    )
+                )
+                .FirstOrDefaultAsync(cancellationToken)
+            : null;
+        var nextMessages = await IncludeMessageDetails(
+                db.MailConversationMessages.AsNoTracking().Where(x =>
+                    x.MailConversationId == currentMessage.MailConversationId
+                    && x.ReplyToConversationMessageId == currentMessage.Id
+                )
+            )
+            .OrderBy(x => x.OccurredAtUtc)
+            .ThenBy(x => x.Id)
+            .ToListAsync(cancellationToken);
+        var neighborMessages = previousMessage is null
+            ? nextMessages
+            : new[] { previousMessage }.Concat(nextMessages).ToList();
+        var neighborsById = (await ToMessageDtosAsync(neighborMessages, cancellationToken))
+            .ToDictionary(x => x.Id);
+        return new MailThreadNeighborsDto(
+            previousMessage is null ? null : neighborsById[previousMessage.Id],
+            nextMessages.Select(x => neighborsById[x.Id]).ToList()
+        );
+    }
+
+    /// <summary>
+    /// 获取不包含正文和附件的邮件原始头元数据。
+    /// </summary>
+    public async Task<MailMessageMetadataDto> GetMessageMetadataAsync(
+        long userId,
+        long conversationMessageId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var message =
+            await db
+                .MailConversationMessages.AsNoTracking()
+                .Include(x => x.IncomingMailMessage)
+                .ThenInclude(x => x!.Addresses)
+                .Include(x => x.IncomingMailMessage)
+                .ThenInclude(x => x!.References)
+                .Include(x => x.SendingItem)
+                .FirstOrDefaultAsync(
+                    x => x.Id == conversationMessageId && x.MailConversation.UserId == userId,
+                    cancellationToken
+                ) ?? throw new KnownException("会话邮件不存在");
+
+        var incoming = message.IncomingMailMessage;
+        if (incoming is not null)
+        {
+            MailboxMessageHeaderMetadata? headerMetadata = null;
+            try
+            {
+                headerMetadata = await messageContentService.GetMetadataAsync(
+                    userId,
+                    incoming.Id,
+                    cancellationToken
+                );
+            }
+            catch (KnownException)
+            {
+                // 基础元数据已经在本地保留，原始邮件不可访问时仅缺少投递链和时区。
+            }
+
+            return new MailMessageMetadataDto(
+                message.Id,
+                message.Direction,
+                incoming.Subject,
+                CreateAddressList(incoming.Addresses, IncomingMailAddressType.From),
+                CreateAddressList(incoming.Addresses, IncomingMailAddressType.Sender),
+                CreateAddressList(incoming.Addresses, IncomingMailAddressType.ReplyTo),
+                CreateAddressList(incoming.Addresses, IncomingMailAddressType.To),
+                CreateAddressList(incoming.Addresses, IncomingMailAddressType.Cc),
+                incoming.SentAtUtc,
+                incoming.ReceivedAtUtc,
+                incoming.Size,
+                headerMetadata?.DeclaredSentAt?.ToString("zzz"),
+                incoming.InternetMessageId,
+                incoming
+                    .References.Where(x => x.ReferenceType == IncomingMailReferenceType.InReplyTo)
+                    .OrderBy(x => x.Position)
+                    .Select(x => x.InternetMessageId)
+                    .ToList(),
+                incoming
+                    .References.Where(x => x.ReferenceType == IncomingMailReferenceType.References)
+                    .OrderBy(x => x.Position)
+                    .Select(x => x.InternetMessageId)
+                    .ToList(),
+                headerMetadata is null
+                    ? []
+                    : CreateDeliveryHops(headerMetadata.ReceivedHeaders)
+            );
+        }
+
+        var sending = message.SendingItem;
+        return new MailMessageMetadataDto(
+            message.Id,
+            message.Direction,
+            sending?.Subject,
+            CreateAddressList(sending?.SenderEmail),
+            [],
+            [],
+            CreateAddressList(sending?.Recipients),
+            CreateAddressList(sending?.CC),
+            message.OccurredAtUtc,
+            null,
+            null,
+            null,
+            sending?.InternetMessageId,
+            string.IsNullOrWhiteSpace(sending?.InReplyToInternetMessageId)
+                ? []
+                : [sending.InReplyToInternetMessageId],
+            sending?.ReferenceInternetMessageIds ?? [],
+            []
+        );
     }
 
     public async Task<MailMessageContentDto> GetMessageContentAsync(
@@ -239,7 +376,62 @@ public sealed class MailConversationQueryService(
                 .ToList()
         );
 
-    internal static MailConversationMessageDto ToMessageDto(MailConversationMessage message)
+    private async Task<List<MailConversationMessageDto>> ToMessageDtosAsync(
+        IReadOnlyList<MailConversationMessage> messages,
+        CancellationToken cancellationToken
+    )
+    {
+        if (messages.Count == 0)
+            return [];
+
+        var messageIds = messages.Select(x => x.Id).ToList();
+        var messageIdsWithThreadReplies = await db
+            .MailConversationMessages.AsNoTracking()
+            .Where(x =>
+                x.ReplyToConversationMessageId.HasValue
+                && messageIds.Contains(x.ReplyToConversationMessageId.Value)
+            )
+            .Select(x => x.ReplyToConversationMessageId!.Value)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+        var replyParentIds = messageIdsWithThreadReplies.ToHashSet();
+        return messages
+            .Select(x => ToMessageDto(x, replyParentIds.Contains(x.Id)))
+            .ToList();
+    }
+
+    private static IQueryable<MailConversationMessage> IncludeMessageDetails(
+        IQueryable<MailConversationMessage> query
+    ) =>
+        query
+            .Include(x => x.IncomingMailMessage)
+            .ThenInclude(x => x!.Addresses)
+            .Include(x => x.IncomingMailMessage)
+            .ThenInclude(x => x!.MimeParts)
+            .Include(x => x.SendingItem)
+            .ThenInclude(x => x!.Attachments!)
+            .ThenInclude(x => x.FileObject)
+            .AsSplitQuery();
+
+    private static List<MailDeliveryHopDto> CreateDeliveryHops(
+        IReadOnlyList<string> receivedHeaders
+    ) =>
+        receivedHeaders
+            .Select(x => new MailDeliveryHopDto(x, ExtractIpAddresses(x)))
+            .ToList();
+
+    private static List<string> ExtractIpAddresses(string receivedHeader) =>
+        IpAddressPattern
+            .Matches(receivedHeader)
+            .Select(x => x.Groups["ip"].Value)
+            .Where(x => IPAddress.TryParse(x, out _))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+    internal static MailConversationMessageDto ToMessageDto(
+        MailConversationMessage message,
+        bool hasThreadReplies = false
+    )
     {
         var incoming = message.IncomingMailMessage;
         var sending = message.SendingItem;
@@ -249,6 +441,8 @@ public sealed class MailConversationQueryService(
             incoming?.Subject ?? sending?.Subject,
             message.OccurredAtUtc,
             message.IsRead,
+            message.ReplyToConversationMessageId,
+            hasThreadReplies,
             sending?.Status,
             incoming is null
                 ? CreateAddressList(sending?.SenderEmail)

@@ -20,7 +20,7 @@ public sealed record TodoMailBranchDto(
     long Id,
     long SourceConversationId,
     string BranchSubject,
-    IReadOnlyList<long> SourceMessageIds,
+    IReadOnlyList<MailConversationMessageDto> SourceMessages,
     IReadOnlyList<MailConversationMessageDto> Messages
 );
 
@@ -36,6 +36,6 @@ public class UpsertTodoTaskRequest
 public sealed class CreateMailTodoTaskRequest : UpsertTodoTaskRequest
 {
     public long SourceConversationId { get; set; }
-    public List<long> SourceMessageIds { get; set; } = [];
+    public long SourceMessageId { get; set; }
     public string? BranchSubject { get; set; }
 }

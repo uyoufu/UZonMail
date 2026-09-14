@@ -8,7 +8,7 @@
       </template>
       <template #after>
         <ConversationTimeline :conversation="selectedConversation" :messages="messages" :is-loading-messages="isLoadingMessages"
-          :is-compact="false" @message-sent="onMessageSent" @tags-saved="onTagsSaved" />
+          :is-compact="false" @message-sent="onMessageSent" @message-loaded="onTimelineMessageLoaded" @tags-saved="onTagsSaved" />
       </template>
     </q-splitter>
     <template v-else>
@@ -17,7 +17,7 @@
         :is-loading="isLoadingConversations" :is-syncing="isSyncing" @select="onConversationSelect" @sync="onSync" />
       <ConversationTimeline v-show="mobileView === 'conversation'" :conversation="selectedConversation" :messages="messages"
         :is-loading-messages="isLoadingMessages" :is-compact="true" @back="mobileView = 'list'" @message-sent="onMessageSent"
-        @tags-saved="onTagsSaved" />
+        @message-loaded="onTimelineMessageLoaded" @tags-saved="onTagsSaved" />
     </template>
   </PageContainer>
 </template>
@@ -110,6 +110,14 @@ async function onMessageSent() {
   if (!selectedConversation.value) return
   messages.value = (await getMailMessages(selectedConversation.value.id)).data
   await loadConversations()
+}
+
+function onTimelineMessageLoaded(message: IMailMessage) {
+  if (messages.value.some(value => value.id === message.id)) return
+  messages.value = [...messages.value, message].sort((left, right) => {
+    const occurredAtDifference = new Date(left.occurredAtUtc).getTime() - new Date(right.occurredAtUtc).getTime()
+    return occurredAtDifference || left.id - right.id
+  })
 }
 
 async function onTagsSaved() {

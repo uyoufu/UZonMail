@@ -20,18 +20,18 @@ import { useDialogPluginComponent } from 'quasar'
 import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import TitleBar from 'src/components/windowLike/TitleBar.vue'
 import { createMailTodoTask, TodoTaskPriority, TodoTaskStatus } from 'src/api/todoTask'
-import type { IMailConversation } from 'src/api/mailConversation'
+import type { IMailConversation, IMailMessage } from 'src/api/mailConversation'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   conversation: IMailConversation
-  messageIds: number[]
+  message: IMailMessage
 }>()
 defineEmits([...useDialogPluginComponent.emits])
 
 const { t } = useI18n()
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
-const todoTitle = ref(props.conversation.displayTitle)
+const todoTitle = ref(props.message.subject || props.conversation.displayTitle)
 const todoDescription = ref('')
 const todoDueAt = ref('')
 
@@ -44,7 +44,7 @@ async function onCreate() {
     priority: TodoTaskPriority.Normal,
     dueAtUtc: todoDueAt.value ? new Date(todoDueAt.value).toISOString() : undefined,
     sourceConversationId: props.conversation.id,
-    sourceMessageIds: props.messageIds,
+    sourceMessageId: props.message.id,
     branchSubject: todoTitle.value.trim()
   })
   onDialogOK()

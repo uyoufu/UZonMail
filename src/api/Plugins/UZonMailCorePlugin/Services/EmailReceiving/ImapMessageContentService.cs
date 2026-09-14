@@ -116,6 +116,41 @@ public sealed class ImapMessageContentService(
         return new MailboxAttachmentContent(fileName, contentType, stream);
     }
 
+    /// <summary>
+    /// 读取邮件原始头中的展示元数据，不缓存正文或改变邮件已读状态。
+    /// </summary>
+    public async Task<MailboxMessageHeaderMetadata?> GetMetadataAsync(
+        long userId,
+        long mailboxMessageId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var mailboxMessage = await GetOwnedMessageAsync(
+            userId,
+            mailboxMessageId,
+            cancellationToken
+        );
+        if (!mailboxMessage.Locations.Any(x => x.IsPresentOnServer))
+            return null;
+
+        using var connection = await OpenMessageAsync(mailboxMessage, false, cancellationToken);
+        var summary = (
+            await connection.Folder.FetchAsync(
+                [connection.UniqueId],
+                MessageSummaryItems.Envelope | MessageSummaryItems.Headers,
+                cancellationToken
+            )
+        ).FirstOrDefault();
+        if (summary is null)
+            return null;
+        var declaredSentAt = summary.Envelope?.Date;
+        var receivedHeaders = summary.Headers?
+            .Where(x => x.Field.Equals("Received", StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.Value)
+            .ToList() ?? [];
+        return new MailboxMessageHeaderMetadata(declaredSentAt, receivedHeaders);
+    }
+
     private async Task<IncomingMailMessage> GetOwnedMessageAsync(
         long userId,
         long mailboxMessageId,

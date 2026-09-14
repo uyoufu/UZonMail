@@ -40,12 +40,43 @@ public sealed record MailConversationMessageDto(
     string? Subject,
     DateTime OccurredAtUtc,
     bool IsRead,
+    long? ReplyToMessageId,
+    bool HasThreadReplies,
     SendingItemStatus? SendingStatus,
     IReadOnlyList<MailAddressDto> From,
     IReadOnlyList<MailAddressDto> To,
     IReadOnlyList<MailAddressDto> Cc,
     string? PreviewText,
     IReadOnlyList<MailAttachmentDto> Attachments
+);
+
+public sealed record MailThreadNeighborsDto(
+    MailConversationMessageDto? PreviousMessage,
+    IReadOnlyList<MailConversationMessageDto> NextMessages
+);
+
+public sealed record MailDeliveryHopDto(
+    string ReceivedHeader,
+    IReadOnlyList<string> IpAddresses
+);
+
+public sealed record MailMessageMetadataDto(
+    long ConversationMessageId,
+    MailMessageDirection Direction,
+    string? Subject,
+    IReadOnlyList<MailAddressDto> From,
+    IReadOnlyList<MailAddressDto> Sender,
+    IReadOnlyList<MailAddressDto> ReplyTo,
+    IReadOnlyList<MailAddressDto> To,
+    IReadOnlyList<MailAddressDto> Cc,
+    DateTime? SentAtUtc,
+    DateTime? ReceivedAtUtc,
+    long? Size,
+    string? SenderTimeZoneOffset,
+    string? InternetMessageId,
+    IReadOnlyList<string> InReplyToMessageIds,
+    IReadOnlyList<string> ReferenceMessageIds,
+    IReadOnlyList<MailDeliveryHopDto> DeliveryHops
 );
 
 public sealed record MailMessageContentDto(

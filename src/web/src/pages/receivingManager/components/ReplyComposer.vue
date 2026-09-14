@@ -5,8 +5,8 @@
     </div>
 
     <section v-if="replyComposerState === ReplyComposerState.expanded" ref="replyComposerElement" class="q-pa-sm">
-      <div class="row items-center q-gutter-sm q-mb-sm">
-        <q-input v-model="draftSubject" dense outlined hide-bottom-space class="col min-width-0" :label="t('pages.receivingManagement.subject')" />
+      <MailReplyEditor ref="replyEditor" v-model:subject="draftSubject" v-model:html-body="draftBody" :is-sending="isSending" @submit="onSend">
+        <template #actions>
         <q-fab v-if="quotedMessage" v-model="isQuoteActionsOpen" color="primary" icon="format_quote" direction="down"
           vertical-actions-align="right" padding="xs">
           <q-fab-action icon="remove_circle_outline" :label="t('pages.receivingManagement.removeQuote')" @click="onRemoveQuote" />
@@ -16,22 +16,17 @@
         <q-btn-toggle v-model="replyMode" dense unelevated toggle-color="primary" :options="replyOptions" />
         <CommonBtn icon="article" flat :tooltip="t('pages.receivingManagement.insertTemplate')" @click="onInsertTemplate" />
         <CommonBtn icon="keyboard_arrow_down" flat :tooltip="t('pages.receivingManagement.collapseReply')" @click="onCollapseReply" />
-      </div>
-
-      <div class="reply-composer__editor relative-position">
-        <q-editor ref="editorRef" v-model="draftBody" min-height="110px" :placeholder="t('pages.receivingManagement.writeReply')"
-          :toolbar="editorToolbar" />
-        <CommonBtn icon="send" class="reply-composer__send" :loading="isSending"
-          :tooltip="t('pages.receivingManagement.send')" @click="onSend" />
-      </div>
+        </template>
+      </MailReplyEditor>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { morph, type QEditor } from 'quasar'
+import { morph } from 'quasar'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import CommonBtn from 'src/components/buttons/CommonBtn.vue'
+import MailReplyEditor from 'src/components/mailMessage/MailReplyEditor.vue'
 import TemplatePickerDialog from './TemplatePickerDialog.vue'
 import { createFullMessageQuoteHtml, createManualQuoteHtml, getMailContentPlainText } from './mailQuote'
 import { getMailContent, MailReplyMode, sendMailConversationMessage, type IMailConversation, type IMailMessage } from 'src/api/mailConversation'
@@ -64,7 +59,7 @@ const emit = defineEmits<{
   'view-quoted-message': [messageId: number]
 }>()
 const { t } = useI18n()
-const editorRef = ref<QEditor>()
+const replyEditor = ref<InstanceType<typeof MailReplyEditor>>()
 const replyComposerElement = ref<HTMLElement>()
 const collapsedReplyElement = ref<HTMLElement>()
 const replyComposerState = ref<ReplyComposerState>(ReplyComposerState.hidden)
@@ -77,7 +72,6 @@ const replyToMessageId = ref<number>()
 const quotedMessageId = ref<number>()
 const isSending = ref(false)
 const isQuoteActionsOpen = ref(false)
-const editorToolbar = [['bold', 'italic', 'underline'], ['unordered', 'ordered'], ['link'], ['undo', 'redo']]
 const replyOptions = computed(() => [
   { label: t('pages.receivingManagement.reply'), value: MailReplyMode.Reply },
   { label: t('pages.receivingManagement.replyAll'), value: MailReplyMode.ReplyAll }
@@ -95,15 +89,15 @@ async function startReply(message: IMailMessage): Promise<void> {
   quotedMessageId.value = message.id
   replyComposerState.value = ReplyComposerState.expanded
   await nextTick()
-  editorRef.value?.focus()
+  replyEditor.value?.focus()
 }
 
 async function insertManualQuote(message: IMailMessage, selectedText: string): Promise<void> {
   if (!selectedText.trim()) return
 
   await startReply(message)
-  editorRef.value?.runCmd('insertHTML', createManualQuoteHtml(selectedText))
-  editorRef.value?.focus()
+  replyEditor.value?.insertHtml(createManualQuoteHtml(selectedText))
+  replyEditor.value?.focus()
 }
 
 function onCollapseReply() {
@@ -172,7 +166,7 @@ async function getQuotePreviewTooltip(): Promise<string[]> {
 async function onInsertTemplate() {
   const result = await showComponentDialog<string>(TemplatePickerDialog)
   if (!result.ok || !result.data) return
-  editorRef.value?.runCmd('insertHTML', result.data)
+  replyEditor.value?.insertHtml(result.data)
 }
 
 async function onSend() {

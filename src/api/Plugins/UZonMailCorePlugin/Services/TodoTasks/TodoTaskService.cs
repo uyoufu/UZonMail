@@ -56,17 +56,16 @@ public sealed class TodoTaskService(SqlContext db) : IScopedService
         CancellationToken cancellationToken = default
     )
     {
-        var sourceMessageIds = request.SourceMessageIds.Where(x => x > 0).Distinct().ToList();
-        if (sourceMessageIds.Count == 0)
-            throw new KnownException("请至少选择一封来源邮件");
-        var sourceMessages = await db
+        if (request.SourceMessageId <= 0)
+            throw new KnownException("请选择来源邮件");
+        var sourceMessage = await db
             .MailConversationMessages.Where(x =>
-                sourceMessageIds.Contains(x.Id)
+                x.Id == request.SourceMessageId
                 && x.MailConversationId == request.SourceConversationId
                 && x.MailConversation.UserId == userId
             )
-            .ToListAsync(cancellationToken);
-        if (sourceMessages.Count != sourceMessageIds.Count)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (sourceMessage is null)
             throw new KnownException("来源邮件无效或不属于当前会话");
         var task = CreateTask(userId, organizationId, TodoTaskKind.MailFollowUp, request);
         var branch = new TodoMailBranch
@@ -76,9 +75,13 @@ public sealed class TodoTaskService(SqlContext db) : IScopedService
             BranchSubject = string.IsNullOrWhiteSpace(request.BranchSubject)
                 ? task.Title
                 : request.BranchSubject.Trim(),
-            SourceMessages = sourceMessageIds
-                .Select(x => new TodoMailBranchSourceMessage { MailConversationMessageId = x })
-                .ToList(),
+            SourceMessages =
+            [
+                new TodoMailBranchSourceMessage
+                {
+                    MailConversationMessageId = sourceMessage.Id,
+                },
+            ],
         };
         task.MailBranch = branch;
         db.TodoTasks.Add(task);
@@ -128,6 +131,20 @@ public sealed class TodoTaskService(SqlContext db) : IScopedService
             .Where(x => x.UserId == userId)
             .Include(x => x.MailBranch)
             .ThenInclude(x => x!.SourceMessages)
+            .ThenInclude(x => x.MailConversationMessage)
+            .ThenInclude(x => x.IncomingMailMessage)
+            .ThenInclude(x => x!.Addresses)
+            .Include(x => x.MailBranch)
+            .ThenInclude(x => x!.SourceMessages)
+            .ThenInclude(x => x.MailConversationMessage)
+            .ThenInclude(x => x.IncomingMailMessage)
+            .ThenInclude(x => x!.MimeParts)
+            .Include(x => x.MailBranch)
+            .ThenInclude(x => x!.SourceMessages)
+            .ThenInclude(x => x.MailConversationMessage)
+            .ThenInclude(x => x.SendingItem)
+            .ThenInclude(x => x!.Attachments!)
+            .ThenInclude(x => x.FileObject)
             .Include(x => x.MailBranch)
             .ThenInclude(x => x!.Messages)
             .ThenInclude(x => x.MailConversationMessage)
@@ -192,7 +209,10 @@ public sealed class TodoTaskService(SqlContext db) : IScopedService
                     task.MailBranch.Id,
                     task.MailBranch.SourceConversationId,
                     task.MailBranch.BranchSubject,
-                    task.MailBranch.SourceMessages.Select(x => x.MailConversationMessageId)
+                    task.MailBranch.SourceMessages.OrderBy(x => x.MailConversationMessage.OccurredAtUtc)
+                        .Select(x =>
+                            MailConversationQueryService.ToMessageDto(x.MailConversationMessage)
+                        )
                         .ToList(),
                     task.MailBranch.Messages.OrderBy(x => x.MailConversationMessage.OccurredAtUtc)
                         .Select(x =>
