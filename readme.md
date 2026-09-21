@@ -104,7 +104,7 @@ Compared to other bulk email software on the market, UzonMail's advantages mainl
 
 1. Windows
 2. Windows Server
-3. Linux
+3. [Linux]()
 4. Docker
 5. macOS
 
