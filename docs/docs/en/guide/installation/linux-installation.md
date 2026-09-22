@@ -3,11 +3,7 @@ title: Linux
 icon: fab fa-linux
 order: 5
 description: Installation Guide for Linux-Based systems
-permalink: /en/guide/installation/linux
----
-
-# Installation Guide for Linux-Based systems
-
+permalink: /en/guide/installation/linux-installation
 ---
 
 ## For new users
@@ -19,8 +15,6 @@ permalink: /en/guide/installation/linux
 > Select the latest Linux build and download the official Linux build
 
 > Mostly **uzonmail-service-linux-x64**
-
----
 
 ## Once Downloaded
 
@@ -63,8 +57,6 @@ ls
 ```bash
 sudo python3 uzonmail_linux_install.py --install
 ```
-
----
 
 ## Installation
 
@@ -210,7 +202,5 @@ Open http://localhost:22345 to continue setup.
 ```
 
 > or ctrl + click to open on your browser
-
----
 
 This document was contributed by [Contractor-x](https://github.com/Contractor-x) for the great work!
