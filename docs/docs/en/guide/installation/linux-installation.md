@@ -1,52 +1,76 @@
+---
+title: Linux
+icon: fab fa-linux
+order: 5
+description: Installation Guide for Linux-Based systems
+permalink: /en/guide/installation/linux
+---
+
 # Installation Guide for Linux-Based systems
 
 ---
-## For new users 
+
+## For new users
+
 > Download the latest version from the official website [UzonCloud](https://uzonmail.uzoncloud.com/en/)
 
-<img src="https://github.com/Contractor-x/UZonMail/blob/master/docs/linux-installation/Screenshot%20From%202026-09-21%2009-24-24.png" alt="Download" width="400"/>
+<img src="https://uzonmail.uzoncloud.com/public/screenshot/download-list.png" alt="Download" width="400"/>
 
 > Select the latest Linux build and download the official Linux build
 
 > Mostly **uzonmail-service-linux-x64**
+
 ---
 
 ## Once Downloaded
+
 - Go to the Downloaded ZIP in the Downloads Folder
-> on Terminal:
+  > on Terminal:
+
 ```bash
 cd Downloads
 ```
+
 - extract the ZIP and save in a folder
-> using Terminal (Use the folder name which can be seen by running "ls"):
-``` bash
-tar -xzf filename.tar.gz 
+  > using Terminal (Use the folder name which can be seen by running "ls"):
+
+```bash
+tar -xzf filename.tar.gz
 ```
+
 ### Open terminal shell at the the directory roots
 
--  Head to the downloads  directory
+- Head to the downloads directory
+
 ```bash
 cd Downloads
 ```
- 
 
 - move to the uzonmail folder
-  
- ```bash
+
+```bash
 cd uzonmail-service-linux-x64-0.23.6.0
 ```
-- List all the active files 
-``` bash
-ls 
+
+- List all the active files
+
+```bash
+ls
 ```
+
 - run this to install system dependencies
+
 ```bash
 sudo python3 uzonmail_linux_install.py --install
- ```
+```
+
 ---
-## Installation 
+
+## Installation
+
 - Once you have already ran the command and see this. **Click Enter**
-``` bash
+
+```bash
 UzonMail Linux installer - install
 This tool can download UzonMail and the required .NET runtimes over HTTPS.
 It manages /var/www/uzonmail and /var/lib/uzonmail-installer.
@@ -54,20 +78,23 @@ It manages system account 'uzonmail' and systemd unit /etc/systemd/system/uzon-m
 Backups are preserved under /var/backups/uzonmail unless another path is selected.
 It does not change firewall rules or remove shared .NET runtimes during uninstall.
 
-Base URL [http://localhost:22345]: 
+Base URL [http://localhost:22345]:
 ```
+
 > click enter
 
 - You would be prompted to add an admin username and password
 
-``` bash
-Administrator username [admin]: 
+```bash
+Administrator username [admin]:
 Administrator password [press Enter to reuse the saved/default password]:
 ```
+
 > click enter when done
 
-- Allow the application to install Locally 
-```bash 
+- Allow the application to install Locally
+
+```bash
 nstallation settings:
   Base URL: http://localhost:22345
   Administrator: Contractor
@@ -84,18 +111,21 @@ Reading the latest release metadata...
    Downloaded 81%
    Downloaded 93%
    Downloaded 100%
-   ```
+```
+
 - **Allow** it to be installed locally
+
 ```bash
 Install UzonMail 0.23.6.0 at /var/www/uzonmail using these settings [y/N]: y
 ```
+
 - Let it fully install (Preview of how it looks on my terminal)
-   
+
 ```text
  Downloaded 100%
    Downloaded 100%
 
-Import the Microsoft dotnet-install signing key 
+Import the Microsoft dotnet-install signing key
    gpg --homedir /tmp/uzonmail-installer-x4e68o2t/gnupg --batch --import /tmp/uzonmail-installer-x4e68o2t/dotnet-install.asc
 gpg: keybox '/tmp/uzonmail-installer-x4e68o2t/gnupg/pubring.kbx' created
 gpg: /tmp/uzonmail-installer-x4e68o2t/gnupg/trustdb.gpg: trustdb created
@@ -168,17 +198,19 @@ Created symlink '/etc/systemd/system/multi-user.target.wants/uzon-mail.service' 
 -> Record installation state at /var/lib/uzonmail-installer/install-state.json
    install -m 0640 -o root -g root /tmp/uzonmail-installer-x4e68o2t/install-state.json /var/lib/uzonmail-installer/install-state.json
 ```
+
 - Installation complete dialog
-  ``` bash 
+  ```bash
   UzonMail 0.23.6.0 was installed successfully.
   ```
 - Open Uzonmail on your browser
-``` bash
+
+```bash
 Open http://localhost:22345 to continue setup.
 ```
+
 > or ctrl + click to open on your browser
+
 ---
 
-[Official repo](https://github.com/uyoufu/UZonMail)
-
-[Support the dev](https://github.com/uyoufu)
+This document was contributed by [Contractor-x](https://github.com/Contractor-x) for the great work!
