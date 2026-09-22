@@ -31,7 +31,7 @@
     <div class="q-px-sm q-pb-sm">
       <q-btn-toggle v-model="unreadOnly" dense unelevated spread toggle-color="primary" :options="unreadOptions" />
     </div>
-    <q-scroll-area class="col height-0">
+    <div class="col height-0 relative-position hover-scroll">
       <q-list dense class="q-px-xs">
         <q-item v-for="conversation in conversations" :key="conversation.id" clickable class="border-radius-4 q-mb-xs"
           :active="conversation.id === selectedConversationId" active-class="bg-blue-1 text-primary" @click="emit('select', conversation)">
@@ -56,7 +56,7 @@
         </q-item>
       </q-list>
       <q-inner-loading :showing="isLoading" color="primary" />
-    </q-scroll-area>
+    </div>
   </aside>
 </template>
 

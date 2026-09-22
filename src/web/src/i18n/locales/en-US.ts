@@ -214,6 +214,9 @@ export default {
   },
   components: {
     abortUpload: 'Abort upload',
+    mailBodyQuoteMenu: {
+      quoteSelection: 'Quote in message'
+    },
     calculatingFileHash: 'Calculating hash for {fileName}',
     cherryBlossomRomanceTheme: 'Cherry Blossom Romance',
     clear: 'Clear',

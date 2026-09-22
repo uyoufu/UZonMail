@@ -27,8 +27,10 @@ import { morph } from 'quasar'
 import AsyncTooltip from 'src/components/asyncTooltip/AsyncTooltip.vue'
 import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import MailReplyEditor from 'src/components/mailMessage/MailReplyEditor.vue'
+import { createManualQuoteHtml, createReplySubject, hasEditorContent } from 'src/components/mailMessage/mailReplyContent'
+import { useMailMessageDraftCache } from 'src/components/mailMessage/useMailMessageDraftCache'
 import TemplatePickerDialog from './TemplatePickerDialog.vue'
-import { createFullMessageQuoteHtml, createManualQuoteHtml, getMailContentPlainText } from './mailQuote'
+import { createFullMessageQuoteHtml, getMailContentPlainText } from './mailQuote'
 import { getMailContent, MailReplyMode, sendMailConversationMessage, type IMailConversation, type IMailMessage } from 'src/api/mailConversation'
 import { showComponentDialog, notifyError, notifySuccess } from 'src/utils/dialog'
 import { useI18n } from 'vue-i18n'
@@ -46,48 +48,46 @@ interface IReplyDraft {
   subject: string
   body: string
   replyMode: MailReplyMode
-  replyToMessageId?: number
-  quotedMessageId?: number
+  quotedMessage?: IMailMessage
 }
 
 const props = defineProps<{
   conversation: IMailConversation
-  messages: IMailMessage[]
+  messages: readonly IMailMessage[]
 }>()
 const emit = defineEmits<{
   sent: []
-  'view-quoted-message': [messageId: number]
+  activated: []
+  'view-quoted-message': [message: IMailMessage]
 }>()
 const { t } = useI18n()
 const replyEditor = ref<InstanceType<typeof MailReplyEditor>>()
 const replyComposerElement = ref<HTMLElement>()
 const collapsedReplyElement = ref<HTMLElement>()
 const replyComposerState = ref<ReplyComposerState>(ReplyComposerState.hidden)
-const replyDraftsByConversationId = new Map<number, IReplyDraft>()
+const activeReplyMessageId = ref<number>()
 const quotePreviewByMessageId = new Map<number, string[]>()
 const draftSubject = ref('')
 const draftBody = ref('')
 const replyMode = ref(MailReplyMode.Reply)
-const replyToMessageId = ref<number>()
-const quotedMessageId = ref<number>()
+const quotedMessage = ref<IMailMessage>()
 const isSending = ref(false)
 const isQuoteActionsOpen = ref(false)
+const replyDraftCache = useMailMessageDraftCache(copyReplyDraft)
 const replyOptions = computed(() => [
   { label: t('pages.receivingManagement.reply'), value: MailReplyMode.Reply },
   { label: t('pages.receivingManagement.replyAll'), value: MailReplyMode.ReplyAll }
 ])
-const quotedMessage = computed(() => props.messages.find(message => message.id === quotedMessageId.value))
-
 async function startReply(message: IMailMessage): Promise<void> {
-  if (replyComposerState.value === ReplyComposerState.hidden) {
-    draftBody.value = ''
-    replyMode.value = MailReplyMode.Reply
-  }
+  saveCurrentReplyDraft()
+  activeReplyMessageId.value = message.id
+  replyDraftCache.saveLastMessageId(props.conversation.id, message.id)
+  const cachedDraft = replyDraftCache.getDraft(message.id)
+  if (cachedDraft) restoreReplyDraft(cachedDraft)
+  else initializeReplyDraft(message)
 
-  draftSubject.value = createReplySubject(message.subject)
-  replyToMessageId.value = message.id
-  quotedMessageId.value = message.id
   replyComposerState.value = ReplyComposerState.expanded
+  emit('activated')
   await nextTick()
   replyEditor.value?.focus()
 }
@@ -105,6 +105,7 @@ function onCollapseReply() {
 }
 
 function onRestoreReply() {
+  emit('activated')
   morphReplyComposer(ReplyComposerState.expanded)
 }
 
@@ -117,7 +118,7 @@ function morphReplyComposer(nextState: ReplyComposerState) {
     to: currentState === ReplyComposerState.expanded ? getCollapsedReplyElement : getReplyComposerElement,
     onToggle: () => {
       replyComposerState.value = nextState
-      saveReplyDraft(props.conversation.id)
+      saveCurrentReplyDraft()
     },
     duration: 300
   })
@@ -132,16 +133,17 @@ function getCollapsedReplyElement() {
 }
 
 function onRemoveQuote() {
-  quotedMessageId.value = undefined
+  quotedMessage.value = undefined
   isQuoteActionsOpen.value = false
+  saveCurrentReplyDraft()
 }
 
 function onViewQuotedMessage() {
-  const messageId = quotedMessageId.value
-  if (!messageId) return
+  const message = quotedMessage.value
+  if (!message) return
 
   isQuoteActionsOpen.value = false
-  emit('view-quoted-message', messageId)
+  emit('view-quoted-message', message)
 }
 
 async function getQuotePreviewTooltip(): Promise<string[]> {
@@ -170,7 +172,8 @@ async function onInsertTemplate() {
 }
 
 async function onSend() {
-  if (!draftSubject.value.trim() || !hasEditorContent(draftBody.value)) {
+  const replyToMessageId = activeReplyMessageId.value
+  if (!replyToMessageId || !draftSubject.value.trim() || !hasEditorContent(draftBody.value)) {
     notifyError(t('pages.receivingManagement.completeReply'))
     return
   }
@@ -179,13 +182,14 @@ async function onSend() {
   try {
     const htmlBody = await createOutgoingHtml()
     await sendMailConversationMessage(props.conversation.id, {
-      replyToMessageId: replyToMessageId.value,
+      replyToMessageId,
       replyMode: replyMode.value,
       subject: draftSubject.value.trim(),
       htmlBody,
       attachmentFileUsageIds: []
     })
-    replyDraftsByConversationId.delete(props.conversation.id)
+    replyDraftCache.removeDraft(replyToMessageId)
+    replyDraftCache.removeLastMessageId(props.conversation.id, replyToMessageId)
     clearReplyDraft()
     notifySuccess(t('pages.receivingManagement.sent'))
     emit('sent')
@@ -203,62 +207,78 @@ async function createOutgoingHtml(): Promise<string> {
   return `${draftBody.value}${createFullMessageQuoteHtml(quotedMessageValue, content)}`
 }
 
-function saveReplyDraft(conversationId: number) {
-  if (replyComposerState.value === ReplyComposerState.hidden) {
-    replyDraftsByConversationId.delete(conversationId)
-    return
-  }
+/** Persists the active mail draft while leaving unrelated mail drafts intact. */
+function saveCurrentReplyDraft(conversationId = props.conversation.id): void {
+  const messageId = activeReplyMessageId.value
+  if (!messageId || replyComposerState.value === ReplyComposerState.hidden) return
 
-  replyDraftsByConversationId.set(conversationId, {
+  replyDraftCache.saveDraft(messageId, {
     state: replyComposerState.value,
     subject: draftSubject.value,
     body: draftBody.value,
     replyMode: replyMode.value,
-    replyToMessageId: replyToMessageId.value,
-    quotedMessageId: quotedMessageId.value
+    quotedMessage: quotedMessage.value
   })
+  replyDraftCache.saveLastMessageId(conversationId, messageId)
 }
 
-function restoreReplyDraft(conversationId: number) {
-  const replyDraft = replyDraftsByConversationId.get(conversationId)
-  if (!replyDraft) {
-    clearReplyDraft()
-    return
-  }
-
+/** Applies a draft retrieved from the mail-ID cache to the current editor view. */
+function restoreReplyDraft(replyDraft: IReplyDraft): void {
   draftSubject.value = replyDraft.subject
   draftBody.value = replyDraft.body
   replyMode.value = replyDraft.replyMode
-  replyToMessageId.value = replyDraft.replyToMessageId
-  quotedMessageId.value = replyDraft.quotedMessageId
+  quotedMessage.value = replyDraft.quotedMessage
   replyComposerState.value = replyDraft.state
+}
+
+/** Initializes an empty expanded reply targeting the supplied source message. */
+function initializeReplyDraft(message: IMailMessage): void {
+  draftSubject.value = createReplySubject(message.subject)
+  draftBody.value = ''
+  replyMode.value = MailReplyMode.Reply
+  quotedMessage.value = message
 }
 
 function clearReplyDraft() {
   draftSubject.value = ''
   draftBody.value = ''
   replyMode.value = MailReplyMode.Reply
-  replyToMessageId.value = undefined
-  quotedMessageId.value = undefined
+  activeReplyMessageId.value = undefined
+  quotedMessage.value = undefined
   replyComposerState.value = ReplyComposerState.hidden
   isQuoteActionsOpen.value = false
 }
 
-function createReplySubject(subject?: string): string {
-  if (!subject) return 'Re: '
-  return subject.startsWith('Re:') ? subject : `Re: ${subject}`
-}
-
-function hasEditorContent(html: string): boolean {
-  return new DOMParser().parseFromString(html, 'text/html').body.textContent?.trim().length !== 0
-}
-
 watch(() => props.conversation.id, (conversationId, previousConversationId) => {
-  if (previousConversationId !== undefined) saveReplyDraft(previousConversationId)
-  restoreReplyDraft(conversationId)
+  if (previousConversationId !== undefined) saveCurrentReplyDraft(previousConversationId)
+  restoreConversationReplyDraft(conversationId)
 }, { immediate: true })
 
 defineExpose({ startReply, insertManualQuote })
+
+/** Restores the last mail-targeted draft used in a conversation, if it still exists. */
+function restoreConversationReplyDraft(conversationId: number): void {
+  const messageId = replyDraftCache.getLastMessageId(conversationId)
+  if (!messageId) {
+    clearReplyDraft()
+    return
+  }
+
+  const replyDraft = replyDraftCache.getDraft(messageId)
+  if (!replyDraft) {
+    replyDraftCache.removeLastMessageId(conversationId)
+    clearReplyDraft()
+    return
+  }
+
+  activeReplyMessageId.value = messageId
+  restoreReplyDraft(replyDraft)
+}
+
+/** Copies a mutable reply draft before it crosses the cache boundary. */
+function copyReplyDraft(replyDraft: IReplyDraft): IReplyDraft {
+  return { ...replyDraft }
+}
 </script>
 
 <style lang="scss" scoped>

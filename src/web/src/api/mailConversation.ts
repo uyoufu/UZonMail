@@ -12,6 +12,7 @@ export interface IMailAddress { email: string, displayName?: string }
 export interface IMailAttachment { id: number, fileName: string, contentType: string, size?: number, isOutgoingFileUsage: boolean }
 export interface IMailMessage { id: number, direction: MailMessageDirection, subject?: string, previewText?: string, occurredAtUtc: string, isRead: boolean, replyToMessageId?: number, hasThreadReplies: boolean, sendingStatus?: number, from: IMailAddress[], to: IMailAddress[], cc: IMailAddress[], attachments: IMailAttachment[] }
 export interface IMailContent { conversationMessageId: number, htmlBody?: string, textBody?: string, attachments: IMailAttachment[] }
+export interface IMailMessagePageQuery { beforeAtUtc?: string, beforeId?: number, limit?: number }
 export interface IMailThreadNeighbors { previousMessage?: IMailMessage, nextMessages: IMailMessage[] }
 export interface IMailDeliveryHop { receivedHeader: string, ipAddresses: string[] }
 export interface IMailMessageMetadata {
@@ -37,7 +38,8 @@ export interface ISendMailRequest { replyToMessageId?: number, replyMode: MailRe
 export function getReceivingAccounts () { return httpClient.get<IReceivingAccount[]>('/receiving-management/accounts') }
 export function synchronizeReceivingAccount (receivingAccountId: number) { return httpClient.post(`/receiving-management/accounts/${receivingAccountId}/sync`) }
 export function getMailConversations (params: { emailAccountId?: number, tagId?: number, unreadOnly?: boolean, filter?: string, limit?: number }) { return httpClient.get<IMailConversation[]>('/mail-conversations', { params }) }
-export function getMailMessages (conversationId: number) { return httpClient.get<IMailMessage[]>(`/mail-conversations/${conversationId}/messages`, { params: { limit: 100 } }) }
+/** Gets a chronological page of conversation messages, optionally before an exclusive cursor. */
+export function getMailMessages (conversationId: number, params: IMailMessagePageQuery = {}) { return httpClient.get<IMailMessage[]>(`/mail-conversations/${conversationId}/messages`, { params }) }
 export function getMailContent (messageId: number) { return httpClient.get<IMailContent>(`/mail-conversations/messages/${messageId}/content`) }
 export function getMailThreadNeighbors (messageId: number) { return httpClient.get<IMailThreadNeighbors>(`/mail-conversations/messages/${messageId}/thread-neighbors`) }
 export function getMailMessageMetadata (messageId: number) { return httpClient.get<IMailMessageMetadata>(`/mail-conversations/messages/${messageId}/metadata`) }

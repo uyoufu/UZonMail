@@ -1,10 +1,9 @@
 import dayjs from 'dayjs'
 import type { IMailContent, IMailMessage } from 'src/api/mailConversation'
+import { createManualQuoteHtml } from 'src/components/mailMessage/mailReplyContent'
 import { formatMailAddressRoute } from './mailMessagePresentation'
 
-export function createManualQuoteHtml(selectedText: string): string {
-  return `<blockquote>${toHtmlText(selectedText)}</blockquote><p><br></p>`
-}
+export { createManualQuoteHtml }
 
 export function createFullMessageQuoteHtml(message: IMailMessage, content: IMailContent): string {
   const plainText = getMailContentPlainText(content)

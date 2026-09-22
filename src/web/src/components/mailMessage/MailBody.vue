@@ -13,24 +13,18 @@
 <script setup lang="ts">
 import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import { getMailContent, type IMailContent } from 'src/api/mailConversation'
+import {
+  MailBodyInteractionType,
+  createMailBodyInteractionBridge,
+  isMailBodyInteractionPayload,
+  type IMailBodySelectionContext
+} from './mailBodyInteraction'
 import { useI18n } from 'vue-i18n'
-
-const mailBodySelectionEvent = 'uzonmail:mail-body-selection-contextmenu'
-
-interface IMailBodySelectionContext {
-  selectedText: string
-  clientX: number
-  clientY: number
-}
-
-interface IFrameSelectionContextPayload extends IMailBodySelectionContext {
-  type: typeof mailBodySelectionEvent
-  channelId: string
-}
 
 const props = defineProps<{ messageId: number }>()
 const emit = defineEmits<{
   'quote-selection-contextmenu': [context: IMailBodySelectionContext]
+  'body-pointerdown': []
 }>()
 const { t } = useI18n()
 const bodyFrame = ref<HTMLIFrameElement>()
@@ -67,7 +61,9 @@ function createDocumentHtml(mailContent: IMailContent): string {
       if (attributeName.startsWith('on') || isUnsafeUrlAttribute(attributeName, attribute.value)) node.removeAttribute(attribute.name)
     })
   })
-  documentNode.body.append(createSelectionBridge(documentNode))
+  documentNode.documentElement.classList.add('mail-body-hover-scroll')
+  documentNode.head.append(createHoverScrollStyle(documentNode))
+  documentNode.body.append(createMailBodyInteractionBridge(documentNode, bodyChannelId))
   return `<!doctype html>${documentNode.documentElement.outerHTML}`
 }
 
@@ -75,30 +71,20 @@ function createPlainTextHtml(text: string): string {
   return `<div>${escapeHtml(text).replace(/\r?\n/g, '<br>')}</div>`
 }
 
-function createSelectionBridge(documentNode: Document): HTMLScriptElement {
-  const bridge = documentNode.createElement('script')
-  bridge.textContent = `
-    document.addEventListener('contextmenu', function (event) {
-      var selection = window.getSelection();
-      if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
-
-      var target = event.target;
-      var selectedRange = selection.getRangeAt(0);
-      if (!(target instanceof Node) || !selectedRange.intersectsNode(target)) return;
-
-      var selectedText = selection.toString().trim();
-      if (!selectedText) return;
-      event.preventDefault();
-      window.parent.postMessage({
-        type: '${mailBodySelectionEvent}',
-        channelId: '${bodyChannelId}',
-        selectedText: selectedText,
-        clientX: event.clientX,
-        clientY: event.clientY
-      }, '*');
-    });
+/** Adds the local equivalent of the application hover-scroll style to the isolated document. */
+function createHoverScrollStyle(documentNode: Document): HTMLStyleElement {
+  const style = documentNode.createElement('style')
+  style.textContent = `
+    html.mail-body-hover-scroll { overflow: overlay; }
+    html.mail-body-hover-scroll::-webkit-scrollbar { width: 0; height: 0; }
+    html.mail-body-hover-scroll:hover::-webkit-scrollbar { width: 5px; height: 5px; background-color: transparent; }
+    html.mail-body-hover-scroll::-webkit-scrollbar-thumb { background-color: transparent; border-radius: 2px; }
+    html.mail-body-hover-scroll:hover::-webkit-scrollbar-thumb { background-color: #e0e0e0; }
+    html.mail-body-hover-scroll::-webkit-scrollbar-track,
+    html.mail-body-hover-scroll:hover::-webkit-scrollbar-track,
+    html.mail-body-hover-scroll:hover::-webkit-scrollbar-track-piece { background-color: transparent; }
   `
-  return bridge
+  return style
 }
 
 function isUnsafeUrlAttribute(attributeName: string, attributeValue: string): boolean {
@@ -118,7 +104,11 @@ function escapeHtml(text: string): string {
 
 function onWindowMessage(event: MessageEvent<unknown>) {
   const frameElement = bodyFrame.value
-  if (event.source !== frameElement?.contentWindow || !isSelectionContextPayload(event.data)) return
+  if (event.source !== frameElement?.contentWindow || !isMailBodyInteractionPayload(event.data, bodyChannelId)) return
+  if (event.data.type === MailBodyInteractionType.pointerDown) {
+    emit('body-pointerdown')
+    return
+  }
 
   const frameBounds = frameElement.getBoundingClientRect()
   emit('quote-selection-contextmenu', {
@@ -126,17 +116,6 @@ function onWindowMessage(event: MessageEvent<unknown>) {
     clientX: frameBounds.left + event.data.clientX,
     clientY: frameBounds.top + event.data.clientY
   })
-}
-
-function isSelectionContextPayload(value: unknown): value is IFrameSelectionContextPayload {
-  if (!value || typeof value !== 'object') return false
-  const payload = value as Partial<IFrameSelectionContextPayload>
-  return payload.type === mailBodySelectionEvent
-    && payload.channelId === bodyChannelId
-    && typeof payload.selectedText === 'string'
-    && payload.selectedText.length > 0
-    && typeof payload.clientX === 'number'
-    && typeof payload.clientY === 'number'
 }
 
 watch(() => props.messageId, () => {

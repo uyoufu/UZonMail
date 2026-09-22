@@ -8,7 +8,8 @@
       </template>
       <template #after>
         <ConversationTimeline :conversation="selectedConversation" :messages="messages" :is-loading-messages="isLoadingMessages"
-          :is-compact="false" @message-sent="onMessageSent" @message-loaded="onTimelineMessageLoaded" @tags-saved="onTagsSaved" />
+          :is-loading-older-messages="isLoadingOlderMessages" :has-older-messages="hasOlderMessages" :is-compact="false"
+          @message-sent="onMessageSent" @request-older-messages="onLoadOlderMessages" @message-loaded="onTimelineMessageLoaded" @tags-saved="onTagsSaved" />
       </template>
     </q-splitter>
     <template v-else>
@@ -16,8 +17,9 @@
         v-model:unread-only="unreadOnly" :accounts="accounts" :conversations="conversations" :selected-conversation-id="selectedConversation?.id"
         :is-loading="isLoadingConversations" :is-syncing="isSyncing" @select="onConversationSelect" @sync="onSync" />
       <ConversationTimeline v-show="mobileView === 'conversation'" :conversation="selectedConversation" :messages="messages"
-        :is-loading-messages="isLoadingMessages" :is-compact="true" @back="mobileView = 'list'" @message-sent="onMessageSent"
-        @message-loaded="onTimelineMessageLoaded" @tags-saved="onTagsSaved" />
+        :is-loading-messages="isLoadingMessages" :is-loading-older-messages="isLoadingOlderMessages"
+        :has-older-messages="hasOlderMessages" :is-compact="true" @back="mobileView = 'list'" @message-sent="onMessageSent"
+        @request-older-messages="onLoadOlderMessages" @message-loaded="onTimelineMessageLoaded" @tags-saved="onTagsSaved" />
     </template>
   </PageContainer>
 </template>
@@ -26,10 +28,11 @@
 import PageContainer from 'src/components/pageContainer/PageContainer.vue'
 import ConversationTimeline from './components/ConversationTimeline.vue'
 import ReceivingConversationList from './components/ReceivingConversationList.vue'
-import { getMailConversations, getMailMessages, getReceivingAccounts, markMailConversationRead, synchronizeReceivingAccount, type IMailConversation, type IMailMessage, type IReceivingAccount } from 'src/api/mailConversation'
+import { getMailConversations, getReceivingAccounts, markMailConversationRead, synchronizeReceivingAccount, type IMailConversation, type IMailMessage, type IReceivingAccount } from 'src/api/mailConversation'
 import { notifyError, notifySuccess } from 'src/utils/dialog'
 import { useI18n } from 'vue-i18n'
 import { restoreReceivingAccountSelection, saveReceivingAccountSelection } from './receivingAccountPreference'
+import { useConversationMessageHistory } from './compositions/useConversationMessageHistory'
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -40,13 +43,22 @@ const accounts = ref<IReceivingAccount[]>([])
 const selectedAccountId = ref<number>()
 const conversations = ref<IMailConversation[]>([])
 const selectedConversation = ref<IMailConversation>()
-const messages = ref<IMailMessage[]>([])
 const filter = ref('')
 const unreadOnly = ref(false)
 const isLoadingConversations = ref(false)
-const isLoadingMessages = ref(false)
 const isSyncing = ref(false)
 let conversationLoadSequence = 0
+const {
+  messages,
+  isLoadingInitialMessages: isLoadingMessages,
+  isLoadingOlderMessages,
+  hasOlderMessages,
+  loadLatestMessages,
+  loadOlderMessages,
+  mergeMessage,
+  refreshLatestMessages,
+  clearMessageHistory
+} = useConversationMessageHistory()
 
 async function loadConversations() {
   isLoadingConversations.value = true
@@ -59,7 +71,7 @@ async function loadConversations() {
     })).data
     if (selectedConversation.value && !conversations.value.some(value => value.id === selectedConversation.value?.id)) {
       selectedConversation.value = undefined
-      messages.value = []
+      clearMessageHistory()
       mobileView.value = 'list'
     }
   } finally {
@@ -69,19 +81,13 @@ async function loadConversations() {
 
 async function onConversationSelect(conversation: IMailConversation) {
   const currentLoadSequence = ++conversationLoadSequence
-  isLoadingMessages.value = true
   if (isCompact.value) mobileView.value = 'conversation'
-  try {
-    const loadedMessages = (await getMailMessages(conversation.id)).data
-    if (currentLoadSequence !== conversationLoadSequence) return
-    messages.value = loadedMessages
-    selectedConversation.value = conversation
-    if (conversation.unreadCount) {
-      conversation.unreadCount = 0
-      void markMailConversationRead(conversation.id)
-    }
-  } finally {
-    if (currentLoadSequence === conversationLoadSequence) isLoadingMessages.value = false
+  selectedConversation.value = conversation
+  await loadLatestMessages(conversation.id)
+  if (currentLoadSequence !== conversationLoadSequence) return
+  if (conversation.unreadCount) {
+    conversation.unreadCount = 0
+    void markMailConversationRead(conversation.id)
   }
 }
 
@@ -108,16 +114,18 @@ async function onSync() {
 
 async function onMessageSent() {
   if (!selectedConversation.value) return
-  messages.value = (await getMailMessages(selectedConversation.value.id)).data
+  await refreshLatestMessages(selectedConversation.value.id)
   await loadConversations()
 }
 
+/** Loads another history page when the virtual timeline reaches its top threshold. */
+async function onLoadOlderMessages(): Promise<void> {
+  if (!selectedConversation.value) return
+  await loadOlderMessages(selectedConversation.value.id)
+}
+
 function onTimelineMessageLoaded(message: IMailMessage) {
-  if (messages.value.some(value => value.id === message.id)) return
-  messages.value = [...messages.value, message].sort((left, right) => {
-    const occurredAtDifference = new Date(left.occurredAtUtc).getTime() - new Date(right.occurredAtUtc).getTime()
-    return occurredAtDifference || left.id - right.id
-  })
+  mergeMessage(message)
 }
 
 async function onTagsSaved() {

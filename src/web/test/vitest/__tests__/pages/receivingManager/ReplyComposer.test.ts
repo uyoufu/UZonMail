@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import type * as MailConversationModule from 'src/api/mailConversation'
 import type * as QuasarModule from 'quasar'
 import type * as VueI18nModule from 'vue-i18n'
-import { MailMessageDirection, type IMailConversation, type IMailMessage } from 'src/api/mailConversation'
+import { MailMessageDirection, getMailContent, sendMailConversationMessage, type IMailConversation, type IMailMessage } from 'src/api/mailConversation'
 import ReplyComposer from 'src/pages/receivingManager/components/ReplyComposer.vue'
 
 vi.mock('quasar', async (importOriginal) => {
@@ -45,9 +45,10 @@ const SlotStub = defineComponent({
 })
 
 const EditorStub = defineComponent({
-  setup(_, { expose }) {
+  emits: ['update:modelValue', 'submit'],
+  setup(_, { emit, expose }) {
     expose({ focus: vi.fn(), runCmd: vi.fn() })
-    return () => h('div', { class: 'q-editor-stub' })
+    return () => h('button', { class: 'q-editor-stub', onClick: () => emit('submit') })
   }
 })
 
@@ -171,5 +172,28 @@ describe('ReplyComposer', () => {
     await wrapper.get('[data-icon="reply"]').trigger('click')
     await flushPromises()
     expect(wrapper.find('.q-editor-stub').exists()).toBe(true)
+  })
+
+  it('restores drafts by reply target and sends using that message ID', async () => {
+    vi.mocked(getMailContent).mockResolvedValue({ data: { conversationMessageId: firstMessage.id, textBody: 'Original content', attachments: [] } } as never)
+    vi.mocked(sendMailConversationMessage).mockResolvedValue({} as never)
+    const wrapper = mountReplyComposer()
+    await wrapper.setProps({ messages: [firstMessage, secondMessage] })
+    const replyComposer = wrapper.vm as unknown as { startReply: (message: IMailMessage) => Promise<void> }
+
+    await replyComposer.startReply(firstMessage)
+    wrapper.findComponent(EditorStub).vm.$emit('update:modelValue', '<p>First target draft</p>')
+    await flushPromises()
+    await replyComposer.startReply(secondMessage)
+    wrapper.findComponent(EditorStub).vm.$emit('update:modelValue', '<p>Second target draft</p>')
+    await flushPromises()
+    await replyComposer.startReply(firstMessage)
+    await wrapper.get('[data-icon="send"]').trigger('click')
+    await flushPromises()
+
+    expect(sendMailConversationMessage).toHaveBeenCalledWith(firstConversation.id, expect.objectContaining({
+      replyToMessageId: firstMessage.id,
+      htmlBody: expect.stringContaining('First target draft')
+    }))
   })
 })

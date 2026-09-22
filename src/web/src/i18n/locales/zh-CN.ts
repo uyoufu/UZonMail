@@ -209,6 +209,9 @@ export default {
   },
   components: {
     abortUpload: '中止上传',
+    mailBodyQuoteMenu: {
+      quoteSelection: '引用到正文'
+    },
     calculatingFileHash: '正在计算 {fileName} 哈希值',
     cherryBlossomRomanceTheme: '樱花浪漫',
     clear: '清空',

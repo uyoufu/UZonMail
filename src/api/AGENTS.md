@@ -29,6 +29,22 @@
 - 数据库迁移使用类似这样 `dotnet ef migrations add xxx --context MysqlContext --output-dir Migrations/Mysql -v` 的命令进行自动迁移，禁止只手写 `Up/Down`，否则运行时 `Database.Migrate()` 会因 `PendingModelChangesWarning` 失败
 - 修改实体模型或生成迁移后，分别对受影响的 Context 执行 `dotnet ef migrations has-pending-model-changes --context <ContextName>` 验证；不得通过忽略或抑制该警告绕过模型快照不一致
 
+## EF Core
+
+在编写任何 LINQ 或 EF Core 查询代码时，你必须严格遵守以下规范：
+
+1. **只读必无追踪**：只要没有后续修改需求，查询末尾必须加 `.AsNoTracking()`。
+2. **严禁 N+1**：绝对不要在任何循环中、或 Select 隐式嵌套中编写数据库查询。
+3. **按需投影**：涉及多表关联或宽表查询，必须使用 `.Select()` 投影到局部匿名对象或特定的 DTO，拒绝返回整个实体模型。
+4. **存在性检查**：检查是否存在一律使用 `.AnyAsync()`，不许使用 Count 或 FirstOrDefault。
+5. **批量操作优化**：如果是大批量更新/删除，必须使用 `ExecuteUpdateAsync` 和 `ExecuteDeleteAsync`。
+
+### Include 约束
+
+- 不要超过 2 个“一对多（Collection）”分支
+- 深度不超过 3 层
+- 禁止在面向前API的查询中使用富 Include，必须使用 Select 或分步查询
+
 ## 项目依赖
 
 - UzonMailProPlugin 依赖于 UzonMailCorePlugin, 后者不能关联任何前者中的逻辑

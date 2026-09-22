@@ -3,7 +3,7 @@
     <aside class="todo-list-pane">
       <div class="todo-toolbar"><div class="text-subtitle1 text-weight-medium col">{{ t('pages.todoManagement.title') }}</div><CommonBtn icon="add" :tooltip="t('pages.todoManagement.add')" @click="onNewTask" /></div>
       <q-tabs v-model="statusFilter" dense align="left" active-color="primary" indicator-color="primary"><q-tab name="active" :label="t('pages.todoManagement.active')" /><q-tab name="completed" :label="t('pages.todoManagement.completed')" /></q-tabs>
-      <q-list separator class="todo-list">
+      <q-list separator class="todo-list hover-scroll">
         <q-item v-for="task in filteredTasks" :key="task.id" clickable :active="task.id === selectedTask?.id" active-class="bg-blue-1 text-primary" @click="selectTask(task)">
           <q-item-section avatar><q-icon :name="task.kind === TodoTaskKind.MailFollowUp ? 'forward_to_inbox' : 'task_alt'" :color="priorityColor(task.priority)" /></q-item-section>
           <q-item-section><q-item-label class="text-weight-medium" lines="2">{{ task.title }}</q-item-label><q-item-label caption>{{ task.dueAtUtc ? formatDate(task.dueAtUtc) : t('pages.todoManagement.noDueDate') }}</q-item-label></q-item-section>
@@ -14,18 +14,18 @@
 
     <main v-if="selectedTask?.mailBranch" class="branch-pane">
       <header class="section-header"><div class="text-subtitle1 text-weight-medium ellipsis">{{ selectedTask.mailBranch.branchSubject }}</div><div class="text-caption text-grey-7">{{ t('pages.todoManagement.independentThread') }}</div></header>
-      <q-scroll-area class="branch-scroll"><div class="branch-stream">
+      <div class="branch-scroll hover-scroll"><div class="branch-stream">
         <article v-for="message in selectedTask.mailBranch.messages" :key="message.id" class="branch-message" :class="message.direction === MailMessageDirection.Outgoing ? 'outgoing' : ''">
-          <div class="branch-bubble" @click="expandedMessageIds.add(message.id)"><div class="row justify-between no-wrap q-gutter-sm"><strong class="ellipsis">{{ message.subject }}</strong><span class="text-caption">{{ formatDate(message.occurredAtUtc) }}</span></div><MailBody v-if="expandedMessageIds.has(message.id)" :message-id="message.id" class="q-mt-sm" /><div v-else class="text-caption text-grey-7 q-mt-xs"><q-icon name="expand_more" /> {{ t('pages.receivingManagement.expand') }}</div></div>
+          <div class="branch-bubble" @click="expandedMessageIds.add(message.id)"><div class="row justify-between no-wrap q-gutter-sm"><strong class="ellipsis">{{ message.subject }}</strong><span class="text-caption">{{ formatDate(message.occurredAtUtc) }}</span></div><MailBody v-if="expandedMessageIds.has(message.id)" :message-id="message.id" class="q-mt-sm" @body-pointerdown="quoteMenu?.hide()" @quote-selection-contextmenu="context => onMailBodyQuoteSelection(message, context)" /><div v-else class="text-caption text-grey-7 q-mt-xs"><q-icon name="expand_more" /> {{ t('pages.receivingManagement.expand') }}</div></div>
         </article>
         <div v-if="selectedTask.mailBranch.messages.length === 0" class="branch-empty"><q-icon name="call_split" size="40px" /><span>{{ t('pages.todoManagement.newThreadReady') }}</span></div>
-      </div></q-scroll-area>
-      <section class="branch-composer"><MailReplyEditor v-model:subject="mailSubject" v-model:html-body="mailBody" :is-sending="sending" @submit="onSendBranchMail" /></section>
+      </div></div>
+      <section class="branch-composer"><TodoMailReplyComposer ref="todoReplyComposer" :task-id="selectedTask.id" :branch-subject="selectedTask.mailBranch.branchSubject" @sent="onTodoMailSent" /></section>
     </main>
 
     <section v-if="selectedTask" class="detail-pane">
       <header class="section-header row items-center"><div class="text-subtitle1 text-weight-medium col">{{ t('pages.todoManagement.details') }}</div><CommonBtn icon="delete" flat color="negative" :tooltip="t('common.delete')" @click="onDelete" /></header>
-      <div class="detail-form q-gutter-md">
+      <div class="detail-form q-gutter-md hover-scroll">
         <q-input v-model="taskDraft.title" outlined dense :label="t('pages.todoManagement.taskTitle')" />
         <q-input v-model="taskDraft.description" outlined dense type="textarea" autogrow :label="t('pages.todoManagement.description')" />
         <q-select v-model="taskDraft.status" outlined dense emit-value map-options :label="t('pages.todoManagement.status')" :options="statusOptions" />
@@ -44,6 +44,7 @@
     </section>
     <div v-else class="empty-state"><q-icon name="checklist" size="48px" /><span>{{ t('pages.todoManagement.selectTask') }}</span></div>
 
+    <MailBodyQuoteMenu ref="quoteMenu" @insert-selection-quote="onInsertSelectionQuote" />
     <q-dialog v-model="showCreateDialog"><q-card class="dialog-card"><q-card-section class="text-subtitle1">{{ t('pages.todoManagement.add') }}</q-card-section><q-card-section class="q-gutter-md"><q-input v-model="newTask.title" outlined dense autofocus :label="t('pages.todoManagement.taskTitle')" /><q-input v-model="newTask.description" outlined dense type="textarea" :label="t('pages.todoManagement.description')" /><q-select v-model="newTask.priority" outlined dense emit-value map-options :label="t('pages.todoManagement.priority')" :options="priorityOptions" /><q-input v-model="newTask.dueAtLocal" outlined dense type="datetime-local" :label="t('pages.todoManagement.dueAt')" /></q-card-section><q-card-actions align="right"><CommonBtn icon="add_task" :label="t('common.create')" @click="onCreate" /></q-card-actions></q-card></q-dialog>
   </div>
 </template>
@@ -52,11 +53,13 @@
 import dayjs from 'dayjs'
 import CommonBtn from 'src/components/buttons/CommonBtn.vue'
 import MailBody from 'src/components/mailMessage/MailBody.vue'
+import MailBodyQuoteMenu from 'src/components/mailMessage/MailBodyQuoteMenu.vue'
 import MailMessageMetadataDialog from 'src/components/mailMessage/MailMessageMetadataDialog.vue'
-import MailReplyEditor from 'src/components/mailMessage/MailReplyEditor.vue'
-import { MailMessageDirection, MailReplyMode, type IMailMessage } from 'src/api/mailConversation'
-import { createTodoTask, deleteTodoTask, getTodoTasks, sendTodoMailMessage, TodoTaskKind, TodoTaskPriority, TodoTaskStatus, updateTodoTask, type ITodoTask } from 'src/api/todoTask'
-import { confirmOperation, notifyError, notifySuccess, showComponentDialog } from 'src/utils/dialog'
+import type { IMailBodySelectionContext } from 'src/components/mailMessage/mailBodyInteraction'
+import { MailMessageDirection, type IMailMessage } from 'src/api/mailConversation'
+import TodoMailReplyComposer from './components/TodoMailReplyComposer.vue'
+import { createTodoTask, deleteTodoTask, getTodoTasks, TodoTaskKind, TodoTaskPriority, TodoTaskStatus, updateTodoTask, type ITodoTask } from 'src/api/todoTask'
+import { confirmOperation, notifySuccess, showComponentDialog } from 'src/utils/dialog'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -64,9 +67,8 @@ const tasks = ref<ITodoTask[]>([])
 const selectedTask = ref<ITodoTask>()
 const statusFilter = ref<'active' | 'completed'>('active')
 const expandedMessageIds = ref(new Set<number>())
-const sending = ref(false)
-const mailSubject = ref('')
-const mailBody = ref('')
+const quoteMenu = ref<InstanceType<typeof MailBodyQuoteMenu>>()
+const todoReplyComposer = ref<InstanceType<typeof TodoMailReplyComposer>>()
 const showCreateDialog = ref(false)
 const createDraft = () => ({ title: '', description: '', status: TodoTaskStatus.Pending, priority: TodoTaskPriority.Normal, dueAtLocal: '' })
 const taskDraft = ref(createDraft())
@@ -76,18 +78,16 @@ const statusOptions = computed(() => [{ label: t('pages.todoManagement.pending')
 const priorityOptions = computed(() => [TodoTaskPriority.Low, TodoTaskPriority.Normal, TodoTaskPriority.High, TodoTaskPriority.Urgent].map(value => ({ label: priorityLabel(value), value })))
 
 function selectTask (task: ITodoTask) {
-  selectedTask.value = task; expandedMessageIds.value = new Set(); taskDraft.value = { title: task.title, description: task.description || '', status: task.status, priority: task.priority, dueAtLocal: task.dueAtUtc ? dayjs(task.dueAtUtc).format('YYYY-MM-DDTHH:mm') : '' }; mailSubject.value = task.mailBranch?.branchSubject || task.title; mailBody.value = ''
+  quoteMenu.value?.hide(); selectedTask.value = task; expandedMessageIds.value = new Set(); taskDraft.value = { title: task.title, description: task.description || '', status: task.status, priority: task.priority, dueAtLocal: task.dueAtUtc ? dayjs(task.dueAtUtc).format('YYYY-MM-DDTHH:mm') : '' }
 }
 async function loadTasks (selectedId?: number) { tasks.value = (await getTodoTasks()).data; const target = tasks.value.find(task => task.id === (selectedId || selectedTask.value?.id)) || tasks.value[0]; if (target) selectTask(target); else selectedTask.value = undefined }
 function onNewTask () { newTask.value = createDraft(); showCreateDialog.value = true }
 async function onCreate () { if (!newTask.value.title.trim()) return; const result = await createTodoTask(toRequest(newTask.value)); showCreateDialog.value = false; await loadTasks(result.data.id); notifySuccess(t('pages.todoManagement.created')) }
 async function onSave () { if (!selectedTask.value || !taskDraft.value.title.trim()) return; await updateTodoTask(selectedTask.value.id, toRequest(taskDraft.value)); await loadTasks(selectedTask.value.id); notifySuccess(t('pages.todoManagement.saved')) }
 async function onDelete () { if (!selectedTask.value || !await confirmOperation(t('common.delete'), t('pages.todoManagement.deleteConfirm'))) return; await deleteTodoTask(selectedTask.value.id); selectedTask.value = undefined; await loadTasks() }
-async function onSendBranchMail () {
-  if (!selectedTask.value?.mailBranch || !mailSubject.value.trim() || !mailBody.value.trim()) { notifyError(t('pages.receivingManagement.completeReply')); return }
-  sending.value = true
-  try { await sendTodoMailMessage(selectedTask.value.id, { replyMode: MailReplyMode.ReplyAll, subject: mailSubject.value, htmlBody: mailBody.value, attachmentFileUsageIds: [] }); mailBody.value = ''; await loadTasks(selectedTask.value.id); notifySuccess(t('pages.receivingManagement.sent')) } finally { sending.value = false }
-}
+function onMailBodyQuoteSelection (message: IMailMessage, context: IMailBodySelectionContext): void { quoteMenu.value?.showForSelection(message, context) }
+function onInsertSelectionQuote (message: IMailMessage, selectedText: string): void { void todoReplyComposer.value?.insertManualQuote(message, selectedText) }
+async function onTodoMailSent (): Promise<void> { if (selectedTask.value) await loadTasks(selectedTask.value.id) }
 async function onShowSourceMailMetadata (messageId: number) {
   await showComponentDialog(MailMessageMetadataDialog, { messageId })
 }
